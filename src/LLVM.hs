@@ -7,10 +7,10 @@
 
 {-# LANGUAGE TupleSections #-}
 
-module LLVM ( llvmMapBinop, llvmMapUnop
-              ) where
+module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM ) where
 
 import           AST
+import           System.IO 
 -- import           Debug.Trace
 -- import           ASTShow
 -- import           BinaryFactory
@@ -37,18 +37,6 @@ import           Data.Map                        as Map
 -- import           Data.Word                       (Word32)
 -- import           Data.Maybe                      (fromMaybe, isJust, catMaybes, isNothing, maybeToList)
 -- import           Flow                            ((|>))
--- -- import qualified LLVM.AST                        as LLVMAST
--- -- import qualified LLVM.AST.Constant               as C
--- -- import qualified LLVM.AST.Float                  as F
--- -- import qualified LLVM.AST.FloatingPointPredicate as FP
--- -- import qualified LLVM.AST.Global                 as G
--- -- import           LLVM.AST.Instruction
--- -- import qualified LLVM.AST.IntegerPredicate       as IP
--- -- import           LLVM.AST.Operand                hiding (PointerType, operands)
--- -- import           LLVM.AST.Type
--- -- import           LLVM.AST.Typed
--- -- import qualified LLVM.AST.Attribute              as A (FunctionAttribute(..))
--- -- import           LLVM.Pretty                     (ppllvm)
 
 -- import qualified Data.ByteString                 as BS
 -- import qualified Data.ByteString.Char8           as B8
@@ -123,3 +111,9 @@ llvmMapUnop =
             ("fptoui", (FloatFamily, IntFamily)),
             ("fptosi", (FloatFamily, IntFamily))
            ]
+
+-- | Generate LLVM code for the specified module, based on its LPVM code, and
+-- write it to the specified file handle.
+writeLLVM :: Handle -> Module -> Compiler ()
+writeLLVM handle mod = do
+    return ()

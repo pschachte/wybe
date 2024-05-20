@@ -13,9 +13,11 @@ where
 
 import           AST
 import           BinaryFactory              (encodeModule)
--- import           Blocks                     (concatLLVMASTModules)
-import           Config
-import Control.Monad ( (>=>), unless )
+import           Config                     (objectExtension, bitcodeExtension,
+                                             assemblyExtension,
+                                             linkerDeadStripArgs,
+                                             removeLPVMSection)
+import           Control.Monad ( (>=>), unless )
 import           Control.Monad.Trans        (liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
@@ -26,27 +28,20 @@ import           Data.List                  as List
 import           Data.Map                   as Map
 import qualified Data.Text.Lazy             as TL
 import           Distribution.System        (buildOS, OS (..))
--- import qualified LLVM.AST                   as LLVMAST
--- import           LLVM.Context
--- import           LLVM.Module                as Mod
--- import           LLVM.PassManager
--- -- import           LLVM.Target
--- import           LLVM.Analysis              (verify)
 import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit),
                                              Options(..), optNoVerifyLLVM, optLLVMOptLevel,
                                              optimisationEnabled, OptFlag(LLVMOpt))
+import qualified Version
 import           System.Exit                (ExitCode (..))
-import           System.Process
+import           System.IO                  (openFile, hClose, Handle,
+                                             IOMode (WriteMode), hPutStrLn)
+import           System.Process             (proc, readCreateProcessWithExitCode)
 import           System.FilePath            ((-<.>))
 import           System.Directory           (getPermissions, writable, doesFileExist)
 import           Util                       (createLocalCacheFile)
--- import LLVM.AST (Module(moduleDefinitions), Definition (GlobalDefinition), Type (ArrayType, IntegerType))
--- import LLVM.AST.Global
--- import qualified LLVM.AST.Global as G
--- import qualified LLVM.AST.Constant as C
+import           LLVM
 import Data.String
-import Config (lpvmSectionName)
 
 ----------------------------------------------------------------------------
 -- For now, make placebo definitions of LLVM-related types
@@ -74,7 +69,7 @@ _haveWritePermission file = do
 -- into the '__lpvm' section of the Macho-O object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
 emitObjectFile m f = do
-    let filename = f -<.> objectExtension
+    let filename = f -<.> Config.objectExtension
     logEmit $ "Creating object file for *" ++ showModSpec m ++ "*" ++
         " @ '" ++ filename ++ "'"
     logEmit $ "Encoding and wrapping Module *" ++ showModSpec m
@@ -99,7 +94,7 @@ emitObjectFile m f = do
 -- target LLVM Bitcode file.
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
 emitBitcodeFile m f = do
-    let filename = f -<.> bitcodeExtension
+    let filename = f -<.> Config.bitcodeExtension
     logEmit $ "Creating wrapped bitcode file for *" ++ showModSpec m ++ "*"
               ++ " @ '" ++ filename ++ "'"
     -- astMod <- getModule id
@@ -113,21 +108,46 @@ emitBitcodeFile m f = do
     liftIO $ makeWrappedBCFile opts filename llmod modBS
 
 
--- | With the LLVM AST representation of a LPVM Module, create a
--- target LLVM Assembly file.
+-- | With the LLVM AST representation of a LPVM Module, create a target LLVM
+-- Assembly file.  This function forms the basis for all LLVM code generation.
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
 emitAssemblyFile m f = do
-    let filename = f -<.> assemblyExtension
+    let filename = f -<.> Config.assemblyExtension
     logEmit $ "Creating assembly file for " ++ showModSpec m ++
         ", with optimisations."
-    llmod <- descendentModuleLLVM m
-    logEmit $ "===> Writing assembly file " ++ filename
+    mod <- trustFromJust 
+            ("emitAssemblyFile for unknown module " ++ showModSpec m)
+            <$> getLoadingModule m
+    logEmit $ "===> Writing LLVM assembly file " ++ filename
     opts <- gets options
+    handle <- liftIO $ openFile filename WriteMode
+    writeAssemblyPrologue handle mod
+    writeLLVM handle mod
+    liftIO $ hClose handle
     return ()
     -- let withMod = if optimisationEnabled LLVMOpt opts then withOptimisedModule else withModule 
     -- liftIO $ withMod opts llmod
     --     (\mm -> withHostTargetMachineDefault $ \_ ->
     --         writeLLVMAssemblyToFile (File filename) mm)
+
+
+-- | Write out some boilerplate at the beginning of each generated .ll file.
+-- Included are a comment identifying the source of the file and the information
+-- required for the file to be compilable.
+writeAssemblyPrologue :: Handle -> Module -> Compiler ()
+writeAssemblyPrologue h mod = do
+    liftIO $ do
+        hPutStrLn h $
+            ";; FILE GENERATED BY wybemk "
+                ++ Version.version
+                ++ " (" ++ Version.gitHash
+                ++ ") -- see https://github.com/pschachte/wybe"
+        hPutStrLn h $ ";; Module " ++ showModSpec (modSpec mod)
+                ++ " from " ++ modOrigin mod
+        hPutStrLn h ""
+        hPutStrLn h $ "target triple = \"" ++ Version.defaultTriple ++ "\""
+        hPutStrLn h ""
+    return ()
 
 -- | Concatenate the LLVMModule implementations of the descendents of
 -- the given module.
@@ -287,7 +307,7 @@ makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
          -> Compiler ()
 makeExec ofiles target = do
-    let options = ["-no-pie"] ++ linkerDeadStripArgs
+    let options = ["-no-pie"] ++ Config.linkerDeadStripArgs
     -- let options = linkerDeadStripArgs
     let args = options ++ ofiles ++ ["-o", target]
     logEmit $ "Generating final executable with command line: cc "
@@ -300,7 +320,7 @@ makeExec ofiles target = do
                 ++ "$ cc " ++ unwords args
                 ++ "\nCC Log:\n" ++ suppressLdWarnings serr
                 ++ "\n-------\n"
-            result <- liftIO $ removeLPVMSection target
+            result <- liftIO $ Config.removeLPVMSection target
             case result of
                 Right ()  -> return ()
                 Left serr -> Error <!> serr
