@@ -18,7 +18,7 @@ module Options (Options(..),
                 defaultOptions) where
 
 import           Data.List             as List
-import           Data.List.Extra
+import           Data.List.Extra       (lower)
 import           Data.Map              as Map
 import           Data.Set              as Set
 import           Data.Either           as Either
@@ -95,7 +95,7 @@ class (Ord a) => Toggleable a where
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
-  | Unbranch | Codegen | Blocks | Emit | Analysis | Transform | Uniqueness
+  | Unbranch | LLVM | Emit | Analysis | Transform | Uniqueness
   | LastCallAnalysis
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
@@ -147,10 +147,8 @@ logSelectionDescription Types
     = "Log type checking"
 logSelectionDescription Unbranch
     = "Log transformation of loops and selections into clausal form"
-logSelectionDescription Codegen
+logSelectionDescription LLVM
     = "Log generation of LLVM code"
-logSelectionDescription Blocks
-    = "Log translation of LPVM procedures into LLVM"
 logSelectionDescription Emit
     = "Log emission of LLVM IR from the definitions created"
 logSelectionDescription Analysis
