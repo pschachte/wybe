@@ -118,7 +118,7 @@ emitAssemblyFile m f = do
     logEmit $ "===> Writing LLVM assembly file " ++ filename
     opts <- gets options
     handle <- liftIO $ openFile filename WriteMode
-    writeLLVM handle m
+    writeLLVM handle m True
     liftIO $ hClose handle
     return ()
     -- let withMod = if optimisationEnabled LLVMOpt opts then withOptimisedModule else withModule 

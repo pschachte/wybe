@@ -12,6 +12,7 @@ module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM ) where
 import           AST
 import           ASTShow
 import           Resources
+import           BinaryFactory
 import           Config
 import           Options
 import           Version
@@ -19,9 +20,13 @@ import           System.IO
 import           Data.Map                        as Map
 import           Control.Exception               (handle)
 import           Control.Monad.Trans.State
+import           Control.Monad
 import           Control.Monad.Extra
 import           Control.Monad.IO.Class
 import           Data.Tuple.HT
+import qualified Data.ByteString                 as B
+-- XXX Why do we need to refer to internals?                          
+import qualified Data.ByteString.Lazy            as BL
 
 ----------------------------------------------------------------------------
 -- Instruction maps
@@ -108,8 +113,8 @@ type LLVMType = String
 
 -- | Generate LLVM code for the specified module, based on its LPVM code, and
 -- write it to the specified file handle.
-writeLLVM :: Handle -> ModSpec -> Compiler ()
-writeLLVM handle modSpec = do
+writeLLVM :: Handle -> ModSpec -> Bool -> Compiler ()
+writeLLVM handle modSpec withLPVM = do
     reenterModule modSpec
     logLLVM $ "*** Generating LLVM for module " ++ showModSpec modSpec
     logWrapWith '-' . show <$> getModule id
@@ -118,7 +123,7 @@ writeLLVM handle modSpec = do
     writeAssemblyGlobals handle
     writeAssemblyExterns handle
     writeAssemblyProcs handle
-    writeAssemblyExports handle
+    when withLPVM $ writeAssemblyExports handle
     logLLVM $ "*** Finished generating LLVM for " ++ showModSpec modSpec
     reexitModule
 
@@ -176,7 +181,10 @@ writeAssemblyProcs h = return ()
 -- includes all the declared types and other submodules, resources, interfaces
 -- of all public procs, and definitions of inline public procs.
 writeAssemblyExports :: Handle -> Compiler ()
-writeAssemblyExports h = return ()
+writeAssemblyExports h = do
+    m <- getModule modSpec
+    modBS <- encodeModule m
+    declareByteStringConstant h (showModSpec m) modBS $ Just "__LPVM,__lpvm"
 
 
 -- | Generate a global declaration for a resource, if it's not a phantom.
@@ -191,6 +199,22 @@ defGlobalResource h res = do
             llvmRep <- llvmTypeRep <$> typeRep ty
             liftIO $ hPutStrLn h $ "@\"" ++ makeGlobalResourceName res'
                     ++ "\" = global " ++ llvmRep ++ " undef")
+
+
+declareStringConstant :: Handle -> String -> String -> Compiler ()
+declareStringConstant h name str = do
+    liftIO $ hPutStrLn h $ "@\"" ++ name ++ "\" = local_unnamed_addr constant ["
+                ++ show (1+length str) ++ " x i8] c"
+                ++ show str
+
+
+declareByteStringConstant :: Handle -> String -> BL.ByteString -> Maybe String
+                          -> Compiler ()
+declareByteStringConstant h name str section = do
+    liftIO $ hPutStrLn h $ "@\"" ++ name ++ "\" = local_unnamed_addr constant ["
+                ++ show (1+BL.length str) ++ " x i8] c"
+                ++ show str
+                ++ maybe "" ((", section "++) . show) section
 
 
 typeRep :: TypeSpec -> Compiler TypeRepresentation
