@@ -204,7 +204,7 @@ defGlobalResource h res = do
 declareStringConstant :: Handle -> String -> String -> Compiler ()
 declareStringConstant h name str = do
     liftIO $ hPutStrLn h $ "@\"" ++ name ++ "\" = local_unnamed_addr constant ["
-                ++ show (1+length str) ++ " x i8] c"
+                ++ show (length str) ++ " x i8] c"
                 ++ show str
 
 
@@ -212,7 +212,7 @@ declareByteStringConstant :: Handle -> String -> BL.ByteString -> Maybe String
                           -> Compiler ()
 declareByteStringConstant h name str section = do
     liftIO $ hPutStrLn h $ "@\"" ++ name ++ "\" = local_unnamed_addr constant ["
-                ++ show (1+BL.length str) ++ " x i8] c"
+                ++ show (BL.length str) ++ " x i8] c"
                 ++ show str
                 ++ maybe "" ((", section "++) . show) section
 
