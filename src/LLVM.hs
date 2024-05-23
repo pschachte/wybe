@@ -197,8 +197,7 @@ declareGlobalResource h spec@(ResourceSpec mod nm) ty = do
     resRoot <- (>>= modRootModSpec) <$> getLoadingModule mod
     rep <- llvmTypeRep <$> typeRep ty
     liftIO $ hPutStrLn h $ "@\"" ++ makeGlobalResourceName spec
-            ++ "\" = external global " ++ rep
-    -- XXX this may be affected by multiprocessing
+            ++ "\" = global " ++ rep ++ " undef"
 
 
 typeRep :: TypeSpec -> Compiler TypeRepresentation
