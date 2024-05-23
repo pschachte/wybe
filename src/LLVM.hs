@@ -157,7 +157,7 @@ writeAssemblyGlobals h = do
     resDefs <- modResources . trustFromJust "blockTransformModule"
                 <$> getModule modImplementation
     let ress = concatMap Map.keys (Map.elems resDefs)
-    mapM_ (globalResourceExtern h) ress
+    mapM_ (defGlobalResource h) ress
 
 
 -- | Write out extern declarations for all procs and resources imported from
@@ -179,31 +179,23 @@ writeAssemblyExports :: Handle -> Compiler ()
 writeAssemblyExports h = return ()
 
 
--- | Generate a global declaration for a resource, if necessary.
-globalResourceExtern :: Handle -> ResourceSpec -> Compiler ()
-globalResourceExtern h res = do
+-- | Generate a global declaration for a resource, if it's not a phantom.
+defGlobalResource :: Handle -> ResourceSpec -> Compiler ()
+defGlobalResource h res = do
     (res', ty) <-
-        mapSnd (trustFromJust $ "globalResourceExtern " ++ show res)
+        mapSnd (trustFromJust $ "defGlobalResource " ++ show res)
         <$> canonicaliseResourceSpec Nothing "newLLVMModule" res
-    let global = makeGlobalResourceName res'
     ifM (typeIsPhantom ty)
         (return ())
-        (declareGlobalResource h res' ty)
-
-
-declareGlobalResource :: Handle -> ResourceSpec -> TypeSpec -> Compiler ()
-declareGlobalResource h spec@(ResourceSpec mod nm) ty = do
-    rootMod <- getModule modRootModSpec
-    resRoot <- (>>= modRootModSpec) <$> getLoadingModule mod
-    rep <- llvmTypeRep <$> typeRep ty
-    liftIO $ hPutStrLn h $ "@\"" ++ makeGlobalResourceName spec
-            ++ "\" = global " ++ rep ++ " undef"
+        (do
+            llvmRep <- llvmTypeRep <$> typeRep ty
+            liftIO $ hPutStrLn h $ "@\"" ++ makeGlobalResourceName res'
+                    ++ "\" = global " ++ llvmRep ++ " undef")
 
 
 typeRep :: TypeSpec -> Compiler TypeRepresentation
 typeRep ty =
-    trustFromJust ("llvmType applied to InvalidType or unknown type ("
-                    ++ show ty ++ ")")
+    trustFromJust ("lookupTypeRepresentation of unknown type " ++ show ty)
       <$> lookupTypeRepresentation ty
 
 
