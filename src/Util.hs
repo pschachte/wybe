@@ -235,10 +235,12 @@ intersectMapIdentity = merge dropMissing dropMissing
                        (zipWithMaybeMatched
                         $ \_ v1 v2 -> if v1 == v2 then Just v1 else Nothing)
 
+
 -- | a `orElse` b returns a if it's a Just, otherwise b
 orElse :: Maybe a -> Maybe a -> Maybe a
 orElse Nothing b  = b
 orElse a@Just{} _ = a
+
 
 -- | apply two functions to the same input and combine the results
 apply2way :: (a->b->c) -> (d->a) -> (d->b) -> d -> c

@@ -18,6 +18,7 @@ import           Options
 import           Version
 import           System.IO
 import           Data.Map                        as Map
+import           Data.List                       as List
 -- import           Control.Exception               (handle)
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
@@ -26,7 +27,6 @@ import           Control.Monad.Extra
 import           Control.Monad.IO.Class
 import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
--- XXX Why do we need to refer to internals?                          
 import qualified Data.ByteString.Lazy            as BL
 
 ----------------------------------------------------------------------------
@@ -111,18 +111,25 @@ llvmMapUnop =
 ----------------------------------------------------------------------------
 
 -- At least for now, we represent LLVM types as strings
-type LLVMType = String
+type LLVMType = String              -- ^ An LLVM type name, such as i8
+type LLVMName = String              -- ^ An LLVM global name, such as a
+                                    --   function, variable or constant name;
+                                    --   must begin with @
+type LLVMLocal = String             -- ^ An LLVM local variable name; must begin
+                                    --   with %
+
 
 data LLVMState = LLVMState {
-        fileHandle :: Handle        -- ^ The file handle we're writing to
+        fileHandle :: Handle,       -- ^ The file handle we're writing to
+        tmpCounter :: Int           -- ^ Next temp var to make for current proc
 }
 
 
 initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState h
-
+initLLVMState h = LLVMState h 0
 
 type LLVM = StateT LLVMState Compiler
+
 
 -- | Apply some function to (access some member of) the current module from
 -- within the LLVM monad.
@@ -155,6 +162,10 @@ writeLLVM handle modSpec withLPVM = do
     reexitModule
 
 
+----------------------------------------------------------------------------
+-- Writing the prologue
+----------------------------------------------------------------------------
+
 -- | Write out some boilerplate at the beginning of a generated .ll file.
 -- Included are a comment identifying the source of the file and the information
 -- required for the file to be compilable.
@@ -174,44 +185,28 @@ writeAssemblyPrologue = do
     return ()
 
 
+----------------------------------------------------------------------------
+-- Writing the constant definitions
+----------------------------------------------------------------------------
+
 -- | Write out definitions of manifest constants used in generated code for this
 -- module.
 writeAssemblyConstants :: LLVM ()
 writeAssemblyConstants = return ()
 
 
+----------------------------------------------------------------------------
+-- Writing the global variable definitions
+----------------------------------------------------------------------------
+
 -- | Write out definitions of global variables to implement the resources of
 -- this module.
 writeAssemblyGlobals :: LLVM ()
 writeAssemblyGlobals = do
-    h <- gets fileHandle
-    resDefs <- modResources . trustFromJust "blockTransformModule"
+    resDefs <- modResources . trustFromJust "writeAssemblyGlobals"
                 <$> llvmGetModule modImplementation
     let ress = concatMap Map.keys (Map.elems resDefs)
     mapM_ defGlobalResource ress
-
-
--- | Write out extern declarations for all procs and resources imported from
--- other modules and used by this one.
-writeAssemblyExterns :: LLVM ()
-writeAssemblyExterns = return ()
-
-
--- | Generate and write out the LLVM code for all the procs defined in this
--- module.
-writeAssemblyProcs :: LLVM ()
-writeAssemblyProcs = return ()
-
-
--- | Write out data needed for wybemk to compile users of this module.  This
--- includes all the declared types and other submodules, resources, interfaces
--- of all public procs, and definitions of inline public procs.
-writeAssemblyExports :: LLVM ()
-writeAssemblyExports = do
-    h <- gets fileHandle
-    m <- llvmGetModule modSpec
-    modBS <- lift $ encodeModule m
-    declareByteStringConstant (showModSpec m) modBS $ Just "__LPVM,__lpvm"
 
 
 -- | Generate a global declaration for a resource, if it's not a phantom.
@@ -224,18 +219,84 @@ defGlobalResource res = do
         (return ())
         (do
             llvmRep <- llvmTypeRep <$> typeRep ty
-            llvmPutStrLn $ "@\"" ++ makeGlobalResourceName res'
-                    ++ "\" = global " ++ llvmRep ++ " undef")
+            llvmPutStrLn $ llvmGlobalName (makeGlobalResourceName res')
+                    ++ " = global " ++ llvmRep ++ " undef")
 
 
-declareStringConstant :: String -> String -> LLVM ()
+----------------------------------------------------------------------------
+-- Writing extern declarations
+----------------------------------------------------------------------------
+
+-- | Write out extern declarations for all procs and resources imported from
+-- other modules and used by this one.
+writeAssemblyExterns :: LLVM ()
+writeAssemblyExterns = return ()
+
+
+----------------------------------------------------------------------------
+-- Writing procedure definitions
+----------------------------------------------------------------------------
+
+-- | Generate and write out the LLVM code for all the procs defined in this
+-- module.
+writeAssemblyProcs :: LLVM ()
+writeAssemblyProcs = do
+    mod <- llvmGetModule modSpec
+    procs <- lift $ getModuleImplementationField
+                    (concatMap (`zip` [0..]) . Map.elems . modProcs)
+    mapM_ (uncurry (writeAssemblyProc mod)) procs
+
+
+-- | Generate and write out the LLVM code for the given proc with its proc
+-- number.
+writeAssemblyProc :: ModSpec -> ProcDef -> Int -> LLVM ()
+writeAssemblyProc mod def procNum = do
+    let name = llvmProcName mod (procName def) procNum
+    let params = (content <$>) <$> procProtoParams $ procProto def
+    realParams <- lift $ filterM (notM . typeIsPhantom . paramType) params
+    let ins = List.filter (flowsIn . paramFlow) params
+    let outs = List.filter (flowsOut . paramFlow) params
+    returnType <- llvmReturnType $ List.map paramType outs
+    llParams <- mapM llvmParameter ins
+    modify $ \s -> s {tmpCounter = procTmpCount def}
+    llvmPutStrLn ""
+    llvmPutStrLn $
+        "define external fastcc " ++ returnType ++ " "
+            ++ name ++ "(" ++ intercalate ", " llParams ++ ")"
+            ++ " alwaysinline {"
+    llvmPutStrLn "}"
+
+
+----------------------------------------------------------------------------
+-- Writing the export information ("header" file equivalent)
+----------------------------------------------------------------------------
+
+-- | Write out data needed for wybemk to compile users of this module.  This
+-- includes all the declared types and other submodules, resources, interfaces
+-- of all public procs, and definitions of inline public procs, written as a
+-- large constant string in the LPVM section of the file.
+writeAssemblyExports :: LLVM ()
+writeAssemblyExports = do
+    llvmPutStrLn ""
+    m <- llvmGetModule modSpec
+    modBS <- lift $ encodeModule m
+    declareByteStringConstant (showModSpec m) modBS $ Just "__LPVM,__lpvm"
+
+
+----------------------------------------------------------------------------
+-- Support code
+----------------------------------------------------------------------------
+
+-- | Emit an LLVM declaration for a string constant.
+declareStringConstant :: LLVMName -> String -> LLVM ()
 declareStringConstant name str = do
     llvmPutStrLn $ "@\"" ++ name ++ "\" = local_unnamed_addr constant ["
         ++ show (length str) ++ " x i8] c"
         ++ show str
 
 
-declareByteStringConstant :: String -> BL.ByteString -> Maybe String -> LLVM ()
+-- | Emit an LLVM declaration for a string constant represented as a ByteString.
+declareByteStringConstant :: LLVMName -> BL.ByteString -> Maybe String -> LLVM ()
 declareByteStringConstant name str section = do
     llvmPutStrLn $ "@\"" ++ name ++ "\" = local_unnamed_addr constant ["
         ++ show (BL.length str) ++ " x i8] c"
@@ -243,6 +304,7 @@ declareByteStringConstant name str section = do
         ++ maybe "" ((", section "++) . show) section
 
 
+-- | Return the representation for the specified type
 typeRep :: TypeSpec -> LLVM TypeRepresentation
 typeRep ty =
     trustFromJust ("lookupTypeRepresentation of unknown type " ++ show ty)
@@ -263,20 +325,40 @@ llvmTypeRep (Func _ _)      = llvmTypeRep $ Bits wordSize
 llvmTypeRep Address         = llvmTypeRep $ Bits wordSize
 
 
--- |Affix its id number to the end of each proc name
-mangleProcs :: [ProcDef] -> [ProcDef]
-mangleProcs ps = zipWith mangleProc ps [0..]
+-- | The LLVM return type for proc with the specified list of output type specs.
+llvmReturnType :: [TypeSpec] -> LLVM LLVMType
+llvmReturnType [] = return "void"
+llvmReturnType [ty] = llvmTypeRep <$> typeRep ty
+llvmReturnType tys = do
+    lltys <- mapM ((llvmTypeRep <$>) . typeRep) tys
+    return $ "{" ++ intercalate ", " lltys ++ "}"
 
 
-mangleProc :: ProcDef -> Int -> ProcDef
-mangleProc def i =
-    let proto = procImplnProto $ procImpln def
-        s = primProtoName proto
-        pname = s ++ "<" ++ show i ++ ">"
-        newProto = proto {primProtoName = pname}
-    in
-    def {procImpln = (procImpln def){procImplnProto = newProto}}
+-- | The LLVM parameter declaration for the specified Wybe input parameter as a
+-- pair of LLVM type and variable name
+llvmParameter :: Param -> LLVM String
+llvmParameter Param{paramName=name, paramType=ty} = do
+    let llname = llvmLocalName name
+    lltype <- llvmTypeRep <$> typeRep ty
+    return $ lltype ++ " " ++ llname
 
+
+-- | The LLVM name for a Wybe proc.
+llvmProcName :: ModSpec -> ProcName -> Int -> LLVMName
+llvmProcName mod procName procNum =
+    showModSpec mod ++ "." ++ procName ++ "<" ++ show procNum ++ ">"
+
+
+-- | Make a suitable LLVM name for a global variable or constant.  We prefix it
+-- with @, enclose the rest in quotes, and escape any special characters.
+llvmGlobalName :: String -> LLVMName
+llvmGlobalName s = '@' : show s
+
+
+-- | Make a suitable LLVM name for a local variable.  We prefix it
+-- with %, enclose the rest in quotes, and escape any special characters.
+llvmLocalName :: String -> LLVMLocal
+llvmLocalName s = '%' : show s
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
