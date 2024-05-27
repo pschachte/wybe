@@ -5,8 +5,6 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
--- {-# LANGUAGE TupleSections #-}
-
 module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM ) where
 
 import           AST
@@ -250,21 +248,27 @@ writeAssemblyProcs = do
 -- | Generate and write out the LLVM code for the given proc with its proc
 -- number.
 writeAssemblyProc :: ModSpec -> ProcDef -> Int -> LLVM ()
-writeAssemblyProc mod def procNum = do
-    let name = llvmProcName mod (procName def) procNum
-    let params = (content <$>) <$> procProtoParams $ procProto def
-    realParams <- lift $ filterM (notM . typeIsPhantom . paramType) params
-    let ins = List.filter (flowsIn . paramFlow) params
-    let outs = List.filter (flowsOut . paramFlow) params
-    returnType <- llvmReturnType $ List.map paramType outs
-    llParams <- mapM llvmParameter ins
-    modify $ \s -> s {tmpCounter = procTmpCount def}
-    llvmPutStrLn ""
-    llvmPutStrLn $
-        "define external fastcc " ++ returnType ++ " "
-            ++ name ++ "(" ++ intercalate ", " llParams ++ ")"
-            ++ " alwaysinline {"
-    llvmPutStrLn "}"
+writeAssemblyProc mod def procNum =
+    case procImpln def of
+        ProcDefPrim {procImplnProcSpec=pspec, procImplnProto=proto,
+                     procImplnBody=body, procImplnSpeczBodies=specz} -> do
+            let name = llvmProcName pspec
+            let params = primProtoParams proto
+            realParams <- lift $ filterM (notM . typeIsPhantom . primParamType)
+                                 params
+            let ins = List.filter ((==FlowIn) . primParamFlow) params
+            let outs = List.filter ((==FlowOut) . primParamFlow) params
+            returnType <- llvmReturnType $ List.map primParamType outs
+            llParams <- mapM llvmParameter ins
+            modify $ \s -> s {tmpCounter = procTmpCount def}
+            llvmPutStrLn ""
+            llvmPutStrLn $
+                "define external fastcc " ++ returnType ++ " "
+                    ++ name ++ "(" ++ intercalate ", " llParams ++ ")"
+                    ++ " alwaysinline {"
+            llvmPutStrLn "}"
+        _ -> shouldnt $ "Generating assembly code for uncompiled proc "
+                        ++ showProcName (procName def)
 
 
 ----------------------------------------------------------------------------
@@ -336,17 +340,16 @@ llvmReturnType tys = do
 
 -- | The LLVM parameter declaration for the specified Wybe input parameter as a
 -- pair of LLVM type and variable name
-llvmParameter :: Param -> LLVM String
-llvmParameter Param{paramName=name, paramType=ty} = do
+llvmParameter :: PrimParam -> LLVM String
+llvmParameter PrimParam{primParamName=name, primParamType=ty} = do
     let llname = llvmLocalName name
     lltype <- llvmTypeRep <$> typeRep ty
     return $ lltype ++ " " ++ llname
 
 
 -- | The LLVM name for a Wybe proc.
-llvmProcName :: ModSpec -> ProcName -> Int -> LLVMName
-llvmProcName mod procName procNum =
-    showModSpec mod ++ "." ++ procName ++ "<" ++ show procNum ++ ">"
+llvmProcName :: ProcSpec -> LLVMName
+llvmProcName pspec = llvmGlobalName $ show pspec
 
 
 -- | Make a suitable LLVM name for a global variable or constant.  We prefix it
@@ -357,8 +360,9 @@ llvmGlobalName s = '@' : show s
 
 -- | Make a suitable LLVM name for a local variable.  We prefix it
 -- with %, enclose the rest in quotes, and escape any special characters.
-llvmLocalName :: String -> LLVMLocal
-llvmLocalName s = '%' : show s
+llvmLocalName :: PrimVarName -> LLVMLocal
+llvmLocalName varName =
+    "%\"" ++ show varName ++ "\""
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
