@@ -4,6 +4,7 @@
 --  Copyright: (c) 2024 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+{-# LANGUAGE LambdaCase #-}
 
 module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM ) where
 
@@ -135,11 +136,21 @@ llvmGetModule :: (Module -> a) -> LLVM a
 llvmGetModule fn = lift $ getModule fn
 
 
--- | Write a newline-terminated string to the current LLVM output file handle.
+-- | Write a string followed by a newline to the current LLVM output file handle
 llvmPutStrLn :: String -> LLVM ()
 llvmPutStrLn str = do
     h <- gets fileHandle
     liftIO $ hPutStrLn h str
+
+
+-- | Write a blank line to the current LLVM output file handle
+llvmBlankLine :: LLVM ()
+llvmBlankLine = llvmPutStrLn ""
+
+
+-- | Write an indented string to the current LLVM output file handle.
+llvmPutStrLnIndented :: String -> LLVM ()
+llvmPutStrLnIndented str = llvmPutStrLn $ "  " ++ str
 
 
 -- | Generate LLVM code for the specified module, based on its LPVM code, and
@@ -176,10 +187,10 @@ writeAssemblyPrologue = do
                 ++ " (" ++ Version.gitHash
                 ++ ") -- see https://github.com/pschachte/wybe"
     llvmPutStrLn $ ";; Module " ++ showModSpec mod
-    llvmPutStrLn ""
+    llvmBlankLine
     llvmPutStrLn $ "source_filename = \"" ++ srcFile ++ "\""
     llvmPutStrLn $ "target triple   = \"" ++ Version.defaultTriple ++ "\""
-    llvmPutStrLn ""
+    llvmBlankLine
     return ()
 
 
@@ -253,23 +264,115 @@ writeAssemblyProc mod def procNum =
         ProcDefPrim {procImplnProcSpec=pspec, procImplnProto=proto,
                      procImplnBody=body, procImplnSpeczBodies=specz} -> do
             let name = llvmProcName pspec
-            let params = primProtoParams proto
-            realParams <- lift $ filterM (notM . typeIsPhantom . primParamType)
-                                 params
-            let ins = List.filter ((==FlowIn) . primParamFlow) params
-            let outs = List.filter ((==FlowOut) . primParamFlow) params
+            (ins,outs) <- partitionParams $ primProtoParams proto
             returnType <- llvmReturnType $ List.map primParamType outs
             llParams <- mapM llvmParameter ins
             modify $ \s -> s {tmpCounter = procTmpCount def}
-            llvmPutStrLn ""
+            llvmBlankLine
             llvmPutStrLn $
                 "define external fastcc " ++ returnType ++ " "
                     ++ name ++ "(" ++ intercalate ", " llParams ++ ")"
                     ++ " alwaysinline {"
+            writeAssemblyBody outs body
             llvmPutStrLn "}"
+            -- XXX need to write out specialisations.
         _ -> shouldnt $ "Generating assembly code for uncompiled proc "
                         ++ showProcName (procName def)
 
+
+-- | Generate and write out the LLVM return statement.
+writeAssemblyReturn :: [PrimParam] -> LLVM ()
+writeAssemblyReturn [] = llvmPutStrLnIndented "ret void"
+writeAssemblyReturn [PrimParam{primParamName=v, primParamType=ty}] = do
+    llty <- llvmTypeRep <$> typeRep ty
+    llvmPutStrLnIndented $ "ret " ++ llty ++ " " ++ show v
+writeAssemblyReturn params = do
+    -- XXX not right:  need to pack a tuple and return that
+    retType <- llvmReturnType $ List.map primParamType params
+    llvmPutStrLnIndented $ "ret " ++ retType
+                           ++ show (List.map primParamName params)
+
+
+
+-- | Generate and write out the LLVM code for an LPVM body
+writeAssemblyBody :: [PrimParam] -> ProcBody -> LLVM ()
+writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
+    mapM_ (placedApply writeAssemblyPrim) prims
+    case fork of
+        NoFork -> writeAssemblyReturn outs
+        PrimFork{forkVar=v, forkVarType=ty, forkBodies=branches,
+                 forkDefault=dflt} -> do
+            rep <- typeRep ty
+            case (rep,branches,dflt) of
+                (Bits 0,_,_) -> shouldnt "Switch on a phantom!"
+                (_,[single],Nothing) -> writeAssemblyBody outs single
+                (Bits 1, [els,thn],Nothing) -> writeAssemblyIfElse outs v thn els
+                (Bits n, _, _) -> llvmPutStrLn $ "Switch " ++ show n ++ " bits"
+                (rep,_,_) -> llvmPutStrLn $ "Switching on " ++ show rep ++ " type "
+                                ++ show ty
+
+
+-- | Generate and write out the LLVM code for a single LPVM prim
+writeAssemblyPrim :: Prim -> OptPos -> LLVM ()
+writeAssemblyPrim (PrimCall _ proc _ args _) pos = do
+    writeWybeCall proc args pos
+writeAssemblyPrim (PrimHigher _ fn _ args) pos = do
+    llvmPutStrLnIndented $ "call " ++ show fn ++ show args
+writeAssemblyPrim (PrimForeign "llvm" op flags args) pos = do
+    writeLLVMCall op flags args pos
+writeAssemblyPrim (PrimForeign "lpvm" op flags args) pos = do
+    writeLPVMCall op flags args pos
+writeAssemblyPrim (PrimForeign "c" cfn flags args) pos = do
+    writeCCall cfn flags args pos
+writeAssemblyPrim (PrimForeign lang op flags args) pos = do
+    shouldnt $ "unknown foreign language " ++ lang
+                ++ " in instruction at " ++ show pos
+
+
+-- | Generate and write out an LLVM if-then-else
+writeAssemblyIfElse :: [PrimParam] -> PrimVarName -> ProcBody -> ProcBody
+                    -> LLVM ()
+writeAssemblyIfElse outs v thn els = do
+    llvmPutStrLn $ "if " ++ show v ++ " then:"
+    writeAssemblyBody outs thn
+    llvmPutStrLn $ "else:"
+    writeAssemblyBody outs els
+    llvmPutStrLn $ "endif"
+
+
+-- | Generate a Wybe proc call instruction
+writeWybeCall :: ProcSpec -> [PrimArg] -> OptPos -> LLVM ()
+writeWybeCall wybeProc args pos = do
+    (ins,outs) <- partitionArgs args
+    argList <- llvmArgumentList ins
+    outTy <- llvmReturnType $ List.map argType outs
+    llvmPutStrLnIndented $ llvmStoreResult outs ++ "tail call fastcc "
+                    ++ outTy ++ " " ++ llvmProcName wybeProc ++ argList
+
+
+-- | Generate LLVM instruction
+writeLLVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
+writeLLVMCall op flags args pos = do
+    (ins,outs) <- partitionArgs args
+    argList <- llvmArgumentList ins
+    llvmPutStrLnIndented $ llvmStoreResult outs ++ op ++ argList
+
+
+-- | Generate LPVM (memory management) instruction
+writeLPVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
+writeLPVMCall op flags args pos = do
+    (ins,outs) <- partitionArgs args
+    argList <- llvmArgumentList ins
+    llvmPutStrLnIndented $ "LPVM: " ++ llvmStoreResult outs ++ op ++ argList
+
+-- | Generate C function call
+writeCCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
+writeCCall cfn flags args pos = do
+    (ins,outs) <- partitionArgs args
+    argList <- llvmArgumentList ins
+    outTy <- llvmReturnType $ List.map argType outs
+    llvmPutStrLnIndented $ llvmStoreResult outs ++ "call " ++ outTy ++ " "
+                            ++ llvmGlobalName cfn ++ argList
 
 ----------------------------------------------------------------------------
 -- Writing the export information ("header" file equivalent)
@@ -281,7 +384,7 @@ writeAssemblyProc mod def procNum =
 -- large constant string in the LPVM section of the file.
 writeAssemblyExports :: LLVM ()
 writeAssemblyExports = do
-    llvmPutStrLn ""
+    llvmBlankLine
     m <- llvmGetModule modSpec
     modBS <- lift $ encodeModule m
     declareByteStringConstant (showModSpec m) modBS $ Just "__LPVM,__lpvm"
@@ -347,6 +450,40 @@ llvmParameter PrimParam{primParamName=name, primParamType=ty} = do
     return $ lltype ++ " " ++ llname
 
 
+-- | The LLVM translation of the specified argument list
+llvmArgumentList :: [PrimArg] -> LLVM String
+llvmArgumentList inputs =
+    ('(':). (++")") . intercalate ", " <$> mapM llvmArgument inputs
+
+
+-- | The LLVM translation of the specified output argument list
+llvmStoreResult :: [PrimArg] -> String
+llvmStoreResult [] = ""
+llvmStoreResult [ArgVar{argVarName=varName}] =
+    show varName ++ " = "
+llvmStoreResult multiOuts =
+    "(" ++ intercalate ", " (show <$> multiOuts) ++ ") = "
+
+-- | The LLVM argument for the specified PrimArg as an LLVM type and value
+llvmArgument :: PrimArg -> LLVM String
+llvmArgument arg = do
+    lltype <- llvmTypeRep <$> typeRep (argType arg)
+    return $ lltype ++ " " ++ llvmValue arg
+
+
+-- | A PrimArg as portrayed in LLVM code
+llvmValue :: PrimArg -> String
+llvmValue ArgVar{argVarName=var} = llvmLocalName var
+llvmValue (ArgInt val _) = show val
+llvmValue (ArgFloat val _) = show val
+llvmValue (ArgString _ val _) = show val -- XXX need to make a global constant
+llvmValue (ArgChar val _) = show val
+llvmValue (ArgClosure _ val _) = show val -- XXX not sure what to do
+llvmValue (ArgGlobal val _) = show val    -- XXX not sure what to do
+llvmValue (ArgUnneeded val _) = show val  -- XXX not sure what to do
+llvmValue (ArgUndef _) = "undef"
+
+
 -- | The LLVM name for a Wybe proc.
 llvmProcName :: ProcSpec -> LLVMName
 llvmProcName pspec = llvmGlobalName $ show pspec
@@ -363,6 +500,25 @@ llvmGlobalName s = '@' : show s
 llvmLocalName :: PrimVarName -> LLVMLocal
 llvmLocalName varName =
     "%\"" ++ show varName ++ "\""
+
+
+-- | Split parameter list into separate list of inputs and outputs, ignoring
+--   any phantom parameters
+-- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
+partitionParams :: [PrimParam] -> LLVM ([PrimParam],[PrimParam])
+partitionParams params = do
+    realParams <- lift $ filterM (notM . typeIsPhantom . primParamType) params
+    return ( List.filter ((==FlowIn) . primParamFlow) realParams
+           , List.filter ((==FlowOut) . primParamFlow) realParams)
+
+
+-- | Split argument list into separate list of inputs and outputs
+-- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
+partitionArgs :: [PrimArg] -> LLVM ([PrimArg],[PrimArg])
+partitionArgs args = do
+    realArgs <- lift $ filterM (notM . argIsPhantom) args
+    return ( List.filter ((==FlowIn) . argFlowDirection) realArgs
+           , List.filter ((==FlowOut) . argFlowDirection) realArgs)
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
