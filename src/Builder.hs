@@ -242,6 +242,7 @@ import qualified Data.ByteString.Char8 as BS
 
 import           Debug.Trace
 import LastCallAnalysis (lastCallAnalyseMod)
+import Data.Ord (comparing, Down (..))
 
 ------------------------ Handling dependencies ------------------------
 
@@ -280,7 +281,7 @@ buildTarget target = do
                        ++ " Module: " ++ showModSpec modspec
             -- target should be in the working directory, lib dir will be added
             -- later
-            depGraph <- loadAllNeededModules modspec True 
+            depGraph <- loadAllNeededModules modspec True
                         (tType == ExecutableFile) [(dir,False)]
 
             -- topological sort (bottom-up)
@@ -360,10 +361,10 @@ loadAllNeededModules modspec isTarget isExec possDirs = do
     let possDirs' = if isTarget
         then possDirs ++ ((,True) <$> optLibDirs opts)
         else possDirs
-    mods' <- if isExec 
+    mods' <- if isExec
         then do
             cmdLineMods <- loadModuleIfNeeded force cmdLineModSpec possDirs'
-            return $ nub $ cmdLineMods ++ mods 
+            return $ nub $ cmdLineMods ++ mods
         else return mods
     logBuild $ "Loading module " ++ showModSpec modspec
                ++ " ... got " ++ showModSpecs mods'
@@ -653,7 +654,7 @@ loadLPVMFromObjFile objFile required = do
         Left err -> return $ Left $ "Error decoding object file data: " ++ err
         Right modBS -> do
             logBuild "No error decoding object file data."
-            logBuild $ "Extracted LPVM data"
+            logBuild "Extracted LPVM data"
             (List.map (\m -> m { modOrigin = objFile } ) <$>)
               <$> decodeModule required modBS
 
@@ -783,7 +784,7 @@ prepareToCompileModSCC modSCC = do
                     Error <!> "Source: " ++ src ++ " has been changed during "
                               ++ "the compilation."
                 else
-                    loadModuleFromSrcFile rootM src Nothing >> return ()
+                    void (loadModuleFromSrcFile rootM src Nothing)
             else Error <!>
                     "Unable to find corresponding source for object: " ++ obj
                     ++ ". Failed to reload modules:" ++ showModSpecs ms
@@ -1024,7 +1025,7 @@ buildExecutable orderedSCCs targetMod target = do
     --     depends = sortOn (modTopoOrder topoMap . fst) dependsUnsorted
 
     -- order each SCC such that submodules come before their parents
-    let orderedSCCs' = List.map (reverse . sort) orderedSCCs
+    let orderedSCCs' = List.map (sortBy (comparing Data.Ord.Down)) orderedSCCs
     let depends = concat orderedSCCs'
     if "" `elem` procs || "<0>" `elem` procs
         then do
@@ -1162,21 +1163,21 @@ sccInits mods = do
     logBuild $ "Collecting initialisations for modules:  " ++ showModSpecs mods
     initialisedRes <- mapM (initialisedResources `inModule`) mods
     logBuild $ "Initialised resources:  " ++ show initialisedRes
-    let initRes = concat (Map.keys <$> initialisedRes)
+    let initRes = concatMap Map.keys initialisedRes
     let resInits = [maybePlace
                     (ForeignCall "llvm" "move" []
                         [initVal, Unplaced (varSet resName)])
                     (resourcePos def)
-                   | (spec,def) <- concat $ Map.toList <$> initialisedRes
-                   , let resName = resourceName spec 
+                   | (spec,def) <- concatMap Map.toList initialisedRes
+                   , let resName = resourceName spec
                    , let maybeInit = resourceInit def
                    , isJust maybeInit
                    , let initVal = fromJust maybeInit]
-    initMods <- filterM 
+    initMods <- filterM
                     ((isJust . Map.lookup ""
                         <$> getModuleImplementationField modProcs) `inModule`)
                 mods
-    let initProcCalls = [Unplaced 
+    let initProcCalls = [Unplaced
                             $ ProcCall (First modSpec "" Nothing) Det True []
                         | modSpec <- initMods
                         ]
