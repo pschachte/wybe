@@ -2787,7 +2787,7 @@ validateForeignCall "llvm" name flags argReps stmt pos = do
     case argReps of
         [inRep1,inRep2,outRep] ->
           case Map.lookup name llvmMapBinop of
-             Just (fam,outTy) -> do
+             Just (_,fam,outTy) -> do
                reportErrorUnless (ReasonWrongFamily name 1 fam pos)
                                  (fam == typeFamily inRep1)
                reportErrorUnless (ReasonWrongFamily name 2 fam pos)

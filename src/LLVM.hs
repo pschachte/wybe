@@ -37,50 +37,50 @@ import qualified Data.ByteString.Lazy            as BL
 
 -- | A map of arithmetic binary operations supported through LLVM to
 -- their Codegen module counterpart.
-llvmMapBinop :: Map String
-                (TypeFamily, TypeRepresentation -> TypeRepresentation)
+llvmMapBinop :: Map Ident (String,
+                    TypeFamily, TypeRepresentation -> TypeRepresentation)
 llvmMapBinop =
     Map.fromList [
             -- Integer arithmetic
-            ("add",  (IntFamily, id)),
-            ("sub",  (IntFamily, id)),
-            ("mul",  (IntFamily, id)),
-            ("udiv", (IntFamily, id)),
-            ("sdiv", (IntFamily, id)),
-            ("urem", (IntFamily, id)),
-            ("srem", (IntFamily, id)),
+            ("add",  ("add",  IntFamily, id)),
+            ("sub",  ("sub",  IntFamily, id)),
+            ("mul",  ("mul",  IntFamily, id)),
+            ("udiv", ("udiv", IntFamily, id)),
+            ("sdiv", ("sdiv", IntFamily, id)),
+            ("urem", ("urem", IntFamily, id)),
+            ("srem", ("srem", IntFamily, id)),
             -- Integer comparisions
-            ("icmp_eq",  (IntFamily, const $ Bits 1)),
-            ("icmp_ne",  (IntFamily, const $ Bits 1)),
-            ("icmp_ugt", (IntFamily, const $ Bits 1)),
-            ("icmp_uge", (IntFamily, const $ Bits 1)),
-            ("icmp_ult", (IntFamily, const $ Bits 1)),
-            ("icmp_ule", (IntFamily, const $ Bits 1)),
-            ("icmp_sgt", (IntFamily, const $ Bits 1)),
-            ("icmp_sge", (IntFamily, const $ Bits 1)),
-            ("icmp_slt", (IntFamily, const $ Bits 1)),
-            ("icmp_sle", (IntFamily, const $ Bits 1)),
+            ("icmp_eq",  ("icmp eq",  IntFamily, const $ Bits 1)),
+            ("icmp_ne",  ("icmp ne",  IntFamily, const $ Bits 1)),
+            ("icmp_ugt", ("icmp ugt", IntFamily, const $ Bits 1)),
+            ("icmp_uge", ("icmp uge", IntFamily, const $ Bits 1)),
+            ("icmp_ult", ("icmp ult", IntFamily, const $ Bits 1)),
+            ("icmp_ule", ("icmp ule", IntFamily, const $ Bits 1)),
+            ("icmp_sgt", ("icmp sgt", IntFamily, const $ Bits 1)),
+            ("icmp_sge", ("icmp sge", IntFamily, const $ Bits 1)),
+            ("icmp_slt", ("icmp slt", IntFamily, const $ Bits 1)),
+            ("icmp_sle", ("icmp sle", IntFamily, const $ Bits 1)),
             -- Bitwise operations
-            ("shl",  (IntFamily, id)),
-            ("lshr", (IntFamily, id)),
-            ("ashr", (IntFamily, id)),
-            ("or",   (IntFamily, id)),
-            ("and",  (IntFamily, id)),
-            ("xor",  (IntFamily, id)),
+            ("shl",  ("shl",  IntFamily, id)),
+            ("lshr", ("lshr", IntFamily, id)),
+            ("ashr", ("ashr", IntFamily, id)),
+            ("or",   ("or",   IntFamily, id)),
+            ("and",  ("and",  IntFamily, id)),
+            ("xor",  ("xor",  IntFamily, id)),
 
             -- Floating point arithmetic
-            ("fadd", (FloatFamily, id)),
-            ("fsub", (FloatFamily, id)),
-            ("fmul", (FloatFamily, id)),
-            ("fdiv", (FloatFamily, id)),
-            ("frem", (FloatFamily, id)),
+            ("fadd", ("fadd", FloatFamily, id)),
+            ("fsub", ("fsub", FloatFamily, id)),
+            ("fmul", ("fmul", FloatFamily, id)),
+            ("fdiv", ("fdiv", FloatFamily, id)),
+            ("frem", ("frem", FloatFamily, id)),
             -- Floating point comparisions
-            ("fcmp_eq",  (FloatFamily, const $ Bits 1)),
-            ("fcmp_ne",  (FloatFamily, const $ Bits 1)),
-            ("fcmp_slt", (FloatFamily, const $ Bits 1)),
-            ("fcmp_sle", (FloatFamily, const $ Bits 1)),
-            ("fcmp_sgt", (FloatFamily, const $ Bits 1)),
-            ("fcmp_sge", (FloatFamily, const $ Bits 1))
+            ("fcmp_eq",  ("fcmp oeq",  FloatFamily, const $ Bits 1)),
+            ("fcmp_ne",  ("fcmp one",  FloatFamily, const $ Bits 1)),
+            ("fcmp_slt", ("fcmp olt", FloatFamily, const $ Bits 1)),
+            ("fcmp_sle", ("fcmp ole", FloatFamily, const $ Bits 1)),
+            ("fcmp_sgt", ("fcmp ogt", FloatFamily, const $ Bits 1)),
+            ("fcmp_sge", ("fcmp oge", FloatFamily, const $ Bits 1))
            ]
 
 -- | A map of unary llvm operations wrapped in the 'Codegen' module.
@@ -120,12 +120,13 @@ type LLVMLocal = String             -- ^ An LLVM local variable name; must begin
 
 data LLVMState = LLVMState {
         fileHandle :: Handle,       -- ^ The file handle we're writing to
-        tmpCounter :: Int           -- ^ Next temp var to make for current proc
+        tmpCounter :: Int,          -- ^ Next temp var to make for current proc
+        labelCounter :: Int         -- ^ Next label number to use
 }
 
 
 initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState h 0
+initLLVMState h = LLVMState h 0 0
 
 type LLVM = StateT LLVMState Compiler
 
@@ -151,6 +152,14 @@ llvmBlankLine = llvmPutStrLn ""
 -- | Write an indented string to the current LLVM output file handle.
 llvmPutStrLnIndented :: String -> LLVM ()
 llvmPutStrLnIndented str = llvmPutStrLn $ "  " ++ str
+
+
+-- | Return labels made unique by adding the next label suffix
+freshLables :: [String] -> LLVM [String]
+freshLables bases = do
+    nxt <- gets labelCounter
+    modify $ \s -> s {labelCounter = nxt+1}
+    return $ List.map (++show nxt) bases
 
 
 -- | Generate LLVM code for the specified module, based on its LPVM code, and
@@ -285,7 +294,7 @@ writeAssemblyReturn :: [PrimParam] -> LLVM ()
 writeAssemblyReturn [] = llvmPutStrLnIndented "ret void"
 writeAssemblyReturn [PrimParam{primParamName=v, primParamType=ty}] = do
     llty <- llvmTypeRep <$> typeRep ty
-    llvmPutStrLnIndented $ "ret " ++ llty ++ " " ++ show v
+    llvmPutStrLnIndented $ "ret " ++ llty ++ " " ++ llvmLocalName v
 writeAssemblyReturn params = do
     -- XXX not right:  need to pack a tuple and return that
     retType <- llvmReturnType $ List.map primParamType params
@@ -329,15 +338,18 @@ writeAssemblyPrim (PrimForeign lang op flags args) pos = do
                 ++ " in instruction at " ++ show pos
 
 
--- | Generate and write out an LLVM if-then-else
+-- | Generate and write out an LLVM if-then-else (switch on an i1 value)
 writeAssemblyIfElse :: [PrimParam] -> PrimVarName -> ProcBody -> ProcBody
                     -> LLVM ()
 writeAssemblyIfElse outs v thn els = do
-    llvmPutStrLn $ "if " ++ show v ++ " then:"
+    [thnlbl,elslbl] <- freshLables ["if.then.","if.else."]
+    llvmPutStrLnIndented $ "br i1 " ++ llvmLocalName v
+                    ++ ", " ++ llvmLableName thnlbl
+                    ++ ", " ++ llvmLableName elslbl
+    llvmPutStrLn $ thnlbl ++ ":"
     writeAssemblyBody outs thn
-    llvmPutStrLn $ "else:"
+    llvmPutStrLn $ elslbl ++ ":"
     writeAssemblyBody outs els
-    llvmPutStrLn $ "endif"
 
 
 -- | Generate a Wybe proc call instruction
@@ -350,12 +362,30 @@ writeWybeCall wybeProc args pos = do
                     ++ outTy ++ " " ++ llvmProcName wybeProc ++ argList
 
 
--- | Generate LLVM instruction
+-- | Generate a native LLVM instruction
 writeLLVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeLLVMCall op flags args pos = do
     (ins,outs) <- partitionArgs args
-    argList <- llvmArgumentList ins
-    llvmPutStrLnIndented $ llvmStoreResult outs ++ op ++ argList
+    argList <- llvmInstrArgumentList ins
+    case ins of
+        [_] ->
+            if op == "move" then do
+                outTy <- llvmTypeRep <$> typeRep (argVarType $ head outs)
+                llvmPutStrLnIndented $ llvmStoreResult outs ++
+                    "bitcast " ++ argList ++ " to " ++ outTy
+            else if op `member` llvmMapUnop && not (List.null outs) then do
+                outTy <- llvmTypeRep <$> typeRep (argVarType $ head outs)
+                llvmPutStrLnIndented $ llvmStoreResult outs ++ op ++ " "
+                                        ++ argList ++ "to " ++ outTy
+            else shouldnt $ "unknown unary llvm op " ++ op
+        [arg1,_] -> do
+            let instr =
+                    fst3 $ trustFromJust ("unknown binary llvm op " ++ op)
+                    $ Map.lookup op llvmMapBinop
+            llvmPutStrLnIndented $ llvmStoreResult outs ++ instr ++ " "
+                                    ++ argList
+        args -> shouldnt $ "unknown llvm op " ++ op ++ " (arity "
+                         ++ show (length ins) ++ ")"
 
 
 -- | Generate LPVM (memory management) instruction
@@ -373,6 +403,7 @@ writeCCall cfn flags args pos = do
     outTy <- llvmReturnType $ List.map argType outs
     llvmPutStrLnIndented $ llvmStoreResult outs ++ "call " ++ outTy ++ " "
                             ++ llvmGlobalName cfn ++ argList
+
 
 ----------------------------------------------------------------------------
 -- Writing the export information ("header" file equivalent)
@@ -450,17 +481,26 @@ llvmParameter PrimParam{primParamName=name, primParamType=ty} = do
     return $ lltype ++ " " ++ llname
 
 
--- | The LLVM translation of the specified argument list
+-- | The LLVM translation of the specified call instruction argument list
 llvmArgumentList :: [PrimArg] -> LLVM String
 llvmArgumentList inputs =
     ('(':). (++")") . intercalate ", " <$> mapM llvmArgument inputs
+
+
+-- | The LLVM translation of the specified LLVM instruction argument list
+llvmInstrArgumentList :: [PrimArg] -> LLVM String
+llvmInstrArgumentList [] = return ""
+llvmInstrArgumentList inputs@(in1:_) = do
+    lltype <- llvmTypeRep <$> typeRep (argType in1)
+    let argsString = intercalate ", " $ List.map llvmValue inputs
+    return $ lltype ++ " " ++ argsString
 
 
 -- | The LLVM translation of the specified output argument list
 llvmStoreResult :: [PrimArg] -> String
 llvmStoreResult [] = ""
 llvmStoreResult [ArgVar{argVarName=varName}] =
-    show varName ++ " = "
+    llvmLocalName varName ++ " = "
 llvmStoreResult multiOuts =
     "(" ++ intercalate ", " (show <$> multiOuts) ++ ") = "
 
@@ -500,6 +540,11 @@ llvmGlobalName s = '@' : show s
 llvmLocalName :: PrimVarName -> LLVMLocal
 llvmLocalName varName =
     "%\"" ++ show varName ++ "\""
+
+
+-- | Make an LLVM reference to the specified label.
+llvmLableName :: String -> String
+llvmLableName varName = "label %\"" ++ varName ++ "\""
 
 
 -- | Split parameter list into separate list of inputs and outputs, ignoring
