@@ -207,7 +207,7 @@ varToRead v = llvmLocalName . fromMaybe v . Map.lookup v <$> gets newNames
 writeLLVM :: Handle -> ModSpec -> Bool -> Compiler ()
 writeLLVM handle modSpec withLPVM = do
     reenterModule modSpec
-    logLLVM $ "*** Generating LLVM for module " ++ showModSpec modSpec
+    logMsg LLVM $ "*** Generating LLVM for module " ++ showModSpec modSpec
     logWrapWith '-' . show <$> getModule id
     flip execStateT (initLLVMState handle) $ do
         writeAssemblyPrologue
@@ -216,7 +216,7 @@ writeLLVM handle modSpec withLPVM = do
         writeAssemblyExterns
         writeAssemblyProcs
         when withLPVM writeAssemblyExports
-    logLLVM $ "*** Finished generating LLVM for " ++ showModSpec modSpec
+    logMsg LLVM $ "*** Finished generating LLVM for " ++ showModSpec modSpec
     reexitModule
 
 
@@ -372,7 +372,7 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
                 (Bits 0,_,_) -> shouldnt "Switch on a phantom!"
                 (_,[single],Nothing) -> writeAssemblyBody outs single
                 (Bits 1, [els,thn],Nothing) -> writeAssemblyIfElse outs v thn els
-                (Bits n, _, _) -> llvmPutStrLn $ "Switch " ++ show n ++ " bits"
+                (Bits _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
                 (rep,_,_) -> llvmPutStrLn $ "Switching on " ++ show rep ++ " type "
                                 ++ show ty
 
@@ -407,6 +407,29 @@ writeAssemblyIfElse outs v thn els = do
     writeAssemblyBody outs thn
     llvmPutStrLn $ elslbl ++ ":"
     writeAssemblyBody outs els
+
+
+-- | Generate and write out an LLVM multi-way switch
+writeAssemblySwitch :: [PrimParam] -> PrimVarName -> TypeRepresentation
+                    -> [ProcBody] -> Maybe ProcBody -> LLVM ()
+writeAssemblySwitch outs v rep cases dflt = do
+    llvar <- varToRead v
+    let prefixes0 = ["case."++show n++".switch." | n <- [0..length cases]]
+    (dfltLabel:labels) <- freshLables $ "default.switch." : prefixes0
+    let llType = llvmTypeRep rep
+    logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
+    llvmPutStrLnIndented $ "switch " ++ llType ++ " " ++ llvar ++ ", "
+        ++ llvmLableName dfltLabel ++ " [ "
+        ++ intercalate ", "
+                [llType ++ " " ++ show n ++ ", " ++ llvmLableName lbl
+                | (lbl,n) <- zip labels [0..]]
+        ++ " ]"
+    zipWithM_
+        (\lbl cs -> llvmPutStrLn (lbl ++ ":") >> writeAssemblyBody outs cs)
+        labels cases
+    llvmPutStrLn $ dfltLabel ++ ":"
+    -- I don't think the Nothing case ever happens, but in case it does...
+    writeAssemblyBody outs $ fromMaybe (last cases) dflt
 
 
 -- | Generate a Wybe proc call instruction
@@ -640,9 +663,9 @@ partitionArgs args = do
 -- Logging                                                                --
 ----------------------------------------------------------------------------
 
--- | Logging from the Compiler monad to LLVM.
-logLLVM :: String -> Compiler ()
-logLLVM = logMsg LLVM
+-- | Logging from the LLVM monad.
+logLLVM :: String -> LLVM ()
+logLLVM = lift . logMsg LLVM
 
 
 -- | Log with a wrapping line of replicated characters above and below.
