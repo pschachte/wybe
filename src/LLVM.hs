@@ -16,8 +16,10 @@ import           Config
 import           Options
 import           Version
 import           System.IO
+import           Data.Set                        as Set
 import           Data.Map                        as Map
 import           Data.List                       as List
+import           Data.Maybe
 -- import           Control.Exception               (handle)
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
@@ -121,12 +123,15 @@ type LLVMLocal = String             -- ^ An LLVM local variable name; must begin
 data LLVMState = LLVMState {
         fileHandle :: Handle,       -- ^ The file handle we're writing to
         tmpCounter :: Int,          -- ^ Next temp var to make for current proc
-        labelCounter :: Int         -- ^ Next label number to use
+        labelCounter :: Int,        -- ^ Next label number to use
+        toRename :: Set PrimVarName, -- ^ Variables that need to get fresh names
+        newNames :: Map PrimVarName PrimVarName
+                                    -- | New names for some variables
 }
 
 
 initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState h 0 0
+initLLVMState h = LLVMState h 0 0 Set.empty Map.empty
 
 type LLVM = StateT LLVMState Compiler
 
@@ -160,6 +165,41 @@ freshLables bases = do
     nxt <- gets labelCounter
     modify $ \s -> s {labelCounter = nxt+1}
     return $ List.map (++show nxt) bases
+
+
+-- |Return a fresh prim variable name.
+makeTemp :: LLVM PrimVarName
+makeTemp = do
+    ctr <- gets tmpCounter
+    modify (\s -> s { tmpCounter = ctr + 1 })
+    return $ PrimVarName (mkTempName ctr) 0
+
+
+-- | Set the set of variables that need to be renamed to convert to SSA.
+-- LPVM is a (dynamic) single assignment language, but LLVM demands static
+-- single assignment.  We generate LPVM that is in SSA form, except for output
+-- parameters, so here we rename all output parameters as they are assigned,
+-- and then use the new names when we return the outputs.
+setRenaming :: Set PrimVarName -> LLVM ()
+setRenaming vars = modify $ \s -> s {toRename = vars}
+
+
+-- | The LLVM name for a variable we are about to assign.  If this is one of the
+-- output parameters, rename it, otherwise leave it alone, and in either case,
+-- transform it to an LLVM local variable name.
+varToWrite :: PrimVarName -> LLVM LLVMLocal
+varToWrite v = do
+    mustRename <- Set.member v <$> gets toRename
+    if mustRename then do
+        tmp <- makeTemp
+        modify $ \s -> s { newNames = Map.insert v tmp $ newNames s }
+        return $ llvmLocalName tmp
+    else return $ llvmLocalName v
+ 
+
+-- | The LLVM name for a variable we are about to read.
+varToRead :: PrimVarName -> LLVM LLVMLocal
+varToRead v = llvmLocalName . fromMaybe v . Map.lookup v <$> gets newNames
 
 
 -- | Generate LLVM code for the specified module, based on its LPVM code, and
@@ -274,6 +314,7 @@ writeAssemblyProc mod def procNum =
                      procImplnBody=body, procImplnSpeczBodies=specz} -> do
             let name = llvmProcName pspec
             (ins,outs) <- partitionParams $ primProtoParams proto
+            setRenaming $ Set.fromList $ primParamName <$> outs
             returnType <- llvmReturnType $ List.map primParamType outs
             llParams <- mapM llvmParameter ins
             modify $ \s -> s {tmpCounter = procTmpCount def}
@@ -294,14 +335,29 @@ writeAssemblyReturn :: [PrimParam] -> LLVM ()
 writeAssemblyReturn [] = llvmPutStrLnIndented "ret void"
 writeAssemblyReturn [PrimParam{primParamName=v, primParamType=ty}] = do
     llty <- llvmTypeRep <$> typeRep ty
-    llvmPutStrLnIndented $ "ret " ++ llty ++ " " ++ llvmLocalName v
+    llvar <- varToRead v
+    llvmPutStrLnIndented $ "ret " ++ llty ++ " " ++ llvar
 writeAssemblyReturn params = do
-    -- XXX not right:  need to pack a tuple and return that
     retType <- llvmReturnType $ List.map primParamType params
-    llvmPutStrLnIndented $ "ret " ++ retType
-                           ++ show (List.map primParamName params)
+    tuple <- buildTuple retType "undef" 0 params
+    llvmPutStrLnIndented $ "ret " ++ retType ++ " " ++ tuple
 
 
+-- | Generate code to build a tuple to return for multi-output functions.
+-- Returns the last variable generated.
+-- Generated code looks like %"temp#25" = insertvalue {i64, i1} undef, i64 %8, 0
+buildTuple :: LLVMType -> LLVMLocal -> Int -> [PrimParam] -> LLVM LLVMLocal
+buildTuple _ tuple _ [] = return tuple
+buildTuple outType tuple argNum
+           (PrimParam{primParamName=v, primParamType=ty}:params) = do
+    llty <- llvmTypeRep <$> typeRep ty
+    llvar <- varToRead v
+    nextVar <- llvmLocalName <$> makeTemp
+    llvmPutStrLnIndented $ nextVar ++ " = insertvalue " ++ outType ++ " "
+                            ++ tuple ++ ", " ++ llty ++ " " ++ llvar
+                            ++ ", " ++ show argNum
+    
+    buildTuple outType nextVar (argNum+1) params
 
 -- | Generate and write out the LLVM code for an LPVM body
 writeAssemblyBody :: [PrimParam] -> ProcBody -> LLVM ()
@@ -342,8 +398,9 @@ writeAssemblyPrim (PrimForeign lang op flags args) pos = do
 writeAssemblyIfElse :: [PrimParam] -> PrimVarName -> ProcBody -> ProcBody
                     -> LLVM ()
 writeAssemblyIfElse outs v thn els = do
+    llvar <- varToRead v
     [thnlbl,elslbl] <- freshLables ["if.then.","if.else."]
-    llvmPutStrLnIndented $ "br i1 " ++ llvmLocalName v
+    llvmPutStrLnIndented $ "br i1 " ++ llvar
                     ++ ", " ++ llvmLableName thnlbl
                     ++ ", " ++ llvmLableName elslbl
     llvmPutStrLn $ thnlbl ++ ":"
@@ -358,8 +415,8 @@ writeWybeCall wybeProc args pos = do
     (ins,outs) <- partitionArgs args
     argList <- llvmArgumentList ins
     outTy <- llvmReturnType $ List.map argType outs
-    llvmPutStrLnIndented $ llvmStoreResult outs ++ "tail call fastcc "
-                    ++ outTy ++ " " ++ llvmProcName wybeProc ++ argList
+    llvmStoreResult outs $
+        "tail call fastcc " ++ outTy ++ " " ++ llvmProcName wybeProc ++ argList
 
 
 -- | Generate a native LLVM instruction
@@ -371,19 +428,17 @@ writeLLVMCall op flags args pos = do
         [_] ->
             if op == "move" then do
                 outTy <- llvmTypeRep <$> typeRep (argVarType $ head outs)
-                llvmPutStrLnIndented $ llvmStoreResult outs ++
+                llvmStoreResult outs $
                     "bitcast " ++ argList ++ " to " ++ outTy
-            else if op `member` llvmMapUnop && not (List.null outs) then do
+            else if op `Map.member` llvmMapUnop && not (List.null outs) then do
                 outTy <- llvmTypeRep <$> typeRep (argVarType $ head outs)
-                llvmPutStrLnIndented $ llvmStoreResult outs ++ op ++ " "
-                                        ++ argList ++ "to " ++ outTy
+                llvmStoreResult outs $ op ++ " " ++ argList ++ "to " ++ outTy
             else shouldnt $ "unknown unary llvm op " ++ op
         [arg1,_] -> do
             let instr =
                     fst3 $ trustFromJust ("unknown binary llvm op " ++ op)
                     $ Map.lookup op llvmMapBinop
-            llvmPutStrLnIndented $ llvmStoreResult outs ++ instr ++ " "
-                                    ++ argList
+            llvmStoreResult outs $ instr ++ " " ++ argList
         args -> shouldnt $ "unknown llvm op " ++ op ++ " (arity "
                          ++ show (length ins) ++ ")"
 
@@ -393,7 +448,7 @@ writeLPVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeLPVMCall op flags args pos = do
     (ins,outs) <- partitionArgs args
     argList <- llvmArgumentList ins
-    llvmPutStrLnIndented $ "LPVM: " ++ llvmStoreResult outs ++ op ++ argList
+    llvmStoreResult outs $ "LPVM " ++ op ++ argList
 
 -- | Generate C function call
 writeCCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
@@ -401,8 +456,8 @@ writeCCall cfn flags args pos = do
     (ins,outs) <- partitionArgs args
     argList <- llvmArgumentList ins
     outTy <- llvmReturnType $ List.map argType outs
-    llvmPutStrLnIndented $ llvmStoreResult outs ++ "call " ++ outTy ++ " "
-                            ++ llvmGlobalName cfn ++ argList
+    llvmStoreResult outs $ "call " ++ outTy ++ " " ++ llvmGlobalName cfn
+                            ++ argList
 
 
 ----------------------------------------------------------------------------
@@ -496,13 +551,29 @@ llvmInstrArgumentList inputs@(in1:_) = do
     return $ lltype ++ " " ++ argsString
 
 
--- | The LLVM translation of the specified output argument list
-llvmStoreResult :: [PrimArg] -> String
-llvmStoreResult [] = ""
-llvmStoreResult [ArgVar{argVarName=varName}] =
-    llvmLocalName varName ++ " = "
-llvmStoreResult multiOuts =
-    "(" ++ intercalate ", " (show <$> multiOuts) ++ ") = "
+-- | WriteThe LLVM translation of the specified output argument list as target
+-- for the specified instruction.  For multiple outputs, we must unpack a tuple.
+llvmStoreResult :: [PrimArg] -> String -> LLVM ()
+llvmStoreResult [] instr = llvmPutStrLn instr
+llvmStoreResult [ArgVar{argVarName=varName}] instr = do
+    llVar <- varToRead varName
+    llvmPutStrLnIndented $ llVar ++ " = " ++ instr
+llvmStoreResult multiOuts instr = do
+    tuple <- llvmLocalName <$> makeTemp
+    retType <- llvmReturnType $ argVarType <$> multiOuts
+    llvmPutStrLnIndented $ tuple ++ " = " ++ instr
+    zipWithM_ (unpackArg retType tuple) multiOuts [0..]
+
+
+-- | Write an LLVM instruction to unpack one argument from a tuple.
+-- instruction looks like:  %var = extractvalue {i64, i1} %0, 0
+unpackArg :: LLVMType -> LLVMLocal -> PrimArg -> Int -> LLVM ()
+unpackArg typ tuple ArgVar{argVarName=varName} argNum = do
+    llvmPutStrLnIndented $ llvmLocalName varName ++ " = extractvalue " ++ typ
+                            ++ tuple ++ ", " ++ show argNum
+unpackArg _ _ outArg _ =
+    shouldnt $ "non-variable output argument " ++ show outArg
+
 
 -- | The LLVM argument for the specified PrimArg as an LLVM type and value
 llvmArgument :: PrimArg -> LLVM String

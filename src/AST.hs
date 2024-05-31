@@ -115,7 +115,7 @@ module AST (
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
   showProcIdentifier, showProcName,
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
-  shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
+  shouldnt, should, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   flowPrefix, showProcModifiers, showProcModifiers', showFlags, showFlags',
   showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
   maybeShow, showMessages, stopOnError,
@@ -4213,6 +4213,12 @@ maybeShow pre (Just something) post =
 -- |Report an internal error and abort.
 shouldnt :: String -> a
 shouldnt what = error $ "Internal error: " ++ what
+
+
+-- |Report an internal error and abort unless the test succeeds.
+should :: String -> Bool -> ()
+should _    True  = ()
+should what False = shouldnt what
 
 
 -- |Report that some feature is not yet implemented and abort.
