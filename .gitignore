@@ -58,3 +58,5 @@ README.html
 dist-newstyle
 stack.yaml.lock
 LOG*
+src/c_config
+src/CConfig.hs

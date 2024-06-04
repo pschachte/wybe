@@ -44,7 +44,7 @@ install:	wybemk
 	"$(INSTALLBIN)/wybemk" --force-all $(addsuffix ", $(addprefix "$(INSTALLLIB)/,$(WYBELIBS)))
 
 
-wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
+wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/CConfig.hs $(SRCDIR)/Version.lhs
 	stack -j3 build && cp "`stack path --local-install-root`/bin/$@" "$@"
 
 libs:	$(addprefix $(LIBDIR)/,$(LIBS))
@@ -73,6 +73,13 @@ $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@printf "> defaultTriple :: String\n> defaultTriple = \"" >> "$@"
 	@clang --version | sed -n 's/Target: *\(.*\)/\1\"/p' >> "$@"
 	@printf "\n\n" >> "$@"
+
+$(SRCDIR)/CConfig.hs:	$(SRCDIR)/c_config
+	$< > $@
+
+$(SRCDIR)/c_config:	$(SRCDIR)/c_config.c
+	clang $(ISSYSROOT) $(EXTRAINCLUDES) -o $@ $<
+
 
 .PHONY:	doc
 doc:	src/README.md

@@ -15,6 +15,7 @@ import           BinaryFactory
 import           Config
 import           Options
 import           Version
+import           CConfig
 import           System.IO
 import           Data.Set                        as Set
 import           Data.Map                        as Map
@@ -419,8 +420,8 @@ writeAssemblySwitch outs v rep cases dflt = do
     let llType = llvmTypeRep rep
     logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
     llvmPutStrLnIndented $ "switch " ++ llType ++ " " ++ llvar ++ ", "
-        ++ llvmLableName dfltLabel ++ " [ "
-        ++ intercalate ", "
+        ++ llvmLableName dfltLabel ++ " [\n    "
+        ++ intercalate "\n    "
                 [llType ++ " " ++ show n ++ ", " ++ llvmLableName lbl
                 | (lbl,n) <- zip labels [0..]]
         ++ " ]"
@@ -457,17 +458,20 @@ writeLLVMCall op flags args pos = do
                 outTy <- llvmTypeRep <$> typeRep (argVarType $ head outs)
                 llvmStoreResult outs $ op ++ " " ++ argList ++ "to " ++ outTy
             else shouldnt $ "unknown unary llvm op " ++ op
-        [arg1,_] -> do
+        [_,_] -> do
             let instr =
                     fst3 $ trustFromJust ("unknown binary llvm op " ++ op)
                     $ Map.lookup op llvmMapBinop
             llvmStoreResult outs $ instr ++ " " ++ argList
-        args -> shouldnt $ "unknown llvm op " ++ op ++ " (arity "
+        _ -> shouldnt $ "unknown llvm op " ++ op ++ " (arity "
                          ++ show (length ins) ++ ")"
 
 
 -- | Generate LPVM (memory management) instruction
 writeLPVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
+-- writeLPVMCall "alloc" [] [sz,noEscape,out] pos =
+writeLPVMCall "alloc" [] args@[sz,out] pos = do
+    marshalledCCall "wybe_malloc" [] [sz,out] ["int","pointer"] pos
 writeLPVMCall op flags args pos = do
     (ins,outs) <- partitionArgs args
     argList <- llvmArgumentList ins
@@ -481,6 +485,19 @@ writeCCall cfn flags args pos = do
     outTy <- llvmReturnType $ List.map argType outs
     llvmStoreResult outs $ "call " ++ outTy ++ " " ++ llvmGlobalName cfn
                             ++ argList
+
+
+-- | Generate C function call with inputs and outputs type converted as needed.
+marshalledCCall :: ProcName -> [Ident] -> [PrimArg] -> [String] -> OptPos
+                -> LLVM ()
+marshalledCCall cfn flags args ctypes pos = do
+    (ins,outs) <- partitionArgsWithTypes $ zip args ctypes
+    argList <- llvmStringArgList <$> mapM (uncurry marshallArgument) ins
+    let instr = llvmGlobalName cfn ++ argList
+    case outs of
+        [] -> llvmPutStrLnIndented $ "call void " ++ instr
+        [(out,cType)] -> marshallCallResult out cType instr
+        _ -> shouldnt "C function call with multiple outputs"
 
 
 ----------------------------------------------------------------------------
@@ -561,8 +578,12 @@ llvmParameter PrimParam{primParamName=name, primParamType=ty} = do
 
 -- | The LLVM translation of the specified call instruction argument list
 llvmArgumentList :: [PrimArg] -> LLVM String
-llvmArgumentList inputs =
-    ('(':). (++")") . intercalate ", " <$> mapM llvmArgument inputs
+llvmArgumentList inputs = llvmStringArgList <$> mapM llvmArgument inputs
+
+
+llvmStringArgList :: [String] -> String
+llvmStringArgList = ('(':). (++")") . intercalate ", "
+
 
 
 -- | The LLVM translation of the specified LLVM instruction argument list
@@ -570,11 +591,11 @@ llvmInstrArgumentList :: [PrimArg] -> LLVM String
 llvmInstrArgumentList [] = return ""
 llvmInstrArgumentList inputs@(in1:_) = do
     lltype <- llvmTypeRep <$> typeRep (argType in1)
-    let argsString = intercalate ", " $ List.map llvmValue inputs
+    argsString <- intercalate ", " <$> mapM llvmValue inputs
     return $ lltype ++ " " ++ argsString
 
 
--- | WriteThe LLVM translation of the specified output argument list as target
+-- | Write the LLVM translation of the specified output argument list as target
 -- for the specified instruction.  For multiple outputs, we must unpack a tuple.
 llvmStoreResult :: [PrimArg] -> String -> LLVM ()
 llvmStoreResult [] instr = llvmPutStrLn instr
@@ -588,6 +609,30 @@ llvmStoreResult multiOuts instr = do
     zipWithM_ (unpackArg retType tuple) multiOuts [0..]
 
 
+-- | Marshall data returned by C code.  Emits a C call instruction, which
+-- returns its result in the specified type representation, leaving its
+-- output in the specified output variable with its expected type
+-- representation, type converting it if necessary.
+marshallCallResult :: PrimArg -> String -> String -> LLVM ()
+marshallCallResult outArg@ArgVar{argVarName=varName} cType instr = do
+    let inTypeRep = trustFromJust
+            ("marshalling output with unknown C type " ++ cType)
+            $ cTypeRepresentation cType
+    outTypeRep <- typeRep $ argType outArg
+    let instr' = "call " ++ llvmTypeRep inTypeRep ++ " " ++ instr 
+    if inTypeRep == outTypeRep then llvmStoreResult [outArg] instr'
+    else do
+        tmp <- makeTemp
+        -- XXX should call llvmStoreResult, but we don't have a wybe type for
+        -- the C function output
+        llVar <- varToWrite tmp
+        let llVal = llvmLocalName tmp
+        llvmPutStrLnIndented $ llVar ++ " = " ++ instr'
+        typeConvert outTypeRep varName inTypeRep llVal
+marshallCallResult outArg inTypeRep instr =
+    shouldnt $ "Can't marshall result into non-variable " ++ show outArg
+
+
 -- | Write an LLVM instruction to unpack one argument from a tuple.
 -- instruction looks like:  %var = extractvalue {i64, i1} %0, 0
 unpackArg :: LLVMType -> LLVMLocal -> PrimArg -> Int -> LLVM ()
@@ -598,24 +643,108 @@ unpackArg _ _ outArg _ =
     shouldnt $ "non-variable output argument " ++ show outArg
 
 
+-- | Marshall data being passed to C code.  Emits code to transform the argument
+-- to the expected format for C code, and returns the llvm argument to actually
+-- pass to the C function.
+marshallArgument :: PrimArg -> String -> LLVM String
+marshallArgument arg cType = do
+    let outTypeRep = trustFromJust
+            ("marshalling argument with unknown C type " ++ cType)
+            $ cTypeRepresentation cType
+    inTypeRep <- typeRep $ argType arg
+    if inTypeRep == outTypeRep then llvmArgument arg
+    else do
+        tmp <- makeTemp
+        llVal <- llvmValue arg
+        typeConvert outTypeRep tmp inTypeRep llVal
+        return $ llvmTypeRep outTypeRep ++ " " ++ llvmLocalName tmp
+
+
 -- | The LLVM argument for the specified PrimArg as an LLVM type and value
 llvmArgument :: PrimArg -> LLVM String
 llvmArgument arg = do
     lltype <- llvmTypeRep <$> typeRep (argType arg)
-    return $ lltype ++ " " ++ llvmValue arg
+    llVal <- llvmValue arg
+    return $ lltype ++ " " ++ llVal
 
 
 -- | A PrimArg as portrayed in LLVM code
-llvmValue :: PrimArg -> String
-llvmValue ArgVar{argVarName=var} = llvmLocalName var
-llvmValue (ArgInt val _) = show val
-llvmValue (ArgFloat val _) = show val
-llvmValue (ArgString _ val _) = show val -- XXX need to make a global constant
-llvmValue (ArgChar val _) = show val
-llvmValue (ArgClosure _ val _) = show val -- XXX not sure what to do
-llvmValue (ArgGlobal val _) = show val    -- XXX not sure what to do
-llvmValue (ArgUnneeded val _) = show val  -- XXX not sure what to do
-llvmValue (ArgUndef _) = "undef"
+llvmValue :: PrimArg -> LLVM String
+llvmValue ArgVar{argVarName=var} = varToRead var
+llvmValue (ArgInt val _) = return $ show val
+llvmValue (ArgFloat val _) = return $ show val
+llvmValue (ArgString _ val _) = return $ show val -- XXX need to make a global constant
+llvmValue (ArgChar val _) = return $ show val
+llvmValue (ArgClosure _ val _) = return $ show val -- XXX not sure what to do
+llvmValue (ArgGlobal val _) = return $ show val    -- XXX not sure what to do
+llvmValue (ArgUnneeded val _) = return $ show val  -- XXX not sure what to do
+llvmValue (ArgUndef _) = return "undef"
+
+
+-- | Emit an instruction to convert the specified input argument with the
+-- specified input type representation to the specified output variable with its
+-- specified type representation.
+typeConvert :: TypeRepresentation -> PrimVarName
+            -> TypeRepresentation -> String -> LLVM ()
+typeConvert outTypeRep outVar inTypeRep llVal = do
+    llVar <- varToWrite outVar
+    let op = typeConvertOp inTypeRep outTypeRep
+    writeConvertOp op inTypeRep llVal outTypeRep llVar
+
+
+-- | Same as typeConvert, except that the input and output are already converted
+-- to LLVM representation ready to be written out.
+typeConvertOp inTypeRep outTypeRep
+    | outTypeRep == inTypeRep = 
+        shouldnt $ "no-op type conversion to and from " ++ show inTypeRep
+typeConvertOp (Bits n) Address = "inttoptr"
+typeConvertOp (Signed n) Address = "inttoptr"
+typeConvertOp rep Address =
+    shouldnt $ "can't convert from " ++ show rep ++ " to address"
+typeConvertOp Address (Bits n) = "ptrtoint"
+typeConvertOp Address (Signed n) = "ptrtoint"
+typeConvertOp Address rep =
+    shouldnt $ "can't convert from address to " ++ show rep
+typeConvertOp (Bits m) (Bits n)
+    | m < n = "zext"
+    | n < m = "trunc"
+    | otherwise = shouldnt "no-op unsigned int conversion"
+typeConvertOp (Bits m) (Signed n)
+    | m < n = "sext"
+    | n < m = "trunc"
+    | otherwise = -- no instruction actually needed, but one is expected
+        "bitcast"
+typeConvertOp (Bits m) (Floating n) = "uitofp"
+typeConvertOp (Signed m) (Bits n)
+    | m < n = "zext"
+    | n < m = "trunc"
+    | otherwise = -- no instruction actually needed, but one is expected
+        "bitcast"
+typeConvertOp (Signed m) (Signed n)
+    | m < n = "sext"
+    | n < m = "trunc"
+    | otherwise = shouldnt "no-op signed int conversion"
+typeConvertOp (Signed m) (Floating n) = "sitofp"
+typeConvertOp (Floating m) (Bits n) = "fptoui"
+typeConvertOp (Floating m) (Signed n) = "fptosi"
+typeConvertOp (Floating m) (Floating n)
+    | m < n = "fpext"
+    | n < m = "fptrunc"
+    | otherwise = shouldnt "no-op floating point conversion"
+typeConvertOp repIn repOut =
+    shouldnt $ "Don't know how to convert from " ++ show repIn
+                 ++ " to " ++ show repOut
+
+
+-- | Write out an LLVM instruction to convert the specified value with its type
+-- to the specified variable with its type.  The required conversion operator is
+-- provided.
+writeConvertOp :: String -> TypeRepresentation -> String
+               -> TypeRepresentation -> String -> LLVM ()
+writeConvertOp opName fromTy fromVal repOut toVar =
+    llvmPutStrLnIndented $ toVar ++ " = " ++ opName ++ " "
+                            ++ llvmTypeRep fromTy ++ " "++ fromVal
+                            ++ " to " ++ llvmTypeRep repOut
 
 
 -- | The LLVM name for a Wybe proc.
@@ -658,6 +787,15 @@ partitionArgs args = do
     realArgs <- lift $ filterM (notM . argIsPhantom) args
     return ( List.filter ((==FlowIn) . argFlowDirection) realArgs
            , List.filter ((==FlowOut) . argFlowDirection) realArgs)
+
+
+-- | Split argument list into separate list of inputs and outputs
+-- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
+partitionArgsWithTypes :: [(PrimArg,a)] -> LLVM ([(PrimArg,a)],[(PrimArg,a)])
+partitionArgsWithTypes args = do
+    realArgs <- lift $ filterM (notM . argIsPhantom . fst) args
+    return ( List.filter ((==FlowIn) . argFlowDirection . fst) realArgs
+           , List.filter ((==FlowOut) . argFlowDirection . fst) realArgs)
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

@@ -39,7 +39,7 @@ executable wybemk
                , utility-ht
                , Diff
   other-modules: AST, BinaryFactory, BodyBuilder, Builder, Callers,
-                 Clause, LLVM, Config, Emit, Expansion, Flatten,
+                 CConfig, Clause, LLVM, Config, Emit, Expansion, Flatten,
                  Macho, Parser, Normalise, ObjectInterface, Optimise,
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, UnivSet, Util,
@@ -69,7 +69,7 @@ test-suite wybe-test
                   , utility-ht
                   , Diff
   other-modules: AST, BinaryFactory, BodyBuilder, Builder, Callers,
-                 Clause, LLVM, Config, Emit, Expansion, Flatten,
+                 CConfig, Clause, LLVM, Config, Emit, Expansion, Flatten,
                  Macho, Parser, Normalise, ObjectInterface, Optimise,
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,

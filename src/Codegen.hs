@@ -6,6 +6,8 @@
 --           : LICENSE in the root directory of this project.
 
 {-# LANGUAGE OverloadedStrings          #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use camelCase" #-}
 
 module Codegen (
   Codegen(..), CodegenState(..), BlockState(..),
