@@ -715,7 +715,7 @@ llvmValue (ArgString str val _) =
             . trustFromJust ("String constant " ++ show str ++ " not recorded")
             . Map.lookup str
             . stringConstants
-llvmValue (ArgChar val _) = return $ show val
+llvmValue (ArgChar val _) = return $ show $ fromEnum val
 llvmValue (ArgClosure _ val _) = return $ show val -- XXX not sure what to do
 llvmValue (ArgGlobal val _) = return $ show val    -- XXX not sure what to do
 llvmValue (ArgUnneeded val _) = return $ show val  -- XXX not sure what to do
