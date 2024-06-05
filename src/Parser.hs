@@ -159,7 +159,8 @@ typeImpln = do
 -- | Type declaration body where representation and items are given
 typeRep :: Parser TypeRepresentation
 typeRep = do
-    ident "address" $> Address
+    ident "address" $> Pointer
+    <|> ident "opaque" $> CPointer
     <|> do bits <- option wordSize
                    (fromIntegral . content <$> intLiteral <* ident "bit")
            ident "unsigned" $> Bits bits

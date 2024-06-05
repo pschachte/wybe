@@ -2253,16 +2253,19 @@ declaration has the form:
 where *rep* has one of these forms:
 
 - `address`
-the type is a machine address, similar to the `void *` type in C.
-- *n* `bit` *numbertype*
-a primitive number type comprising *n* bits, where *n* is any non-negative
-integer and *numbertype* is one of:
-  - `signed`
-  a signed integer type
-  - `unsigned`
-  an unsigned integer type
-  - `float`
-  a floating point number; *n* must be 16, 32, 64, or 128.
+ the type is the address of a Wybe data structure.  Foreign code should not
+treat this as an ordinary pointer.
+- `opaque`
+the type is a machine address, similar to the `void *` type in C.  Wybe treats such values as opaque.
+- *n* `bit signed`
+a signed primitive number type comprising *n* bits, where *n* is any non-negative
+integer.  Represents integers between -2<sup>*n*-1</sup> and 2<sup>*n*-1</sup>-1 inclusive.
+- *n* `bit unsigned`
+an unsigned primitive number type comprising *n* bits, where *n* is any non-negative
+integer. Represents integers between 0 and 2<sup>*n*</sup>-1 inclusive.
+- *n* `bit float`
+a floating point number type comprising *n* bits, where *n* is one of 16, 32,
+64, or 128.  
 
 Like a `constructor` declaration, a `representation` declaration makes the
 enclosing module into type.  Also like a `constructor` declaration, a submodule

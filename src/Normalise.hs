@@ -275,7 +275,7 @@ completeTypeSCC (CyclicSCC modTypeDefs) = do
              logNormalise $ "   " ++ showModSpec mod ++ " = " ++ show typedef)
           modTypeDefs
     -- First set representations to addresses, then layout types
-    mapM_ ((setTypeRep Address `inModule`) . fst) modTypeDefs
+    mapM_ ((setTypeRep Pointer `inModule`) . fst) modTypeDefs
     mapM_ (uncurry completeType) modTypeDefs
 
 
@@ -434,7 +434,7 @@ typeRepresentation :: [TypeRepresentation] -> Int -> TypeRepresentation
 typeRepresentation [] numConsts =
     Bits $ ceiling $ logBase 2 $ fromIntegral numConsts
 typeRepresentation [rep] 0      = rep
-typeRepresentation _ _          = Address
+typeRepresentation _ _          = Pointer
 
 
 ----------------------------------------------------------------
@@ -590,12 +590,12 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
         let (fields,size) = layoutRecord paramInfos tag tagLimit
         logNormalise $ "Laid out structure size " ++ show size
             ++ ": " ++ show fields
-        let ptrCount = length $ List.filter ((==Address) . paramInfoTypeRep) paramInfos
+        let ptrCount = length $ List.filter ((==Pointer) . paramInfoTypeRep) paramInfos
         logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
                         ++ show numConsts ++ " const constructors, "
                         ++ show numNonConsts ++ " non-const constructors"
         let params = paramInfoParam <$> paramInfos
-        return (Address,
+        return (Pointer,
                 constructorItems vis ctorName typeSpec params fields
                     size tag tagLimit pos
                 ++ deconstructorItems uniq vis ctorName typeSpec params numConsts
@@ -773,9 +773,9 @@ boxedGetterSetterStmts vis rectype numConsts numNonConsts ptrCount size
     let startOffset = if tag > tagLimit then tagLimit+1 else tag
         detism = deconstructorDetism numConsts numNonConsts
         -- Set the "noalias" flag when all other fields (exclude the one
-        -- that is being changed) in this struct aren't [Address].
+        -- that is being changed) in this struct aren't [Pointer].
         -- This flag is used in [AliasAnalysis.hs]
-        otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
+        otherPtrCount = if rep == Pointer then ptrCount-1 else ptrCount
         flags = ["noalias" | otherPtrCount == 0]
     in [( field
         , GetterSetterInfo pos vis fieldtype

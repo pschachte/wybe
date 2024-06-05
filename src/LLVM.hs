@@ -32,7 +32,7 @@ import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
-import AST (Ident)
+import AST (Ident, TypeRepresentation)
 import Distribution.Compat.CharParsing (CharParsing(char))
 
 ----------------------------------------------------------------------------
@@ -490,17 +490,18 @@ writeLLVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeLLVMCall op flags args pos = do
     (ins,outs) <- partitionArgs args
     argList <- llvmInstrArgumentList ins
-    case ins of
-        [_] ->
+    case (ins,outs) of
+        ([arg],[out@ArgVar{argVarName=outVar}]) ->
             if op == "move" then do
-                outTy <- llvmTypeRep <$> typeRep (argVarType $ head outs)
-                llvmStoreResult outs $
-                    "bitcast " ++ argList ++ " to " ++ outTy
-            else if op `Map.member` llvmMapUnop && not (List.null outs) then do
-                outTy <- llvmTypeRep <$> typeRep (argVarType $ head outs)
+                outRep <- argTypeRep out
+                inRep <- argTypeRep arg
+                inVal <- llvmValue arg
+                typeConvert inRep inVal outRep outVar
+            else if op `Map.member` llvmMapUnop then do
+                outTy <- llvmTypeRep <$> argTypeRep out
                 llvmStoreResult outs $ op ++ " " ++ argList ++ " to " ++ outTy
             else shouldnt $ "unknown unary llvm op " ++ op
-        [_,_] -> do
+        ([_,_],_) -> do
             let instr =
                     fst3 $ trustFromJust ("unknown binary llvm op " ++ op)
                     $ Map.lookup op llvmMapBinop
@@ -592,16 +593,21 @@ llvmTypeRep (Floating 128)  = "fp128"
 llvmTypeRep (Floating n)    = shouldnt $ "invalid float size " ++ show n
 -- XXX these should be made more accurate (use pointer and function types):
 llvmTypeRep (Func _ _)      = llvmTypeRep $ Bits wordSize
-llvmTypeRep Address         = llvmTypeRep $ Bits wordSize
+llvmTypeRep Pointer         = llvmTypeRep $ Bits wordSize
+llvmTypeRep CPointer        = "ptr"
+
+
+-- | The LLVM return type for proc with the specified list of output type specs.
+llvmRepReturnType :: [TypeRepresentation] -> LLVMType
+llvmRepReturnType [] = "void"
+llvmRepReturnType [ty] = llvmTypeRep ty
+llvmRepReturnType tys =
+    "{" ++ intercalate ", " (List.map llvmTypeRep tys) ++ "}"
 
 
 -- | The LLVM return type for proc with the specified list of output type specs.
 llvmReturnType :: [TypeSpec] -> LLVM LLVMType
-llvmReturnType [] = return "void"
-llvmReturnType [ty] = llvmTypeRep <$> typeRep ty
-llvmReturnType tys = do
-    lltys <- mapM ((llvmTypeRep <$>) . typeRep) tys
-    return $ "{" ++ intercalate ", " lltys ++ "}"
+llvmReturnType specs = llvmRepReturnType <$> mapM typeRep specs
 
 
 -- | The LLVM parameter declaration for the specified Wybe input parameter as a
@@ -622,12 +628,11 @@ llvmStringArgList :: [String] -> String
 llvmStringArgList = ('(':). (++")") . intercalate ", "
 
 
-
 -- | The LLVM translation of the specified LLVM instruction argument list
 llvmInstrArgumentList :: [PrimArg] -> LLVM String
 llvmInstrArgumentList [] = return ""
 llvmInstrArgumentList inputs@(in1:_) = do
-    lltype <- llvmTypeRep <$> typeRep (argType in1)
+    lltype <- llvmTypeRep <$> argTypeRep in1
     argsString <- intercalate ", " <$> mapM llvmValue inputs
     return $ lltype ++ " " ++ argsString
 
@@ -655,7 +660,7 @@ marshallCallResult outArg@ArgVar{argVarName=varName} cType instr = do
     let inTypeRep = trustFromJust
             ("marshalling output with unknown C type " ++ cType)
             $ cTypeRepresentation cType
-    outTypeRep <- typeRep $ argType outArg
+    outTypeRep <- argTypeRep outArg
     let instr' = "call " ++ llvmTypeRep inTypeRep ++ " " ++ instr
     if inTypeRep == outTypeRep then llvmStoreResult [outArg] instr'
     else do
@@ -665,7 +670,7 @@ marshallCallResult outArg@ArgVar{argVarName=varName} cType instr = do
         llVar <- varToWrite tmp
         let llVal = llvmLocalName tmp
         llvmPutStrLnIndented $ llVar ++ " = " ++ instr'
-        typeConvert outTypeRep varName inTypeRep llVal
+        typeConvert inTypeRep llVal outTypeRep varName
 marshallCallResult outArg inTypeRep instr =
     shouldnt $ "Can't marshall result into non-variable " ++ show outArg
 
@@ -688,19 +693,25 @@ marshallArgument arg cType = do
     let outTypeRep = trustFromJust
             ("marshalling argument with unknown C type " ++ cType)
             $ cTypeRepresentation cType
-    inTypeRep <- typeRep $ argType arg
+    inTypeRep <- argTypeRep arg
     if inTypeRep == outTypeRep then llvmArgument arg
     else do
         tmp <- makeTemp
         llVal <- llvmValue arg
-        typeConvert outTypeRep tmp inTypeRep llVal
+        typeConvert inTypeRep llVal outTypeRep tmp
         return $ llvmTypeRep outTypeRep ++ " " ++ llvmLocalName tmp
+
+
+-- | The LLVM type of the specified 
+argTypeRep :: PrimArg -> LLVM TypeRepresentation
+argTypeRep ArgString{} = return CPointer -- strings are all pointers
+argTypeRep arg = typeRep $ argType arg
 
 
 -- | The LLVM argument for the specified PrimArg as an LLVM type and value
 llvmArgument :: PrimArg -> LLVM String
 llvmArgument arg = do
-    lltype <- llvmTypeRep <$> typeRep (argType arg)
+    lltype <- llvmTypeRep <$> argTypeRep arg
     llVal <- llvmValue arg
     return $ lltype ++ " " ++ llVal
 
@@ -710,7 +721,7 @@ llvmValue :: PrimArg -> LLVM String
 llvmValue ArgVar{argVarName=var} = varToRead var
 llvmValue (ArgInt val _) = return $ show val
 llvmValue (ArgFloat val _) = return $ show val
-llvmValue (ArgString str val _) =
+llvmValue (ArgString str _ _) =
     gets $ llvmGlobalName
             . trustFromJust ("String constant " ++ show str ++ " not recorded")
             . Map.lookup str
@@ -725,9 +736,9 @@ llvmValue (ArgUndef _) = return "undef"
 -- | Emit an instruction to convert the specified input argument with the
 -- specified input type representation to the specified output variable with its
 -- specified type representation.
-typeConvert :: TypeRepresentation -> PrimVarName
-            -> TypeRepresentation -> String -> LLVM ()
-typeConvert outTypeRep outVar inTypeRep llVal = do
+typeConvert :: TypeRepresentation -> String -> TypeRepresentation -> PrimVarName
+            -> LLVM ()
+typeConvert inTypeRep llVal outTypeRep outVar = do
     llVar <- varToWrite outVar
     let op = typeConvertOp inTypeRep outTypeRep
     writeConvertOp op inTypeRep llVal outTypeRep llVar
@@ -736,15 +747,16 @@ typeConvert outTypeRep outVar inTypeRep llVal = do
 -- | Same as typeConvert, except that the input and output are already converted
 -- to LLVM representation ready to be written out.
 typeConvertOp inTypeRep outTypeRep
-    | outTypeRep == inTypeRep =
-        shouldnt $ "no-op type conversion to and from " ++ show inTypeRep
-typeConvertOp (Bits n) Address = "inttoptr"
-typeConvertOp (Signed n) Address = "inttoptr"
-typeConvertOp rep Address =
+    | inTypeRep == outTypeRep = "bitcast" -- use bitcast for no-op conversion
+typeConvertOp (Bits n) Pointer = "bitcast"
+typeConvertOp (Signed n) Pointer = "bitcast"
+typeConvertOp CPointer Pointer = "ptrtoint"
+typeConvertOp rep Pointer =
     shouldnt $ "can't convert from " ++ show rep ++ " to address"
-typeConvertOp Address (Bits n) = "ptrtoint"
-typeConvertOp Address (Signed n) = "ptrtoint"
-typeConvertOp Address rep =
+typeConvertOp Pointer (Bits n) = "bitcast"
+typeConvertOp Pointer (Signed n) = "bitcast"
+typeConvertOp Pointer CPointer = "inttoptr"
+typeConvertOp Pointer rep =
     shouldnt $ "can't convert from address to " ++ show rep
 typeConvertOp (Bits m) (Bits n)
     | m < n = "zext"

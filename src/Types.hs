@@ -2821,33 +2821,43 @@ validateForeignCall lang name flags argReps stmt pos =
 -- | Are two types compatible for use as inputs to a binary LLVM op?
 --   Used for type checking LLVM instructions.
 compatibleReps :: TypeRepresentation -> TypeRepresentation -> Bool
-compatibleReps Address      Address      = True
-compatibleReps Address      (Bits bs)    = bs == wordSize
-compatibleReps Address      (Signed bs)  = bs == wordSize
-compatibleReps Address      (Floating _) = False
-compatibleReps Address      (Func _ _)   = True
-compatibleReps (Bits bs)    Address      = bs == wordSize
+compatibleReps Pointer      Pointer      = True
+compatibleReps Pointer      (Bits bs)    = bs == wordSize
+compatibleReps Pointer      (Signed bs)  = bs == wordSize
+compatibleReps Pointer      (Floating _) = False
+compatibleReps Pointer      (Func _ _)   = True
+compatibleReps Pointer      CPointer     = True
+compatibleReps (Bits bs)    Pointer      = bs == wordSize
 compatibleReps (Bits m)     (Bits n)     = m == n
 compatibleReps (Bits m)     (Signed n)   = m == n
 compatibleReps (Bits _)     (Floating _) = False
 compatibleReps (Bits bs)    (Func _ _)   = bs == wordSize
-compatibleReps (Signed bs)  Address      = bs == wordSize
+compatibleReps (Bits bs)    CPointer     = bs == wordSize
+compatibleReps (Signed bs)  Pointer      = bs == wordSize
 compatibleReps (Signed m)   (Bits n)     = m == n
 compatibleReps (Signed m)   (Signed n)   = m == n
 compatibleReps (Signed _)   (Floating _) = False
 compatibleReps (Signed bs)  (Func _ _)   = bs == wordSize
-compatibleReps (Floating _) Address      = False
+compatibleReps (Signed bs)  CPointer     = bs == wordSize
+compatibleReps (Floating _) Pointer      = False
 compatibleReps (Floating _) (Bits _)     = False
 compatibleReps (Floating _) (Signed _)   = False
 compatibleReps (Floating m) (Floating n) = m == n
 compatibleReps (Floating _) (Func _ _)   = False
-compatibleReps (Func _ _)   Address      = True
+compatibleReps (Floating _) CPointer     = False
+compatibleReps (Func _ _)   Pointer      = True
 compatibleReps (Func i1 o1) (Func i2 o2) = sameLength i1 i2 && sameLength o1 o2 &&
                                            and (zipWith compatibleReps i1 i2) &&
                                            and (zipWith compatibleReps o1 o2)
 compatibleReps (Func _ _)   (Bits bs)    = bs == wordSize
 compatibleReps (Func _ _)   (Signed bs)  = bs == wordSize
 compatibleReps (Func _ _)   (Floating _) = False
+compatibleReps CPointer     Pointer      = True
+compatibleReps CPointer     (Bits bs)    = bs == wordSize
+compatibleReps CPointer     (Signed bs)  = bs == wordSize
+compatibleReps CPointer     (Floating _) = False
+compatibleReps CPointer     (Func _ _)   = True
+compatibleReps CPointer     CPointer     = True
 
 
 -- | Check arg types of an LPVM instruction
@@ -2857,12 +2867,12 @@ checkLPVMArgs "alloc" _ [sz,struct] stmt pos = do
     reportErrorUnless (ReasonForeignArgRep "alloc" 1 sz "integer" pos)
                       (integerTypeRep sz)
     reportErrorUnless (ReasonForeignArgRep "alloc" 2 struct "address" pos)
-                      (struct == Address)
+                      (struct == Pointer)
 checkLPVMArgs "alloc" _ args stmt pos =
     typeError (ReasonForeignArity "alloc" (length args) 2 pos)
 checkLPVMArgs "access" _ [struct,offset,size,startOffset,val] stmt pos = do
     reportErrorUnless (ReasonForeignArgRep "access" 1 struct "address" pos)
-                      (struct == Address)
+                      (struct == Pointer)
     reportErrorUnless (ReasonForeignArgRep "access" 2 offset "integer" pos)
                       (integerTypeRep offset)
     reportErrorUnless (ReasonForeignArgRep "access" 3 size "integer" pos)
@@ -2873,9 +2883,9 @@ checkLPVMArgs "access" _ args stmt pos =
     typeError (ReasonForeignArity "access" (length args) 5 pos)
 checkLPVMArgs "mutate" _ [old,new,offset,destr,sz,start,val] stmt pos = do
     reportErrorUnless (ReasonForeignArgRep "mutate" 1 old "address" pos)
-                      (old == Address)
+                      (old == Pointer)
     reportErrorUnless (ReasonForeignArgRep "mutate" 2 new "address" pos)
-                      (new == Address)
+                      (new == Pointer)
     reportErrorUnless (ReasonForeignArgRep "mutate" 3 offset "integer" pos)
                       (integerTypeRep offset)
     reportErrorUnless (ReasonForeignArgRep "mutate" 4 destr "boolean" pos)

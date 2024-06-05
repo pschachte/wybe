@@ -286,14 +286,20 @@ determinismCanFail Det      = False
 determinismCanFail SemiDet  = True
 
 
--- | Internal representation of data
+-- | Internal representation of data.
+-- Because Wybe uses a tagged representation for data structures, which requires
+-- integer and bit operations, while C and LLVM do not, we distinguish between
+-- two different kinds of pointers:  Pointer for possibly tagged pointers used
+-- for Wybe data structures and CPointer for untagged pointers (just raw
+-- addresses) used for C and LLVM code.
 data TypeRepresentation
-    = Address           -- ^ A pointer; occupies wordSize bits
+    = Pointer           -- ^ A (possibly tagged) pointer as represented in Wybe
     | Bits Int          -- ^ An unsigned integer representation
     | Signed Int        -- ^ A signed integer representation
     | Floating Int      -- ^ A floating point representation
     | Func [TypeRepresentation] [TypeRepresentation]
                         -- ^ A function pointer with inputs and outputs
+    | CPointer          -- ^ A pointer as represented in C
     deriving (Eq, Ord, Generic)
 
 
@@ -308,7 +314,8 @@ typeRepSize (Bits bits)     = bits
 typeRepSize (Signed bits)   = bits
 typeRepSize (Floating bits) = bits
 typeRepSize (Func _ _)      = wordSize
-typeRepSize Address         = wordSize
+typeRepSize Pointer         = wordSize
+typeRepSize CPointer        = wordSize
 
 
 -- | The type representation is for a (signed or unsigned) integer type
@@ -3777,13 +3784,14 @@ instance Show Item where
 
 -- |How to show a type representation
 instance Show TypeRepresentation where
-  show Address = "address"
+  show Pointer = "address"
   show (Bits bits) = show bits ++ " bit unsigned"
   show (Signed bits) = show bits ++ " bit signed"
   show (Floating bits) = show bits ++ " bit float"
   show (Func ins outs) =
       "function {" ++ intercalate ", " (List.map show outs) ++ "}"
       ++ "(" ++ intercalate ", " (List.map show ins) ++ ")"
+  show CPointer = "opaque"
 
 
 -- |How to show a type family

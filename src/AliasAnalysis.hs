@@ -342,8 +342,8 @@ _maybeAliasPrimArgs args = do
             -> do
                 isPhantom <- argIsPhantom arg
                 rep <- lookupTypeRepresentation ty
-                -- Only Address type will create alias
-                if not isPhantom && rep == Just Address
+                -- Only Pointer type will create alias
+                if not isPhantom && rep == Just Pointer
                     then return $ Just var
                     else return Nothing
         _   -> return Nothing
