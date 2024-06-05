@@ -4,7 +4,7 @@
 --  Copyright: (c) 2024 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
-{-# LANGUAGE LambdaCase #-}
+
 
 module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM ) where
 
@@ -18,7 +18,8 @@ import           Version
 import           CConfig
 import           System.IO
 import           Data.Set                        as Set
-import           Data.Map                        as Map
+import qualified Data.Map                        as Map
+import           Data.Map                        (Map)
 import           Data.List                       as List
 import           Data.Maybe
 -- import           Control.Exception               (handle)
@@ -30,6 +31,9 @@ import           Control.Monad.IO.Class
 import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
+import qualified Data.ByteString.Internal        as BI
+import AST (Ident)
+import Distribution.Compat.CharParsing (CharParsing(char))
 
 ----------------------------------------------------------------------------
 -- Instruction maps
@@ -126,13 +130,16 @@ data LLVMState = LLVMState {
         tmpCounter :: Int,          -- ^ Next temp var to make for current proc
         labelCounter :: Int,        -- ^ Next label number to use
         toRename :: Set PrimVarName, -- ^ Variables that need to get fresh names
-        newNames :: Map PrimVarName PrimVarName
+        newNames :: Map PrimVarName PrimVarName,
                                     -- | New names for some variables
+        stringConstants :: Map String Ident
+                                    -- | local name given to string constants
 }
 
 
 initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState h 0 0 Set.empty Map.empty
+initLLVMState h = LLVMState h 0 0 Set.empty Map.empty Map.empty
+
 
 type LLVM = StateT LLVMState Compiler
 
@@ -196,7 +203,7 @@ varToWrite v = do
         modify $ \s -> s { newNames = Map.insert v tmp $ newNames s }
         return $ llvmLocalName tmp
     else return $ llvmLocalName v
- 
+
 
 -- | The LLVM name for a variable we are about to read.
 varToRead :: PrimVarName -> LLVM LLVMLocal
@@ -251,7 +258,42 @@ writeAssemblyPrologue = do
 -- | Write out definitions of manifest constants used in generated code for this
 -- module.
 writeAssemblyConstants :: LLVM ()
-writeAssemblyConstants = return ()
+writeAssemblyConstants = do
+    mod <- llvmGetModule modSpec
+    bodies <- lift $ getModuleImplementationField
+            (concatMap (mapMaybe procBody) . Map.elems . modProcs)
+    let strings = List.foldr bodyStrings Set.empty bodies
+    zipWithM_ declareString (toList strings) [0..]
+
+
+-- | Write out a declaration for a string and record its name.
+declareString :: String -> Int -> LLVM ()
+declareString str n = do
+    let name = specialName2 "string" $ show n
+    modify $ \s -> s { stringConstants=Map.insert str name $ stringConstants s}
+    declareStringConstant name str Nothing
+    llvmPutStrLn ""
+
+-- | Collect all the string constants appearing in a proc body as a set
+bodyStrings :: ProcBody -> Set String -> Set String
+bodyStrings ProcBody{bodyPrims=prims, bodyFork=fork} set =
+    forkStrings fork $ List.foldr (primStrings . content) set prims
+
+
+-- | Collect all the string constants appearing in a proc fork as a set
+forkStrings NoFork set = set
+forkStrings PrimFork{forkBodies=bodies, forkDefault=dflt} set =
+    let set' = List.foldr bodyStrings set bodies
+    in maybe set' (`bodyStrings` set') dflt
+
+
+-- | Collect all the string constants appearing in a prim instruction as a set
+primStrings prim set = List.foldr argStrings set $ fst $ primArgs prim
+
+
+-- | If the specified PrimArg is a string constant, add it to the set
+argStrings (ArgString str _ _) set = Set.insert str set
+argStrings _                   set = set
 
 
 ----------------------------------------------------------------------------
@@ -357,7 +399,7 @@ buildTuple outType tuple argNum
     llvmPutStrLnIndented $ nextVar ++ " = insertvalue " ++ outType ++ " "
                             ++ tuple ++ ", " ++ llty ++ " " ++ llvar
                             ++ ", " ++ show argNum
-    
+
     buildTuple outType nextVar (argNum+1) params
 
 -- | Generate and write out the LLVM code for an LPVM body
@@ -456,7 +498,7 @@ writeLLVMCall op flags args pos = do
                     "bitcast " ++ argList ++ " to " ++ outTy
             else if op `Map.member` llvmMapUnop && not (List.null outs) then do
                 outTy <- llvmTypeRep <$> typeRep (argVarType $ head outs)
-                llvmStoreResult outs $ op ++ " " ++ argList ++ "to " ++ outTy
+                llvmStoreResult outs $ op ++ " " ++ argList ++ " to " ++ outTy
             else shouldnt $ "unknown unary llvm op " ++ op
         [_,_] -> do
             let instr =
@@ -476,6 +518,7 @@ writeLPVMCall op flags args pos = do
     (ins,outs) <- partitionArgs args
     argList <- llvmArgumentList ins
     llvmStoreResult outs $ "LPVM " ++ op ++ argList
+
 
 -- | Generate C function call
 writeCCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
@@ -512,29 +555,23 @@ writeAssemblyExports :: LLVM ()
 writeAssemblyExports = do
     llvmBlankLine
     m <- llvmGetModule modSpec
-    modBS <- lift $ encodeModule m
-    declareByteStringConstant (showModSpec m) modBS $ Just "__LPVM,__lpvm"
+    modBS <- lift $ List.map BI.w2c . BL.unpack <$> encodeModule m
+    declareStringConstant (showModSpec m) modBS $ Just "__LPVM,__lpvm"
 
 
 ----------------------------------------------------------------------------
 -- Support code
 ----------------------------------------------------------------------------
 
--- | Emit an LLVM declaration for a string constant.
-declareStringConstant :: LLVMName -> String -> LLVM ()
-declareStringConstant name str = do
-    llvmPutStrLn $ "@\"" ++ name ++ "\" = local_unnamed_addr constant ["
-        ++ show (length str) ++ " x i8] c"
-        ++ show str
-
-
--- | Emit an LLVM declaration for a string constant represented as a ByteString.
-declareByteStringConstant :: LLVMName -> BL.ByteString -> Maybe String -> LLVM ()
-declareByteStringConstant name str section = do
-    llvmPutStrLn $ "@\"" ++ name ++ "\" = local_unnamed_addr constant ["
-        ++ show (BL.length str) ++ " x i8] c"
-        ++ show str
-        ++ maybe "" ((", section "++) . show) section
+-- | Emit an LLVM declaration for a string constant, optionally specifying a
+-- file section.
+declareStringConstant :: LLVMName -> String -> Maybe String -> LLVM ()
+declareStringConstant name str section = do
+    llvmPutStrLn $ llvmGlobalName name
+                    ++ " = private unnamed_addr constant "
+                    ++ showLLVMString str True
+                    ++ maybe "" ((", section "++) . show) section
+                    ++ ", align " ++ show wordSizeBytes
 
 
 -- | Return the representation for the specified type
@@ -619,7 +656,7 @@ marshallCallResult outArg@ArgVar{argVarName=varName} cType instr = do
             ("marshalling output with unknown C type " ++ cType)
             $ cTypeRepresentation cType
     outTypeRep <- typeRep $ argType outArg
-    let instr' = "call " ++ llvmTypeRep inTypeRep ++ " " ++ instr 
+    let instr' = "call " ++ llvmTypeRep inTypeRep ++ " " ++ instr
     if inTypeRep == outTypeRep then llvmStoreResult [outArg] instr'
     else do
         tmp <- makeTemp
@@ -673,7 +710,11 @@ llvmValue :: PrimArg -> LLVM String
 llvmValue ArgVar{argVarName=var} = varToRead var
 llvmValue (ArgInt val _) = return $ show val
 llvmValue (ArgFloat val _) = return $ show val
-llvmValue (ArgString _ val _) = return $ show val -- XXX need to make a global constant
+llvmValue (ArgString str val _) =
+    gets $ llvmGlobalName
+            . trustFromJust ("String constant " ++ show str ++ " not recorded")
+            . Map.lookup str
+            . stringConstants
 llvmValue (ArgChar val _) = return $ show val
 llvmValue (ArgClosure _ val _) = return $ show val -- XXX not sure what to do
 llvmValue (ArgGlobal val _) = return $ show val    -- XXX not sure what to do
@@ -695,7 +736,7 @@ typeConvert outTypeRep outVar inTypeRep llVal = do
 -- | Same as typeConvert, except that the input and output are already converted
 -- to LLVM representation ready to be written out.
 typeConvertOp inTypeRep outTypeRep
-    | outTypeRep == inTypeRep = 
+    | outTypeRep == inTypeRep =
         shouldnt $ "no-op type conversion to and from " ++ show inTypeRep
 typeConvertOp (Bits n) Address = "inttoptr"
 typeConvertOp (Signed n) Address = "inttoptr"
@@ -747,29 +788,6 @@ writeConvertOp opName fromTy fromVal repOut toVar =
                             ++ " to " ++ llvmTypeRep repOut
 
 
--- | The LLVM name for a Wybe proc.
-llvmProcName :: ProcSpec -> LLVMName
-llvmProcName pspec = llvmGlobalName $ show pspec
-
-
--- | Make a suitable LLVM name for a global variable or constant.  We prefix it
--- with @, enclose the rest in quotes, and escape any special characters.
-llvmGlobalName :: String -> LLVMName
-llvmGlobalName s = '@' : show s
-
-
--- | Make a suitable LLVM name for a local variable.  We prefix it
--- with %, enclose the rest in quotes, and escape any special characters.
-llvmLocalName :: PrimVarName -> LLVMLocal
-llvmLocalName varName =
-    "%\"" ++ show varName ++ "\""
-
-
--- | Make an LLVM reference to the specified label.
-llvmLableName :: String -> String
-llvmLableName varName = "label %\"" ++ varName ++ "\""
-
-
 -- | Split parameter list into separate list of inputs and outputs, ignoring
 --   any phantom parameters
 -- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
@@ -796,6 +814,54 @@ partitionArgsWithTypes args = do
     realArgs <- lift $ filterM (notM . argIsPhantom . fst) args
     return ( List.filter ((==FlowIn) . argFlowDirection . fst) realArgs
            , List.filter ((==FlowOut) . argFlowDirection . fst) realArgs)
+
+----------------------------------------------------------------------------
+-- Formatting for LLVM                                                    --
+----------------------------------------------------------------------------
+
+-- | The LLVM name for a Wybe proc.
+llvmProcName :: ProcSpec -> LLVMName
+llvmProcName pspec = llvmGlobalName $ show pspec
+
+
+-- | Make a suitable LLVM name for a global variable or constant.  We prefix it
+-- with @, enclose the rest in quotes, and escape any special characters.
+llvmGlobalName :: String -> LLVMName
+llvmGlobalName s = '@' : show s
+
+
+-- | Make a suitable LLVM name for a local variable.  We prefix it
+-- with %, enclose the rest in quotes, and escape any special characters.
+llvmLocalName :: PrimVarName -> LLVMLocal
+llvmLocalName varName =
+    "%\"" ++ show varName ++ "\""
+
+
+-- | Make an LLVM reference to the specified label.
+llvmLableName :: String -> String
+llvmLableName varName = "label %\"" ++ varName ++ "\""
+
+
+-- | Format a string as an LLVM string; the Bool indicates whether to add
+-- a zero terminator.
+showLLVMString :: String -> Bool -> String
+showLLVMString str zeroTerminator =
+    let suffix = if zeroTerminator then "\0" else ""
+        len = length str + length suffix
+    in "[ " ++ show len ++ " x i8 ] c\""
+        ++ concatMap showLLVMChar str ++ concatMap showLLVMChar suffix ++ "\""
+
+-- | Format a single character as a character i an LLVM string.
+showLLVMChar :: Char -> String
+showLLVMChar char
+    | char == '\\'               = "\\"
+    | char == '"'                = "\\22"
+    | char >= ' ' && char <= '~' = [char]
+    | otherwise                  =
+        let ascii = fromEnum char
+            hexChar i = if i < 10 then toEnum $ fromEnum '0' + i
+                        else toEnum $ fromEnum 'A' + i - 10
+        in ['\\', hexChar (ascii `div` 16), hexChar (ascii `mod` 16)]
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

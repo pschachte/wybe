@@ -55,7 +55,7 @@ module AST (
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, validModuleName, maybeModPrefix, 
-  ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  ProcImpln(..), ProcDef(..), procBody, procInline, procCallCount,
   transformModuleProcs,
   getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
@@ -162,6 +162,7 @@ import           GHC.Generics (Generic)
 
 -- import qualified LLVM.AST as LLVMAST
 import Data.Binary (Binary)
+import Data.Maybe (Maybe(Nothing))
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -1981,6 +1982,15 @@ transformModuleProcs trans thisMod = do
                                   (Map.fromList $ zip names procs')
                                   (modProcs imp) })
     reexitModule
+
+
+-- | Return the LPVM-form proc body, if the proc has been compiled to LPVM
+procBody :: ProcDef -> Maybe ProcBody
+procBody def =
+    case procImpln def of
+        ProcDefSrc{}                     -> Nothing
+        ProcDefPrim{procImplnBody=body}  -> Just body
+
 
 -- |Whether this proc should definitely be inlined, either because the user said
 -- to, or because we inferred it would be a good idea.

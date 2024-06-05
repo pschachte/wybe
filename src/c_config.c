@@ -26,6 +26,6 @@ int main() {
     printf("cTypeRepresentation \"double\" = Just $ Floating %lu\n", 8*sizeof(d));
     printf("cTypeRepresentation \"char\" = Just $ Bits %lu\n", 8*sizeof(c));
     printf("cTypeRepresentation \"pointer\" = Just $ Bits %lu\n", 8*sizeof(p));
-    printf("cTypeRepresentation other = Nothing");
+    printf("cTypeRepresentation other = Nothing\n");
     return 0;
 }

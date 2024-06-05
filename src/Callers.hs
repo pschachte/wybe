@@ -105,18 +105,15 @@ getSccProcs thisMod = do
   let ordered =
           stronglyConnComp
           [(pspec,pspec,
-            nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
+            nub $ concatMap
+                ( localBodyCallees thisMod
+                . trustFromJust "Analysing un-compiled code"
+                . procBody) procDefs)
            | (name,procDefs) <- procs,
              (n,def) <- zip [0..] procDefs,
              let pspec = ProcSpec thisMod name n generalVersion
            ]
   return ordered
-
-procBody :: ProcDef -> ProcBody
-procBody def =
-  case procImpln def of
-      ProcDefSrc _         -> shouldnt "Analysing un-compiled code"
-      ProcDefPrim{procImplnBody = body} -> body
 
 
 -- |Finding all procs called by a given proc body
