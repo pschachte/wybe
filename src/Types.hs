@@ -2852,6 +2852,7 @@ compatibleReps (Func i1 o1) (Func i2 o2) = sameLength i1 i2 && sameLength o1 o2 
 compatibleReps (Func _ _)   (Bits bs)    = bs == wordSize
 compatibleReps (Func _ _)   (Signed bs)  = bs == wordSize
 compatibleReps (Func _ _)   (Floating _) = False
+compatibleReps (Func _ _)   CPointer     = False
 compatibleReps CPointer     Pointer      = True
 compatibleReps CPointer     (Bits bs)    = bs == wordSize
 compatibleReps CPointer     (Signed bs)  = bs == wordSize

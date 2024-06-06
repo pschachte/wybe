@@ -16,6 +16,7 @@ import           Config
 import           Options
 import           Version
 import           CConfig
+import           Snippets
 import           System.IO
 import           Data.Set                        as Set
 import qualified Data.Map                        as Map
@@ -123,12 +124,17 @@ type LLVMName = String              -- ^ An LLVM global name, such as a
                                     --   must begin with @
 type LLVMLocal = String             -- ^ An LLVM local variable name; must begin
                                     --   with %
+-- | Information we collect about external functions we call in a module, so we
+-- can declare them.
+type ExternSpec = (LLVMName, [TypeSpec], [TypeSpec])
 
 
 data LLVMState = LLVMState {
         fileHandle :: Handle,       -- ^ The file handle we're writing to
         tmpCounter :: Int,          -- ^ Next temp var to make for current proc
         labelCounter :: Int,        -- ^ Next label number to use
+        allStrings :: Set String,   -- ^ String constants appearing in module
+        allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
         toRename :: Set PrimVarName, -- ^ Variables that need to get fresh names
         newNames :: Map PrimVarName PrimVarName,
                                     -- | New names for some variables
@@ -138,7 +144,8 @@ data LLVMState = LLVMState {
 
 
 initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState h 0 0 Set.empty Map.empty Map.empty
+initLLVMState h = LLVMState h 0 0 Set.empty Set.empty Set.empty
+                     Map.empty Map.empty
 
 
 type LLVM = StateT LLVMState Compiler
@@ -218,6 +225,7 @@ writeLLVM handle modSpec withLPVM = do
     logMsg LLVM $ "*** Generating LLVM for module " ++ showModSpec modSpec
     logWrapWith '-' . show <$> getModule id
     flip execStateT (initLLVMState handle) $ do
+        preScanProcs
         writeAssemblyPrologue
         writeAssemblyConstants
         writeAssemblyGlobals
@@ -226,6 +234,66 @@ writeLLVM handle modSpec withLPVM = do
         when withLPVM writeAssemblyExports
     logMsg LLVM $ "*** Finished generating LLVM for " ++ showModSpec modSpec
     reexitModule
+
+
+----------------------------------------------------------------------------
+-- Scanning the module in preparation
+----------------------------------------------------------------------------
+
+-- | Scan proc bodies to find and record whatever we need to later produce the
+-- llvm assembly code for the current module.  Currently we collect string
+-- constants and extern declarations for foreign procs and imported Wybe procs
+-- used by the module.
+preScanProcs :: LLVM ()
+preScanProcs = do
+    mod <- llvmGetModule modSpec
+    bodies <- lift $ getModuleImplementationField
+            (concatMap (mapMaybe procBody) . Map.elems . modProcs)
+    let (strings,externs) =
+            List.foldl (preScanBody mod) (Set.empty, Set.empty) bodies
+    modify $ \s -> s{allStrings = strings, allExterns = externs}
+
+
+type PreScanState = (Set String, Set ExternSpec)
+
+
+-- | Collect all the string constants appearing in a proc body as a set
+preScanBody :: ModSpec -> PreScanState -> ProcBody -> PreScanState
+preScanBody mod = foldLPVMPrims (preScanPrim mod)
+
+
+preScanPrim :: ModSpec -> PreScanState -> Prim -> PreScanState
+preScanPrim mod (strings,externs) prim =
+    let strings' = foldLPVMPrimArgs argStrings strings prim
+        externs' = addExtern mod prim externs
+    in (strings', externs')
+
+
+-- | If the specified PrimArg is a string constant, add it to the set
+argStrings set (ArgString str _ _) = Set.insert str set
+argStrings set _                   = set
+
+
+-- | Construct and return a whole extern declaration ready to be emitted.
+addExtern :: ModSpec -> Prim -> Set ExternSpec -> Set ExternSpec
+addExtern mod (PrimCall _ pspec _ args _) externs =
+    if mod `isPrefixOf` procSpecMod pspec then externs
+    else let (ins,outs) = partitionByFlow argFlowDirection args
+             extern = (llvmProcName pspec, argType <$> ins, argType <$> outs)
+         in Set.insert extern externs
+addExtern _ PrimHigher{} externs = externs
+addExtern _ (PrimForeign "llvm" _ _ _) externs = externs
+addExtern _ (PrimForeign "lpvm" "alloc" _ _) externs =
+    let externName = llvmForeignName "wybe_malloc"
+        extern = (externName, [intType], [Representation CPointer])
+    in Set.insert extern externs
+addExtern _ (PrimForeign "lpvm" _ _ _) externs = externs
+addExtern _ (PrimForeign "c" name _ args) externs =
+    let (ins,outs) = partitionByFlow argFlowDirection args
+        extern = (llvmForeignName name, argType <$> ins, argType <$> outs)
+    in Set.insert extern externs
+addExtern _ (PrimForeign other name _ args) externs =
+    shouldnt $ "Unknown foreign language " ++ other
 
 
 ----------------------------------------------------------------------------
@@ -259,11 +327,8 @@ writeAssemblyPrologue = do
 -- module.
 writeAssemblyConstants :: LLVM ()
 writeAssemblyConstants = do
-    mod <- llvmGetModule modSpec
-    bodies <- lift $ getModuleImplementationField
-            (concatMap (mapMaybe procBody) . Map.elems . modProcs)
-    let strings = List.foldr bodyStrings Set.empty bodies
-    zipWithM_ declareString (toList strings) [0..]
+    strings <- gets $ Set.toList . allStrings
+    zipWithM_ declareString strings [0..]
 
 
 -- | Write out a declaration for a string and record its name.
@@ -273,27 +338,6 @@ declareString str n = do
     modify $ \s -> s { stringConstants=Map.insert str name $ stringConstants s}
     declareStringConstant name str Nothing
     llvmPutStrLn ""
-
--- | Collect all the string constants appearing in a proc body as a set
-bodyStrings :: ProcBody -> Set String -> Set String
-bodyStrings ProcBody{bodyPrims=prims, bodyFork=fork} set =
-    forkStrings fork $ List.foldr (primStrings . content) set prims
-
-
--- | Collect all the string constants appearing in a proc fork as a set
-forkStrings NoFork set = set
-forkStrings PrimFork{forkBodies=bodies, forkDefault=dflt} set =
-    let set' = List.foldr bodyStrings set bodies
-    in maybe set' (`bodyStrings` set') dflt
-
-
--- | Collect all the string constants appearing in a prim instruction as a set
-primStrings prim set = List.foldr argStrings set $ fst $ primArgs prim
-
-
--- | If the specified PrimArg is a string constant, add it to the set
-argStrings (ArgString str _ _) set = Set.insert str set
-argStrings _                   set = set
 
 
 ----------------------------------------------------------------------------
@@ -331,7 +375,19 @@ defGlobalResource res = do
 -- | Write out extern declarations for all procs and resources imported from
 -- other modules and used by this one.
 writeAssemblyExterns :: LLVM ()
-writeAssemblyExterns = return ()
+writeAssemblyExterns = do
+    externs <- gets $ Set.toList . allExterns
+    mapM_ declareExtern externs
+
+
+declareExtern :: ExternSpec -> LLVM ()
+declareExtern (name, ins, outs) = do
+    outs' <- lift $ filterM (notM . typeIsPhantom) outs
+    ins' <- lift $ filterM (notM . typeIsPhantom) ins
+    outTy <- llvmReturnType outs'
+    argTypes <- (llvmTypeRep <$>) <$> mapM typeRep ins'
+    llvmPutStrLn $ "declare " ++ outTy ++ " " ++ name ++ "("
+                  ++ intercalate ", " argTypes ++ ")"
 
 
 ----------------------------------------------------------------------------
@@ -552,7 +608,7 @@ writeLPVMCall "store" _ args pos = do
             shouldnt $ "lpvm store with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
 
-    
+
 writeLPVMCall op flags args pos = do
     (ins,outs) <- partitionArgs args
     argList <- llvmArgumentList ins
@@ -840,32 +896,36 @@ writeConvertOp opName fromTy fromVal repOut toVar =
 
 -- | Split parameter list into separate list of inputs and outputs, ignoring
 --   any phantom parameters
--- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
 partitionParams :: [PrimParam] -> LLVM ([PrimParam],[PrimParam])
 partitionParams params = do
     realParams <- lift $ filterM (notM . typeIsPhantom . primParamType) params
-    return ( List.filter ((==FlowIn) . primParamFlow) realParams
-           , List.filter ((==FlowOut) . primParamFlow) realParams)
+    return $ partitionByFlow primParamFlow realParams
 
 
 -- | Split argument list into separate list of inputs and outputs, eliminating
 -- phantom arguments.
--- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
 partitionArgs :: [PrimArg] -> LLVM ([PrimArg],[PrimArg])
 partitionArgs args = do
     realArgs <- lift $ filterM (notM . argIsPhantom) args
-    return ( List.filter ((==FlowIn) . argFlowDirection) realArgs
-           , List.filter ((==FlowOut) . argFlowDirection) realArgs)
+    return $ partitionByFlow argFlowDirection realArgs
 
 
 -- | Split list of pairs of argument and something else into separate lists of
 -- inputs and outputs, after eliminating phantom arguments.
--- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
 partitionArgTuples :: [(PrimArg,a)] -> LLVM ([(PrimArg,a)],[(PrimArg,a)])
 partitionArgTuples args = do
     realArgs <- lift $ filterM (notM . argIsPhantom . fst) args
-    return ( List.filter ((==FlowIn) . argFlowDirection . fst) realArgs
-           , List.filter ((==FlowOut) . argFlowDirection . fst) realArgs)
+    return $ partitionByFlow (argFlowDirection . fst) realArgs
+
+
+-- | Split the provided list into inputs and outputs given a function to
+-- determine the flow direction of each element.
+-- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
+partitionByFlow :: (a -> PrimFlow) -> [a] -> ([a],[a])
+partitionByFlow fn lst =
+    (List.filter ((==FlowIn)  . fn) lst,
+     List.filter ((==FlowOut) . fn) lst)
+
 
 ----------------------------------------------------------------------------
 -- Formatting for LLVM                                                    --
@@ -880,6 +940,12 @@ llvmProcName pspec = llvmGlobalName $ show pspec
 -- with @, enclose the rest in quotes, and escape any special characters.
 llvmGlobalName :: String -> LLVMName
 llvmGlobalName s = '@' : show s
+
+
+-- | Make a suitable LLVM name for a foreign (e.g., C) function.  We just prefix it
+-- with @, with no escaping of any characters.
+llvmForeignName :: String -> LLVMName
+llvmForeignName s = '@' : s
 
 
 -- | Make a suitable LLVM name for a local variable.  We prefix it

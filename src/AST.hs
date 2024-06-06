@@ -54,7 +54,7 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, validModuleName, maybeModPrefix, 
+  ModSpec, validModuleName, maybeModPrefix,
   ProcImpln(..), ProcDef(..), procBody, procInline, procCallCount,
   transformModuleProcs,
   getProcGlobalFlows,
@@ -71,11 +71,12 @@ module AST (
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
+  foldLPVMPrims, foldLPVMPrimArgs,
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
-  Prim(..), primArgs, replacePrimArgs, 
-  primGlobalFlows, argGlobalFlow, argsGlobalFlows, effectiveGlobalFlows, 
+  Prim(..), primArgs, replacePrimArgs,
+  primGlobalFlows, argGlobalFlow, argsGlobalFlows, effectiveGlobalFlows,
   argIsVar, argIsConst, argIntegerValue,
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
@@ -2012,7 +2013,7 @@ getProcGlobalFlows pspec = do
     case procImpln pDef of
       ProcDefSrc _ ->
             let ProcProto _ params resFlows = procProto pDef
-                paramFlows 
+                paramFlows
                     | any (isResourcefulHigherOrder . paramType . content) params
                     = UniversalSet
                     | otherwise
@@ -2188,7 +2189,7 @@ univGlobalFlows = GlobalFlows UniversalSet UniversalSet UniversalSet
 -- we take a conservative approach and assume all do.
 makeGlobalFlows :: [(ParameterID, PrimParam)] -> Set ResourceFlowSpec -> GlobalFlows
 makeGlobalFlows params resFlows =
-    Set.fold addGlobalResourceFlows 
+    Set.fold addGlobalResourceFlows
         (emptyGlobalFlows{globalFlowsParams=pFlows}) resFlows
   where
     pFlows = FiniteSet $ Set.fromList $ catMaybes $ List.map (uncurry paramFlow) params
@@ -2230,9 +2231,9 @@ hasGlobalFlow GlobalFlows{globalFlowsIn=ins, globalFlowsOut=outs} flow info
 -- | Take the union of the sets of two global flows
 globalFlowsUnion :: GlobalFlows -> GlobalFlows -> GlobalFlows
 globalFlowsUnion (GlobalFlows ins1 outs1 params1) (GlobalFlows ins2 outs2 params2)
-    = GlobalFlows 
-        (USet.union ins1 ins2) 
-        (USet.union outs1 outs2) 
+    = GlobalFlows
+        (USet.union ins1 ins2)
+        (USet.union outs1 outs2)
         (USet.union params1 params2)
 
 globalFlowsUnions :: [GlobalFlows] -> GlobalFlows
@@ -2241,11 +2242,11 @@ globalFlowsUnions = List.foldr globalFlowsUnion emptyGlobalFlows
 
 -- | Take the intersection of the sets of two global flows
 globalFlowsIntersection :: GlobalFlows -> GlobalFlows -> GlobalFlows
-globalFlowsIntersection (GlobalFlows ins1 outs1 params1) 
+globalFlowsIntersection (GlobalFlows ins1 outs1 params1)
                         (GlobalFlows ins2 outs2 params2)
-    = GlobalFlows 
-        (USet.intersection ins1 ins2) 
-        (USet.intersection outs1 outs2) 
+    = GlobalFlows
+        (USet.intersection ins1 ins2)
+        (USet.intersection outs1 outs2)
         (USet.intersection params1 params2)
 
 
@@ -2648,6 +2649,29 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
         $ bodies ++ maybeToList deflt
 
 
+-- |Left fold a function over the LPVM Prims in a proc body.  This code does
+-- nothing to track where in the proc body a Prim appears.
+foldLPVMPrims :: (a -> Prim -> a) -> a -> ProcBody -> a
+foldLPVMPrims fn a (ProcBody pprims fork) =
+    List.foldl fn (foldLPVMFork fn a fork) $ List.map content pprims
+
+
+-- |Left fold a function over the LPVM Prims in a PrimFork
+foldLPVMFork :: (a -> Prim -> a) -> a -> PrimFork -> a
+foldLPVMFork _  a NoFork = a
+foldLPVMFork fn a (PrimFork _ _ _ bodies deflt) =
+    List.foldl (foldLPVMPrims fn) (maybe a (foldLPVMPrims fn a) deflt) bodies
+
+
+-- |Left fold a function over the LPVM PrimArgs in a prim.  This is useful in
+-- the first argument to foldLPVMPrims to apply a function to every argument to
+-- every instruction in a proc body, eg, foldLPVMPrims (foldLPVMPrimArgs fn) ...
+foldLPVMPrimArgs :: (a -> PrimArg -> a) -> a -> Prim -> a
+foldLPVMPrimArgs fn a (PrimCall _ _ _ args _)   = List.foldl fn a args
+foldLPVMPrimArgs fn a (PrimHigher _ hfn _ args) = List.foldl fn (fn a hfn) args
+foldLPVMPrimArgs fn a (PrimForeign _ _ _ args)  = List.foldl fn a args
+
+
 -- |Info about a proc call, including the ID, prototype, and an
 --  optional source position.
 data ProcSpec = ProcSpec {
@@ -2828,7 +2852,7 @@ data PrimParam = PrimParam {
 -- |Info inferred about a single proc parameter
 data ParamInfo = ParamInfo {
         paramInfoUnneeded :: Bool, -- ^Can this parameter be eliminated?
-        paramInfoGlobalFlows :: GlobalFlows 
+        paramInfoGlobalFlows :: GlobalFlows
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
@@ -3334,13 +3358,13 @@ primGlobalFlows varFlows prim = do
 -- |Return the GlobalFlows of a PrimArg, given the currently known GlobalFlows 
 -- of variables 
 argGlobalFlow :: Map PrimVarName GlobalFlows -> PrimArg -> Compiler GlobalFlows
-argGlobalFlow varFlows (ArgVar name ty _ _ _) 
+argGlobalFlow varFlows (ArgVar name ty _ _ _)
     = return $ Map.findWithDefault univGlobalFlows name varFlows
 argGlobalFlow varFlows (ArgClosure pspec args _) = do
-    params <- getPrimParams pspec 
+    params <- getPrimParams pspec
     let nArgs = length args
         (closedParams, freeParams) = List.splitAt nArgs params
-    if any (\(PrimParam _ ty flow _ _) -> 
+    if any (\(PrimParam _ ty flow _ _) ->
             isInputFlow flow && isResourcefulHigherOrder ty) freeParams
     then return univGlobalFlows
     else do
@@ -3351,17 +3375,17 @@ argGlobalFlow _ _ = return emptyGlobalFlows
 
 -- Get the corresponding GlobalFlows and Flows of the given PrimArgs
 argsGlobalFlows :: Map PrimVarName GlobalFlows -> [PrimArg] -> Compiler [(GlobalFlows, PrimFlow)]
-argsGlobalFlows varFlows 
+argsGlobalFlows varFlows
     = mapM (\a -> (, argFlowDirection a) <$> argGlobalFlow varFlows a)
 
 
 -- | Gather the effective GlobalFLows of a given set of GlobalGlows, 
 -- using the GlobalFlows of the arguments corresponding to each parameter
 effectiveGlobalFlows :: [(GlobalFlows, PrimFlow)] -> GlobalFlows -> GlobalFlows
-effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ UniversalSet) 
+effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ UniversalSet)
     = globalFlowsUnions $ primFlows{globalFlowsParams=emptyUnivSet}
                         : List.map fst (List.filter (isInputFlow . snd) argFlows)
-effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ (FiniteSet ids)) 
+effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ (FiniteSet ids))
     = globalFlowsUnions $ primFlows{globalFlowsParams=emptyUnivSet}
                         : List.map (fst . (argFlows !!)) (Set.toList ids)
 
@@ -3724,7 +3748,7 @@ instance Show Item where
     ++ show typeModifiers
     ++ showOptPos pos ++ "\n    "
     ++ visibilityPrefix vis ++ "constructors "
-    ++ intercalate "\n  | " 
+    ++ intercalate "\n  | "
         (List.map (\(vis, ctor) -> visibilityPrefix vis ++ show ctor) ctors)
     ++ concatMap (("\n  "++) . show) items
     ++ "\n}\n"
@@ -4324,7 +4348,7 @@ showMessages :: Compiler ()
 showMessages = do
     opts <- gets options
     let verbose = optVerbose opts
-    let noFonts = optNoFont opts 
+    let noFonts = optNoFont opts
     messages <- reverse <$> gets msgs -- messages are collected in reverse order
     let filtered =
             if verbose
@@ -4338,7 +4362,7 @@ showMessage :: Bool -> Message -> IO ()
 showMessage noFont (Message lvl pos msg) = do
     posMsg <- makeMessage pos msg
     let showMsg colour msg =
-            if noFont 
+            if noFont
                 then putStrLn msg
                 else do
                     setSGR [SetColor Foreground Vivid colour]
