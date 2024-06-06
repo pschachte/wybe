@@ -506,15 +506,53 @@ writeLLVMCall op flags args pos = do
                     fst3 $ trustFromJust ("unknown binary llvm op " ++ op)
                     $ Map.lookup op llvmMapBinop
             llvmStoreResult outs $ instr ++ " " ++ argList
+        ([],[]) -> return () -- eliminate if all data flow was phantoms
         _ -> shouldnt $ "unknown llvm op " ++ op ++ " (arity "
                          ++ show (length ins) ++ ")"
 
 
 -- | Generate LPVM (memory management) instruction
 writeLPVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
--- writeLPVMCall "alloc" [] [sz,noEscape,out] pos =
-writeLPVMCall "alloc" [] args@[sz,out] pos = do
+writeLPVMCall "alloc" _ [sz,out] pos = do
     marshalledCCall "wybe_malloc" [] [sz,out] ["int","pointer"] pos
+writeLPVMCall "alloc" _ args pos = do
+    shouldnt $ "lpvm alloc with arguments " ++ show args
+writeLPVMCall "cast" _ args pos = do
+    args' <- partitionArgs args
+    case args' of
+        ([],[]) -> return ()
+        ([val],[var]) -> do
+            llValType <- argTypeRep val
+            llVal <- llvmValue val
+            llVarType <- argTypeRep var
+            let varname = argVarName var
+            typeConvert llValType llVal llVarType varname
+        (ins, outs) ->
+            shouldnt $ "lpvm cast with arguments " ++ show ins ++ " and outputs "
+                ++ show outs
+writeLPVMCall "load" _ args pos = do
+    args' <- partitionArgs args
+    case args' of
+        ([],[]) -> return ()
+        ([global],outs@[outVar]) -> do
+            lltype <- llvmTypeRep <$> argTypeRep outVar
+            arg <- llvmArgument global
+            llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
+        (ins, outs) ->
+            shouldnt $ "lpvm load with inputs " ++ show ins ++ " and outputs "
+                ++ show outs
+writeLPVMCall "store" _ args pos = do
+    args' <- partitionArgs args
+    case args' of
+        ([],[]) -> return ()
+        (args@[val,global],[]) -> do
+            llargs <- llvmArgumentList args
+            llvmPutStrLnIndented $ "store " ++ llargs
+        (ins, outs) ->
+            shouldnt $ "lpvm store with inputs " ++ show ins ++ " and outputs "
+                ++ show outs
+
+    
 writeLPVMCall op flags args pos = do
     (ins,outs) <- partitionArgs args
     argList <- llvmArgumentList ins
@@ -535,7 +573,7 @@ writeCCall cfn flags args pos = do
 marshalledCCall :: ProcName -> [Ident] -> [PrimArg] -> [String] -> OptPos
                 -> LLVM ()
 marshalledCCall cfn flags args ctypes pos = do
-    (ins,outs) <- partitionArgsWithTypes $ zip args ctypes
+    (ins,outs) <- partitionArgTuples $ zip args ctypes
     argList <- llvmStringArgList <$> mapM (uncurry marshallArgument) ins
     let instr = llvmGlobalName cfn ++ argList
     case outs of
@@ -640,7 +678,7 @@ llvmInstrArgumentList inputs@(in1:_) = do
 -- | Write the LLVM translation of the specified output argument list as target
 -- for the specified instruction.  For multiple outputs, we must unpack a tuple.
 llvmStoreResult :: [PrimArg] -> String -> LLVM ()
-llvmStoreResult [] instr = llvmPutStrLn instr
+llvmStoreResult [] instr = llvmPutStrLnIndented instr
 llvmStoreResult [ArgVar{argVarName=varName}] instr = do
     llVar <- varToRead varName
     llvmPutStrLnIndented $ llVar ++ " = " ++ instr
@@ -810,7 +848,8 @@ partitionParams params = do
            , List.filter ((==FlowOut) . primParamFlow) realParams)
 
 
--- | Split argument list into separate list of inputs and outputs
+-- | Split argument list into separate list of inputs and outputs, eliminating
+-- phantom arguments.
 -- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
 partitionArgs :: [PrimArg] -> LLVM ([PrimArg],[PrimArg])
 partitionArgs args = do
@@ -819,10 +858,11 @@ partitionArgs args = do
            , List.filter ((==FlowOut) . argFlowDirection) realArgs)
 
 
--- | Split argument list into separate list of inputs and outputs
+-- | Split list of pairs of argument and something else into separate lists of
+-- inputs and outputs, after eliminating phantom arguments.
 -- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
-partitionArgsWithTypes :: [(PrimArg,a)] -> LLVM ([(PrimArg,a)],[(PrimArg,a)])
-partitionArgsWithTypes args = do
+partitionArgTuples :: [(PrimArg,a)] -> LLVM ([(PrimArg,a)],[(PrimArg,a)])
+partitionArgTuples args = do
     realArgs <- lift $ filterM (notM . argIsPhantom . fst) args
     return ( List.filter ((==FlowIn) . argFlowDirection . fst) realArgs
            , List.filter ((==FlowOut) . argFlowDirection . fst) realArgs)
