@@ -457,7 +457,7 @@ writeAssemblySwitch :: [PrimParam] -> PrimVarName -> TypeRepresentation
                     -> [ProcBody] -> Maybe ProcBody -> LLVM ()
 writeAssemblySwitch outs v rep cases dflt = do
     llvar <- varToRead v
-    let prefixes0 = ["case."++show n++".switch." | n <- [0..length cases]]
+    let prefixes0 = ["case."++show n++".switch." | n <- [0..length cases-1]]
     (dfltLabel:labels) <- freshLables $ "default.switch." : prefixes0
     let llType = llvmTypeRep rep
     logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
