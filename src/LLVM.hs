@@ -35,6 +35,8 @@ import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
 import AST (Ident, TypeRepresentation)
 import Distribution.Compat.CharParsing (CharParsing(char))
+import Config (wordSize)
+import Data.Bool (Bool)
 
 ----------------------------------------------------------------------------
 -- Instruction maps
@@ -127,6 +129,12 @@ type LLVMLocal = String             -- ^ An LLVM local variable name; must begin
 -- | Information we collect about external functions we call in a module, so we
 -- can declare them.
 type ExternSpec = (LLVMName, [TypeSpec], [TypeSpec])
+
+-- | Information needed to specify one constant value, giving the representation
+-- to be stored, the representation used for the value, and the value itself.
+-- XXX should change the last element to be a PrimArg after we introduce a
+-- CString manifest constant argument constructor.
+type ConstSpec = (TypeRepresentation,TypeRepresentation,String)
 
 
 data LLVMState = LLVMState {
@@ -334,9 +342,15 @@ writeAssemblyConstants = do
 -- | Write out a declaration for a string and record its name.
 declareString :: String -> Int -> LLVM ()
 declareString str n = do
-    let name = specialName2 "string" $ show n
-    modify $ \s -> s { stringConstants=Map.insert str name $ stringConstants s}
-    declareStringConstant name str Nothing
+    let textName = specialName2 "cstring" $ show n
+    let stringName = specialName2 "string" $ show n
+    modify $ \s -> s { stringConstants=Map.insert str stringName
+                                       $ stringConstants s}
+    declareStructConstant stringName
+        [ (Bits wordSize, Bits wordSize, show $ length str)
+        , (CPointer, Pointer, llvmGlobalName textName)]
+        Nothing
+    declareStringConstant textName str Nothing
     llvmPutStrLn ""
 
 
@@ -607,6 +621,9 @@ writeLPVMCall "store" _ args pos = do
         (ins, outs) ->
             shouldnt $ "lpvm store with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
+-- writeLPVMCall "access" _ args pos = do
+--     args' <- partitionArgs args
+--     case args' of
 
 
 writeLPVMCall op flags args pos = do
@@ -667,6 +684,27 @@ declareStringConstant name str section = do
                     ++ showLLVMString str True
                     ++ maybe "" ((", section "++) . show) section
                     ++ ", align " ++ show wordSizeBytes
+
+
+-- | Emit an LLVM declaration for a string constant, optionally specifying a
+-- file section.
+declareStructConstant :: LLVMName -> [ConstSpec] -> Maybe String -> LLVM ()
+declareStructConstant name fields section = do
+    let llvmFields = llvmConstStruct fields
+    llvmPutStrLn $ llvmGlobalName name
+                    ++ " = private unnamed_addr constant " ++ llvmFields
+                    ++ maybe "" ((", section "++) . show) section
+                    ++ ", align " ++ show wordSizeBytes
+
+
+-- | Build a string giving the body of an llvm constant structure declaration
+llvmConstStruct :: [ConstSpec] -> String
+llvmConstStruct fields =
+    let fieldReps = snd3 <$> fields
+        llvmVals = [llvmTypeRep toTy ++ " "
+                    ++ typeConversion fromTy fromVal toTy True
+                   | (fromTy, toTy, fromVal) <- fields]
+    in llvmRepReturnType fieldReps ++ " { " ++ intercalate ", " llvmVals ++ " }"
 
 
 -- | Return the representation for the specified type
@@ -832,16 +870,32 @@ llvmValue (ArgUndef _) = return "undef"
 -- specified type representation.
 typeConvert :: TypeRepresentation -> String -> TypeRepresentation -> PrimVarName
             -> LLVM ()
-typeConvert inTypeRep llVal outTypeRep outVar = do
+typeConvert fromTy llVal toTy outVar = do
     llVar <- varToWrite outVar
-    let op = typeConvertOp inTypeRep outTypeRep
-    writeConvertOp op inTypeRep llVal outTypeRep llVar
+    llvmPutStrLnIndented $ llVar ++ " = "
+                         ++ typeConversion fromTy llVal toTy False
 
 
--- | Same as typeConvert, except that the input and output are already converted
--- to LLVM representation ready to be written out.
-typeConvertOp inTypeRep outTypeRep
-    | inTypeRep == outTypeRep = "bitcast" -- use bitcast for no-op conversion
+-- | An LLVM expression to convert fromVal, with type fromTy, to toTy.  If
+-- asExpr is True then a conversion *expression* is written if needed, otherwise
+-- the result is a conversion *instruction* body.
+typeConversion :: TypeRepresentation -> String -> TypeRepresentation -> Bool
+               -> String
+typeConversion fromTy fromVal toTy True
+    | fromTy == toTy = fromVal
+    | otherwise      =
+        typeConvertOp fromTy toTy ++ " ("
+            ++ llvmTypeRep fromTy ++ " " ++ fromVal
+            ++ " to " ++ llvmTypeRep toTy ++ " )"
+typeConversion fromTy fromVal toTy False =
+    typeConvertOp fromTy toTy ++ " "
+        ++ llvmTypeRep fromTy ++ " " ++ fromVal
+        ++ " to " ++ llvmTypeRep toTy
+
+
+-- | The appropriate type conversion operator to convert from fromTy to toTy
+typeConvertOp fromTy toTy
+    | fromTy == toTy = "bitcast" -- use bitcast for no-op conversion
 typeConvertOp (Bits n) Pointer = "bitcast"
 typeConvertOp (Signed n) Pointer = "bitcast"
 typeConvertOp CPointer Pointer = "ptrtoint"
@@ -878,20 +932,9 @@ typeConvertOp (Floating m) (Floating n)
     | m < n = "fpext"
     | n < m = "fptrunc"
     | otherwise = shouldnt "no-op floating point conversion"
-typeConvertOp repIn repOut =
+typeConvertOp repIn toTy =
     shouldnt $ "Don't know how to convert from " ++ show repIn
-                 ++ " to " ++ show repOut
-
-
--- | Write out an LLVM instruction to convert the specified value with its type
--- to the specified variable with its type.  The required conversion operator is
--- provided.
-writeConvertOp :: String -> TypeRepresentation -> String
-               -> TypeRepresentation -> String -> LLVM ()
-writeConvertOp opName fromTy fromVal repOut toVar =
-    llvmPutStrLnIndented $ toVar ++ " = " ++ opName ++ " "
-                            ++ llvmTypeRep fromTy ++ " "++ fromVal
-                            ++ " to " ++ llvmTypeRep repOut
+                 ++ " to " ++ show toTy
 
 
 -- | Split parameter list into separate list of inputs and outputs, ignoring
