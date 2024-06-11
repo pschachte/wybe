@@ -1053,14 +1053,19 @@ partitionParams params = do
 -- out-by-reference or take-reference arguments.
 partitionArgs :: String -> [PrimArg] -> LLVM ([PrimArg],[PrimArg])
 partitionArgs op args = do
-    realArgs <- lift $ filterM (notM . argIsPhantom) args
-    let (ins,outs,oRefs,iRefs) =
-            partitionByFlow argFlowDirection realArgs
-    unless (List.null oRefs)
-     $ shouldnt $ "out-by-reference argument of " ++ op ++ " instruction"
-    unless (List.null iRefs)
-     $ shouldnt $ "take-reference argument of " ++ op ++ " instruction"
+    (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
+    unless (List.null oRefs) $ shouldnt $ "out-by-reference argument of " ++ op
+    unless (List.null iRefs) $ shouldnt $ "take-reference argument of " ++ op
     return (ins,outs)
+
+
+-- | Split the provided list of arguments into input, output, out-by-reference,
+-- and take-reference arguments, after eliminating phantom arguments.
+partitionArgsWithRefs :: [PrimArg]
+                      -> LLVM ([PrimArg],[PrimArg],[PrimArg],[PrimArg])
+partitionArgsWithRefs args = do
+    realArgs <- lift $ filterM (notM . argIsPhantom) args
+    return $ partitionByFlow argFlowDirection realArgs
 
 
 -- | Split list of pairs of argument and something else into separate lists of
