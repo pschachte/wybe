@@ -2870,7 +2870,19 @@ data PrimFlow =
     --  in or out
     FlowIn | FlowOut
     -- Two "special" flows used to improve last-call optimization.
-    -- Users cannot (at present) manually refer to these flows
+    -- Users cannot (at present) manually refer to these flows.
+    -- FlowOutByReference denotes an argument that is notionally an output, but
+    -- is actually passed as an input reference to the place to write the
+    -- output.  FlowTakeReference is notionally an input, but is actually passed
+    -- as an output of a pointer to the place to write the input when it becomes
+    -- available.  This may allow the call with the FlowTakeReference argument
+    -- to be made before the call with the FlowOutByReference argument.  Of
+    -- course, there must not be any other ordering restriction that prevents
+    -- this reordering, and the procedure with the FlowTakeReference argument
+    -- must be able to complete without having access to the value, and without
+    -- needing to write it in more than one place.  For now, we only allow
+    -- FlowTakeReference to be used for the last argument of LPVM mutate
+    -- instructions.
     | FlowOutByReference | FlowTakeReference
                    deriving (Show,Eq,Ord,Generic)
 

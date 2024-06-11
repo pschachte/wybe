@@ -294,9 +294,7 @@ argStrings set _                   = set
 addExtern :: ModSpec -> Prim -> Set ExternSpec -> Set ExternSpec
 addExtern mod (PrimCall _ pspec _ args _) externs =
     if mod `isPrefixOf` procSpecMod pspec then externs
-    else let (ins,outs) = partitionByFlow argFlowDirection args
-             extern = (llvmProcName pspec, argType <$> ins, argType <$> outs)
-         in Set.insert extern externs
+    else recordExtern args (llvmProcName pspec) externs
 addExtern _ PrimHigher{} externs = externs
 addExtern _ (PrimForeign "llvm" _ _ _) externs = externs
 addExtern _ (PrimForeign "lpvm" "alloc" _ _) externs =
@@ -305,11 +303,21 @@ addExtern _ (PrimForeign "lpvm" "alloc" _ _) externs =
     in Set.insert extern externs
 addExtern _ (PrimForeign "lpvm" _ _ _) externs = externs
 addExtern _ (PrimForeign "c" name _ args) externs =
-    let (ins,outs) = partitionByFlow argFlowDirection args
-        extern = (llvmForeignName name, argType <$> ins, argType <$> outs)
-    in Set.insert extern externs
+    recordExtern args (llvmForeignName name) externs
 addExtern _ (PrimForeign other name _ args) externs =
     shouldnt $ "Unknown foreign language " ++ other
+
+
+-- | Insert the fact that the named function is an external function with the
+-- specified argument types in the provided set, returning the resulting set.
+recordExtern :: [PrimArg] -> LLVMName -> Set ExternSpec -> Set ExternSpec
+recordExtern args fName externs =
+    let (ins,outs,oRefs,iRefs) = partitionByFlow argFlowDirection args
+        extern = (fName
+                 , (argType <$> ins) ++ (Representation CPointer <$ oRefs)
+                 , argType <$> outs)
+    in if List.null iRefs then Set.insert extern externs
+       else shouldnt $ "Function " ++ fName ++ " has TakeReference parameters"
 
 
 ----------------------------------------------------------------------------
@@ -436,10 +444,12 @@ writeAssemblyProc mod def procNum =
         ProcDefPrim {procImplnProcSpec=pspec, procImplnProto=proto,
                      procImplnBody=body, procImplnSpeczBodies=specz} -> do
             let name = llvmProcName pspec
-            (ins,outs) <- partitionParams $ primProtoParams proto
+            (ins,outs,oRefs,iRefs) <- partitionParams $ primProtoParams proto
+            unless (List.null iRefs)
+              $ nyi $ "take-reference parameter for proc " ++ show pspec
             setRenaming $ Set.fromList $ primParamName <$> outs
             returnType <- llvmReturnType $ List.map primParamType outs
-            llParams <- mapM llvmParameter ins
+            llParams <- mapM llvmParameter $ ins ++ oRefs
             modify $ \s -> s {tmpCounter = procTmpCount def}
             llvmBlankLine
             logLLVM $ "Generating LLVM for proc " ++ show pspec
@@ -564,7 +574,8 @@ writeAssemblySwitch outs v rep cases dflt = do
 -- | Generate a Wybe proc call instruction
 writeWybeCall :: ProcSpec -> [PrimArg] -> OptPos -> LLVM ()
 writeWybeCall wybeProc args pos = do
-    (ins,outs) <- partitionArgs args
+    -- XXX Must support out-by-reference
+    (ins,outs) <- partitionArgs ("call to Wybe proc " ++ show wybeProc) args
     argList <- llvmArgumentList ins
     outTy <- llvmReturnType $ List.map argType outs
     llvmStoreResult outs $
@@ -574,9 +585,10 @@ writeWybeCall wybeProc args pos = do
 -- | Generate a native LLVM instruction
 writeLLVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeLLVMCall op flags args pos = do
-    (ins,outs) <- partitionArgs args
+    (ins,outs) <- partitionArgs ("llvm " ++ op ++ " instruction") args
     argList <- llvmInstrArgumentList ins
     case (ins,outs) of
+        ([],[]) -> return () -- eliminate if all data flow was phantoms
         ([arg],[out@ArgVar{argVarName=outVar}]) ->
             if op == "move" then do
                 outRep <- argTypeRep out
@@ -592,19 +604,21 @@ writeLLVMCall op flags args pos = do
                     fst3 $ trustFromJust ("unknown binary llvm op " ++ op)
                     $ Map.lookup op llvmMapBinop
             llvmStoreResult outs $ instr ++ " " ++ argList
-        ([],[]) -> return () -- eliminate if all data flow was phantoms
         _ -> shouldnt $ "unknown llvm op " ++ op ++ " (arity "
                          ++ show (length ins) ++ ")"
 
 
 -- | Generate LPVM (memory management) instruction
 writeLPVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
-writeLPVMCall "alloc" _ [sz,out] pos = do
-    marshalledCCall "wybe_malloc" [] [sz,out] ["int","pointer"] pos
 writeLPVMCall "alloc" _ args pos = do
-    shouldnt $ "lpvm alloc with arguments " ++ show args
+    args' <- partitionArgs "lpvm alloc instruction" args
+    case args' of
+        ([sz],[out]) ->
+            marshalledCCall "wybe_malloc" [] [sz,out] ["int","pointer"] pos
+        _ ->
+            shouldnt $ "lpvm alloc with arguments " ++ show args
 writeLPVMCall "cast" _ args pos = do
-    args' <- partitionArgs args
+    args' <- partitionArgs "lpvm cast instruction" args
     case args' of
         ([],[]) -> return ()
         ([val],[var]) -> do
@@ -617,7 +631,7 @@ writeLPVMCall "cast" _ args pos = do
             shouldnt $ "lpvm cast with arguments " ++ show ins ++ " and outputs "
                 ++ show outs
 writeLPVMCall "load" _ args pos = do
-    args' <- partitionArgs args
+    args' <- partitionArgs "lpvm load instruction" args
     case args' of
         ([],[]) -> return ()
         ([global],outs@[outVar]) -> do
@@ -628,7 +642,8 @@ writeLPVMCall "load" _ args pos = do
             shouldnt $ "lpvm load with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
 writeLPVMCall "store" _ args pos = do
-    args' <- partitionArgs args
+    -- XXX We could actually support take-reference for this op
+    args' <- partitionArgs "lpvm store instruction" args
     case args' of
         ([],[]) -> return ()
         (args@[val,global],[]) -> do
@@ -638,7 +653,7 @@ writeLPVMCall "store" _ args pos = do
             shouldnt $ "lpvm store with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
 writeLPVMCall "access" _ args pos = do
-    args' <- partitionArgs args
+    args' <- partitionArgs "lpvm access instruction" args
     case args' of
         ([struct, ArgInt 0 _, _], outs@[member]) -> do
             lltype <- llvmTypeRep <$> argTypeRep member
@@ -656,7 +671,8 @@ writeLPVMCall "access" _ args pos = do
             shouldnt $ "lpvm access with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
 writeLPVMCall "mutate" _ args pos = do
-    args' <- partitionArgs args
+    -- XXX Must support take-reference for this op
+    args' <- partitionArgs "lpvm mutate instruction" args
     case args' of
         ([struct, offset, destructive, size, startOffset, member],
          outs@[struct2]) -> do
@@ -681,16 +697,14 @@ writeLPVMCall "mutate" _ args pos = do
         (ins,outs) ->
             shouldnt $ "lpvm mutate with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
-writeLPVMCall op flags args pos = do
-    (ins,outs) <- partitionArgs args
-    argList <- llvmArgumentList ins
-    llvmStoreResult outs $ "LPVM " ++ op ++ argList
+writeLPVMCall op flags args pos =
+    shouldnt $ "unknown lpvm operation:  " ++ op
 
 
 -- | Generate C function call
 writeCCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeCCall cfn flags args pos = do
-    (ins,outs) <- partitionArgs args
+    (ins,outs) <- partitionArgs ("call to C function " ++ cfn) args
     argList <- llvmArgumentList ins
     outTy <- llvmReturnType $ List.map argType outs
     llvmStoreResult outs $ "call " ++ outTy ++ " " ++ llvmGlobalName cfn
@@ -701,7 +715,7 @@ writeCCall cfn flags args pos = do
 marshalledCCall :: ProcName -> [Ident] -> [PrimArg] -> [String] -> OptPos
                 -> LLVM ()
 marshalledCCall cfn flags args ctypes pos = do
-    (ins,outs) <- partitionArgTuples $ zip args ctypes
+    (ins,outs) <- partitionArgTuples cfn $ zip args ctypes
     argList <- llvmStringArgList <$> mapM (uncurry marshallArgument) ins
     let instr = llvmGlobalName cfn ++ argList
     case outs of
@@ -798,12 +812,19 @@ llvmReturnType specs = llvmRepReturnType <$> mapM typeRep specs
 
 
 -- | The LLVM parameter declaration for the specified Wybe input parameter as a
--- pair of LLVM type and variable name
+-- pair of LLVM type and variable name.
 llvmParameter :: PrimParam -> LLVM String
-llvmParameter PrimParam{primParamName=name, primParamType=ty} = do
+llvmParameter PrimParam{primParamName=name, primParamType=ty,
+                        primParamFlow=FlowIn} = do
     let llname = llvmLocalName name
     lltype <- llvmTypeRep <$> typeRep ty
     return $ lltype ++ " " ++ llname
+llvmParameter PrimParam{primParamName=name,
+                        primParamFlow=FlowOutByReference} = do
+    let llname = llvmLocalName name
+    return $ "ptr " ++ llname
+llvmParameter param =
+    shouldnt $ "parameter " ++ show param ++ " should be an input"
 
 
 -- | The LLVM translation of the specified call instruction argument list
@@ -1018,37 +1039,65 @@ duplicateStruct struct startOffset size = do
             return readTagged
 
 
--- | Split parameter list into separate list of inputs and outputs, ignoring
---   any phantom parameters
-partitionParams :: [PrimParam] -> LLVM ([PrimParam],[PrimParam])
+-- | Split parameter list into separate list of input, output, out-by-reference,
+-- and take-reference arguments, ignoring any phantom parameters.
+partitionParams :: [PrimParam]
+                -> LLVM ([PrimParam],[PrimParam],[PrimParam],[PrimParam])
 partitionParams params = do
     realParams <- lift $ filterM (notM . typeIsPhantom . primParamType) params
     return $ partitionByFlow primParamFlow realParams
 
 
--- | Split argument list into separate list of inputs and outputs, eliminating
--- phantom arguments.
-partitionArgs :: [PrimArg] -> LLVM ([PrimArg],[PrimArg])
-partitionArgs args = do
+-- | Split argument list into separate list of inputs and outputs, after
+-- eliminating phantom arguments.  Report an error if there are any
+-- out-by-reference or take-reference arguments.
+partitionArgs :: String -> [PrimArg] -> LLVM ([PrimArg],[PrimArg])
+partitionArgs op args = do
     realArgs <- lift $ filterM (notM . argIsPhantom) args
-    return $ partitionByFlow argFlowDirection realArgs
+    let (ins,outs,oRefs,iRefs) =
+            partitionByFlow argFlowDirection realArgs
+    unless (List.null oRefs)
+     $ shouldnt $ "out-by-reference argument of " ++ op ++ " instruction"
+    unless (List.null iRefs)
+     $ shouldnt $ "take-reference argument of " ++ op ++ " instruction"
+    return (ins,outs)
 
 
 -- | Split list of pairs of argument and something else into separate lists of
--- inputs and outputs, after eliminating phantom arguments.
-partitionArgTuples :: [(PrimArg,a)] -> LLVM ([(PrimArg,a)],[(PrimArg,a)])
-partitionArgTuples args = do
+-- input, output, out-by-reference, and take-reference arguments, after
+-- eliminating phantom arguments.
+partitionArgTuples :: String -> [(PrimArg,a)]
+                   -> LLVM ([(PrimArg,a)],[(PrimArg,a)])
+partitionArgTuples cfn args = do
     realArgs <- lift $ filterM (notM . argIsPhantom . fst) args
-    return $ partitionByFlow (argFlowDirection . fst) realArgs
+    let (ins,outs,oRefs,iRefs) =
+            partitionByFlow (argFlowDirection . fst) realArgs
+    unless (List.null oRefs)
+     $ nyi $ "out-by-reference argument in call to C function " ++ cfn
+    unless (List.null iRefs)
+     $ nyi $ "take-reference argument in call to C function " ++ cfn
+    return (ins,outs)
 
 
--- | Split the provided list into inputs and outputs given a function to
--- determine the flow direction of each element.
--- XXX This ignores FlowOutByReference and FlowTakeReference PrimFlows.
-partitionByFlow :: (a -> PrimFlow) -> [a] -> ([a],[a])
+-- | Split the provided list into input, output, out-by-reference, and
+-- take-reference arguments, given a function to determine the flow direction of
+-- each element.  Out-by-reference means the flow is FlowOutByReference, which
+-- denotes an argument that is notionally an output, but actually a reference
+-- input that points to the location to write the output.  Take-reference
+-- denotes a notional input argument that in actually produces the reference to
+-- pass as an out-by-reference argument.  The key benefit of these flows comes
+-- when the call with the out-by-reference argument precedes the one with the
+-- take-reference argument (ie, the former notionally produces the value to use
+-- in the latter):  if no other dependency forces this order of execution,
+-- making these out-by-reference and take-reference allows us to swap their
+-- order, potentially allowing last call optimisation.  The LastCallAnalysis
+-- module contains the analysis and transformation introducing these flows.
+partitionByFlow :: (a -> PrimFlow) -> [a] -> ([a],[a],[a],[a])
 partitionByFlow fn lst =
     (List.filter ((==FlowIn)  . fn) lst,
-     List.filter ((==FlowOut) . fn) lst)
+     List.filter ((==FlowOut) . fn) lst,
+     List.filter ((==FlowOutByReference) . fn) lst,
+     List.filter ((==FlowTakeReference) . fn) lst)
 
 
 ----------------------------------------------------------------------------
