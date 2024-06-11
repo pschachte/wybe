@@ -23,7 +23,6 @@ import qualified Data.Map                        as Map
 import           Data.Map                        (Map)
 import           Data.List                       as List
 import           Data.Maybe
--- import           Control.Exception               (handle)
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
 import           Control.Monad
@@ -33,10 +32,9 @@ import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
-import AST (Ident, TypeRepresentation)
-import Distribution.Compat.CharParsing (CharParsing(char))
+import AST (Ident, TypeRepresentation, PrimVarName (PrimVarName), showProcName)
+-- import Distribution.Compat.CharParsing (CharParsing(char))
 import Config (wordSize)
-import Data.Bool (Bool)
 
 ----------------------------------------------------------------------------
 -- Instruction maps
@@ -198,6 +196,16 @@ makeTemp = do
     return $ PrimVarName (mkTempName ctr) 0
 
 
+-- |Return a pair of PrimArgs to write and read, respectively, a fresh temp
+-- variable of the specified type.
+freshTempArgs :: TypeSpec -> LLVM (PrimVarName,PrimArg, PrimArg)
+freshTempArgs ty = do
+    tmp <- makeTemp
+    let writeArg = ArgVar tmp ty FlowOut Ordinary False
+    let readArg = ArgVar tmp ty FlowIn Ordinary True
+    return (tmp,writeArg,readArg)
+
+
 -- | Set the set of variables that need to be renamed to convert to SSA.
 -- LPVM is a (dynamic) single assignment language, but LLVM demands static
 -- single assignment.  We generate LPVM that is in SSA form, except for output
@@ -337,7 +345,7 @@ writeAssemblyConstants :: LLVM ()
 writeAssemblyConstants = do
     strings <- gets $ Set.toList . allStrings
     zipWithM_ declareString strings [0..]
-
+    llvmBlankLine
 
 -- | Write out a declaration for a string and record its name.
 declareString :: String -> Int -> LLVM ()
@@ -351,7 +359,7 @@ declareString str n = do
         , (CPointer, Pointer, llvmGlobalName textName)]
         Nothing
     declareStringConstant textName str Nothing
-    llvmPutStrLn ""
+    llvmBlankLine
 
 
 ----------------------------------------------------------------------------
@@ -390,7 +398,9 @@ defGlobalResource res = do
 -- other modules and used by this one.
 writeAssemblyExterns :: LLVM ()
 writeAssemblyExterns = do
-    externs <- gets $ Set.toList . allExterns
+    copyFn <- llvmMemcpyFn
+    let spec = (copyFn, Representation <$> [CPointer,CPointer,Bits wordSize,Bits 1], [])
+    externs <- (spec:) . Set.toList <$> gets allExterns
     mapM_ declareExtern externs
 
 
@@ -432,6 +442,7 @@ writeAssemblyProc mod def procNum =
             llParams <- mapM llvmParameter ins
             modify $ \s -> s {tmpCounter = procTmpCount def}
             llvmBlankLine
+            logLLVM $ "Generating LLVM for proc " ++ show pspec
             llvmPutStrLn $
                 "define external fastcc " ++ returnType ++ " "
                     ++ name ++ "(" ++ intercalate ", " llParams ++ ")"
@@ -492,19 +503,24 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
 
 -- | Generate and write out the LLVM code for a single LPVM prim
 writeAssemblyPrim :: Prim -> OptPos -> LLVM ()
-writeAssemblyPrim (PrimCall _ proc _ args _) pos = do
+writeAssemblyPrim instr@(PrimCall _ proc _ args _) pos = do
+    logLLVM $ "Translating Wybe call " ++ show instr
     writeWybeCall proc args pos
-writeAssemblyPrim (PrimHigher _ fn _ args) pos = do
+writeAssemblyPrim instr@(PrimHigher _ fn _ args) pos = do
+    logLLVM $ "Translating HO call " ++ show instr
     llvmPutStrLnIndented $ "call " ++ show fn ++ show args
-writeAssemblyPrim (PrimForeign "llvm" op flags args) pos = do
+writeAssemblyPrim instr@(PrimForeign "llvm" op flags args) pos = do
+    logLLVM $ "Translating LLVM instruction " ++ show instr
     writeLLVMCall op flags args pos
-writeAssemblyPrim (PrimForeign "lpvm" op flags args) pos = do
+writeAssemblyPrim instr@(PrimForeign "lpvm" op flags args) pos = do
+    logLLVM $ "Translating LPVM instruction " ++ show instr
     writeLPVMCall op flags args pos
-writeAssemblyPrim (PrimForeign "c" cfn flags args) pos = do
+writeAssemblyPrim instr@(PrimForeign "c" cfn flags args) pos = do
+    logLLVM $ "Translating C call " ++ show instr
     writeCCall cfn flags args pos
-writeAssemblyPrim (PrimForeign lang op flags args) pos = do
+writeAssemblyPrim instr@(PrimForeign lang op flags args) pos = do
     shouldnt $ "unknown foreign language " ++ lang
-                ++ " in instruction at " ++ show pos
+                ++ " in instruction " ++ show instr
 
 
 -- | Generate and write out an LLVM if-then-else (switch on an i1 value)
@@ -621,11 +637,50 @@ writeLPVMCall "store" _ args pos = do
         (ins, outs) ->
             shouldnt $ "lpvm store with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
--- writeLPVMCall "access" _ args pos = do
---     args' <- partitionArgs args
---     case args' of
-
-
+writeLPVMCall "access" _ args pos = do
+    args' <- partitionArgs args
+    case args' of
+        ([struct, ArgInt 0 _, _], outs@[member]) -> do
+            lltype <- llvmTypeRep <$> argTypeRep member
+            structStr <- llvmArgument struct
+            let arg = typeConversion Pointer structStr CPointer True
+            llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
+        ([struct, offset, _, _], outs@[member]) -> do
+            (_,writeArg,readArg) <- freshTempArgs $ argType struct
+            writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
+            lltype <- llvmTypeRep <$> argTypeRep member
+            structStr <- llvmArgument readArg
+            let arg = typeConversion Pointer structStr CPointer True
+            llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
+        (ins,outs) ->
+            shouldnt $ "lpvm access with inputs " ++ show ins ++ " and outputs "
+                ++ show outs
+writeLPVMCall "mutate" _ args pos = do
+    args' <- partitionArgs args
+    case args' of
+        ([struct, offset, destructive, size, startOffset, member],
+         outs@[struct2]) -> do
+            struct' <- case destructive of
+                ArgInt 1 _ -> return struct
+                ArgInt 0 _ -> duplicateStruct struct startOffset size
+                _ -> -- XXX add code to test `destructive` and duplicate if false
+                    shouldnt "lpvm mutate instr with non-const destructive flag"
+            (ptrVar,_,readPtr) <- freshTempArgs $ argType struct
+            ptrArg <- case offset of
+                ArgInt 0 _ -> return struct'
+                _ -> do
+                    (_,writeArg,readArg) <- freshTempArgs $ argType struct
+                    writeLLVMCall "add" [] [struct',offset,writeArg] Nothing
+                    return readArg
+            ptr <- llvmArgument ptrArg
+            typeConvert Pointer ptr CPointer ptrVar
+            llMember <- llvmArgument member
+            structStr <- llvmArgument struct'
+            let dest = typeConversion Pointer structStr CPointer True
+            llvmPutStrLnIndented $ "store " ++ llMember ++ ", " ++ dest
+        (ins,outs) ->
+            shouldnt $ "lpvm mutate with inputs " ++ show ins ++ " and outputs "
+                ++ show outs
 writeLPVMCall op flags args pos = do
     (ins,outs) <- partitionArgs args
     argList <- llvmArgumentList ins
@@ -799,10 +854,9 @@ marshallCallResult outArg@ArgVar{argVarName=varName} cType instr = do
         tmp <- makeTemp
         -- XXX should call llvmStoreResult, but we don't have a wybe type for
         -- the C function output
-        llVar <- varToWrite tmp
-        let llVal = llvmLocalName tmp
+        let llVar = llvmLocalName tmp
         llvmPutStrLnIndented $ llVar ++ " = " ++ instr'
-        typeConvert inTypeRep llVal outTypeRep varName
+        typeConvert inTypeRep llVar outTypeRep varName
 marshallCallResult outArg inTypeRep instr =
     shouldnt $ "Can't marshall result into non-variable " ++ show outArg
 
@@ -937,6 +991,33 @@ typeConvertOp repIn toTy =
                  ++ " to " ++ show toTy
 
 
+-- | Generate code to copy a structure, returning a fresh temp variable holding
+-- the new copy.
+duplicateStruct :: PrimArg -> PrimArg -> PrimArg -> LLVM PrimArg
+duplicateStruct struct startOffset size = do
+    start <- case startOffset of
+        ArgInt 0 _ -> return struct
+        _ -> do
+            (_,writeStart,readStart) <- freshTempArgs $ Representation Pointer
+            writeLLVMCall "sub" [] [struct,startOffset,writeStart] Nothing
+            return readStart
+    llvmStart <- llvmArgument start
+    (startCptrVar,_,readStartCPtr) <- freshTempArgs $ Representation CPointer
+    typeConvert Pointer llvmStart CPointer startCptrVar
+    (cptrVar,writeCPtr,readCPtr) <- freshTempArgs $ Representation CPointer
+    marshalledCCall "wybe_malloc" [] [size,writeCPtr] ["int","pointer"] Nothing
+    copyfn <- llvmMemcpyFn
+    writeCCall copyfn [] [readCPtr,readStartCPtr,size] Nothing
+    (ptrVar,writePtr,readPtr) <- freshTempArgs $ Representation Pointer
+    typeConvert CPointer (llvmLocalName cptrVar) Pointer ptrVar
+    case startOffset of
+        ArgInt 0 _ -> return readPtr
+        _ -> do
+            (_,writeTagged,readTagged) <- freshTempArgs $ Representation Pointer
+            writeLLVMCall "add" [] [readPtr,startOffset,writeTagged] Nothing
+            return readTagged
+
+
 -- | Split parameter list into separate list of inputs and outputs, ignoring
 --   any phantom parameters
 partitionParams :: [PrimParam] -> LLVM ([PrimParam],[PrimParam])
@@ -1023,6 +1104,15 @@ showLLVMChar char
             hexChar i = if i < 10 then toEnum $ fromEnum '0' + i
                         else toEnum $ fromEnum 'A' + i - 10
         in ['\\', hexChar (ascii `div` 16), hexChar (ascii `mod` 16)]
+
+
+-- | The name of the LLVM memcpy intrinsic that applies to 2 CPointers and one
+-- Wybe int type argument.
+llvmMemcpyFn :: LLVM String
+llvmMemcpyFn =
+    llvmForeignName . ("llvm.memcpy.p0.p0." ++) . llvmTypeRep
+        <$> typeRep intType
+
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --
