@@ -33,8 +33,46 @@ import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
 import AST (Ident, TypeRepresentation, PrimVarName (PrimVarName), showProcName)
--- import Distribution.Compat.CharParsing (CharParsing(char))
 import Config (wordSize)
+import qualified Parser
+
+
+-- BEGIN MAJOR DOC
+-- 
+-- # Generating LLVM code
+-- 
+-- We generate a `.ll` text file directly for each Wybe `.wybe` file, compiling
+-- this as necessary to build `.o`, `.bc` or executable files.  For each
+-- generated `.ll` file, we produce the following, in order:
+-- 
+--   Prologue 
+--   :  contains an introductory comment and any configuration info
+--     needed for LLVM.
+--
+--   Constants  
+--   :  LLVM definitions of the manifest constants used in this module; mostly
+--      used for strings.
+--
+--   Global variables
+--   : LLVM declarations of the global variables used to implement the resources
+--     defined in this module.
+--
+--   Externs
+--   : Extern declarations for all symbols used, but not defined, in this
+--     module; this includes imported Wybe procedures, C functions,  and global
+--     variables.
+--
+--   Definitions
+--   : Definitions of the procs of this module.
+--
+--   Exports
+--   : Everything needed by the Wybe compiler to compile users of this module;
+--     currently this is represented as a serialisation of the Module data
+--     structure.
+--
+-- END MAJOR DOC
+
+
 
 ----------------------------------------------------------------------------
 -- Instruction maps
@@ -102,22 +140,8 @@ llvmMapUnop =
            ]
 
 
-----------------------------------------------------------------------------
--- LLVM Assembler Generation
---
--- We generate an LLVM assembler (.ll) file as a translation of the generated
--- LPVM code for a module.  The parts of this file are:
---
---  the prologue     : boilerplate comments and declarations
---  constants        : manifest constants used in this module
---  global variables : implementation of the resources of this module
---  externs          : declarations of functions and globals defined elsewhere
---  definitions      : definitions of the procs of this module
---  exports          : everything needed to compile users of this module
---
-----------------------------------------------------------------------------
 
--- At least for now, we represent LLVM types as strings
+-- At least for now, we represent LLVM info as strings
 type LLVMType = String              -- ^ An LLVM type name, such as i8
 type LLVMName = String              -- ^ An LLVM global name, such as a
                                     --   function, variable or constant name;
@@ -143,15 +167,18 @@ data LLVMState = LLVMState {
         allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
         toRename :: Set PrimVarName, -- ^ Variables that need to get fresh names
         newNames :: Map PrimVarName PrimVarName,
-                                    -- | New names for some variables
-        stringConstants :: Map String Ident
-                                    -- | local name given to string constants
+                                    -- ^ New names for some variables
+        stringConstants :: Map String Ident,
+                                    -- ^ local name given to string constants
+        deferredCall :: Maybe Prim, -- ^ instr deferred for out-by-reference arg
+        deferredVars :: Map PrimVarName LLVMName
+                                    -- ^ llvm name for take-reference vars
 }
 
 
 initLLVMState :: Handle -> LLVMState
 initLLVMState h = LLVMState h 0 0 Set.empty Set.empty Set.empty
-                     Map.empty Map.empty
+                     Map.empty Map.empty Nothing Map.empty
 
 
 type LLVM = StateT LLVMState Compiler
@@ -232,6 +259,10 @@ varToWrite v = do
 varToRead :: PrimVarName -> LLVM LLVMLocal
 varToRead v = llvmLocalName . fromMaybe v . Map.lookup v <$> gets newNames
 
+
+----------------------------------------------------------------------------
+-- Generating LLVM for a module
+----------------------------------------------------------------------------
 
 -- | Generate LLVM code for the specified module, based on its LPVM code, and
 -- write it to the specified file handle.
@@ -575,7 +606,11 @@ writeAssemblySwitch outs v rep cases dflt = do
 writeWybeCall :: ProcSpec -> [PrimArg] -> OptPos -> LLVM ()
 writeWybeCall wybeProc args pos = do
     -- XXX Must support out-by-reference
-    (ins,outs) <- partitionArgs ("call to Wybe proc " ++ show wybeProc) args
+    (ins,outs,oRefs,iRefs) <-
+        partitionArgsWithRefs args
+    -- XXX if oRefs is non-empty, then we need to defer this call
+    unless (List.null iRefs)
+     $ shouldnt $ "Wybe proc " ++ show wybeProc ++ " with take-reference param"
     argList <- llvmArgumentList ins
     outTy <- llvmReturnType $ List.map argType outs
     llvmStoreResult outs $
@@ -671,11 +706,13 @@ writeLPVMCall "access" _ args pos = do
             shouldnt $ "lpvm access with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
 writeLPVMCall "mutate" _ args pos = do
-    -- XXX Must support take-reference for this op
-    args' <- partitionArgs "lpvm mutate instruction" args
+    args' <- partitionArgsWithRefs args
     case args' of
         ([struct, offset, destructive, size, startOffset, member],
-         outs@[struct2]) -> do
+         outs@[struct2],oRefs,iRefs) -> do
+            unless (List.null oRefs)
+             $ shouldnt "LPVM mutate instruction with out-by-reference arg"
+            -- XXX Must support take-reference for this op
             struct' <- case destructive of
                 ArgInt 1 _ -> return struct
                 ArgInt 0 _ -> duplicateStruct struct startOffset size
@@ -694,7 +731,7 @@ writeLPVMCall "mutate" _ args pos = do
             structStr <- llvmArgument struct'
             let dest = typeConversion Pointer structStr CPointer True
             llvmPutStrLnIndented $ "store " ++ llMember ++ ", " ++ dest
-        (ins,outs) ->
+        (ins,outs,oRefs,iRefs) ->
             shouldnt $ "lpvm mutate with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
 writeLPVMCall op flags args pos =

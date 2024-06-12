@@ -25,6 +25,45 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
 
+
+-- BEGIN MAJOR DOC
+-- 
+-- # Last Call Optimisation
+-- 
+-- The compiler relies on the LLVM compiler to perform last call optimisation,
+-- turning the last call in a procedure body into a jump, if no other
+-- instructions follow the last call.  This module tries to increase the number
+-- of procedures where this optimisation applies by moving code that follows the
+-- last call before it, whenever all the inputs to those instructions are
+-- available before the last call.
+-- 
+-- One particular trick employed to make this possible is
+-- last-call-module-construction optimisation.  The idea here is to invert the
+-- direction of data flow, turing an output into an input, by passing in the
+-- address to which to write the output.  When the instruction following the
+-- last call in a body simply writes an output of that call into one memory
+-- location, without using it in any other way, and when the called procedure is
+-- defined in the module currently being compiled (so we can transform it), we
+-- can change that output argument into a pointer input, and modify the
+-- procedure definition to write the output value to memory through that
+-- pointer.  This is done by changing that parameter from FlowOut to
+-- FlowOutByReference, and similarly changing the corresponding argument in all
+-- calls to that procedure.  Likewise, we change the instruction intended to
+-- write the procedure output to memory from FlowIn to FlowTakeReference.
+-- 
+-- Note that this transformation leaves the call that notionally produces the
+-- output before the instruction that notionally writes the value to memory,
+-- despite the fact that now the latter actually takes the address to be written
+-- to, and the former actually passes that address into a procedure call.
+-- Therefore, when the LLVM code is actually generated, the procedure call must
+-- be deferred until after the address is taken.  This is performed by the LLVM
+-- module.
+--
+-- END MAJOR DOC
+
+
+
+
 -- | Perform last call analysis on a single module.
 -- Internally, we perform analysis bottom-up on proc SCCs.
 lastCallAnalyseMod :: ModSpec -> Compiler ()
