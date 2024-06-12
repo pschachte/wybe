@@ -315,30 +315,24 @@ We generate a `.ll` text file directly for each Wybe `.wybe` file, compiling
 this as necessary to build `.o`, `.bc` or executable files.  For each
 generated `.ll` file, we produce the following, in order:
 
- Prologue 
- :  contains an introductory comment and any configuration info
+* *Prologue* -- contains an introductory comment and any configuration info
    needed for LLVM.
 
- Constants  
- :  LLVM definitions of the manifest constants used in this module; mostly
-    used for strings.
+* *Constants* -- LLVM definitions of the manifest constants used in this
+    module; mostly used for strings.
 
- Global variables
- : LLVM declarations of the global variables used to implement the resources
-   defined in this module.
+* *Global variables* --  LLVM declarations of the global variables used to
+   implement the resources defined in this module.
 
- Externs
- : Extern declarations for all symbols used, but not defined, in this
-   module; this includes imported Wybe procedures, C functions,  and global
-   variables.
+* *Externs* -- Extern declarations for all symbols used, but not defined, in
+ this module; this includes imported Wybe procedures, C functions,  and
+   global variables.
 
- Definitions
- : Definitions of the procs of this module.
+* *Definitions* -- Definitions of the procs of this module.
 
- Exports
- : Everything needed by the Wybe compiler to compile users of this module;
-   currently this is represented as a serialisation of the Module data
-   structure.
+* *Exports* -- Everything needed by the Wybe compiler to compile users of
+ this module; currently this is represented as a serialisation of the Module
+ data structure, placed in the LLVM section.
 
 
 ## LastCallAnalysis --  Transform proc bodies and their output arguments so that
