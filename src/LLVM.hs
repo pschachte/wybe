@@ -366,35 +366,6 @@ writeAssemblyProc mod def procNum =
                         ++ showProcName (procName def)
 
 
--- | Generate and write out the LLVM return statement.
-writeAssemblyReturn :: [PrimParam] -> LLVM ()
-writeAssemblyReturn [] = llvmPutStrLnIndented "ret void"
-writeAssemblyReturn [PrimParam{primParamName=v, primParamType=ty}] = do
-    llty <- llvmTypeRep <$> typeRep ty
-    llvar <- varToRead v
-    llvmPutStrLnIndented $ "ret " ++ llty ++ " " ++ llvar
-writeAssemblyReturn params = do
-    retType <- llvmReturnType $ List.map primParamType params
-    tuple <- buildTuple retType "undef" 0 params
-    llvmPutStrLnIndented $ "ret " ++ retType ++ " " ++ tuple
-
-
--- | Generate code to build a tuple to return for multi-output functions.
--- Returns the last variable generated.
--- Generated code looks like %"temp#25" = insertvalue {i64, i1} undef, i64 %8, 0
-buildTuple :: LLVMType -> LLVMLocal -> Int -> [PrimParam] -> LLVM LLVMLocal
-buildTuple _ tuple _ [] = return tuple
-buildTuple outType tuple argNum
-           (PrimParam{primParamName=v, primParamType=ty}:params) = do
-    llty <- llvmTypeRep <$> typeRep ty
-    llvar <- varToRead v
-    nextVar <- llvmLocalName <$> makeTemp
-    llvmPutStrLnIndented $ nextVar ++ " = insertvalue " ++ outType ++ " "
-                            ++ tuple ++ ", " ++ llty ++ " " ++ llvar
-                            ++ ", " ++ show argNum
-
-    buildTuple outType nextVar (argNum+1) params
-
 -- | Generate and write out the LLVM code for an LPVM body
 writeAssemblyBody :: [PrimParam] -> ProcBody -> LLVM ()
 writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
@@ -630,6 +601,36 @@ marshalledCCall cfn flags args ctypes pos = do
         [] -> llvmPutStrLnIndented $ "call void " ++ instr
         [(out,cType)] -> marshallCallResult out cType instr
         _ -> shouldnt "C function call with multiple outputs"
+
+
+-- | Generate and write out the LLVM return statement.
+writeAssemblyReturn :: [PrimParam] -> LLVM ()
+writeAssemblyReturn [] = llvmPutStrLnIndented "ret void"
+writeAssemblyReturn [PrimParam{primParamName=v, primParamType=ty}] = do
+    llty <- llvmTypeRep <$> typeRep ty
+    llvar <- varToRead v
+    llvmPutStrLnIndented $ "ret " ++ llty ++ " " ++ llvar
+writeAssemblyReturn params = do
+    retType <- llvmReturnType $ List.map primParamType params
+    tuple <- buildTuple retType "undef" 0 params
+    llvmPutStrLnIndented $ "ret " ++ retType ++ " " ++ tuple
+
+
+-- | Generate code to build a tuple to return for multi-output functions.
+-- Returns the last variable generated.
+-- Generated code looks like %"temp#25" = insertvalue {i64, i1} undef, i64 %8, 0
+buildTuple :: LLVMType -> LLVMLocal -> Int -> [PrimParam] -> LLVM LLVMLocal
+buildTuple _ tuple _ [] = return tuple
+buildTuple outType tuple argNum
+           (PrimParam{primParamName=v, primParamType=ty}:params) = do
+    llty <- llvmTypeRep <$> typeRep ty
+    llvar <- varToRead v
+    nextVar <- llvmLocalName <$> makeTemp
+    llvmPutStrLnIndented $ nextVar ++ " = insertvalue " ++ outType ++ " "
+                            ++ tuple ++ ", " ++ llty ++ " " ++ llvar
+                            ++ ", " ++ show argNum
+
+    buildTuple outType nextVar (argNum+1) params
 
 
 ----------------------------------------------------------------------------
@@ -1180,7 +1181,7 @@ showLLVMString str zeroTerminator =
     in "[ " ++ show len ++ " x i8 ] c\""
         ++ concatMap showLLVMChar str ++ concatMap showLLVMChar suffix ++ "\""
 
--- | Format a single character as a character i an LLVM string.
+-- | Format a single character as a character in an LLVM string.
 showLLVMChar :: Char -> String
 showLLVMChar char
     | char == '\\'               = "\\"
