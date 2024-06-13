@@ -32,9 +32,6 @@ import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
-import AST (Ident, TypeRepresentation, PrimVarName (PrimVarName), showProcName)
-import Config (wordSize)
-import qualified Parser
 
 
 -- BEGIN MAJOR DOC
@@ -132,126 +129,6 @@ llvmMapUnop =
             ("fptoui", (FloatFamily, IntFamily)),
             ("fptosi", (FloatFamily, IntFamily))
            ]
-
-
-
--- At least for now, we represent LLVM info as strings
-type LLVMType = String              -- ^ An LLVM type name, such as i8
-type LLVMName = String              -- ^ An LLVM global name, such as a
-                                    --   function, variable or constant name;
-                                    --   must begin with @
-type LLVMLocal = String             -- ^ An LLVM local variable name; must begin
-                                    --   with %
--- | Information we collect about external functions we call in a module, so we
--- can declare them.
-type ExternSpec = (LLVMName, [TypeSpec], [TypeSpec])
-
--- | Information needed to specify one constant value, giving the representation
--- to be stored, the representation used for the value, and the value itself.
--- XXX should change the last element to be a PrimArg after we introduce a
--- CString manifest constant argument constructor.
-type ConstSpec = (TypeRepresentation,TypeRepresentation,String)
-
-
-data LLVMState = LLVMState {
-        fileHandle :: Handle,       -- ^ The file handle we're writing to
-        tmpCounter :: Int,          -- ^ Next temp var to make for current proc
-        labelCounter :: Int,        -- ^ Next label number to use
-        allStrings :: Set String,   -- ^ String constants appearing in module
-        allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
-        toRename :: Set PrimVarName, -- ^ Variables that need to get fresh names
-        newNames :: Map PrimVarName PrimVarName,
-                                    -- ^ New names for some variables
-        stringConstants :: Map String Ident,
-                                    -- ^ local name given to string constants
-        deferredCall :: Maybe Prim, -- ^ instr deferred for out-by-reference arg
-        deferredVars :: Map PrimVarName LLVMName
-                                    -- ^ llvm name for take-reference vars
-}
-
-
-initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState h 0 0 Set.empty Set.empty Set.empty
-                     Map.empty Map.empty Nothing Map.empty
-
-
-type LLVM = StateT LLVMState Compiler
-
-
--- | Apply some function to (access some member of) the current module from
--- within the LLVM monad.
-llvmGetModule :: (Module -> a) -> LLVM a
-llvmGetModule fn = lift $ getModule fn
-
-
--- | Write a string followed by a newline to the current LLVM output file handle
-llvmPutStrLn :: String -> LLVM ()
-llvmPutStrLn str = do
-    h <- gets fileHandle
-    liftIO $ hPutStrLn h str
-
-
--- | Write a blank line to the current LLVM output file handle
-llvmBlankLine :: LLVM ()
-llvmBlankLine = llvmPutStrLn ""
-
-
--- | Write an indented string to the current LLVM output file handle.
-llvmPutStrLnIndented :: String -> LLVM ()
-llvmPutStrLnIndented str = llvmPutStrLn $ "  " ++ str
-
-
--- | Return labels made unique by adding the next label suffix
-freshLables :: [String] -> LLVM [String]
-freshLables bases = do
-    nxt <- gets labelCounter
-    modify $ \s -> s {labelCounter = nxt+1}
-    return $ List.map (++show nxt) bases
-
-
--- |Return a fresh prim variable name.
-makeTemp :: LLVM PrimVarName
-makeTemp = do
-    ctr <- gets tmpCounter
-    modify (\s -> s { tmpCounter = ctr + 1 })
-    return $ PrimVarName (mkTempName ctr) 0
-
-
--- |Return a pair of PrimArgs to write and read, respectively, a fresh temp
--- variable of the specified type.
-freshTempArgs :: TypeSpec -> LLVM (PrimVarName,PrimArg, PrimArg)
-freshTempArgs ty = do
-    tmp <- makeTemp
-    let writeArg = ArgVar tmp ty FlowOut Ordinary False
-    let readArg = ArgVar tmp ty FlowIn Ordinary True
-    return (tmp,writeArg,readArg)
-
-
--- | Set the set of variables that need to be renamed to convert to SSA.
--- LPVM is a (dynamic) single assignment language, but LLVM demands static
--- single assignment.  We generate LPVM that is in SSA form, except for output
--- parameters, so here we rename all output parameters as they are assigned,
--- and then use the new names when we return the outputs.
-setRenaming :: Set PrimVarName -> LLVM ()
-setRenaming vars = modify $ \s -> s {toRename = vars}
-
-
--- | The LLVM name for a variable we are about to assign.  If this is one of the
--- output parameters, rename it, otherwise leave it alone, and in either case,
--- transform it to an LLVM local variable name.
-varToWrite :: PrimVarName -> LLVM LLVMLocal
-varToWrite v = do
-    mustRename <- Set.member v <$> gets toRename
-    if mustRename then do
-        tmp <- makeTemp
-        modify $ \s -> s { newNames = Map.insert v tmp $ newNames s }
-        return $ llvmLocalName tmp
-    else return $ llvmLocalName v
-
-
--- | The LLVM name for a variable we are about to read.
-varToRead :: PrimVarName -> LLVM LLVMLocal
-varToRead v = llvmLocalName . fromMaybe v . Map.lookup v <$> gets newNames
 
 
 ----------------------------------------------------------------------------
@@ -1134,6 +1011,131 @@ partitionByFlow fn lst =
      List.filter ((==FlowOut) . fn) lst,
      List.filter ((==FlowOutByReference) . fn) lst,
      List.filter ((==FlowTakeReference) . fn) lst)
+
+
+----------------------------------------------------------------------------
+-- The LLVM Monad and LLVM code generation and manipulation               --
+----------------------------------------------------------------------------
+
+
+-- At least for now, we represent LLVM info as strings
+type LLVMType = String              -- ^ An LLVM type name, such as i8
+type LLVMName = String              -- ^ An LLVM global name, such as a
+                                    --   function, variable or constant name;
+                                    --   must begin with @
+type LLVMLocal = String             -- ^ An LLVM local variable name; must begin
+                                    --   with %
+-- | Information we collect about external functions we call in a module, so we
+-- can declare them.
+type ExternSpec = (LLVMName, [TypeSpec], [TypeSpec])
+
+-- | Information needed to specify one constant value, giving the representation
+-- to be stored, the representation used for the value, and the value itself.
+-- XXX should change the last element to be a PrimArg after we introduce a
+-- CString manifest constant argument constructor.
+type ConstSpec = (TypeRepresentation,TypeRepresentation,String)
+
+
+-- | The LLVM State monad
+data LLVMState = LLVMState {
+        fileHandle :: Handle,       -- ^ The file handle we're writing to
+        tmpCounter :: Int,          -- ^ Next temp var to make for current proc
+        labelCounter :: Int,        -- ^ Next label number to use
+        allStrings :: Set String,   -- ^ String constants appearing in module
+        allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
+        toRename :: Set PrimVarName, -- ^ Variables that need to get fresh names
+        newNames :: Map PrimVarName PrimVarName,
+                                    -- ^ New names for some variables
+        stringConstants :: Map String Ident,
+                                    -- ^ local name given to string constants
+        deferredCall :: Maybe Prim, -- ^ instr deferred for out-by-reference arg
+        deferredVars :: Map PrimVarName LLVMName
+                                    -- ^ llvm name for take-reference vars
+}
+
+
+initLLVMState :: Handle -> LLVMState
+initLLVMState h = LLVMState h 0 0 Set.empty Set.empty Set.empty
+                     Map.empty Map.empty Nothing Map.empty
+
+
+type LLVM = StateT LLVMState Compiler
+
+
+-- | Apply some function to (access some member of) the current module from
+-- within the LLVM monad.
+llvmGetModule :: (Module -> a) -> LLVM a
+llvmGetModule fn = lift $ getModule fn
+
+
+-- | Write a string followed by a newline to the current LLVM output file handle
+llvmPutStrLn :: String -> LLVM ()
+llvmPutStrLn str = do
+    h <- gets fileHandle
+    liftIO $ hPutStrLn h str
+
+
+-- | Write an indented string to the current LLVM output file handle.
+llvmPutStrLnIndented :: String -> LLVM ()
+llvmPutStrLnIndented str = llvmPutStrLn $ "  " ++ str
+
+
+-- | Write a blank line to the current LLVM output file handle
+llvmBlankLine :: LLVM ()
+llvmBlankLine = llvmPutStrLn ""
+
+
+-- | Return labels made unique by adding the next label suffix
+freshLables :: [String] -> LLVM [String]
+freshLables bases = do
+    nxt <- gets labelCounter
+    modify $ \s -> s {labelCounter = nxt+1}
+    return $ List.map (++show nxt) bases
+
+
+-- |Return a fresh prim variable name.
+makeTemp :: LLVM PrimVarName
+makeTemp = do
+    ctr <- gets tmpCounter
+    modify (\s -> s { tmpCounter = ctr + 1 })
+    return $ PrimVarName (mkTempName ctr) 0
+
+
+-- |Return a pair of PrimArgs to write and read, respectively, a fresh temp
+-- variable of the specified type.
+freshTempArgs :: TypeSpec -> LLVM (PrimVarName,PrimArg, PrimArg)
+freshTempArgs ty = do
+    tmp <- makeTemp
+    let writeArg = ArgVar tmp ty FlowOut Ordinary False
+    let readArg = ArgVar tmp ty FlowIn Ordinary True
+    return (tmp,writeArg,readArg)
+
+
+-- | Set the set of variables that need to be renamed to convert to SSA.
+-- LPVM is a (dynamic) single assignment language, but LLVM demands static
+-- single assignment.  We generate LPVM that is in SSA form, except for output
+-- parameters, so here we rename all output parameters as they are assigned,
+-- and then use the new names when we return the outputs.
+setRenaming :: Set PrimVarName -> LLVM ()
+setRenaming vars = modify $ \s -> s {toRename = vars}
+
+
+-- | The LLVM name for a variable we are about to assign.  If this is one of the
+-- output parameters, rename it, otherwise leave it alone, and in either case,
+-- transform it to an LLVM local variable name.
+varToWrite :: PrimVarName -> LLVM LLVMLocal
+varToWrite v = do
+    mustRename <- Set.member v <$> gets toRename
+    if mustRename then do
+        tmp <- makeTemp
+        modify $ \s -> s { newNames = Map.insert v tmp $ newNames s }
+        return $ llvmLocalName tmp
+    else return $ llvmLocalName v
+
+
+-- | The LLVM name for a variable we are about to read.
+varToRead :: PrimVarName -> LLVM LLVMLocal
+varToRead v = llvmLocalName . fromMaybe v . Map.lookup v <$> gets newNames
 
 
 ----------------------------------------------------------------------------
