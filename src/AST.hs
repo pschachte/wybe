@@ -3664,7 +3664,8 @@ varsInPrims dir =
     List.foldr (Set.union . (varsInPrim dir)) Set.empty
 
 varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
-varsInPrim dir prim      = let (args, globals) = primArgs prim in varsInPrimArgs dir args
+varsInPrim dir prim      = let (args, globals) = primArgs prim
+                           in varsInPrimArgs dir args
 
 varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
 varsInPrimArgs dir =
