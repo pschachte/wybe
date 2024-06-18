@@ -18,70 +18,62 @@ optimisation.  This part can be seen in more detail as several separate passes:
 # Wybe compiler source directory
 The source files in this directory and their purposes are:
 
-| File                         | Purpose                                                  |
-| ---------------------------- | -------------------------------------------------------- |
-| [AST.hs](#AST)               | Wybe Abstract Syntax Tree and LPVM representation |
-| [ASTShow.hs](#ASTShow)       | Show Wybe intermediate representation |
-| [AliasAnalysis.hs](#AliasAnalysis)| Alias analysis for a single module |
-| [Analysis.hs](#Analysis)     | Entry point of all kinds of analysis for a single module |
-| [BinaryFactory.hs](#BinaryFactory)| Deriving AST Types to be Binary instances |
-| [Blocks.hs](#Blocks)         | Transform a clausal form (LPVM) module to LLVM |
-| [BodyBuilder.hs](#BodyBuilder)| A monad to build up a procedure Body, with copy propagation |
-| [Builder.hs](#Builder)       | Handles compilation at the module level. |
-| [CConfig.hs](#CConfig)       |  |
-| [Callers.hs](#Callers)       | Find all callers for each proc and count static calls per caller |
-| [Clause.hs](#Clause)         | Convert Wybe code to clausal (LPVM) form |
-| [Codegen.hs](#Codegen)       | Generate and emit LLVM from basic blocks of a module |
-| [Config.hs](#Config)         | Configuration for wybe compiler |
-| [Emit.hs](#Emit)             | Emit LLVM code |
-| [Expansion.hs](#Expansion)   | Replace certain procedure calls with others |
-| [Flatten.hs](#Flatten)       | Flatten function calls (expressions) into procedure calls |
-| [LLVM.hs](#LLVM)             | Generate LLVM code from LPVM form |
-| [LastCallAnalysis.hs](#LastCallAnalysis)| Transform proc bodies and their output arguments so that |
-| [Macho.hs](#Macho)           | Extended version of parser for Mach-O object format files |
-| [Normalise.hs](#Normalise)   | Convert parse tree into an AST |
-| [ObjectInterface.hs](#ObjectInterface)| Parse and edit a object file. |
-| [Optimise.hs](#Optimise)     | Framework to optimise a single module |
-| [Options.hs](#Options)       | Handle compiler options/switches |
-| [Parser.hs](#Parser)         | Parser for the Wybe language using Parsec. |
-| [Resources.hs](#Resources)   | Resource checker for Wybe |
-| [Scanner.hs](#Scanner)       | Lexical scanner for the Wybe language |
-| [Snippets.hs](#Snippets)     | Convenience functions for generation of Wybe AST |
-| [Transform.hs](#Transform)   | Transform LPVM after alias analysis |
-| [Types.hs](#Types)           | Type checker/inferencer for Wybe |
-| [Unbranch.hs](#Unbranch)     | Turn loops and conditionals into separate procedures |
-| [Unique.hs](#Unique)         | The unique typing system for Wybe |
-| [UnivSet.hs](#UnivSet)       | Provide a set type supporting the universal set. |
-| [Util.hs](#Util)             | Various small utility functions |
-| [wybemk.hs](#wybemk)         | Wybe compiler/builder main code |
+| File | Purpose                                      |
+| ---- | -------------------------------------------- |
+| [AST.hs](#AST)       | Wybe Abstract Syntax Tree and LPVM representation |
+| [ASTShow.hs](#ASTShow) | Show Wybe intermediate representation |
+| [AliasAnalysis.hs](#AliasAnalysis) | Alias analysis for a single module |
+| [Analysis.hs](#Analysis) | Entry point of all kinds of analysis for a single module |
+| [BinaryFactory.hs](#BinaryFactory) | Deriving AST Types to be Binary instances |
+| [Blocks.hs](#Blocks) | Transform a clausal form (LPVM) module to LLVM |
+| [BodyBuilder.hs](#BodyBuilder) | A monad to build up a procedure Body, with copy propagation |
+| [Builder.hs](#Builder) | Handles compilation at the module level. |
+| [CConfig.hs](#CConfig) |  |
+| [Callers.hs](#Callers) | Find all callers for each proc and count static calls per caller |
+| [Clause.hs](#Clause) | Convert Wybe code to clausal (LPVM) form |
+| [Codegen.hs](#Codegen) | Generate and emit LLVM from basic blocks of a module |
+| [Config.hs](#Config) | Configuration for wybe compiler |
+| [Emit.hs](#Emit)     | Emit LLVM code |
+| [Expansion.hs](#Expansion) | Replace certain procedure calls with others |
+| [Flatten.hs](#Flatten) | Flatten function calls (expressions) into procedure calls |
+| [LLVM.hs](#LLVM)     | Generate LLVM code from LPVM form |
+| [LastCallAnalysis.hs](#LastCallAnalysis) | Transform proc bodies and their output arguments so that |
+| [Macho.hs](#Macho)   | Extended version of parser for Mach-O object format files |
+| [Normalise.hs](#Normalise) | Convert parse tree into an AST |
+| [ObjectInterface.hs](#ObjectInterface) | Parse and edit a object file. |
+| [Optimise.hs](#Optimise) | Framework to optimise a single module |
+| [Options.hs](#Options) | Handle compiler options/switches |
+| [Parser.hs](#Parser) | Parser for the Wybe language using Parsec. |
+| [Resources.hs](#Resources) | Resource checker for Wybe |
+| [Scanner.hs](#Scanner) | Lexical scanner for the Wybe language |
+| [Snippets.hs](#Snippets) | Convenience functions for generation of Wybe AST |
+| [Transform.hs](#Transform) | Transform LPVM after alias analysis |
+| [Types.hs](#Types)   | Type checker/inferencer for Wybe |
+| [Unbranch.hs](#Unbranch) | Turn loops and conditionals into separate procedures |
+| [Unique.hs](#Unique) | The unique typing system for Wybe |
+| [UnivSet.hs](#UnivSet) | Provide a set type supporting the universal set. |
+| [Util.hs](#Util)     | Various small utility functions |
+| [wybemk.hs](#wybemk) | Wybe compiler/builder main code |
 
 
 # Modules in more detail
 
 
-## AST --  Wybe Abstract Syntax Tree and LPVM representation
+## AST <a id=AST></a>
 
+## ASTShow <a id=ASTShow></a>
 
-## ASTShow --  Show Wybe intermediate representation
+## AliasAnalysis <a id=AliasAnalysis></a>
 
+## Analysis <a id=Analysis></a>
 
-## AliasAnalysis --  Alias analysis for a single module
+## BinaryFactory <a id=BinaryFactory></a>
 
+## Blocks <a id=Blocks></a>
 
-## Analysis --  Entry point of all kinds of analysis for a single module
+## BodyBuilder <a id=BodyBuilder></a>
 
-
-## BinaryFactory --  Deriving AST Types to be Binary instances
-
-
-## Blocks --  Transform a clausal form (LPVM) module to LLVM
-
-
-## BodyBuilder --  A monad to build up a procedure Body, with copy propagation
-
-
-## Builder --  Handles compilation at the module level.
-
+## Builder <a id=Builder></a>
 The wybe compiler handles module dependencies, and builds
 executables by itself, without the need for build tools like
 make.  The function buildTarget is responsible for determining
@@ -260,27 +252,21 @@ order, we call compileModSCC, which does the following:
        2. Optimise procs (Optimise)
 
 
+## CConfig <a id=CConfig></a>
 
-## Callers --  Find all callers for each proc and count static calls per caller
+## Callers <a id=Callers></a>
 
+## Clause <a id=Clause></a>
 
-## Clause --  Convert Wybe code to clausal (LPVM) form
+## Codegen <a id=Codegen></a>
 
+## Config <a id=Config></a>
 
-## Codegen --  Generate and emit LLVM from basic blocks of a module
+## Emit <a id=Emit></a>
 
+## Expansion <a id=Expansion></a>
 
-## Config --  Configuration for wybe compiler
-
-
-## Emit --  Emit LLVM code
-
-
-## Expansion --  Replace certain procedure calls with others
-
-
-## Flatten --  Flatten function calls (expressions) into procedure calls
-
+## Flatten <a id=Flatten></a>
 We transform away all expression types except for constants and
 variables.  Where, let, conditional, and function call
 expressions are turned into statements that bind a variable, and
@@ -306,8 +292,7 @@ the initial value of the expression, and a second to assign it
 the specified new value.  For example, a statement p(f(!x,y),z) is
 transformed to f(x,y,?t); p(!t,z); f(!x,y,t).
 
-## LLVM --  Generate LLVM code from LPVM form
-
+## LLVM <a id=LLVM></a>
 
 # Generating LLVM code
 
@@ -335,8 +320,7 @@ generated `.ll` file, we produce the following, in order:
  data structure, placed in the LLVM section.
 
 
-## LastCallAnalysis --  Transform proc bodies and their output arguments so that
-
+## LastCallAnalysis <a id=LastCallAnalysis></a>
 
 # Last Call Optimisation
 
@@ -370,26 +354,19 @@ be deferred until after the address is taken.  This is performed by the LLVM
 module.
 
 
-## Macho --  Extended version of parser for Mach-O object format files
+## Macho <a id=Macho></a>
 
+## Normalise <a id=Normalise></a>
 
-## Normalise --  Convert parse tree into an AST
+## ObjectInterface <a id=ObjectInterface></a>
 
+## Optimise <a id=Optimise></a>
 
-## ObjectInterface --  Parse and edit a object file.
+## Options <a id=Options></a>
 
+## Parser <a id=Parser></a>
 
-## Optimise --  Framework to optimise a single module
-
-
-## Options --  Handle compiler options/switches
-
-
-## Parser --  Parser for the Wybe language using Parsec.
-
-
-## Resources --  Resource checker for Wybe
-
+## Resources <a id=Resources></a>
 ###                 Resource Transformations.
 
 There are two passes related to resources within the Wybe compiler.
@@ -408,17 +385,13 @@ checking ensures that resources have the correct types, and mode checking
 ensures that resources, where applicable are in scope.
 
 
-## Scanner --  Lexical scanner for the Wybe language
+## Scanner <a id=Scanner></a>
 
+## Snippets <a id=Snippets></a>
 
-## Snippets --  Convenience functions for generation of Wybe AST
+## Transform <a id=Transform></a>
 
-
-## Transform --  Transform LPVM after alias analysis
-
-
-## Types --  Type checker/inferencer for Wybe
-
+## Types <a id=Types></a>
 ###                 Type Checking Module SCCs
 
 Our type inference is flow sensitive, that is, types flow from callees to
@@ -449,8 +422,7 @@ be transformed.  Therefore, type checking must be prepared to handle both
 calls that have had resources transformed to parameters and calls that
 haven't.
 
-## Unbranch --  Turn loops and conditionals into separate procedures
-
+## Unbranch <a id=Unbranch></a>
 This code transforms loops into fresh recursive procs, and ensures
 that all conditionals are the last statements in their respective
 bodies. Note that conditionals can be nested, but at the end of
@@ -505,17 +477,13 @@ AST form with the following requirements:
     TestBool, and whose branches are bodies satisfying these
     same conditions.
 
-## Unique --  The unique typing system for Wybe
+## Unique <a id=Unique></a>
 
+## UnivSet <a id=UnivSet></a>
 
-## UnivSet --  Provide a set type supporting the universal set.
+## Util <a id=Util></a>
 
-
-## Util --  Various small utility functions
-
-
-## wybemk --  Wybe compiler/builder main code
-
+## wybemk <a id=wybemk></a>
 
 
 # This Document

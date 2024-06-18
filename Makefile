@@ -90,14 +90,12 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 	cat src/README.md.intro > "$@"
 
 	printf "The source files in this directory and their purposes are:\n\n" >> "$@"
-	printf "| File                         " >> "$@"
-	printf "| Purpose                                                  |\n" >> "$@"
-	printf "| ---------------------------- " >> "$@"
-	printf "| -------------------------------------------------------- |\n" >> "$@"
+	printf "| File | Purpose                                      |\n" >> "$@"
+	printf "| ---- | -------------------------------------------- |\n" >> "$@"
 	for f in src/*.hs ; do \
       b=`basename $$f` ; \
       m=`basename $$f .hs` ; \
-	    printf "| `printf '%-29s' [$$b]\(#$$m\)`| " ; \
+	    printf "| `printf '%-20s' [$$b]\(#$$m\)` | " ; \
 	    sed -n "s/^-- *Purpose *: *\(.*\)/\1/p" $$f | tr -d '\n' ; \
 	    printf " |\n" ; \
 	done >> "$@"
@@ -106,7 +104,8 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 	for f in src/*.hs ; do \
       m=`basename $$f .hs` ; \
 	    echo -e ; \
-	    sed -E -e '/^-- *Purpose *:/{s/^-- *Purpose *:/## '"$$m -- "'/; G; p;}' -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
+	    echo -e "## $$m <a id="$$m"></a>" ; \
+	    sed -E -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
 	done >> "$@"
 
 	printf "\n\n" >> "$@"
