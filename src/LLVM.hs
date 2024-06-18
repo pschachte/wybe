@@ -547,14 +547,14 @@ writeLPVMCall "access" _ args pos = do
     case args' of
         ([struct, ArgInt 0 _, _], outs@[member]) -> do
             lltype <- llvmTypeRep <$> argTypeRep member
-            structStr <- llvmArgument struct
+            structStr <- llvmValue struct
             let arg = typeConversion Pointer structStr CPointer True
             llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
         ([struct, offset, _, _], outs@[member]) -> do
             (_,writeArg,readArg) <- freshTempArgs $ argType struct
             writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
             lltype <- llvmTypeRep <$> argTypeRep member
-            structStr <- llvmArgument readArg
+            structStr <- llvmValue readArg
             let arg = typeConversion Pointer structStr CPointer True
             llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
         (ins,outs) ->
@@ -586,7 +586,7 @@ writeLPVMCall "mutate" _ args pos = do
             case (restIns,iRefs) of
                 ([member],[]) -> do
                     llMember <- llvmArgument member
-                    structStr <- llvmArgument struct
+                    structStr <- llvmValue struct
                     let dest = typeConversion Pointer structStr CPointer True
                     llvmPutStrLnIndented $ "store " ++ llMember ++ ", " ++ dest
                 ([],[takeRef]) -> do
@@ -722,7 +722,7 @@ llvmLoad :: PrimArg -> PrimArg -> LLVM ()
 llvmLoad ptr outVar = do
     lltype <- llvmTypeRep <$> argTypeRep outVar
     ptrType <- argTypeRep ptr
-    arg <- llvmArgument ptr
+    arg <- llvmValue ptr
     let arg' = typeConversion ptrType arg CPointer True
     llvmStoreResult [outVar] $ "load " ++ lltype ++ ", " ++ arg'
 
@@ -899,7 +899,7 @@ argVar msg _ = shouldnt $ "variable argument expected " ++ msg
 -- specified output argument.
 typeConvert :: PrimArg -> PrimArg -> LLVM ()
 typeConvert fromArg toArg = do
-    fromVal <- llvmArgument fromArg
+    fromVal <- llvmValue fromArg
     fromTy <- argTypeRep fromArg
     toVar <- varToWrite $ argVar "in type conversion" toArg
     toTy <- argTypeRep toArg
