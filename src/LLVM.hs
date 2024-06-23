@@ -345,16 +345,17 @@ writeAssemblyProc mod def procNum =
     case procImpln def of
         ProcDefPrim {procImplnProcSpec=pspec, procImplnProto=proto,
                      procImplnBody=body, procImplnSpeczBodies=specz} -> do
+            logLLVM $ "Generating LLVM for proc " ++ show pspec
             let name = llvmProcName pspec
             (ins,outs,oRefs,iRefs) <- partitionParams $ primProtoParams proto
             unless (List.null iRefs)
               $ nyi $ "take-reference parameter for proc " ++ show pspec
             setRenaming $ Set.fromList $ primParamName <$> outs
             returnType <- llvmReturnType $ List.map primParamType outs
-            llParams <- mapM llvmParameter $ ins ++ oRefs
+            oRefParams <- mapM recordProcOutByRef oRefs
+            llParams <- mapM llvmParameter $ ins ++ oRefParams
             modify $ \s -> s {tmpCounter = procTmpCount def}
             llvmBlankLine
-            logLLVM $ "Generating LLVM for proc " ++ show pspec
             llvmPutStrLn $
                 "define external fastcc " ++ returnType ++ " "
                     ++ name ++ "(" ++ intercalate ", " llParams ++ ")"
@@ -366,12 +367,28 @@ writeAssemblyProc mod def procNum =
                         ++ showProcName (procName def)
 
 
+-- | Create an opaque pointer parameter for each out-by-reference parameter, and
+-- record the correspondence, so we can translate assignments to the
+-- out-by-reference parameter into a store through the opaque pointer.
+recordProcOutByRef :: PrimParam -> LLVM PrimParam
+recordProcOutByRef param@PrimParam{primParamName=p, primParamType=ty} = do
+    tmp <- makeTemp
+    let rep = Representation CPointer
+    let readCPtrArg = ArgVar tmp rep FlowIn Ordinary True
+    let actualParam = param{primParamName=tmp, primParamType=rep, 
+                            primParamFlow=FlowIn}
+    addTakeRefPointer p readCPtrArg ty
+    return actualParam
+
+
 -- | Generate and write out the LLVM code for an LPVM body
 writeAssemblyBody :: [PrimParam] -> ProcBody -> LLVM ()
 writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
     mapM_ (placedApply writeAssemblyPrim) prims
     case fork of
-        NoFork -> writeAssemblyReturn outs
+        NoFork -> do
+            releaseDeferredCall
+            writeAssemblyReturn outs
         PrimFork{forkVar=v, forkVarType=ty, forkBodies=branches,
                  forkDefault=dflt} -> do
             rep <- typeRep ty
@@ -393,18 +410,23 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
 -- | Generate and write out the LLVM code for a single LPVM prim
 writeAssemblyPrim :: Prim -> OptPos -> LLVM ()
 writeAssemblyPrim instr@(PrimCall _ proc _ args _) pos = do
+    releaseDeferredCall
     logLLVM $ "Translating Wybe call " ++ show instr
     writeWybeCall proc args pos
 writeAssemblyPrim instr@(PrimHigher _ fn _ args) pos = do
+    releaseDeferredCall
     logLLVM $ "Translating HO call " ++ show instr
     llvmPutStrLnIndented $ "call " ++ show fn ++ show args
 writeAssemblyPrim instr@(PrimForeign "llvm" op flags args) pos = do
+    releaseDeferredCall
     logLLVM $ "Translating LLVM instruction " ++ show instr
     writeLLVMCall op flags args pos
 writeAssemblyPrim instr@(PrimForeign "lpvm" op flags args) pos = do
+    -- Some of these should be handled before releasing deferred calls
     logLLVM $ "Translating LPVM instruction " ++ show instr
     writeLPVMCall op flags args pos
 writeAssemblyPrim instr@(PrimForeign "c" cfn flags args) pos = do
+    releaseDeferredCall
     logLLVM $ "Translating C call " ++ show instr
     writeCCall cfn flags args pos
 writeAssemblyPrim instr@(PrimForeign lang op flags args) pos = do
@@ -455,7 +477,6 @@ writeAssemblySwitch outs v rep cases dflt = do
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeWybeCall :: ProcSpec -> [PrimArg] -> OptPos -> LLVM ()
 writeWybeCall wybeProc args pos = do
-    releaseDeferredCall
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
     unless (List.null iRefs)
      $ shouldnt $ "Wybe call " ++ show wybeProc ++ " with take-reference arg"
@@ -479,7 +500,6 @@ writeActualCall wybeProc ins outs tailFlag = do
 -- | Generate a native LLVM instruction
 writeLLVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeLLVMCall op flags args pos = do
-    releaseDeferredCall
     (ins,outs) <- partitionArgs ("llvm " ++ op ++ " instruction") args
     argList <- llvmInstrArgumentList ins
     case (ins,outs) of
@@ -545,16 +565,16 @@ writeLPVMCall "access" _ args pos = do
     releaseDeferredCall
     args' <- partitionArgs "lpvm access instruction" args
     case args' of
-        ([struct, ArgInt 0 _, _], outs@[member]) -> do
-            lltype <- llvmTypeRep <$> argTypeRep member
-            structStr <- llvmValue struct
-            let arg = typeConversion Pointer structStr CPointer True
-            llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
         ([struct, offset, _, _], outs@[member]) -> do
-            (_,writeArg,readArg) <- freshTempArgs $ argType struct
-            writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
+            logLLVM $ "llvm access offset = " ++ show offset
+            addrArg <- case offset of
+                ArgInt 0 _ -> return struct
+                _ -> do
+                        (writeArg,readArg) <- freshTempArgs $ argType struct
+                        writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
+                        return readArg
             lltype <- llvmTypeRep <$> argTypeRep member
-            structStr <- llvmValue readArg
+            structStr <- llvmValue addrArg
             let arg = typeConversion Pointer structStr CPointer True
             llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
         (ins,outs) ->
@@ -571,18 +591,23 @@ writeLPVMCall "mutate" _ args pos = do
             when (List.null iRefs) releaseDeferredCall
             case destr of
                 ArgInt 1 _ -> do
+                    logLLVM "lpvm mutate destructive case"
                     typeConvert struct struct2
-                ArgInt 0 _ -> duplicateStruct struct startOffset size struct2
+                ArgInt 0 _ -> do
+                    logLLVM "lpvm mutate non-destructive case"
+                    duplicateStruct struct startOffset size struct2
                 _ ->
                     nyi "lpvm mutate instr with non-const destructive flag"
             ptrArg <- case offset of
                 ArgInt 0 _ -> return struct2
                 _ -> do
-                    (_,writeArg,readArg) <- freshTempArgs $ argType struct
+                    (writeArg,readArg) <- freshTempArgs $ argType struct
                     writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
                     return readArg
+            logLLVM $ "address to store into is held by " ++ show ptrArg
             case (restIns,iRefs) of
                 ([member],[]) -> do
+                    logLLVM "Normal (non-take-reference) case"
                     llMember <- llvmArgument member
                     structStr <- llvmValue ptrArg
                     let dest = typeConversion Pointer structStr CPointer True
@@ -591,11 +616,12 @@ writeLPVMCall "mutate" _ args pos = do
                     -- FlowTakeReference case:  generate and record a fresh
                     -- local variable to hold the pointer to the location the
                     -- value should be written in, once it's generated.
-                    (_,writeCPtrArg,readCPtrArg) <-
+                    logLLVM "Special take-reference case"
+                    (writeCPtrArg,readCPtrArg) <-
                         freshTempArgs $ Representation CPointer
                     let takeRefVar = argVar "in lpvm alloc" takeRef
                     addTakeRefPointer takeRefVar readCPtrArg (argType takeRef)
-                    takeRefs <- gets deferredVars
+                    takeRefs <- gets takeRefVars
                     logLLVM $ "take-ref pointers = " ++ show takeRefs
                     typeConvert ptrArg writeCPtrArg
                 _ -> 
@@ -612,7 +638,6 @@ writeLPVMCall op flags args pos =
 -- | Generate C function call
 writeCCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeCCall cfn flags args pos = do
-    releaseDeferredCall
     (ins,outs) <- partitionArgs ("call to C function " ++ cfn) args
     argList <- llvmArgumentList ins
     outTy <- llvmReturnType $ List.map argType outs
@@ -659,7 +684,6 @@ buildTuple outType tuple argNum
     llvmPutStrLnIndented $ nextVar ++ " = insertvalue " ++ outType ++ " "
                             ++ tuple ++ ", " ++ llty ++ " " ++ llvar
                             ++ ", " ++ show argNum
-
     buildTuple outType nextVar (argNum+1) params
 
 
@@ -801,12 +825,13 @@ llvmInstrArgumentList inputs@(in1:_) = do
 llvmStoreResult :: [PrimArg] -> String -> LLVM ()
 llvmStoreResult [] instr = llvmPutStrLnIndented instr
 llvmStoreResult [ArgVar{argVarName=varName}] instr = do
-    llVar <- varToRead varName
+    llVar <- varToWrite varName
     llvmPutStrLnIndented $ llVar ++ " = " ++ instr
 llvmStoreResult multiOuts instr = do
     tuple <- llvmLocalName <$> makeTemp
     retType <- llvmReturnType $ argVarType <$> multiOuts
     llvmPutStrLnIndented $ tuple ++ " = " ++ instr
+    -- This uses llvmStoreResult to store each individual element of tuple
     zipWithM_ (unpackArg retType tuple) multiOuts [0..]
 
 
@@ -823,7 +848,7 @@ marshallCallResult outArg@ArgVar{argVarName=varName} cType instr = do
     let instr' = "call " ++ llvmTypeRep inTypeRep ++ " " ++ instr
     if inTypeRep == outTypeRep then llvmStoreResult [outArg] instr'
     else do
-        (_,writeTmp,readTmp) <- freshTempArgs $ Representation inTypeRep
+        (writeTmp,readTmp) <- freshTempArgs $ Representation inTypeRep
         llvmStoreResult [writeTmp] instr'
         typeConvert readTmp outArg
 marshallCallResult outArg inTypeRep instr =
@@ -833,11 +858,9 @@ marshallCallResult outArg inTypeRep instr =
 -- | Write an LLVM instruction to unpack one argument from a tuple.
 -- instruction looks like:  %var = extractvalue {i64, i1} %0, 0
 unpackArg :: LLVMType -> LLVMLocal -> PrimArg -> Int -> LLVM ()
-unpackArg typ tuple ArgVar{argVarName=varName} argNum = do
-    llvmPutStrLnIndented $ llvmLocalName varName ++ " = extractvalue " ++ typ
+unpackArg typ tuple arg argNum = do
+    llvmStoreResult [arg] $ "extractvalue " ++ typ
                             ++ tuple ++ ", " ++ show argNum
-unpackArg _ _ outArg _ =
-    shouldnt $ "non-variable output argument " ++ show outArg
 
 
 -- | Marshall data being passed to C code.  Emits code to transform the argument
@@ -851,7 +874,7 @@ marshallArgument arg cType = do
     inTypeRep <- argTypeRep arg
     if inTypeRep == outTypeRep then llvmArgument arg
     else do
-        (_,writeTmp,readTmp) <- freshTempArgs $ Representation outTypeRep
+        (writeTmp,readTmp) <- freshTempArgs $ Representation outTypeRep
         tmp <- makeTemp
         llVal <- llvmValue arg
         typeConvert arg writeTmp
@@ -901,10 +924,8 @@ typeConvert :: PrimArg -> PrimArg -> LLVM ()
 typeConvert fromArg toArg = do
     fromVal <- llvmValue fromArg
     fromTy <- argTypeRep fromArg
-    toVar <- varToWrite $ argVar "in type conversion" toArg
     toTy <- argTypeRep toArg
-    llvmPutStrLnIndented $ toVar ++ " = "
-                         ++ typeConversion fromTy fromVal toTy False
+    llvmStoreResult [toArg] $ typeConversion fromTy fromVal toTy False
 
 
 -- | LLVM code to convert fromVal, with type fromTy, to toTy.  If
@@ -975,17 +996,17 @@ duplicateStruct struct startOffset size newStruct = do
     start <- case startOffset of
         ArgInt 0 _ -> return struct
         _ -> do
-            (_,writeStart,readStart) <- freshTempArgs $ Representation Pointer
+            (writeStart,readStart) <- freshTempArgs $ Representation Pointer
             writeLLVMCall "sub" [] [struct,startOffset,writeStart] Nothing
             return readStart
     llvmStart <- llvmArgument start
-    (_,writeStartCPtr,readStartCPtr) <- freshTempArgs $ Representation CPointer
+    (writeStartCPtr,readStartCPtr) <- freshTempArgs $ Representation CPointer
     typeConvert start writeStartCPtr
-    (_,writeCPtr,readCPtr) <- freshTempArgs $ Representation CPointer
+    (writeCPtr,readCPtr) <- freshTempArgs $ Representation CPointer
     marshalledCCall "wybe_malloc" [] [size,writeCPtr] ["int","pointer"] Nothing
     copyfn <- llvmMemcpyFn
     writeCCall copyfn [] [readCPtr,readStartCPtr,size] Nothing
-    (_,writePtr,readPtr) <- freshTempArgs $ Representation Pointer
+    (writePtr,readPtr) <- freshTempArgs $ Representation Pointer
     typeConvert readCPtr writePtr
     case startOffset of
         ArgInt 0 _ -> typeConvert readPtr newStruct
@@ -1090,15 +1111,15 @@ data LLVMState = LLVMState {
         allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
         toRename :: Set PrimVarName, -- ^ Variables that need to get fresh names
         newNames :: Map PrimVarName PrimVarName,
-                                    -- ^ New names for some variables
+                                    -- ^ New names for some variables to read
         stringConstants :: Map String Ident,
                                     -- ^ local name given to string constants
         deferredCall :: Maybe (ProcSpec, [PrimArg], [PrimArg], [PrimArg]),
                                     -- ^ Wybe proc call deferred for
                                     -- out-by-reference arg, with in, out, and
                                     -- out-by-ref args
-        deferredVars :: Map PrimVarName (PrimArg,TypeSpec)
-                                    -- ^ arg to read take-reference pointer,
+        takeRefVars :: Map PrimVarName (PrimArg,TypeSpec)
+                                    -- ^ arg to read each take-reference ptr,
                                     -- plus the type of the original variable
 }
 
@@ -1153,12 +1174,12 @@ makeTemp = do
 
 -- |Return a pair of PrimArgs to write and read, respectively, a fresh temp
 -- variable of the specified type, along with the variable name.
-freshTempArgs :: TypeSpec -> LLVM (PrimVarName,PrimArg, PrimArg)
+freshTempArgs :: TypeSpec -> LLVM (PrimArg, PrimArg)
 freshTempArgs ty = do
     tmp <- makeTemp
     let writeArg = ArgVar tmp ty FlowOut Ordinary False
     let readArg = ArgVar tmp ty FlowIn Ordinary True
-    return (tmp,writeArg,readArg)
+    return (writeArg,readArg)
 
 
 -- | Set the set of variables that need to be renamed to convert to SSA.
@@ -1240,9 +1261,12 @@ deferCall wybeProc ins outs oRefs = do
 -- write to the FlowTakeReference variable takeRef when we see its
 -- FlowOutByReference use.
 addTakeRefPointer :: PrimVarName -> PrimArg -> TypeSpec -> LLVM ()
-addTakeRefPointer takeRefVar readPtrArg ty =
-    modify $ \s -> s{ deferredVars =
-                        Map.insert takeRefVar (readPtrArg,ty) $ deferredVars s }
+addTakeRefPointer takeRefVar readPtrArg ty = do
+    logLLVM $ "Recording take-ref pointer " ++ show readPtrArg
+            ++ " as replacement for output to " ++ show takeRefVar
+            ++ ":" ++ show ty
+    modify $ \s -> s{ takeRefVars =
+                        Map.insert takeRefVar (readPtrArg,ty) $ takeRefVars s }
 
 
 -- | Emit the deferred instruction, if there is one.  If not, do nothing.  This
@@ -1256,7 +1280,7 @@ releaseDeferredCall = do
         Just (wybeProc, ins, outs, oRefs) -> do
             logLLVM $ "releasing deferred call to " ++ show wybeProc
             (refIns,old) <- mapAndUnzipM convertOutByRefArg oRefs
-            takeRefs <- gets deferredVars
+            takeRefs <- gets takeRefVars
             logLLVM $ "take-ref pointers = " ++ show takeRefs
             logLLVM $ "new ref args: " ++ show refIns ++ "; old = " ++ show old
             let allOld = and old
@@ -1266,24 +1290,24 @@ releaseDeferredCall = do
                 let oVar = argVar "in releaseDeferredCall" oRef
                 (ptrArg,ty) <-
                     trustFromJust "TakeReference pointer variable lost!"
-                    . Map.lookup oVar <$> gets deferredVars
+                    . Map.lookup oVar <$> gets takeRefVars
                 let byRefArg = setArgFlow FlowOut oRef
                 llvmLoad ptrArg byRefArg
-            modify $ \s -> s{ deferredCall = Nothing, deferredVars = Map.empty }
+            modify $ \s -> s{ deferredCall = Nothing, takeRefVars = Map.empty }
 
 
--- | Convert a FlowTakeReference argument into an input CPointer arg.  If we've
--- already created a variable for the pointer, use that, otherwise alloca space
--- for the value and return an argument holding a pointer to it.  Also return a
--- Boolean indicating whether the variable was already created.
+-- | Convert a FlowOutByeReference argument into an input CPointer arg.  If
+-- we've already created a variable for the pointer, use that, otherwise alloca
+-- space for the value and return an argument holding a pointer to it.  Also
+-- return a Boolean indicating whether the variable was already created.
 convertOutByRefArg :: PrimArg -> LLVM (PrimArg,Bool)
 convertOutByRefArg ArgVar{argVarName=name, argVarType=ty,
                         argVarFlow=FlowOutByReference} = do
-    maybePtrArg <- Map.lookup name <$> gets deferredVars
+    maybePtrArg <- Map.lookup name <$> gets takeRefVars
     case maybePtrArg of
         Just (ptrArg,_) -> return (ptrArg,True)
         Nothing -> do
-            (_,writeArg,readArg) <- freshTempArgs $ Representation CPointer
+            (writeArg,readArg) <- freshTempArgs $ Representation CPointer
             llvmStoreResult [writeArg]
                 $ "alloca ptr align " ++ show wordSizeBytes
             addTakeRefPointer name readArg ty
