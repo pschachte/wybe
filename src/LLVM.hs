@@ -375,7 +375,7 @@ recordProcOutByRef param@PrimParam{primParamName=p, primParamType=ty} = do
     tmp <- makeTemp
     let rep = Representation CPointer
     let readCPtrArg = ArgVar tmp rep FlowIn Ordinary True
-    let actualParam = param{primParamName=tmp, primParamType=rep, 
+    let actualParam = param{primParamName=tmp, primParamType=rep,
                             primParamFlow=FlowIn}
     addTakeRefPointer p readCPtrArg ty
     return actualParam
@@ -624,7 +624,7 @@ writeLPVMCall "mutate" _ args pos = do
                     takeRefs <- gets takeRefVars
                     logLLVM $ "take-ref pointers = " ++ show takeRefs
                     typeConvert ptrArg writeCPtrArg
-                _ -> 
+                _ ->
                     shouldnt $ "lpvm mutate with inputs "
                             ++ show (struct:offset:destr:size:startOffset:restIns)
                             ++ " and output " ++ show struct2
@@ -674,7 +674,7 @@ writeAssemblyReturn params = do
 -- | Generate code to build a tuple to return for multi-output functions.
 -- Returns the last variable generated.
 -- Generated code looks like %"temp#25" = insertvalue {i64, i1} undef, i64 %8, 0
-buildTuple :: LLVMType -> LLVMLocal -> Int -> [PrimParam] -> LLVM LLVMLocal
+buildTuple :: LLVMType -> LLVMName -> Int -> [PrimParam] -> LLVM LLVMName
 buildTuple _ tuple _ [] = return tuple
 buildTuple outType tuple argNum
            (PrimParam{primParamName=v, primParamType=ty}:params) = do
@@ -857,7 +857,7 @@ marshallCallResult outArg inTypeRep instr =
 
 -- | Write an LLVM instruction to unpack one argument from a tuple.
 -- instruction looks like:  %var = extractvalue {i64, i1} %0, 0
-unpackArg :: LLVMType -> LLVMLocal -> PrimArg -> Int -> LLVM ()
+unpackArg :: LLVMType -> LLVMName -> PrimArg -> Int -> LLVM ()
 unpackArg typ tuple arg argNum = do
     llvmStoreResult [arg] $ "extractvalue " ++ typ
                             ++ tuple ++ ", " ++ show argNum
@@ -925,7 +925,11 @@ typeConvert fromArg toArg = do
     toTy <- argTypeRep toArg
     fromTy <- argTypeRep fromArg
     fromVal <- llvmValue fromArg
-    llvmStoreResult [toArg] $ typeConversion fromTy fromVal toTy False
+    case toArg of
+        ArgVar{argVarName=varName} | fromTy == toTy ->
+            renameVariable varName fromVal
+        _ ->
+            llvmStoreResult [toArg] $ typeConversion fromTy fromVal toTy False
 
 
 -- | LLVM code to convert fromVal, with type fromTy, to toTy.  If
@@ -1085,12 +1089,15 @@ partitionByFlow fn lst =
 
 
 -- At least for now, we represent LLVM info as strings
-type LLVMType = String              -- ^ An LLVM type name, such as i8
-type LLVMName = String              -- ^ An LLVM global name, such as a
-                                    --   function, variable or constant name;
-                                    --   must begin with @
-type LLVMLocal = String             -- ^ An LLVM local variable name; must begin
-                                    --   with %
+
+-- | An LLVM type name, such as i8
+type LLVMType = String
+
+-- | An LLVM global name, such as a function, variable or constant name; must
+--   begin with @, or an LLVM local variable name; must begin with %, or an LLVM
+--   constant value.
+type LLVMName = String              
+
 -- | Information we collect about external functions we call in a module, so we
 -- can declare them.
 type ExternSpec = (LLVMName, [TypeSpec], [TypeSpec])
@@ -1111,7 +1118,7 @@ data LLVMState = LLVMState {
         allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
         varDefRenaming :: Set PrimVarName,
                                     -- ^ Vars to rename on definition
-        varUseRenaming :: Map PrimVarName LLVMLocal,
+        varUseRenaming :: Map PrimVarName LLVMName,
                                     -- ^ New action for some variables to read
         stringConstants :: Map String Ident,
                                     -- ^ local name given to string constants
@@ -1192,21 +1199,28 @@ setRenaming :: Set PrimVarName -> LLVM ()
 setRenaming vars = modify $ \s -> s { varDefRenaming = vars }
 
 
+-- | Replace the specified variable with the specified new value in all
+-- following code.
+renameVariable :: PrimVarName -> LLVMName -> LLVM ()
+renameVariable var val =
+    modify $ \s -> s { varUseRenaming = Map.insert var val $ varUseRenaming s }
+
+
 -- | The LLVM name for a variable we are about to assign.  If this is one of the
 -- output parameters, rename it, otherwise leave it alone, and in either case,
 -- transform it to an LLVM local variable name.
-varToWrite :: PrimVarName -> LLVM LLVMLocal
+varToWrite :: PrimVarName -> LLVM LLVMName
 varToWrite v = do
     mustRename <- Set.member v <$> gets varDefRenaming
     if mustRename then do
         tmp <- llvmLocalName <$> makeTemp
-        modify $ \s -> s { varUseRenaming = Map.insert v tmp $ varUseRenaming s }
+        renameVariable v tmp
         return tmp
     else return $ llvmLocalName v
 
 
 -- | The LLVM name for a variable we are about to read.
-varToRead :: PrimVarName -> LLVM LLVMLocal
+varToRead :: PrimVarName -> LLVM LLVMName
 varToRead v = do
     renaming <- gets varUseRenaming
     return $ fromMaybe (llvmLocalName v) $ Map.lookup v renaming
@@ -1343,7 +1357,7 @@ llvmForeignName s = '@' : s
 
 -- | Make a suitable LLVM name for a local variable.  We prefix it
 -- with %, enclose the rest in quotes, and escape any special characters.
-llvmLocalName :: PrimVarName -> LLVMLocal
+llvmLocalName :: PrimVarName -> LLVMName
 llvmLocalName varName =
     "%\"" ++ show varName ++ "\""
 
