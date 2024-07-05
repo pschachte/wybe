@@ -439,8 +439,8 @@ writeAssemblyIfElse :: [PrimParam] -> PrimVarName -> ProcBody -> ProcBody
                     -> LLVM ()
 writeAssemblyIfElse outs v thn els = do
     releaseDeferredCall
-    llvar <- varToRead v
     [thnlbl,elslbl] <- freshLables ["if.then.","if.else."]
+    llvar <- varToRead v
     llvmPutStrLnIndented $ "br i1 " ++ llvar
                     ++ ", " ++ llvmLableName thnlbl
                     ++ ", " ++ llvmLableName elslbl
@@ -455,10 +455,10 @@ writeAssemblySwitch :: [PrimParam] -> PrimVarName -> TypeRepresentation
                     -> [ProcBody] -> Maybe ProcBody -> LLVM ()
 writeAssemblySwitch outs v rep cases dflt = do
     releaseDeferredCall
-    llvar <- varToRead v
     let prefixes0 = ["case."++show n++".switch." | n <- [0..length cases-1]]
     (dfltLabel:labels) <- freshLables $ "default.switch." : prefixes0
     let llType = llvmTypeRep rep
+    llvar <- varToRead v
     logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
     llvmPutStrLnIndented $ "switch " ++ llType ++ " " ++ llvar ++ ", "
         ++ llvmLableName dfltLabel ++ " [\n    "
@@ -490,8 +490,8 @@ writeWybeCall wybeProc args pos = do
 -- tail call optimisation we want.
 writeActualCall :: ProcSpec -> [PrimArg] -> [PrimArg] -> String -> LLVM ()
 writeActualCall wybeProc ins outs tailFlag = do
-        argList <- llvmArgumentList ins
         outTy <- llvmReturnType $ List.map argType outs
+        argList <- llvmArgumentList ins
         llvmStoreResult outs $
             tailFlag ++ "call fastcc " ++ outTy ++ " " ++ llvmProcName wybeProc
             ++ argList
@@ -608,9 +608,9 @@ writeLPVMCall "mutate" _ args pos = do
             case (restIns,iRefs) of
                 ([member],[]) -> do
                     logLLVM "Normal (non-take-reference) case"
-                    llMember <- llvmArgument member
                     structStr <- llvmValue ptrArg
                     let dest = typeConversion Pointer structStr CPointer True
+                    llMember <- llvmArgument member
                     llvmPutStrLnIndented $ "store " ++ llMember ++ ", " ++ dest
                 ([],[takeRef]) -> do
                     -- FlowTakeReference case:  generate and record a fresh
@@ -639,8 +639,8 @@ writeLPVMCall op flags args pos =
 writeCCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeCCall cfn flags args pos = do
     (ins,outs) <- partitionArgs ("call to C function " ++ cfn) args
-    argList <- llvmArgumentList ins
     outTy <- llvmReturnType $ List.map argType outs
+    argList <- llvmArgumentList ins
     llvmStoreResult outs $ "call " ++ outTy ++ " " ++ llvmGlobalName cfn
                             ++ argList
 
@@ -922,9 +922,9 @@ argVar msg _ = shouldnt $ "variable argument expected " ++ msg
 -- specified output argument.
 typeConvert :: PrimArg -> PrimArg -> LLVM ()
 typeConvert fromArg toArg = do
-    fromVal <- llvmValue fromArg
-    fromTy <- argTypeRep fromArg
     toTy <- argTypeRep toArg
+    fromTy <- argTypeRep fromArg
+    fromVal <- llvmValue fromArg
     llvmStoreResult [toArg] $ typeConversion fromTy fromVal toTy False
 
 
@@ -999,8 +999,8 @@ duplicateStruct struct startOffset size newStruct = do
             (writeStart,readStart) <- freshTempArgs $ Representation Pointer
             writeLLVMCall "sub" [] [struct,startOffset,writeStart] Nothing
             return readStart
-    llvmStart <- llvmArgument start
     (writeStartCPtr,readStartCPtr) <- freshTempArgs $ Representation CPointer
+    llvmStart <- llvmArgument start
     typeConvert start writeStartCPtr
     (writeCPtr,readCPtr) <- freshTempArgs $ Representation CPointer
     marshalledCCall "wybe_malloc" [] [size,writeCPtr] ["int","pointer"] Nothing
@@ -1109,9 +1109,10 @@ data LLVMState = LLVMState {
         labelCounter :: Int,        -- ^ Next label number to use
         allStrings :: Set String,   -- ^ String constants appearing in module
         allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
-        toRename :: Set PrimVarName, -- ^ Variables that need to get fresh names
-        newNames :: Map PrimVarName PrimVarName,
-                                    -- ^ New names for some variables to read
+        varDefRenaming :: Set PrimVarName,
+                                    -- ^ Vars to rename on definition
+        varUseRenaming :: Map PrimVarName LLVMLocal,
+                                    -- ^ New action for some variables to read
         stringConstants :: Map String Ident,
                                     -- ^ local name given to string constants
         deferredCall :: Maybe (ProcSpec, [PrimArg], [PrimArg], [PrimArg]),
@@ -1188,7 +1189,7 @@ freshTempArgs ty = do
 -- parameters, so here we rename all output parameters as they are assigned,
 -- and then use the new names when we return the outputs.
 setRenaming :: Set PrimVarName -> LLVM ()
-setRenaming vars = modify $ \s -> s {toRename = vars}
+setRenaming vars = modify $ \s -> s { varDefRenaming = vars }
 
 
 -- | The LLVM name for a variable we are about to assign.  If this is one of the
@@ -1196,17 +1197,19 @@ setRenaming vars = modify $ \s -> s {toRename = vars}
 -- transform it to an LLVM local variable name.
 varToWrite :: PrimVarName -> LLVM LLVMLocal
 varToWrite v = do
-    mustRename <- Set.member v <$> gets toRename
+    mustRename <- Set.member v <$> gets varDefRenaming
     if mustRename then do
-        tmp <- makeTemp
-        modify $ \s -> s { newNames = Map.insert v tmp $ newNames s }
-        return $ llvmLocalName tmp
+        tmp <- llvmLocalName <$> makeTemp
+        modify $ \s -> s { varUseRenaming = Map.insert v tmp $ varUseRenaming s }
+        return tmp
     else return $ llvmLocalName v
 
 
 -- | The LLVM name for a variable we are about to read.
 varToRead :: PrimVarName -> LLVM LLVMLocal
-varToRead v = llvmLocalName . fromMaybe v . Map.lookup v <$> gets newNames
+varToRead v = do
+    renaming <- gets varUseRenaming
+    return $ fromMaybe (llvmLocalName v) $ Map.lookup v renaming
 
 
 ----------------------------------------------------------------------------
