@@ -265,8 +265,10 @@ declareString str n = do
     modify $ \s -> s { stringConstants=Map.insert str stringName
                                        $ stringConstants s}
     declareStructConstant stringName
-        [ (Bits wordSize, Bits wordSize, show $ length str)
-        , (CPointer, Pointer, llvmGlobalName textName)]
+        [ (ArgInt (fromIntegral $ length str) (Representation $ Bits wordSize)
+          , Bits wordSize)
+        , (ArgGlobal (GlobalVariable textName) (Representation CPointer)
+          , Pointer)]
         Nothing
     declareStringConstant textName str Nothing
     llvmBlankLine
@@ -289,15 +291,10 @@ writeAssemblyGlobals = do
 -- | Generate a global declaration for a resource, if it's not a phantom.
 defGlobalResource :: ResourceSpec -> LLVM ()
 defGlobalResource res = do
-    (res', ty) <-
-        mapSnd (trustFromJust $ "defGlobalResource " ++ show res)
-        <$> lift (canonicaliseResourceSpec Nothing "newLLVMModule" res)
-    ifM (lift $ typeIsPhantom ty)
-        (return ())
-        (do
-            llvmRep <- llvmTypeRep <$> typeRep ty
-            llvmPutStrLn $ llvmGlobalName (makeGlobalResourceName res')
-                    ++ " = global " ++ llvmRep ++ " undef")
+    (name, rep) <- llvmResource res
+    if repIsPhantom rep
+        then return ()
+        else llvmPutStrLn $ name ++ " = global " ++ llvmTypeRep rep ++ " undef"
 
 
 ----------------------------------------------------------------------------
@@ -345,7 +342,10 @@ writeAssemblyProc mod def procNum =
     case procImpln def of
         ProcDefPrim {procImplnProcSpec=pspec, procImplnProto=proto,
                      procImplnBody=body, procImplnSpeczBodies=specz} -> do
+            let tmpCount = procTmpCount def
             logLLVM $ "Generating LLVM for proc " ++ show pspec
+                    ++ " with temp counter " ++ show tmpCount
+            modify $ \s -> s {tmpCounter = tmpCount}
             let name = llvmProcName pspec
             (ins,outs,oRefs,iRefs) <- partitionParams $ primProtoParams proto
             unless (List.null iRefs)
@@ -354,7 +354,6 @@ writeAssemblyProc mod def procNum =
             returnType <- llvmReturnType $ List.map primParamType outs
             oRefParams <- mapM recordProcOutByRef oRefs
             llParams <- mapM llvmParameter $ ins ++ oRefParams
-            modify $ \s -> s {tmpCounter = procTmpCount def}
             llvmBlankLine
             llvmPutStrLn $
                 "define external fastcc " ++ returnType ++ " "
@@ -574,9 +573,8 @@ writeLPVMCall "access" _ args pos = do
                         writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
                         return readArg
             lltype <- llvmTypeRep <$> argTypeRep member
-            structStr <- llvmValue addrArg
-            let arg = typeConversion Pointer structStr CPointer True
-            llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
+            arg <- typeConverted addrArg CPointer
+            llvmStoreResult outs $ "load " ++ lltype ++ ", ptr " ++ arg
         (ins,outs) ->
             shouldnt $ "lpvm access with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
@@ -608,9 +606,8 @@ writeLPVMCall "mutate" _ args pos = do
             case (restIns,iRefs) of
                 ([member],[]) -> do
                     logLLVM "Normal (non-take-reference) case"
-                    structStr <- llvmValue ptrArg
-                    let dest = typeConversion Pointer structStr CPointer True
                     llMember <- llvmArgument member
+                    dest <- typeConverted ptrArg CPointer
                     llvmPutStrLnIndented $ "store " ++ llMember ++ ", " ++ dest
                 ([],[takeRef]) -> do
                     -- FlowTakeReference case:  generate and record a fresh
@@ -722,7 +719,7 @@ declareStringConstant name str section = do
 -- file section.
 declareStructConstant :: LLVMName -> [ConstSpec] -> Maybe String -> LLVM ()
 declareStructConstant name fields section = do
-    let llvmFields = llvmConstStruct fields
+    llvmFields <- llvmConstStruct fields
     llvmPutStrLn $ llvmGlobalName name
                     ++ " = private unnamed_addr constant " ++ llvmFields
                     ++ maybe "" ((", section "++) . show) section
@@ -730,14 +727,18 @@ declareStructConstant name fields section = do
 
 
 -- | Build a string giving the body of an llvm constant structure declaration
-llvmConstStruct :: [ConstSpec] -> String
-llvmConstStruct fields =
-    let fieldReps = snd3 <$> fields
-        llvmVals = [llvmTypeRep toTy ++ " "
-                    ++ typeConversion fromTy fromVal toTy True
-                   | (fromTy, toTy, fromVal) <- fields]
-    in llvmRepReturnType fieldReps ++ " { " ++ intercalate ", " llvmVals ++ " }"
+llvmConstStruct :: [ConstSpec] -> LLVM String
+llvmConstStruct fields = do
+    llvmVals <- mapM (uncurry llvmConstField) fields
+    return $ llvmRepReturnType (snd <$> fields)
+            ++ " { " ++ intercalate ", " llvmVals ++ " }"
 
+
+-- | Produce an LLVM string of type and constant value
+llvmConstField :: PrimArg -> TypeRepresentation -> LLVM String
+llvmConstField fromArg toTy = do
+    val <- convertedConstant fromArg toTy
+    return $ llvmTypeRep toTy ++ " " ++ val
 
 
 -- | Generate an LLVM load instruction to load from the specified address into
@@ -745,10 +746,8 @@ llvmConstStruct fields =
 llvmLoad :: PrimArg -> PrimArg -> LLVM ()
 llvmLoad ptr outVar = do
     lltype <- llvmTypeRep <$> argTypeRep outVar
-    ptrType <- argTypeRep ptr
-    arg <- llvmValue ptr
-    let arg' = typeConversion ptrType arg CPointer True
-    llvmStoreResult [outVar] $ "load " ++ lltype ++ ", " ++ arg'
+    arg <- typeConverted ptr CPointer
+    llvmStoreResult [outVar] $ "load " ++ lltype ++ ", ptr " ++ arg
 
 
 -- | Return the representation for the specified type
@@ -756,6 +755,17 @@ typeRep :: TypeSpec -> LLVM TypeRepresentation
 typeRep ty =
     trustFromJust ("lookupTypeRepresentation of unknown type " ++ show ty)
       <$> lift (lookupTypeRepresentation ty)
+
+
+
+llvmResource :: ResourceSpec -> LLVM (LLVMName, TypeRepresentation)
+llvmResource res = do
+    (res', ty) <-
+        mapSnd (trustFromJust $ "defGlobalResource " ++ show res)
+        <$> lift (canonicaliseResourceSpec Nothing "newLLVMModule" res)
+    rep <- typeRep ty
+    return (llvmGlobalName (makeGlobalResourceName res'), rep)
+
 
 
 -- | The LLVM representation of a Wybe type based on its TypeRepresentation
@@ -907,7 +917,7 @@ llvmValue (ArgString str _ _) =
             . stringConstants
 llvmValue (ArgChar val _) = return $ show $ fromEnum val
 llvmValue (ArgClosure _ val _) = return $ show val -- XXX not sure what to do
-llvmValue (ArgGlobal val _) = return $ show val    -- XXX not sure what to do
+llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
 llvmValue (ArgUnneeded val _) = return $ show val  -- XXX not sure what to do
 llvmValue (ArgUndef _) = return "undef"
 
@@ -929,24 +939,49 @@ typeConvert fromArg toArg = do
         ArgVar{argVarName=varName} | fromTy == toTy ->
             renameVariable varName fromVal
         _ ->
-            llvmStoreResult [toArg] $ typeConversion fromTy fromVal toTy False
+            llvmStoreResult [toArg]
+              $ typeConvertOp fromTy toTy ++ " "
+                ++ llvmTypeRep fromTy ++ " " ++ fromVal
+                ++ " to " ++ llvmTypeRep toTy
 
 
--- | LLVM code to convert fromVal, with type fromTy, to toTy.  If
--- asExpr is True then a conversion *expression* is written if needed, otherwise
--- the result is a conversion *instruction* body.
-typeConversion :: TypeRepresentation -> String -> TypeRepresentation -> Bool
-               -> String
-typeConversion fromTy fromVal toTy True
-    | fromTy == toTy = fromVal
-    | otherwise      =
-        typeConvertOp fromTy toTy ++ " ("
-            ++ llvmTypeRep fromTy ++ " " ++ fromVal
-            ++ " to " ++ llvmTypeRep toTy ++ " )"
-typeConversion fromTy fromVal toTy False =
-    typeConvertOp fromTy toTy ++ " "
-        ++ llvmTypeRep fromTy ++ " " ++ fromVal
-        ++ " to " ++ llvmTypeRep toTy
+-- | LLVM code to convert PrimArg fromVal to representation toTy, returning a
+-- LLVMName holding the converted value.
+typeConverted :: PrimArg -> TypeRepresentation -> LLVM LLVMName
+typeConverted fromArg toTy
+    | argIsConst fromArg         = convertedConstant fromArg toTy
+    | otherwise = do
+        argRep <- argTypeRep fromArg
+        if  argRep == toTy
+            then llvmValue fromArg
+            else do
+                (writeArg,readArg) <- freshTempArgs $ Representation toTy
+                typeConvert fromArg writeArg
+                llvmValue readArg
+
+-- | An LLVM constant expression of the specified type toTy, when the constant
+-- is initially of the specified type fromTy.  This may take the form of an
+-- LLVM type conversion expression, which is fully evaluated at compile-time, so
+-- it cannot involve conversion instructions.
+convertedConstant :: PrimArg -> TypeRepresentation -> LLVM LLVMName
+convertedConstant arg toTy = do
+    -- XXX should verify that arg is constant, if ArgGlobal is considered const
+    fromTy <- argTypeRep arg
+    if trivialConstConversion fromTy toTy
+        then llvmValue arg
+        else do
+            fromVal <- llvmValue arg
+            return $ typeConvertOp fromTy toTy ++ "( " ++ fromVal
+                         ++ " to " ++ llvmTypeRep toTy ++ " )"
+
+-- Converting constants between these types is completely trivial, because the
+-- constant is automatically considered to have both types.
+trivialConstConversion (Bits _) (Bits _)         = True
+trivialConstConversion (Bits _) (Signed _)       = True
+trivialConstConversion (Signed _) (Signed _)     = True
+trivialConstConversion (Signed _) (Bits _)       = True
+trivialConstConversion (Floating _) (Floating _) = True
+trivialConstConversion _ _                       = False
 
 
 -- | The appropriate type conversion operator to convert from fromTy to toTy
@@ -1096,17 +1131,15 @@ type LLVMType = String
 -- | An LLVM global name, such as a function, variable or constant name; must
 --   begin with @, or an LLVM local variable name; must begin with %, or an LLVM
 --   constant value.
-type LLVMName = String              
+type LLVMName = String
 
 -- | Information we collect about external functions we call in a module, so we
 -- can declare them.
 type ExternSpec = (LLVMName, [TypeSpec], [TypeSpec])
 
 -- | Information needed to specify one constant value, giving the representation
--- to be stored, the representation used for the value, and the value itself.
--- XXX should change the last element to be a PrimArg after we introduce a
--- CString manifest constant argument constructor.
-type ConstSpec = (TypeRepresentation,TypeRepresentation,String)
+-- to be stored and the (constant) value itself.
+type ConstSpec = (PrimArg,TypeRepresentation)
 
 
 -- | The LLVM State monad
@@ -1347,6 +1380,13 @@ llvmProcName pspec = llvmGlobalName $ show pspec
 -- with @, enclose the rest in quotes, and escape any special characters.
 llvmGlobalName :: String -> LLVMName
 llvmGlobalName s = '@' : show s
+
+
+-- | Produce a suitable LLVM global name based on a GlobalInfo
+llvmGlobalInfoName :: GlobalInfo -> LLVM LLVMName
+llvmGlobalInfoName (GlobalResource res) =
+     llvmGlobalName . fst <$> llvmResource res
+llvmGlobalInfoName (GlobalVariable var) = return $ llvmGlobalName var
 
 
 -- | Make a suitable LLVM name for a foreign (e.g., C) function.  We just prefix

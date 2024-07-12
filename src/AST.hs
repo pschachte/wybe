@@ -3124,8 +3124,15 @@ data StringVariant = WybeString | CString
 
 -- Information about a global variable.
 -- A global variable is a variable that is available everywhere,
--- and can be access via an LPVM load instruction, or written to via an LPVM store
+-- and can be access via an LPVM load instruction, or written to via an LPVM
+-- store.  This is used to implement resources, or for other things represented
+-- as low level global constants or variables.  The latter case is used in
+-- manifest constant wybe strings, which are represented as a structure holding
+-- the string length and a pointer to a C-style string.  Eventually we want to
+-- use this for other cases of constant values appearing in Wybe code, such as a
+-- constant list.
 data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
+                | GlobalVariable { globalVarSpec :: Ident }
     deriving (Eq, Ord, Generic)
 
 
@@ -3410,6 +3417,8 @@ argIsConst ArgFloat{}          = True
 argIsConst ArgString{}         = True
 argIsConst ArgChar{}           = True
 argIsConst (ArgClosure _ as _) = all argIsConst as
+-- XXX Should we consider globals to be constants, since they are compile-time
+-- constant pointers, even if what they point to might not be constant?
 argIsConst ArgGlobal{}         = False
 argIsConst ArgUnneeded{}       = False
 argIsConst ArgUndef{}          = False
@@ -3934,12 +3943,13 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-  procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity ctor sub _) =
+  procdef@(ProcDef n proto def pos tmpCount _ _ vis detism inline impurity ctor
+                   sub _) =
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
     ++ showProcModifiers' (ProcModifiers detism inline impurity ctor False)
-    ++ "(" ++ show (procCallCount procdef) ++ " calls)"
+    ++ "(" ++ show (procCallCount procdef) ++ " calls, temp counter " ++ show tmpCount ++ ")"
     ++ showSuperProc sub
     ++ "\n"
     ++ show thisID ++ ": "
@@ -4219,7 +4229,7 @@ instance Show StringVariant where
 
 instance Show GlobalInfo where
     show (GlobalResource res) = "<<" ++ show res ++ ">>"
-
+    show (GlobalVariable res) = "@" ++ res
 
 
 showMap :: String -> String -> String -> (k->String) -> (v->String)
