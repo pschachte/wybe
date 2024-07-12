@@ -305,7 +305,7 @@ defGlobalResource res = do
 -- other modules and used by this one.
 writeAssemblyExterns :: LLVM ()
 writeAssemblyExterns = do
-    copyFn <- llvmMemcpyFn
+    copyFn <- llvmGlobalName <$> llvmMemcpyFn
     let spec = (copyFn, Representation <$> [CPointer,CPointer,Bits wordSize,Bits 1], [])
     externs <- (spec:) . Set.toList <$> gets allExterns
     mapM_ declareExtern externs
@@ -342,10 +342,8 @@ writeAssemblyProc mod def procNum =
     case procImpln def of
         ProcDefPrim {procImplnProcSpec=pspec, procImplnProto=proto,
                      procImplnBody=body, procImplnSpeczBodies=specz} -> do
-            let tmpCount = procTmpCount def
             logLLVM $ "Generating LLVM for proc " ++ show pspec
-                    ++ " with temp counter " ++ show tmpCount
-            modify $ \s -> s {tmpCounter = tmpCount}
+            initialiseLLVMForProc def
             let name = llvmProcName pspec
             (ins,outs,oRefs,iRefs) <- partitionParams $ primProtoParams proto
             unless (List.null iRefs)
@@ -500,7 +498,10 @@ writeActualCall wybeProc ins outs tailFlag = do
 writeLLVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeLLVMCall op flags args pos = do
     (ins,outs) <- partitionArgs ("llvm " ++ op ++ " instruction") args
+    logLLVM $ "llvm instr args " ++ show args ++ " => ins "
+             ++ show ins ++ " ; outs " ++ show outs
     argList <- llvmInstrArgumentList ins
+    logLLVM $ "translated arg list: " ++ argList
     case (ins,outs) of
         ([],[]) -> return () -- eliminate if all data flow was phantoms
         ([arg],[out@ArgVar{argVarName=outVar}]) ->
@@ -608,7 +609,8 @@ writeLPVMCall "mutate" _ args pos = do
                     logLLVM "Normal (non-take-reference) case"
                     llMember <- llvmArgument member
                     dest <- typeConverted ptrArg CPointer
-                    llvmPutStrLnIndented $ "store " ++ llMember ++ ", " ++ dest
+                    llvmPutStrLnIndented $ "store " ++ llMember
+                                            ++ ", ptr " ++ dest
                 ([],[takeRef]) -> do
                     -- FlowTakeReference case:  generate and record a fresh
                     -- local variable to hold the pointer to the location the
@@ -1165,9 +1167,22 @@ data LLVMState = LLVMState {
 }
 
 
+-- | Set up LLVM monad to translate a module into the given file handle
 initLLVMState :: Handle -> LLVMState
 initLLVMState h = LLVMState h 0 0 Set.empty Set.empty Set.empty
                      Map.empty Map.empty Nothing Map.empty
+
+
+-- | Reset the LLVM monad in preparation for translating the specified proc
+initialiseLLVMForProc :: ProcDef -> LLVM ()
+initialiseLLVMForProc def = do
+    modify $ \s -> s { tmpCounter = procTmpCount def
+                     , labelCounter = 0
+                     , varDefRenaming = Set.empty
+                     , varUseRenaming = Map.empty
+                     , deferredCall = Nothing
+                     , takeRefVars = Map.empty
+                     }
 
 
 type LLVM = StateT LLVMState Compiler
@@ -1432,9 +1447,7 @@ showLLVMChar char
 -- | The name of the LLVM memcpy intrinsic that applies to 2 CPointers and one
 -- Wybe int type argument.
 llvmMemcpyFn :: LLVM String
-llvmMemcpyFn =
-    llvmForeignName . ("llvm.memcpy.p0.p0." ++) . llvmTypeRep
-        <$> typeRep intType
+llvmMemcpyFn = ("llvm.memcpy.p0.p0." ++) . llvmTypeRep <$> typeRep intType
 
 
 ----------------------------------------------------------------------------
