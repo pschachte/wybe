@@ -37,7 +37,7 @@ module AST (
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   defaultTypeModifiers,
-  lookupTypeRepresentation, lookupModuleRepresentation,
+  lookupTypeRepresentation, lookupModuleRepresentation, argIsReal,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
   primProtoParamNames,
   protoRealParams, realParams, paramIsReal, paramIsNeeded,
@@ -3420,8 +3420,23 @@ argIsConst (ArgClosure _ as _) = all argIsConst as
 -- XXX Should we consider globals to be constants, since they are compile-time
 -- constant pointers, even if what they point to might not be constant?
 argIsConst ArgGlobal{}         = False
-argIsConst ArgUnneeded{}       = False
+argIsConst ArgUnneeded{}       = True
 argIsConst ArgUndef{}          = False
+
+
+-- | Test if a PrimArg actually needs to be passed; ie, it is not a phantom type
+-- and is not unneeded.
+argIsReal :: PrimArg -> Compiler Bool
+argIsReal ArgVar{argVarType=ty} = not <$> typeIsPhantom ty
+argIsReal ArgInt{}              = return True
+argIsReal ArgFloat{}            = return True
+argIsReal ArgString{}           = return True
+argIsReal ArgChar{}             = return True
+argIsReal (ArgClosure _ as _)   = return True
+argIsReal (ArgGlobal _ ty)      = not <$> typeIsPhantom ty
+argIsReal ArgUnneeded{}         = return False
+argIsReal ArgUndef{}            = return True
+
 
 
 -- | Return Just the integer constant value if a PrimArg iff it is an integer

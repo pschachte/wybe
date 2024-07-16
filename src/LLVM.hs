@@ -918,9 +918,9 @@ llvmValue (ArgString str _ _) =
             . Map.lookup str
             . stringConstants
 llvmValue (ArgChar val _) = return $ show $ fromEnum val
-llvmValue (ArgClosure _ val _) = return $ show val -- XXX not sure what to do
+llvmValue cl@ArgClosure{} = nyi $ "passing closure argument " ++ show cl
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
-llvmValue (ArgUnneeded val _) = return $ show val  -- XXX not sure what to do
+llvmValue (ArgUnneeded val _) = shouldnt "llvm value of unneeded arg"
 llvmValue (ArgUndef _) = return "undef"
 
 
@@ -972,8 +972,8 @@ convertedConstant arg toTy = do
     if trivialConstConversion fromTy toTy
         then llvmValue arg
         else do
-            fromVal <- llvmValue arg
-            return $ typeConvertOp fromTy toTy ++ "( " ++ fromVal
+            fromArg <- llvmArgument arg
+            return $ typeConvertOp fromTy toTy ++ "( " ++ fromArg
                          ++ " to " ++ llvmTypeRep toTy ++ " )"
 
 -- Converting constants between these types is completely trivial, because the
@@ -1059,8 +1059,7 @@ duplicateStruct struct startOffset size newStruct = do
 partitionParams :: [PrimParam]
                 -> LLVM ([PrimParam],[PrimParam],[PrimParam],[PrimParam])
 partitionParams params = do
-    realParams <- lift $ filterM (notM . typeIsPhantom . primParamType) params
-    return $ partitionByFlow primParamFlow realParams
+    partitionByFlow primParamFlow <$> lift (realParams params)
 
 
 -- | Split argument list into separate list of inputs and outputs, after
@@ -1079,7 +1078,7 @@ partitionArgs op args = do
 partitionArgsWithRefs :: [PrimArg]
                       -> LLVM ([PrimArg],[PrimArg],[PrimArg],[PrimArg])
 partitionArgsWithRefs args = do
-    realArgs <- lift $ filterM (notM . argIsPhantom) args
+    realArgs <- lift $ filterM argIsReal args
     return $ partitionByFlow argFlowDirection realArgs
 
 
