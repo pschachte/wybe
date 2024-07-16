@@ -575,7 +575,7 @@ writeLPVMCall "access" _ args pos = do
                         return readArg
             lltype <- llvmTypeRep <$> argTypeRep member
             arg <- typeConverted addrArg CPointer
-            llvmStoreResult outs $ "load " ++ lltype ++ ", ptr " ++ arg
+            llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
         (ins,outs) ->
             shouldnt $ "lpvm access with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
@@ -610,7 +610,7 @@ writeLPVMCall "mutate" _ args pos = do
                     llMember <- llvmArgument member
                     dest <- typeConverted ptrArg CPointer
                     llvmPutStrLnIndented $ "store " ++ llMember
-                                            ++ ", ptr " ++ dest
+                                            ++ ", " ++ dest
                 ([],[takeRef]) -> do
                     -- FlowTakeReference case:  generate and record a fresh
                     -- local variable to hold the pointer to the location the
@@ -731,16 +731,9 @@ declareStructConstant name fields section = do
 -- | Build a string giving the body of an llvm constant structure declaration
 llvmConstStruct :: [ConstSpec] -> LLVM String
 llvmConstStruct fields = do
-    llvmVals <- mapM (uncurry llvmConstField) fields
+    llvmVals <- mapM (uncurry convertedConstant) fields
     return $ llvmRepReturnType (snd <$> fields)
             ++ " { " ++ intercalate ", " llvmVals ++ " }"
-
-
--- | Produce an LLVM string of type and constant value
-llvmConstField :: PrimArg -> TypeRepresentation -> LLVM String
-llvmConstField fromArg toTy = do
-    val <- convertedConstant fromArg toTy
-    return $ llvmTypeRep toTy ++ " " ++ val
 
 
 -- | Generate an LLVM load instruction to load from the specified address into
@@ -749,7 +742,7 @@ llvmLoad :: PrimArg -> PrimArg -> LLVM ()
 llvmLoad ptr outVar = do
     lltype <- llvmTypeRep <$> argTypeRep outVar
     arg <- typeConverted ptr CPointer
-    llvmStoreResult [outVar] $ "load " ++ lltype ++ ", ptr " ++ arg
+    llvmStoreResult [outVar] $ "load " ++ lltype ++ ", " ++ arg
 
 
 -- | Return the representation for the specified type
@@ -878,19 +871,20 @@ unpackArg typ tuple arg argNum = do
 -- | Marshall data being passed to C code.  Emits code to transform the argument
 -- to the expected format for C code, and returns the llvm argument to actually
 -- pass to the C function.
-marshallArgument :: PrimArg -> String -> LLVM String
+marshallArgument :: PrimArg -> String -> LLVM LLVMArg
 marshallArgument arg cType = do
     let outTypeRep = trustFromJust
             ("marshalling argument with unknown C type " ++ cType)
             $ cTypeRepresentation cType
     inTypeRep <- argTypeRep arg
     if inTypeRep == outTypeRep then llvmArgument arg
-    else do
-        (writeTmp,readTmp) <- freshTempArgs $ Representation outTypeRep
-        tmp <- makeTemp
-        llVal <- llvmValue arg
-        typeConvert arg writeTmp
-        llvmArgument readTmp
+    else typeConverted arg outTypeRep
+    -- else do
+    --     (writeTmp,readTmp) <- freshTempArgs $ Representation outTypeRep
+    --     tmp <- makeTemp
+    --     llVal <- llvmValue arg
+    --     typeConvert arg writeTmp
+    --     llvmArgument readTmp
 
 
 -- | The LLVM type of the specified 
@@ -900,7 +894,7 @@ argTypeRep arg = typeRep $ argType arg
 
 
 -- | The LLVM argument for the specified PrimArg as an LLVM type and value
-llvmArgument :: PrimArg -> LLVM String
+llvmArgument :: PrimArg -> LLVM LLVMArg
 llvmArgument arg = do
     lltype <- llvmTypeRep <$> argTypeRep arg
     llVal <- llvmValue arg
@@ -949,32 +943,33 @@ typeConvert fromArg toArg = do
 
 -- | LLVM code to convert PrimArg fromVal to representation toTy, returning a
 -- LLVMName holding the converted value.
-typeConverted :: PrimArg -> TypeRepresentation -> LLVM LLVMName
+typeConverted :: PrimArg -> TypeRepresentation -> LLVM LLVMArg
 typeConverted fromArg toTy
-    | argIsConst fromArg         = convertedConstant fromArg toTy
+    | argIsConst fromArg = convertedConstant fromArg toTy
     | otherwise = do
         argRep <- argTypeRep fromArg
         if  argRep == toTy
-            then llvmValue fromArg
+            then llvmArgument fromArg
             else do
                 (writeArg,readArg) <- freshTempArgs $ Representation toTy
                 typeConvert fromArg writeArg
-                llvmValue readArg
+                llvmArgument readArg
 
 -- | An LLVM constant expression of the specified type toTy, when the constant
 -- is initially of the specified type fromTy.  This may take the form of an
 -- LLVM type conversion expression, which is fully evaluated at compile-time, so
 -- it cannot involve conversion instructions.
-convertedConstant :: PrimArg -> TypeRepresentation -> LLVM LLVMName
+convertedConstant :: PrimArg -> TypeRepresentation -> LLVM LLVMArg
 convertedConstant arg toTy = do
     -- XXX should verify that arg is constant, if ArgGlobal is considered const
     fromTy <- argTypeRep arg
+    let llvmTy = llvmTypeRep toTy
     if trivialConstConversion fromTy toTy
-        then llvmValue arg
+        then ((llvmTy++" ") ++) <$> llvmValue arg
         else do
             fromArg <- llvmArgument arg
-            return $ typeConvertOp fromTy toTy ++ "( " ++ fromArg
-                         ++ " to " ++ llvmTypeRep toTy ++ " )"
+            return $ llvmTy ++ " " ++ typeConvertOp fromTy toTy ++ "( "
+                         ++ fromArg ++ " to " ++ llvmTy ++ " )"
 
 -- Converting constants between these types is completely trivial, because the
 -- constant is automatically considered to have both types.
@@ -1129,10 +1124,13 @@ partitionByFlow fn lst =
 -- | An LLVM type name, such as i8
 type LLVMType = String
 
--- | An LLVM global name, such as a function, variable or constant name; must
---   begin with @, or an LLVM local variable name; must begin with %, or an LLVM
+-- | An LLVM global name, such as a function, variable or constant name, which must
+--   begin with @; or an LLVM local variable name, which must begin with %; or an LLVM
 --   constant value.
 type LLVMName = String
+
+-- | An LLVM value (constant or LLVMName), preceded by and LLVMType
+type LLVMArg = String
 
 -- | Information we collect about external functions we call in a module, so we
 -- can declare them.
@@ -1433,7 +1431,7 @@ showLLVMString str zeroTerminator =
 -- | Format a single character as a character in an LLVM string.
 showLLVMChar :: Char -> String
 showLLVMChar char
-    | char == '\\'               = "\\"
+    | char == '\\'               = "\\\\"
     | char == '"'                = "\\22"
     | char >= ' ' && char <= '~' = [char]
     | otherwise                  =
