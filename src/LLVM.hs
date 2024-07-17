@@ -413,7 +413,7 @@ writeAssemblyPrim instr@(PrimCall _ proc _ args _) pos = do
 writeAssemblyPrim instr@(PrimHigher _ fn _ args) pos = do
     releaseDeferredCall
     logLLVM $ "Translating HO call " ++ show instr
-    llvmPutStrLnIndented $ "call " ++ show fn ++ show args
+    writeHOCall fn args pos
 writeAssemblyPrim instr@(PrimForeign "llvm" op flags args) pos = do
     releaseDeferredCall
     logLLVM $ "Translating LLVM instruction " ++ show instr
@@ -481,6 +481,26 @@ writeWybeCall wybeProc args pos = do
         writeActualCall wybeProc ins outs "tail "
     else
         deferCall wybeProc ins outs oRefs
+
+
+-- | Generate a Wybe proc call instruction, or defer it if necessary.
+writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
+writeHOCall callee args pos = do
+    (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
+    let hoCall = PrimHigher 0 callee Pure args
+    unless (List.null iRefs)
+     $ shouldnt $ "Higher order call " ++ show hoCall
+                ++ " with take-reference arg"
+    unless (List.null oRefs && List.null iRefs)
+     $ nyi $ "Higher order call with out-by-ref or take-ref argument "
+            ++ show hoCall
+    outTy <- llvmReturnType $ List.map argType outs
+    (writeArg,readArg) <- freshTempArgs $ Representation CPointer
+    typeConvert callee writeArg
+    fnVar <- llvmValue readArg
+    argList <- llvmArgumentList ins
+    llvmStoreResult outs $
+        "tail call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
 
 
 -- | Actually generate a Wybe proc call.  tailFlag indicates what degree of LLVM
@@ -879,12 +899,6 @@ marshallArgument arg cType = do
     inTypeRep <- argTypeRep arg
     if inTypeRep == outTypeRep then llvmArgument arg
     else typeConverted arg outTypeRep
-    -- else do
-    --     (writeTmp,readTmp) <- freshTempArgs $ Representation outTypeRep
-    --     tmp <- makeTemp
-    --     llVal <- llvmValue arg
-    --     typeConvert arg writeTmp
-    --     llvmArgument readTmp
 
 
 -- | The LLVM type of the specified 
@@ -948,7 +962,7 @@ typeConverted fromArg toTy
     | argIsConst fromArg = convertedConstant fromArg toTy
     | otherwise = do
         argRep <- argTypeRep fromArg
-        if  argRep == toTy
+        if argRep == toTy
             then llvmArgument fromArg
             else do
                 (writeArg,readArg) <- freshTempArgs $ Representation toTy
@@ -982,6 +996,7 @@ trivialConstConversion _ _                       = False
 
 
 -- | The appropriate type conversion operator to convert from fromTy to toTy
+typeConvertOp :: TypeRepresentation -> TypeRepresentation -> String
 typeConvertOp fromTy toTy
     | fromTy == toTy = "bitcast" -- use bitcast for no-op conversion
 typeConvertOp (Bits n) Pointer = "bitcast"
@@ -1020,6 +1035,7 @@ typeConvertOp (Floating m) (Floating n)
     | m < n = "fpext"
     | n < m = "fptrunc"
     | otherwise = shouldnt "no-op floating point conversion"
+typeConvertOp (Func _ _) CPointer = "inttoptr"
 typeConvertOp repIn toTy =
     shouldnt $ "Don't know how to convert from " ++ show repIn
                  ++ " to " ++ show toTy
