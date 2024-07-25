@@ -1057,7 +1057,8 @@ duplicateStruct struct startOffset size newStruct = do
     (writeCPtr,readCPtr) <- freshTempArgs $ Representation CPointer
     marshalledCCall "wybe_malloc" [] [size,writeCPtr] ["int","pointer"] Nothing
     copyfn <- llvmMemcpyFn
-    writeCCall copyfn [] [readCPtr,readStartCPtr,size] Nothing
+    let nonvolatile = ArgInt 0 $ Representation $ Bits 1
+    writeCCall copyfn [] [readCPtr,readStartCPtr,size,nonvolatile] Nothing
     (writePtr,readPtr) <- freshTempArgs $ Representation Pointer
     typeConvert readCPtr writePtr
     case startOffset of
@@ -1458,7 +1459,7 @@ showLLVMChar char
 
 
 -- | The name of the LLVM memcpy intrinsic that applies to 2 CPointers and one
--- Wybe int type argument.
+-- Wybe int type argument (there's also a Boolean flag).
 llvmMemcpyFn :: LLVM String
 llvmMemcpyFn = ("llvm.memcpy.p0.p0." ++) . llvmTypeRep <$> typeRep intType
 
