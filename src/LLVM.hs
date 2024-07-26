@@ -158,7 +158,7 @@ llvmMapBinop =
             binaryInstr "fcmp_ugt"  FloatFamily SizeFromInputs  True,
             binaryInstr "fcmp_uge"  FloatFamily SizeFromInputs  True,
             binaryInstr "fcmp_uno"  FloatFamily SizeFromInputs  True,
-            binaryInstr "fcmp_true" FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_true" FloatFamily SizeFromInputs  True
            ]
 
 
