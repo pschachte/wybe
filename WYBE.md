@@ -2214,18 +2214,38 @@ Floating point multiplication
 Floating point division
 - `foreign llvm frem(`arg1:float, arg2:float`)`:float
 Floating point remainder
-- `foreign llvm fcmp_eq(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_ord(`arg1:float, arg2:float`)`:bool
+Floating point ordered (neither is a NaN)
+- `foreign llvm fcmp_oeq(`arg1:float, arg2:float`)`:bool
 Floating point equality
-- `foreign llvm fcmp_ne(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_one(`arg1:float, arg2:float`)`:bool
 Floating point disequality
-- `foreign llvm fcmp_slt(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_olt(`arg1:float, arg2:float`)`:bool
 Floating point (signed) strictly less
-- `foreign llvm fcmp_sle(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_ole(`arg1:float, arg2:float`)`:bool
 Floating point (signed) less or equal
-- `foreign llvm fcmp_sgt(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_ogt(`arg1:float, arg2:float`)`:bool
 Floating point (signed) strictly greater
-- `foreign llvm fcmp_sge(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_oge(`arg1:float, arg2:float`)`:bool
 Floating point (signed) greater or equal
+- `foreign llvm fcmp_ord(`arg1:float, arg2:float`)`:bool
+Floating point unordered (either is a NaN)
+- `foreign llvm fcmp_ueq(`arg1:float, arg2:float`)`:bool
+Floating point unordered or equal
+- `foreign llvm fcmp_une(`arg1:float, arg2:float`)`:bool
+Floating point unordered or not equal
+- `foreign llvm fcmp_ult(`arg1:float, arg2:float`)`:bool
+Floating point unordered or strictly less
+- `foreign llvm fcmp_ule(`arg1:float, arg2:float`)`:bool
+Floating point unordered or less or equal
+- `foreign llvm fcmp_ugt(`arg1:float, arg2:float`)`:bool
+Floating point unordered or strictly greater
+- `foreign llvm fcmp_uge(`arg1:float, arg2:float`)`:bool
+Floating point unordered or greater or equal
+- `foreign llvm fcmp_true(`arg1:float, arg2:float`)`:bool
+Always returns true with no comparison
+- `foreign llvm fcmp_false(`arg1:float, arg2:float`)`:bool
+Always returns false with no comparison
 
 #####  <a name="conversion"></a>Integer/floating point conversion
 

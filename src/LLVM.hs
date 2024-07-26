@@ -6,7 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 
-module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM ) where
+module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM, BinOpInfo(..) ) where
 
 import           AST
 import           ASTShow
@@ -22,6 +22,7 @@ import           Data.Set                        as Set
 import qualified Data.Map                        as Map
 import           Data.Map                        (Map)
 import           Data.List                       as List
+import           Data.List.Extra
 import           Data.Maybe
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
@@ -72,62 +73,110 @@ import qualified Data.ByteString.Internal        as BI
 ----------------------------------------------------------------------------
 
 
--- | A map of arithmetic binary operations supported through LLVM to
--- their Codegen module counterpart.
-llvmMapBinop :: Map Ident (String,
-                    TypeFamily, TypeRepresentation -> TypeRepresentation)
+-- | How to determine the sizes of the inputs of a binary llvm instruction. The
+-- compiler handles arguments of different sizes, which may be different from
+-- the output size.  Both arguments in the generated instruction must have the
+-- same size.  If the specified LLVMArgSize of an instruction is SizeFromOutput,
+-- then both arguments must be converted to the type of the output before the
+-- instruction.  If it is SizeFromInputs, then both arguments must be converted
+-- to the type of the larger input argument.  For SizeFromLargest, both inputs
+-- must be converted to the type of the largest of the inputs and output, and
+-- the result must be converted (truncated if necessary) to the expected output
+-- type.
+data LLVMArgSize = SizeFromOutput | SizeFromInputs | SizeFromLargest
+
+
+data BinOpInfo = BinOpInfo {
+    binOpInstr :: String,           -- ^ full llvm instruction
+    binOpFamily :: TypeFamily,      -- ^ Type family of inputs
+    binOpArgSize :: LLVMArgSize,    -- ^ How to convert arguments and result
+    binOpResultFn :: TypeRepresentation -> TypeRepresentation
+                                    -- ^ Determine result representation from
+                                    --   (common) argument representation
+}
+
+-- | Create a mapping for a binary instruction given its argument family, how to
+-- convert the arguments, and whether the operation returns a Boolean (otherwise
+-- it returns the same type as the arguments).
+binaryInstr :: String -> TypeFamily -> LLVMArgSize -> Bool -> (String,BinOpInfo)
+binaryInstr instr family argSize toBool =
+    (instr, BinOpInfo (unwords $ wordsBy (=='_') instr) family argSize
+                $ if toBool then const $ Bits 1 else id)
+
+
+-- | A map of arithmetic binary operations supported by LLVM to the info we need
+-- to know to compile calls to them.
+llvmMapBinop :: Map Ident BinOpInfo
 llvmMapBinop =
     Map.fromList [
             -- Integer arithmetic
-            ("add",  ("add",  IntFamily, id)),
-            ("sub",  ("sub",  IntFamily, id)),
-            ("mul",  ("mul",  IntFamily, id)),
-            ("udiv", ("udiv", IntFamily, id)),
-            ("sdiv", ("sdiv", IntFamily, id)),
-            ("urem", ("urem", IntFamily, id)),
-            ("srem", ("srem", IntFamily, id)),
+            binaryInstr "add"       IntFamily   SizeFromLargest False,
+            binaryInstr "sub"       IntFamily   SizeFromLargest False,
+            binaryInstr "mul"       IntFamily   SizeFromLargest False,
+            binaryInstr "udiv"      IntFamily   SizeFromLargest False,
+            binaryInstr "sdiv"      IntFamily   SizeFromLargest False,
+            binaryInstr "urem"      IntFamily   SizeFromLargest False,
+            binaryInstr "srem"      IntFamily   SizeFromLargest False,
             -- Integer comparisions
-            ("icmp_eq",  ("icmp eq",  IntFamily, const $ Bits 1)),
-            ("icmp_ne",  ("icmp ne",  IntFamily, const $ Bits 1)),
-            ("icmp_ugt", ("icmp ugt", IntFamily, const $ Bits 1)),
-            ("icmp_uge", ("icmp uge", IntFamily, const $ Bits 1)),
-            ("icmp_ult", ("icmp ult", IntFamily, const $ Bits 1)),
-            ("icmp_ule", ("icmp ule", IntFamily, const $ Bits 1)),
-            ("icmp_sgt", ("icmp sgt", IntFamily, const $ Bits 1)),
-            ("icmp_sge", ("icmp sge", IntFamily, const $ Bits 1)),
-            ("icmp_slt", ("icmp slt", IntFamily, const $ Bits 1)),
-            ("icmp_sle", ("icmp sle", IntFamily, const $ Bits 1)),
+            binaryInstr "icmp_eq"   IntFamily   SizeFromInputs  True,
+            binaryInstr "icmp_ne"   IntFamily   SizeFromInputs  True,
+            binaryInstr "icmp_ugt"  IntFamily   SizeFromInputs  True,
+            binaryInstr "icmp_uge"  IntFamily   SizeFromInputs  True,
+            binaryInstr "icmp_ult"  IntFamily   SizeFromInputs  True,
+            binaryInstr "icmp_ule"  IntFamily   SizeFromInputs  True,
+            binaryInstr "icmp_sgt"  IntFamily   SizeFromInputs  True,
+            binaryInstr "icmp_sge"  IntFamily   SizeFromInputs  True,
+            binaryInstr "icmp_slt"  IntFamily   SizeFromInputs  True,
+            binaryInstr "icmp_sle"  IntFamily   SizeFromInputs  True,
             -- Bitwise operations
-            ("shl",  ("shl",  IntFamily, id)),
-            ("lshr", ("lshr", IntFamily, id)),
-            ("ashr", ("ashr", IntFamily, id)),
-            ("or",   ("or",   IntFamily, id)),
-            ("and",  ("and",  IntFamily, id)),
-            ("xor",  ("xor",  IntFamily, id)),
+            binaryInstr "shl"       IntFamily   SizeFromOutput  False,
+            binaryInstr "lshr"      IntFamily   SizeFromInputs  False,
+            binaryInstr "ashr"      IntFamily   SizeFromInputs  False,
+            binaryInstr "or"        IntFamily   SizeFromOutput  False,
+            binaryInstr "and"       IntFamily   SizeFromOutput  False,
+            binaryInstr "xor"       IntFamily   SizeFromOutput  False,
 
             -- Floating point arithmetic
-            ("fadd", ("fadd", FloatFamily, id)),
-            ("fsub", ("fsub", FloatFamily, id)),
-            ("fmul", ("fmul", FloatFamily, id)),
-            ("fdiv", ("fdiv", FloatFamily, id)),
-            ("frem", ("frem", FloatFamily, id)),
+            binaryInstr "fadd"      FloatFamily SizeFromLargest False,
+            binaryInstr "fsub"      FloatFamily SizeFromLargest False,
+            binaryInstr "fmul"      FloatFamily SizeFromLargest False,
+            binaryInstr "fdiv"      FloatFamily SizeFromLargest False,
+            binaryInstr "frem"      FloatFamily SizeFromLargest False,
             -- Floating point comparisions
-            ("fcmp_eq",  ("fcmp oeq",  FloatFamily, const $ Bits 1)),
-            ("fcmp_ne",  ("fcmp one",  FloatFamily, const $ Bits 1)),
-            ("fcmp_slt", ("fcmp olt", FloatFamily, const $ Bits 1)),
-            ("fcmp_sle", ("fcmp ole", FloatFamily, const $ Bits 1)),
-            ("fcmp_sgt", ("fcmp ogt", FloatFamily, const $ Bits 1)),
-            ("fcmp_sge", ("fcmp oge", FloatFamily, const $ Bits 1))
+            binaryInstr "fcmp_false" FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_oeq"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_one"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_olt"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_ole"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_ogt"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_oge"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_ord"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_ueq"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_une"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_ult"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_ule"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_ugt"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_uge"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_uno"  FloatFamily SizeFromInputs  True,
+            binaryInstr "fcmp_true" FloatFamily SizeFromInputs  True,
            ]
+
+
+-- | Create a mapping for a unary instruction given its input and output
+-- argument families.
+unaryInstr :: String -> TypeFamily -> TypeFamily
+           -> (String,(TypeFamily,TypeFamily))
+unaryInstr instr inFamily outFamily = (instr, (inFamily,outFamily))
+
 
 -- | A map of unary llvm operations wrapped in the 'Codegen' module.
 llvmMapUnop :: Map String (TypeFamily, TypeFamily)
 llvmMapUnop =
     Map.fromList [
-            ("uitofp", (IntFamily, FloatFamily)),
-            ("sitofp", (IntFamily, FloatFamily)),
-            ("fptoui", (FloatFamily, IntFamily)),
-            ("fptosi", (FloatFamily, IntFamily))
+            unaryInstr "uitofp" IntFamily   FloatFamily,
+            unaryInstr "sitofp" IntFamily   FloatFamily,
+            unaryInstr "fptoui" FloatFamily IntFamily,
+            unaryInstr "fptosi" FloatFamily IntFamily
            ]
 
 
@@ -428,7 +477,6 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
 -- Generating and emitting LLVM for a single LPVM Prim instruction
 ----------------------------------------------------------------------------
 
---
 
 -- | Generate and write out the LLVM code for a single LPVM prim
 writeAssemblyPrim :: Prim -> OptPos -> LLVM ()
@@ -546,21 +594,21 @@ writeLLVMCall op flags args pos = do
     (ins,outs) <- partitionArgs ("llvm " ++ op ++ " instruction") args
     logLLVM $ "llvm instr args " ++ show args ++ " => ins "
              ++ show ins ++ " ; outs " ++ show outs
-    argList <- llvmInstrArgumentList ins
-    logLLVM $ "translated arg list: " ++ argList
     case (ins,outs) of
         ([],[]) -> return () -- eliminate if all data flow was phantoms
-        ([arg],[out@ArgVar{argVarName=outVar}]) ->
+        ([arg],[out@ArgVar{}]) ->
             if op == "move" then
                 typeConvert arg out
             else if op `Map.member` llvmMapUnop then do
                 outTy <- llvmTypeRep <$> argTypeRep out
-                llvmStoreResult outs $ op ++ " " ++ argList ++ " to " ++ outTy
+                llvmArg <- llvmArgument arg
+                llvmStoreResult outs $ op ++ " " ++ llvmArg ++ " to " ++ outTy
             else shouldnt $ "unknown unary llvm op " ++ op
         ([_,_],_) -> do
             let instr =
-                    fst3 $ trustFromJust ("unknown binary llvm op " ++ op)
+                    binOpInstr $ trustFromJust ("unknown binary llvm op " ++ op)
                     $ Map.lookup op llvmMapBinop
+            argList <- llvmInstrArgumentList ins
             llvmStoreResult outs $ instr ++ " " ++ argList
         _ -> shouldnt $ "unknown llvm op " ++ op ++ " (arity "
                          ++ show (length ins) ++ ")"
@@ -862,7 +910,9 @@ llvmStringArgList :: [String] -> String
 llvmStringArgList = ('(':). (++")") . intercalate ", "
 
 
--- | The LLVM translation of the specified LLVM instruction argument list
+-- | The LLVM translation of the specified LLVM instruction argument list.
+-- Since all arguments of these instructions must have the same types, the type
+-- is only shown once, at the front.
 llvmInstrArgumentList :: [PrimArg] -> LLVM String
 llvmInstrArgumentList [] = return ""
 llvmInstrArgumentList inputs@(in1:_) = do

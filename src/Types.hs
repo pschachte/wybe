@@ -34,7 +34,7 @@ import           Resources
 import           Util
 import           Config
 import           Snippets
-import           LLVM                (llvmMapBinop, llvmMapUnop)
+import           LLVM                (llvmMapBinop, llvmMapUnop, BinOpInfo(..))
 import Data.Tuple.HT (mapSnd)
 
 
@@ -2782,12 +2782,11 @@ validateForeignCall "llvm" "move" _ [inRep,outRep] stmt pos
   | otherwise       = typeError (ReasonWrongOutput "move" outRep inRep pos)
 validateForeignCall "llvm" "move" _ argReps stmt pos =
     typeError (ReasonForeignArity "move" (length argReps) 2 pos)
-validateForeignCall "llvm" name flags argReps stmt pos = do
-    let arity = length argReps
+validateForeignCall "llvm" name flags argReps stmt pos =
     case argReps of
         [inRep1,inRep2,outRep] ->
           case Map.lookup name llvmMapBinop of
-             Just (_,fam,outTy) -> do
+             Just (BinOpInfo _ fam _ outTy) -> do
                reportErrorUnless (ReasonWrongFamily name 1 fam pos)
                                  (fam == typeFamily inRep1)
                reportErrorUnless (ReasonWrongFamily name 2 fam pos)
@@ -2796,7 +2795,7 @@ validateForeignCall "llvm" name flags argReps stmt pos = do
                                  (compatibleReps inRep1 inRep2)
              Nothing ->
                if isJust $ Map.lookup name llvmMapUnop
-               then typeError (ReasonForeignArity name arity 2 pos)
+               then typeError (ReasonForeignArity name 3 2 pos)
                else typeError (ReasonBadForeign "llvm" name pos)
         [inRep,outRep] ->
           case Map.lookup name llvmMapUnop of
@@ -2805,13 +2804,14 @@ validateForeignCall "llvm" name flags argReps stmt pos = do
                                  (famIn == typeFamily inRep)
              Nothing ->
                if isJust $ Map.lookup name llvmMapBinop
-               then typeError (ReasonForeignArity name arity 3 pos)
+               then typeError (ReasonForeignArity name 2 3 pos)
                else typeError (ReasonBadForeign "llvm" name pos)
-        _ -> if isJust $ Map.lookup name llvmMapBinop
-             then typeError (ReasonForeignArity name arity 3 pos)
-             else if isJust $ Map.lookup name llvmMapUnop
-                  then typeError (ReasonForeignArity name arity 2 pos)
-                  else typeError (ReasonBadForeign "llvm" name pos)
+        _ -> let arity = length argReps
+             in if isJust $ Map.lookup name llvmMapBinop
+                then typeError (ReasonForeignArity name arity 3 pos)
+                else if isJust $ Map.lookup name llvmMapUnop
+                then typeError (ReasonForeignArity name arity 2 pos)
+                else typeError (ReasonBadForeign "llvm" name pos)
 validateForeignCall "lpvm" name flags argReps stmt pos =
     checkLPVMArgs name flags argReps stmt pos
 validateForeignCall lang name flags argReps stmt pos =

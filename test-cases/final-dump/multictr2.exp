@@ -493,7 +493,7 @@ proc = > public (1 calls)
                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    foreign llvm fcmp_eq(~#left#f08_c##0:wybe.float, ~#right#f08_c##0:wybe.float, ?#success##0:wybe.bool) @float:nn:nn
+                    foreign llvm fcmp_oeq(~#left#f08_c##0:wybe.float, ~#right#f08_c##0:wybe.float, ?#success##0:wybe.bool) @float:nn:nn
 
 
 

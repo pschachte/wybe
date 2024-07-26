@@ -5591,7 +5591,7 @@ proc = > public (1 calls)
 
             1:
                 foreign lpvm access(~#right##0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#right#float_value##0:wybe.float) @multictr:nn:nn
-                foreign llvm fcmp_eq(~#left#float_value##0:wybe.float, ~#right#float_value##0:wybe.float, ?#success##0:wybe.bool) @float:nn:nn
+                foreign llvm fcmp_oeq(~#left#float_value##0:wybe.float, ~#right#float_value##0:wybe.float, ?#success##0:wybe.bool) @float:nn:nn
 
 
 

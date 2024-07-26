@@ -1346,12 +1346,12 @@ llvmMapBinop =
             ("fdiv", (fdiv, FloatFamily, id)),
             ("frem", (frem, FloatFamily, id)),
             -- Floating point comparisions
-            ("fcmp_eq",  (fcmp FP.OEQ, FloatFamily, const $ Bits 1)),
-            ("fcmp_ne",  (fcmp FP.ONE, FloatFamily, const $ Bits 1)),
-            ("fcmp_slt", (fcmp FP.OLT, FloatFamily, const $ Bits 1)),
-            ("fcmp_sle", (fcmp FP.OLE, FloatFamily, const $ Bits 1)),
-            ("fcmp_sgt", (fcmp FP.OGT, FloatFamily, const $ Bits 1)),
-            ("fcmp_sge", (fcmp FP.OGE, FloatFamily, const $ Bits 1))
+            ("fcmp_oeq",  (fcmp FP.OEQ, FloatFamily, const $ Bits 1)),
+            ("fcmp_one",  (fcmp FP.ONE, FloatFamily, const $ Bits 1)),
+            ("fcmp_olt", (fcmp FP.OLT, FloatFamily, const $ Bits 1)),
+            ("fcmp_ole", (fcmp FP.OLE, FloatFamily, const $ Bits 1)),
+            ("fcmp_ogt", (fcmp FP.OGT, FloatFamily, const $ Bits 1)),
+            ("fcmp_oge", (fcmp FP.OGE, FloatFamily, const $ Bits 1))
            ]
 
 -- | A map of unary llvm operations wrapped in the 'Codegen' module.
