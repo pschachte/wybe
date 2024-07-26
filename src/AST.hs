@@ -55,8 +55,8 @@ module AST (
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, validModuleName, maybeModPrefix,
-  ProcImpln(..), ProcDef(..), procBody, procInline, procCallCount,
-  transformModuleProcs,
+  ProcImpln(..), ProcDef(..), procBody, allProcBodies, procInline,
+  procCallCount, transformModuleProcs,
   getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
@@ -163,7 +163,7 @@ import           GHC.Generics (Generic)
 
 -- import qualified LLVM.AST as LLVMAST
 import Data.Binary (Binary)
-import Data.Maybe (Maybe(Nothing))
+import Data.Maybe (Maybe(Nothing), catMaybes)
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -1998,6 +1998,17 @@ procBody def =
     case procImpln def of
         ProcDefSrc{}                     -> Nothing
         ProcDefPrim{procImplnBody=body}  -> Just body
+
+
+-- | Return all the LPVM-form proc bodies available, including the main body and
+-- all specialisations.  Anything that hasn't been compiled to LPVM is silently
+-- omitted.
+allProcBodies :: ProcDef -> [ProcBody]
+allProcBodies def =
+    case procImpln def of
+        ProcDefSrc{}                     -> []
+        ProcDefPrim{procImplnBody=body, procImplnSpeczBodies=specz} ->
+             body : catMaybes (Map.elems specz)
 
 
 -- |Whether this proc should definitely be inlined, either because the user said
