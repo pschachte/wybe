@@ -501,7 +501,8 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
                 (_,[single],Nothing) -> writeAssemblyBody outs single
                 (Bits 1, [els,thn],Nothing) -> writeAssemblyIfElse outs v thn els
                 (Bits _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
-                (rep,_,_) -> llvmPutStrLn $ "Switching on " ++ show rep ++ " type "
+                (Signed _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
+                (rep,_,_) -> shouldnt $ "Switching on " ++ show rep ++ " type "
                                 ++ show ty
 
 
