@@ -33,6 +33,7 @@ import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
+import Config (wordSize)
 
 
 -- BEGIN MAJOR DOC
@@ -84,6 +85,37 @@ import qualified Data.ByteString.Internal        as BI
 -- the result must be converted (truncated if necessary) to the expected output
 -- type.
 data LLVMArgSize = SizeFromOutput | SizeFromInputs | SizeFromLargest
+    deriving Eq
+
+
+-- | Determine the type representations of the inputs of a binary LLVM
+-- instruction, given the LLVMArgSize policy, the representation of the output,
+-- and the representations of the inputs.  These instructions require both
+-- arguments to be the same size.
+resolveLLVMArgType :: LLVMArgSize -> TypeRepresentation -> [TypeRepresentation]
+                   -> TypeRepresentation
+resolveLLVMArgType SizeFromOutput outTy _ = outTy
+resolveLLVMArgType SizeFromInputs _ inTys = List.foldr1 maxSizeRep inTys
+resolveLLVMArgType SizeFromLargest outTy inTys =
+    List.foldr maxSizeRep outTy inTys
+
+
+-- | Pick the larger of two compatible types; an error if the types are not
+-- compatible.
+maxSizeRep :: TypeRepresentation -> TypeRepresentation -> TypeRepresentation
+maxSizeRep (Bits sz1) (Bits sz2)         = Bits (max sz1 sz2)
+maxSizeRep (Bits sz1) (Signed sz2)       = Bits (max sz1 sz2)
+maxSizeRep (Bits sz) Pointer             = Pointer
+maxSizeRep Pointer (Bits sz)             = Pointer
+maxSizeRep (Signed sz1) (Bits sz2)       = Bits (max sz1 sz2)
+maxSizeRep (Signed sz1) (Signed sz2)     = Signed (max sz1 sz2)
+maxSizeRep (Signed sz) Pointer           = Pointer
+maxSizeRep Pointer (Signed sz)           = Pointer
+maxSizeRep (Floating sz1) (Floating sz2) = Floating (max sz1 sz2)
+maxSizeRep rep1 rep2 | rep1 == rep2      = rep1
+maxSizeRep rep1 rep2 =
+    shouldnt $ "Generating LLVM instruction with incompatible types "
+             ++ show rep1 ++ " and " ++ show rep2
 
 
 data BinOpInfo = BinOpInfo {
@@ -604,12 +636,13 @@ writeLLVMCall op flags args pos = do
                 llvmArg <- llvmArgument arg
                 llvmStoreResult outs $ op ++ " " ++ llvmArg ++ " to " ++ outTy
             else shouldnt $ "unknown unary llvm op " ++ op
-        ([_,_],_) -> do
-            let instr =
-                    binOpInstr $ trustFromJust ("unknown binary llvm op " ++ op)
+        ([_,_],[out]) -> do
+            let BinOpInfo {binOpInstr=instr,binOpArgSize=argSize,
+                           binOpResultFn=resultFn} =
+                    trustFromJust ("unknown binary llvm op " ++ op)
                     $ Map.lookup op llvmMapBinop
-            argList <- llvmInstrArgumentList ins
-            llvmStoreResult outs $ instr ++ " " ++ argList
+            (argList,outRep) <- llvmInstrArgumentList argSize out ins resultFn
+            llvmStoreConvertedResult out outRep $ instr ++ " " ++ argList
         _ -> shouldnt $ "unknown llvm op " ++ op ++ " (arity "
                          ++ show (length ins) ++ ")"
 
@@ -668,7 +701,7 @@ writeLPVMCall "access" _ args pos = do
                         writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
                         return readArg
             lltype <- llvmTypeRep <$> argTypeRep member
-            arg <- typeConverted addrArg CPointer
+            arg <- typeConverted CPointer addrArg
             llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
         (ins,outs) ->
             shouldnt $ "lpvm access with inputs " ++ show ins ++ " and outputs "
@@ -702,7 +735,7 @@ writeLPVMCall "mutate" _ args pos = do
                 ([member],[]) -> do
                     logLLVM "Normal (non-take-reference) case"
                     llMember <- llvmArgument member
-                    dest <- typeConverted ptrArg CPointer
+                    dest <- typeConverted CPointer ptrArg
                     llvmPutStrLnIndented $ "store " ++ llMember
                                             ++ ", " ++ dest
                 ([],[takeRef]) -> do
@@ -825,7 +858,7 @@ declareStructConstant name fields section = do
 -- | Build a string giving the body of an llvm constant structure declaration
 llvmConstStruct :: [ConstSpec] -> LLVM String
 llvmConstStruct fields = do
-    llvmVals <- mapM (uncurry convertedConstant) fields
+    llvmVals <- mapM (uncurry typedConvertedConstant) fields
     return $ llvmRepReturnType (snd <$> fields)
             ++ " { " ++ intercalate ", " llvmVals ++ " }"
 
@@ -835,7 +868,7 @@ llvmConstStruct fields = do
 llvmLoad :: PrimArg -> PrimArg -> LLVM ()
 llvmLoad ptr outVar = do
     lltype <- llvmTypeRep <$> argTypeRep outVar
-    arg <- typeConverted ptr CPointer
+    arg <- typeConverted CPointer ptr
     llvmStoreResult [outVar] $ "load " ++ lltype ++ ", " ++ arg
 
 
@@ -846,7 +879,6 @@ typeRep ty =
       <$> lift (lookupTypeRepresentation ty)
 
 
-
 llvmResource :: ResourceSpec -> LLVM (LLVMName, TypeRepresentation)
 llvmResource res = do
     (res', ty) <-
@@ -854,7 +886,6 @@ llvmResource res = do
         <$> lift (canonicaliseResourceSpec Nothing "newLLVMModule" res)
     rep <- typeRep ty
     return (llvmGlobalName (makeGlobalResourceName res'), rep)
-
 
 
 -- | The LLVM representation of a Wybe type based on its TypeRepresentation
@@ -913,12 +944,16 @@ llvmStringArgList = ('(':). (++")") . intercalate ", "
 -- | The LLVM translation of the specified LLVM instruction argument list.
 -- Since all arguments of these instructions must have the same types, the type
 -- is only shown once, at the front.
-llvmInstrArgumentList :: [PrimArg] -> LLVM String
-llvmInstrArgumentList [] = return ""
-llvmInstrArgumentList inputs@(in1:_) = do
-    lltype <- llvmTypeRep <$> argTypeRep in1
-    argsString <- intercalate ", " <$> mapM llvmValue inputs
-    return $ lltype ++ " " ++ argsString
+llvmInstrArgumentList :: LLVMArgSize -> PrimArg -> [PrimArg]
+        -> (TypeRepresentation -> TypeRepresentation)
+        -> LLVM (String,TypeRepresentation)
+llvmInstrArgumentList argSize output inputs repFn = do
+    (outTy : inTys) <- mapM argTypeRep $ output : inputs
+    let typeRep = resolveLLVMArgType argSize outTy inTys
+    let outTyRep = repFn typeRep
+    let llArgTyRep = llvmTypeRep typeRep
+    argsString <- intercalate ", " <$> mapM (typeConvertedBare typeRep) inputs
+    return (llArgTyRep ++ " " ++ argsString, outTyRep)
 
 
 -- | Write the LLVM translation of the specified output argument list as target
@@ -935,6 +970,25 @@ llvmStoreResult multiOuts instr = do
     -- This uses llvmStoreResult to store each individual element of tuple
     zipWithM_ (unpackArg retType tuple) multiOuts [0..]
 
+
+-- | Write the LLVM translation of the specified single output variable as
+-- target for the specified instruction, converting from the specified type
+-- representation if necessary.
+llvmStoreConvertedResult :: PrimArg -> TypeRepresentation -> String -> LLVM ()
+llvmStoreConvertedResult arg@ArgVar{argVarName=varName,argVarType=ty}
+                         actualRep instr = do
+    neededRep <- typeRep ty
+    if neededRep == actualRep
+        then do
+            llVar <- varToWrite varName
+            llvmPutStrLnIndented $ llVar ++ " = " ++ instr
+        else do
+            (writeArg,readArg) <- freshTempArgs $ Representation actualRep
+            llVar <- varToWrite $ argVar "in llvmStoreConvertedResult" writeArg
+            llvmPutStrLnIndented $ llVar ++ " = " ++ instr
+            typeConvert readArg arg
+llvmStoreConvertedResult notAVar _ _ =
+    shouldnt $ "llvmStoreConvertedResult into non-variable " ++ show notAVar
 
 -- | Marshall data returned by C code.  Emits a C call instruction, which
 -- returns its result in the specified type representation, leaving its
@@ -974,10 +1028,10 @@ marshallArgument arg cType = do
             $ cTypeRepresentation cType
     inTypeRep <- argTypeRep arg
     if inTypeRep == outTypeRep then llvmArgument arg
-    else typeConverted arg outTypeRep
+    else typeConverted outTypeRep arg
 
 
--- | The LLVM type of the specified 
+-- | The LLVM type of the specified argument
 argTypeRep :: PrimArg -> LLVM TypeRepresentation
 argTypeRep ArgString{} = return CPointer -- strings are all C pointers
 argTypeRep arg = typeRep $ argType arg
@@ -1008,7 +1062,7 @@ llvmValue (ArgUnneeded val _) = shouldnt "llvm value of unneeded arg"
 llvmValue (ArgUndef _) = return "undef"
 
 
--- | The variable name of a PrimArg, or Nothing if not a variable
+-- | The variable name of a PrimArg; report an error if not a variable.
 argVar :: String -> PrimArg -> PrimVarName
 argVar _ ArgVar{argVarName=var} =  var
 argVar msg _ = shouldnt $ "variable argument expected " ++ msg
@@ -1031,11 +1085,11 @@ typeConvert fromArg toArg = do
                 ++ " to " ++ llvmTypeRep toTy
 
 
--- | LLVM code to convert PrimArg fromVal to representation toTy, returning a
--- LLVMName holding the converted value.
-typeConverted :: PrimArg -> TypeRepresentation -> LLVM LLVMArg
-typeConverted fromArg toTy
-    | argIsConst fromArg = convertedConstant fromArg toTy
+-- | LLVM code to convert PrimArg fromVal to representation toTy, returning an
+-- LLVMArg holding the converted value.
+typeConverted :: TypeRepresentation -> PrimArg -> LLVM LLVMArg
+typeConverted toTy fromArg
+    | argIsConst fromArg = typedConvertedConstant fromArg toTy
     | otherwise = do
         argRep <- argTypeRep fromArg
         if argRep == toTy
@@ -1045,21 +1099,46 @@ typeConverted fromArg toTy
                 typeConvert fromArg writeArg
                 llvmArgument readArg
 
+
+-- | LLVM code to convert PrimArg fromVal to representation toTy, returning a
+-- LLVMName (ie, without type prefix) holding the converted value.
+typeConvertedBare :: TypeRepresentation -> PrimArg -> LLVM LLVMName
+typeConvertedBare toTy fromArg
+    | argIsConst fromArg = convertedConstant fromArg toTy
+    | otherwise = do
+        argRep <- argTypeRep fromArg
+        if argRep == toTy
+            then llvmValue fromArg
+            else do
+                (writeArg,readArg) <- freshTempArgs $ Representation toTy
+                typeConvert fromArg writeArg
+                llvmValue readArg
+
 -- | An LLVM constant expression of the specified type toTy, when the constant
 -- is initially of the specified type fromTy.  This may take the form of an
 -- LLVM type conversion expression, which is fully evaluated at compile-time, so
 -- it cannot involve conversion instructions.
-convertedConstant :: PrimArg -> TypeRepresentation -> LLVM LLVMArg
+convertedConstant :: PrimArg -> TypeRepresentation -> LLVM LLVMName
 convertedConstant arg toTy = do
     -- XXX should verify that arg is constant, if ArgGlobal is considered const
     fromTy <- argTypeRep arg
-    let llvmTy = llvmTypeRep toTy
-    if trivialConstConversion fromTy toTy
-        then ((llvmTy++" ") ++) <$> llvmValue arg
+    if fromTy == toTy || trivialConstConversion fromTy toTy
+        then llvmValue arg
         else do
             fromArg <- llvmArgument arg
-            return $ llvmTy ++ " " ++ typeConvertOp fromTy toTy ++ "( "
-                         ++ fromArg ++ " to " ++ llvmTy ++ " )"
+            return $ typeConvertOp fromTy toTy ++ "( "
+                         ++ fromArg ++ " to " ++ llvmTypeRep toTy ++ " )"
+
+
+-- | An LLVM constant expression of the specified type toTy, when the constant
+-- is initially of the specified type fromTy.  This may take the form of an
+-- LLVM type conversion expression, which is fully evaluated at compile-time, so
+-- it cannot involve conversion instructions.
+typedConvertedConstant :: PrimArg -> TypeRepresentation -> LLVM LLVMArg
+typedConvertedConstant arg toTy = do
+    -- XXX should verify that arg is constant, if ArgGlobal is considered const
+    ((llvmTypeRep toTy++" ")++) <$> convertedConstant arg toTy
+
 
 -- Converting constants between these types is completely trivial, because the
 -- constant is automatically considered to have both types.
@@ -1068,6 +1147,10 @@ trivialConstConversion (Bits _) (Signed _)       = True
 trivialConstConversion (Signed _) (Signed _)     = True
 trivialConstConversion (Signed _) (Bits _)       = True
 trivialConstConversion (Floating _) (Floating _) = True
+trivialConstConversion Pointer (Bits b)
+    | b==wordSize                                = True
+trivialConstConversion (Bits b) Pointer
+    | b==wordSize                                = True
 trivialConstConversion _ _                       = False
 
 
@@ -1075,16 +1158,10 @@ trivialConstConversion _ _                       = False
 typeConvertOp :: TypeRepresentation -> TypeRepresentation -> String
 typeConvertOp fromTy toTy
     | fromTy == toTy = "bitcast" -- use bitcast for no-op conversion
-typeConvertOp (Bits n) Pointer = "bitcast"
-typeConvertOp (Signed n) Pointer = "bitcast"
 typeConvertOp CPointer Pointer = "ptrtoint"
-typeConvertOp rep Pointer =
-    shouldnt $ "can't convert from " ++ show rep ++ " to address"
-typeConvertOp Pointer (Bits n) = "bitcast"
-typeConvertOp Pointer (Signed n) = "bitcast"
 typeConvertOp Pointer CPointer = "inttoptr"
-typeConvertOp Pointer rep =
-    shouldnt $ "can't convert from address to " ++ show rep
+typeConvertOp Pointer toTy = typeConvertOp (Bits wordSize) toTy
+typeConvertOp fromTy Pointer = typeConvertOp fromTy (Bits wordSize)
 typeConvertOp (Bits m) (Bits n)
     | m < n = "zext"
     | n < m = "trunc"

@@ -822,7 +822,7 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          List.concatMap
           (\(FieldInfo var pPos _ ty _ shift sz) ->
                [maybePlace (ForeignCall "llvm" "shl" []
-                 [castFromTo ty typeSpec (varGet var) `maybePlace` pPos,
+                 [varGetTyped var ty `maybePlace` pPos,
                   iVal shift `castTo` typeSpec `maybePlace` pos,
                   varSetTyped tmpName1 typeSpec `maybePlace` pos]) pos,
                 maybePlace (ForeignCall "llvm" "or" []

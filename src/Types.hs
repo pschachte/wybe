@@ -2819,45 +2819,47 @@ validateForeignCall lang name flags argReps stmt pos =
 
 
 -- | Are two types compatible for use as inputs to a binary LLVM op?
---   Used for type checking LLVM instructions.
+--   Used for type checking LLVM instructions.  LLVM code generation will inject
+--   instructions to convert types or extend or truncate as necessary, so we can
+--   be a bit forgiving here.
 compatibleReps :: TypeRepresentation -> TypeRepresentation -> Bool
 compatibleReps Pointer      Pointer      = True
-compatibleReps Pointer      (Bits bs)    = bs == wordSize
-compatibleReps Pointer      (Signed bs)  = bs == wordSize
-compatibleReps Pointer      (Floating _) = False
+compatibleReps Pointer      Bits{}       = True
+compatibleReps Pointer      Signed{}     = True
+compatibleReps Pointer      Floating{}   = False
 compatibleReps Pointer      (Func _ _)   = True
 compatibleReps Pointer      CPointer     = True
-compatibleReps (Bits bs)    Pointer      = bs == wordSize
-compatibleReps (Bits m)     (Bits n)     = m == n
-compatibleReps (Bits m)     (Signed n)   = m == n
-compatibleReps (Bits _)     (Floating _) = False
-compatibleReps (Bits bs)    (Func _ _)   = bs == wordSize
-compatibleReps (Bits bs)    CPointer     = bs == wordSize
-compatibleReps (Signed bs)  Pointer      = bs == wordSize
-compatibleReps (Signed m)   (Bits n)     = m == n
-compatibleReps (Signed m)   (Signed n)   = m == n
-compatibleReps (Signed _)   (Floating _) = False
-compatibleReps (Signed bs)  (Func _ _)   = bs == wordSize
-compatibleReps (Signed bs)  CPointer     = bs == wordSize
-compatibleReps (Floating _) Pointer      = False
-compatibleReps (Floating _) (Bits _)     = False
-compatibleReps (Floating _) (Signed _)   = False
-compatibleReps (Floating m) (Floating n) = m == n
-compatibleReps (Floating _) (Func _ _)   = False
-compatibleReps (Floating _) CPointer     = False
-compatibleReps (Func _ _)   Pointer      = True
+compatibleReps Bits{}       Pointer      = True
+compatibleReps Bits{}       Bits{}       = True
+compatibleReps Bits{}       Signed{}     = True
+compatibleReps Bits{}       Floating{}   = False
+compatibleReps Bits{}       Func{}       = False
+compatibleReps Bits{}       CPointer     = True
+compatibleReps Signed{}     Pointer      = True
+compatibleReps Signed{}     Bits{}       = True
+compatibleReps Signed{}     Signed{}     = True
+compatibleReps Signed{}     Floating{}   = False
+compatibleReps Signed{}     Func{}       = False
+compatibleReps Signed{}     CPointer     = True
+compatibleReps Floating{}   Pointer      = False
+compatibleReps Floating{}   Bits{}       = False
+compatibleReps Floating{}   Signed{}     = False
+compatibleReps Floating{}   Floating{}   = True
+compatibleReps Floating{}   Func{}       = False
+compatibleReps Floating{}   CPointer     = False
+compatibleReps Func{}       Pointer      = True
 compatibleReps (Func i1 o1) (Func i2 o2) = sameLength i1 i2 && sameLength o1 o2 &&
                                            and (zipWith compatibleReps i1 i2) &&
                                            and (zipWith compatibleReps o1 o2)
-compatibleReps (Func _ _)   (Bits bs)    = bs == wordSize
-compatibleReps (Func _ _)   (Signed bs)  = bs == wordSize
-compatibleReps (Func _ _)   (Floating _) = False
-compatibleReps (Func _ _)   CPointer     = False
+compatibleReps Func{}       Bits{}       = False
+compatibleReps Func{}       Signed{}     = False
+compatibleReps Func{}       Floating{}   = False
+compatibleReps Func{}       CPointer     = False
 compatibleReps CPointer     Pointer      = True
-compatibleReps CPointer     (Bits bs)    = bs == wordSize
-compatibleReps CPointer     (Signed bs)  = bs == wordSize
-compatibleReps CPointer     (Floating _) = False
-compatibleReps CPointer     (Func _ _)   = True
+compatibleReps CPointer     Bits{}       = True
+compatibleReps CPointer     Signed{}     = True
+compatibleReps CPointer     Floating{}   = False
+compatibleReps CPointer     Func{}       = True
 compatibleReps CPointer     CPointer     = True
 
 
