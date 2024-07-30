@@ -559,8 +559,14 @@ writeAssemblySwitch :: [PrimParam] -> PrimVarName -> TypeRepresentation
                     -> [ProcBody] -> Maybe ProcBody -> LLVM ()
 writeAssemblySwitch outs v rep cases dflt = do
     releaseDeferredCall
-    let prefixes0 = ["case."++show n++".switch." | n <- [0..length cases-1]]
-    (dfltLabel:labels) <- freshLables $ "default.switch." : prefixes0
+    let prefixes = ["case."++show n++".switch." | n <- [0..length cases-1]]
+    (dfltLabel,numLabels) <- if isJust dflt
+        then do
+            (dfltLabel:numLabels) <- freshLables $ "default.switch.":prefixes
+            return (dfltLabel,numLabels)
+        else do
+            labels <- freshLables prefixes
+            return (last labels, labels) -- if no default, use last case
     let llType = llvmTypeRep rep
     llvar <- varToRead v
     logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
@@ -568,14 +574,17 @@ writeAssemblySwitch outs v rep cases dflt = do
         ++ llvmLableName dfltLabel ++ " [\n    "
         ++ intercalate "\n    "
                 [llType ++ " " ++ show n ++ ", " ++ llvmLableName lbl
-                | (lbl,n) <- zip labels [0..]]
+                | (lbl,n) <- zip numLabels [0..]]
         ++ " ]"
     zipWithM_
         (\lbl cs -> llvmPutStrLn (lbl ++ ":") >> writeAssemblyBody outs cs)
-        labels cases
-    llvmPutStrLn $ dfltLabel ++ ":"
+        numLabels cases
+    case dflt of
+        Nothing -> return ()
+        Just dfltCode -> do
+            llvmPutStrLn $ dfltLabel ++ ":"
     -- I don't think the Nothing case ever happens, but in case it does...
-    writeAssemblyBody outs $ fromMaybe (last cases) dflt
+            writeAssemblyBody outs dfltCode
 
 
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
