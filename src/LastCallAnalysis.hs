@@ -384,6 +384,7 @@ mapProcLeavesM f leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork } = d
         prims <- f prims
         return leafBlock { bodyPrims = prims }
 mapProcLeavesM f current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} } = do
+        -- XXX must map over default, too
         bodies' <- mapM (mapProcLeavesM f) bodies
         return current { bodyFork = fork { forkBodies = bodies' } }
 
@@ -393,6 +394,7 @@ mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = NoFork } = do
         prims' <- mapM fn prims
         return body { bodyPrims = prims' }
 mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@PrimFork{forkBodies = bodies } } = do
+        -- XXX must map over default, too
         prims' <- mapM fn prims
         bodies <- mapM (mapProcPrimsM fn) bodies
         return body { bodyPrims = prims', bodyFork = fork { forkBodies = bodies } }
