@@ -488,6 +488,7 @@ recordProcOutByRef param@PrimParam{primParamName=p, primParamType=ty} = do
 -- | Generate and write out the LLVM code for an LPVM body
 writeAssemblyBody :: [PrimParam] -> ProcBody -> LLVM ()
 writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
+    logLLVM $ "Generating LLVM body with outs " ++ show outs
     mapM_ (placedApply writeAssemblyPrim) prims
     case fork of
         NoFork -> do
@@ -1024,6 +1025,7 @@ marshallCallResult outArg inTypeRep instr =
 -- instruction looks like:  %var = extractvalue {i64, i1} %0, 0
 unpackArg :: LLVMType -> LLVMName -> PrimArg -> Int -> LLVM ()
 unpackArg typ tuple arg argNum = do
+    logLLVM $ "Extracting arg " ++ show argNum ++ " into " ++ show arg
     llvmStoreResult [arg] $ "extractvalue " ++ typ
                             ++ tuple ++ ", " ++ show argNum
 
@@ -1422,7 +1424,9 @@ freshTempArgs ty = do
 -- parameters, so here we rename all output parameters as they are assigned,
 -- and then use the new names when we return the outputs.
 setRenaming :: Set PrimVarName -> LLVM ()
-setRenaming vars = modify $ \s -> s { varDefRenaming = vars }
+setRenaming vars = do
+    logLLVM $ "Recording variables needing renaming = " ++ show vars
+    modify $ \s -> s { varDefRenaming = vars }
 
 
 -- | Replace the specified variable with the specified new value in all
@@ -1438,11 +1442,17 @@ renameVariable var val =
 varToWrite :: PrimVarName -> LLVM LLVMName
 varToWrite v = do
     mustRename <- Set.member v <$> gets varDefRenaming
+    logLLVM $ "varToWrite " ++ show v ++ "; mustRename = " ++ show mustRename
+    vdr <- gets varDefRenaming
+    logLLVM $ "varDefRenaming = " ++ show vdr
     if mustRename then do
         tmp <- llvmLocalName <$> makeTemp
         renameVariable v tmp
         return tmp
-    else return $ llvmLocalName v
+    else do
+        -- rename v next time we try to assign it
+        modify $ \s -> s { varDefRenaming = Set.insert v $ varDefRenaming s }
+        return $ llvmLocalName v
 
 
 -- | The LLVM name for a variable we are about to read.
