@@ -3715,7 +3715,7 @@ varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty
 varsInPrimArg _ ArgString{}   = Set.empty
 varsInPrimArg _ ArgChar{}     = Set.empty
-varsInPrimArg _ ArgGlobal{} = Set.empty
+varsInPrimArg _ ArgGlobal{}   = Set.empty
 varsInPrimArg _ ArgUnneeded{} = Set.empty
 varsInPrimArg _ ArgUndef{}    = Set.empty
 

@@ -693,9 +693,10 @@ writeLPVMCall "store" _ args pos = do
     args' <- partitionArgs "lpvm store instruction" args
     case args' of
         ([],[]) -> return ()
-        (args@[_,_],[]) -> do
-            llargs <- llvmArgumentList args
-            llvmPutStrLnIndented $ "store " ++ llargs
+        ([val,ptr],[]) -> do
+            llVal <- llvmArgument val
+            arg <- typeConverted CPointer ptr
+            llvmStoreResult [] $ "store " ++ llVal ++ ", " ++ arg
         (ins, outs) ->
             shouldnt $ "lpvm store with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
@@ -1046,6 +1047,7 @@ marshallArgument arg cType = do
 -- | The LLVM type of the specified argument
 argTypeRep :: PrimArg -> LLVM TypeRepresentation
 argTypeRep ArgString{} = return CPointer -- strings are all C pointers
+argTypeRep ArgGlobal{} = return CPointer -- as are globals
 argTypeRep arg = typeRep $ argType arg
 
 
@@ -1087,6 +1089,7 @@ typeConvert fromArg toArg = do
     toTy <- argTypeRep toArg
     fromTy <- argTypeRep fromArg
     fromVal <- llvmValue fromArg
+    logLLVM $ "typeConvert " ++ fromVal ++ " from " ++ show fromTy ++ " to " ++ show toTy
     case toArg of
         ArgVar{argVarName=varName} | fromTy == toTy ->
             renameVariable varName fromVal
@@ -1159,10 +1162,8 @@ trivialConstConversion (Bits _) (Signed _)       = True
 trivialConstConversion (Signed _) (Signed _)     = True
 trivialConstConversion (Signed _) (Bits _)       = True
 trivialConstConversion (Floating _) (Floating _) = True
-trivialConstConversion Pointer (Bits b)
-    | b==wordSize                                = True
-trivialConstConversion (Bits b) Pointer
-    | b==wordSize                                = True
+trivialConstConversion Pointer (Bits b)          = True
+trivialConstConversion (Bits b) Pointer          = True
 trivialConstConversion _ _                       = False
 
 
@@ -1588,7 +1589,7 @@ llvmGlobalName s = '@' : show s
 -- | Produce a suitable LLVM global name based on a GlobalInfo
 llvmGlobalInfoName :: GlobalInfo -> LLVM LLVMName
 llvmGlobalInfoName (GlobalResource res) =
-     llvmGlobalName . fst <$> llvmResource res
+     fst <$> llvmResource res
 llvmGlobalInfoName (GlobalVariable var) = return $ llvmGlobalName var
 
 
