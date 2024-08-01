@@ -900,32 +900,35 @@ unboxedGetterSetterStmts vis recType numConsts numNonConsts tag tagBits
     in [ ( field
          , GetterSetterInfo pos vis fieldType
            (tagCheck pos numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing recName)
-           [maybePlace (ForeignCall "llvm" "lshr" [] -- The getter:
-                [varGetTyped recName recType `maybePlace` pos,
-                    iVal shift `withType` recType `maybePlace` pos,
-                    varSetTyped recName recType `maybePlace` pos]) pos,
-                -- XXX Don't need to do this for the most significant field:
-                maybePlace (ForeignCall "llvm" "and" []
-                [varGetTyped recName recType `maybePlace` pos,
-                    iVal fieldMask `withType` recType `maybePlace` pos,
-                    varSetTyped fieldName recType `maybePlace` pos]) pos,
-                maybePlace (ForeignCall "lpvm" "cast" []
-                [varGetTyped fieldName recType `maybePlace` pos,
-                    varSetTyped outputVariableName fieldType `maybePlace` pos]) pos
-                ]
-            [maybePlace (ForeignCall "llvm" "and" []
-                [varGetTyped recName recType `maybePlace` pos,
-                    iVal shiftedHoleMask `withType` recType `maybePlace` pos,
-                    varSetTyped recName recType `maybePlace` pos]) pos,
-                maybePlace (ForeignCall "llvm" "shl" []
-                [castFromTo fieldType recType (varGet fieldName) `maybePlace` pos,
-                    iVal shift `castTo` recType `maybePlace` pos,
-                    varSetTyped tmpName1 recType `maybePlace` pos]) pos,
-                maybePlace (ForeignCall "llvm" "or" []
-                [varGetTyped tmpName1 recType `maybePlace` pos,
-                    varGetTyped recName recType `maybePlace` pos,
-                    varSetTyped recName recType `maybePlace` pos]) pos
-                ]
+           [ForeignCall "llvm" "lshr" [] -- The getter:
+               [varGetTyped recName recType `maybePlace` pos,
+                iVal shift `withType` recType `maybePlace` pos,
+                varSetTyped recName recType `maybePlace` pos] `maybePlace` pos,
+            -- XXX Don't need to do this for the most significant field:
+            ForeignCall "llvm" "and" []
+               [varGetTyped recName recType `maybePlace` pos,
+                iVal fieldMask `withType` recType `maybePlace` pos,
+                varSetTyped fieldName recType `maybePlace` pos] `maybePlace` pos,
+            ForeignCall "lpvm" "cast" []
+               [varGetTyped fieldName recType `maybePlace` pos,
+                varSetTyped outputVariableName fieldType `maybePlace` pos] `maybePlace` pos
+            ]
+           [ForeignCall "llvm" "and" []
+               [varGetTyped recName recType `maybePlace` pos,
+                iVal shiftedHoleMask `withType` recType `maybePlace` pos,
+                varSetTyped recName recType `maybePlace` pos] `maybePlace` pos,
+            ForeignCall "lpvm" "cast" []
+               [varGetTyped fieldName fieldType `maybePlace` pos,
+                varSetTyped tmpName1 recType `maybePlace` pos] `maybePlace` pos,
+            ForeignCall "llvm" "shl" []
+               [varGetTyped tmpName1 recType `maybePlace` pos,
+                iVal shift `castTo` recType `maybePlace` pos,
+                varSetTyped tmpName1 recType `maybePlace` pos] `maybePlace` pos,
+            ForeignCall "llvm" "or" []
+               [varGetTyped tmpName1 recType `maybePlace` pos,
+                varGetTyped recName recType `maybePlace` pos,
+                varSetTyped recName recType `maybePlace` pos] `maybePlace` pos
+            ]
             )]
 
 
