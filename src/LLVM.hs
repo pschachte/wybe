@@ -17,7 +17,9 @@ import           Options
 import           Version
 import           CConfig
 import           Snippets
+import           Util                            ((|||))
 import           System.IO
+import           Data.Char                       (isAlphaNum)
 import           Data.Set                        as Set
 import qualified Data.Map                        as Map
 import           Data.Map                        (Map)
@@ -277,26 +279,27 @@ argStrings set _                   = set
 addExtern :: ModSpec -> Prim -> Set ExternSpec -> Set ExternSpec
 addExtern mod (PrimCall _ pspec _ args _) externs =
     if mod `isPrefixOf` procSpecMod pspec then externs
-    else recordExtern args (llvmProcName pspec) externs
+    else recordExtern "fastcc" (llvmProcName pspec) args externs
 addExtern _ PrimHigher{} externs = externs
 addExtern _ (PrimForeign "llvm" _ _ _) externs = externs
 addExtern _ (PrimForeign "lpvm" "alloc" _ _) externs =
     let externName = llvmForeignName "wybe_malloc"
-        extern = (externName, [intType], [Representation CPointer])
+        extern = ("ccc", externName, [intType], [Representation CPointer])
     in Set.insert extern externs
 addExtern _ (PrimForeign "lpvm" _ _ _) externs = externs
 addExtern _ (PrimForeign "c" name _ args) externs =
-    recordExtern args (llvmForeignName name) externs
+    recordExtern "ccc" (llvmForeignName name) args externs
 addExtern _ (PrimForeign other name _ args) externs =
     shouldnt $ "Unknown foreign language " ++ other
 
 
 -- | Insert the fact that the named function is an external function with the
 -- specified argument types in the provided set, returning the resulting set.
-recordExtern :: [PrimArg] -> LLVMName -> Set ExternSpec -> Set ExternSpec
-recordExtern args fName externs =
+recordExtern :: String -> LLVMName -> [PrimArg] -> Set ExternSpec
+             -> Set ExternSpec
+recordExtern cc fName args externs =
     let (ins,outs,oRefs,iRefs) = partitionByFlow argFlowDirection args
-        extern = (fName
+        extern = (cc, fName
                  , (argType <$> ins) ++ (Representation CPointer <$ oRefs)
                  , argType <$> outs)
     in if List.null iRefs then Set.insert extern externs
@@ -387,18 +390,20 @@ defGlobalResource res = do
 writeAssemblyExterns :: LLVM ()
 writeAssemblyExterns = do
     copyFn <- llvmGlobalName <$> llvmMemcpyFn
-    let spec = (copyFn, Representation <$> [CPointer,CPointer,Bits wordSize,Bits 1], [])
+    let spec = ("ccc", copyFn,
+                Representation <$> [CPointer,CPointer,Bits wordSize,Bits 1], [])
     externs <- (spec:) . Set.toList <$> gets allExterns
     mapM_ declareExtern externs
 
 
 declareExtern :: ExternSpec -> LLVM ()
-declareExtern (name, ins, outs) = do
+declareExtern (cc, name, ins, outs) = do
     outs' <- lift $ filterM (notM . typeIsPhantom) outs
     ins' <- lift $ filterM (notM . typeIsPhantom) ins
     outTy <- llvmReturnType outs'
     argTypes <- (llvmTypeRep <$>) <$> mapM typeRep ins'
-    llvmPutStrLn $ "declare " ++ outTy ++ " " ++ name ++ "("
+    llvmPutStrLn $ "declare external " ++ cc ++ " "
+                  ++ outTy ++ " " ++ name ++ "("
                   ++ intercalate ", " argTypes ++ ")"
 
 
@@ -779,7 +784,7 @@ writeCCall cfn flags args pos = do
     (ins,outs) <- partitionArgs ("call to C function " ++ cfn) args
     outTy <- llvmReturnType $ List.map argType outs
     argList <- llvmArgumentList ins
-    llvmStoreResult outs $ "call " ++ outTy ++ " " ++ llvmGlobalName cfn
+    llvmStoreResult outs $ "call ccc " ++ outTy ++ " " ++ llvmGlobalName cfn
                             ++ argList
 
 
@@ -1316,8 +1321,9 @@ type LLVMName = String
 type LLVMArg = String
 
 -- | Information we collect about external functions we call in a module, so we
--- can declare them.
-type ExternSpec = (LLVMName, [TypeSpec], [TypeSpec])
+-- can declare them.  This includes the LLVM calling convention, the LLVM name
+-- of the function, and the input and output argument types.
+type ExternSpec = (String, LLVMName, [TypeSpec], [TypeSpec])
 
 -- | Information needed to specify one constant value, giving the representation
 -- to be stored and the (constant) value itself.
@@ -1583,7 +1589,10 @@ llvmProcName pspec = llvmGlobalName $ show pspec
 -- | Make a suitable LLVM name for a global variable or constant.  We prefix it
 -- with @, enclose the rest in quotes, and escape any special characters.
 llvmGlobalName :: String -> LLVMName
-llvmGlobalName s = '@' : show s
+llvmGlobalName s =
+    '@' : if all ((=='_')|||isAlphaNum) s 
+        then s
+        else '"' : concatMap showLLVMChar s ++ "\""
 
 
 -- | Produce a suitable LLVM global name based on a GlobalInfo
