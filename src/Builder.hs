@@ -237,6 +237,7 @@ import           Util                      (sccElts, useLocalCacheFileIfPossible
 import           Snippets
 import           Text.Parsec.Error
 import           BinaryFactory
+import           LLVM                      (writeLLVM)
 import qualified Data.ByteString.Char8 as BS
 -- import qualified LLVM.AST              as LLVMAST
 
@@ -252,10 +253,7 @@ buildTargets targets = do
     mapM_ buildTarget targets
     showMessages
     stopOnError "building outputs"
-    dumpOpt <- option optDumpOptLLVM
-    let dumper = if dumpOpt then logDumpWith ((Just <$>) . extractLLVM)
-                            else logDump
-    dumper FinalDump FinalDump "EVERYTHING"
+    logDumpWith writeLLVM FinalDump FinalDump "EVERYTHING"
 
 
 
@@ -329,6 +327,8 @@ buildTarget target = do
                             (emitMod emitBitcodeFile bitcodeExtension) targets
                         AssemblyFile -> mapM_
                             (emitMod emitAssemblyFile assemblyExtension) targets
+                        NativeAssemblyFile -> mapM_
+                            (emitMod emitNativeAssemblyFile nativeAssemblyExtension) targets
                         -- ArchiveFile -> do
                         --     mapM_ (uncurry emitObjectFile) targets
                         --     buildArchive target
@@ -1411,7 +1411,8 @@ isModuleDirectory path = do
 -- |The different sorts of files that could be specified on the
 --  command line.
 data TargetType = ObjectFile | BitcodeFile | AssemblyFile
-                | ArchiveFile | ExecutableFile | UnknownFile
+                | NativeAssemblyFile | ExecutableFile
+                | ArchiveFile | UnknownFile
                 deriving (Show,Eq)
 
 
@@ -1419,12 +1420,13 @@ data TargetType = ObjectFile | BitcodeFile | AssemblyFile
 --  file need not exist.
 targetType :: FilePath -> TargetType
 targetType filename
-  | ext == objectExtension     = ObjectFile
-  | ext == bitcodeExtension    = BitcodeFile
-  | ext == assemblyExtension   = AssemblyFile
-  | ext == archiveExtension    = ArchiveFile
-  | ext == executableExtension = ExecutableFile
-  | otherwise                   = UnknownFile
+  | ext == objectExtension         = ObjectFile
+  | ext == bitcodeExtension        = BitcodeFile
+  | ext == assemblyExtension       = AssemblyFile
+  | ext == nativeAssemblyExtension = NativeAssemblyFile
+  | ext == archiveExtension        = ArchiveFile
+  | ext == executableExtension     = ExecutableFile
+  | otherwise                      = UnknownFile
       where ext = dropWhile (=='.') $ takeExtension filename
 
 

@@ -3439,7 +3439,7 @@ argIsConst ArgUndef{}          = False
 -- and is not unneeded.
 argIsReal :: PrimArg -> Compiler Bool
 argIsReal ArgVar{argVarType=ty} = not <$> typeIsPhantom ty
-argIsReal ArgInt{}              = return True
+argIsReal (ArgInt _ ty)         = not <$> typeIsPhantom ty -- 0 is a valid phantom constant
 argIsReal ArgFloat{}            = return True
 argIsReal ArgString{}           = return True
 argIsReal ArgChar{}             = return True
@@ -3975,7 +3975,7 @@ showProcDef thisID
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
     ++ showProcModifiers' (ProcModifiers detism inline impurity ctor False)
-    ++ "(" ++ show (procCallCount procdef) ++ " calls, temp counter " ++ show tmpCount ++ ")"
+    ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"
     ++ show thisID ++ ": "

@@ -95,7 +95,9 @@ Hello, World!
 
 Note that `wybemk` is like `make` in that you give it the name of the
 file you want it to build, and it figures out what files it needs
-to compile.
+to compile.  Currently, the Wybe compiler can generate an executable file, an
+object (.o) file, an LLVM assembler (.ll) file, an LLVM bitcode (.bc), and a
+native assembly language (.s) file from a wybe source file.
 
 ### Compiler Options
 
@@ -108,8 +110,8 @@ can be found with the following:
 
 #### Optimisation Options
 
-The `--llvm-opt-level` (`-O`) options specifies the level of optimisation used
-within the LLVM compiler during the compilations stage of a Wybe module. By default, this is set to 3, yet supports the values 0, 1, 2, or 3. More information
+The `--llvm-opt-level` (-O) option specifies the level of optimisation used
+within the LLVM compiler during the compilation stage of a Wybe module. By default, this is set to 3, yet supports the values 0, 1, 2, or 3. More information
 can be found [here](https://llvm.org/docs/CommandGuide/llc.html#id1).
 
 

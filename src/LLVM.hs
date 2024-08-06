@@ -45,23 +45,23 @@ import Config (wordSize)
 -- generated `.ll` file, we produce the following, in order:
 -- 
 --  * **Prologue** — contains an introductory comment and any configuration info
---     needed for LLVM.
+--    needed for LLVM.
 --
 --  * **Constants** — LLVM definitions of the manifest constants used in this
---      module; mostly used for strings.
+--    module; mostly used for strings.
 --
 --  * **Global variables** —  LLVM declarations of the global variables used to
---     implement the resources defined in this module.
+--    implement the resources defined in this module.
 --
---  * **Externs** — Extern declarations for all symbols used, but not defined, in
---   this module; this includes imported Wybe procedures, C functions,  and
---     global variables.
+--  * **Externs** — Extern declarations for all symbols used, but not defined,
+--    in this module; this includes imported Wybe procedures, C functions,  and
+--    global variables.
 --
 --  * **Definitions** — Definitions of the procs of this module.
 --
 --  * **Exports** — Everything needed by the Wybe compiler to compile users of
---   this module; currently this is represented as a serialisation of the Module
---   data structure, placed in the LLVM section.
+--    this module; currently this is represented as a serialisation of the
+--    Module data structure, placed in the LLVM section.
 --
 -- END MAJOR DOC
 
@@ -318,7 +318,7 @@ writeAssemblyPrologue = do
                 ++ Version.version
                 ++ " (" ++ Version.gitHash
                 ++ ") -- see https://github.com/pschachte/wybe"
-    llvmPutStrLn $ ";; Module " ++ showModSpec mod
+    llvmPutStrLn $ "; ModuleID = '" ++ showModSpec mod ++ "'"
     llvmBlankLine
     llvmPutStrLn $ "source_filename = \"" ++ srcFile ++ "\""
     llvmPutStrLn $ "target triple   = \"" ++ Version.defaultTriple ++ "\""

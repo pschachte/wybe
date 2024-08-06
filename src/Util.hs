@@ -320,7 +320,7 @@ _getFileHash file = do
 
 
 -- | Given a file path and return the actual file that should be used.
--- It can the original file or a local cache file.
+-- It can be the original file or a local cache file.
 useLocalCacheFileIfPossible :: FilePath -> IO FilePath
 useLocalCacheFileIfPossible file = do
     (cacheFile, meta) <- _localCachePathOfFile file
@@ -341,7 +341,7 @@ useLocalCacheFileIfPossible file = do
         return file
 
 
--- | Given a file path and return the file path to the local cache
+-- | Given a file path, return the file path to the local cache
 -- file of the actual file.
 createLocalCacheFile :: FilePath -> IO FilePath
 createLocalCacheFile file = do

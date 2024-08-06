@@ -9,16 +9,19 @@
 -- |Compiler configuration parameters.  These may vary between
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
-               bitcodeExtension, assemblyExtension, archiveExtension,
-               moduleDirectoryBasename, currentModuleAlias,
+               bitcodeExtension, assemblyExtension, nativeAssemblyExtension,
+               archiveExtension, moduleDirectoryBasename, currentModuleAlias,
                specialChar, specialName, specialName2, initProcName,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
                minimumSwitchCases, magicVersion,
-               linkerDeadStripArgs, functionDefSection, removeLPVMSection,
+               linkerDeadStripArgs, removeLPVMSection,
+               llvmToBitcodeCommand, llvmToNativeAssemblerCommand,
+               llvmToObjectCommand,
                lpvmSectionName, localCacheLibDir)
     where
 
+import Options
 import Data.Word
 import qualified Data.List as List
 import Distribution.System (buildOS, OS (..))
@@ -27,6 +30,7 @@ import System.Exit (ExitCode (..))
 import System.Process
 import System.FilePath
 import System.Directory.Extra (getHomeDirectory)
+
 
 -- |The file extension for source files.
 sourceExtension :: String
@@ -48,9 +52,14 @@ bitcodeExtension :: String
 bitcodeExtension = "bc"
 
 
--- |The file extension for assembly files.
+-- |The file extension for LLVM assembly files.
 assemblyExtension :: String
 assemblyExtension = "ll"
+
+
+-- |The file extension for native assembly files.
+nativeAssemblyExtension :: String
+nativeAssemblyExtension = "s"
 
 
 -- |The file extension for object archive files.
@@ -157,14 +166,33 @@ linkerDeadStripArgs =
         os    -> error $ "Unsupported OS: " ++ show os
 
 
--- | Given the name of a function and return which section to store it,
--- Nothing means the default section. For now, we put functions in separate
--- sections on Linux to fit the "-Wl,--gc-sections" above.
-functionDefSection :: String -> Maybe String
-functionDefSection label =
+-- | Command and switches to compile a .ll file to bitcode.
+llvmToBitcodeCommand :: FilePath -> FilePath -> Options  -> (String, [String])
+llvmToBitcodeCommand llFile bcFile _ =
     case buildOS of
-        OSX   -> Nothing
-        Linux -> Just $ ".text." ++ label
+        OSX   -> ("llvm-as", ["-o", bcFile, llFile])
+        Linux -> ("llvm-as", ["-o", bcFile, llFile])
+        os    -> error $ "Unsupported OS: " ++ show os
+
+
+-- | Command and switches to compile a .ll file to native assembler.
+llvmToNativeAssemblerCommand :: FilePath -> FilePath -> Options
+                             -> (String, [String])
+llvmToNativeAssemblerCommand llFile sFile options =
+    let opt = "-O" ++ show (optLLVMOptLevel options)
+    in case buildOS of
+        OSX   -> ("llc", ["--filetype=asm", opt, "-o", sFile, llFile])
+        Linux -> ("llc", ["--filetype=asm", opt, "-o", sFile, llFile])
+        os    -> error $ "Unsupported OS: " ++ show os
+
+
+-- | Command and switches to compile a .ll file to an object file.
+llvmToObjectCommand :: FilePath -> FilePath -> Options  -> (String, [String])
+llvmToObjectCommand llFile oFile options =
+    let opt = "-O" ++ show (optLLVMOptLevel options)
+    in case buildOS of
+        OSX   -> ("llc", ["--filetype=obj", opt, "-o", oFile, llFile])
+        Linux -> ("llc", ["--filetype=obj", opt, "-o", oFile, llFile])
         os    -> error $ "Unsupported OS: " ++ show os
 
 

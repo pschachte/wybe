@@ -1,13 +1,13 @@
 --  File     : Emit.hs
---  Author   : Rishi Ranjan, Modified by Zed(Zijun) Chen.
+--  Author   : Rishi Ranjan, Modified by Zed(Zijun) Chen and Peter Schachte.
 --  Purpose  : Emit LLVM code
 --  Copyright: (c) 2016 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
 module Emit (emitObjectFile, emitBitcodeFile, emitAssemblyFile,
-             makeArchive, makeExec,
-             logLLVMString, extractLLVM
+             emitNativeAssemblyFile, makeArchive, makeExec, extractLLVM,
+             logLLVMString
             )
 where
 
@@ -15,7 +15,11 @@ import           AST
 import           BinaryFactory              (encodeModule)
 import           Config                     (objectExtension, bitcodeExtension,
                                              assemblyExtension,
+                                             nativeAssemblyExtension,
                                              linkerDeadStripArgs,
+                                             llvmToBitcodeCommand,
+                                             llvmToNativeAssemblerCommand,
+                                             llvmToObjectCommand,
                                              removeLPVMSection)
 import           Control.Monad ( (>=>), unless )
 import           Control.Monad.Trans        (liftIO)
@@ -64,20 +68,14 @@ _haveWritePermission file = do
     else return True
 
 
--- | With the LLVM AST representation of a LPVM Module, create a
--- target object file, embedding the 'AST.Module' serialised bytestring
--- into the '__lpvm' section of the Macho-O object file.
+-- | With a LPVM Module, create a target object file, including the serialised
+-- bytestring of the LPVM module.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
 emitObjectFile m f = do
     let filename = f -<.> Config.objectExtension
-    logEmit $ "Creating object file for *" ++ showModSpec m ++ "*" ++
-        " @ '" ++ filename ++ "'"
-    logEmit $ "Encoding and wrapping Module *" ++ showModSpec m
-              ++ "* in a wrapped object."
-    logEmit $ "Running passmanager on the generated LLVM for *"
-              ++ showModSpec m ++ "*."
-    modBS <- encodeModule m
-    llmod <- descendentModuleLLVM m
+    llFilename <- emitAssemblyFile m f
+    logEmit $ "===> Producing object file " ++ filename
+    userOptions <- gets options
     filename <- do
         writable <- liftIO $ _haveWritePermission filename
         if writable
@@ -86,8 +84,8 @@ emitObjectFile m f = do
             logEmit $ "Do not have write permission on file " ++ filename
                 ++ ", use local cache file instead"
             liftIO $ createLocalCacheFile filename
-    logEmit $ "===> Writing object file " ++ filename
-    makeWrappedObjFile filename llmod modBS
+    let (cmd,cmdLine) = llvmToObjectCommand llFilename filename userOptions
+    runOSCmd cmd cmdLine
 
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -95,22 +93,17 @@ emitObjectFile m f = do
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
 emitBitcodeFile m f = do
     let filename = f -<.> Config.bitcodeExtension
-    logEmit $ "Creating wrapped bitcode file for *" ++ showModSpec m ++ "*"
-              ++ " @ '" ++ filename ++ "'"
+    llFilename <- emitAssemblyFile m f
     -- astMod <- getModule id
-    logEmit $ "Encoding and wrapping Module *" ++ showModSpec m
-              ++ "* in a wrapped bitcodefile."
-    -- modBS <- encodeModule astMod
-    modBS <- encodeModule m
-    llmod <- descendentModuleLLVM m
-    logEmit $ "===> Writing bitcode file " ++ filename
-    opts <- gets options
-    liftIO $ makeWrappedBCFile opts filename llmod modBS
+    logEmit $ "===> Producing bitcode file " ++ filename
+    userOptions <- gets options
+    let (cmd,cmdLine) = llvmToBitcodeCommand llFilename filename userOptions
+    runOSCmd cmd cmdLine
 
 
 -- | With the LLVM AST representation of a LPVM Module, create a target LLVM
 -- Assembly file.  This function forms the basis for all LLVM code generation.
-emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
+emitAssemblyFile :: ModSpec -> FilePath -> Compiler FilePath
 emitAssemblyFile m f = do
     let filename = f -<.> Config.assemblyExtension
     logEmit $ "Creating assembly file for " ++ showModSpec m ++
@@ -120,49 +113,38 @@ emitAssemblyFile m f = do
     handle <- liftIO $ openFile filename WriteMode
     writeLLVM handle m True
     liftIO $ hClose handle
-    return ()
-    -- let withMod = if optimisationEnabled LLVMOpt opts then withOptimisedModule else withModule 
-    -- liftIO $ withMod opts llmod
-    --     (\mm -> withHostTargetMachineDefault $ \_ ->
-    --         writeLLVMAssemblyToFile (File filename) mm)
+    return filename
 
 
--- | Concatenate the LLVMModule implementations of the descendents of
--- the given module.
-descendentModuleLLVM :: ModSpec -> Compiler LLVMModule
-descendentModuleLLVM mspec = do
-    return ()
-    -- someMods <- sameOriginModules mspec
-    -- unless (List.null someMods) $
-    --     logEmit $ "### Combining descendents of " ++ showModSpec mspec
-    --                ++ ": " ++ showModSpecs someMods
-    -- llmod <- concatLLVMASTModules mspec someMods
-    -- modBS <- encodeModule mspec
-    -- logEmit $ "### flattened LPVM module to " ++ show modBS
-    -- addLPVMtoLLVM mspec llmod modBS
+-- | With the LLVM AST representation of a LPVM Module, create a target native
+-- assembly language file.
+emitNativeAssemblyFile :: ModSpec -> FilePath -> Compiler ()
+emitNativeAssemblyFile m f = do
+    let filename = f -<.> Config.nativeAssemblyExtension
+    llFilename <- emitAssemblyFile m f
+    -- astMod <- getModule id
+    logEmit $ "===> Producing bitcode file " ++ filename
+    userOptions <- gets options
+    let (cmd,cmdLine) =
+            llvmToNativeAssemblerCommand llFilename filename userOptions
+    runOSCmd cmd cmdLine
 
 
--- | Create a definition to hold the encoded LPVM for a module as LLVM data
-lpvmDefine :: ModSpec -> BL.ByteString -> Definition
-lpvmDefine mspec modBS
-    = ()
-            --  = GlobalDefinition $ globalVariableDefaults {
-            --           name = fromString $ show mspec
-            --         , isConstant = True
-            --         , G.type' = ArrayType (fromIntegral $ BL.length modBS) (IntegerType 8)
-            --         , initializer = Just $ C.Array (IntegerType 8)
-            --                              $ List.map (C.Int 8 . fromIntegral)
-            --                              $ BL.unpack modBS
-            --         , section = Just $ fromString lpvmSectionName
-            --         }
-
-
--- | Inject the linearised LPVM byte string into the LLVM code, so that it can
--- later be extracted from the generated object file.
-addLPVMtoLLVM :: ModSpec -> LLVMModule -> BL.ByteString -> Compiler LLVMModule
-addLPVMtoLLVM mspec llmod modBS = do
-    return ()
-    -- return $ llmod { moduleDefinitions = lpvmDefine mspec modBS:moduleDefinitions llmod}
+-- | Compile the specified .ll file to the specified output file, using the
+-- the configured LLVM assembler with the specified switches.
+runOSCmd :: String          -- OS command to run
+         -> [String]        -- commandline arguments
+         -> Compiler ()
+runOSCmd cmd cmdLine = do
+    logEmit $ "Running command: " ++ cmd ++ concatMap (" "++) cmdLine
+    (exCode, _, serr) <- liftIO $
+        readCreateProcessWithExitCode (proc cmd cmdLine) ""
+    case exCode of
+        ExitSuccess -> do
+            logEmit $ "completed successfully"
+                ++ "\nstderr:\n" ++ serr
+                ++ "\n-------\n"
+        _ -> Error <!> serr
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
@@ -231,61 +213,31 @@ passes lvl = ["-O" ++ show lvl]
 --             action m
 
 
-
-----------------------------------------------------------------------------
--- Target Emitters                                                        --
-----------------------------------------------------------------------------
-
--- | Use the bitcode wrapper structure to wrap both the AST.Module
--- (serialised) and the bitcode generated for the Module
-makeWrappedBCFile :: Options -> FilePath -> LLVMModule -> BL.ByteString -> IO ()
-makeWrappedBCFile opts file llmod modBS =
-    return ()
-    -- withOptimisedModule opts llmod $ \m -> do
-    --     bc <- moduleBitcode m
-    --     let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
-    --     BL.writeFile file wrapped
-
--- | Create a Macho-O object file and embed a 'AST.Module' bytestring
--- representation into the '__lpvm' section in it.
-makeWrappedObjFile :: FilePath -> LLVMModule -> BL.ByteString -> Compiler ()
-makeWrappedObjFile file llmod modBS = do
-    return ()
-    -- tmpDir <- gets tmpDir
-    -- opts <- gets options
-    -- liftIO $ withContext $ \_ ->
-    --     withOptimisedModule opts llmod $ \m -> do
-    --         withHostTargetMachineDefault $ \tm ->
-    --             writeObjectToFile tm (File file) m
-
-
 ----------------------------------------------------------------------------
 -- -- * Linking                                                           --
 ----------------------------------------------------------------------------
--- * Link time dead code elimination -- More detail can be found here: https://github.com/pschachte/wybe/issues/60
--- There are two goals: (1) remove unused code. (2) remove the lpvm section
--- On macOS (1) (2) are done by using linker arg: `-dead_strip`
--- On Linux (1) is done by using linker arg: `--gc-sections` (requires separate
--- ELF section for each function). (2) is done by calling `objcopy` after the
--- linker build the executable.
+-- * Link time dead code elimination -- More detail can be found here:
+-- https://github.com/pschachte/wybe/issues/60 There are two goals: (1) remove
+-- unused code. (2) remove the lpvm section.  On macOS, (1) (2) are done by
+-- using linker arg: `-dead_strip`.  On Linux, (1) is done by using linker arg:
+-- `--gc-sections` (requires separate ELF section for each function). (2) is
+-- done by calling `objcopy` after the linker build the executable.
 -- XXX it's better to use the linker to remove the lpvm section.
 
 
 -- | Remove OSX Ld warnings of incompatible built object file version.
-
 suppressLdWarnings :: String -> String
 suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
   where
     notWarning l = not ("ld: warning:" `List.isPrefixOf` l)
 
 
--- | With the `ld` linker, link the object files and create target
--- executable.
+-- | Using `cc` as a linker, link the object files and create target executable.
 makeExec :: [FilePath]          -- Object Files
          -> FilePath            -- Target File
          -> Compiler ()
 makeExec ofiles target = do
-    let options = ["-no-pie"] ++ Config.linkerDeadStripArgs
+    let options = "-no-pie" : Config.linkerDeadStripArgs
     -- let options = linkerDeadStripArgs
     let args = options ++ ofiles ++ ["-o", target]
     logEmit $ "Generating final executable with command line: cc "

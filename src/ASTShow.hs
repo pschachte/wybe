@@ -16,7 +16,7 @@ import Data.List as List
 import Data.Set  as Set
 import Data.Map  as Map
 import Data.Maybe
--- import Control.Monad
+import Control.Monad
 import Control.Monad.Trans (lift,liftIO)
 import Control.Monad.Trans.State
 import System.IO
@@ -65,12 +65,9 @@ instance Show Module where
                        showMap "" ", " "" (const "") showModSpec
                        (modSubmods impl)) ++
                  "\n  procs           : " ++ "\n" ++
-                 (showMap "" "\n\n" "" (const "") (showProcDefs 0)
-                  (modProcs impl)) ++
+                 showMap "" "\n\n" "" (const "") (showProcDefs 0)
+                  (modProcs impl) ++
                   ""
-                --  (maybe "\n\nLLVM code       : None\n"
-                --   (("\n\n  LLVM code       :\n\n" ++) . TL.unpack . ppllvm)
-                --   $ modLLVM impl)
 
 
 -- |How to show a map, one line per item.
@@ -87,25 +84,25 @@ showMapPoses = showMap "" ", " "" id showOptPos
 -- of the specified log selectors have been selected for logging.  This
 -- is called between the passes of those two selectors.
 logDump :: LogSelection -> LogSelection -> String -> Compiler ()
-logDump = logDumpWith (const $ return Nothing)
+logDump = logDumpWith (\h m b -> return ())
 
 
--- |Dump the content of the specified module and all submodules, with the
--- result of an optional action applied to each module if either of the
--- specified log selectors have been selected for logging.  This is called
--- between the passes of those two selectors.
-logDumpWith :: (Module -> Compiler (Maybe String))
+-- |Dump the content of the specified module and all submodules, using the
+-- specified LLVM printer to emit the LLVM code, if either of the specified log
+-- selectors have been selected for logging.  This is called between the passes
+-- of those two selectors.
+logDumpWith :: (Handle -> ModSpec -> Bool -> Compiler ())
             -> LogSelection -> LogSelection -> String -> Compiler ()
-logDumpWith action selector1 selector2 pass =
+logDumpWith llPrinter selector1 selector2 pass =
     whenLogging2 selector1 selector2 $ do
         modList <- gets (Map.elems . modules)
         dumpLib <- gets (optDumpLib . options)
         let toLog mod = let spec  = modSpec mod
                         in  List.null spec || dumpLib || head spec /= "wybe"
         let logging = List.filter toLog modList
-        mbStrs <- mapM action logging
         liftIO $ hPutStrLn stderr $ replicate 70 '='
-          ++ "\nAFTER " ++ pass ++ ":\n"
-          ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
-          (zipWith (\mod mbStr -> show mod ++ maybe "" ("\n\n" ++) mbStr)
-              logging mbStrs)
+                    ++ "\nAFTER " ++ pass ++ ":\n"
+        forM_ logging $ \mod -> do
+                liftIO $ hPutStrLn stderr $ "\n" ++ replicate 50 '-' ++ "\n"
+                        ++ show mod ++ "\n\n  LLVM code       :\n"
+                llPrinter stderr (modSpec mod) False
