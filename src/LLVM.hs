@@ -843,7 +843,8 @@ writeAssemblyExports = do
     llvmBlankLine
     m <- llvmGetModule modSpec
     modBS <- lift $ List.map BI.w2c . BL.unpack <$> encodeModule m
-    declareStringConstant (showModSpec m) modBS $ Just "__LPVM,__lpvm"
+    let constName = "##MODULE:" ++ showModSpec m
+    declareStringConstant constName modBS $ Just "__LPVM,__lpvm"
 
 
 ----------------------------------------------------------------------------
