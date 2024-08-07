@@ -13,7 +13,7 @@ EXTRAINCLUDES=-I /usr/local/include -I /opt/homebrew/include
 
 
 # You shouldn't need to edit anything below here
-VERSION = 0.1
+VERSION = 0.2
 SRCDIR = src
 LIBDIR = wybelibs
 WYBELIBS = wybe.o command_line.o logging.o random.o benchmark.o
