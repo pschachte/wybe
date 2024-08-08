@@ -35,7 +35,6 @@ import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
-import Config (wordSize)
 
 
 -- BEGIN MAJOR DOC
@@ -278,32 +277,57 @@ argStrings set _                   = set
 -- | Construct and return a whole extern declaration ready to be emitted.
 addExtern :: ModSpec -> Prim -> Set ExternSpec -> Set ExternSpec
 addExtern mod (PrimCall _ pspec _ args _) externs =
-    if mod `isPrefixOf` procSpecMod pspec then externs
-    else recordExtern "fastcc" (llvmProcName pspec) args externs
+    if mod /= [] && mod `isPrefixOf` procSpecMod pspec then externs
+    else let (nm,cc) = llvmProcName pspec
+         in recordExternFn cc nm args externs
 addExtern _ PrimHigher{} externs = externs
 addExtern _ (PrimForeign "llvm" _ _ _) externs = externs
 addExtern _ (PrimForeign "lpvm" "alloc" _ _) externs =
     let externName = llvmForeignName "wybe_malloc"
-        extern = ("ccc", externName, [intType], [Representation CPointer])
+        extern = ExternFunction "ccc" externName [intType]
+                                [Representation CPointer]
     in Set.insert extern externs
+addExtern mod (PrimForeign "lpvm" "load" _ [ArgGlobal glob ty,_]) externs =
+    recordExternVar mod glob ty externs
+addExtern mod (PrimForeign "lpvm" "store" _ [_,ArgGlobal glob ty]) externs =
+    recordExternVar mod glob ty externs
 addExtern _ (PrimForeign "lpvm" _ _ _) externs = externs
 addExtern _ (PrimForeign "c" name _ args) externs =
-    recordExtern "ccc" (llvmForeignName name) args externs
+    recordExternFn "ccc" (llvmForeignName name) args externs
 addExtern _ (PrimForeign other name _ args) externs =
     shouldnt $ "Unknown foreign language " ++ other
 
 
 -- | Insert the fact that the named function is an external function with the
 -- specified argument types in the provided set, returning the resulting set.
-recordExtern :: String -> LLVMName -> [PrimArg] -> Set ExternSpec
+recordExternFn :: String -> LLVMName -> [PrimArg] -> Set ExternSpec
              -> Set ExternSpec
-recordExtern cc fName args externs =
+recordExternFn cc fName args externs =
     let (ins,outs,oRefs,iRefs) = partitionByFlow argFlowDirection args
-        extern = (cc, fName
-                 , (argType <$> ins) ++ (Representation CPointer <$ oRefs)
-                 , argType <$> outs)
+        extern = ExternFunction cc fName
+                 ((argType <$> ins) ++ (Representation CPointer <$ oRefs))
+                 (argType <$> outs)
     in if List.null iRefs then Set.insert extern externs
        else shouldnt $ "Function " ++ fName ++ " has TakeReference parameters"
+
+
+-- | Insert the fact that the named function is an external function with the
+-- specified argument types in the provided set, returning the resulting set.
+-- Only add the spec if it's for an external global var.
+recordExternVar :: ModSpec -> GlobalInfo -> TypeSpec
+                -> Set ExternSpec -> Set ExternSpec
+recordExternVar mspec global ty externs =
+    if globalIsLocal mspec global
+    then externs
+    else Set.insert (ExternVariable global ty) externs
+
+
+-- | Test if the GlobalInfo specifies a global variable defined in the current
+-- file, determined by whether is from (a submodule of) the current module.
+globalIsLocal :: ModSpec -> GlobalInfo -> Bool
+globalIsLocal mspec (GlobalResource (ResourceSpec mod _)) =
+    notNull mspec && mspec `isPrefixOf` mod
+globalIsLocal _ _ = False
 
 
 ----------------------------------------------------------------------------
@@ -390,14 +414,14 @@ defGlobalResource res = do
 writeAssemblyExterns :: LLVM ()
 writeAssemblyExterns = do
     copyFn <- llvmGlobalName <$> llvmMemcpyFn
-    let spec = ("ccc", copyFn,
-                Representation <$> [CPointer,CPointer,Bits wordSize,Bits 1], [])
+    let spec = ExternFunction "ccc" copyFn
+                (Representation <$> [CPointer,CPointer,Bits wordSize,Bits 1]) []
     externs <- (spec:) . Set.toList <$> gets allExterns
     mapM_ declareExtern externs
 
 
 declareExtern :: ExternSpec -> LLVM ()
-declareExtern (cc, name, ins, outs) = do
+declareExtern (ExternFunction cc name ins outs) = do
     outs' <- lift $ filterM (notM . typeIsPhantom) outs
     ins' <- lift $ filterM (notM . typeIsPhantom) ins
     outTy <- llvmReturnType outs'
@@ -405,6 +429,11 @@ declareExtern (cc, name, ins, outs) = do
     llvmPutStrLn $ "declare external " ++ cc ++ " "
                   ++ outTy ++ " " ++ name ++ "("
                   ++ intercalate ", " argTypes ++ ")"
+declareExtern (ExternVariable glob ty) = do
+    rep <- typeRep ty
+    unless (repIsPhantom rep) $ do
+        name <- llvmGlobalInfoName glob
+        llvmPutStrLn $ name ++ " = external global " ++ llvmTypeRep rep
 
 
 ----------------------------------------------------------------------------
@@ -458,7 +487,7 @@ writeProcSpeczLLVM :: ProcSpec -> Int -> [PrimParam] -> ProcBody -> LLVM ()
 writeProcSpeczLLVM pspec tmpCount params body = do
     logLLVM $ "Generating LLVM for proc " ++ show pspec
     initialiseLLVMForProc tmpCount
-    let name = llvmProcName pspec
+    let (name,cc) = llvmProcName pspec
     (ins,outs,oRefs,iRefs) <- partitionParams params
     unless (List.null iRefs)
         $ nyi $ "take-reference parameter for proc " ++ show pspec
@@ -468,7 +497,7 @@ writeProcSpeczLLVM pspec tmpCount params body = do
     llParams <- mapM llvmParameter $ ins ++ oRefParams
     llvmBlankLine
     llvmPutStrLn $
-        "define external fastcc " ++ returnType ++ " "
+        "define external " ++ cc ++ " " ++ returnType ++ " "
             ++ name ++ "(" ++ intercalate ", " llParams ++ ")"
             ++ " alwaysinline {"
     writeAssemblyBody outs body
@@ -510,38 +539,6 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
                 (Signed _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
                 (rep,_,_) -> shouldnt $ "Switching on " ++ show rep ++ " type "
                                 ++ show ty
-
-
-----------------------------------------------------------------------------
--- Generating and emitting LLVM for a single LPVM Prim instruction
-----------------------------------------------------------------------------
-
-
--- | Generate and write out the LLVM code for a single LPVM prim
-writeAssemblyPrim :: Prim -> OptPos -> LLVM ()
-writeAssemblyPrim instr@(PrimCall _ proc _ args _) pos = do
-    releaseDeferredCall
-    logLLVM $ "Translating Wybe call " ++ show instr
-    writeWybeCall proc args pos
-writeAssemblyPrim instr@(PrimHigher _ fn _ args) pos = do
-    releaseDeferredCall
-    logLLVM $ "Translating HO call " ++ show instr
-    writeHOCall fn args pos
-writeAssemblyPrim instr@(PrimForeign "llvm" op flags args) pos = do
-    releaseDeferredCall
-    logLLVM $ "Translating LLVM instruction " ++ show instr
-    writeLLVMCall op flags args pos
-writeAssemblyPrim instr@(PrimForeign "lpvm" op flags args) pos = do
-    -- Some of these should be handled before releasing deferred calls
-    logLLVM $ "Translating LPVM instruction " ++ show instr
-    writeLPVMCall op flags args pos
-writeAssemblyPrim instr@(PrimForeign "c" cfn flags args) pos = do
-    releaseDeferredCall
-    logLLVM $ "Translating C call " ++ show instr
-    writeCCall cfn flags args pos
-writeAssemblyPrim instr@(PrimForeign lang op flags args) pos = do
-    shouldnt $ "unknown foreign language " ++ lang
-                ++ " in instruction " ++ show instr
 
 
 -- | Generate and write out an LLVM if-then-else (switch on an i1 value)
@@ -593,6 +590,38 @@ writeAssemblySwitch outs v rep cases dflt = do
             writeAssemblyBody outs dfltCode
 
 
+----------------------------------------------------------------------------
+-- Generating and emitting LLVM for a single LPVM Prim instruction
+----------------------------------------------------------------------------
+
+
+-- | Generate and write out the LLVM code for a single LPVM prim
+writeAssemblyPrim :: Prim -> OptPos -> LLVM ()
+writeAssemblyPrim instr@(PrimCall _ proc _ args _) pos = do
+    releaseDeferredCall
+    logLLVM $ "Translating Wybe call " ++ show instr
+    writeWybeCall proc args pos
+writeAssemblyPrim instr@(PrimHigher _ fn _ args) pos = do
+    releaseDeferredCall
+    logLLVM $ "Translating HO call " ++ show instr
+    writeHOCall fn args pos
+writeAssemblyPrim instr@(PrimForeign "llvm" op flags args) pos = do
+    releaseDeferredCall
+    logLLVM $ "Translating LLVM instruction " ++ show instr
+    writeLLVMCall op flags args pos
+writeAssemblyPrim instr@(PrimForeign "lpvm" op flags args) pos = do
+    -- Some of these should be handled before releasing deferred calls
+    logLLVM $ "Translating LPVM instruction " ++ show instr
+    writeLPVMCall op flags args pos
+writeAssemblyPrim instr@(PrimForeign "c" cfn flags args) pos = do
+    releaseDeferredCall
+    logLLVM $ "Translating C call " ++ show instr
+    writeCCall cfn flags args pos
+writeAssemblyPrim instr@(PrimForeign lang op flags args) pos = do
+    shouldnt $ "unknown foreign language " ++ lang
+                ++ " in instruction " ++ show instr
+
+
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeWybeCall :: ProcSpec -> [PrimArg] -> OptPos -> LLVM ()
 writeWybeCall wybeProc args pos = do
@@ -625,15 +654,15 @@ writeHOCall callee args pos = do
         "tail call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
 
 
--- | Actually generate a Wybe proc call.  tailFlag indicates what degree of LLVM
+-- | Actually generate a Wybe proc call.  tailKind indicates what degree of LLVM
 -- tail call optimisation we want.
 writeActualCall :: ProcSpec -> [PrimArg] -> [PrimArg] -> String -> LLVM ()
-writeActualCall wybeProc ins outs tailFlag = do
+writeActualCall wybeProc ins outs tailKind = do
         outTy <- llvmReturnType $ List.map argType outs
         argList <- llvmArgumentList ins
+        let (name,cc) = llvmProcName wybeProc
         llvmStoreResult outs $
-            tailFlag ++ "call fastcc " ++ outTy ++ " " ++ llvmProcName wybeProc
-            ++ argList
+            tailKind ++ "call " ++ cc ++ " " ++ outTy ++ " " ++ name ++ argList
 
 
 -- | Generate a native LLVM instruction
@@ -1321,10 +1350,24 @@ type LLVMName = String
 -- | An LLVM value (constant or LLVMName), preceded by and LLVMType
 type LLVMArg = String
 
--- | Information we collect about external functions we call in a module, so we
--- can declare them.  This includes the LLVM calling convention, the LLVM name
+-- | Information we collect about external things referenced by this module, so we
+-- can declare them.  For functions, this includes the LLVM calling convention, the LLVM name
 -- of the function, and the input and output argument types.
-type ExternSpec = (String, LLVMName, [TypeSpec], [TypeSpec])
+data ExternSpec =
+    -- | An external function we call
+    ExternFunction {
+        extFnCC   :: String,     -- ^ The function's calling convention
+        extFnName :: LLVMName,   -- ^ The function's LLVM name (with @)
+        extFnArgs :: [TypeSpec], -- ^ The function's input argument types
+        extFnOut  :: [TypeSpec]  -- ^ The function's result (tuple) types
+        }
+      -- | An external global variable we refer to
+    | ExternVariable {
+        extVarName :: GlobalInfo, -- ^ The global variable to declare
+        extVarType :: TypeSpec    -- ^ The variable's Wybe type
+        }
+    deriving (Eq,Ord,Show)
+
 
 -- | Information needed to specify one constant value, giving the representation
 -- to be stored and the (constant) value itself.
@@ -1545,8 +1588,8 @@ releaseDeferredCall = do
             logLLVM $ "take-ref pointers = " ++ show takeRefs
             logLLVM $ "new ref args: " ++ show refIns ++ "; old = " ++ show old
             let allOld = and old
-            let tailFlag = if allOld then "musttail " else ""
-            writeActualCall wybeProc (ins++refIns) outs tailFlag
+            let tailKind = if allOld then "musttail " else ""
+            writeActualCall wybeProc (ins++refIns) outs tailKind
             unless allOld $ forM_ refIns $ \oRef -> do
                 let oVar = argVar "in releaseDeferredCall" oRef
                 (ptrArg,ty) <-
@@ -1583,15 +1626,17 @@ convertOutByRefArg other =
 ----------------------------------------------------------------------------
 
 -- | The LLVM name for a Wybe proc.
-llvmProcName :: ProcSpec -> LLVMName
-llvmProcName pspec = llvmGlobalName $ show pspec
+llvmProcName :: ProcSpec -> (LLVMName,String)
+llvmProcName ProcSpec{procSpecMod=[],procSpecName=""} =
+    (llvmGlobalName "main", "ccc")
+llvmProcName pspec = (llvmGlobalName $ show pspec, "fastcc")
 
 
 -- | Make a suitable LLVM name for a global variable or constant.  We prefix it
 -- with @, enclose the rest in quotes, and escape any special characters.
 llvmGlobalName :: String -> LLVMName
 llvmGlobalName s =
-    '@' : if all ((=='_')|||isAlphaNum) s 
+    '@' : if all ((=='_')|||(=='.')|||isAlphaNum) s
         then s
         else '"' : concatMap showLLVMChar s ++ "\""
 

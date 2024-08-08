@@ -163,7 +163,6 @@ import           GHC.Generics (Generic)
 
 -- import qualified LLVM.AST as LLVMAST
 import Data.Binary (Binary)
-import Data.Maybe (Maybe(Nothing), catMaybes)
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -900,9 +899,9 @@ addConstructor vis pctor = do
            ++ " with declared representation"
     pctors <- fromMaybe [] <$> getModuleImplementationField modConstructors
     let redundant =
-          any (\c -> procProtoName c == procProtoName ctor
+          any ((\c -> procProtoName c == procProtoName ctor
                 && length (procProtoParams c) == length (procProtoParams ctor))
-          $ content . snd <$> pctors
+                . content . snd) pctors
     when redundant
       $  errmsg pos
            $ "Declaring constructor for type " ++ showModSpec currMod

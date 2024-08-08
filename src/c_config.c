@@ -1,7 +1,7 @@
 /* File     : c_config.c
  * Author   : Peter Schachte
  * Purpose  : Determine configuration for Wybe -> C interface
- * Copyright: (c) 2018-2019 Ting Lu.  All rights reserved.
+ * Copyright: (c) 2024 Peter Schachte.  All rights reserved.
  * License  : Licensed under terms of the MIT license.  See the file
  *          : LICENSE in the root directory of this project.
  *
