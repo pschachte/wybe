@@ -672,8 +672,7 @@ getSpecModule context getter spec = do
     --   " matching modules under compilation"
     case curr of
         []    -> gets (maybe (error msg) getter . Map.lookup spec . modules)
-        [mod] -> return $ getter mod
-        _     -> shouldnt "getSpecModule: multiple modules with same spec"
+        (mod:_) -> return $ getter mod
 
 
 -- | Is the specified module a type?  Determined by checking if it has a
@@ -3867,6 +3866,7 @@ instance Show TypeFamily where
 
 -- |How to show a ModSpec.
 showModSpec :: ModSpec -> String
+showModSpec [] = "*main* module"
 showModSpec spec = intercalate "." $ (\case "" -> "``" ; m -> m) <$> spec
 
 
