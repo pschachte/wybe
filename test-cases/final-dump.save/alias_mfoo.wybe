@@ -1,0 +1,18 @@
+# transitive aliasing data structures incurred by defs  {in SCC modules
+
+use position
+use alias_mbar
+
+# Expected Alias Pairs: [(p1, p2)]
+pub def foo(p1:position, ?p2:position, ?p3:position) use !io {
+    if { p1^x > 1 ::
+            ?p2 = p1 # p1 and p2 aliased
+            ?p3 = position(3,3)
+            !print("p3:")
+            !printPosition(p3)
+       | else      :: ?tmp = p1^x
+            x(!p1, tmp + 1)
+            !bar(p1, ?p3) # p1(2,1), p1 and p3 aliased
+            ?p2 = position(2,2) # p1 is dead, so p3 is not aliased
+    }
+}

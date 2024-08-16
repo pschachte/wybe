@@ -1,0 +1,6 @@
+pub type person { pub person(firstname:string, lastname:string) }
+
+# expect: destructively update A; A is fresh
+?personA = person("John", "Smith")
+lastname(!personA, "Wang")
+!print(personA^lastname)

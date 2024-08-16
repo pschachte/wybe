@@ -1,7 +1,7 @@
 ======================================================================
 AFTER EVERYTHING:
  Module generic_list(T)
-  representation  : address
+  representation  : pointer
   public submods  : 
   public resources: 
   public procs    : generic_list.append<0>
@@ -169,34 +169,34 @@ nil(?#result##0:generic_list(T))<{}; {}; {}>:
  
 
 
-declare external ccc  i8* @wybe_malloc(i32)    
+declare external ccc  ptr @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0.p0.i64(ptr, ptr, i32, i1)    
 
 
-define external fastcc  void @"generic_list.append<0>"(i64  %"x##0", i64  %"y##0", i64*  %"#result##0")    {
+define external fastcc  void @"generic_list.append<0>"(i64  %"x##0", i64  %"y##0", ptr  %"#result##0")    {
 entry:
   %0 = icmp ne i64 %"x##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"x##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"x##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"x##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
   %6 = trunc i64 16 to i32  
-  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
-  %8 = ptrtoint i8* %7 to i64 
-  %9 = inttoptr i64 %8 to i64* 
-  store  i64 %2, i64* %9 
+  %7 = call ccc  ptr  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint ptr %7 to i64 
+  %9 = inttoptr i64 %8 to ptr 
+  store  i64 %2, ptr %9 
   %10 = add   i64 %8, 8 
-  %11 = inttoptr i64 %10 to i64* 
-  store  i64 %8, i64* %"#result##0" 
-  musttail call fastcc  void  @"generic_list.append<0>"(i64  %5, i64  %"y##0", i64*  %11)  
+  %11 = inttoptr i64 %10 to ptr 
+  store  i64 %8, ptr %"#result##0" 
+  musttail call fastcc  void  @"generic_list.append<0>"(i64  %5, i64  %"y##0", ptr  %11)  
   ret void 
 if.else:
-  store  i64 %"y##0", i64* %"#result##0" 
+  store  i64 %"y##0", ptr %"#result##0" 
   ret void 
 }
 
@@ -206,8 +206,8 @@ entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"#rec##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"#rec##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = insertvalue {i64, i1} undef, i64 %2, 0 
   %4 = insertvalue {i64, i1} %3, i1 1, 1 
   ret {i64, i1} %4 
@@ -224,14 +224,14 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = trunc i64 16 to i32  
-  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
-  %3 = ptrtoint i8* %2 to i64 
-  %4 = inttoptr i64 %3 to i8* 
-  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %2 = call ccc  ptr  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint ptr %2 to i64 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = inttoptr i64 %"#rec##0" to ptr 
   %6 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
-  %7 = inttoptr i64 %3 to i64* 
-  store  i64 %"#field##0", i64* %7 
+  call ccc  void  @llvm.memcpy.p0.p0.i64(ptr  %4, ptr  %5, i32  %6, i1  0)  
+  %7 = inttoptr i64 %3 to ptr 
+  store  i64 %"#field##0", ptr %7 
   %8 = insertvalue {i64, i1} undef, i64 %3, 0 
   %9 = insertvalue {i64, i1} %8, i1 1, 1 
   ret {i64, i1} %9 
@@ -248,8 +248,8 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = add   i64 %"#rec##0", 8 
-  %2 = inttoptr i64 %1 to i64* 
-  %3 = load  i64, i64* %2 
+  %2 = inttoptr i64 %1 to ptr 
+  %3 = load  i64, ptr %2 
   %4 = insertvalue {i64, i1} undef, i64 %3, 0 
   %5 = insertvalue {i64, i1} %4, i1 1, 1 
   ret {i64, i1} %5 
@@ -266,15 +266,15 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = trunc i64 16 to i32  
-  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
-  %3 = ptrtoint i8* %2 to i64 
-  %4 = inttoptr i64 %3 to i8* 
-  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %2 = call ccc  ptr  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint ptr %2 to i64 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = inttoptr i64 %"#rec##0" to ptr 
   %6 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  call ccc  void  @llvm.memcpy.p0.p0.i64(ptr  %4, ptr  %5, i32  %6, i1  0)  
   %7 = add   i64 %3, 8 
-  %8 = inttoptr i64 %7 to i64* 
-  store  i64 %"#field##0", i64* %8 
+  %8 = inttoptr i64 %7 to ptr 
+  store  i64 %"#field##0", ptr %8 
   %9 = insertvalue {i64, i1} undef, i64 %3, 0 
   %10 = insertvalue {i64, i1} %9, i1 1, 1 
   ret {i64, i1} %10 
@@ -288,13 +288,13 @@ if.else:
 define external fastcc  i64 @"generic_list.cons<0>"(i64  %"car##0", i64  %"cdr##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
-  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
-  %2 = ptrtoint i8* %1 to i64 
-  %3 = inttoptr i64 %2 to i64* 
-  store  i64 %"car##0", i64* %3 
+  %1 = call ccc  ptr  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint ptr %1 to i64 
+  %3 = inttoptr i64 %2 to ptr 
+  store  i64 %"car##0", ptr %3 
   %4 = add   i64 %2, 8 
-  %5 = inttoptr i64 %4 to i64* 
-  store  i64 %"cdr##0", i64* %5 
+  %5 = inttoptr i64 %4 to ptr 
+  store  i64 %"cdr##0", ptr %5 
   ret i64 %2 
 }
 
@@ -304,11 +304,11 @@ entry:
   %0 = icmp ne i64 %"#result##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"#result##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"#result##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"#result##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
   %6 = insertvalue {i64, i64, i1} undef, i64 %2, 0 
   %7 = insertvalue {i64, i64, i1} %6, i64 %5, 1 
   %8 = insertvalue {i64, i64, i1} %7, i1 1, 2 
@@ -334,8 +334,8 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = add   i64 %"x##0", 8 
-  %2 = inttoptr i64 %1 to i64* 
-  %3 = load  i64, i64* %2 
+  %2 = inttoptr i64 %1 to ptr 
+  %3 = load  i64, ptr %2 
   %4 = add   i64 %"acc##0", 1 
   %5 = musttail call fastcc  i64  @"generic_list.length1<0>"(i64  %3, i64  %4)  
   ret i64 %5 
@@ -602,7 +602,7 @@ reverse1(lst##0:generic_list(T) <{}; {}; {0}>, suffix##0:generic_list(T) <{}; {}
  
 
 
-@generic_use.1 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @generic_use.0 to i64) }
+@generic_use.1 =    constant {i64, i64} { i64 2, i64 ptrtoint (ptr @generic_use.0 to i64) }
 
 
 @generic_use.0 =    constant [?? x i8] c", \00"
@@ -617,10 +617,10 @@ declare external ccc  void @print_int(i64)
 declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
-declare external ccc  i8* @wybe_malloc(i32)    
+declare external ccc  ptr @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0.p0.i64(ptr, ptr, i32, i1)    
 
 
 define external fastcc  void @"generic_use.<0>"()    {
@@ -628,65 +628,65 @@ entry:
   %0 = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  1, i64  5, i64  0)  
   %1 = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  6, i64  10, i64  0)  
   tail call fastcc  void  @"generic_use.print<0>"(i64  %0)  
-  tail call ccc  void  @putchar(i8  10)  
+  call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"generic_use.print<0>"(i64  %1)  
-  tail call ccc  void  @putchar(i8  10)  
+  call ccc  void  @putchar(i8  10)  
   %2 = alloca i64 
-   call fastcc  void  @"generic_use.concat<0>"(i64  %0, i64  %1, i64*  %2)  
-  %3 = load  i64, i64* %2 
+   call fastcc  void  @"generic_use.concat<0>"(i64  %0, i64  %1, ptr  %2)  
+  %3 = load  i64, ptr %2 
   tail call fastcc  void  @"generic_use.print<0>"(i64  %3)  
-  tail call ccc  void  @putchar(i8  10)  
+  call ccc  void  @putchar(i8  10)  
   %4 = tail call fastcc  i64  @"generic_use.reverse1<0>[410bae77d3]"(i64  %0, i64  0)  
   tail call fastcc  void  @"generic_use.print<0>"(i64  %4)  
-  tail call ccc  void  @putchar(i8  10)  
+  call ccc  void  @putchar(i8  10)  
   %5 = tail call fastcc  i64  @"generic_use.nrev<0>[410bae77d3]"(i64  %1)  
   tail call fastcc  void  @"generic_use.print<0>"(i64  %5)  
-  tail call ccc  void  @putchar(i8  10)  
+  call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
 
-define external fastcc  void @"generic_use.concat<0>"(i64  %"l1##0", i64  %"l2##0", i64*  %"#result##0")    {
+define external fastcc  void @"generic_use.concat<0>"(i64  %"l1##0", i64  %"l2##0", ptr  %"#result##0")    {
 entry:
   %0 = icmp ne i64 %"l1##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"l1##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"l1##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"l1##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
   %6 = trunc i64 16 to i32  
-  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
-  %8 = ptrtoint i8* %7 to i64 
-  %9 = inttoptr i64 %8 to i64* 
-  store  i64 %2, i64* %9 
+  %7 = call ccc  ptr  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint ptr %7 to i64 
+  %9 = inttoptr i64 %8 to ptr 
+  store  i64 %2, ptr %9 
   %10 = add   i64 %8, 8 
-  %11 = inttoptr i64 %10 to i64* 
-  store  i64 %8, i64* %"#result##0" 
-  musttail call fastcc  void  @"generic_use.concat<0>"(i64  %5, i64  %"l2##0", i64*  %11)  
+  %11 = inttoptr i64 %10 to ptr 
+  store  i64 %8, ptr %"#result##0" 
+  musttail call fastcc  void  @"generic_use.concat<0>"(i64  %5, i64  %"l2##0", ptr  %11)  
   ret void 
 if.else:
-  store  i64 %"l2##0", i64* %"#result##0" 
+  store  i64 %"l2##0", ptr %"#result##0" 
   ret void 
 }
 
 
-define external fastcc  void @"generic_use.concat<0>[410bae77d3]"(i64  %"l1##0", i64  %"l2##0", i64*  %"#result##0")    {
+define external fastcc  void @"generic_use.concat<0>[410bae77d3]"(i64  %"l1##0", i64  %"l2##0", ptr  %"#result##0")    {
 entry:
   %0 = icmp ne i64 %"l1##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = add   i64 %"l1##0", 8 
-  %2 = inttoptr i64 %1 to i64* 
-  %3 = load  i64, i64* %2 
+  %2 = inttoptr i64 %1 to ptr 
+  %3 = load  i64, ptr %2 
   %4 = add   i64 %"l1##0", 8 
-  %5 = inttoptr i64 %4 to i64* 
-  store  i64 %"l1##0", i64* %"#result##0" 
-  musttail call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %3, i64  %"l2##0", i64*  %5)  
+  %5 = inttoptr i64 %4 to ptr 
+  store  i64 %"l1##0", ptr %"#result##0" 
+  musttail call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %3, i64  %"l2##0", ptr  %5)  
   ret void 
 if.else:
-  store  i64 %"l2##0", i64* %"#result##0" 
+  store  i64 %"l2##0", ptr %"#result##0" 
   ret void 
 }
 
@@ -705,13 +705,13 @@ entry:
 if.then:
   %1 = sub   i64 %"hi##0", 1 
   %2 = trunc i64 16 to i32  
-  %3 = tail call ccc  i8*  @wybe_malloc(i32  %2)  
-  %4 = ptrtoint i8* %3 to i64 
-  %5 = inttoptr i64 %4 to i64* 
-  store  i64 %"hi##0", i64* %5 
+  %3 = call ccc  ptr  @wybe_malloc(i32  %2)  
+  %4 = ptrtoint ptr %3 to i64 
+  %5 = inttoptr i64 %4 to ptr 
+  store  i64 %"hi##0", ptr %5 
   %6 = add   i64 %4, 8 
-  %7 = inttoptr i64 %6 to i64* 
-  store  i64 %"sofar##0", i64* %7 
+  %7 = inttoptr i64 %6 to ptr 
+  store  i64 %"sofar##0", ptr %7 
   %8 = musttail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %1, i64  %4)  
   ret i64 %8 
 if.else:
@@ -731,23 +731,23 @@ entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"lst##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"lst##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"lst##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
   %6 = tail call fastcc  i64  @"generic_use.nrev<0>"(i64  %5)  
   %7 = trunc i64 16 to i32  
-  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
-  %9 = ptrtoint i8* %8 to i64 
-  %10 = inttoptr i64 %9 to i64* 
-  store  i64 %2, i64* %10 
+  %8 = call ccc  ptr  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint ptr %8 to i64 
+  %10 = inttoptr i64 %9 to ptr 
+  store  i64 %2, ptr %10 
   %11 = add   i64 %9, 8 
-  %12 = inttoptr i64 %11 to i64* 
-  store  i64 0, i64* %12 
+  %12 = inttoptr i64 %11 to ptr 
+  store  i64 0, ptr %12 
   %13 = alloca i64 
-   call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %6, i64  %9, i64*  %13)  
-  %14 = load  i64, i64* %13 
+   call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %6, i64  %9, ptr  %13)  
+  %14 = load  i64, ptr %13 
   ret i64 %14 
 if.else:
   ret i64 0 
@@ -760,15 +760,15 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = add   i64 %"lst##0", 8 
-  %2 = inttoptr i64 %1 to i64* 
-  %3 = load  i64, i64* %2 
+  %2 = inttoptr i64 %1 to ptr 
+  %3 = load  i64, ptr %2 
   %4 = tail call fastcc  i64  @"generic_use.nrev<0>[410bae77d3]"(i64  %3)  
   %5 = add   i64 %"lst##0", 8 
-  %6 = inttoptr i64 %5 to i64* 
-  store  i64 0, i64* %6 
+  %6 = inttoptr i64 %5 to ptr 
+  store  i64 0, ptr %6 
   %7 = alloca i64 
-   call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %4, i64  %"lst##0", i64*  %7)  
-  %8 = load  i64, i64* %7 
+   call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %4, i64  %"lst##0", ptr  %7)  
+  %8 = load  i64, ptr %7 
   ret i64 %8 
 if.else:
   ret i64 0 
@@ -777,21 +777,21 @@ if.else:
 
 define external fastcc  void @"generic_use.print<0>"(i64  %"lst##0")    {
 entry:
-  tail call ccc  void  @putchar(i8  91)  
+  call ccc  void  @putchar(i8  91)  
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"lst##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"lst##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"lst##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
-  tail call ccc  void  @print_int(i64  %2)  
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
+  call ccc  void  @print_int(i64  %2)  
   tail call fastcc  void  @"generic_use.print_tail<0>"(i64  %5)  
-  tail call ccc  void  @putchar(i8  93)  
+  call ccc  void  @putchar(i8  93)  
   ret void 
 if.else:
-  tail call ccc  void  @putchar(i8  93)  
+  call ccc  void  @putchar(i8  93)  
   ret void 
 }
 
@@ -801,13 +801,13 @@ entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"lst##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"lst##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"lst##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @generic_use.1, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %2)  
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (ptr getelementptr inbounds ({i64, i64}, {i64, i64}* @generic_use.1, i32 0, i32 0) to i64))  
+  call ccc  void  @print_int(i64  %2)  
   musttail call fastcc  void  @"generic_use.print_tail<0>"(i64  %5)  
   ret void 
 if.else:
@@ -818,7 +818,7 @@ if.else:
 define external fastcc  void @"generic_use.println<0>"(i64  %"lst##0") alwaysinline   {
 entry:
   tail call fastcc  void  @"generic_use.print<0>"(i64  %"lst##0")  
-  tail call ccc  void  @putchar(i8  10)  
+  call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
@@ -835,19 +835,19 @@ entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"lst##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"lst##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"lst##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
   %6 = trunc i64 16 to i32  
-  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
-  %8 = ptrtoint i8* %7 to i64 
-  %9 = inttoptr i64 %8 to i64* 
-  store  i64 %2, i64* %9 
+  %7 = call ccc  ptr  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint ptr %7 to i64 
+  %9 = inttoptr i64 %8 to ptr 
+  store  i64 %2, ptr %9 
   %10 = add   i64 %8, 8 
-  %11 = inttoptr i64 %10 to i64* 
-  store  i64 %"suffix##0", i64* %11 
+  %11 = inttoptr i64 %10 to ptr 
+  store  i64 %"suffix##0", ptr %11 
   %12 = musttail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %5, i64  %8)  
   ret i64 %12 
 if.else:
@@ -861,11 +861,11 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = add   i64 %"lst##0", 8 
-  %2 = inttoptr i64 %1 to i64* 
-  %3 = load  i64, i64* %2 
+  %2 = inttoptr i64 %1 to ptr 
+  %3 = load  i64, ptr %2 
   %4 = add   i64 %"lst##0", 8 
-  %5 = inttoptr i64 %4 to i64* 
-  store  i64 %"suffix##0", i64* %5 
+  %5 = inttoptr i64 %4 to ptr 
+  store  i64 %"suffix##0", ptr %5 
   %6 = musttail call fastcc  i64  @"generic_use.reverse1<0>[410bae77d3]"(i64  %3, i64  %"lst##0")  
   ret i64 %6 
 if.else:

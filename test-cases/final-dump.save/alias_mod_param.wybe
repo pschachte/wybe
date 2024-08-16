@@ -1,0 +1,12 @@
+use position
+
+pub def foo(pa:position) use !io {
+    x(!pa, 1111) # Non-destructive
+    !print("expect pa(1111,10):")
+    !printPosition(pa)
+}
+
+?p1 = position(10,10)
+!foo(p1)
+!print("expect p1(10,10):")
+!printPosition(p1)

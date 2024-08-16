@@ -1,0 +1,164 @@
+======================================================================
+AFTER EVERYTHING:
+ Module call_site_id
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : call_site_id.<0>
+                    call_site_id.bar<0>
+                    call_site_id.foo<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: call_site_id.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c read_int(?x##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c read_int(?y##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @call_site_id:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @call_site_id:nn:nn
+    foreign llvm icmp_sgt(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @call_site_id:nn:nn
+    case ~tmp#5##0:wybe.bool of
+    0:
+        foreign llvm sub(0:wybe.int, ~x##0:wybe.int, ?tmp#1##0:wybe.int) @call_site_id:nn:nn
+        call_site_id.foo<0>(~tmp#1##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @call_site_id:nn:nn
+        foreign llvm icmp_sgt(y##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @call_site_id:nn:nn
+        case ~tmp#4##0:wybe.bool of
+        0:
+            foreign llvm sub(0:wybe.int, ~y##0:wybe.int, ?tmp#2##0:wybe.int) @call_site_id:nn:nn
+            call_site_id.foo<0>(~tmp#2##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @call_site_id:nn:nn
+
+        1:
+            call_site_id.foo<0>(~y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @call_site_id:nn:nn
+
+
+    1:
+        call_site_id.foo<0>(~x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @call_site_id:nn:nn
+        foreign llvm icmp_sgt(y##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @call_site_id:nn:nn
+        case ~tmp#3##0:wybe.bool of
+        0:
+            foreign llvm sub(0:wybe.int, ~y##0:wybe.int, ?tmp#0##0:wybe.int) @call_site_id:nn:nn
+            call_site_id.foo<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @call_site_id:nn:nn
+
+        1:
+            call_site_id.foo<0>(~y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @call_site_id:nn:nn
+
+
+
+
+proc bar > public {inline} (9 calls)
+0: call_site_id.bar<0>
+bar(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    call_site_id.foo<0>(~x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @call_site_id:nn:nn
+
+
+proc foo > public (1 calls)
+0: call_site_id.foo<0>
+foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @call_site_id:nn:nn
+    foreign llvm mul(~x##0:wybe.int, 5:wybe.int, ?tmp#1##0:wybe.int) @call_site_id:nn:nn
+    foreign llvm add(~tmp#1##0:wybe.int, 10:wybe.int, ?tmp#0##0:wybe.int) @call_site_id:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @call_site_id:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @call_site_id:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'call_site_id'
+
+
+ 
+
+
+@call_site_id.1 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.0 to i64) }
+
+
+@call_site_id.0 =    constant [?? x i8] c" \00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
+
+
+declare external ccc  i64 @read_int()    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"call_site_id.<0>"()    {
+entry:
+  %0 = tail call ccc  i64  @read_int()  
+  %1 = tail call ccc  i64  @read_int()  
+  %2 = icmp sgt i64 %0, 0 
+  br i1 %2, label %if.then, label %if.else 
+if.then:
+  tail call fastcc  void  @"call_site_id.foo<0>"(i64  %0)  
+  %3 = icmp sgt i64 %1, 0 
+  br i1 %3, label %if.then1, label %if.else1 
+if.else:
+  %5 = sub   i64 0, %0 
+  tail call fastcc  void  @"call_site_id.foo<0>"(i64  %5)  
+  %6 = icmp sgt i64 %1, 0 
+  br i1 %6, label %if.then2, label %if.else2 
+if.then1:
+  tail call fastcc  void  @"call_site_id.foo<0>"(i64  %1)  
+  ret void 
+if.else1:
+  %4 = sub   i64 0, %1 
+  tail call fastcc  void  @"call_site_id.foo<0>"(i64  %4)  
+  ret void 
+if.then2:
+  tail call fastcc  void  @"call_site_id.foo<0>"(i64  %1)  
+  ret void 
+if.else2:
+  %7 = sub   i64 0, %1 
+  tail call fastcc  void  @"call_site_id.foo<0>"(i64  %7)  
+  ret void 
+}
+
+
+define external fastcc  void @"call_site_id.bar<0>"(i64  %"x##0") alwaysinline   {
+entry:
+  musttail call fastcc  void  @"call_site_id.foo<0>"(i64  %"x##0")  
+  ret void 
+}
+
+
+define external fastcc  void @"call_site_id.foo<0>"(i64  %"x##0")    {
+entry:
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  %0 = mul   i64 %"x##0", 5 
+  %1 = add   i64 %0, 10 
+  tail call ccc  void  @print_int(i64  %1)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}

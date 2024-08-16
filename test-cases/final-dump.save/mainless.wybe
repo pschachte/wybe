@@ -1,0 +1,4 @@
+# A module with no main code, so we shouldn't be able to
+# build an executable for it.
+
+pub def nothing_interesting:int = 7

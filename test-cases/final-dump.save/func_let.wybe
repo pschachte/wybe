@@ -1,0 +1,3 @@
+pub def quad(x:int):int = let { ?d = x+x } in d+d
+
+!print(quad(10))

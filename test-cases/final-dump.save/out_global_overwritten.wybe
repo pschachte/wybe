@@ -1,0 +1,9 @@
+resource res:int
+
+def {noinline} out use ?res { ?res = 11 }
+
+use res in { 
+    !out # this can be removed -- following statements overwrite only flowing global
+    ?res = 10 
+    !println(res) # value res can be inferred from (re)assignment
+} # this whole use block can be removed -- res is definitely unchanged

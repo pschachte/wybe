@@ -1,0 +1,21 @@
+# test of new inline and noinline modifiers
+
+pub def {inline} long use !io {
+    !print('h')
+    !print('e')
+    !print('l')
+    !print('l')
+    !print('o')
+    !print(' ')
+    !print('w')
+    !print('o')
+    !print('r')
+    !print('l')
+    !print('d')
+    !print('!')
+    !finish
+}
+
+pub def {noinline} finish use !io { !nl }
+
+!long

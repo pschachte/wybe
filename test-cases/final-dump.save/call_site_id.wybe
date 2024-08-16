@@ -1,0 +1,39 @@
+
+!read(?x:int)
+!read(?y:int)
+
+
+if { x > 0 :: 
+    !bar(x)
+    if { y > 0 ::
+        !bar(y)
+    | else      ::
+        !bar(-y)
+    }
+| else      :: 
+    !bar(-x)
+    if { y > 0 ::
+        !bar(y)
+    | else      ::
+        !bar(-y)
+    }
+}
+
+
+# make use this proc will be inline.
+pub def bar(x: int) use !io {
+    !foo(x)
+}
+
+# make use this proc won't be inlined.
+pub def foo(x: int) use !io {
+    !print(" ")
+    !print(" ")
+    !print(" ")
+    !print(" ")
+    !print(" ")
+    !print(" ")
+    !print(" ")
+    ?x = x * 5 + 10
+    !println(x)
+}

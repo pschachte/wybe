@@ -1,0 +1,18 @@
+resource res:int = 0
+resource ser:int = 0
+
+def {test,noinline} foo(?s:c_string) use call_source_location, !res {
+    ?res = 1
+    ?s = call_source_location
+    use ser in {
+        ?ser = 1
+        res = 2 # fail
+    }
+}
+
+!println(res) # should print 0
+
+if { !foo(?s) :: !println(s) } # will never execute
+
+!println(res) # should print as above
+!println(ser) # should print 0

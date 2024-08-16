@@ -1,0 +1,64 @@
+pub type suit { pub constructors 
+    clubs | diamonds | hearts | spades
+
+    pub def suits:list(_) = [clubs, diamonds, hearts, spades]
+
+    pub def char(s:_):char =
+        case s in {
+            clubs    :: 'C'
+        |   diamonds :: 'D'
+        |   hearts   :: 'H'
+        |   spades   :: 'S'
+        |   else     :: shouldnt
+        }
+
+    pub def print(r:_) use !io {
+        !print(char(r))
+    }
+}
+
+pub type rank { pub constructors 
+    r2 | r3 | r4 | r5 | r6 | r7 | r8
+    | r9 | r10 | jack | queen | king | ace
+
+    pub def ranks:list(_) =
+         [r2, r3, r4, r5, r6, r7, r8, r9, r10, jack, queen, king, ace]
+
+    pub def char(r:_):char =
+        case r in {
+            r2    :: '2'
+        |   r3    :: '3'
+        |   r4    :: '4'
+        |   r5    :: '5'
+        |   r6    :: '6'
+        |   r7    :: '7'
+        |   r8    :: '8'
+        |   r9    :: '9'
+        |   r10   :: 'T'
+        |   jack  :: 'J'
+        |   queen :: 'Q'
+        |   king  :: 'K'
+        |   ace   :: 'A'
+        |   else  :: shouldnt
+        }
+
+    pub def print(r:_) use !io {
+        !print(char(r))
+    }
+}
+
+pub constructor card(rank:rank, suit:suit)
+
+pub def print(c:_) use !io {
+    !print(c^rank)
+    !print(c^suit)
+}
+
+
+for ?s in suits {
+    for ?r in ranks {
+        ?c = card(r, s)
+        !print(c)
+        !nl
+    }
+}

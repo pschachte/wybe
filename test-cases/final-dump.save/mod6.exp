@@ -1,0 +1,24 @@
+======================================================================
+AFTER EVERYTHING:
+ Module mod6
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mod6'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    

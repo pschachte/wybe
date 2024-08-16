@@ -1,0 +1,297 @@
+======================================================================
+AFTER EVERYTHING:
+ Module current_module_alias_type_args(T)
+  representation  : address
+  public submods  : 
+  public resources: 
+  public procs    : current_module_alias_type_args.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: current_module_alias_type_args.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
+    foreign lpvm mutate(~tmp#6##0:current_module_alias_type_args(T), ?tmp#7##0:current_module_alias_type_args(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 42:T) @current_module_alias_type_args:nn:nn
+    foreign lpvm mutate(~tmp#7##0:current_module_alias_type_args(T), ?tmp#1##0:current_module_alias_type_args(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
+    foreign llvm icmp_ne(tmp#1##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @current_module_alias_type_args:nn:nn
+    case ~tmp#9##0:wybe.bool of
+    0:
+
+    1:
+        foreign lpvm access(~tmp#1##0:current_module_alias_type_args(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @current_module_alias_type_args:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @current_module_alias_type_args:nn:nn
+        foreign c print_int(~tmp#2##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @current_module_alias_type_args:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @current_module_alias_type_args:nn:nn
+        foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @current_module_alias_type_args:nn:nn
+
+
+
+proc cons > {inline} (3 calls)
+0: current_module_alias_type_args.cons<0>
+cons(head##0:T <{}; {}; {0}>, tail##0:current_module_alias_type_args(T) <{}; {}; {1}>, ?#result##0:current_module_alias_type_args(T) <{}; {}; {0, 1}>)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
+    foreign lpvm mutate(~#rec##0:current_module_alias_type_args(T), ?#rec##1:current_module_alias_type_args(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:T) @current_module_alias_type_args:nn:nn
+    foreign lpvm mutate(~#rec##1:current_module_alias_type_args(T), ?#result##0:current_module_alias_type_args(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
+proc cons > {inline} (0 calls)
+1: current_module_alias_type_args.cons<1>
+cons(?head##0:T <{}; {}; {2}>, ?tail##0:current_module_alias_type_args(T) <{}; {}; {2}>, #result##0:current_module_alias_type_args(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:T, ?head##0:T)
+        foreign llvm move(undef:current_module_alias_type_args(T), ?tail##0:current_module_alias_type_args(T))
+
+    1:
+        foreign lpvm access(#result##0:current_module_alias_type_args(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:T) @current_module_alias_type_args:nn:nn
+        foreign lpvm access(~#result##0:current_module_alias_type_args(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+proc empty > {inline} (3 calls)
+0: current_module_alias_type_args.empty<0>
+empty(?#result##0:current_module_alias_type_args(T))<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:current_module_alias_type_args(T), ?#result##0:current_module_alias_type_args(T))
+
+
+proc head > {inline} (3 calls)
+0: current_module_alias_type_args.head<0>
+head(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:T, ?#result##0:T)
+
+    1:
+        foreign lpvm access(~#rec##0:current_module_alias_type_args(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:T) @current_module_alias_type_args:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+proc head > {inline} (0 calls)
+1: current_module_alias_type_args.head<1>
+head(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#rec##1:current_module_alias_type_args(T) <{}; {}; {0, 2}>, #field##0:T <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:current_module_alias_type_args(T), ?#rec##1:current_module_alias_type_args(T))
+
+    1:
+        foreign lpvm mutate(~#rec##0:current_module_alias_type_args(T), ?#rec##1:current_module_alias_type_args(T), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:T) @current_module_alias_type_args:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+proc tail > {inline} (0 calls)
+0: current_module_alias_type_args.tail<0>
+tail(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#result##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:current_module_alias_type_args(T), ?#result##0:current_module_alias_type_args(T))
+
+    1:
+        foreign lpvm access(~#rec##0:current_module_alias_type_args(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+proc tail > {inline} (0 calls)
+1: current_module_alias_type_args.tail<1>
+tail(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#rec##1:current_module_alias_type_args(T) <{}; {}; {0, 2}>, #field##0:current_module_alias_type_args(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:current_module_alias_type_args(T), ?#rec##1:current_module_alias_type_args(T))
+
+    1:
+        foreign lpvm {noalias} mutate(~#rec##0:current_module_alias_type_args(T), ?#rec##1:current_module_alias_type_args(T), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+  LLVM code       :
+
+; ModuleID = 'current_module_alias_type_args'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"current_module_alias_type_args.<0>"()    {
+entry:
+  %0 = trunc i64 16 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 42, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 0, i64* %5 
+  %6 = icmp ne i64 %2, 0 
+  br i1 %6, label %if.then, label %if.else 
+if.then:
+  %7 = inttoptr i64 %2 to i64* 
+  %8 = load  i64, i64* %7 
+  tail call ccc  void  @print_int(i64  %8)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+if.else:
+  ret void 
+}
+
+
+define external fastcc  i64 @"current_module_alias_type_args.cons<0>"(i64  %"head##0", i64  %"tail##0") alwaysinline   {
+entry:
+  %0 = trunc i64 16 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 %"head##0", i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"tail##0", i64* %5 
+  ret i64 %2 
+}
+
+
+define external fastcc  {i64, i64, i1} @"current_module_alias_type_args.cons<1>"(i64  %"#result##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"#result##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = add   i64 %"#result##0", 8 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i64, i1} undef, i64 %2, 0 
+  %7 = insertvalue {i64, i64, i1} %6, i64 %5, 1 
+  %8 = insertvalue {i64, i64, i1} %7, i1 1, 2 
+  ret {i64, i64, i1} %8 
+if.else:
+  %9 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i64, i1} %9, i64 undef, 1 
+  %11 = insertvalue {i64, i64, i1} %10, i1 0, 2 
+  ret {i64, i64, i1} %11 
+}
+
+
+define external fastcc  i64 @"current_module_alias_type_args.empty<0>"() alwaysinline   {
+entry:
+  ret i64 0 
+}
+
+
+define external fastcc  {i64, i1} @"current_module_alias_type_args.head<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"#rec##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = insertvalue {i64, i1} undef, i64 %2, 0 
+  %4 = insertvalue {i64, i1} %3, i1 1, 1 
+  ret {i64, i1} %4 
+if.else:
+  %5 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %6 = insertvalue {i64, i1} %5, i1 0, 1 
+  ret {i64, i1} %6 
+}
+
+
+define external fastcc  {i64, i1} @"current_module_alias_type_args.head<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = trunc i64 16 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %6 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  %7 = inttoptr i64 %3 to i64* 
+  store  i64 %"#field##0", i64* %7 
+  %8 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %9 = insertvalue {i64, i1} %8, i1 1, 1 
+  ret {i64, i1} %9 
+if.else:
+  %10 = insertvalue {i64, i1} undef, i64 0, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
+}
+
+
+define external fastcc  {i64, i1} @"current_module_alias_type_args.tail<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = add   i64 %"#rec##0", 8 
+  %2 = inttoptr i64 %1 to i64* 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
+if.else:
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
+}
+
+
+define external fastcc  {i64, i1} @"current_module_alias_type_args.tail<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = trunc i64 16 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %6 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  %7 = add   i64 %3, 8 
+  %8 = inttoptr i64 %7 to i64* 
+  store  i64 %"#field##0", i64* %8 
+  %9 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %10 = insertvalue {i64, i1} %9, i1 1, 1 
+  ret {i64, i1} %10 
+if.else:
+  %11 = insertvalue {i64, i1} undef, i64 0, 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
+}

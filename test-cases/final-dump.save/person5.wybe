@@ -1,0 +1,14 @@
+pub type person { pub person(firstname:string, lastname:string) }
+
+# update both objects
+# expect: copy B into a new memory and do update
+def update_both(!p1:person, !p2:person) use !io {
+  firstname(!p1, "Amy")
+  firstname(!p2, "Bob")
+}
+
+?personA = person("John", "Smith")
+?personB = personA
+!update_both(!personA, !personB)
+!print(personA^firstname) # expect Amy
+!print(personB^firstname) # expect Bob

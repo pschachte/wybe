@@ -1,0 +1,1 @@
+def incr(a):int = a+1

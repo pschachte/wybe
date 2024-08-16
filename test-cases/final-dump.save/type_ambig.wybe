@@ -1,0 +1,1 @@
+def ambig(x) use !io { !print(x) }

@@ -1,0 +1,6 @@
+resource n:int = 0
+def {test} test use n {
+    ?b = false
+    if { true :: pass }
+    b
+}

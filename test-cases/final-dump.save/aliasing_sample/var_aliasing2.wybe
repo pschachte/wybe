@@ -1,0 +1,22 @@
+use position
+
+?pa = position(1, 1)
+?pb = pa
+?pc = pb
+
+!print("expect pa(1,1):")
+!printPosition(pa)
+!print("expect pb(1,1):")
+!printPosition(pb)
+!print("expect pc(1,1):")
+!printPosition(pc)
+
+x(!pa, 10)
+x(!pb, 20)
+x(!pc, 30)
+!print("expect pa(10,1):")
+!printPosition(pa)
+!print("expect pb(20,1):")
+!printPosition(pb)
+!print("expect pc(30,1):")
+!printPosition(pc)

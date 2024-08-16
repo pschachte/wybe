@@ -1,0 +1,14 @@
+# use position
+pub type position { pub position(x:int, y:int) }
+
+pub type posrec { pub posrec(p:position, a:int) }
+
+?pos = position(100,100)
+?rec = posrec(pos, 1)
+
+a(!rec, 2)
+x(!pos, 200) # Non-destructive
+
+!println(pos^x)
+?rp = rec^p
+!println(rp^x)

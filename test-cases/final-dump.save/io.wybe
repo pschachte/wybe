@@ -1,0 +1,11 @@
+pub def myprint_a(x:int) use !io {
+  !println(x)
+}
+
+pub def myprint_b(x:int, ?y:int) use !io {
+  !myprint_a(x)
+  ?y = 200
+}
+
+!myprint_b(100, ?y)
+!println(y)

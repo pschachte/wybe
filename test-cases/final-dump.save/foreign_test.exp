@@ -1,0 +1,193 @@
+======================================================================
+AFTER EVERYTHING:
+ Module foreign_test
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : foreign_test.<0>
+                    foreign_test.lt<0>
+                    foreign_test.neq<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {inline,semipure} (0 calls)
+0: foreign_test.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.string.print<0>("lt(1,2)":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @foreign_test:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @foreign_test:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @foreign_test:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @foreign_test:nn:nn
+    foreign_test.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
+
+
+proc #cont#1 > {inline,semipure} (2 calls)
+0: foreign_test.#cont#1<0>
+#cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign_test.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
+
+
+proc #cont#2 > {semipure} (2 calls)
+0: foreign_test.#cont#2<0>
+#cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign c strcmp(c"string":wybe.c_string, c"string":wybe.c_string, ?tmp#4##0:wybe.int) @foreign_test:nn:nn
+    foreign llvm icmp_ne(~tmp#4##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @foreign_test:nn:nn
+    case ~tmp#1##0:wybe.bool of
+    0:
+        foreign_test.#cont#3<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
+
+    1:
+        wybe.string.print<0>("neq(c\"string\", c\"string\")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @foreign_test:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @foreign_test:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @foreign_test:nn:nn
+        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @foreign_test:nn:nn
+        foreign_test.#cont#3<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
+
+
+
+proc #cont#3 > {semipure} (2 calls)
+0: foreign_test.#cont#3<0>
+#cont#3()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign c strcmp(c"string":wybe.c_string, c"strong":wybe.c_string, ?tmp#3##0:wybe.int) @foreign_test:nn:nn
+    foreign llvm icmp_ne(~tmp#3##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @foreign_test:nn:nn
+    case ~tmp#0##0:wybe.bool of
+    0:
+
+    1:
+        wybe.string.print<0>("neq(c\"string\", c\"strong\")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @foreign_test:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @foreign_test:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @foreign_test:nn:nn
+        foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @foreign_test:nn:nn
+
+
+
+proc lt > public {inline} (6 calls)
+0: foreign_test.lt<0>
+lt(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_slt(~x##0:wybe.int, ~y##0:wybe.int, ?#success##0:wybe.bool) @foreign_test:nn:nn
+
+
+proc neq > public {inline} (6 calls)
+0: foreign_test.neq<0>
+neq(x##0:wybe.c_string, y##0:wybe.c_string, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign c strcmp(~x##0:wybe.c_string, ~y##0:wybe.c_string, ?tmp#0##0:wybe.int) @foreign_test:nn:nn
+    foreign llvm icmp_ne(~tmp#0##0:wybe.int, 0:wybe.int, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'foreign_test'
+
+
+ 
+
+
+@foreign_test.1 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @foreign_test.0 to i64) }
+
+
+@foreign_test.4 =    constant {i64, i64} { i64 25, i64 ptrtoint ([?? x i8]* @foreign_test.3 to i64) }
+
+
+@foreign_test.7 =    constant {i64, i64} { i64 25, i64 ptrtoint ([?? x i8]* @foreign_test.6 to i64) }
+
+
+@foreign_test.0 =    constant [?? x i8] c"lt(1,2)\00"
+
+
+@foreign_test.3 =    constant [?? x i8] c"neq(c\22string\22, c\22string\22)\00"
+
+
+@foreign_test.6 =    constant [?? x i8] c"neq(c\22string\22, c\22strong\22)\00"
+
+
+@foreign_test.2 =    constant [?? x i8] c"string\00"
+
+
+@foreign_test.5 =    constant [?? x i8] c"strong\00"
+
+
+declare external ccc  i64 @strcmp(i64, i64)    
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"foreign_test.<0>"() alwaysinline   {
+entry:
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foreign_test.1, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  musttail call fastcc  void  @"foreign_test.#cont#2<0>"()  
+  ret void 
+}
+
+
+define external fastcc  void @"foreign_test.#cont#1<0>"() alwaysinline   {
+entry:
+  musttail call fastcc  void  @"foreign_test.#cont#2<0>"()  
+  ret void 
+}
+
+
+define external fastcc  void @"foreign_test.#cont#2<0>"()    {
+entry:
+  %0 = tail call ccc  i64  @strcmp(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @foreign_test.2, i32 0, i32 0) to i64), i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @foreign_test.2, i32 0, i32 0) to i64))  
+  %1 = icmp ne i64 %0, 0 
+  br i1 %1, label %if.then, label %if.else 
+if.then:
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foreign_test.4, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  musttail call fastcc  void  @"foreign_test.#cont#3<0>"()  
+  ret void 
+if.else:
+  musttail call fastcc  void  @"foreign_test.#cont#3<0>"()  
+  ret void 
+}
+
+
+define external fastcc  void @"foreign_test.#cont#3<0>"()    {
+entry:
+  %0 = tail call ccc  i64  @strcmp(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @foreign_test.2, i32 0, i32 0) to i64), i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @foreign_test.5, i32 0, i32 0) to i64))  
+  %1 = icmp ne i64 %0, 0 
+  br i1 %1, label %if.then, label %if.else 
+if.then:
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foreign_test.7, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+if.else:
+  ret void 
+}
+
+
+define external fastcc  i1 @"foreign_test.lt<0>"(i64  %"x##0", i64  %"y##0") alwaysinline   {
+entry:
+  %0 = icmp slt i64 %"x##0", %"y##0" 
+  ret i1 %0 
+}
+
+
+define external fastcc  i1 @"foreign_test.neq<0>"(i64  %"x##0", i64  %"y##0") alwaysinline   {
+entry:
+  %0 = tail call ccc  i64  @strcmp(i64  %"x##0", i64  %"y##0")  
+  %1 = icmp ne i64 %0, 0 
+  ret i1 %1 
+}

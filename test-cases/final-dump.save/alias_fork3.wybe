@@ -1,0 +1,24 @@
+# how to modify part of a recursive data type?
+
+# Recursive data type:
+# access part of the data structure
+
+use mytree
+
+# return the left tree node
+pub def simpleSlice(tr:tree):tree =
+  if {tr = node(?l, ?k, ?r):: l
+     |else:: node(empty, -1, empty)
+  }
+
+?t1 = node(node(empty, 100, empty), 200, empty)
+?t = simpleSlice(t1)
+!println("expect t - 100:")
+!printTree(t)
+!println("")
+
+#?t1 = node(node(empty, -100, empty), 200, empty)
+#!print("t1")
+#!printTree(t1)
+#!print("t")
+#!printTree(t)

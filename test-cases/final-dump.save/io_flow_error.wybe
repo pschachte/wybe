@@ -1,0 +1,15 @@
+def woops use io {
+    !println("hello world!")
+}
+
+def {test,noinline} dunno { pass }
+
+use io in {
+    !println("shouldn't be allowed.")
+}
+
+if { !println("no go") & dunno :: pass
+   | pass
+   }
+
+!woops

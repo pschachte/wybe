@@ -1,0 +1,504 @@
+======================================================================
+AFTER EVERYTHING:
+ Module ctor_char
+  representation  : address
+  public submods  : 
+  public resources: 
+  public procs    : ctor_char.<0>
+                    ctor_char.=<0>
+                    ctor_char.~=<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: ctor_char.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm shl('a':ctor_char, 1:ctor_char, ?tmp#3##0:ctor_char) @ctor_char:nn:nn
+    foreign llvm or(~tmp#3##0:ctor_char, 512:ctor_char, ?tmp#1##0:ctor_char) @ctor_char:nn:nn
+    ctor_char.foo<0>(~tmp#1##0:ctor_char, ?tmp#0##0:wybe.char) #1 @ctor_char:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @ctor_char:nn:nn
+    foreign c putchar(~tmp#0##0:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @ctor_char:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @ctor_char:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @ctor_char:nn:nn
+
+
+proc = > public (2 calls)
+0: ctor_char.=<0>
+=(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm icmp_eq(~#right##0:ctor_char, 0:ctor_char, ?#success##0:wybe.bool)
+
+    1:
+        foreign llvm and(#left##0:wybe.int, 1:wybe.int, ?tmp#10##0:wybe.int)
+        foreign llvm icmp_eq(tmp#10##0:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.bool)
+        case ~tmp#11##0:wybe.bool of
+        0:
+            foreign llvm icmp_eq(~tmp#10##0:wybe.int, 1:wybe.int, ?tmp#17##0:wybe.bool)
+            case ~tmp#17##0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+            1:
+                foreign lpvm access(~#left##0:ctor_char, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#left#other_ctor#1##0:ctor_char) @ctor_char:nn:nn
+                foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#19##0:wybe.bool)
+                case ~tmp#19##0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                1:
+                    foreign llvm and(#right##0:wybe.int, 1:wybe.int, ?tmp#20##0:wybe.int)
+                    foreign llvm icmp_eq(~tmp#20##0:wybe.int, 1:wybe.int, ?tmp#21##0:wybe.bool)
+                    case ~tmp#21##0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                    1:
+                        foreign lpvm access(~#right##0:ctor_char, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#right#other_ctor#1##0:ctor_char) @ctor_char:nn:nn
+                        ctor_char.=<0>(~#left#other_ctor#1##0:ctor_char, ~#right#other_ctor#1##0:ctor_char, ?#success##0:wybe.bool) #5
+
+
+
+
+        1:
+            foreign llvm lshr(~#left##0:ctor_char, 1:ctor_char, ?tmp#12##0:ctor_char) @ctor_char:nn:nn
+            foreign llvm and(~tmp#12##0:ctor_char, 255:ctor_char, ?tmp#13##0:ctor_char) @ctor_char:nn:nn
+            foreign lpvm cast(~tmp#13##0:ctor_char, ?#left#c##0:wybe.char) @ctor_char:nn:nn
+            foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#23##0:wybe.bool)
+            case ~tmp#23##0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+            1:
+                foreign llvm and(#right##0:wybe.int, 1:wybe.int, ?tmp#24##0:wybe.int)
+                foreign llvm icmp_eq(~tmp#24##0:wybe.int, 0:wybe.int, ?tmp#25##0:wybe.bool)
+                case ~tmp#25##0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                1:
+                    foreign llvm lshr(~#right##0:ctor_char, 1:ctor_char, ?tmp#26##0:ctor_char) @ctor_char:nn:nn
+                    foreign llvm and(~tmp#26##0:ctor_char, 255:ctor_char, ?tmp#27##0:ctor_char) @ctor_char:nn:nn
+                    foreign lpvm cast(~tmp#27##0:ctor_char, ?#right#c##0:wybe.char) @ctor_char:nn:nn
+                    foreign llvm icmp_eq(~#left#c##0:wybe.char, ~#right#c##0:wybe.char, ?#success##0:wybe.bool) @char:nn:nn
+
+
+
+
+
+
+proc c > {inline} (0 calls)
+0: ctor_char.c<0>
+c(#rec##0:ctor_char, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.char, ?#result##0:wybe.char)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.char, ?#result##0:wybe.char)
+
+        1:
+            foreign llvm lshr(~#rec##0:ctor_char, 1:ctor_char, ?#rec##1:ctor_char) @ctor_char:nn:nn
+            foreign llvm and(~#rec##1:ctor_char, 255:ctor_char, ?#field##0:ctor_char) @ctor_char:nn:nn
+            foreign lpvm cast(~#field##0:ctor_char, ?#result##0:wybe.char) @ctor_char:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+proc c > {inline} (0 calls)
+1: ctor_char.c<1>
+c(#rec##0:ctor_char, ?#rec##2:ctor_char, #field##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:ctor_char, ?#rec##2:ctor_char)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(~#rec##0:ctor_char, ?#rec##2:ctor_char)
+
+        1:
+            foreign llvm and(~#rec##0:ctor_char, -511:ctor_char, ?#rec##1:ctor_char) @ctor_char:nn:nn
+            foreign llvm shl(~#field##0:ctor_char, 1:ctor_char, ?#temp##0:ctor_char) @ctor_char:nn:nn
+            foreign llvm or(~#rec##1:ctor_char, ~#temp##0:ctor_char, ?#rec##2:ctor_char) @ctor_char:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc const > {inline} (0 calls)
+0: ctor_char.const<0>
+const(?#result##0:ctor_char)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:ctor_char, ?#result##0:ctor_char)
+
+
+proc ctor > {inline} (1 calls)
+0: ctor_char.ctor<0>
+ctor(c##0:wybe.char, ?#result##3:ctor_char)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm shl(~c##0:ctor_char, 1:ctor_char, ?#temp##0:ctor_char) @ctor_char:nn:nn
+    foreign llvm or(~#temp##0:ctor_char, 512:ctor_char, ?#result##3:ctor_char) @ctor_char:nn:nn
+proc ctor > {inline} (13 calls)
+1: ctor_char.ctor<1>
+ctor(?c##0:wybe.char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.char, ?c##0:wybe.char)
+
+    1:
+        foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.char, ?c##0:wybe.char)
+
+        1:
+            foreign llvm lshr(~#result##0:ctor_char, 1:ctor_char, ?#temp##0:ctor_char) @ctor_char:nn:nn
+            foreign llvm and(~#temp##0:ctor_char, 255:ctor_char, ?#temp2##0:ctor_char) @ctor_char:nn:nn
+            foreign lpvm cast(~#temp2##0:ctor_char, ?c##0:wybe.char) @ctor_char:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc foo > (1 calls)
+0: ctor_char.foo<0>
+foo(this##0:ctor_char, ?#result##0:wybe.char)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(this##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @ctor_char:nn:nn
+    case ~tmp#3##0:wybe.bool of
+    0:
+        foreign llvm move('0':wybe.char, ?#result##0:wybe.char) @ctor_char:nn:nn
+
+    1:
+        foreign llvm and(this##0:wybe.int, 1:wybe.int, ?tmp#4##0:wybe.int) @ctor_char:nn:nn
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @ctor_char:nn:nn
+        case ~tmp#5##0:wybe.bool of
+        0:
+            foreign llvm move('0':wybe.char, ?#result##0:wybe.char) @ctor_char:nn:nn
+
+        1:
+            foreign llvm lshr(~this##0:ctor_char, 1:ctor_char, ?tmp#6##0:ctor_char) @ctor_char:nn:nn
+            foreign llvm and(~tmp#6##0:ctor_char, 255:ctor_char, ?tmp#7##0:ctor_char) @ctor_char:nn:nn
+            foreign lpvm cast(~tmp#7##0:ctor_char, ?#result##0:wybe.char) @ctor_char:nn:nn
+
+
+
+
+proc other_ctor > {inline} (0 calls)
+0: ctor_char.other_ctor<0>
+other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char) @ctor_char:nn:nn
+    foreign lpvm mutate(~#rec##0:ctor_char, ?#rec##1:ctor_char, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char) @ctor_char:nn:nn
+    foreign llvm or(~#rec##1:ctor_char, 1:wybe.int, ?#result##0:ctor_char) @ctor_char:nn:nn
+proc other_ctor > {inline} (5 calls)
+1: ctor_char.other_ctor<1>
+other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:ctor_char, ?other_ctor#1##0:ctor_char)
+
+    1:
+        foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:ctor_char, ?other_ctor#1##0:ctor_char)
+
+        1:
+            foreign lpvm access(~#result##0:ctor_char, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?other_ctor#1##0:ctor_char) @ctor_char:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc ~= > public {inline} (0 calls)
+0: ctor_char.~=<0>
+~=(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ctor_char.=<0>(~#left##0:ctor_char, ~#right##0:ctor_char, ?tmp#0##0:wybe.bool) #0
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'ctor_char'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"ctor_char.<0>"()    {
+entry:
+  %0 = shl   i64 97, 1 
+  %1 = or i64 %0, 512 
+  %2 = tail call fastcc  i8  @"ctor_char.foo<0>"(i64  %1)  
+  tail call ccc  void  @putchar(i8  %2)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  i1 @"ctor_char.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+entry:
+  %0 = icmp ne i64 %"#left##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#left##0", 1 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %24 = icmp eq i64 %"#right##0", 0 
+  ret i1 %24 
+if.then1:
+  %3 = lshr  i64 %"#left##0", 1 
+  %4 = and i64 %3, 255 
+  %5 = trunc i64 %4 to i8  
+  %6 = icmp ne i64 %"#right##0", 0 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
+  %13 = icmp eq i64 %1, 1 
+  br i1 %13, label %if.then4, label %if.else4 
+if.then2:
+  %7 = and i64 %"#right##0", 1 
+  %8 = icmp eq i64 %7, 0 
+  br i1 %8, label %if.then3, label %if.else3 
+if.else2:
+  ret i1 0 
+if.then3:
+  %9 = lshr  i64 %"#right##0", 1 
+  %10 = and i64 %9, 255 
+  %11 = trunc i64 %10 to i8  
+  %12 = icmp eq i8 %5, %11 
+  ret i1 %12 
+if.else3:
+  ret i1 0 
+if.then4:
+  %14 = add   i64 %"#left##0", -1 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = load  i64, i64* %15 
+  %17 = icmp ne i64 %"#right##0", 0 
+  br i1 %17, label %if.then5, label %if.else5 
+if.else4:
+  ret i1 0 
+if.then5:
+  %18 = and i64 %"#right##0", 1 
+  %19 = icmp eq i64 %18, 1 
+  br i1 %19, label %if.then6, label %if.else6 
+if.else5:
+  ret i1 0 
+if.then6:
+  %20 = add   i64 %"#right##0", -1 
+  %21 = inttoptr i64 %20 to i64* 
+  %22 = load  i64, i64* %21 
+  %23 = musttail call fastcc  i1  @"ctor_char.=<0>"(i64  %16, i64  %22)  
+  ret i1 %23 
+if.else6:
+  ret i1 0 
+}
+
+
+define external fastcc  {i8, i1} @"ctor_char.c<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 1 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %10 = insertvalue {i8, i1} undef, i8 undef, 0 
+  %11 = insertvalue {i8, i1} %10, i1 0, 1 
+  ret {i8, i1} %11 
+if.then1:
+  %3 = lshr  i64 %"#rec##0", 1 
+  %4 = and i64 %3, 255 
+  %5 = trunc i64 %4 to i8  
+  %6 = insertvalue {i8, i1} undef, i8 %5, 0 
+  %7 = insertvalue {i8, i1} %6, i1 1, 1 
+  ret {i8, i1} %7 
+if.else1:
+  %8 = insertvalue {i8, i1} undef, i8 undef, 0 
+  %9 = insertvalue {i8, i1} %8, i1 0, 1 
+  ret {i8, i1} %9 
+}
+
+
+define external fastcc  {i64, i1} @"ctor_char.c<1>"(i64  %"#rec##0", i8  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 1 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %11 = insertvalue {i64, i1} undef, i64 0, 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
+if.then1:
+  %3 = and i64 %"#rec##0", -511 
+  %4 = zext i8 %"#field##0" to i64  
+  %5 = shl   i64 %4, 1 
+  %6 = or i64 %3, %5 
+  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %8 = insertvalue {i64, i1} %7, i1 1, 1 
+  ret {i64, i1} %8 
+if.else1:
+  %9 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
+}
+
+
+define external fastcc  i64 @"ctor_char.const<0>"() alwaysinline   {
+entry:
+  ret i64 0 
+}
+
+
+define external fastcc  i64 @"ctor_char.ctor<0>"(i8  %"c##0") alwaysinline   {
+entry:
+  %0 = zext i8 %"c##0" to i64  
+  %1 = shl   i64 %0, 1 
+  %2 = or i64 %1, 512 
+  ret i64 %2 
+}
+
+
+define external fastcc  {i8, i1} @"ctor_char.ctor<1>"(i64  %"#result##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#result##0", 1 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %10 = insertvalue {i8, i1} undef, i8 undef, 0 
+  %11 = insertvalue {i8, i1} %10, i1 0, 1 
+  ret {i8, i1} %11 
+if.then1:
+  %3 = lshr  i64 %"#result##0", 1 
+  %4 = and i64 %3, 255 
+  %5 = trunc i64 %4 to i8  
+  %6 = insertvalue {i8, i1} undef, i8 %5, 0 
+  %7 = insertvalue {i8, i1} %6, i1 1, 1 
+  ret {i8, i1} %7 
+if.else1:
+  %8 = insertvalue {i8, i1} undef, i8 undef, 0 
+  %9 = insertvalue {i8, i1} %8, i1 0, 1 
+  ret {i8, i1} %9 
+}
+
+
+define external fastcc  i8 @"ctor_char.foo<0>"(i64  %"this##0")    {
+entry:
+  %0 = icmp ne i64 %"this##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"this##0", 1 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  ret i8 48 
+if.then1:
+  %3 = lshr  i64 %"this##0", 1 
+  %4 = and i64 %3, 255 
+  %5 = trunc i64 %4 to i8  
+  ret i8 %5 
+if.else1:
+  ret i8 48 
+}
+
+
+define external fastcc  i64 @"ctor_char.other_ctor<0>"(i64  %"other_ctor#1##0") alwaysinline   {
+entry:
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 %"other_ctor#1##0", i64* %3 
+  %4 = or i64 %2, 1 
+  ret i64 %4 
+}
+
+
+define external fastcc  {i64, i1} @"ctor_char.other_ctor<1>"(i64  %"#result##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#result##0", 1 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
+if.then1:
+  %3 = add   i64 %"#result##0", -1 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
+if.else1:
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
+}
+
+
+define external fastcc  i1 @"ctor_char.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
+entry:
+  %0 = tail call fastcc  i1  @"ctor_char.=<0>"(i64  %"#left##0", i64  %"#right##0")  
+  %1 = xor i1 %0, 1 
+  ret i1 %1 
+}

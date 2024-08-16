@@ -303,8 +303,7 @@ addExtern _ PrimHigher{} externs = externs
 addExtern _ (PrimForeign "llvm" _ _ _) externs = externs
 addExtern _ (PrimForeign "lpvm" "alloc" _ _) externs =
     let externName = llvmForeignName "wybe_malloc"
-        extern = ExternFunction "ccc" externName [intType]
-                                [Representation CPointer]
+        extern = externCFunction externName ["int"] "pointer"
     in Set.insert extern externs
 addExtern mod (PrimForeign "lpvm" "load" _ [ArgGlobal glob ty,_]) externs =
     recordExternVar mod glob ty externs
@@ -315,6 +314,16 @@ addExtern _ (PrimForeign "c" name _ args) externs =
     recordExternFn "ccc" (llvmForeignName name) args externs
 addExtern _ (PrimForeign other name _ args) externs =
     shouldnt $ "Unknown foreign language " ++ other
+
+
+externCFunction :: String -> [String] -> String -> ExternSpec
+externCFunction name argTypes resultType =
+    let convert t = Representation
+                    $ trustFromJust ("unknown C type " ++ t)
+                    $ cTypeRepresentation t
+        typeReps = List.map convert argTypes
+        resultRep = convert resultType
+    in ExternFunction "ccc" name typeReps [resultRep]
 
 
 -- | Insert the fact that the named function is an external function with the
@@ -783,7 +792,6 @@ writeLPVMCall "mutate" _ args pos = do
              shouldnt $ "LPVM mutate instruction with out-by-reference arg: "
                         ++ show args
         (struct:offset:destr:size:startOffset:restIns,[struct2],_,iRefs) -> do
-            -- XXX Must support take-reference for this op
             when (List.null iRefs) releaseDeferredCall
             case destr of
                 ArgInt 1 _ -> do
@@ -1106,8 +1114,8 @@ marshallArgument arg cType = do
 
 -- | The LLVM type of the specified argument
 argTypeRep :: PrimArg -> LLVM TypeRepresentation
-argTypeRep ArgString{} = return CPointer -- strings are all C pointers
-argTypeRep ArgGlobal{} = return CPointer -- as are globals
+argTypeRep ArgString{} = return Pointer -- strings are Wybe pointers
+argTypeRep ArgGlobal{} = return CPointer -- globals are C pointers
 argTypeRep arg = typeRep $ argType arg
 
 
@@ -1124,11 +1132,13 @@ llvmValue :: PrimArg -> LLVM String
 llvmValue ArgVar{argVarName=var} = varToRead var
 llvmValue (ArgInt val _) = return $ show val
 llvmValue (ArgFloat val _) = return $ show val
-llvmValue (ArgString str _ _) =
-    gets $ llvmGlobalName
-            . trustFromJust ("String constant " ++ show str ++ " not recorded")
+llvmValue (ArgString str _ _) = do
+    glob <- gets
+            $ trustFromJust ("String constant " ++ show str ++ " not recorded")
             . Map.lookup str
             . stringConstants
+    convertedConstant
+        (ArgGlobal (GlobalVariable glob) $ Representation CPointer) Pointer
 llvmValue (ArgChar val _) = return $ show $ fromEnum val
 llvmValue cl@ArgClosure{} = nyi $ "passing closure argument " ++ show cl
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
@@ -1149,7 +1159,8 @@ typeConvert fromArg toArg = do
     toTy <- argTypeRep toArg
     fromTy <- argTypeRep fromArg
     fromVal <- llvmValue fromArg
-    logLLVM $ "typeConvert " ++ fromVal ++ " from " ++ show fromTy ++ " to " ++ show toTy
+    logLLVM $ "typeConvert " ++ fromVal ++ " from " ++ show fromTy
+                ++ " to " ++ show toTy
     case toArg of
         ArgVar{argVarName=varName} | fromTy == toTy ->
             renameVariable varName fromVal
@@ -1167,7 +1178,7 @@ typeConverted toTy fromArg
     | argIsConst fromArg = typedConvertedConstant fromArg toTy
     | otherwise = do
         argRep <- argTypeRep fromArg
-        if argRep == toTy
+        if equivLLTypes argRep toTy
             then llvmArgument fromArg
             else do
                 (writeArg,readArg) <- freshTempArgs $ Representation toTy
@@ -1182,7 +1193,7 @@ typeConvertedBare toTy fromArg
     | argIsConst fromArg = convertedConstant fromArg toTy
     | otherwise = do
         argRep <- argTypeRep fromArg
-        if argRep == toTy
+        if equivLLTypes argRep toTy
             then llvmValue fromArg
             else do
                 (writeArg,readArg) <- freshTempArgs $ Representation toTy
@@ -1196,8 +1207,12 @@ typeConvertedBare toTy fromArg
 convertedConstant :: PrimArg -> TypeRepresentation -> LLVM LLVMName
 convertedConstant arg toTy = do
     -- XXX should verify that arg is constant, if ArgGlobal is considered const
+    logLLVM $ "Converting constant " ++ show arg ++ " to type " ++ show toTy
     fromTy <- argTypeRep arg
-    if fromTy == toTy || trivialConstConversion fromTy toTy
+    logLLVM $ "  conversion " ++ show fromTy ++ " -> " ++ show toTy
+            ++ (if trivialConstConversion fromTy toTy then " IS" else " is NOT")
+            ++ " trivial"
+    if trivialConstConversion fromTy toTy
         then llvmValue arg
         else do
             fromArg <- llvmArgument arg
@@ -1215,16 +1230,30 @@ typedConvertedConstant arg toTy = do
     ((llvmTypeRep toTy++" ")++) <$> convertedConstant arg toTy
 
 
--- Converting constants between these types is completely trivial, because the
--- constant is automatically considered to have both types.
-trivialConstConversion (Bits _) (Bits _)         = True
-trivialConstConversion (Bits _) (Signed _)       = True
-trivialConstConversion (Signed _) (Signed _)     = True
-trivialConstConversion (Signed _) (Bits _)       = True
-trivialConstConversion (Floating _) (Floating _) = True
-trivialConstConversion Pointer (Bits b)          = True
-trivialConstConversion (Bits b) Pointer          = True
-trivialConstConversion _ _                       = False
+-- Converting constants from the first type to the second is completely trivial,
+-- because the constant is automatically considered to have both types.
+trivialConstConversion (Bits _) (Bits _)          = True
+trivialConstConversion (Bits _) (Signed _)        = True
+trivialConstConversion (Bits _) Pointer           = True
+trivialConstConversion (Signed _) (Signed _)      = True
+trivialConstConversion (Signed _) (Bits _)        = True
+trivialConstConversion (Signed _) Pointer         = True
+trivialConstConversion (Floating _) (Floating _)  = True
+trivialConstConversion Pointer (Bits b)           = b == wordSize
+trivialConstConversion Pointer (Signed b)         = b == wordSize
+trivialConstConversion _ _                        = False
+
+
+-- | Are two type representations the same in LLVM (and hence need no
+-- conversion)?
+equivLLTypes :: TypeRepresentation -> TypeRepresentation -> Bool
+equivLLTypes Pointer (Bits b)      = b == wordSize
+equivLLTypes Pointer (Signed b)    = b == wordSize
+equivLLTypes (Bits b) Pointer      = b == wordSize
+equivLLTypes (Signed b) Pointer    = b == wordSize
+equivLLTypes (Signed b1) (Bits b2) = b1 == b2
+equivLLTypes (Bits b1) (Signed b2) = b1 == b2
+equivLLTypes t1 t2 = t1 == t2
 
 
 -- | The appropriate type conversion operator to convert from fromTy to toTy
@@ -1661,7 +1690,16 @@ llvmProcName pspec = (llvmGlobalName $ show pspec, "fastcc")
 -- with @, enclose the rest in quotes, and escape any special characters.
 llvmGlobalName :: String -> LLVMName
 llvmGlobalName s =
-    '@' : if all ((=='_')|||(=='.')|||isAlphaNum) s
+    '@' : llvmQuoteIfNecessary s
+
+
+
+-- | Wrap quotes around the specified string, using character escapes for any
+-- special characters, if it contains any characters but alphanumerics,
+-- underscores, or period characters.
+llvmQuoteIfNecessary :: String -> String
+llvmQuoteIfNecessary s =
+     if all ((=='_')|||(=='.')|||isAlphaNum) s
         then s
         else '"' : concatMap showLLVMChar s ++ "\""
 
@@ -1673,22 +1711,21 @@ llvmGlobalInfoName (GlobalResource res) =
 llvmGlobalInfoName (GlobalVariable var) = return $ llvmGlobalName var
 
 
--- | Make a suitable LLVM name for a foreign (e.g., C) function.  We just prefix
--- it with @, with no escaping of any characters.
+-- | Make a suitable LLVM name for a foreign (e.g., C) function.
 llvmForeignName :: String -> LLVMName
-llvmForeignName s = '@' : s
+llvmForeignName s = '@' : llvmQuoteIfNecessary s
 
 
 -- | Make a suitable LLVM name for a local variable.  We prefix it
 -- with %, enclose the rest in quotes, and escape any special characters.
 llvmLocalName :: PrimVarName -> LLVMName
 llvmLocalName varName =
-    "%\"" ++ show varName ++ "\""
+    '%' : llvmQuoteIfNecessary (show varName)
 
 
 -- | Make an LLVM reference to the specified label.
 llvmLableName :: String -> String
-llvmLableName varName = "label %\"" ++ varName ++ "\""
+llvmLableName varName = "label %" ++ llvmQuoteIfNecessary varName
 
 
 -- | Format a string as an LLVM string; the Bool indicates whether to add

@@ -1,0 +1,217 @@
+======================================================================
+AFTER EVERYTHING:
+ Module imports
+  representation  : (not a type)
+  public submods  : mod5 -> mod5
+                    mod6 -> mod6
+  public resources: 
+  public procs    : 
+  imports         : use mod1
+                    use mod2
+                    from mod3 use fn1
+                    from mod4 use fn2
+                    public use mod5
+                    public use mod6
+                    public from mod7 use fn3
+                    public from mod8 use fn4
+                    use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'imports'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module mod1
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mod1'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module mod2
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mod2'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module mod3
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mod3'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module mod4
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mod4'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module mod5
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mod5'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module mod6
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mod6'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module mod7
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mod7'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module mod8
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mod8'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    

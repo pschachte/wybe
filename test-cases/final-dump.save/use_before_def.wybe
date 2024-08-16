@@ -1,0 +1,4 @@
+pub def use_before_def(?result:int)        {
+       ?result = result + 1
+       
+}

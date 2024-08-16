@@ -1,0 +1,35 @@
+# Tests for wybe's support for test defs {, ie, defs  {that can succeed or fail
+
+pub def {test} lt(x:int, y:int) {
+    # use a test to implement another test
+    # x < y # this should work, but is currently a syntax error, so do this:
+    if { x < y :: true | true :: false }
+}
+
+pub def lt2(x:int, y:int, ?res:bool) {
+    # reify a test as a bool to implement a non-test
+    ?res = lt(x, y)
+}
+
+pub def {test} lt3(x:int, y:int) {
+    # use a boolean expr to implement a test
+    lt2(y,x)
+}
+
+pub type map { pub constructors empty | node(left:_, key:int, value:int, right:_) }
+
+pub def {test} lookup(key:int, map:map, ?result:int) {
+    if{ key = map^key:: ?result = map^value
+    |   key < map^key:: lookup(key, map^left, ?result)
+    |   else         :: lookup(key, map^right, ?result)
+    }
+}
+
+# # this should work, too, since map^key should fail if map is empty
+# # hopefully we can optimise this to be the same as lookup
+# pub {test} def lookup2(key:int, map:map, ?result:int) {
+#     if key = map^key:: ?result = map^value
+#     |  key < map^key:: lookup2(key, map^left, ?result)
+#     |  key > map^key:: lookup2(key, map^right, ?result)
+#     end
+# end

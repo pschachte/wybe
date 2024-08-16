@@ -1,0 +1,3 @@
+pub resource res:int = 3
+pub def fn(i:int):int = 2**i
+pub def three(?n:int) use res { ?n = res}

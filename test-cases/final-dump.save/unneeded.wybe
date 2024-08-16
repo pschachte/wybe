@@ -1,0 +1,3 @@
+def unneeded(x:int, y:int, ?z:int, !q:int) {
+    ?z = x+1
+}

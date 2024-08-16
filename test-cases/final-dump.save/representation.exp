@@ -1,0 +1,37 @@
+======================================================================
+AFTER EVERYTHING:
+ Module representation
+  representation  : 16 bit unsigned
+  public submods  : 
+  public resources: 
+  public procs    : representation.+<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+proc + > public {inline} (0 calls)
+0: representation.+<0>
++(x##0:representation, y##0:representation, ?#result##0:representation)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(~x##0:representation, ~y##0:representation, ?#result##0:representation) @representation:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'representation'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i16 @"representation.+<0>"(i16  %"x##0", i16  %"y##0") alwaysinline   {
+entry:
+  %0 = add   i16 %"x##0", %"y##0" 
+  ret i16 %0 
+}

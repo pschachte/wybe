@@ -1,0 +1,4 @@
+?mixed = { ?@ + @1 = @ }
+
+?func_outs = @( ?@ + ?bar * foo )
+?func_outs = @( !@ )

@@ -1,0 +1,44 @@
+# transitive aliasing data structures in multi def calls {
+
+use position
+
+pub def replicate2(p1:position, ?p2:position) use !io {
+  ?pp = position(0,0)
+  !print("random replicate2 ")
+  !println(pp^x)
+  ?p2 = p1
+}
+
+# Expected Alias Pairs: [(0,1),(0,2),(1,2)]
+pub def replicate1(p1:position, ?p2:position, ?p3:position) use !io {
+  ?pp = position(0,0)
+  !print("random replicate1 ")
+  !println(pp^x)
+
+  ?p2 = p1
+  !replicate2(p1, ?p3)
+}
+
+pub def bar use !io {
+  ?p1 = position(101,102)
+  !replicate1(p1, ?p2, ?p3)
+
+  !println("--- After calling replicate1: ")
+  !print("expect p1(101,102):")
+  !printPosition(p1)
+  !print("expect p2(101,102):")
+  !printPosition(p2)
+  !print("expect p3(101,102):")
+  !printPosition(p3)
+
+  x(!p1, 555)
+  !println("--- After calling x(!p1, 555): ")
+  !print("expect p1(555,102):")
+  !printPosition(p1) # expected 555 - is 555
+  !print("expect p2(101,102):")
+  !printPosition(p2) # expected 101 - but is 555
+  !print("expect p3(101,102):")
+  !printPosition(p3) # expected 101 - but is 555
+}
+
+!bar

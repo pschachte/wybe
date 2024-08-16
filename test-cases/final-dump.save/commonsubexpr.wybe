@@ -1,0 +1,13 @@
+def common_subexpr(x:int) use !io {
+    # there should only be one (x+1) and one multiplication
+    # this demonstrates reusing the subexpressions, but also that
+    # it understands that * is commutative.
+    !println((x+1) * (x-1) + (x-1) * (x+1))
+    # the whole computation should be reused, but the prinln shouldn't
+    # this also checks that the compiler knows that + is commutative.
+    !println((x-1) * (x+1) + (x+1) * (x-1))
+    # and check that the compiler understands about inverting operations
+    !println((x+1) - (x-1) + (x-1))
+}
+
+!common_subexpr(10)

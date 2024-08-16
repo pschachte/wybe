@@ -1,0 +1,9 @@
+public type position = public position(x:int, y:int) end
+
+public proc printPosition(pos:position) use !io
+    !print(" (")
+    !print(pos^x)
+    !print(",")
+    !print(pos^y)
+    !println(")")
+end

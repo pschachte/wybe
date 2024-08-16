@@ -1,0 +1,39 @@
+======================================================================
+AFTER EVERYTHING:
+ Module func_where
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : func_where.quad<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+proc quad > public {inline} (0 calls)
+0: func_where.quad<0>
+quad(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(~x##0:wybe.int, ~x##0:wybe.int, ?tmp#0##0:wybe.int) @func_where:nn:nn
+    foreign llvm add(~tmp#0##0:wybe.int, ~tmp#0##0:wybe.int, ?#result##0:wybe.int) @func_where:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'func_where'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i64 @"func_where.quad<0>"(i64  %"x##0") alwaysinline   {
+entry:
+  %0 = add   i64 %"x##0", %"x##0" 
+  %1 = add   i64 %0, %0 
+  ret i64 %1 
+}

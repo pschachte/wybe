@@ -1,0 +1,15 @@
+pub def yorn(prompt:string, ?result:bool) use !io {
+       do {! print(prompt)
+       	   ! print(" (y/n) ")
+           ! read(?response)
+             ?result = is_yes(response)
+           until is_yes_or_no(response)
+           ! println("Please answer 'yes' or 'no'.")
+        }
+}
+
+def is_yes(ch) = ~(ch~='y' && ch~='Y') # test of ~ and &&
+def is_yes_or_no(ch) = is_yes(ch) || ch='n' || ch='N' # test of ||
+
+!yorn("Well, yes or no?", ?r)
+!println(r)

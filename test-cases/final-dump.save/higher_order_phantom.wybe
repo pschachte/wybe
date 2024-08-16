@@ -1,0 +1,7 @@
+def a(f:(phantom, ?phantom), x:phantom):phantom = f(x)
+
+def {semipure} b(f:{impure}(phantom, ?phantom), x:phantom, y:phantom) {
+    !f(x, ?y)
+}
+
+def c(f:(phantom, ?X), x:phantom):X = f(x)

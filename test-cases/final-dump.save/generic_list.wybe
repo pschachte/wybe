@@ -1,0 +1,11 @@
+pub constructors(T) nil | cons(car: T, cdr:_(T))
+
+pub def append(x:_(T), y:_(T)):_(T) =
+    if {x = cons(?h, ?t):: cons(h, append(t,y))
+       | else:: y
+    }
+
+pub def length(x:_(T)) : int = length1(x, 0)
+
+def length1(x:_(T), acc:int) : int =
+    if {x = cons(?h, ?t):: length1(t, acc+1) | else:: acc}

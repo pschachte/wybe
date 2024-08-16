@@ -1,0 +1,5 @@
+# Test case for mutually recursive types.
+
+type a { pub constructors no_a | a(ahead:int, atail:b) }
+
+type b { pub constructors no_b | b(bhead:int, btail:a) }

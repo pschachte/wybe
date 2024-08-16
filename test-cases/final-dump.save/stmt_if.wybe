@@ -1,0 +1,27 @@
+# if case
+
+pub type tree { pub constructors empty | node(left:_, key:int, right:_) }
+
+pub def lookup(key:int, tree:tree, ?result:bool) {
+    if {tree = node(?left, ?nodekey, ?right)::
+        if{ key = nodekey:: ?result = true
+        |   key < nodekey:: lookup(key, left , ?result)
+# This should work, if we handled exhaustive tests:
+#       |   key > nodekey:: lookup(key, right, ?result)
+# For now, just do this:
+        |   else         :: lookup(key, right, ?result)
+        }
+    |   else:: ?result = false
+    }
+}
+
+def foobar use !io {
+    ?tr = node(empty, 1, empty)
+
+    if{ lookup(1, tr) :: !println("lookup succeeds when it should")
+    |   else          :: !println("lookup fails when it should succeed")
+    }
+    if{ lookup(3, tr) :: !println("lookup fails when it should")
+    |   else          :: !println("lookup succeeds when it should fail")
+    }
+}

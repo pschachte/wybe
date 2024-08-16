@@ -1,0 +1,18 @@
+pub type int_list { pub constructors nil | cons(head:int, tail:_) }
+
+
+pub def print(x:int_list) use !io {
+    if { x = cons( ?h, ?t) ::
+        !print(h)
+        !print(' ') # the problem seems related to this one.
+        !print(t)
+    }
+}
+
+pub def println(x:int_list) use !io {
+    !print(x)
+    !nl
+}
+
+?x = cons(1,cons(2,cons(3,nil)))
+!println(x)

@@ -1,0 +1,81 @@
+======================================================================
+AFTER EVERYTHING:
+ Module constfold
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : constfold.fold_add<0>
+                    constfold.fold_mult<0>
+                    constfold.fold_test<0>
+                    constfold.fortytwo<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+proc fold_add > public {inline} (3 calls)
+0: constfold.fold_add<0>
+fold_add(?#result##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
+
+
+proc fold_mult > public {inline} (3 calls)
+0: constfold.fold_mult<0>
+fold_mult(?#result##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
+
+
+proc fold_test > public {inline} (0 calls)
+0: constfold.fold_test<0>
+fold_test(?#result##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
+
+
+proc fortytwo > public {inline} (0 calls)
+0: constfold.fortytwo<0>
+fortytwo(?#result##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'constfold'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i64 @"constfold.fold_add<0>"() alwaysinline   {
+entry:
+  ret i64 42 
+}
+
+
+define external fastcc  i64 @"constfold.fold_mult<0>"() alwaysinline   {
+entry:
+  ret i64 42 
+}
+
+
+define external fastcc  i64 @"constfold.fold_test<0>"() alwaysinline   {
+entry:
+  ret i64 42 
+}
+
+
+define external fastcc  i64 @"constfold.fortytwo<0>"() alwaysinline   {
+entry:
+  ret i64 42 
+}

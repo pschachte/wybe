@@ -80,30 +80,30 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  i8* @wybe_malloc(i32)    
+declare external ccc  ptr @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0.p0.i64(ptr, ptr, i32, i1)    
 
 
 define external fastcc  void @"higher_order_loop.<0>"()    {
 entry:
   %0 = trunc i64 16 to i32  
-  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
-  %2 = ptrtoint i8* %1 to i64 
-  %3 = inttoptr i64 %2 to i64* 
-  store  i64 ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_loop.0, i32 0, i32 0) to i64), i64* %3 
+  %1 = call ccc  ptr  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint ptr %1 to i64 
+  %3 = inttoptr i64 %2 to ptr 
+  store  i64 ptrtoint (ptr getelementptr inbounds ([1 x i64], ptr @higher_order_loop.0, i32 0, i32 0) to i64), ptr %3 
   %4 = add   i64 %2, 8 
-  %5 = inttoptr i64 %4 to i64* 
-  store  i64 0, i64* %5 
+  %5 = inttoptr i64 %4 to ptr 
+  store  i64 0, ptr %5 
   %6 = trunc i64 16 to i32  
-  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
-  %8 = ptrtoint i8* %7 to i64 
-  %9 = inttoptr i64 %8 to i64* 
-  store  i64 ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_loop.1, i32 0, i32 0) to i64), i64* %9 
+  %7 = call ccc  ptr  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint ptr %7 to i64 
+  %9 = inttoptr i64 %8 to ptr 
+  store  i64 ptrtoint (ptr getelementptr inbounds ([1 x i64], ptr @higher_order_loop.1, i32 0, i32 0) to i64), ptr %9 
   %10 = add   i64 %8, 8 
-  %11 = inttoptr i64 %10 to i64* 
-  store  i64 %2, i64* %11 
+  %11 = inttoptr i64 %10 to ptr 
+  store  i64 %2, ptr %11 
   tail call fastcc  void  @"higher_order_loop.#cont#1<0>"(i64  %8)  
   ret void 
 }
@@ -111,15 +111,15 @@ entry:
 
 define external fastcc  void @"higher_order_loop.#closure#1<0>"(i64  %"#env##0", i64  %"x##0") alwaysinline   {
 entry:
-  tail call ccc  void  @print_int(i64  %"x##0")  
-  tail call ccc  void  @putchar(i8  10)  
+  call ccc  void  @print_int(i64  %"x##0")  
+  call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
 
 define external fastcc  void @"higher_order_loop.#closure#2<0>"(i64  %"#env##0", i64  %"x##0") alwaysinline   {
 entry:
-  tail call ccc  void  @print_int(i64  %"x##0")  
+  call ccc  void  @print_int(i64  %"x##0")  
   ret void 
 }
 
@@ -129,13 +129,13 @@ entry:
   %0 = icmp ne i64 %"tmp#5##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"tmp#5##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"tmp#5##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"tmp#5##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
-  %6 = inttoptr i64 %2 to i64* 
-  %7 = load  i64, i64* %6 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
+  %6 = inttoptr i64 %2 to ptr 
+  %7 = load  i64, ptr %6 
   %8 = inttoptr i64 %7 to void (i64, i64)* 
   tail call fastcc  void  %8(i64  %2, i64  10)  
   musttail call fastcc  void  @"higher_order_loop.#cont#1<0>"(i64  %5)  

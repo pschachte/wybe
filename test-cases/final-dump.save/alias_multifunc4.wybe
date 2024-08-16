@@ -1,0 +1,58 @@
+# partial data structures aliasing in multi def calls {
+
+use position
+
+# AliasPairs: [(pa#0,pc#0)]
+pub def replicate1(pa:position, ?pb:position, ?pc:position) use !io {
+    ?pb = pa
+    ?pc = pa
+
+    ?pp = position(99,99)
+    x(!pb, pp^x)
+}
+
+pub def replicate21(?pb:position) use !io {
+    ?pa = position(99999,99999)
+    ?pb = pa
+    ?pc = pa
+    x(!pc,1111111111)
+    !print("--- Inside replicate21, expect pc(1111111111,99999): ")
+    !printPosition(pc)
+}
+
+pub def replicate22(?pb:position, ?pc:position) use !io {
+    ?pa = position(99999,99999)
+    ?pb = pa
+    ?pc = pa
+    !print("--- Inside replicate22, expect pc(99999,99999):")
+    !printPosition(pc)
+
+    x(!pc,1111111111)
+    !print("--- Inside replicate22, after calling x(!pc,1111111111), expect pc(1111111111,99999): ")
+    !printPosition(pc)
+}
+
+?p1 = position(10,10)
+!replicate1(p1, ?p2, ?p3)
+
+!println("--- After calling replicate1:")
+!print("expect p1(10,10):")
+!printPosition(p1)
+!print("expect p2(99,10):")
+!printPosition(p2)
+!print("expect p3(10,10):")
+!printPosition(p3)
+
+# pb and pc is aliased
+!replicate21(?p4)
+!println("--- After calling replicate21:")
+!print("expect p4(99999,99999):")
+!printPosition(p4)
+
+#!println(p5^x)
+!replicate22(?p6, ?p7)
+!println("--- After calling replicate22:")
+!print("expect p6(99999,99999):")
+!printPosition(p6)
+!print("expect p7(1111111111,99999):")
+!printPosition(p7)

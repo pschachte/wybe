@@ -1,0 +1,7 @@
+type foo {
+    foo
+
+    type bar {
+        bar
+    }
+}

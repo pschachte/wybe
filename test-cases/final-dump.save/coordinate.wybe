@@ -1,0 +1,15 @@
+pub type Coordinate { pub Coordinate(x:int, y:int, z:int) }
+
+# Two fields of crd1 are referenced by crd2
+# crd2 points to same space as crd1
+# expect: to create a new memory block if crd1 or crd2 is ever going to be updated?
+pub def fcopy(crd1:Coordinate):Coordinate =
+  crd1
+
+?crd1 = Coordinate(1000,1000,1000)
+?crd2 = fcopy(crd1)
+z(!crd1, 8000)
+!print("expect crd1^z=8000: ")
+!println(crd1^z)
+!print("expect crd2^z=1000: ")
+!println(crd2^z)

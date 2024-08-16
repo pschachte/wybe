@@ -1,0 +1,35 @@
+======================================================================
+AFTER EVERYTHING:
+ Module proc_allin
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : proc_allin.nada<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+proc nada > public {inline} (0 calls)
+0: proc_allin.nada<0>
+nada([x##0:wybe.int], [y##0:wybe.int])<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+
+  LLVM code       :
+
+; ModuleID = 'proc_allin'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"proc_allin.nada<0>"() alwaysinline   {
+entry:
+  ret void 
+}

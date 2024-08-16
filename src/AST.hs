@@ -3848,7 +3848,7 @@ instance Show Item where
 
 -- |How to show a type representation
 instance Show TypeRepresentation where
-  show Pointer = "address"
+  show Pointer = "pointer"
   show (Bits bits) = show bits ++ " bit unsigned"
   show (Signed bits) = show bits ++ " bit signed"
   show (Floating bits) = show bits ++ " bit float"

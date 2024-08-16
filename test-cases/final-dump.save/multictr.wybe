@@ -1,0 +1,95 @@
+# Test case for type with multiple non-constant constructors
+
+# This type should be an i2
+pub type suit { pub constructors 
+        clubs | diamonds | hearts | spades
+}
+
+# This type should be an i4
+pub type rank { pub constructors 
+        r2 | r3 | r4 | r5 | r6 | r7 | r8
+      | r9 | r10 | jack | queen | king | ace
+}
+
+# This type should be an i6
+pub type card { pub
+        card(rank:rank, suit:suit)
+}
+
+# This type should be a 0 bit integer
+pub type unit { pub unit }
+
+
+# This type should be unboxed
+pub type length { pub
+        metres(value:float)
+}
+
+# This type should be unboxed
+pub type perhaps { pub
+        perhaps(content:maybe_int)
+}
+
+# This should not use any tag bits, but should be boxed
+pub type maybe_int { pub constructors 
+        nothing
+      | just(value:int)
+}
+
+# This type should be boxed and use 1 tag bit, but no value test
+pub type number { pub constructors 
+       int(int_value:int)
+     | float(float_value:float)
+}
+
+# This type should be boxed, use 1 tag bit, and a value test
+pub type simple { pub constructors 
+       zero
+     | one(one_field:int)
+     | two(two_field1:int, two_field2:int)
+}
+
+# This type requires a secondary tag, plus a value test
+pub type complicated { pub constructors 
+       winter | spring | summer | autumn
+     | c01(f01:int)
+     | c02(f02:int)
+     | c03(f03:int)
+     | c04(f04:int)
+     | c05(f05:int)
+     | c06(f06:int)
+     | c07(f07:int)
+     | c08(f08:int)
+     | c09(f09:int)
+     | c10(f10:int)
+     | c11(f11:int)
+     | c12(f12:int)
+     | c13(f13:int)
+     | c14(f14:int)
+     | c15(f15:int)
+     | c16(f16:int)
+     | c17(f17:int)
+     # Performance bug makes this intractable:
+     # | c18(f18:int)
+     # | c19(f19:int)
+     # | c20(f20:int)
+     # | c21(f11:int)
+     # | c22(f12:int)
+     # | c23(f13:int)
+     # | c24(f14:int)
+     # | c25(f15:int)
+     # | c26(f16:int)
+     # | c27(f17:int)
+     # | c28(f18:int)
+     # | c29(f19:int)
+     # | c30(f20:int)
+     # | c31(f11:int)
+     # | c32(f12:int)
+     # | c33(f13:int)
+     # | c34(f14:int)
+     # | c35(f15:int)
+     # | c36(f16:int)
+     # | c37(f17:int)
+     # | c38(f18:int)
+     # | c39(f19:int)
+}

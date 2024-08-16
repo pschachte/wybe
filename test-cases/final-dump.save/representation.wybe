@@ -1,0 +1,5 @@
+# Test case of bare representation declaration
+representation is 16 bit unsigned
+
+pub def `+`(x:_, y:_):_ =
+    foreign llvm add(x, y)

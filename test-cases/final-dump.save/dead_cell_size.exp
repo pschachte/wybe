@@ -1,0 +1,1878 @@
+======================================================================
+AFTER EVERYTHING:
+ Module dead_cell_size
+  representation  : (not a type)
+  public submods  : t -> dead_cell_size.t
+                    t2 -> dead_cell_size.t2
+  public resources: 
+  public procs    : dead_cell_size.<0>
+                    dead_cell_size.bar<0>
+                    dead_cell_size.diff_type<0>
+                    dead_cell_size.foo<0>
+                    dead_cell_size.print_t<0>
+                    dead_cell_size.print_t2<0>
+                    dead_cell_size.t.=<0>
+                    dead_cell_size.t.ta<0>
+                    dead_cell_size.t.tb<0>
+                    dead_cell_size.t.tb<1>
+                    dead_cell_size.t.tb1<0>
+                    dead_cell_size.t.tb1<1>
+                    dead_cell_size.t.tc<0>
+                    dead_cell_size.t.tc<1>
+                    dead_cell_size.t.tc1<0>
+                    dead_cell_size.t.tc1<1>
+                    dead_cell_size.t.tc2<0>
+                    dead_cell_size.t.tc2<1>
+                    dead_cell_size.t.tc3<0>
+                    dead_cell_size.t.tc3<1>
+                    dead_cell_size.t.td<0>
+                    dead_cell_size.t.td<1>
+                    dead_cell_size.t.td1<0>
+                    dead_cell_size.t.td1<1>
+                    dead_cell_size.t.~=<0>
+                    dead_cell_size.t2.=<0>
+                    dead_cell_size.t2.a<0>
+                    dead_cell_size.t2.a<1>
+                    dead_cell_size.t2.t2a<0>
+                    dead_cell_size.t2.t2b<0>
+                    dead_cell_size.t2.t2b<1>
+                    dead_cell_size.t2.~=<0>
+  imports         : public use dead_cell_size.t
+                    public use dead_cell_size.t2
+                    use wybe
+  resources       : 
+  submodules      : dead_cell_size.t, dead_cell_size.t2
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: dead_cell_size.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(4,(dead_cell_size.bar<0>,fromList [NonAliasedParamCond 0 []])),(7,(dead_cell_size.diff_type<0>,fromList [NonAliasedParamCond 0 []]))]
+    foreign lpvm alloc(8:wybe.int, ?tmp#7##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~tmp#7##0:dead_cell_size.t, ?tmp#8##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
+    dead_cell_size.foo<0>(~tmp#8##0:dead_cell_size.t, ?tmp#0##0:dead_cell_size.t) #1 @dead_cell_size:nn:nn
+    dead_cell_size.print_t<0>(~tmp#0##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @dead_cell_size:nn:nn
+    foreign lpvm alloc(8:wybe.int, ?tmp#10##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~tmp#10##0:dead_cell_size.t, ?tmp#11##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
+    dead_cell_size.bar<0>[410bae77d3](~tmp#11##0:dead_cell_size.t, ?tmp#2##0:dead_cell_size.t) #4 @dead_cell_size:nn:nn
+    dead_cell_size.print_t<0>(~tmp#2##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @dead_cell_size:nn:nn
+    foreign lpvm alloc(8:wybe.int, ?tmp#13##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~tmp#13##0:dead_cell_size.t, ?tmp#14##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
+    dead_cell_size.diff_type<0>[410bae77d3](~tmp#14##0:dead_cell_size.t, ?tmp#4##0:dead_cell_size.t2) #7 @dead_cell_size:nn:nn
+    dead_cell_size.print_t2<0>(~tmp#4##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @dead_cell_size:nn:nn
+
+
+proc bar > public (1 calls)
+0: dead_cell_size.bar<0>[410bae77d3]
+bar(x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)<{}; {}; {}>:
+  AliasPairs: [(x##0,x##1)]
+  InterestingCallProperties: [InterestingUnaliased 0]
+    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @dead_cell_size:nn:nn
+    case ~tmp#3##0:wybe.bool of
+    0:
+        foreign llvm move(0:dead_cell_size.t, ?x##1:dead_cell_size.t)
+
+    1:
+        foreign llvm and(x##0:wybe.int, 3:wybe.int, ?tmp#4##0:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @dead_cell_size:nn:nn
+        case ~tmp#5##0:wybe.bool of
+        0:
+            foreign llvm move(~x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)
+
+        1:
+            foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm alloc(8:wybe.int, ?tmp#7##0:dead_cell_size.t) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#7##0:dead_cell_size.t, ?tmp#8##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm or(~tmp#8##0:dead_cell_size.t, 2:wybe.int, ?x##1:dead_cell_size.t) @dead_cell_size:nn:nn
+
+
+ [410bae77d3] [NonAliasedParam 0] :
+    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @dead_cell_size:nn:nn
+    case ~tmp#3##0:wybe.bool of
+    0:
+        foreign llvm move(0:dead_cell_size.t, ?x##1:dead_cell_size.t)
+
+    1:
+        foreign llvm and(x##0:wybe.int, 3:wybe.int, ?tmp#4##0:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @dead_cell_size:nn:nn
+        case ~tmp#5##0:wybe.bool of
+        0:
+            foreign llvm move(~x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)
+
+        1:
+            foreign llvm or(~x##0:dead_cell_size.t, 2:wybe.int, ?x##1:dead_cell_size.t) @dead_cell_size:nn:nn
+
+
+
+
+proc diff_type > public (1 calls)
+0: dead_cell_size.diff_type<0>[410bae77d3]
+diff_type(x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: [InterestingUnaliased 0]
+    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @dead_cell_size:nn:nn
+    case ~tmp#4##0:wybe.bool of
+    0:
+        foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+        foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
+
+    1:
+        foreign llvm and(x##0:wybe.int, 3:wybe.int, ?tmp#5##0:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm icmp_eq(~tmp#5##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @dead_cell_size:nn:nn
+        case ~tmp#6##0:wybe.bool of
+        0:
+            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
+
+        1:
+            foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm alloc(8:wybe.int, ?tmp#11##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#11##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @dead_cell_size:nn:nn
+
+
+ [410bae77d3] [NonAliasedParam 0] :
+    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @dead_cell_size:nn:nn
+    case ~tmp#4##0:wybe.bool of
+    0:
+        foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+        foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
+
+    1:
+        foreign llvm and(x##0:wybe.int, 3:wybe.int, ?tmp#5##0:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm icmp_eq(~tmp#5##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @dead_cell_size:nn:nn
+        case ~tmp#6##0:wybe.bool of
+        0:
+            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
+
+        1:
+            foreign llvm move(~x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+
+
+
+
+proc foo > public (1 calls)
+0: dead_cell_size.foo<0>
+foo(x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)<{}; {}; {}>:
+  AliasPairs: [(x##0,x##1)]
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @dead_cell_size:nn:nn
+    case ~tmp#3##0:wybe.bool of
+    0:
+        foreign llvm move(0:dead_cell_size.t, ?x##1:dead_cell_size.t)
+
+    1:
+        foreign llvm and(x##0:wybe.int, 3:wybe.int, ?tmp#4##0:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @dead_cell_size:nn:nn
+        case ~tmp#5##0:wybe.bool of
+        0:
+            foreign llvm move(~x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)
+
+        1:
+            foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm alloc(24:wybe.int, ?tmp#9##0:dead_cell_size.t) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#9##0:dead_cell_size.t, ?tmp#10##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#10##0:dead_cell_size.t, ?tmp#11##0:dead_cell_size.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#11##0:dead_cell_size.t, ?tmp#12##0:dead_cell_size.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 3:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm or(~tmp#12##0:dead_cell_size.t, 1:wybe.int, ?x##1:dead_cell_size.t) @dead_cell_size:nn:nn
+
+
+
+
+proc print_t > public (2 calls)
+0: dead_cell_size.print_t<0>
+print_t(x##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    dead_cell_size.t.=<0>(0:dead_cell_size.t, x##0:dead_cell_size.t, ?tmp#4##0:wybe.bool) #1 @dead_cell_size:nn:nn
+    case ~tmp#4##0:wybe.bool of
+    0:
+        foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @dead_cell_size:nn:nn
+        case ~tmp#6##0:wybe.bool of
+        0:
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+
+        1:
+            foreign llvm and(x##0:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.int) @dead_cell_size:nn:nn
+            case ~tmp#7##0:wybe.int of
+            0:
+                foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
+                wybe.string.print<0>("tb(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~a##0:wybe.int, ~tmp#36##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#37##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+
+            1:
+                foreign lpvm access(x##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?a##1:wybe.int) @dead_cell_size:nn:nn
+                foreign lpvm access(x##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?b##0:wybe.int) @dead_cell_size:nn:nn
+                foreign lpvm access(~x##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?c##0:wybe.int) @dead_cell_size:nn:nn
+                wybe.string.print<0>("tc(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~a##1:wybe.int, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#26##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~b##0:wybe.int, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~c##0:wybe.int, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#32##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+
+            2:
+                foreign lpvm access(~x##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int) @dead_cell_size:nn:nn
+                wybe.string.print<0>("td(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~a##2:wybe.int, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+
+
+
+    1:
+        wybe.string.print<0>("ta":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @dead_cell_size:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#40##0:wybe.phantom) @dead_cell_size:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#41##0:wybe.phantom) @dead_cell_size:nn:nn
+        foreign lpvm store(~%tmp#41##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+
+
+
+proc print_t2 > public (1 calls)
+0: dead_cell_size.print_t2<0>
+print_t2(x##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    dead_cell_size.t2.=<0>(0:dead_cell_size.t2, x##0:dead_cell_size.t2, ?tmp#2##0:wybe.bool) #1 @dead_cell_size:nn:nn
+    case ~tmp#2##0:wybe.bool of
+    0:
+        foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @dead_cell_size:nn:nn
+        case ~tmp#4##0:wybe.bool of
+        0:
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+
+        1:
+            foreign lpvm access(~x##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
+            wybe.string.print<0>("t2b(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @dead_cell_size:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign c print_int(~a##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+            wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @dead_cell_size:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+
+
+    1:
+        wybe.string.print<0>("t2a":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @dead_cell_size:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @dead_cell_size:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @dead_cell_size:nn:nn
+        foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+
+
+  LLVM code       :
+
+; ModuleID = 'dead_cell_size'
+
+
+ 
+
+
+@dead_cell_size.5 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.4 to i64) }
+
+
+@dead_cell_size.9 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.8 to i64) }
+
+
+@dead_cell_size.1 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @dead_cell_size.0 to i64) }
+
+
+@dead_cell_size.11 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.10 to i64) }
+
+
+@dead_cell_size.13 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.12 to i64) }
+
+
+@dead_cell_size.3 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.2 to i64) }
+
+
+@dead_cell_size.7 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.6 to i64) }
+
+
+@dead_cell_size.15 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @dead_cell_size.14 to i64) }
+
+
+@dead_cell_size.4 =    constant [?? x i8] c")\00"
+
+
+@dead_cell_size.8 =    constant [?? x i8] c",\00"
+
+
+@dead_cell_size.12 =    constant [?? x i8] c"t2a\00"
+
+
+@dead_cell_size.14 =    constant [?? x i8] c"t2b(\00"
+
+
+@dead_cell_size.0 =    constant [?? x i8] c"ta\00"
+
+
+@dead_cell_size.2 =    constant [?? x i8] c"tb(\00"
+
+
+@dead_cell_size.6 =    constant [?? x i8] c"tc(\00"
+
+
+@dead_cell_size.10 =    constant [?? x i8] c"td(\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"dead_cell_size.<0>"()    {
+entry:
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 9, i64* %3 
+  %4 = tail call fastcc  i64  @"dead_cell_size.foo<0>"(i64  %2)  
+  tail call fastcc  void  @"dead_cell_size.print_t<0>"(i64  %4)  
+  %5 = trunc i64 8 to i32  
+  %6 = tail call ccc  i8*  @wybe_malloc(i32  %5)  
+  %7 = ptrtoint i8* %6 to i64 
+  %8 = inttoptr i64 %7 to i64* 
+  store  i64 9, i64* %8 
+  %9 = tail call fastcc  i64  @"dead_cell_size.bar<0>[410bae77d3]"(i64  %7)  
+  tail call fastcc  void  @"dead_cell_size.print_t<0>"(i64  %9)  
+  %10 = trunc i64 8 to i32  
+  %11 = tail call ccc  i8*  @wybe_malloc(i32  %10)  
+  %12 = ptrtoint i8* %11 to i64 
+  %13 = inttoptr i64 %12 to i64* 
+  store  i64 9, i64* %13 
+  %14 = tail call fastcc  i64  @"dead_cell_size.diff_type<0>[410bae77d3]"(i64  %12)  
+  tail call fastcc  void  @"dead_cell_size.print_t2<0>"(i64  %14)  
+  ret void 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.bar<0>"(i64  %"x##0")    {
+entry:
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  ret i64 0 
+if.then1:
+  %3 = inttoptr i64 %"x##0" to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = trunc i64 8 to i32  
+  %6 = tail call ccc  i8*  @wybe_malloc(i32  %5)  
+  %7 = ptrtoint i8* %6 to i64 
+  %8 = inttoptr i64 %7 to i64* 
+  store  i64 %4, i64* %8 
+  %9 = or i64 %7, 2 
+  ret i64 %9 
+if.else1:
+  ret i64 %"x##0" 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.bar<0>[410bae77d3]"(i64  %"x##0")    {
+entry:
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  ret i64 0 
+if.then1:
+  %3 = or i64 %"x##0", 2 
+  ret i64 %3 
+if.else1:
+  ret i64 %"x##0" 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.diff_type<0>"(i64  %"x##0")    {
+entry:
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %13 = trunc i64 8 to i32  
+  %14 = tail call ccc  i8*  @wybe_malloc(i32  %13)  
+  %15 = ptrtoint i8* %14 to i64 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 -1, i64* %16 
+  ret i64 %15 
+if.then1:
+  %3 = inttoptr i64 %"x##0" to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = trunc i64 8 to i32  
+  %6 = tail call ccc  i8*  @wybe_malloc(i32  %5)  
+  %7 = ptrtoint i8* %6 to i64 
+  %8 = inttoptr i64 %7 to i64* 
+  store  i64 %4, i64* %8 
+  ret i64 %7 
+if.else1:
+  %9 = trunc i64 8 to i32  
+  %10 = tail call ccc  i8*  @wybe_malloc(i32  %9)  
+  %11 = ptrtoint i8* %10 to i64 
+  %12 = inttoptr i64 %11 to i64* 
+  store  i64 -1, i64* %12 
+  ret i64 %11 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.diff_type<0>[410bae77d3]"(i64  %"x##0")    {
+entry:
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %7 = trunc i64 8 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = inttoptr i64 %9 to i64* 
+  store  i64 -1, i64* %10 
+  ret i64 %9 
+if.then1:
+  ret i64 %"x##0" 
+if.else1:
+  %3 = trunc i64 8 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = inttoptr i64 %5 to i64* 
+  store  i64 -1, i64* %6 
+  ret i64 %5 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.foo<0>"(i64  %"x##0")    {
+entry:
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  ret i64 0 
+if.then1:
+  %3 = inttoptr i64 %"x##0" to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = trunc i64 24 to i32  
+  %6 = tail call ccc  i8*  @wybe_malloc(i32  %5)  
+  %7 = ptrtoint i8* %6 to i64 
+  %8 = inttoptr i64 %7 to i64* 
+  store  i64 %4, i64* %8 
+  %9 = add   i64 %7, 8 
+  %10 = inttoptr i64 %9 to i64* 
+  store  i64 2, i64* %10 
+  %11 = add   i64 %7, 16 
+  %12 = inttoptr i64 %11 to i64* 
+  store  i64 3, i64* %12 
+  %13 = or i64 %7, 1 
+  ret i64 %13 
+if.else1:
+  ret i64 %"x##0" 
+}
+
+
+define external fastcc  void @"dead_cell_size.print_t<0>"(i64  %"x##0")    {
+entry:
+  %0 = tail call fastcc  i1  @"dead_cell_size.t.=<0>"(i64  0, i64  %"x##0")  
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.1, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+if.else:
+  %1 = icmp ne i64 %"x##0", 0 
+  br i1 %1, label %if.then1, label %if.else1 
+if.then1:
+  %2 = and i64 %"x##0", 3 
+  switch i64 %2, label %switch.3.2 [i64 0, label %switch.3.0 i64 1, label %switch.3.1 i64 2, label %switch.3.2] 
+if.else1:
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+switch.3.0:
+  %3 = inttoptr i64 %"x##0" to i64* 
+  %4 = load  i64, i64* %3 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.3, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %4)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.5, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+switch.3.1:
+  %5 = add   i64 %"x##0", -1 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = load  i64, i64* %6 
+  %8 = add   i64 %"x##0", 7 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = load  i64, i64* %9 
+  %11 = add   i64 %"x##0", 15 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = load  i64, i64* %12 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.7, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %7)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.9, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %10)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.9, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %13)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.5, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+switch.3.2:
+  %14 = add   i64 %"x##0", -2 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = load  i64, i64* %15 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.11, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %16)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.5, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  void @"dead_cell_size.print_t2<0>"(i64  %"x##0")    {
+entry:
+  %0 = tail call fastcc  i1  @"dead_cell_size.t2.=<0>"(i64  0, i64  %"x##0")  
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.13, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+if.else:
+  %1 = icmp ne i64 %"x##0", 0 
+  br i1 %1, label %if.then1, label %if.else1 
+if.then1:
+  %2 = inttoptr i64 %"x##0" to i64* 
+  %3 = load  i64, i64* %2 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.15, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %3)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.5, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+if.else1:
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+--------------------------------------------------
+ Module dead_cell_size.t
+  representation  : address
+  public submods  : 
+  public resources: 
+  public procs    : dead_cell_size.t.=<0>
+                    dead_cell_size.t.ta<0>
+                    dead_cell_size.t.tb<0>
+                    dead_cell_size.t.tb<1>
+                    dead_cell_size.t.tb1<0>
+                    dead_cell_size.t.tb1<1>
+                    dead_cell_size.t.tc<0>
+                    dead_cell_size.t.tc<1>
+                    dead_cell_size.t.tc1<0>
+                    dead_cell_size.t.tc1<1>
+                    dead_cell_size.t.tc2<0>
+                    dead_cell_size.t.tc2<1>
+                    dead_cell_size.t.tc3<0>
+                    dead_cell_size.t.tc3<1>
+                    dead_cell_size.t.td<0>
+                    dead_cell_size.t.td<1>
+                    dead_cell_size.t.td1<0>
+                    dead_cell_size.t.td1<1>
+                    dead_cell_size.t.~=<0>
+  imports         : use dead_cell_size
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc = > public (1 calls)
+0: dead_cell_size.t.=<0>
+=(#left##0:dead_cell_size.t, #right##0:dead_cell_size.t, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm icmp_eq(~#right##0:dead_cell_size.t, 0:dead_cell_size.t, ?#success##0:wybe.bool)
+
+    1:
+        foreign llvm and(#left##0:wybe.int, 3:wybe.int, ?tmp#15##0:wybe.int)
+        case ~tmp#15##0:wybe.int of
+        0:
+            foreign lpvm access(~#left##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#tb1##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#42##0:wybe.bool)
+            case ~tmp#42##0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+            1:
+                foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#43##0:wybe.int)
+                foreign llvm icmp_eq(~tmp#43##0:wybe.int, 0:wybe.int, ?tmp#44##0:wybe.bool)
+                case ~tmp#44##0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                1:
+                    foreign lpvm access(~#right##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#tb1##0:wybe.int) @dead_cell_size:nn:nn
+                    foreign llvm icmp_eq(~#left#tb1##0:wybe.int, ~#right#tb1##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
+
+
+
+        1:
+            foreign lpvm access(#left##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?#left#tc1##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm access(#left##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#left#tc2##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm access(~#left##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?#left#tc3##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#32##0:wybe.bool)
+            case ~tmp#32##0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+            1:
+                foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#33##0:wybe.int)
+                foreign llvm icmp_eq(~tmp#33##0:wybe.int, 1:wybe.int, ?tmp#34##0:wybe.bool)
+                case ~tmp#34##0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                1:
+                    foreign lpvm access(#right##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?#right#tc1##0:wybe.int) @dead_cell_size:nn:nn
+                    foreign lpvm access(#right##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#right#tc2##0:wybe.int) @dead_cell_size:nn:nn
+                    foreign lpvm access(~#right##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?#right#tc3##0:wybe.int) @dead_cell_size:nn:nn
+                    foreign llvm icmp_eq(~#left#tc1##0:wybe.int, ~#right#tc1##0:wybe.int, ?tmp#5##0:wybe.bool) @int:nn:nn
+                    case ~tmp#5##0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                    1:
+                        foreign llvm icmp_eq(~#left#tc2##0:wybe.int, ~#right#tc2##0:wybe.int, ?tmp#6##0:wybe.bool) @int:nn:nn
+                        case ~tmp#6##0:wybe.bool of
+                        0:
+                            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                        1:
+                            foreign llvm icmp_eq(~#left#tc3##0:wybe.int, ~#right#tc3##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
+
+
+
+
+
+        2:
+            foreign lpvm access(~#left##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#left#td1##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.bool)
+            case ~tmp#26##0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+            1:
+                foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#27##0:wybe.int)
+                foreign llvm icmp_eq(~tmp#27##0:wybe.int, 2:wybe.int, ?tmp#28##0:wybe.bool)
+                case ~tmp#28##0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                1:
+                    foreign lpvm access(~#right##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#right#td1##0:wybe.int) @dead_cell_size:nn:nn
+                    foreign llvm icmp_eq(~#left#td1##0:wybe.int, ~#right#td1##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
+
+
+
+
+
+
+proc ta > public {inline} (0 calls)
+0: dead_cell_size.t.ta<0>
+ta(?#result##0:dead_cell_size.t)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:dead_cell_size.t, ?#result##0:dead_cell_size.t)
+
+
+proc tb > public {inline} (0 calls)
+0: dead_cell_size.t.tb<0>
+tb(tb1##0:wybe.int, ?#result##0:dead_cell_size.t)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#result##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~tb1##0:wybe.int) @dead_cell_size:nn:nn
+proc tb > public {inline} (14 calls)
+1: dead_cell_size.t.tb<1>
+tb(?tb1##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?tb1##0:wybe.int)
+
+    1:
+        foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?tb1##0:wybe.int)
+
+        1:
+            foreign lpvm access(~#result##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tb1##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc tb1 > public {inline} (0 calls)
+0: dead_cell_size.t.tb1<0>
+tb1(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+        1:
+            foreign lpvm access(~#rec##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+proc tb1 > public {inline} (0 calls)
+1: dead_cell_size.t.tb1<1>
+tb1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+        1:
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc tc > public {inline} (0 calls)
+0: dead_cell_size.t.tc<0>
+tc(tc1##0:wybe.int, tc2##0:wybe.int, tc3##0:wybe.int, ?#result##0:dead_cell_size.t)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(24:wybe.int, ?#rec##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc1##0:wybe.int) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##1:dead_cell_size.t, ?#rec##2:dead_cell_size.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc2##0:wybe.int) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##2:dead_cell_size.t, ?#rec##3:dead_cell_size.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc3##0:wybe.int) @dead_cell_size:nn:nn
+    foreign llvm or(~#rec##3:dead_cell_size.t, 1:wybe.int, ?#result##0:dead_cell_size.t) @dead_cell_size:nn:nn
+proc tc > public {inline} (11 calls)
+1: dead_cell_size.t.tc<1>
+tc(?tc1##0:wybe.int, ?tc2##0:wybe.int, ?tc3##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?tc1##0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?tc2##0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?tc3##0:wybe.int)
+
+    1:
+        foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?tc1##0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?tc2##0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?tc3##0:wybe.int)
+
+        1:
+            foreign lpvm access(#result##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?tc1##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm access(#result##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?tc2##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm access(~#result##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?tc3##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc tc1 > public {inline} (0 calls)
+0: dead_cell_size.t.tc1<0>
+tc1(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+        1:
+            foreign lpvm access(~#rec##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+proc tc1 > public {inline} (0 calls)
+1: dead_cell_size.t.tc1<1>
+tc1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+        1:
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, -1:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc tc2 > public {inline} (0 calls)
+0: dead_cell_size.t.tc2<0>
+tc2(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+        1:
+            foreign lpvm access(~#rec##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+proc tc2 > public {inline} (0 calls)
+1: dead_cell_size.t.tc2<1>
+tc2(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+        1:
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 7:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc tc3 > public {inline} (0 calls)
+0: dead_cell_size.t.tc3<0>
+tc3(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+        1:
+            foreign lpvm access(~#rec##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+proc tc3 > public {inline} (0 calls)
+1: dead_cell_size.t.tc3<1>
+tc3(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+        1:
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 15:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc td > public {inline} (0 calls)
+0: dead_cell_size.t.td<0>
+td(td1##0:wybe.int, ?#result##0:dead_cell_size.t)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~td1##0:wybe.int) @dead_cell_size:nn:nn
+    foreign llvm or(~#rec##1:dead_cell_size.t, 2:wybe.int, ?#result##0:dead_cell_size.t) @dead_cell_size:nn:nn
+proc td > public {inline} (5 calls)
+1: dead_cell_size.t.td<1>
+td(?td1##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?td1##0:wybe.int)
+
+    1:
+        foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?td1##0:wybe.int)
+
+        1:
+            foreign lpvm access(~#result##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?td1##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc td1 > public {inline} (0 calls)
+0: dead_cell_size.t.td1<0>
+td1(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+        1:
+            foreign lpvm access(~#rec##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+proc td1 > public {inline} (0 calls)
+1: dead_cell_size.t.td1<1>
+td1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+    1:
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
+
+        1:
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, -2:wybe.int, 0:wybe.int, 8:wybe.int, 2:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc ~= > public {inline} (0 calls)
+0: dead_cell_size.t.~=<0>
+~=(#left##0:dead_cell_size.t, #right##0:dead_cell_size.t, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    dead_cell_size.t.=<0>(~#left##0:dead_cell_size.t, ~#right##0:dead_cell_size.t, ?tmp#0##0:wybe.bool) #0
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'dead_cell_size.t'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i1 @"dead_cell_size.t.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+entry:
+  %0 = icmp ne i64 %"#left##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#left##0", 3 
+  switch i64 %1, label %switch.3.2 [i64 0, label %switch.3.0 i64 1, label %switch.3.1 i64 2, label %switch.3.2] 
+if.else:
+  %44 = icmp eq i64 %"#right##0", 0 
+  ret i1 %44 
+switch.3.0:
+  %2 = inttoptr i64 %"#left##0" to i64* 
+  %3 = load  i64, i64* %2 
+  %4 = icmp ne i64 %"#right##0", 0 
+  br i1 %4, label %if.then1, label %if.else1 
+switch.3.1:
+  %10 = add   i64 %"#left##0", -1 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = load  i64, i64* %11 
+  %13 = add   i64 %"#left##0", 7 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = load  i64, i64* %14 
+  %16 = add   i64 %"#left##0", 15 
+  %17 = inttoptr i64 %16 to i64* 
+  %18 = load  i64, i64* %17 
+  %19 = icmp ne i64 %"#right##0", 0 
+  br i1 %19, label %if.then3, label %if.else3 
+switch.3.2:
+  %34 = add   i64 %"#left##0", -2 
+  %35 = inttoptr i64 %34 to i64* 
+  %36 = load  i64, i64* %35 
+  %37 = icmp ne i64 %"#right##0", 0 
+  br i1 %37, label %if.then7, label %if.else7 
+if.then1:
+  %5 = and i64 %"#right##0", 3 
+  %6 = icmp eq i64 %5, 0 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
+  ret i1 0 
+if.then2:
+  %7 = inttoptr i64 %"#right##0" to i64* 
+  %8 = load  i64, i64* %7 
+  %9 = icmp eq i64 %3, %8 
+  ret i1 %9 
+if.else2:
+  ret i1 0 
+if.then3:
+  %20 = and i64 %"#right##0", 3 
+  %21 = icmp eq i64 %20, 1 
+  br i1 %21, label %if.then4, label %if.else4 
+if.else3:
+  ret i1 0 
+if.then4:
+  %22 = add   i64 %"#right##0", -1 
+  %23 = inttoptr i64 %22 to i64* 
+  %24 = load  i64, i64* %23 
+  %25 = add   i64 %"#right##0", 7 
+  %26 = inttoptr i64 %25 to i64* 
+  %27 = load  i64, i64* %26 
+  %28 = add   i64 %"#right##0", 15 
+  %29 = inttoptr i64 %28 to i64* 
+  %30 = load  i64, i64* %29 
+  %31 = icmp eq i64 %12, %24 
+  br i1 %31, label %if.then5, label %if.else5 
+if.else4:
+  ret i1 0 
+if.then5:
+  %32 = icmp eq i64 %15, %27 
+  br i1 %32, label %if.then6, label %if.else6 
+if.else5:
+  ret i1 0 
+if.then6:
+  %33 = icmp eq i64 %18, %30 
+  ret i1 %33 
+if.else6:
+  ret i1 0 
+if.then7:
+  %38 = and i64 %"#right##0", 3 
+  %39 = icmp eq i64 %38, 2 
+  br i1 %39, label %if.then8, label %if.else8 
+if.else7:
+  ret i1 0 
+if.then8:
+  %40 = add   i64 %"#right##0", -2 
+  %41 = inttoptr i64 %40 to i64* 
+  %42 = load  i64, i64* %41 
+  %43 = icmp eq i64 %36, %42 
+  ret i1 %43 
+if.else8:
+  ret i1 0 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.t.ta<0>"() alwaysinline   {
+entry:
+  ret i64 0 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.t.tb<0>"(i64  %"tb1##0") alwaysinline   {
+entry:
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 %"tb1##0", i64* %3 
+  ret i64 %2 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.tb<1>"(i64  %"#result##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#result##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
+if.then1:
+  %3 = inttoptr i64 %"#result##0" to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = insertvalue {i64, i1} undef, i64 %4, 0 
+  %6 = insertvalue {i64, i1} %5, i1 1, 1 
+  ret {i64, i1} %6 
+if.else1:
+  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %8 = insertvalue {i64, i1} %7, i1 0, 1 
+  ret {i64, i1} %8 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.tb1<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
+if.then1:
+  %3 = inttoptr i64 %"#rec##0" to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = insertvalue {i64, i1} undef, i64 %4, 0 
+  %6 = insertvalue {i64, i1} %5, i1 1, 1 
+  ret {i64, i1} %6 
+if.else1:
+  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %8 = insertvalue {i64, i1} %7, i1 0, 1 
+  ret {i64, i1} %8 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.tb1<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %14 = insertvalue {i64, i1} undef, i64 0, 0 
+  %15 = insertvalue {i64, i1} %14, i1 0, 1 
+  ret {i64, i1} %15 
+if.then1:
+  %3 = trunc i64 8 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = inttoptr i64 %5 to i8* 
+  %7 = inttoptr i64 %"#rec##0" to i8* 
+  %8 = trunc i64 8 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %6, i8*  %7, i32  %8, i1  0)  
+  %9 = inttoptr i64 %5 to i64* 
+  store  i64 %"#field##0", i64* %9 
+  %10 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else1:
+  %12 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.t.tc<0>"(i64  %"tc1##0", i64  %"tc2##0", i64  %"tc3##0") alwaysinline   {
+entry:
+  %0 = trunc i64 24 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 %"tc1##0", i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"tc2##0", i64* %5 
+  %6 = add   i64 %2, 16 
+  %7 = inttoptr i64 %6 to i64* 
+  store  i64 %"tc3##0", i64* %7 
+  %8 = or i64 %2, 1 
+  ret i64 %8 
+}
+
+
+define external fastcc  {i64, i64, i64, i1} @"dead_cell_size.t.tc<1>"(i64  %"#result##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#result##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %20 = insertvalue {i64, i64, i64, i1} undef, i64 undef, 0 
+  %21 = insertvalue {i64, i64, i64, i1} %20, i64 undef, 1 
+  %22 = insertvalue {i64, i64, i64, i1} %21, i64 undef, 2 
+  %23 = insertvalue {i64, i64, i64, i1} %22, i1 0, 3 
+  ret {i64, i64, i64, i1} %23 
+if.then1:
+  %3 = add   i64 %"#result##0", -1 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = add   i64 %"#result##0", 7 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = load  i64, i64* %7 
+  %9 = add   i64 %"#result##0", 15 
+  %10 = inttoptr i64 %9 to i64* 
+  %11 = load  i64, i64* %10 
+  %12 = insertvalue {i64, i64, i64, i1} undef, i64 %5, 0 
+  %13 = insertvalue {i64, i64, i64, i1} %12, i64 %8, 1 
+  %14 = insertvalue {i64, i64, i64, i1} %13, i64 %11, 2 
+  %15 = insertvalue {i64, i64, i64, i1} %14, i1 1, 3 
+  ret {i64, i64, i64, i1} %15 
+if.else1:
+  %16 = insertvalue {i64, i64, i64, i1} undef, i64 undef, 0 
+  %17 = insertvalue {i64, i64, i64, i1} %16, i64 undef, 1 
+  %18 = insertvalue {i64, i64, i64, i1} %17, i64 undef, 2 
+  %19 = insertvalue {i64, i64, i64, i1} %18, i1 0, 3 
+  ret {i64, i64, i64, i1} %19 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.tc1<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
+if.then1:
+  %3 = add   i64 %"#rec##0", -1 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
+if.else1:
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.tc1<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %17 = insertvalue {i64, i1} undef, i64 0, 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
+if.then1:
+  %3 = trunc i64 24 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = add   i64 %5, 1 
+  %7 = sub   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %5 to i8* 
+  %9 = inttoptr i64 %7 to i8* 
+  %10 = trunc i64 24 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = add   i64 %6, -1 
+  %12 = inttoptr i64 %11 to i64* 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
+if.else1:
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.tc2<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
+if.then1:
+  %3 = add   i64 %"#rec##0", 7 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
+if.else1:
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.tc2<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %17 = insertvalue {i64, i1} undef, i64 0, 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
+if.then1:
+  %3 = trunc i64 24 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = add   i64 %5, 1 
+  %7 = sub   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %5 to i8* 
+  %9 = inttoptr i64 %7 to i8* 
+  %10 = trunc i64 24 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = add   i64 %6, 7 
+  %12 = inttoptr i64 %11 to i64* 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
+if.else1:
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.tc3<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
+if.then1:
+  %3 = add   i64 %"#rec##0", 15 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
+if.else1:
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.tc3<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %17 = insertvalue {i64, i1} undef, i64 0, 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
+if.then1:
+  %3 = trunc i64 24 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = add   i64 %5, 1 
+  %7 = sub   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %5 to i8* 
+  %9 = inttoptr i64 %7 to i8* 
+  %10 = trunc i64 24 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = add   i64 %6, 15 
+  %12 = inttoptr i64 %11 to i64* 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
+if.else1:
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.t.td<0>"(i64  %"td1##0") alwaysinline   {
+entry:
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 %"td1##0", i64* %3 
+  %4 = or i64 %2, 2 
+  ret i64 %4 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.td<1>"(i64  %"#result##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#result##0", 3 
+  %2 = icmp eq i64 %1, 2 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
+if.then1:
+  %3 = add   i64 %"#result##0", -2 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
+if.else1:
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.td1<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 2 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
+if.then1:
+  %3 = add   i64 %"#rec##0", -2 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
+if.else1:
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t.td1<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 2 
+  br i1 %2, label %if.then1, label %if.else1 
+if.else:
+  %17 = insertvalue {i64, i1} undef, i64 0, 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
+if.then1:
+  %3 = trunc i64 8 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = add   i64 %5, 2 
+  %7 = sub   i64 %"#rec##0", 2 
+  %8 = inttoptr i64 %5 to i8* 
+  %9 = inttoptr i64 %7 to i8* 
+  %10 = trunc i64 8 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = add   i64 %6, -2 
+  %12 = inttoptr i64 %11 to i64* 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
+if.else1:
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
+}
+
+
+define external fastcc  i1 @"dead_cell_size.t.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
+entry:
+  %0 = tail call fastcc  i1  @"dead_cell_size.t.=<0>"(i64  %"#left##0", i64  %"#right##0")  
+  %1 = xor i1 %0, 1 
+  ret i1 %1 
+}
+--------------------------------------------------
+ Module dead_cell_size.t2
+  representation  : address
+  public submods  : 
+  public resources: 
+  public procs    : dead_cell_size.t2.=<0>
+                    dead_cell_size.t2.a<0>
+                    dead_cell_size.t2.a<1>
+                    dead_cell_size.t2.t2a<0>
+                    dead_cell_size.t2.t2b<0>
+                    dead_cell_size.t2.t2b<1>
+                    dead_cell_size.t2.~=<0>
+  imports         : use dead_cell_size
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc = > public (1 calls)
+0: dead_cell_size.t2.=<0>
+=(#left##0:dead_cell_size.t2, #right##0:dead_cell_size.t2, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm icmp_eq(~#right##0:dead_cell_size.t2, 0:dead_cell_size.t2, ?#success##0:wybe.bool)
+
+    1:
+        foreign lpvm access(~#left##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#a##0:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
+        case ~tmp#8##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+        1:
+            foreign lpvm access(~#right##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm icmp_eq(~#left#a##0:wybe.int, ~#right#a##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
+
+
+
+
+proc a > public {inline} (0 calls)
+0: dead_cell_size.t2.a<0>
+a(#rec##0:dead_cell_size.t2, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
+
+    1:
+        foreign lpvm access(~#rec##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+proc a > public {inline} (0 calls)
+1: dead_cell_size.t2.a<1>
+a(#rec##0:dead_cell_size.t2, ?#rec##1:dead_cell_size.t2, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:dead_cell_size.t2, ?#rec##1:dead_cell_size.t2)
+
+    1:
+        foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t2, ?#rec##1:dead_cell_size.t2, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+proc t2a > public {inline} (0 calls)
+0: dead_cell_size.t2.t2a<0>
+t2a(?#result##0:dead_cell_size.t2)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:dead_cell_size.t2, ?#result##0:dead_cell_size.t2)
+
+
+proc t2b > public {inline} (0 calls)
+0: dead_cell_size.t2.t2b<0>
+t2b(a##0:wybe.int, ?#result##0:dead_cell_size.t2)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##0:dead_cell_size.t2, ?#result##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @dead_cell_size:nn:nn
+proc t2b > public {inline} (8 calls)
+1: dead_cell_size.t2.t2b<1>
+t2b(?a##0:wybe.int, #result##0:dead_cell_size.t2, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?a##0:wybe.int)
+
+    1:
+        foreign lpvm access(~#result##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+proc ~= > public {inline} (0 calls)
+0: dead_cell_size.t2.~=<0>
+~=(#left##0:dead_cell_size.t2, #right##0:dead_cell_size.t2, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    dead_cell_size.t2.=<0>(~#left##0:dead_cell_size.t2, ~#right##0:dead_cell_size.t2, ?tmp#0##0:wybe.bool) #0
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'dead_cell_size.t2'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i1 @"dead_cell_size.t2.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+entry:
+  %0 = icmp ne i64 %"#left##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"#left##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = icmp ne i64 %"#right##0", 0 
+  br i1 %3, label %if.then1, label %if.else1 
+if.else:
+  %7 = icmp eq i64 %"#right##0", 0 
+  ret i1 %7 
+if.then1:
+  %4 = inttoptr i64 %"#right##0" to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = icmp eq i64 %2, %5 
+  ret i1 %6 
+if.else1:
+  ret i1 0 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t2.a<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"#rec##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = insertvalue {i64, i1} undef, i64 %2, 0 
+  %4 = insertvalue {i64, i1} %3, i1 1, 1 
+  ret {i64, i1} %4 
+if.else:
+  %5 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %6 = insertvalue {i64, i1} %5, i1 0, 1 
+  ret {i64, i1} %6 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t2.a<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = trunc i64 8 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %6 = trunc i64 8 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  %7 = inttoptr i64 %3 to i64* 
+  store  i64 %"#field##0", i64* %7 
+  %8 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %9 = insertvalue {i64, i1} %8, i1 1, 1 
+  ret {i64, i1} %9 
+if.else:
+  %10 = insertvalue {i64, i1} undef, i64 0, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.t2.t2a<0>"() alwaysinline   {
+entry:
+  ret i64 0 
+}
+
+
+define external fastcc  i64 @"dead_cell_size.t2.t2b<0>"(i64  %"a##0") alwaysinline   {
+entry:
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 %"a##0", i64* %3 
+  ret i64 %2 
+}
+
+
+define external fastcc  {i64, i1} @"dead_cell_size.t2.t2b<1>"(i64  %"#result##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"#result##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = insertvalue {i64, i1} undef, i64 %2, 0 
+  %4 = insertvalue {i64, i1} %3, i1 1, 1 
+  ret {i64, i1} %4 
+if.else:
+  %5 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %6 = insertvalue {i64, i1} %5, i1 0, 1 
+  ret {i64, i1} %6 
+}
+
+
+define external fastcc  i1 @"dead_cell_size.t2.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
+entry:
+  %0 = tail call fastcc  i1  @"dead_cell_size.t2.=<0>"(i64  %"#left##0", i64  %"#right##0")  
+  %1 = xor i1 %0, 1 
+  ret i1 %1 
+}

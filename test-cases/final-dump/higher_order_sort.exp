@@ -73,60 +73,60 @@ sort#cont#1(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, sorted##0:wybe.list(X) <{}; 
  
 
 
-declare external ccc  i8* @wybe_malloc(i32)    
+declare external ccc  ptr @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0.p0.i64(ptr, ptr, i32, i1)    
 
 
-define external fastcc  void @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %"x##0", i64  %"xs##0", i64*  %"xs##1")    {
+define external fastcc  void @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %"x##0", i64  %"xs##0", ptr  %"xs##1")    {
 entry:
   %0 = icmp ne i64 %"xs##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"xs##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"xs##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"xs##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
-  %6 = inttoptr i64 %"<=##0" to i64* 
-  %7 = load  i64, i64* %6 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
+  %6 = inttoptr i64 %"<=##0" to ptr 
+  %7 = load  i64, ptr %6 
   %8 = inttoptr i64 %7 to i64 (i64, i64, i64)* 
   %9 = tail call fastcc  i64  %8(i64  %"<=##0", i64  %"x##0", i64  %2)  
   %10 = trunc i64 %9 to i1  
   br i1 %10, label %if.then1, label %if.else1 
 if.else:
   %23 = trunc i64 16 to i32  
-  %24 = tail call ccc  i8*  @wybe_malloc(i32  %23)  
-  %25 = ptrtoint i8* %24 to i64 
-  %26 = inttoptr i64 %25 to i64* 
-  store  i64 %"x##0", i64* %26 
+  %24 = call ccc  ptr  @wybe_malloc(i32  %23)  
+  %25 = ptrtoint ptr %24 to i64 
+  %26 = inttoptr i64 %25 to ptr 
+  store  i64 %"x##0", ptr %26 
   %27 = add   i64 %25, 8 
-  %28 = inttoptr i64 %27 to i64* 
-  store  i64 0, i64* %28 
-  store  i64 %25, i64* %"xs##1" 
+  %28 = inttoptr i64 %27 to ptr 
+  store  i64 0, ptr %28 
+  store  i64 %25, ptr %"xs##1" 
   ret void 
 if.then1:
   %11 = trunc i64 16 to i32  
-  %12 = tail call ccc  i8*  @wybe_malloc(i32  %11)  
-  %13 = ptrtoint i8* %12 to i64 
-  %14 = inttoptr i64 %13 to i64* 
-  store  i64 %"x##0", i64* %14 
+  %12 = call ccc  ptr  @wybe_malloc(i32  %11)  
+  %13 = ptrtoint ptr %12 to i64 
+  %14 = inttoptr i64 %13 to ptr 
+  store  i64 %"x##0", ptr %14 
   %15 = add   i64 %13, 8 
-  %16 = inttoptr i64 %15 to i64* 
-  store  i64 %"xs##0", i64* %16 
-  store  i64 %13, i64* %"xs##1" 
+  %16 = inttoptr i64 %15 to ptr 
+  store  i64 %"xs##0", ptr %16 
+  store  i64 %13, ptr %"xs##1" 
   ret void 
 if.else1:
   %17 = trunc i64 16 to i32  
-  %18 = tail call ccc  i8*  @wybe_malloc(i32  %17)  
-  %19 = ptrtoint i8* %18 to i64 
-  %20 = inttoptr i64 %19 to i64* 
-  store  i64 %2, i64* %20 
+  %18 = call ccc  ptr  @wybe_malloc(i32  %17)  
+  %19 = ptrtoint ptr %18 to i64 
+  %20 = inttoptr i64 %19 to ptr 
+  store  i64 %2, ptr %20 
   %21 = add   i64 %19, 8 
-  %22 = inttoptr i64 %21 to i64* 
-  store  i64 %19, i64* %"xs##1" 
-  musttail call fastcc  void  @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %"x##0", i64  %5, i64*  %22)  
+  %22 = inttoptr i64 %21 to ptr 
+  store  i64 %19, ptr %"xs##1" 
+  musttail call fastcc  void  @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %"x##0", i64  %5, ptr  %22)  
   ret void 
 }
 
@@ -143,14 +143,14 @@ entry:
   %0 = icmp ne i64 %"tmp#1##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  %1 = inttoptr i64 %"tmp#1##0" to i64* 
-  %2 = load  i64, i64* %1 
+  %1 = inttoptr i64 %"tmp#1##0" to ptr 
+  %2 = load  i64, ptr %1 
   %3 = add   i64 %"tmp#1##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = load  i64, i64* %4 
+  %4 = inttoptr i64 %3 to ptr 
+  %5 = load  i64, ptr %4 
   %6 = alloca i64 
-   call fastcc  void  @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %2, i64  %"sorted##0", i64*  %6)  
-  %7 = load  i64, i64* %6 
+   call fastcc  void  @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %2, i64  %"sorted##0", ptr  %6)  
+  %7 = load  i64, ptr %6 
   %8 = musttail call fastcc  i64  @"higher_order_sort.sort#cont#1<0>"(i64  %"<=##0", i64  %7, i64  %5)  
   ret i64 %8 
 if.else:

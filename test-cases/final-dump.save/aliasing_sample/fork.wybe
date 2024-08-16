@@ -1,0 +1,18 @@
+use position
+
+public proc if_then_else(a:position, b:position, ?r:position)
+    if a^x > 0 :: ?r = a
+    | true :: ?r = b
+    end
+end
+
+?pa = position(1, 1)
+?pb = position(-1, -1)
+if_then_else(pa, pb, ?pr)
+x(!pr, 100)
+!print("expect pa(1,1):")
+!printPosition(pa)
+!print("expect pb(-1,-1):")
+!printPosition(pb)
+!print("expect pr(100,1):")
+!printPosition(pr)

@@ -1,0 +1,15 @@
+type ctor_keyword { constructor foo | bar }
+
+type all_priv { foo | bar }
+
+type one_pub { pub foo | bar }
+
+type one_pub2 { foo | pub bar }
+
+type all_public_short { pub constructors foo | bar }
+
+type all_public_long { pub foo | pub bar }
+
+type with_fields { pub constructor foo(a:int) | bar(a:int, b:int) }
+
+type with_fields2 { pub foo(a:int) | bar(b:int) }

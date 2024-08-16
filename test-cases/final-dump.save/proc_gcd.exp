@@ -1,0 +1,139 @@
+======================================================================
+AFTER EVERYTHING:
+ Module proc_gcd
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : proc_gcd.<0>
+                    proc_gcd.gcd<0>
+                    proc_gcd.mod<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: proc_gcd.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    proc_gcd.gcd#cont#1<0>(_:wybe.int, 18:wybe.int, 24:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_gcd:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @proc_gcd:nn:nn
+    foreign c print_int(~r##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @proc_gcd:nn:nn
+    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_gcd:nn:nn
+
+
+proc gcd > public {inline} (1 calls)
+0: proc_gcd.gcd<0>
+gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    proc_gcd.gcd#cont#1<0>(_:wybe.int, ~a##0:wybe.int, ~b##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_gcd:nn:nn
+
+
+proc gcd#cont#1 > (2 calls)
+0: proc_gcd.gcd#cont#1<0>
+gcd#cont#1([t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(y##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @proc_gcd:nn:nn
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(~x##0:wybe.int, ?r##0:wybe.int) @proc_gcd:nn:nn
+
+    1:
+        proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?tmp#6##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_gcd:nn:nn
+        proc_gcd.gcd#cont#1<0>(_:wybe.int, ~y##0:wybe.int, ~tmp#6##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @proc_gcd:nn:nn
+
+
+
+proc gcd#cont#2 > {inline} (1 calls)
+0: proc_gcd.gcd#cont#2<0>
+gcd#cont#2([t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?y##1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_gcd:nn:nn
+    proc_gcd.gcd#cont#1<0>(_:wybe.int, ~y##0:wybe.int, ~y##1:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @proc_gcd:nn:nn
+
+
+proc mod > public (1 calls)
+0: proc_gcd.mod<0>
+mod(x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @proc_gcd:nn:nn
+    foreign c putchar('x':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @proc_gcd:nn:nn
+    foreign c print_int(x##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @proc_gcd:nn:nn
+    foreign c putchar(' ':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @proc_gcd:nn:nn
+    foreign c putchar('y':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @proc_gcd:nn:nn
+    foreign c print_int(y##0:wybe.int, ~tmp#12##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @proc_gcd:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @proc_gcd:nn:nn
+    foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_gcd:nn:nn
+    foreign llvm urem(~x##0:wybe.int, ~y##0:wybe.int, ?r##0:wybe.int) @proc_gcd:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'proc_gcd'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"proc_gcd.<0>"()    {
+entry:
+  %0 = tail call fastcc  i64  @"proc_gcd.gcd#cont#1<0>"(i64  18, i64  24)  
+  tail call ccc  void  @print_int(i64  %0)  
+  ret void 
+}
+
+
+define external fastcc  i64 @"proc_gcd.gcd<0>"(i64  %"a##0", i64  %"b##0") alwaysinline   {
+entry:
+  %0 = musttail call fastcc  i64  @"proc_gcd.gcd#cont#1<0>"(i64  %"a##0", i64  %"b##0")  
+  ret i64 %0 
+}
+
+
+define external fastcc  i64 @"proc_gcd.gcd#cont#1<0>"(i64  %"x##0", i64  %"y##0")    {
+entry:
+  %0 = icmp ne i64 %"y##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x##0", i64  %"y##0")  
+  %2 = musttail call fastcc  i64  @"proc_gcd.gcd#cont#1<0>"(i64  %"y##0", i64  %1)  
+  ret i64 %2 
+if.else:
+  ret i64 %"x##0" 
+}
+
+
+define external fastcc  i64 @"proc_gcd.gcd#cont#2<0>"(i64  %"x##0", i64  %"y##0") alwaysinline   {
+entry:
+  %0 = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x##0", i64  %"y##0")  
+  %1 = musttail call fastcc  i64  @"proc_gcd.gcd#cont#1<0>"(i64  %"y##0", i64  %0)  
+  ret i64 %1 
+}
+
+
+define external fastcc  i64 @"proc_gcd.mod<0>"(i64  %"x##0", i64  %"y##0")    {
+entry:
+  tail call ccc  void  @putchar(i8  120)  
+  tail call ccc  void  @print_int(i64  %"x##0")  
+  tail call ccc  void  @putchar(i8  32)  
+  tail call ccc  void  @putchar(i8  121)  
+  tail call ccc  void  @print_int(i64  %"y##0")  
+  tail call ccc  void  @putchar(i8  10)  
+  %0 = urem i64 %"x##0", %"y##0" 
+  ret i64 %0 
+}

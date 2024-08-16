@@ -1,0 +1,10 @@
+module sub {
+
+    pub def proc(x:hidden) { pass }
+
+    type hidden { hidden }
+}
+
+pub def proc2(y) { 
+    proc(y) 
+}

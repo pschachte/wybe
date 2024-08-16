@@ -1,0 +1,19 @@
+def append(front: list(int), back: list(int), ?result: list(int)) {
+    if { [?h | ?t] = front ::
+            append(t, back, ?tail)
+            ?result = [h|tail]
+       | else ::
+            ?result = back
+    }
+}
+
+?x = [[1],[2],[3]]
+?cons = [4,6]
+map({append(@, cons, ?@)}, x, ?y)
+
+def print_list_of_ints(l: list(int)) use !io {
+    !print(print, l)
+}
+
+!println(print_list_of_ints, x)
+!println(print_list_of_ints, y)

@@ -1,0 +1,15 @@
+
+
+def {noinline} one:int = 1
+def {noinline} two:int = 2
+
+!println(
+    case one <=> two in {
+        lesser ::
+            "less"
+    |   equal ::
+            "equal"
+    |   greater ::
+            "greater"
+    }
+)
