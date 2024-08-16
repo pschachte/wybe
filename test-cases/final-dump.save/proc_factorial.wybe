@@ -1,9 +1,0 @@
-pub def factorial(n:int, ?result:int) {
-    ?result = 1
-    do {while n > 1
-        ?result = result * n
-        ?n = n - 1
-    }
-}
-
-!println(factorial(5))

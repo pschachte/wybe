@@ -1,3 +1,0 @@
-# test case with top-level constructors
-
-pub constructors nothing | just(value:int)

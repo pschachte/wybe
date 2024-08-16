@@ -1,3 +1,0 @@
-for ?i in [] { pass }
-if { true :: pass }
-if { true :: pass }

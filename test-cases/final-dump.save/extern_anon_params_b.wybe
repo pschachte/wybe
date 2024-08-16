@@ -1,3 +1,0 @@
-use extern_anon_params_a
-
-!run({impure} { ?foo = 300 })

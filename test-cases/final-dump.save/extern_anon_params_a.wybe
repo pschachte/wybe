@@ -1,8 +1,0 @@
-pub def {semipure} need(stmt: {impure}()) {!stmt}
-
-pub def {impure} run(func: {impure}()) {
-    # !func()
-    !need({impure}{
-        !func()
-    })
-}

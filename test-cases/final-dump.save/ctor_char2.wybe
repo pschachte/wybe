@@ -1,5 +1,0 @@
-constructors const | ctor(c:char) | other_ctor(_) | another_ctor(_)
-
-def foo(this:_):char = if { this = ctor(?c) :: c | else :: '0' }
-
-!println(foo(ctor('a')))

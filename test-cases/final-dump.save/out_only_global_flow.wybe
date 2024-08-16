@@ -1,9 +1,0 @@
-resource res:int
-
-def {noinline} out use ?res { ?res = 11 }
-
-use res in {
-    ?res = 10
-    !out
-    !println(res)
-}

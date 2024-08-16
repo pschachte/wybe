@@ -1,3 +1,0 @@
-pub def missing_resource_marker use !io {
-    println("shouldn't work: no ! before println call")
-}

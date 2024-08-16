@@ -1,6 +1,0 @@
-def increment(!x: int) {
-    ?x = x+1
-}
-
-l = 1
-increment(!l)

@@ -1,3 +1,0 @@
-!println("should print this")
-!exit(1)
-!println("shouldn't print this")

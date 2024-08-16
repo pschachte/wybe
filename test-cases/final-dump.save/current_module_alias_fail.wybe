@@ -1,5 +1,0 @@
-use math.temperature
-
-pub def {noinline} toCelsius(f:float):float = (f - 32.0) / 1.8
-
-!println(toCelsius(1.0))

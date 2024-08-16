@@ -1,3 +1,0 @@
-pub def double(a:int) : int = a+a
-
-pub def quadruple(a:int) : int = double(double(a))

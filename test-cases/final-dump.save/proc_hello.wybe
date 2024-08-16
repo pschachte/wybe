@@ -1,3 +1,0 @@
-pub def print2(x:int, y:int) use !io {
-       !println("hello, world")
-}

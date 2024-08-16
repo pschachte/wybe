@@ -1,8 +1,0 @@
-use position
-
-# posB is redundant - space not allocated
-?posA = position(111, 222)
-?posB = position(333, 444)
-y(!posA, 112)
-!print("expect posA(111,112):")
-!printPosition(posA)

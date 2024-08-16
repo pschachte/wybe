@@ -1,6 +1,0 @@
-use position
-
-?pos = position(100,100)
-x(!pos, 200) # destructive update
-!print("expect pos(200,100):")
-!printPosition(pos)

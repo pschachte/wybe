@@ -1,4 +1,0 @@
-pub def print2(x:int, y:int) use !io {
-       !print(x)
-       !print(y)
-}

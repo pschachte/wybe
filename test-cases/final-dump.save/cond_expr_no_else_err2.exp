@@ -1,3 +1,0 @@
-Error detected during type checking of module(s) cond_expr_no_else_err2
-[91mfinal-dump/cond_expr_no_else_err2.wybe:1:1: proc vowel_num has test determinism, but declared normal (total)
-[0m

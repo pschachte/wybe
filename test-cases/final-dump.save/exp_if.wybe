@@ -1,5 +1,0 @@
-# ifExpParser
-pub def if_test(x:int) : string =
-  if {x > 0:: "larger" |else:: "smaller"}
-!print("expect larger: ")
-!print(if_test(3))

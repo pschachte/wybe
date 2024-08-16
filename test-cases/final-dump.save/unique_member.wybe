@@ -1,7 +1,0 @@
-representation is {unique} 32 bit signed
-
-type ty { pub ctor(uniq:unique_member) }
-
-?data = ctor(0:_)
-?uniq0 = data^uniq
-?uniq1 = data^uniq

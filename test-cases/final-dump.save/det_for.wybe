@@ -1,6 +1,0 @@
-def `[|]`(?value:int, ?next:int, current:int) {
-    ?value = current
-    ?next = current + 1
-}
-
-for ?i in 0 { !println i }

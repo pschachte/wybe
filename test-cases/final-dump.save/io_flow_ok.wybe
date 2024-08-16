@@ -1,9 +1,0 @@
-def {noinline,test} unknown {pass}
-
-def aok use !io {
-    !println("hello world!")
-}
-
-!aok
-if {unknown :: !println("OK") | else:: !println("That's odd!")}
-!aok

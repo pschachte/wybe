@@ -1,5 +1,0 @@
-def {terminal, semipure} exit_bool(b:bool) {
-  foreign c {terminal, impure} exit(if{b::1|else::0})
-}
-
-!exit_bool(false)

@@ -1,3 +1,0 @@
-?identity = id
-identity(1, ?i)
-!println(i)

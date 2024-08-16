@@ -1,3 +1,0 @@
-pub def foo(v:int) use !io {
-    !println(v)
-}

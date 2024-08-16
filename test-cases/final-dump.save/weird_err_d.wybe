@@ -1,6 +1,0 @@
-# see bug #418
-pub constructor empty 
-
-pub type a is address {}
-
-pub type c is address {}

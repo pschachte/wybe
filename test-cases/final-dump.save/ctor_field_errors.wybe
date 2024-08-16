@@ -1,3 +1,0 @@
-type mixed_type { pub constructor foo(a:int) | bar(a:float, b:int) }
-
-type mixed_vis { pub foo(a:int) | bar(a:int) }

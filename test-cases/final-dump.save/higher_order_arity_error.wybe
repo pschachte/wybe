@@ -1,3 +1,0 @@
-def a(f:(X, Y), x:X, y:Y) {
-    f(x)
-}

@@ -1,6 +1,0 @@
-do {
-    !println("Outer")
-    do {
-        !println("Inner")
-    }
-}

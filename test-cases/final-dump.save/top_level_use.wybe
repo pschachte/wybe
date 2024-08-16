@@ -1,5 +1,0 @@
-resource res:int = 0
-use res in {
-     ?res = 0
-     !println(res)
-}

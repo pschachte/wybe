@@ -1,3 +1,0 @@
-pub def in_before_out(?result:int) {
-       incr(!result)
-}

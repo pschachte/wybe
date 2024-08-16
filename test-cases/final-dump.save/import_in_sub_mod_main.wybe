@@ -1,9 +1,0 @@
-
-module sub {
-    use import_in_sub_mod_lib
-    pub def bar(v:int) use !io {
-        !foo(v)
-    }
-}
-
-!bar(10)

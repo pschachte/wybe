@@ -1,8 +1,0 @@
-!println("should print this")
-my_exit(1)
-!println("shouldn't print this")
-
-
-def {terminal} my_exit(code:int) {
-    foreign c {terminal,semipure} exit(code)
-}

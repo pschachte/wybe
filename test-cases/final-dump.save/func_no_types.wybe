@@ -1,1 +1,0 @@
-pub def double(a) = a*2

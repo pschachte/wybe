@@ -1,3 +1,0 @@
-def foo(f:(A, B), a:A, ?b:B) {
-    f(a, ?b)
-}

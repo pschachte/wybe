@@ -1,8 +1,0 @@
-def bug(!i:int) {
-    if { true :: pass }
-    if { true :: pass }
-}
-
-?i = 1
-bug(!i)
-!print(i)

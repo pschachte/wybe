@@ -1,3 +1,0 @@
-# should be errors
-!println(1:string:int)
-foreign llvm move(1:!int:!count, ?x:count)

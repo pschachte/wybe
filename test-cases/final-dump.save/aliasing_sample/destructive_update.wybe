@@ -1,7 +1,0 @@
-use position
-
-?pa = position(1,1)
-x(pa, ?pa1, pa^x + 10)
-x(pa, ?pa2, pa^x + 20)
-!printPosition(pa1)
-!printPosition(pa2)

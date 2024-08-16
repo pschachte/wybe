@@ -1,9 +1,0 @@
-
-constructor foo(int, bool, i:int) | bar(int) | baz(field:int)
-
-pub type quux { pub quuz(int, j:int) }
- 
-if { foo(1, false, 1) = bar(1) :: !println("uh oh") }
-if { i(foo(1, false, 1)) = 1 :: !println("good") }
-if { foo(1, false, 1) = foo(2, false, 1) :: !println("bad") }
-if { field(baz(1)) ~= 2 :: !println("maybe") }

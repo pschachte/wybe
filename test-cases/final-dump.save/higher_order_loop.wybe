@@ -1,7 +1,0 @@
-
-?fs = [int.println, int.print]
-
-# XXX: get rid of this constraint
-for ?f:{resource}(int) in fs {
-    !f(10)
-}

@@ -1,4 +1,0 @@
-?res = 10 > 5
-!println(res)
-?res = 10 < 5
-!println(res)
