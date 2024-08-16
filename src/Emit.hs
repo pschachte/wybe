@@ -111,7 +111,7 @@ emitAssemblyFile m f = do
     logEmit $ "===> Writing LLVM assembly file " ++ filename
     opts <- gets options
     handle <- liftIO $ openFile filename WriteMode
-    writeLLVM handle m True
+    writeLLVM handle m True True
     liftIO $ hClose handle
     return filename
 

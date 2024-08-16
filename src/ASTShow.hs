@@ -84,14 +84,14 @@ showMapPoses = showMap "" ", " "" id showOptPos
 -- of the specified log selectors have been selected for logging.  This
 -- is called between the passes of those two selectors.
 logDump :: LogSelection -> LogSelection -> String -> Compiler ()
-logDump = logDumpWith (\h m b -> return ())
+logDump = logDumpWith (\_ _ _ _ -> return ())
 
 
 -- |Dump the content of the specified module and all submodules, using the
 -- specified LLVM printer to emit the LLVM code, if either of the specified log
 -- selectors have been selected for logging.  This is called between the passes
 -- of those two selectors.
-logDumpWith :: (Handle -> ModSpec -> Bool -> Compiler ())
+logDumpWith :: (Handle -> ModSpec -> Bool -> Bool -> Compiler ())
             -> LogSelection -> LogSelection -> String -> Compiler ()
 logDumpWith llPrinter selector1 selector2 pass =
     whenLogging2 selector1 selector2 $ do
@@ -105,4 +105,4 @@ logDumpWith llPrinter selector1 selector2 pass =
         forM_ logging $ \mod -> do
                 liftIO $ hPutStrLn stderr $ "\n" ++ replicate 50 '-' ++ "\n"
                         ++ show mod ++ "\n\n  LLVM code       :\n"
-                llPrinter stderr (modSpec mod) False
+                llPrinter stderr (modSpec mod) False False
