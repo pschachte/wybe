@@ -39,7 +39,7 @@ foo(size##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'alloc_args'
 
 source_filename = "!ROOT!/final-dump/alloc_args.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @putchar(i8)

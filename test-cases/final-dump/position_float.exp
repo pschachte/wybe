@@ -28,7 +28,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'position_float'
 
 source_filename = "!ROOT!/final-dump/position_float.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -141,7 +141,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'position_float.position'
 
 source_filename = "!ROOT!/final-dump/position_float.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

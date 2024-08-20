@@ -65,7 +65,7 @@ factorial#cont#2(n##0:wybe.int, result##0:wybe.int, ?result##2:wybe.int)<{}; {};
 ; ModuleID = 'proc_factorial'
 
 source_filename = "!ROOT!/final-dump/proc_factorial.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

@@ -168,7 +168,7 @@ foo2(x##0:T0 <{}; {}; {0}>, ?y##0:T0 <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; 
 ; ModuleID = 'type_generics'
 
 source_filename = "!ROOT!/final-dump/type_generics.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_float(double)

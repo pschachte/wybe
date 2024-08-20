@@ -69,7 +69,7 @@ mod(x##0:wybe.int, y##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 ; ModuleID = 'stmt_when'
 
 source_filename = "!ROOT!/final-dump/stmt_when.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

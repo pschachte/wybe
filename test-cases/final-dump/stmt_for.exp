@@ -723,7 +723,7 @@ xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_
 ; ModuleID = 'stmt_for'
 
 source_filename = "!ROOT!/final-dump/stmt_for.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 20 x i8 ] c"\0Amultiple_generator\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 32 x i8 ] c"\0Ashortest_generator_termination\00", align 8
@@ -1682,7 +1682,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'stmt_for.int_sequence'
 
 source_filename = "!ROOT!/final-dump/stmt_for.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

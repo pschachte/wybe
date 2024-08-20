@@ -66,7 +66,7 @@ foo(?s##0:wybe.c_string, ?#success##0:wybe.bool, %call_source_location##0:wybe.c
 ; ModuleID = 'resource_rollback'
 
 source_filename = "!ROOT!/final-dump/resource_rollback.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 23 x i8 ] c"resource_rollback:15:7\00", align 8
 

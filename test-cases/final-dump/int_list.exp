@@ -81,7 +81,7 @@ println(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'int_list'
 
 source_filename = "!ROOT!/final-dump/int_list.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)
@@ -304,7 +304,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'int_list.int_list'
 
 source_filename = "!ROOT!/final-dump/int_list.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

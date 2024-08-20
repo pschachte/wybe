@@ -49,7 +49,7 @@ init_res()<{}; {<<bug228-okay.res>>}; {}>:
 ; ModuleID = 'bug228-okay'
 
 source_filename = "!ROOT!/final-dump/bug228-okay.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#bug228-okay.res" = global i64 undef

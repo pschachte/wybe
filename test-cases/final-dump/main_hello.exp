@@ -52,7 +52,7 @@ set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
 ; ModuleID = 'command_line'
 
 source_filename = "!ROOT!/../wybelibs/command_line.o"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 34 x i8 ] c"Erroneous program argument vector\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 19 x i8 ] c"command_line:18:15\00", align 8
@@ -122,7 +122,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'main_hello'
 
 source_filename = "!ROOT!/final-dump/main_hello.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 26 x i8 ] c" command line argument(s)\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 14 x i8 ] c"hello, world!\00", align 8

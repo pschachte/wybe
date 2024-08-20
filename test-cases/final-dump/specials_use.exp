@@ -88,7 +88,7 @@ show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.
 ; ModuleID = 'specials'
 
 source_filename = "!ROOT!/final-dump/specials.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)
@@ -169,7 +169,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'specials_use'
 
 source_filename = "!ROOT!/final-dump/specials_use.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 75 x i8 ] c"!ROOT!/final-dump/specials_use.wybe\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 79 x i8 ] c"!ROOT!/final-dump/specials_use.wybe:8:2\00", align 8

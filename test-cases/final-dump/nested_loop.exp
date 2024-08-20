@@ -61,7 +61,7 @@ proc #cont#2 > {inline,semipure} (2 calls)
 ; ModuleID = 'nested_loop'
 
 source_filename = "!ROOT!/final-dump/nested_loop.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 6 x i8 ] c"Inner\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 6 x i8 ] c"Outer\00", align 8

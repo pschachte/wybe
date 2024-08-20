@@ -616,7 +616,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'common_fields'
 
 source_filename = "!ROOT!/final-dump/common_fields.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 2 x i8 ] c"a\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c"b\00", align 8

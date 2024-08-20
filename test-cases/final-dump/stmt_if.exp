@@ -110,7 +110,7 @@ lookup(key##0:wybe.int, tree##0:stmt_if.tree, ?result##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'stmt_if'
 
 source_filename = "!ROOT!/final-dump/stmt_if.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 28 x i8 ] c"lookup fails when it should\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 36 x i8 ] c"lookup fails when it should succeed\00", align 8
@@ -404,7 +404,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'stmt_if.tree'
 
 source_filename = "!ROOT!/final-dump/stmt_if.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

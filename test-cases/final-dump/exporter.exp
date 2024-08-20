@@ -34,7 +34,7 @@ three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
 ; ModuleID = 'exporter'
 
 source_filename = "!ROOT!/final-dump/exporter.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#exporter.res" = global i64 undef

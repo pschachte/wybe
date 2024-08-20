@@ -36,7 +36,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'person4'
 
 source_filename = "!ROOT!/final-dump/person4.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 6 x i8 ] c"Smith\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 5 x i8 ] c"Wang\00", align 8
@@ -164,7 +164,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'person4.person'
 
 source_filename = "!ROOT!/final-dump/person4.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

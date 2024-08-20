@@ -137,7 +137,7 @@ tail(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#rec##1:current_m
 ; ModuleID = 'current_module_alias_type_args'
 
 source_filename = "!ROOT!/final-dump/current_module_alias_type_args.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

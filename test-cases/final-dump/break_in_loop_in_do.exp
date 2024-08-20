@@ -53,7 +53,7 @@ proc #cont#2 > {inline,semipure} (1 calls)
 ; ModuleID = 'break_in_loop_in_do'
 
 source_filename = "!ROOT!/final-dump/break_in_loop_in_do.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#break_in_loop_in_do.counter" = global i64 undef

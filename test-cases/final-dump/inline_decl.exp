@@ -73,7 +73,7 @@ long()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'inline_decl'
 
 source_filename = "!ROOT!/final-dump/inline_decl.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @putchar(i8)

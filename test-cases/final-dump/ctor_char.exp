@@ -267,7 +267,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_char'
 
 source_filename = "!ROOT!/final-dump/ctor_char.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @putchar(i8)

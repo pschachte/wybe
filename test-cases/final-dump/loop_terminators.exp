@@ -77,7 +77,7 @@ loop3#cont#1()<{}; {}; {}>:
 ; ModuleID = 'loop_terminators'
 
 source_filename = "!ROOT!/final-dump/loop_terminators.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c"lol\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 23 x i8 ] c"loop_terminators:14:11\00", align 8

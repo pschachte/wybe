@@ -21,7 +21,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'bug217'
 
 source_filename = "!ROOT!/final-dump/bug217.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -69,7 +69,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'bug217.foo'
 
 source_filename = "!ROOT!/final-dump/bug217.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -127,7 +127,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'bug217.foo.bar'
 
 source_filename = "!ROOT!/final-dump/bug217.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

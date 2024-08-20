@@ -22,7 +22,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'submodule'
 
 source_filename = "!ROOT!/final-dump/submodule.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -59,7 +59,7 @@ semi_hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'submodule.privatetest'
 
 source_filename = "!ROOT!/final-dump/submodule.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 33 x i8 ] c"private proc in a private module\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 32 x i8 ] c"public proc in a private module\00", align 8
@@ -111,7 +111,7 @@ visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'submodule.publictest'
 
 source_filename = "!ROOT!/final-dump/submodule.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 32 x i8 ] c"private proc in a public module\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 31 x i8 ] c"public proc in a public module\00", align 8

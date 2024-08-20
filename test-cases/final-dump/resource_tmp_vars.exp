@@ -45,7 +45,7 @@ proc #cont#1 > {inline,semipure} (1 calls)
 ; ModuleID = 'resource_tmp_vars'
 
 source_filename = "!ROOT!/final-dump/resource_tmp_vars.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#resource_tmp_vars.counter" = global i64 undef

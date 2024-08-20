@@ -94,7 +94,7 @@ neq(x##0:wybe.c_string, y##0:wybe.c_string, ?#success##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'foreign_test'
 
 source_filename = "!ROOT!/final-dump/foreign_test.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 8 x i8 ] c"lt(1,2)\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 26 x i8 ] c"neq(c\22string\22, c\22string\22)\00", align 8

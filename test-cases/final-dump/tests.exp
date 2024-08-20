@@ -100,7 +100,7 @@ lt3(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'tests'
 
 source_filename = "!ROOT!/final-dump/tests.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -425,7 +425,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'tests.map'
 
 source_filename = "!ROOT!/final-dump/tests.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

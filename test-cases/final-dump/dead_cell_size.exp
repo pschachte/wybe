@@ -295,7 +295,7 @@ print_t2(x##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'dead_cell_size'
 
 source_filename = "!ROOT!/final-dump/dead_cell_size.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c",\00", align 8
@@ -1044,7 +1044,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'dead_cell_size.t'
 
 source_filename = "!ROOT!/final-dump/dead_cell_size.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
@@ -1654,7 +1654,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'dead_cell_size.t2'
 
 source_filename = "!ROOT!/final-dump/dead_cell_size.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

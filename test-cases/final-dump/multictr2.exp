@@ -164,7 +164,7 @@ print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'multictr2'
 
 source_filename = "!ROOT!/final-dump/multictr2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 3 x i8 ] c", \00", align 8
@@ -1031,7 +1031,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'multictr2.t'
 
 source_filename = "!ROOT!/final-dump/multictr2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

@@ -185,7 +185,7 @@ test_index(s##0:wybe.string, i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; 
 ; ModuleID = 'string'
 
 source_filename = "!ROOT!/final-dump/string.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 1 x i8 ] c"\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 32 x i8 ] c"\0ATESTING CONVERSION TO c_string\00", align 8

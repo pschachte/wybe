@@ -61,7 +61,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'alias_type2'
 
 source_filename = "!ROOT!/final-dump/alias_type2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)
@@ -218,7 +218,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'alias_type2.position'
 
 source_filename = "!ROOT!/final-dump/alias_type2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
@@ -453,7 +453,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'alias_type2.posrec'
 
 source_filename = "!ROOT!/final-dump/alias_type2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

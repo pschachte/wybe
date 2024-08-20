@@ -35,7 +35,7 @@ quadruple(a##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 ; ModuleID = 'func_quadruple'
 
 source_filename = "!ROOT!/final-dump/func_quadruple.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

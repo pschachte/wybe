@@ -98,7 +98,7 @@ saturating_tail2(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.list(T) <{}
 ; ModuleID = 'disjunction'
 
 source_filename = "!ROOT!/final-dump/disjunction.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

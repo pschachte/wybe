@@ -32,7 +32,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'compute'
 
 source_filename = "!ROOT!/final-dump/compute.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_float(double)
@@ -73,7 +73,7 @@ define external fastcc void @"compute.<0>"() alwaysinline {
 ; ModuleID = 'math'
 
 source_filename = "!ROOT!/final-dump/math/_.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -102,7 +102,7 @@ toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 ; ModuleID = 'math.temperature'
 
 source_filename = "!ROOT!/final-dump/math/temperature.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -157,7 +157,7 @@ factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 ; ModuleID = 'math.utils'
 
 source_filename = "!ROOT!/final-dump/math/utils.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 28 x i8 ] c"Utils has been initialised.\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 27, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8

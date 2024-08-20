@@ -40,7 +40,7 @@ out()<{}; {<<out_only_global_flow.res>>}; {}>:
 ; ModuleID = 'out_only_global_flow'
 
 source_filename = "!ROOT!/final-dump/out_only_global_flow.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#out_only_global_flow.res" = global i64 undef

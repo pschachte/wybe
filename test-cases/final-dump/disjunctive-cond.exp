@@ -125,7 +125,7 @@ proc #cont#3 > {semipure} (7 calls)
 ; ModuleID = 'disjunctive-cond'
 
 source_filename = "!ROOT!/final-dump/disjunctive-cond.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 9 x i8 ] c"all good\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 10 x i8 ] c"also good\00", align 8

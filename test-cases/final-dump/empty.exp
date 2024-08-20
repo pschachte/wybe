@@ -19,7 +19,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'empty'
 
 source_filename = "!ROOT!/final-dump/empty.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

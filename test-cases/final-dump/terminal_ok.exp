@@ -39,7 +39,7 @@ exit_bool(b##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'terminal_ok'
 
 source_filename = "!ROOT!/final-dump/terminal_ok.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @exit(i64)

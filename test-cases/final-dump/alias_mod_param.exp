@@ -42,7 +42,7 @@ foo(pa##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'alias_mod_param'
 
 source_filename = "!ROOT!/final-dump/alias_mod_param.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 18 x i8 ] c"expect p1(10,10):\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 20 x i8 ] c"expect pa(1111,10):\00", align 8
@@ -126,7 +126,7 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'position'
 
 source_filename = "!ROOT!/final-dump/position.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c" (\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
@@ -263,7 +263,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'position.position'
 
 source_filename = "!ROOT!/final-dump/position.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

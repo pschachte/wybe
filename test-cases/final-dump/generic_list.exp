@@ -170,7 +170,7 @@ nil(?#result##0:generic_list(T))<{}; {}; {}>:
 ; ModuleID = 'generic_list'
 
 source_filename = "!ROOT!/final-dump/generic_list.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

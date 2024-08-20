@@ -72,7 +72,7 @@ beer99#cont#2(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'proc_beer'
 
 source_filename = "!ROOT!/final-dump/proc_beer.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 29 x i8 ] c" bottles of beer on the wall\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 28, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8

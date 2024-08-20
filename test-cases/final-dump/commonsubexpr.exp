@@ -51,7 +51,7 @@ common_subexpr(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'commonsubexpr'
 
 source_filename = "!ROOT!/final-dump/commonsubexpr.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

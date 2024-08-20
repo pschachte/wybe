@@ -55,7 +55,7 @@ myprint_b(x##0:wybe.int, ?y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>
 ; ModuleID = 'io'
 
 source_filename = "!ROOT!/final-dump/io.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

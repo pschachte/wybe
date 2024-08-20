@@ -46,7 +46,7 @@ time_execution(proc##0:{semipure}(), ?time##0:wybe.float, %call_source_location#
 ; ModuleID = 'benchmark'
 
 source_filename = "!ROOT!/../wybelibs/benchmark.o"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc double @benchmark_end(i64)
@@ -222,7 +222,7 @@ naive_fib1(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 ; ModuleID = 'benchmark_fib'
 
 source_filename = "!ROOT!/final-dump/benchmark_fib.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 20 x i8 ] c"Elapsed time (s):  \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 20 x i8 ] c"benchmark_fib:18:21\00", align 8

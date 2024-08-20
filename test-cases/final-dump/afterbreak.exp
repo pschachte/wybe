@@ -56,7 +56,7 @@ proc #cont#2 > {inline,semipure} (1 calls)
 ; ModuleID = 'afterbreak'
 
 source_filename = "!ROOT!/final-dump/afterbreak.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

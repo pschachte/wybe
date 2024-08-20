@@ -26,7 +26,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'assert_error'
 
 source_filename = "!ROOT!/final-dump/assert_error.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 17 x i8 ] c"assert_error:3:2\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 17 x i8 ] c"assert_error:5:2\00", align 8

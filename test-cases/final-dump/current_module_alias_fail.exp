@@ -40,7 +40,7 @@ toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 ; ModuleID = 'current_module_alias_fail'
 
 source_filename = "!ROOT!/final-dump/current_module_alias_fail.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_float(double)
@@ -84,7 +84,7 @@ toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 ; ModuleID = 'math.temperature'
 
 source_filename = "!ROOT!/final-dump/math/temperature.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

@@ -28,7 +28,7 @@ foo(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'import_in_sub_mod_lib'
 
 source_filename = "!ROOT!/final-dump/import_in_sub_mod_lib.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)
@@ -69,7 +69,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'import_in_sub_mod_main'
 
 source_filename = "!ROOT!/final-dump/import_in_sub_mod_main.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)
@@ -110,7 +110,7 @@ bar(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'import_in_sub_mod_main.sub'
 
 source_filename = "!ROOT!/final-dump/import_in_sub_mod_main.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

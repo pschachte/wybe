@@ -58,7 +58,7 @@ nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'nested_if'
 
 source_filename = "!ROOT!/final-dump/nested_if.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 21 x i8 ] c"one thousand and one\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 6 x i8 ] c"other\00", align 8

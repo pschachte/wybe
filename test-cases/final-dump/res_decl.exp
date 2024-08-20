@@ -19,7 +19,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'res_decl'
 
 source_filename = "!ROOT!/final-dump/res_decl.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#res_decl.count" = global i64 undef

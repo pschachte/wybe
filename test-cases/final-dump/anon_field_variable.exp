@@ -128,7 +128,7 @@ foo(?foo#1##0:T <{}; {}; {1}>, #result##0:anon_field_variable(T) <{}; {}; {1}>, 
 ; ModuleID = 'anon_field_variable'
 
 source_filename = "!ROOT!/final-dump/anon_field_variable.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c"foo\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8

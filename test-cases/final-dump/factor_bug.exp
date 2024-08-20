@@ -51,7 +51,7 @@ test(?#result##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'factor_bug'
 
 source_filename = "!ROOT!/final-dump/factor_bug.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

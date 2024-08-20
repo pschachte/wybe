@@ -47,7 +47,7 @@ factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 ; ModuleID = 'func_factorial'
 
 source_filename = "!ROOT!/final-dump/func_factorial.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

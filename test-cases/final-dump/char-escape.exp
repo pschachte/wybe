@@ -60,7 +60,7 @@ test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {
 ; ModuleID = 'char-escape'
 
 source_filename = "!ROOT!/final-dump/char-escape.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 37 x i8 ] c"\07string with hex character escapes!\0A\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 25 x i8 ] c" char escapes don't work\00", align 8

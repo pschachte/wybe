@@ -75,7 +75,7 @@ foo(r1##0:alias_type4.posrec)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'alias_type4'
 
 source_filename = "!ROOT!/final-dump/alias_type4.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)
@@ -238,7 +238,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'alias_type4.position'
 
 source_filename = "!ROOT!/final-dump/alias_type4.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
@@ -473,7 +473,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'alias_type4.posrec'
 
 source_filename = "!ROOT!/final-dump/alias_type4.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

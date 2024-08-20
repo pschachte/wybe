@@ -51,7 +51,7 @@ yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wy
 ; ModuleID = 'proc_yorn2'
 
 source_filename = "!ROOT!/final-dump/proc_yorn2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 8 x i8 ] c" (y/n) \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 29 x i8 ] c"Please answer 'yes' or 'no'.\00", align 8

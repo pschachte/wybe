@@ -28,7 +28,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'top_level_use'
 
 source_filename = "!ROOT!/final-dump/top_level_use.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#top_level_use.res" = global i64 undef

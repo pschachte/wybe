@@ -358,7 +358,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'anon_field'
 
 source_filename = "!ROOT!/final-dump/anon_field.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c"bad\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 5 x i8 ] c"good\00", align 8
@@ -825,7 +825,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'anon_field.quux'
 
 source_filename = "!ROOT!/final-dump/anon_field.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

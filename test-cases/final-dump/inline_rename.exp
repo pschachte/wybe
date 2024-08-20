@@ -51,7 +51,7 @@ foo(?bar##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'inline_rename'
 
 source_filename = "!ROOT!/final-dump/inline_rename.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

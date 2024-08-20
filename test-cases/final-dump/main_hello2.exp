@@ -29,7 +29,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'main_hello2'
 
 source_filename = "!ROOT!/final-dump/main_hello2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 8 x i8 ] c"hello, \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 7 x i8 ] c"world!\00", align 8

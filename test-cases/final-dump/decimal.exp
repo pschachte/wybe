@@ -46,7 +46,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'decimal'
 
 source_filename = "!ROOT!/final-dump/decimal.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_float(double)

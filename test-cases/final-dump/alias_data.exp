@@ -60,7 +60,7 @@ bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'alias_data'
 
 source_filename = "!ROOT!/final-dump/alias_data.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 12 x i8 ] c"intro to cs\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 9 x i8 ] c"student1\00", align 8
@@ -207,7 +207,7 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'student'
 
 source_filename = "!ROOT!/final-dump/student.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 24 x i8 ] c"Declarative Programming\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 14 x i8 ] c"course code: \00", align 8
@@ -400,7 +400,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'student.course'
 
 source_filename = "!ROOT!/final-dump/student.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
@@ -640,7 +640,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'student.student'
 
 source_filename = "!ROOT!/final-dump/student.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

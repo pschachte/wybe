@@ -77,7 +77,7 @@ is_true#cont#1(check##0:wybe.bool, res##0:wybe.bool, tmp#1##0:wybe.range, ?res##
 ; ModuleID = 'undef_bug'
 
 source_filename = "!ROOT!/final-dump/undef_bug.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @putchar(i8)

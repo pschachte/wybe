@@ -195,7 +195,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'int_sequence'
 
 source_filename = "!ROOT!/final-dump/int_sequence.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

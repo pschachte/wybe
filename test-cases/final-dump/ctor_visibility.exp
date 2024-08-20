@@ -28,7 +28,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'ctor_visibility'
 
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -83,7 +83,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_visibility.all_priv'
 
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -159,7 +159,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_visibility.all_public_long'
 
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -235,7 +235,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_visibility.all_public_short'
 
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -309,7 +309,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_visibility.ctor_keyword'
 
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -384,7 +384,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_visibility.one_pub'
 
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -459,7 +459,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_visibility.one_pub2'
 
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -687,7 +687,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_visibility.with_fields'
 
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
@@ -1079,7 +1079,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_visibility.with_fields2'
 
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

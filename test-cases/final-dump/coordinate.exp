@@ -61,7 +61,7 @@ fcopy(crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate)<{}; {}; 
 ; ModuleID = 'coordinate'
 
 source_filename = "!ROOT!/final-dump/coordinate.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 21 x i8 ] c"expect crd1^z=8000: \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 21 x i8 ] c"expect crd2^z=1000: \00", align 8
@@ -249,7 +249,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'coordinate.Coordinate'
 
 source_filename = "!ROOT!/final-dump/coordinate.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

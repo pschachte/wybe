@@ -35,7 +35,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'fn_update'
 
 source_filename = "!ROOT!/final-dump/fn_update.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c"p =\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
@@ -111,7 +111,7 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'position'
 
 source_filename = "!ROOT!/final-dump/position.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c" (\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
@@ -248,7 +248,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'position.position'
 
 source_filename = "!ROOT!/final-dump/position.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

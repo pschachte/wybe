@@ -93,7 +93,7 @@ show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.
 ; ModuleID = 'specials_one_module'
 
 source_filename = "!ROOT!/final-dump/specials_one_module.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 21 x i8 ] c" (should be line 28)\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 20 x i8 ] c"specials_one_module\00", align 8

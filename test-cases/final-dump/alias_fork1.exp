@@ -93,7 +93,7 @@ simpleMerge#cont#1(tmp#2##0:mytree.tree, ?#result##0:mytree.tree)<{}; {}; {}>:
 ; ModuleID = 'alias_fork1'
 
 source_filename = "!ROOT!/final-dump/alias_fork1.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 2 x i8 ] c"{\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c"}\00", align 8
@@ -271,7 +271,7 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
 ; ModuleID = 'mytree'
 
 source_filename = "!ROOT!/final-dump/mytree.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c", \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c"{\00", align 8
@@ -522,7 +522,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'mytree.tree'
 
 source_filename = "!ROOT!/final-dump/mytree.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

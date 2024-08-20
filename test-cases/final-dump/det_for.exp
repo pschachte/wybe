@@ -47,7 +47,7 @@ proc [|] > {inline} (1 calls)
 ; ModuleID = 'det_for'
 
 source_filename = "!ROOT!/final-dump/det_for.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

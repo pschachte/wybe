@@ -69,7 +69,7 @@ unknown(?#success##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'io_flow_ok'
 
 source_filename = "!ROOT!/final-dump/io_flow_ok.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c"OK\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 12 x i8 ] c"That's odd!\00", align 8

@@ -120,7 +120,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'constructors'
 
 source_filename = "!ROOT!/final-dump/constructors.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

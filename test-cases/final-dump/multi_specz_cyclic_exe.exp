@@ -62,7 +62,7 @@ main()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'multi_specz_cyclic_exe'
 
 source_filename = "!ROOT!/final-dump/multi_specz_cyclic_exe.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 14 x i8 ] c"-------------\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 14 x i8 ] c"=============\00", align 8
@@ -230,7 +230,7 @@ printPosition(pos##0:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.
 ; ModuleID = 'multi_specz_cyclic_lib'
 
 source_filename = "!ROOT!/final-dump/multi_specz_cyclic_lib.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c" (\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
@@ -433,7 +433,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'multi_specz_cyclic_lib.position'
 
 source_filename = "!ROOT!/final-dump/multi_specz_cyclic_lib.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
@@ -600,7 +600,7 @@ foo2(x1##0:multi_specz_cyclic_lib.position, x2##0:multi_specz_cyclic_lib.positio
 ; ModuleID = 'multi_specz_cyclic_lib2'
 
 source_filename = "!ROOT!/final-dump/multi_specz_cyclic_lib2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external fastcc void @"multi_specz_cyclic_lib.foo1<0>"(i64, i64, i64, i64, i64)

@@ -36,7 +36,7 @@ foo(?i##3:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'failure_in_cond_test'
 
 source_filename = "!ROOT!/final-dump/failure_in_cond_test.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

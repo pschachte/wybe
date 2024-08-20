@@ -52,7 +52,7 @@ set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
 ; ModuleID = 'command_line'
 
 source_filename = "!ROOT!/../wybelibs/command_line.o"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 34 x i8 ] c"Erroneous program argument vector\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 19 x i8 ] c"command_line:18:15\00", align 8
@@ -128,7 +128,7 @@ myincr(x##0:wybe.int, ?x##1:wybe.int)<{}; {}; {}>:
 ; ModuleID = 'inline_pos'
 
 source_filename = "!ROOT!/final-dump/inline_pos.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 5 x i8 ] c"v = \00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8

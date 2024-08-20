@@ -131,7 +131,7 @@ hypot(s1##0:wybe.float, s2##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 ; ModuleID = 'hypot'
 
 source_filename = "!ROOT!/final-dump/hypot.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c" = \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 11 x i8 ] c"area(5) = \00", align 8

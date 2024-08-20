@@ -73,7 +73,7 @@ use_test()<{<<use_resource.count>>, <<wybe.io.io>>}; {<<use_resource.count>>, <<
 ; ModuleID = 'use_resource'
 
 source_filename = "!ROOT!/final-dump/use_resource.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 18 x i8 ] c"Inner count (4): \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 18 x i8 ] c"Outer count (1): \00", align 8

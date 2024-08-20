@@ -34,7 +34,7 @@ three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
 ; ModuleID = 'exporter'
 
 source_filename = "!ROOT!/final-dump/exporter.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#exporter.res" = global i64 undef
@@ -101,7 +101,7 @@ my_three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
 ; ModuleID = 'importer'
 
 source_filename = "!ROOT!/final-dump/importer.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c" = \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 3 x i8 ] c"2^\00", align 8
@@ -159,7 +159,7 @@ define external fastcc i64 @"importer.my_three<0>"() alwaysinline {
 ; ModuleID = 'pub_importer'
 
 source_filename = "!ROOT!/final-dump/pub_importer.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

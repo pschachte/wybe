@@ -79,7 +79,7 @@ mod(x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.i
 ; ModuleID = 'proc_gcd'
 
 source_filename = "!ROOT!/final-dump/proc_gcd.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

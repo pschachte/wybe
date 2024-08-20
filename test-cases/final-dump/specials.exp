@@ -88,7 +88,7 @@ show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.
 ; ModuleID = 'specials'
 
 source_filename = "!ROOT!/final-dump/specials.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

@@ -39,7 +39,7 @@ out()<{}; {<<out_global_overwritten.res>>}; {}>:
 ; ModuleID = 'out_global_overwritten'
 
 source_filename = "!ROOT!/final-dump/out_global_overwritten.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#out_global_overwritten.res" = global i64 undef

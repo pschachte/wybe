@@ -39,7 +39,7 @@ my_error(msg##0:wybe.string)<{}; {}; {}>:
 ; ModuleID = 'early_error'
 
 source_filename = "!ROOT!/final-dump/early_error.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 18 x i8 ] c"should print this\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 32 x i8 ] c"should print this error message\00", align 8

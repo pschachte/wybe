@@ -326,7 +326,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'bug214'
 
 source_filename = "!ROOT!/final-dump/bug214.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 9 x i8 ] c"Part 1: \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 9 x i8 ] c"Part 2: \00", align 8
@@ -867,7 +867,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'bug214.direction'
 
 source_filename = "!ROOT!/final-dump/bug214.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 5 x i8 ] c"down\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 8 x i8 ] c"forward\00", align 8
@@ -1070,7 +1070,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'bug214.position'
 
 source_filename = "!ROOT!/final-dump/bug214.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 2 x i8 ] c"(\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8

@@ -251,7 +251,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'mixed_fields'
 
 source_filename = "!ROOT!/final-dump/mixed_fields.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)

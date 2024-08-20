@@ -27,7 +27,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'dont_care_constraint'
 
 source_filename = "!ROOT!/final-dump/dont_care_constraint.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc i64 @read_line()

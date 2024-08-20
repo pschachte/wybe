@@ -34,7 +34,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'type_int'
 
 source_filename = "!ROOT!/final-dump/type_int.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -172,7 +172,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'type_int.myint'
 
 source_filename = "!ROOT!/final-dump/type_int.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

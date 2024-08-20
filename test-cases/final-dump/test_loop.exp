@@ -124,7 +124,7 @@ find_test(modulus##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'test_loop'
 
 source_filename = "!ROOT!/final-dump/test_loop.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 5 x i8 ] c" is \00", align 8
 @"cstring#1" = private unnamed_addr constant [ 40 x i8 ] c"Couldn't find even number divisible by \00", align 8
@@ -419,7 +419,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'test_loop.int_seq'
 
 source_filename = "!ROOT!/final-dump/test_loop.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

@@ -45,7 +45,7 @@ update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?
 ; ModuleID = 'person5'
 
 source_filename = "!ROOT!/final-dump/person5.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c"Amy\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 4 x i8 ] c"Bob\00", align 8
@@ -191,7 +191,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'person5.person'
 
 source_filename = "!ROOT!/final-dump/person5.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

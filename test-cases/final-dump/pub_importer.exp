@@ -34,7 +34,7 @@ three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
 ; ModuleID = 'exporter'
 
 source_filename = "!ROOT!/final-dump/exporter.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 @"resource#exporter.res" = global i64 undef
@@ -70,7 +70,7 @@ define external fastcc i64 @"exporter.three<0>"() alwaysinline {
 ; ModuleID = 'pub_importer'
 
 source_filename = "!ROOT!/final-dump/pub_importer.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

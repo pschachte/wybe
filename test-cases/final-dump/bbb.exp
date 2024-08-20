@@ -29,7 +29,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'bbb'
 
 source_filename = "!ROOT!/final-dump/bbb.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 10 x i8 ] c"BBB: Init\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
@@ -70,7 +70,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'ddd'
 
 source_filename = "!ROOT!/final-dump/ddd.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 10 x i8 ] c"DDD: Init\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8

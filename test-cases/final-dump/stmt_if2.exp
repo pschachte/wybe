@@ -96,7 +96,7 @@ lookup#cont#1(tmp#4##0:wybe.bool, ?#result##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'stmt_if2'
 
 source_filename = "!ROOT!/final-dump/stmt_if2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 6 x i8 ] c"found\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
@@ -374,7 +374,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'stmt_if2.tree'
 
 source_filename = "!ROOT!/final-dump/stmt_if2.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

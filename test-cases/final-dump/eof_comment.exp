@@ -28,7 +28,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'eof_comment'
 
 source_filename = "!ROOT!/final-dump/eof_comment.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 11 x i8 ] c"Wominjeka!\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8

@@ -38,7 +38,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'block_comment'
 
 source_filename = "!ROOT!/final-dump/block_comment.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 42 x i8 ] c"print(x:string) creates a newline already\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 46 x i8 ] c"println(x:string) generates an extra newline?\00", align 8

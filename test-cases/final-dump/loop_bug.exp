@@ -85,7 +85,7 @@ print#cont#2(h##0:wybe.int, t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io
 ; ModuleID = 'loop_bug'
 
 source_filename = "!ROOT!/final-dump/loop_bug.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c", \00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
@@ -303,7 +303,7 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'loop_bug.int_list'
 
 source_filename = "!ROOT!/final-dump/loop_bug.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc ptr @wybe_malloc(i32)

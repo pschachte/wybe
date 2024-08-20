@@ -52,7 +52,7 @@ backwards_assign(?output##0:wybe.int, input##0:wybe.int)<{}; {}; {}>:
 ; ModuleID = 'backwards_assign'
 
 source_filename = "!ROOT!/final-dump/backwards_assign.wybe"
-target triple   = "arm64-apple-darwin23.6.0"
+target triple    ????
 
 
 declare external ccc void @print_int(i64)
