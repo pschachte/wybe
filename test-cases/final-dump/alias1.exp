@@ -155,51 +155,36 @@ replicate(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {
 source_filename = "!ROOT!/final-dump/alias1.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 43, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 44 x i8 ] c"--- Inside bar, after calling x(!p2, 555): \00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 17 x i8 ] c"--- Inside bar: \00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 43, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 44 x i8 ] c"--- Inside baz, after calling x(!p1, 555): \00", align 8
-
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"cstring#3" = private unnamed_addr constant [ 17 x i8 ] c"--- Inside baz: \00", align 8
-
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 43, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
 @"cstring#4" = private unnamed_addr constant [ 44 x i8 ] c"--- Inside foo, after calling x(!p1, 555): \00", align 8
-
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
 @"cstring#5" = private unnamed_addr constant [ 17 x i8 ] c"--- Inside foo: \00", align 8
-
-@"string#6" = private unnamed_addr constant {i64, i64} { i64 28, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
 @"cstring#6" = private unnamed_addr constant [ 29 x i8 ] c"-------------- Calling bar: \00", align 8
-
-@"string#7" = private unnamed_addr constant {i64, i64} { i64 28, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
 @"cstring#7" = private unnamed_addr constant [ 29 x i8 ] c"-------------- Calling baz: \00", align 8
-
-@"string#8" = private unnamed_addr constant {i64, i64} { i64 28, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
 @"cstring#8" = private unnamed_addr constant [ 29 x i8 ] c"-------------- Calling foo: \00", align 8
-
-@"string#9" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#9" to i64 ) }, align 8
 @"cstring#9" = private unnamed_addr constant [ 20 x i8 ] c"expect p1(101,102):\00", align 8
-
-@"string#10" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#10" to i64 ) }, align 8
 @"cstring#10" = private unnamed_addr constant [ 20 x i8 ] c"expect p1(555,102):\00", align 8
-
-@"string#11" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#11" to i64 ) }, align 8
 @"cstring#11" = private unnamed_addr constant [ 20 x i8 ] c"expect p2(101,102):\00", align 8
-
-@"string#12" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#12" to i64 ) }, align 8
 @"cstring#12" = private unnamed_addr constant [ 20 x i8 ] c"expect p2(555,102):\00", align 8
-
-@"string#13" = private unnamed_addr constant {i64, i64} { i64 24, i64 ptrtoint( ptr @"cstring#13" to i64 ) }, align 8
 @"cstring#13" = private unnamed_addr constant [ 25 x i8 ] c"expect p3(33333333,102):\00", align 8
-
-@"string#14" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#14" to i64 ) }, align 8
 @"cstring#14" = private unnamed_addr constant [ 13 x i8 ] c"random print\00", align 8
-
+@"string#15" = private unnamed_addr constant {i64, i64} { i64 43, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#16" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#17" = private unnamed_addr constant {i64, i64} { i64 43, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#18" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
+@"string#19" = private unnamed_addr constant {i64, i64} { i64 43, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
+@"string#20" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
+@"string#21" = private unnamed_addr constant {i64, i64} { i64 28, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
+@"string#22" = private unnamed_addr constant {i64, i64} { i64 28, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
+@"string#23" = private unnamed_addr constant {i64, i64} { i64 28, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
+@"string#24" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#9" to i64 ) }, align 8
+@"string#25" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#10" to i64 ) }, align 8
+@"string#26" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#11" to i64 ) }, align 8
+@"string#27" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#12" to i64 ) }, align 8
+@"string#28" = private unnamed_addr constant {i64, i64} { i64 24, i64 ptrtoint( ptr @"cstring#13" to i64 ) }, align 8
+@"string#29" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#14" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -209,13 +194,13 @@ declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"alias1.<0>"() alwaysinline {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#23" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"alias1.foo<0>"()
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"alias1.bar<0>"()
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"alias1.baz<0>"()
   ret void
@@ -230,11 +215,11 @@ define external fastcc void @"alias1.bar<0>"() alwaysinline {
   %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
   store i64 102, ptr %"tmp#16##0"
   %"p2##0" = tail call fastcc i64 @"alias1.replicate<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#16" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#24" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
   %"tmp#17##0" = inttoptr i64 %"p2##0" to ptr
   %"tmp#18##0" = call ccc ptr @wybe_malloc(i32 16)
@@ -242,11 +227,11 @@ define external fastcc void @"alias1.bar<0>"() alwaysinline {
   %"tmp#19##0" = ptrtoint ptr %"tmp#18##0" to i64
   %"tmp#20##0" = inttoptr i64 %"tmp#19##0" to ptr
   store i64 555, ptr %"tmp#20##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#24" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#12" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#27" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#19##0")
   ret void
 }
@@ -260,11 +245,11 @@ define external fastcc void @"alias1.baz<0>"() alwaysinline {
   %"tmp#23##0" = inttoptr i64 %"tmp#22##0" to ptr
   store i64 102, ptr %"tmp#23##0"
   %"p2##0" = tail call fastcc i64 @"alias1.replicate<0>"(i64 %"tmp#5##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#18" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#24" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#5##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
   %"tmp#24##0" = add i64 %"p2##0", 8
   %"tmp#25##0" = inttoptr i64 %"tmp#24##0" to ptr
@@ -276,7 +261,7 @@ define external fastcc void @"alias1.baz<0>"() alwaysinline {
   %"tmp#28##0" = add i64 %"tmp#13##0", 8
   %"tmp#29##0" = inttoptr i64 %"tmp#28##0" to ptr
   store i64 %"tmp#2##0", ptr %"tmp#29##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#13" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#28" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#13##0")
   %"tmp#30##0" = inttoptr i64 %"tmp#5##0" to ptr
   %"tmp#31##0" = call ccc ptr @wybe_malloc(i32 16)
@@ -284,13 +269,13 @@ define external fastcc void @"alias1.baz<0>"() alwaysinline {
   %"tmp#32##0" = ptrtoint ptr %"tmp#31##0" to i64
   %"tmp#33##0" = inttoptr i64 %"tmp#32##0" to ptr
   store i64 555, ptr %"tmp#33##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#17" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#25" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#32##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#13" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#28" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#13##0")
   ret void
 }
@@ -304,11 +289,11 @@ define external fastcc void @"alias1.foo<0>"() alwaysinline {
   %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
   store i64 102, ptr %"tmp#16##0"
   %"p2##0" = tail call fastcc i64 @"alias1.replicate<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#20" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#24" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
   %"tmp#17##0" = inttoptr i64 %"tmp#3##0" to ptr
   %"tmp#18##0" = call ccc ptr @wybe_malloc(i32 16)
@@ -316,11 +301,11 @@ define external fastcc void @"alias1.foo<0>"() alwaysinline {
   %"tmp#19##0" = ptrtoint ptr %"tmp#18##0" to i64
   %"tmp#20##0" = inttoptr i64 %"tmp#19##0" to ptr
   store i64 555, ptr %"tmp#20##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#19" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#25" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#19##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
   ret void
 }
@@ -333,7 +318,7 @@ define external fastcc i64 @"alias1.replicate<0>"(i64 %"p1##0") alwaysinline {
   %"tmp#13##0" = add i64 %"tmp#4##0", 8
   %"tmp#14##0" = inttoptr i64 %"tmp#13##0" to ptr
   store i64 0, ptr %"tmp#14##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#14" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#29" to i64 ))
   %"tmp#15##0" = inttoptr i64 %"tmp#4##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#15##0"
   call ccc void @print_int(i64 %"tmp#1##0")
@@ -389,15 +374,12 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/position.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c" (\00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 2 x i8 ] c",\00", align 8
-
+@"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -405,16 +387,16 @@ declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"position.printPosition<0>"(i64 %"pos##0") alwaysinline {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   %"tmp#13##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#13##0"
   call ccc void @print_int(i64 %"tmp#0##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   %"tmp#14##0" = add i64 %"pos##0", 8
   %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#15##0"
   call ccc void @print_int(i64 %"tmp#1##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

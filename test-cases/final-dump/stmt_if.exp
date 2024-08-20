@@ -112,18 +112,14 @@ lookup(key##0:wybe.int, tree##0:stmt_if.tree, ?result##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/stmt_if.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 27, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 28 x i8 ] c"lookup fails when it should\00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 35, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 36 x i8 ] c"lookup fails when it should succeed\00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 31 x i8 ] c"lookup succeeds when it should\00", align 8
-
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 35, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"cstring#3" = private unnamed_addr constant [ 36 x i8 ] c"lookup succeeds when it should fail\00", align 8
-
+@"string#4" = private unnamed_addr constant {i64, i64} { i64 27, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#5" = private unnamed_addr constant {i64, i64} { i64 35, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#6" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#7" = private unnamed_addr constant {i64, i64} { i64 35, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
@@ -144,12 +140,12 @@ define external fastcc void @"stmt_if.foobar<0>"() alwaysinline {
   %"tmp#4##0" = tail call fastcc i1 @"stmt_if.lookup<0>"(i64 1, i64 %"tmp#8##0")
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"stmt_if.foobar#cont#1<0>"(i64 %"tmp#8##0")
   ret void
 if.else.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"stmt_if.foobar#cont#1<0>"(i64 %"tmp#8##0")
   ret void
@@ -159,11 +155,11 @@ define external fastcc void @"stmt_if.foobar#cont#1<0>"(i64 %"tr##0") alwaysinli
   %"tmp#3##0" = tail call fastcc i1 @"stmt_if.lookup<0>"(i64 3, i64 %"tr##0")
   br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

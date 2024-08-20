@@ -297,30 +297,22 @@ print_t2(x##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/dead_cell_size.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c",\00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 4 x i8 ] c"t2a\00", align 8
-
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"cstring#3" = private unnamed_addr constant [ 5 x i8 ] c"t2b(\00", align 8
-
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
 @"cstring#4" = private unnamed_addr constant [ 3 x i8 ] c"ta\00", align 8
-
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
 @"cstring#5" = private unnamed_addr constant [ 4 x i8 ] c"tb(\00", align 8
-
-@"string#6" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
 @"cstring#6" = private unnamed_addr constant [ 4 x i8 ] c"tc(\00", align 8
-
-@"string#7" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
 @"cstring#7" = private unnamed_addr constant [ 4 x i8 ] c"td(\00", align 8
-
+@"string#8" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#9" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#10" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#11" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
+@"string#12" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
+@"string#13" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
+@"string#14" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
+@"string#15" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -472,7 +464,7 @@ define external fastcc void @"dead_cell_size.print_t<0>"(i64 %"x##0") alwaysinli
   %"tmp#4##0" = tail call fastcc i1 @"dead_cell_size.t.=<0>"(i64 0, i64 %"x##0")
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#12" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
@@ -487,9 +479,9 @@ if.then.1:
 case.0.switch.2:
   %"tmp#42##0" = inttoptr i64 %"x##0" to ptr
   %"a##0" = load i64, ptr %"tmp#42##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#13" to i64 ))
   call ccc void @print_int(i64 %"a##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 case.1.switch.2:
@@ -502,22 +494,22 @@ case.1.switch.2:
   %"tmp#47##0" = add i64 %"x##0", 15
   %"tmp#48##0" = inttoptr i64 %"tmp#47##0" to ptr
   %"c##0" = load i64, ptr %"tmp#48##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#14" to i64 ))
   call ccc void @print_int(i64 %"a##1")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
   call ccc void @print_int(i64 %"b##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
   call ccc void @print_int(i64 %"c##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 case.2.switch.2:
   %"tmp#49##0" = add i64 %"x##0", -2
   %"tmp#50##0" = inttoptr i64 %"tmp#49##0" to ptr
   %"a##2" = load i64, ptr %"tmp#50##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
   call ccc void @print_int(i64 %"a##2")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.1:
@@ -529,7 +521,7 @@ define external fastcc void @"dead_cell_size.print_t2<0>"(i64 %"x##0") alwaysinl
   %"tmp#2##0" = tail call fastcc i1 @"dead_cell_size.t2.=<0>"(i64 0, i64 %"x##0")
   br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
@@ -538,9 +530,9 @@ if.else.0:
 if.then.1:
   %"tmp#14##0" = inttoptr i64 %"x##0" to ptr
   %"a##0" = load i64, ptr %"tmp#14##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
   call ccc void @print_int(i64 %"a##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.1:

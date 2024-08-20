@@ -130,9 +130,8 @@ foo(?foo#1##0:T <{}; {}; {1}>, #result##0:anon_field_variable(T) <{}; {}; {1}>, 
 source_filename = "!ROOT!/final-dump/anon_field_variable.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c"foo\00", align 8
-
+@"string#1" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
@@ -148,7 +147,7 @@ define external fastcc void @"anon_field_variable.<0>"() alwaysinline {
   %"tmp#8##0" = icmp eq i64 %"tmp#7##0", 0
   br i1 %"tmp#8##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:

@@ -618,18 +618,14 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/common_fields.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 2 x i8 ] c"a\00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c"b\00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 2 x i8 ] c"c\00", align 8
-
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"cstring#3" = private unnamed_addr constant [ 2 x i8 ] c"g\00", align 8
-
+@"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#6" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#7" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -643,20 +639,20 @@ define external fastcc void @"common_fields.<0>"() alwaysinline {
   %"tmp#43##0" = call ccc ptr @wybe_malloc(i32 32)
   %"tmp#15##0" = ptrtoint ptr %"tmp#43##0" to i64
   %"tmp#44##0" = inttoptr i64 %"tmp#15##0" to ptr
-  store i64 ptrtoint( ptr @"string#0" to i64 ), ptr %"tmp#44##0"
+  store i64 ptrtoint( ptr @"string#4" to i64 ), ptr %"tmp#44##0"
   %"tmp#45##0" = add i64 %"tmp#15##0", 8
   %"tmp#46##0" = inttoptr i64 %"tmp#45##0" to ptr
-  store i64 ptrtoint( ptr @"string#1" to i64 ), ptr %"tmp#46##0"
+  store i64 ptrtoint( ptr @"string#5" to i64 ), ptr %"tmp#46##0"
   %"tmp#47##0" = add i64 %"tmp#15##0", 16
   %"tmp#48##0" = inttoptr i64 %"tmp#47##0" to ptr
-  store i64 ptrtoint( ptr @"string#2" to i64 ), ptr %"tmp#48##0"
+  store i64 ptrtoint( ptr @"string#6" to i64 ), ptr %"tmp#48##0"
   %"tmp#49##0" = add i64 %"tmp#15##0", 24
   %"tmp#50##0" = inttoptr i64 %"tmp#49##0" to ptr
   store i64 0, ptr %"tmp#50##0"
   %"tmp#51##0" = call ccc ptr @wybe_malloc(i32 24)
   %"tmp#22##0" = ptrtoint ptr %"tmp#51##0" to i64
   %"tmp#52##0" = inttoptr i64 %"tmp#22##0" to ptr
-  store i64 ptrtoint( ptr @"string#1" to i64 ), ptr %"tmp#52##0"
+  store i64 ptrtoint( ptr @"string#5" to i64 ), ptr %"tmp#52##0"
   %"tmp#53##0" = add i64 %"tmp#22##0", 8
   %"tmp#54##0" = inttoptr i64 %"tmp#53##0" to ptr
   store i64 0, ptr %"tmp#54##0"
@@ -679,7 +675,7 @@ define external fastcc void @"common_fields.<0>"() alwaysinline {
   %"tmp#9##0" = extractvalue {i64, i1}%"tmp#57##0", 1
   br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#58##0" = tail call fastcc {i64, i1} @"common_fields.genre<1>"(i64 %"tmp#15##0", i64 ptrtoint( ptr @"string#3" to i64 ))
+  %"tmp#58##0" = tail call fastcc {i64, i1} @"common_fields.genre<1>"(i64 %"tmp#15##0", i64 ptrtoint( ptr @"string#7" to i64 ))
   %"b##1" = extractvalue {i64, i1}%"tmp#58##0", 0
   %"tmp#10##0" = extractvalue {i64, i1}%"tmp#58##0", 1
   br i1 %"tmp#10##0", label %if.then.1, label %if.else.1

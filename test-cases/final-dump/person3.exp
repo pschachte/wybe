@@ -38,19 +38,17 @@ module top-level code > public {inline,semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/person3.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 6 x i8 ] c"Smith\00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 5 x i8 ] c"Wang\00", align 8
-
+@"string#2" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#3" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"person3.<0>"() alwaysinline {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   ret void
 }
 

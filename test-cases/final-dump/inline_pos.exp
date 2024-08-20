@@ -54,12 +54,8 @@ set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
 source_filename = "!ROOT!/../wybelibs/command_line.o"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 33, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 34 x i8 ] c"Erroneous program argument vector\00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 19 x i8 ] c"command_line:18:15\00", align 8
-
 
 @"resource#command_line.argc" = global i64 undef
 @"resource#command_line.arguments" = global i64 undef
@@ -82,7 +78,7 @@ if.then.0:
   store i64 %"command##1", ptr @"resource#command_line.command"
   ret void
 if.else.0:
-  call ccc void @error_exit(i64 ptrtoint( ptr @"string#1" to i64 ), i64 ptrtoint( ptr @"string#0" to i64 ))
+  call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 ptrtoint( ptr @"cstring#0" to i64 ))
   ret void
 }
 
@@ -134,9 +130,8 @@ myincr(x##0:wybe.int, ?x##1:wybe.int)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/inline_pos.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 5 x i8 ] c"v = \00", align 8
-
+@"string#1" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external ccc void @putchar(i8)
 declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
@@ -151,7 +146,7 @@ define external fastcc void @"inline_pos.<0>"() alwaysinline {
   %"tmp#0##0" = load i64, ptr %"tmp#9##0"
   %"v##1" = add i64 %"tmp#0##0", 1
   %"tmp#2##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"v##1", i64 0, i8 32)
-  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#2##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#2##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
   ret void

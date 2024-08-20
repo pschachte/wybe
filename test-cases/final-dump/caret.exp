@@ -102,12 +102,10 @@ expand_region(reg##0:caret.region, ?reg##4:caret.region, point##0:position.posit
 source_filename = "!ROOT!/final-dump/caret.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 11 x i8 ] c"now ten = \00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 7 x i8 ] c"ten = \00", align 8
-
+@"string#2" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#3" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -141,7 +139,7 @@ define external fastcc void @"caret.<0>"() alwaysinline {
   store i64 %"tmp#19##0", ptr %"tmp#45##0"
   %"tmp#46##0" = inttoptr i64 %"tmp#19##0" to ptr
   %"ten##0" = load i64, ptr %"tmp#46##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   call ccc void @print_int(i64 %"ten##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"caret.#cont#1<0>[410bae77d3]"(i64 %"tmp#23##0")
@@ -163,7 +161,7 @@ define external fastcc void @"caret.#cont#1<0>"(i64 %"reg##0") alwaysinline {
   store i64 %"tmp#5##1", ptr %"tmp#31##0"
   %"tmp#32##0" = inttoptr i64 %"tmp#30##0" to ptr
   %"ten##0" = load i64, ptr %"tmp#32##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
   call ccc void @print_int(i64 %"ten##0")
   call ccc void @putchar(i8 10)
   ret void
@@ -180,7 +178,7 @@ define external fastcc void @"caret.#cont#1<0>[410bae77d3]"(i64 %"reg##0") alway
   store i64 %"tmp#5##1", ptr %"tmp#28##0"
   %"tmp#29##0" = inttoptr i64 %"tmp#6##0" to ptr
   %"ten##0" = load i64, ptr %"tmp#29##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
   call ccc void @print_int(i64 %"ten##0")
   call ccc void @putchar(i8 10)
   ret void
@@ -634,15 +632,12 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/position.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c" (\00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 2 x i8 ] c",\00", align 8
-
+@"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -650,16 +645,16 @@ declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"position.printPosition<0>"(i64 %"pos##0") alwaysinline {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   %"tmp#13##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#13##0"
   call ccc void @print_int(i64 %"tmp#0##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   %"tmp#14##0" = add i64 %"pos##0", 8
   %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#15##0"
   call ccc void @print_int(i64 %"tmp#1##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

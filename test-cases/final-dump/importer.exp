@@ -103,12 +103,10 @@ my_three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
 source_filename = "!ROOT!/final-dump/importer.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c" = \00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 3 x i8 ] c"2^\00", align 8
-
+@"string#2" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 
 declare external ccc i64 @ipow(i64, i64)
 declare external ccc void @putchar(i8)
@@ -124,14 +122,14 @@ define external fastcc void @"importer.<0>"() alwaysinline {
   %"tmp#20##0" = call ccc i64 @ipow(i64 2, i64 %"tmp#19##0")
   %"tmp#3##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#19##0", i64 0, i8 32)
   %"tmp#5##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#20##0", i64 0, i8 32)
-  %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#5##0")
+  %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#5##0")
   %"tmp#2##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#3##0", i64 %"tmp#4##0")
-  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#2##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#2##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
-  %"tmp#10##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#5##0")
+  %"tmp#10##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#5##0")
   %"tmp#8##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#3##0", i64 %"tmp#10##0")
-  %"tmp#7##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#8##0")
+  %"tmp#7##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#8##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#7##0")
   call ccc void @putchar(i8 10)
   ret void

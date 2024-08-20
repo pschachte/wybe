@@ -65,18 +65,14 @@ simpleSlice(tr##0:mytree.tree, ?#result##0:mytree.tree)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/alias_fork3.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 0, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 1 x i8 ] c"\00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 16 x i8 ] c"expect t - 100:\00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 2 x i8 ] c"{\00", align 8
-
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"cstring#3" = private unnamed_addr constant [ 2 x i8 ] c"}\00", align 8
-
+@"string#4" = private unnamed_addr constant {i64, i64} { i64 0, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#5" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#6" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#7" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
@@ -106,11 +102,11 @@ define external fastcc void @"alias_fork3.<0>"() alwaysinline {
   %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
   store i64 0, ptr %"tmp#37##0"
   %"tmp#5##0" = tail call fastcc i64 @"alias_fork3.simpleSlice<0>"(i64 %"tmp#15##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#22##0" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"tmp#5##0", i64 ptrtoint( ptr @"string#2" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  %"tmp#22##0" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"tmp#5##0", i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -200,23 +196,20 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
 source_filename = "!ROOT!/final-dump/mytree.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c", \00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c"{\00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 2 x i8 ] c"}\00", align 8
-
+@"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"mytree.printTree<0>"(i64 %"t##0") alwaysinline {
-  %"prefix##1" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"t##0", i64 ptrtoint( ptr @"string#1" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  %"prefix##1" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"t##0", i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   ret void
 }
 
@@ -235,7 +228,7 @@ if.then.0:
   %"prefix##1" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"l##0", i64 %"prefix##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"prefix##1")
   call ccc void @print_int(i64 %"k##0")
-  %"tmp#11##0" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"r##0", i64 ptrtoint( ptr @"string#0" to i64 ))
+  %"tmp#11##0" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"r##0", i64 ptrtoint( ptr @"string#3" to i64 ))
   ret i64 %"tmp#11##0"
 if.else.0:
   ret i64 %"prefix##0"

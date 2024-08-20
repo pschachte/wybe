@@ -87,9 +87,8 @@ print#cont#2(h##0:wybe.int, t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io
 source_filename = "!ROOT!/final-dump/loop_bug.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c", \00", align 8
-
+@"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -123,7 +122,7 @@ if.then.0:
   %"tmp#13##0" = add i64 %"t##0", 8
   %"tmp#14##0" = inttoptr i64 %"tmp#13##0" to ptr
   %"t##1" = load i64, ptr %"tmp#14##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @print_int(i64 %"h##1")
   tail call fastcc void @"loop_bug.print#cont#1<0>"(i64 %"t##1")
   ret void
@@ -133,7 +132,7 @@ if.else.0:
 }
 
 define external fastcc void @"loop_bug.print#cont#2<0>"(i64 %"h##0", i64 %"t##0") alwaysinline {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @print_int(i64 %"h##0")
   tail call fastcc void @"loop_bug.print#cont#1<0>"(i64 %"t##0")
   ret void

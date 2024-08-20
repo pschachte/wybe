@@ -98,9 +98,8 @@ lookup#cont#1(tmp#4##0:wybe.bool, ?#result##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/stmt_if2.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 6 x i8 ] c"found\00", align 8
-
+@"string#1" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -120,7 +119,7 @@ define external fastcc void @"stmt_if2.<0>"() alwaysinline {
   %"tmp#3##0" = tail call fastcc i1 @"stmt_if2.lookup<0>"(i64 1, i64 %"tmp#7##0")
   br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   ret void
 if.else.0:
   ret void

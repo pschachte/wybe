@@ -60,18 +60,14 @@ nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/nested_if.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 21 x i8 ] c"one thousand and one\00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 6 x i8 ] c"other\00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 4 x i8 ] c"two\00", align 8
-
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"cstring#3" = private unnamed_addr constant [ 5 x i8 ] c"zero\00", align 8
-
+@"string#4" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#5" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#6" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#7" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 
 declare external ccc void @putchar(i8)
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -81,25 +77,25 @@ define external fastcc void @"nested_if.nested_if<0>"(i64 %"i##0") alwaysinline 
   %"tmp#3##0" = icmp eq i64 %"i##0", 0
   br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
   %"tmp#2##0" = icmp eq i64 %"i##0", 1001
   br i1 %"tmp#2##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.1:
   %"tmp#1##0" = icmp eq i64 %"i##0", 2
   br i1 %"tmp#1##0", label %if.then.2, label %if.else.2
 if.then.2:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.2:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

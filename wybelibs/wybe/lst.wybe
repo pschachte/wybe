@@ -1,9 +1,0 @@
-pragma no_standard_library  # Standard library can't depend on itself!
-
-use wybe.int, wybe.bool
-
-pub constructors nil | cons(head:int, tail:_)
-
-# List concatenation
-pub def ap(x:_ , y:_):_ =
-    if { x = cons(?h, ?t) :: cons(h, ap(t, y)) | else :: y }

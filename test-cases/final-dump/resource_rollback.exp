@@ -68,9 +68,7 @@ foo(?s##0:wybe.c_string, ?#success##0:wybe.bool, %call_source_location##0:wybe.c
 source_filename = "!ROOT!/final-dump/resource_rollback.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 22, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 23 x i8 ] c"resource_rollback:15:7\00", align 8
-
 
 @"resource#resource_rollback.res" = global i64 undef
 @"resource#resource_rollback.ser" = global i64 undef
@@ -83,7 +81,7 @@ define external fastcc void @"resource_rollback.<0>"() alwaysinline {
   %"res##0" = load i64, ptr @"resource#resource_rollback.res"
   call ccc void @print_int(i64 %"res##0")
   call ccc void @putchar(i8 10)
-  %"tmp#13##0" = tail call fastcc {i64, i1} @"resource_rollback.foo<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  %"tmp#13##0" = tail call fastcc {i64, i1} @"resource_rollback.foo<0>"(i64 ptrtoint( ptr @"cstring#0" to i64 ))
   %"s##0" = extractvalue {i64, i1}%"tmp#13##0", 0
   %"tmp#4##0" = extractvalue {i64, i1}%"tmp#13##0", 1
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0

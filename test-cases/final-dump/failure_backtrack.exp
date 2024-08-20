@@ -377,63 +377,44 @@ yup(?#success##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/failure_backtrack.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 7 x i8 ] c", r = \00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 7 x i8 ] c", s = \00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 7 x i8 ] c", y = \00", align 8
-
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 23, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"cstring#3" = private unnamed_addr constant [ 24 x i8 ] c"after conditional; x = \00", align 8
-
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 29, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
 @"cstring#4" = private unnamed_addr constant [ 30 x i8 ] c"after first disjunction: x = \00", align 8
-
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
 @"cstring#5" = private unnamed_addr constant [ 31 x i8 ] c"after fourth conditional; x = \00", align 8
-
-@"string#6" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
 @"cstring#6" = private unnamed_addr constant [ 31 x i8 ] c"after second conditional; x = \00", align 8
-
-@"string#7" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
 @"cstring#7" = private unnamed_addr constant [ 31 x i8 ] c"after second disjunction: x = \00", align 8
-
-@"string#8" = private unnamed_addr constant {i64, i64} { i64 29, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
 @"cstring#8" = private unnamed_addr constant [ 30 x i8 ] c"after third conditional; x = \00", align 8
-
-@"string#9" = private unnamed_addr constant {i64, i64} { i64 24, i64 ptrtoint( ptr @"cstring#9" to i64 ) }, align 8
 @"cstring#9" = private unnamed_addr constant [ 25 x i8 ] c"before conditional: x = \00", align 8
-
-@"string#10" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#10" to i64 ) }, align 8
 @"cstring#10" = private unnamed_addr constant [ 31 x i8 ] c"before first disjunction: x = \00", align 8
-
-@"string#11" = private unnamed_addr constant {i64, i64} { i64 31, i64 ptrtoint( ptr @"cstring#11" to i64 ) }, align 8
 @"cstring#11" = private unnamed_addr constant [ 32 x i8 ] c"before fourth conditional: x = \00", align 8
-
-@"string#12" = private unnamed_addr constant {i64, i64} { i64 31, i64 ptrtoint( ptr @"cstring#12" to i64 ) }, align 8
 @"cstring#12" = private unnamed_addr constant [ 32 x i8 ] c"before second conditional: x = \00", align 8
-
-@"string#13" = private unnamed_addr constant {i64, i64} { i64 31, i64 ptrtoint( ptr @"cstring#13" to i64 ) }, align 8
 @"cstring#13" = private unnamed_addr constant [ 32 x i8 ] c"before second disjunction: x = \00", align 8
-
-@"string#14" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#14" to i64 ) }, align 8
 @"cstring#14" = private unnamed_addr constant [ 31 x i8 ] c"before third conditional: x = \00", align 8
-
-@"string#15" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#15" to i64 ) }, align 8
 @"cstring#15" = private unnamed_addr constant [ 17 x i8 ] c"nope fails; x = \00", align 8
-
-@"string#16" = private unnamed_addr constant {i64, i64} { i64 14, i64 ptrtoint( ptr @"cstring#16" to i64 ) }, align 8
 @"cstring#16" = private unnamed_addr constant [ 15 x i8 ] c"nope succeeds!\00", align 8
-
-@"string#17" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#17" to i64 ) }, align 8
 @"cstring#17" = private unnamed_addr constant [ 18 x i8 ] c"nope2 fails; x = \00", align 8
-
-@"string#18" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#18" to i64 ) }, align 8
 @"cstring#18" = private unnamed_addr constant [ 16 x i8 ] c"nope2 succeeds!\00", align 8
-
+@"string#19" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#20" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#21" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#22" = private unnamed_addr constant {i64, i64} { i64 23, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
+@"string#23" = private unnamed_addr constant {i64, i64} { i64 29, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
+@"string#24" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
+@"string#25" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
+@"string#26" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
+@"string#27" = private unnamed_addr constant {i64, i64} { i64 29, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
+@"string#28" = private unnamed_addr constant {i64, i64} { i64 24, i64 ptrtoint( ptr @"cstring#9" to i64 ) }, align 8
+@"string#29" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#10" to i64 ) }, align 8
+@"string#30" = private unnamed_addr constant {i64, i64} { i64 31, i64 ptrtoint( ptr @"cstring#11" to i64 ) }, align 8
+@"string#31" = private unnamed_addr constant {i64, i64} { i64 31, i64 ptrtoint( ptr @"cstring#12" to i64 ) }, align 8
+@"string#32" = private unnamed_addr constant {i64, i64} { i64 31, i64 ptrtoint( ptr @"cstring#13" to i64 ) }, align 8
+@"string#33" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#14" to i64 ) }, align 8
+@"string#34" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#15" to i64 ) }, align 8
+@"string#35" = private unnamed_addr constant {i64, i64} { i64 14, i64 ptrtoint( ptr @"cstring#16" to i64 ) }, align 8
+@"string#36" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#17" to i64 ) }, align 8
+@"string#37" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#18" to i64 ) }, align 8
 
 @"resource#failure_backtrack.r" = global i64 undef
 @"resource#failure_backtrack.s" = global i64 undef
@@ -451,14 +432,14 @@ define external fastcc void @"failure_backtrack.<0>"() alwaysinline {
   store i64 14, ptr @"resource#failure_backtrack.s"
   %"tmp#2##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 42, i64 0, i8 32)
   %"tmp#4##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 7, i64 0, i8 32)
-  %"tmp#3##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#4##0")
+  %"tmp#3##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#4##0")
   %"tmp#1##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#2##0", i64 %"tmp#3##0")
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#9" to i64 ), i64 %"tmp#1##0")
+  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#28" to i64 ), i64 %"tmp#1##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  %"tmp#8##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#4##0")
+  %"tmp#8##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#4##0")
   %"tmp#6##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#2##0", i64 %"tmp#8##0")
-  %"tmp#5##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#15" to i64 ), i64 %"tmp#6##0")
+  %"tmp#5##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#34" to i64 ), i64 %"tmp#6##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#5##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"failure_backtrack.#cont#1<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 42, i64 21)
@@ -469,14 +450,14 @@ define external fastcc void @"failure_backtrack.#cont#1<0>"(i64 %"tmp#139##0", i
   %"tmp#12##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"r##0" = load i64, ptr @"resource#failure_backtrack.r"
   %"tmp#14##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"r##0", i64 0, i8 32)
-  %"tmp#13##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#14##0")
+  %"tmp#13##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#14##0")
   %"tmp#11##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#12##0", i64 %"tmp#13##0")
-  %"tmp#10##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#11##0")
+  %"tmp#10##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#22" to i64 ), i64 %"tmp#11##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#10##0")
   call ccc void @putchar(i8 10)
-  %"tmp#18##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#14##0")
+  %"tmp#18##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#14##0")
   %"tmp#16##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#12##0", i64 %"tmp#18##0")
-  %"tmp#15##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#12" to i64 ), i64 %"tmp#16##0")
+  %"tmp#15##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#31" to i64 ), i64 %"tmp#16##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#15##0")
   call ccc void @putchar(i8 10)
   store i64 9, ptr @"resource#failure_backtrack.r"
@@ -485,15 +466,15 @@ define external fastcc void @"failure_backtrack.#cont#1<0>"(i64 %"tmp#139##0", i
   %"tmp#165##0" = extractvalue {i64, i1}%"tmp#184##0", 1
   br i1 %"tmp#165##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#18" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#37" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"failure_backtrack.#cont#2<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##1", i64 %"y##0")
   ret void
 if.else.0:
   store i64 %"r##0", ptr @"resource#failure_backtrack.r"
-  %"tmp#23##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#14##0")
+  %"tmp#23##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#14##0")
   %"tmp#21##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#12##0", i64 %"tmp#23##0")
-  %"tmp#20##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#17" to i64 ), i64 %"tmp#21##0")
+  %"tmp#20##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#36" to i64 ), i64 %"tmp#21##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#20##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"failure_backtrack.#cont#2<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0")
@@ -504,14 +485,14 @@ define external fastcc void @"failure_backtrack.#cont#2<0>"(i64 %"tmp#139##0", i
   %"tmp#27##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"tmp#144##0" = load i64, ptr @"resource#failure_backtrack.r"
   %"tmp#29##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#144##0", i64 0, i8 32)
-  %"tmp#28##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#29##0")
+  %"tmp#28##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#29##0")
   %"tmp#26##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#27##0", i64 %"tmp#28##0")
-  %"tmp#25##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#6" to i64 ), i64 %"tmp#26##0")
+  %"tmp#25##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#25" to i64 ), i64 %"tmp#26##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#25##0")
   call ccc void @putchar(i8 10)
-  %"tmp#33##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#29##0")
+  %"tmp#33##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#29##0")
   %"tmp#31##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#27##0", i64 %"tmp#33##0")
-  %"tmp#30##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#14" to i64 ), i64 %"tmp#31##0")
+  %"tmp#30##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#33" to i64 ), i64 %"tmp#31##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#30##0")
   call ccc void @putchar(i8 10)
   %"tmp#183##0" = tail call fastcc {i64, i1} @"failure_backtrack.nope2<0>"()
@@ -520,14 +501,14 @@ define external fastcc void @"failure_backtrack.#cont#2<0>"(i64 %"tmp#139##0", i
   br i1 %"tmp#164##0", label %if.then.0, label %if.else.0
 if.then.0:
   store i64 %"r##3", ptr @"resource#failure_backtrack.r"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#18" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#37" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"failure_backtrack.#cont#3<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 25, i64 %"y##0")
   ret void
 if.else.0:
-  %"tmp#38##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#29##0")
+  %"tmp#38##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#29##0")
   %"tmp#36##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#27##0", i64 %"tmp#38##0")
-  %"tmp#35##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#17" to i64 ), i64 %"tmp#36##0")
+  %"tmp#35##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#36" to i64 ), i64 %"tmp#36##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#35##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"failure_backtrack.#cont#3<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0")
@@ -538,21 +519,21 @@ define external fastcc void @"failure_backtrack.#cont#3<0>"(i64 %"tmp#139##0", i
   %"tmp#42##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"r##0" = load i64, ptr @"resource#failure_backtrack.r"
   %"tmp#44##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"r##0", i64 0, i8 32)
-  %"tmp#43##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#44##0")
+  %"tmp#43##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#44##0")
   %"tmp#41##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#42##0", i64 %"tmp#43##0")
-  %"tmp#40##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#8" to i64 ), i64 %"tmp#41##0")
+  %"tmp#40##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#27" to i64 ), i64 %"tmp#41##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#40##0")
   call ccc void @putchar(i8 10)
   %"tmp#50##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"y##0", i64 0, i8 32)
   %"s##0" = load i64, ptr @"resource#failure_backtrack.s"
   %"tmp#55##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"s##0", i64 0, i8 32)
-  %"tmp#54##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#55##0")
+  %"tmp#54##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#20" to i64 ), i64 %"tmp#55##0")
   %"tmp#52##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#44##0", i64 %"tmp#54##0")
-  %"tmp#51##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#52##0")
+  %"tmp#51##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#52##0")
   %"tmp#49##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#50##0", i64 %"tmp#51##0")
-  %"tmp#48##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#49##0")
+  %"tmp#48##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#21" to i64 ), i64 %"tmp#49##0")
   %"tmp#46##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#42##0", i64 %"tmp#48##0")
-  %"tmp#45##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#11" to i64 ), i64 %"tmp#46##0")
+  %"tmp#45##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#30" to i64 ), i64 %"tmp#46##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#45##0")
   call ccc void @putchar(i8 10)
   store i64 10, ptr @"resource#failure_backtrack.r"
@@ -563,33 +544,33 @@ if.then.0:
   %"tmp#163##0" = tail call fastcc i1 @"failure_backtrack.nope<0>"()
   br i1 %"tmp#163##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#16" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#35" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"failure_backtrack.#cont#4<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 26, i64 12)
   ret void
 if.else.1:
   store i64 %"r##0", ptr @"resource#failure_backtrack.r"
   store i64 %"s##0", ptr @"resource#failure_backtrack.s"
-  %"tmp#65##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#55##0")
+  %"tmp#65##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#20" to i64 ), i64 %"tmp#55##0")
   %"tmp#63##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#44##0", i64 %"tmp#65##0")
-  %"tmp#62##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#63##0")
+  %"tmp#62##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#63##0")
   %"tmp#60##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#50##0", i64 %"tmp#62##0")
-  %"tmp#59##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#60##0")
+  %"tmp#59##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#21" to i64 ), i64 %"tmp#60##0")
   %"tmp#57##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#42##0", i64 %"tmp#59##0")
-  %"tmp#56##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#15" to i64 ), i64 %"tmp#57##0")
+  %"tmp#56##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#34" to i64 ), i64 %"tmp#57##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#56##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"failure_backtrack.#cont#4<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0")
   ret void
 if.else.0:
   store i64 %"r##0", ptr @"resource#failure_backtrack.r"
-  %"tmp#193##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#55##0")
+  %"tmp#193##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#20" to i64 ), i64 %"tmp#55##0")
   %"tmp#194##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#44##0", i64 %"tmp#193##0")
-  %"tmp#195##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#194##0")
+  %"tmp#195##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#194##0")
   %"tmp#196##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#50##0", i64 %"tmp#195##0")
-  %"tmp#197##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#196##0")
+  %"tmp#197##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#21" to i64 ), i64 %"tmp#196##0")
   %"tmp#198##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#42##0", i64 %"tmp#197##0")
-  %"tmp#199##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#15" to i64 ), i64 %"tmp#198##0")
+  %"tmp#199##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#34" to i64 ), i64 %"tmp#198##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#199##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"failure_backtrack.#cont#4<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0")
@@ -603,22 +584,22 @@ define external fastcc void @"failure_backtrack.#cont#4<0>"(i64 %"tmp#139##0", i
   %"tmp#75##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#150##0", i64 0, i8 32)
   %"s##0" = load i64, ptr @"resource#failure_backtrack.s"
   %"tmp#77##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"s##0", i64 0, i8 32)
-  %"tmp#76##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#77##0")
+  %"tmp#76##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#20" to i64 ), i64 %"tmp#77##0")
   %"tmp#74##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#75##0", i64 %"tmp#76##0")
-  %"tmp#73##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#74##0")
+  %"tmp#73##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#74##0")
   %"tmp#71##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#72##0", i64 %"tmp#73##0")
-  %"tmp#70##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#71##0")
+  %"tmp#70##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#21" to i64 ), i64 %"tmp#71##0")
   %"tmp#68##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#69##0", i64 %"tmp#70##0")
-  %"tmp#67##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#5" to i64 ), i64 %"tmp#68##0")
+  %"tmp#67##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#24" to i64 ), i64 %"tmp#68##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#67##0")
   call ccc void @putchar(i8 10)
-  %"tmp#87##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#77##0")
+  %"tmp#87##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#20" to i64 ), i64 %"tmp#77##0")
   %"tmp#85##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#75##0", i64 %"tmp#87##0")
-  %"tmp#84##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#85##0")
+  %"tmp#84##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#85##0")
   %"tmp#82##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#72##0", i64 %"tmp#84##0")
-  %"tmp#81##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#82##0")
+  %"tmp#81##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#21" to i64 ), i64 %"tmp#82##0")
   %"tmp#79##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#69##0", i64 %"tmp#81##0")
-  %"tmp#78##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#10" to i64 ), i64 %"tmp#79##0")
+  %"tmp#78##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#29" to i64 ), i64 %"tmp#79##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#78##0")
   call ccc void @putchar(i8 10)
   store i64 11, ptr @"resource#failure_backtrack.r"
@@ -642,13 +623,13 @@ define external fastcc void @"failure_backtrack.#cont#5<0>"(i64 %"tmp#139##0", i
   %"tmp#97##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"r##0", i64 0, i8 32)
   %"s##0" = load i64, ptr @"resource#failure_backtrack.s"
   %"tmp#99##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"s##0", i64 0, i8 32)
-  %"tmp#98##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#99##0")
+  %"tmp#98##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#20" to i64 ), i64 %"tmp#99##0")
   %"tmp#96##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#97##0", i64 %"tmp#98##0")
-  %"tmp#95##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#96##0")
+  %"tmp#95##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#96##0")
   %"tmp#93##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#94##0", i64 %"tmp#95##0")
-  %"tmp#92##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#93##0")
+  %"tmp#92##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#21" to i64 ), i64 %"tmp#93##0")
   %"tmp#90##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#91##0", i64 %"tmp#92##0")
-  %"tmp#89##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#4" to i64 ), i64 %"tmp#90##0")
+  %"tmp#89##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#23" to i64 ), i64 %"tmp#90##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#89##0")
   call ccc void @putchar(i8 10)
   store i64 14, ptr @"resource#failure_backtrack.s"
@@ -656,13 +637,13 @@ define external fastcc void @"failure_backtrack.#cont#5<0>"(i64 %"tmp#139##0", i
   %"tmp#105##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 21, i64 0, i8 32)
   %"tmp#108##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 7, i64 0, i8 32)
   %"tmp#110##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 14, i64 0, i8 32)
-  %"tmp#109##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#110##0")
+  %"tmp#109##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#20" to i64 ), i64 %"tmp#110##0")
   %"tmp#107##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#108##0", i64 %"tmp#109##0")
-  %"tmp#106##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#107##0")
+  %"tmp#106##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#107##0")
   %"tmp#104##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#105##0", i64 %"tmp#106##0")
-  %"tmp#103##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#104##0")
+  %"tmp#103##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#21" to i64 ), i64 %"tmp#104##0")
   %"tmp#101##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#102##0", i64 %"tmp#103##0")
-  %"tmp#100##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#13" to i64 ), i64 %"tmp#101##0")
+  %"tmp#100##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#32" to i64 ), i64 %"tmp#101##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#100##0")
   call ccc void @putchar(i8 10)
   store i64 12, ptr @"resource#failure_backtrack.r"
@@ -691,13 +672,13 @@ define external fastcc void @"failure_backtrack.#cont#6<0>"(i64 %"tmp#139##0", i
   %"tmp#119##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"r##0", i64 0, i8 32)
   %"s##0" = load i64, ptr @"resource#failure_backtrack.s"
   %"tmp#121##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"s##0", i64 0, i8 32)
-  %"tmp#120##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#121##0")
+  %"tmp#120##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#20" to i64 ), i64 %"tmp#121##0")
   %"tmp#118##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#119##0", i64 %"tmp#120##0")
-  %"tmp#117##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#0" to i64 ), i64 %"tmp#118##0")
+  %"tmp#117##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#19" to i64 ), i64 %"tmp#118##0")
   %"tmp#115##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#116##0", i64 %"tmp#117##0")
-  %"tmp#114##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#115##0")
+  %"tmp#114##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#21" to i64 ), i64 %"tmp#115##0")
   %"tmp#112##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#113##0", i64 %"tmp#114##0")
-  %"tmp#111##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#7" to i64 ), i64 %"tmp#112##0")
+  %"tmp#111##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#26" to i64 ), i64 %"tmp#112##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#111##0")
   call ccc void @putchar(i8 10)
   store i64 %"tmp#139##0", ptr @"resource#failure_backtrack.r"

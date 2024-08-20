@@ -74,21 +74,16 @@ replicate1(v1##0:wybe.int, ?v2##0:wybe.int, v3##0:wybe.int, ?v4##1:wybe.int)<{<<
 source_filename = "!ROOT!/final-dump/alias5.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 16 x i8 ] c"expect p1=111: \00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 16 x i8 ] c"expect p2=100: \00", align 8
-
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"cstring#2" = private unnamed_addr constant [ 16 x i8 ] c"expect p3=100: \00", align 8
-
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"cstring#3" = private unnamed_addr constant [ 18 x i8 ] c"expect p4=45000: \00", align 8
-
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
 @"cstring#4" = private unnamed_addr constant [ 18 x i8 ] c"random replicate1\00", align 8
-
+@"string#5" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#6" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#7" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#8" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
+@"string#9" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -107,23 +102,23 @@ define external fastcc void @"alias5.bar<0>"() alwaysinline {
   %"tmp#17##0" = tail call fastcc {i64, i64} @"alias5.replicate1<0>"(i64 100, i64 800)
   %"p3##0" = extractvalue {i64, i64}%"tmp#17##0", 0
   %"p4##1" = extractvalue {i64, i64}%"tmp#17##0", 1
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @print_int(i64 111)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   call ccc void @print_int(i64 %"p2##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
   call ccc void @print_int(i64 %"p3##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
   call ccc void @print_int(i64 %"p4##1")
   call ccc void @putchar(i8 10)
   ret void
 }
 
 define external fastcc {i64, i64} @"alias5.replicate1<0>"(i64 %"v1##0", i64 %"v3##0") alwaysinline {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
   call ccc void @print_int(i64 2)
   call ccc void @putchar(i8 10)
   %"tmp#0##0" = add i64 %"v3##0", 100

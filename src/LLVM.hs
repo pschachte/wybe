@@ -223,7 +223,7 @@ llvmMapUnop =
 writeLLVM :: Handle -> ModSpec -> Bool -> Bool -> Compiler ()
 writeLLVM handle modSpec withLPVM recursive = do
     allMods <-
-        if recursive 
+        if recursive
         then (modSpec:) <$> sameOriginModules modSpec
         else return [modSpec]
     logMsg LLVM $ "*** Generating LLVM for module(s) " ++ showModSpecs allMods
@@ -275,9 +275,27 @@ preScanProcs = do
     modify $ \s -> s{allStrings = strings, allExterns = externs}
 
 
+-- | What's needed to identify a manifest constant string in generated LLVM
+-- code.  Wybe string constants (usually) consist of a size and a pointer to a C
+-- string, while C strings are C pointers to 0-terminated packed arrays of
+-- bytes.
+data StringSpec = CStringSpec String | WybeStringSpec String
+    deriving (Eq,Ord)
+
+instance Show StringSpec where
+    show (CStringSpec str) = 'c' : show str
+    show (WybeStringSpec str) = show str
+
+
+-- | return the StringVariant of a StringSpec
+stringSpecVariant :: StringSpec -> StringVariant
+stringSpecVariant CStringSpec{}    = CString
+stringSpecVariant WybeStringSpec{} = WybeString
+
+
 -- | All the info we accumulate through prescanning:  the literal strings and
 -- external LLVM functions and global variables used.
-type PreScanState = (Set String, Set ExternSpec)
+type PreScanState = (Set StringSpec, Set ExternSpec)
 
 
 -- | Collect the info we need from a single prim.
@@ -288,9 +306,16 @@ preScanPrim mod (strings,externs) prim =
     in (strings', externs')
 
 
--- | If the specified PrimArg is a string constant, add it to the set
-argStrings set (ArgString str _ _) = Set.insert str set
-argStrings set _                   = set
+-- | If the specified PrimArg is a string constant, add it to the set.  For Wybe
+-- strings, add both the Wybe string and the C string, since the Wybe string
+-- constant refers to the C string.
+argStrings :: Set StringSpec -> PrimArg -> Set StringSpec
+argStrings set (ArgString str WybeString _) =
+    Set.insert (WybeStringSpec str)
+    $ Set.insert (CStringSpec str) set
+argStrings set (ArgString str CString _) =
+    Set.insert (CStringSpec str) set
+argStrings set _ = set
 
 
 -- | If needed, add an extern declaration for a prim to the set.
@@ -386,7 +411,8 @@ writeAssemblyPrologue = do
 ----------------------------------------------------------------------------
 
 -- | Write out definitions of manifest constants used in generated code for this
--- module.
+-- module.  This assumes that sets are converted to lists such that the CStrings
+-- appear before the WybeStrings.
 writeAssemblyConstants :: LLVM ()
 writeAssemblyConstants = do
     logLLVM "writeAssemblyConstants"
@@ -394,21 +420,36 @@ writeAssemblyConstants = do
     zipWithM_ declareString strings [0..]
     llvmBlankLine
 
--- | Write out a declaration for a string and record its name.
-declareString :: String -> Int -> LLVM ()
-declareString str n = do
-    let textName = specialName2 "cstring" $ show n
+
+-- | Write out a declaration for a string and record its name.  This code
+-- assumes that the CString that a WybeString refers to has already been
+-- declared and recorded.  This will happen because sets are sorted
+-- alphabetically, and CString comes before WybeString.
+declareString :: StringSpec -> Int -> LLVM ()
+declareString spec@(WybeStringSpec str) n = do
     let stringName = specialName2 "string" $ show n
-    modify $ \s -> s { stringConstants=Map.insert str stringName
+    modify $ \s -> s { stringConstants=Map.insert spec stringName
                                        $ stringConstants s}
+    textName <- lookupStringConstant $ CStringSpec str
     declareStructConstant stringName
         [ (ArgInt (fromIntegral $ length str) (Representation $ Bits wordSize)
           , Bits wordSize)
         , (ArgGlobal (GlobalVariable textName) (Representation CPointer)
           , Pointer)]
         Nothing
+declareString spec@(CStringSpec str) n = do
+    let textName = specialName2 "cstring" $ show n
+    modify $ \s -> s { stringConstants=Map.insert spec textName
+                                       $ stringConstants s}
     declareStringConstant textName str Nothing
-    llvmBlankLine
+
+
+-- | Find the global constant that holds the value of the specified string
+-- constant.
+lookupStringConstant :: StringSpec -> LLVM Ident
+lookupStringConstant spec =
+    gets $ trustFromJust ("lookupStringConstant " ++ show spec)
+            . Map.lookup spec . stringConstants
 
 
 ----------------------------------------------------------------------------
@@ -1112,11 +1153,15 @@ marshallArgument arg cType = do
     else typeConverted outTypeRep arg
 
 
--- | The LLVM type of the specified argument
+-- | The LLVM type of the specified argument.  Wybe strings are Wybe pointers; C
+-- strings are also Wybe pointers, because we do address arithmetic on them;
+-- globals are C pointers.  Other kinds of args are represented however their
+-- types say they are.
 argTypeRep :: PrimArg -> LLVM TypeRepresentation
-argTypeRep ArgString{} = return Pointer -- strings are Wybe pointers
-argTypeRep ArgGlobal{} = return CPointer -- globals are C pointers
-argTypeRep arg = typeRep $ argType arg
+argTypeRep (ArgString _ WybeString _) = return Pointer
+argTypeRep (ArgString _ CString _)    = return Pointer
+argTypeRep ArgGlobal{}                = return CPointer
+argTypeRep arg                        = typeRep $ argType arg
 
 
 -- | The LLVM argument for the specified PrimArg as an LLVM type and value
@@ -1132,11 +1177,11 @@ llvmValue :: PrimArg -> LLVM String
 llvmValue ArgVar{argVarName=var} = varToRead var
 llvmValue (ArgInt val _) = return $ show val
 llvmValue (ArgFloat val _) = return $ show val
-llvmValue (ArgString str _ _) = do
-    glob <- gets
-            $ trustFromJust ("String constant " ++ show str ++ " not recorded")
-            . Map.lookup str
-            . stringConstants
+llvmValue (ArgString str stringVariant _) = do
+    let spec = case stringVariant of
+                WybeString -> WybeStringSpec str
+                CString    -> CStringSpec str
+    glob <- lookupStringConstant spec
     convertedConstant
         (ArgGlobal (GlobalVariable glob) $ Representation CPointer) Pointer
 llvmValue (ArgChar val _) = return $ show $ fromEnum val
@@ -1430,7 +1475,8 @@ type ConstSpec = (PrimArg,TypeRepresentation)
 
 -- | The LLVM State monad
 data LLVMState = LLVMState {
-        allStrings :: Set String,   -- ^ String constants appearing in module
+        allStrings :: Set StringSpec,
+                                     -- ^ String constants appearing in module
         allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
         fileHandle :: Handle,       -- ^ The file handle we're writing to
         tmpCounter :: Int,          -- ^ Next temp var to make for current proc
@@ -1439,7 +1485,7 @@ data LLVMState = LLVMState {
                                     -- ^ Vars to rename on definition
         varUseRenaming :: Map PrimVarName LLVMName,
                                     -- ^ New action for some variables to read
-        stringConstants :: Map String Ident,
+        stringConstants :: Map StringSpec Ident,
                                     -- ^ local name given to string constants
         deferredCall :: Maybe (ProcSpec, [PrimArg], [PrimArg], [PrimArg]),
                                     -- ^ Wybe proc call deferred for

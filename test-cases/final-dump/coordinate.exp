@@ -63,12 +63,10 @@ fcopy(crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate)<{}; {}; 
 source_filename = "!ROOT!/final-dump/coordinate.wybe"
 target triple   = "arm64-apple-darwin23.6.0"
 
-@"string#0" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"cstring#0" = private unnamed_addr constant [ 21 x i8 ] c"expect crd1^z=8000: \00", align 8
-
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"cstring#1" = private unnamed_addr constant [ 21 x i8 ] c"expect crd2^z=1000: \00", align 8
-
+@"string#2" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#3" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -90,13 +88,13 @@ define external fastcc void @"coordinate.<0>"() alwaysinline {
   %"tmp#30##0" = add i64 %"tmp#7##0", 16
   %"tmp#31##0" = inttoptr i64 %"tmp#30##0" to ptr
   store i64 8000, ptr %"tmp#31##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#0" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
   %"tmp#32##0" = add i64 %"tmp#7##0", 16
   %"tmp#33##0" = inttoptr i64 %"tmp#32##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#33##0"
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   call ccc void @print_int(i64 1000)
   call ccc void @putchar(i8 10)
   ret void
