@@ -91,6 +91,7 @@ target triple    ????
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
+declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc void @"multi_specz_cyclic_lib2.foo2<0>"(i64, i64, i64, i64, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

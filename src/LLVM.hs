@@ -327,13 +327,15 @@ addExtern mod (PrimCall _ pspec _ args _) externs =
 addExtern _ PrimHigher{} externs = externs
 addExtern _ (PrimForeign "llvm" _ _ _) externs = externs
 addExtern _ (PrimForeign "lpvm" "alloc" _ _) externs =
-    let externName = llvmForeignName "wybe_malloc"
-        extern = externCFunction externName ["int"] "pointer"
-    in Set.insert extern externs
+    Set.insert externAlloc externs
 addExtern mod (PrimForeign "lpvm" "load" _ [ArgGlobal glob ty,_]) externs =
     recordExternVar mod glob ty externs
 addExtern mod (PrimForeign "lpvm" "store" _ [_,ArgGlobal glob ty]) externs =
     recordExternVar mod glob ty externs
+addExtern _ (PrimForeign "lpvm" "mutate" _ (_:_:destr:_)) externs =
+    case destr of
+        ArgInt 1 _ -> externs
+        _ -> Set.insert externAlloc externs
 addExtern _ (PrimForeign "lpvm" _ _ _) externs = externs
 addExtern _ (PrimForeign "c" name _ args) externs =
     recordExternFn "ccc" (llvmForeignName name) args externs
@@ -349,6 +351,11 @@ externCFunction name argTypes resultType =
         typeReps = List.map convert argTypes
         resultRep = convert resultType
     in ExternFunction "ccc" name typeReps [resultRep]
+
+
+-- | An extern spec for the wybe_malloc function.
+externAlloc :: ExternSpec
+externAlloc = externCFunction (llvmForeignName mallocFn) ["int"] "pointer"
 
 
 -- | Insert the fact that the named function is an external function with the
@@ -773,7 +780,7 @@ writeLPVMCall "alloc" _ args pos = do
     args' <- partitionArgs "lpvm alloc instruction" args
     case args' of
         ([sz],[out]) ->
-            marshalledCCall "wybe_malloc" [] [sz,out] ["int","pointer"] pos
+            marshalledCCall mallocFn [] [sz,out] ["int","pointer"] pos
         _ ->
             shouldnt $ "lpvm alloc with arguments " ++ show args
 writeLPVMCall "cast" _ args pos = do
@@ -1356,7 +1363,7 @@ duplicateStruct struct startOffset size newStruct = do
     llvmStart <- llvmArgument start
     typeConvert start writeStartCPtr
     (writeCPtr,readCPtr) <- freshTempArgs $ Representation CPointer
-    marshalledCCall "wybe_malloc" [] [size,writeCPtr] ["int","pointer"] Nothing
+    marshalledCCall mallocFn [] [size,writeCPtr] ["int","pointer"] Nothing
     copyfn <- llvmMemcpyFn
     let nonvolatile = ArgInt 0 $ Representation $ Bits 1
     writeCCall copyfn [] [readCPtr,readStartCPtr,size,nonvolatile] Nothing
@@ -1801,6 +1808,12 @@ showLLVMChar char
 -- Wybe int type argument (there's also a Boolean flag).
 llvmMemcpyFn :: LLVM String
 llvmMemcpyFn = ("llvm.memcpy.p0.p0." ++) . llvmTypeRep <$> typeRep intType
+
+
+-- | The malloc function we call.  Currently wybe_malloc, which just calls
+-- GC_malloc.
+mallocFn :: Ident
+mallocFn = "wybe_malloc"
 
 
 ----------------------------------------------------------------------------
