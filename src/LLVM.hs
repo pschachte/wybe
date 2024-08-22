@@ -846,8 +846,9 @@ writeLPVMCall "mutate" _ args pos = do
             ptrArg <- case offset of
                 ArgInt 0 _ -> return struct2
                 _ -> do
-                    (writeArg,readArg) <- freshTempArgs $ argType struct
-                    writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
+                    (writeArg,readArg) <- freshTempArgs $ argType struct2
+                    writeLLVMCall "add" []
+                        [setArgFlow FlowIn struct2,offset,writeArg] Nothing
                     return readArg
             logLLVM $ "address to store into is held by " ++ show ptrArg
             case (restIns,iRefs) of

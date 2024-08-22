@@ -1318,7 +1318,7 @@ if.then.1:
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 24, i1 0)
   %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
   %"tmp#7##0" = add i64 %"tmp#6##0", 1
-  %"tmp#8##0" = add i64 %"#rec##0", -1
+  %"tmp#8##0" = add i64 %"tmp#7##0", -1
   %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i64 %"#field##0", ptr %"tmp#9##0"
   %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
@@ -1372,7 +1372,7 @@ if.then.1:
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 24, i1 0)
   %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
   %"tmp#7##0" = add i64 %"tmp#6##0", 1
-  %"tmp#8##0" = add i64 %"#rec##0", 7
+  %"tmp#8##0" = add i64 %"tmp#7##0", 7
   %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i64 %"#field##0", ptr %"tmp#9##0"
   %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
@@ -1426,7 +1426,7 @@ if.then.1:
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 24, i1 0)
   %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
   %"tmp#7##0" = add i64 %"tmp#6##0", 1
-  %"tmp#8##0" = add i64 %"#rec##0", 15
+  %"tmp#8##0" = add i64 %"tmp#7##0", 15
   %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i64 %"#field##0", ptr %"tmp#9##0"
   %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
@@ -1513,7 +1513,7 @@ if.then.1:
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 8, i1 0)
   %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
   %"tmp#7##0" = add i64 %"tmp#6##0", 2
-  %"tmp#8##0" = add i64 %"#rec##0", -2
+  %"tmp#8##0" = add i64 %"tmp#7##0", -2
   %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i64 %"#field##0", ptr %"tmp#9##0"
   %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0

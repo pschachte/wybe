@@ -512,7 +512,7 @@ if.then.0:
   %"tmp#2##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#2##0", ptr %"tmp#1##0", i64 32, i1 0)
   %"tmp#3##0" = ptrtoint ptr %"tmp#2##0" to i64
-  %"tmp#4##0" = add i64 %"#rec##0", 8
+  %"tmp#4##0" = add i64 %"tmp#3##0", 8
   %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
   store i64 %"#field##0", ptr %"tmp#5##0"
   %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
@@ -629,7 +629,7 @@ if.then.0:
   %"tmp#2##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#2##0", ptr %"tmp#1##0", i64 32, i1 0)
   %"tmp#3##0" = ptrtoint ptr %"tmp#2##0" to i64
-  %"tmp#4##0" = add i64 %"#rec##0", 24
+  %"tmp#4##0" = add i64 %"tmp#3##0", 24
   %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
   store i64 %"#field##0", ptr %"tmp#5##0"
   %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
@@ -665,7 +665,7 @@ if.then.0:
   %"tmp#2##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#2##0", ptr %"tmp#1##0", i64 32, i1 0)
   %"tmp#3##0" = ptrtoint ptr %"tmp#2##0" to i64
-  %"tmp#4##0" = add i64 %"#rec##0", 16
+  %"tmp#4##0" = add i64 %"tmp#3##0", 16
   %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
   store i64 %"#field##0", ptr %"tmp#5##0"
   %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0

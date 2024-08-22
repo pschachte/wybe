@@ -315,7 +315,7 @@ define external fastcc i64 @"position.position.y<1>"(i64 %"#rec##0", i64 %"#fiel
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
   %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
-  %"tmp#3##0" = add i64 %"#rec##0", 8
+  %"tmp#3##0" = add i64 %"tmp#2##0", 8
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i64 %"#field##0", ptr %"tmp#4##0"
   ret i64 %"tmp#2##0"

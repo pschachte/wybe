@@ -224,7 +224,7 @@ if.then.0:
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 24, i1 0)
   %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
   %"tmp#6##0" = add i64 %"tmp#5##0", 1
-  %"tmp#7##0" = add i64 %"#rec##0", 7
+  %"tmp#7##0" = add i64 %"tmp#6##0", 7
   %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
   store i64 %"#field##0", ptr %"tmp#8##0"
   %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0

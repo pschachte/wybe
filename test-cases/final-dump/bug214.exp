@@ -485,7 +485,7 @@ define external fastcc i64 @"bug214.aim<1>"(i64 %"#rec##0", i64 %"#field##0") al
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
   %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
-  %"tmp#3##0" = add i64 %"#rec##0", 8
+  %"tmp#3##0" = add i64 %"tmp#2##0", 8
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i64 %"#field##0", ptr %"tmp#4##0"
   ret i64 %"tmp#2##0"
@@ -516,7 +516,7 @@ case.1.switch.0:
   %"tmp#44##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#44##0", ptr %"tmp#43##0", i64 16, i1 0)
   %"tmp#45##0" = ptrtoint ptr %"tmp#44##0" to i64
-  %"tmp#46##0" = add i64 %"pos##0", 8
+  %"tmp#46##0" = add i64 %"tmp#45##0", 8
   %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
   store i64 %"tmp#4##0", ptr %"tmp#47##0"
   ret i64 %"tmp#45##0"
@@ -529,7 +529,7 @@ case.2.switch.0:
   %"tmp#51##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#51##0", ptr %"tmp#50##0", i64 16, i1 0)
   %"tmp#52##0" = ptrtoint ptr %"tmp#51##0" to i64
-  %"tmp#53##0" = add i64 %"pos##0", 8
+  %"tmp#53##0" = add i64 %"tmp#52##0", 8
   %"tmp#54##0" = inttoptr i64 %"tmp#53##0" to ptr
   store i64 %"tmp#7##0", ptr %"tmp#54##0"
   ret i64 %"tmp#52##0"
@@ -604,7 +604,7 @@ case.0.switch.0:
   %"tmp#76##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#76##0", ptr %"tmp#75##0", i64 16, i1 0)
   %"tmp#77##0" = ptrtoint ptr %"tmp#76##0" to i64
-  %"tmp#78##0" = add i64 %"tmp#5##0", 8
+  %"tmp#78##0" = add i64 %"tmp#77##0", 8
   %"tmp#79##0" = inttoptr i64 %"tmp#78##0" to ptr
   store i64 %"tmp#6##0", ptr %"tmp#79##0"
   %"tmp#80##0" = inttoptr i64 %"tmp#68##0" to ptr
@@ -619,7 +619,7 @@ case.1.switch.0:
   %"tmp#84##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#84##0", ptr %"tmp#83##0", i64 16, i1 0)
   %"tmp#85##0" = ptrtoint ptr %"tmp#84##0" to i64
-  %"tmp#86##0" = add i64 %"sub##0", 8
+  %"tmp#86##0" = add i64 %"tmp#85##0", 8
   %"tmp#87##0" = inttoptr i64 %"tmp#86##0" to ptr
   store i64 %"tmp#12##0", ptr %"tmp#87##0"
   ret i64 %"tmp#85##0"
@@ -632,7 +632,7 @@ case.2.switch.0:
   %"tmp#91##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#91##0", ptr %"tmp#90##0", i64 16, i1 0)
   %"tmp#92##0" = ptrtoint ptr %"tmp#91##0" to i64
-  %"tmp#93##0" = add i64 %"sub##0", 8
+  %"tmp#93##0" = add i64 %"tmp#92##0", 8
   %"tmp#94##0" = inttoptr i64 %"tmp#93##0" to ptr
   store i64 %"tmp#15##0", ptr %"tmp#94##0"
   ret i64 %"tmp#92##0"
@@ -671,7 +671,7 @@ case.0.switch.0:
   %"tmp#73##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#73##0", ptr %"tmp#72##0", i64 16, i1 0)
   %"tmp#74##0" = ptrtoint ptr %"tmp#73##0" to i64
-  %"tmp#75##0" = add i64 %"tmp#5##0", 8
+  %"tmp#75##0" = add i64 %"tmp#74##0", 8
   %"tmp#76##0" = inttoptr i64 %"tmp#75##0" to ptr
   store i64 %"tmp#6##0", ptr %"tmp#76##0"
   %"tmp#77##0" = inttoptr i64 %"sub##0" to ptr
@@ -1179,7 +1179,7 @@ define external fastcc i64 @"bug214.position.y<1>"(i64 %"#rec##0", i64 %"#field#
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
   %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
-  %"tmp#3##0" = add i64 %"#rec##0", 8
+  %"tmp#3##0" = add i64 %"tmp#2##0", 8
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i64 %"#field##0", ptr %"tmp#4##0"
   ret i64 %"tmp#2##0"
