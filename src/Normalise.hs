@@ -821,8 +821,11 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          -- Shift each field into place and or with the result
          List.concatMap
           (\(FieldInfo var pPos _ ty _ shift sz) ->
-               [maybePlace (ForeignCall "llvm" "shl" []
+               [maybePlace (ForeignCall "lpvm" "cast" []
                  [varGetTyped var ty `maybePlace` pPos,
+                  varSetTyped tmpName1 typeSpec `maybePlace` pos]) pos,
+                maybePlace (ForeignCall "llvm" "shl" []
+                 [varGetTyped tmpName1 typeSpec `maybePlace` pPos,
                   iVal shift `castTo` typeSpec `maybePlace` pos,
                   varSetTyped tmpName1 typeSpec `maybePlace` pos]) pos,
                 maybePlace (ForeignCall "llvm" "or" []
