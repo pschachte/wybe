@@ -22,5 +22,5 @@ source_filename = "!ROOT!/final-dump/resource_conflict_b.wybe"
 target triple    ????
 
 
-@"resource#resource_conflict_b.res" = global i8 undef
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#resource_conflict_b.res" = global i8 undef

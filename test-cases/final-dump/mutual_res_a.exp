@@ -23,8 +23,8 @@ source_filename = "!ROOT!/final-dump/mutual_res_a.wybe"
 target triple    ????
 
 
-@"resource#mutual_res_a.a_res" = global i64 undef
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#mutual_res_a.a_res" = global i64 undef
 
 --------------------------------------------------
  Module mutual_res_b
@@ -47,5 +47,5 @@ source_filename = "!ROOT!/final-dump/mutual_res_b.wybe"
 target triple    ????
 
 
-@"resource#mutual_res_b.b_res" = global i8 undef
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#mutual_res_b.b_res" = global i8 undef

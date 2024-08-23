@@ -45,8 +45,8 @@ source_filename = "!ROOT!/final-dump/unbranch_issue.wybe"
 target triple    ????
 
 
-@"resource#unbranch_issue.n" = global i64 undef
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#unbranch_issue.n" = global i64 undef
 
 define external fastcc i1 @"unbranch_issue.test<0>"() alwaysinline {
   %"tmp#2##0" = load i64, ptr @"resource#unbranch_issue.n"

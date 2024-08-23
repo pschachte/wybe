@@ -235,8 +235,8 @@ writeLLVM handle modSpec withLPVM recursive = do
         forEachModule allMods preScanProcs
         writeAssemblyPrologue
         writeAssemblyConstants
-        writeAssemblyGlobals
         writeAssemblyExterns
+        forEachModule allMods writeAssemblyGlobals
         forEachModule allMods writeAssemblyProcs
         when withLPVM $ do
             writeAssemblyExports
@@ -263,10 +263,11 @@ forEachModule mods code =
 -- used by the module.
 preScanProcs :: LLVM ()
 preScanProcs = do
-    logLLVM "preScanProcs"
     mod <- llvmGetModule modSpec
-    bodies <- lift $ getModuleImplementationField
-            (concatMap (concatMap allProcBodies) . Map.elems . modProcs)
+    procss <- lift $ getModuleImplementationField (Map.elems . modProcs)
+    logLLVM $ "preScanProcs: "
+                ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
+    let bodies = concatMap (concatMap allProcBodies) procss
     allStrings0 <- gets allStrings
     allExterns0 <- gets allExterns
     let (strings,externs) =

@@ -31,10 +31,10 @@ source_filename = "!ROOT!/final-dump/top_level_use.wybe"
 target triple    ????
 
 
-@"resource#top_level_use.res" = global i64 undef
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#top_level_use.res" = global i64 undef
 
 define external fastcc void @"top_level_use.<0>"() alwaysinline {
   call ccc void @print_int(i64 0)

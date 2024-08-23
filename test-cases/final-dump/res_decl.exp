@@ -22,5 +22,5 @@ source_filename = "!ROOT!/final-dump/res_decl.wybe"
 target triple    ????
 
 
-@"resource#res_decl.count" = global i64 undef
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#res_decl.count" = global i64 undef

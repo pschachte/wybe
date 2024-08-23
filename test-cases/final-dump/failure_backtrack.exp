@@ -416,14 +416,14 @@ target triple    ????
 @"string#36" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#17" to i64 ) }, align 8
 @"string#37" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#18" to i64 ) }, align 8
 
-@"resource#failure_backtrack.r" = global i64 undef
-@"resource#failure_backtrack.s" = global i64 undef
 declare external ccc void @putchar(i8)
 declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#failure_backtrack.r" = global i64 undef
+@"resource#failure_backtrack.s" = global i64 undef
 
 define external fastcc void @"failure_backtrack.<0>"() alwaysinline {
   %"tmp#139##0" = load i64, ptr @"resource#failure_backtrack.r"

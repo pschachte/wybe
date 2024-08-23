@@ -70,12 +70,12 @@ target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ 23 x i8 ] c"resource_rollback:15:7\00", align 8
 
-@"resource#resource_rollback.res" = global i64 undef
-@"resource#resource_rollback.ser" = global i64 undef
 declare external ccc void @print_int(i64)
 declare external ccc void @print_string(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#resource_rollback.res" = global i64 undef
+@"resource#resource_rollback.ser" = global i64 undef
 
 define external fastcc void @"resource_rollback.<0>"() alwaysinline {
   %"res##0" = load i64, ptr @"resource#resource_rollback.res"

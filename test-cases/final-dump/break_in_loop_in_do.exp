@@ -56,10 +56,10 @@ source_filename = "!ROOT!/final-dump/break_in_loop_in_do.wybe"
 target triple    ????
 
 
-@"resource#break_in_loop_in_do.counter" = global i64 undef
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#break_in_loop_in_do.counter" = global i64 undef
 
 define external fastcc void @"break_in_loop_in_do.<0>"() alwaysinline {
   %"tmp#3##0" = load i64, ptr @"resource#break_in_loop_in_do.counter"

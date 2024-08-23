@@ -48,10 +48,10 @@ source_filename = "!ROOT!/final-dump/resource_tmp_vars.wybe"
 target triple    ????
 
 
-@"resource#resource_tmp_vars.counter" = global i64 undef
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#resource_tmp_vars.counter" = global i64 undef
 
 define external fastcc void @"resource_tmp_vars.<0>"() alwaysinline {
   %"tmp#1##0" = load i64, ptr @"resource#resource_tmp_vars.counter"

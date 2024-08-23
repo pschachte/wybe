@@ -1089,25 +1089,28 @@ emitObjectFilesIfNeeded depends = do
     logBuild $ "Unchanged Set: " ++ show unchangedSet
     mapM (\m -> do
         reenterModule m
-        -- package (directory mod) won't be included in "depends", no need to
-        -- handle it
-        subMods <- Map.elems <$> getModuleImplementationField modSubmods
-        source <- getSource
-        let objFile = source -<.> objectExtension
-        logBuild $ "Ready to emit module: " ++ showModSpec m ++
-                    " with sub-modules: " ++ showModSpecs subMods
-        let changed = List.any (`Set.notMember` unchangedSet) (m:subMods)
-        if changed
-        then do
-            logBuild $ "emitting to: " ++ objFile
-            emitObjectFile m objFile
-        else
-            logBuild $ "unchanged, skip it: " ++ objFile
-        reexitModule
+        rootMod <- getModule modRootModSpec
+        if rootMod == Just m then do
+            -- package (directory mod) won't be included in "depends", no need to
+            -- handle it
+            subMods <- Map.elems <$> getModuleImplementationField modSubmods
+            source <- getSource
+            let objFile = source -<.> objectExtension
+            logBuild $ "Ready to emit module: " ++ showModSpec m ++
+                        " with sub-modules: " ++ showModSpecs subMods
+            let changed = List.any (`Set.notMember` unchangedSet) (m:subMods)
+            if changed
+            then do
+                logBuild $ "emitting to: " ++ objFile
+                emitObjectFile m objFile
+            else
+                logBuild $ "unchanged, skip it: " ++ objFile
+            reexitModule
 
-        -- we might use the local cache file instead of the actual file
-        -- check and overwrite the file name
-        liftIO $ useLocalCacheFileIfPossible objFile
+            -- we might use the local cache file instead of the actual file
+            -- check and overwrite the file name
+            liftIO $ useLocalCacheFileIfPossible objFile
+        else return []
         ) depends
 
 
