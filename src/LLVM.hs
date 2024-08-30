@@ -710,8 +710,9 @@ writeWybeCall wybeProc args pos = do
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
     unless (List.null iRefs)
      $ shouldnt $ "Wybe call " ++ show wybeProc ++ " with take-reference arg"
+    prefix <- tailMarker False
     if List.null oRefs then
-        writeActualCall wybeProc ins outs "tail "
+        writeActualCall wybeProc ins outs prefix
     else
         deferCall wybeProc ins outs oRefs
 
@@ -719,6 +720,7 @@ writeWybeCall wybeProc args pos = do
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
 writeHOCall callee args pos = do
+    -- XXX add special case for statically known callee
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
     let hoCall = PrimHigher 0 callee Pure args
     unless (List.null iRefs)
@@ -732,8 +734,9 @@ writeHOCall callee args pos = do
     typeConvert callee writeArg
     fnVar <- llvmValue readArg
     argList <- llvmArgumentList ins
+    prefix <- tailMarker False
     llvmStoreResult outs $
-        "tail call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
+        prefix ++ "call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
 
 
 -- | Actually generate a Wybe proc call.  tailKind indicates what degree of LLVM
@@ -1440,6 +1443,17 @@ partitionByFlow fn lst =
      List.filter ((==FlowTakeReference) . fn) lst)
 
 
+-- | Work out the appropriate prefix for a call:  tail, musttail, or nothing.
+-- The input specifies whether 
+tailMarker :: Bool -> LLVM String
+tailMarker must = do
+    didAlloca <- gets doesAlloca
+    return $ case (didAlloca, must) of
+        (True,_)      -> ""
+        (False,True)  -> "musttail "
+        (False,False) -> "tail "
+
+
 ----------------------------------------------------------------------------
 -- The LLVM Monad and LLVM code generation and manipulation               --
 ----------------------------------------------------------------------------
@@ -1500,16 +1514,17 @@ data LLVMState = LLVMState {
                                     -- ^ Wybe proc call deferred for
                                     -- out-by-reference arg, with in, out, and
                                     -- out-by-ref args
-        takeRefVars :: Map PrimVarName (PrimArg,TypeSpec)
+        takeRefVars :: Map PrimVarName (PrimArg,TypeSpec),
                                     -- ^ arg to read each take-reference ptr,
                                     -- plus the type of the original variable
+        doesAlloca :: Bool          -- Does current body do alloca?
 }
 
 
 -- | Set up LLVM monad to translate a module into the given file handle
 initLLVMState :: Handle -> LLVMState
 initLLVMState h = LLVMState Set.empty Set.empty h 0 0 Set.empty
-                     Map.empty Map.empty Nothing Map.empty
+                     Map.empty Map.empty Nothing Map.empty False
 
 
 -- | Reset the LLVM monad in preparation for translating a proc definition with
@@ -1522,6 +1537,7 @@ initialiseLLVMForProc tmpCount = do
                      , varUseRenaming = Map.empty
                      , deferredCall = Nothing
                      , takeRefVars = Map.empty
+                     , doesAlloca = False
                      }
 
 
@@ -1697,7 +1713,7 @@ releaseDeferredCall = do
             logLLVM $ "take-ref pointers = " ++ show takeRefs
             logLLVM $ "new ref args: " ++ show refIns ++ "; old = " ++ show old
             let allOld = and old
-            let tailKind = if allOld then "musttail " else ""
+            tailKind <- tailMarker allOld
             writeActualCall wybeProc (ins++refIns) outs tailKind
             unless allOld $ forM_ refIns $ \oRef -> do
                 let oVar = argVar "in releaseDeferredCall" oRef
@@ -1721,13 +1737,17 @@ convertOutByRefArg ArgVar{argVarName=name, argVarType=ty,
         Just (ptrArg,_) -> return (ptrArg,True)
         Nothing -> do
             (writeArg,readArg) <- freshTempArgs $ Representation CPointer
-            llvmStoreResult [writeArg]
-                $ "alloca ptr align " ++ show wordSizeBytes
+            alloca writeArg wordSizeBytes
             addTakeRefPointer name readArg ty
             return (readArg,False)
 convertOutByRefArg other =
     shouldnt $ "Expected out-by-reference argument: " ++ show other
 
+
+alloca :: PrimArg -> Int -> LLVM ()
+alloca result size = do
+    llvmStoreResult [result] $ "alloca ptr align " ++ show size
+    modify $ \s -> s { doesAlloca = True }
 
 
 ----------------------------------------------------------------------------
