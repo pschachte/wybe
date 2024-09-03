@@ -739,6 +739,18 @@ writeHOCall callee args pos = do
         prefix ++ "call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
 
 
+-- | Work out the appropriate prefix for a call:  tail, musttail, or nothing.
+-- The input specifies whether this call is has had out-by-ref arguments
+-- converted to input pointers.
+tailMarker :: Bool -> LLVM String
+tailMarker must = do
+    didAlloca <- gets doesAlloca
+    return $ case (didAlloca, must) of
+        (True,_)      -> ""
+        (False,True)  -> "musttail "
+        (False,False) -> "tail "
+
+
 -- | Actually generate a Wybe proc call.  tailKind indicates what degree of LLVM
 -- tail call optimisation we want.
 writeActualCall :: ProcSpec -> [PrimArg] -> [PrimArg] -> String -> LLVM ()
@@ -962,10 +974,6 @@ writeAssemblyExports = do
     declareStringConstant constName modBS $ Just "__LPVM,__lpvm"
 
 
-----------------------------------------------------------------------------
--- Support code
-----------------------------------------------------------------------------
-
 -- | Emit an LLVM declaration for a string constant, optionally specifying a
 -- file section.
 declareStringConstant :: LLVMName -> String -> Maybe String -> LLVM ()
@@ -996,6 +1004,10 @@ llvmConstStruct fields = do
             ++ " { " ++ intercalate ", " llvmVals ++ " }"
 
 
+----------------------------------------------------------------------------
+-- Support code
+----------------------------------------------------------------------------
+
 -- | Generate an LLVM load instruction to load from the specified address into
 -- the specified variable
 llvmLoad :: PrimArg -> PrimArg -> LLVM ()
@@ -1005,49 +1017,34 @@ llvmLoad ptr outVar = do
     llvmStoreResult [outVar] $ "load " ++ lltype ++ ", " ++ arg
 
 
--- | Return the representation for the specified type
-typeRep :: TypeSpec -> LLVM TypeRepresentation
-typeRep ty =
-    trustFromJust ("lookupTypeRepresentation of unknown type " ++ show ty)
-      <$> lift (lookupTypeRepresentation ty)
+-- | Generate code to copy a structure, given a tagged pointer, the tag, the
+-- size of the structure, and the variable to write the new tagged pointer into.
+duplicateStruct :: PrimArg -> PrimArg -> PrimArg -> PrimArg -> LLVM ()
+duplicateStruct struct startOffset size newStruct = do
+    start <- case startOffset of
+        ArgInt 0 _ -> return struct
+        _ -> do
+            (writeStart,readStart) <- freshTempArgs $ Representation Pointer
+            writeLLVMCall "sub" [] [struct,startOffset,writeStart] Nothing
+            return readStart
+    (writeStartCPtr,readStartCPtr) <- freshTempArgs $ Representation CPointer
+    llvmStart <- llvmArgument start
+    typeConvert start writeStartCPtr
+    (writeCPtr,readCPtr) <- freshTempArgs $ Representation CPointer
+    marshalledCCall mallocFn [] [size,writeCPtr] ["int","pointer"] Nothing
+    copyfn <- llvmMemcpyFn
+    let nonvolatile = ArgInt 0 $ Representation $ Bits 1
+    writeCCall copyfn [] [readCPtr,readStartCPtr,size,nonvolatile] Nothing
+    (writePtr,readPtr) <- freshTempArgs $ Representation Pointer
+    typeConvert readCPtr writePtr
+    case startOffset of
+        ArgInt 0 _ -> typeConvert readPtr newStruct
+        _ -> writeLLVMCall "add" [] [readPtr,startOffset,newStruct] Nothing
 
 
-llvmResource :: ResourceSpec -> LLVM (LLVMName, TypeRepresentation)
-llvmResource res = do
-    (res', ty) <-
-        mapSnd (trustFromJust $ "defGlobalResource " ++ show res)
-        <$> lift (canonicaliseResourceSpec Nothing "newLLVMModule" res)
-    rep <- typeRep ty
-    return (llvmGlobalName (makeGlobalResourceName res'), rep)
-
-
--- | The LLVM representation of a Wybe type based on its TypeRepresentation
-llvmTypeRep :: TypeRepresentation -> LLVMType
-llvmTypeRep (Bits bits)     = "i" ++ show bits
-llvmTypeRep (Signed bits)   = "i" ++ show bits
-llvmTypeRep (Floating 16)   = "half"
-llvmTypeRep (Floating 32)   = "float"
-llvmTypeRep (Floating 64)   = "double"
-llvmTypeRep (Floating 128)  = "fp128"
-llvmTypeRep (Floating n)    = shouldnt $ "invalid float size " ++ show n
--- XXX these should be made more accurate (use pointer and function types):
-llvmTypeRep (Func _ _)      = llvmTypeRep $ Bits wordSize
-llvmTypeRep Pointer         = llvmTypeRep $ Bits wordSize
-llvmTypeRep CPointer        = "ptr"
-
-
--- | The LLVM return type for proc with the specified list of output type specs.
-llvmRepReturnType :: [TypeRepresentation] -> LLVMType
-llvmRepReturnType [] = "void"
-llvmRepReturnType [ty] = llvmTypeRep ty
-llvmRepReturnType tys =
-    "{" ++ intercalate ", " (List.map llvmTypeRep tys) ++ "}"
-
-
--- | The LLVM return type for proc with the specified list of output type specs.
-llvmReturnType :: [TypeSpec] -> LLVM LLVMType
-llvmReturnType specs = llvmRepReturnType <$> mapM typeRep specs
-
+----------------------------------------------------------------------------
+-- Handling parameters and arguments
+----------------------------------------------------------------------------
 
 -- | The LLVM parameter declaration for the specified Wybe input parameter as a
 -- pair of LLVM type and variable name.
@@ -1123,6 +1120,71 @@ llvmStoreConvertedResult arg@ArgVar{argVarName=varName,argVarType=ty}
 llvmStoreConvertedResult notAVar _ _ =
     shouldnt $ "llvmStoreConvertedResult into non-variable " ++ show notAVar
 
+-- | Split parameter list into separate list of input, output, out-by-reference,
+-- and take-reference arguments, ignoring any phantom parameters.
+partitionParams :: [PrimParam]
+                -> LLVM ([PrimParam],[PrimParam],[PrimParam],[PrimParam])
+partitionParams params = do
+    partitionByFlow primParamFlow <$> lift (realParams params)
+
+
+-- | Split argument list into separate list of inputs and outputs, after
+-- eliminating phantom arguments.  Report an error if there are any
+-- out-by-reference or take-reference arguments.
+partitionArgs :: String -> [PrimArg] -> LLVM ([PrimArg],[PrimArg])
+partitionArgs op args = do
+    (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
+    unless (List.null oRefs) $ shouldnt $ "out-by-reference argument of " ++ op
+    unless (List.null iRefs) $ shouldnt $ "take-reference argument of " ++ op
+    return (ins,outs)
+
+
+-- | Split the provided list of arguments into input, output, out-by-reference,
+-- and take-reference arguments, after eliminating phantom arguments.
+partitionArgsWithRefs :: [PrimArg]
+                      -> LLVM ([PrimArg],[PrimArg],[PrimArg],[PrimArg])
+partitionArgsWithRefs args = do
+    realArgs <- lift $ filterM argIsReal args
+    return $ partitionByFlow argFlowDirection realArgs
+
+
+-- | Split list of pairs of argument and something else into separate lists of
+-- input, output, out-by-reference, and take-reference arguments, after
+-- eliminating phantom arguments.
+partitionArgTuples :: String -> [(PrimArg,a)]
+                   -> LLVM ([(PrimArg,a)],[(PrimArg,a)])
+partitionArgTuples cfn args = do
+    realArgs <- lift $ filterM (notM . argIsPhantom . fst) args
+    let (ins,outs,oRefs,iRefs) =
+            partitionByFlow (argFlowDirection . fst) realArgs
+    unless (List.null oRefs)
+     $ nyi $ "out-by-reference argument in call to C function " ++ cfn
+    unless (List.null iRefs)
+     $ nyi $ "take-reference argument in call to C function " ++ cfn
+    return (ins,outs)
+
+
+-- | Split the provided list into input, output, out-by-reference, and
+-- take-reference arguments, given a function to determine the flow direction of
+-- each element.  Out-by-reference means the flow is FlowOutByReference, which
+-- denotes an argument that is notionally an output, but actually a reference
+-- input that points to the location to write the output.  Take-reference
+-- denotes a notional input argument that in actually produces the reference to
+-- pass as an out-by-reference argument.  The key benefit of these flows comes
+-- when the call with the out-by-reference argument precedes the one with the
+-- take-reference argument (ie, the former notionally produces the value to use
+-- in the latter):  if no other dependency forces this order of execution,
+-- making these out-by-reference and take-reference allows us to swap their
+-- order, potentially allowing last call optimisation.  The LastCallAnalysis
+-- module contains the analysis and transformation introducing these flows.
+partitionByFlow :: (a -> PrimFlow) -> [a] -> ([a],[a],[a],[a])
+partitionByFlow fn lst =
+    (List.filter ((==FlowIn)  . fn) lst,
+     List.filter ((==FlowOut) . fn) lst,
+     List.filter ((==FlowOutByReference) . fn) lst,
+     List.filter ((==FlowTakeReference) . fn) lst)
+
+
 -- | Marshall data returned by C code.  Emits a C call instruction, which
 -- returns its result in the specified type representation, leaving its
 -- output in the specified output variable with its expected type
@@ -1197,7 +1259,26 @@ llvmValue (ArgString str stringVariant _) = do
     convertedConstant
         (ArgGlobal (GlobalVariable glob) $ Representation CPointer) Pointer
 llvmValue (ArgChar val _) = return $ show $ fromEnum val
-llvmValue cl@ArgClosure{} = nyi $ "passing closure argument " ++ show cl
+llvmValue arg@(ArgClosure ps args ty) = do
+    logLLVM $ "llvmValue of " ++ show arg
+    return $ nyi "closure argument " ++ show arg
+    -- args' <- neededFreeArgs ps args
+    -- if all argIsConst args'
+    -- then do
+    --     noAlloca $ cons <$> cgenArgConst arg
+    -- else do
+    --     fnOp <- cons <$> cgenFuncRef ps
+    --     (envArgs, allocaTracking) <- cgenArgsFull (setArgType intType <$> args')
+    --     mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args))
+    --                                   `ArgInt` intType) address_t
+    --     memPtr <- inttoptr mem (ptr_t address_t)
+    --     mapM_ (\(idx,arg) -> do
+    --         let getEltPtr = getElementPtrInstr memPtr [idx]
+    --         accessPtr <- instr (ptr_t address_t) getEltPtr
+    --         store accessPtr arg
+    --         ) $ zip [0..] (fnOp:envArgs)
+    --     return (mem, allocaTracking)
+
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
 llvmValue (ArgUnneeded val _) = shouldnt "llvm value of unneeded arg"
 llvmValue (ArgUndef _) = return "undef"
@@ -1208,6 +1289,58 @@ argVar :: String -> PrimArg -> PrimVarName
 argVar _ ArgVar{argVarName=var} =  var
 argVar msg _ = shouldnt $ "variable argument expected " ++ msg
 
+
+----------------------------------------------------------------------------
+-- Handling LLVM types and converting from Wybe types
+----------------------------------------------------------------------------
+
+-- | Return the representation for the specified type
+typeRep :: TypeSpec -> LLVM TypeRepresentation
+typeRep ty =
+    trustFromJust ("lookupTypeRepresentation of unknown type " ++ show ty)
+      <$> lift (lookupTypeRepresentation ty)
+
+
+llvmResource :: ResourceSpec -> LLVM (LLVMName, TypeRepresentation)
+llvmResource res = do
+    (res', ty) <-
+        mapSnd (trustFromJust $ "defGlobalResource " ++ show res)
+        <$> lift (canonicaliseResourceSpec Nothing "newLLVMModule" res)
+    rep <- typeRep ty
+    return (llvmGlobalName (makeGlobalResourceName res'), rep)
+
+
+-- | The LLVM representation of a Wybe type based on its TypeRepresentation
+llvmTypeRep :: TypeRepresentation -> LLVMType
+llvmTypeRep (Bits bits)     = "i" ++ show bits
+llvmTypeRep (Signed bits)   = "i" ++ show bits
+llvmTypeRep (Floating 16)   = "half"
+llvmTypeRep (Floating 32)   = "float"
+llvmTypeRep (Floating 64)   = "double"
+llvmTypeRep (Floating 128)  = "fp128"
+llvmTypeRep (Floating n)    = shouldnt $ "invalid float size " ++ show n
+-- XXX these should be made more accurate (use pointer and function types):
+llvmTypeRep (Func _ _)      = llvmTypeRep $ Bits wordSize
+llvmTypeRep Pointer         = llvmTypeRep $ Bits wordSize
+llvmTypeRep CPointer        = "ptr"
+
+
+-- | The LLVM return type for proc with the specified list of output type specs.
+llvmRepReturnType :: [TypeRepresentation] -> LLVMType
+llvmRepReturnType [] = "void"
+llvmRepReturnType [ty] = llvmTypeRep ty
+llvmRepReturnType tys =
+    "{" ++ intercalate ", " (List.map llvmTypeRep tys) ++ "}"
+
+
+-- | The LLVM return type for proc with the specified list of output type specs.
+llvmReturnType :: [TypeSpec] -> LLVM LLVMType
+llvmReturnType specs = llvmRepReturnType <$> mapM typeRep specs
+
+
+----------------------------------------------------------------------------
+-- LLVM Type conversion
+----------------------------------------------------------------------------
 
 -- | Emit an instruction to convert the specified input argument to the
 -- specified output argument.
@@ -1351,108 +1484,6 @@ typeConvertOp (Func _ _) CPointer = "inttoptr"
 typeConvertOp repIn toTy =
     shouldnt $ "Don't know how to convert from " ++ show repIn
                  ++ " to " ++ show toTy
-
-
--- | Generate code to copy a structure, given a tagged pointer, the tag, the
--- size of the structure, and the variable to write the new tagged pointer into.
-duplicateStruct :: PrimArg -> PrimArg -> PrimArg -> PrimArg -> LLVM ()
-duplicateStruct struct startOffset size newStruct = do
-    start <- case startOffset of
-        ArgInt 0 _ -> return struct
-        _ -> do
-            (writeStart,readStart) <- freshTempArgs $ Representation Pointer
-            writeLLVMCall "sub" [] [struct,startOffset,writeStart] Nothing
-            return readStart
-    (writeStartCPtr,readStartCPtr) <- freshTempArgs $ Representation CPointer
-    llvmStart <- llvmArgument start
-    typeConvert start writeStartCPtr
-    (writeCPtr,readCPtr) <- freshTempArgs $ Representation CPointer
-    marshalledCCall mallocFn [] [size,writeCPtr] ["int","pointer"] Nothing
-    copyfn <- llvmMemcpyFn
-    let nonvolatile = ArgInt 0 $ Representation $ Bits 1
-    writeCCall copyfn [] [readCPtr,readStartCPtr,size,nonvolatile] Nothing
-    (writePtr,readPtr) <- freshTempArgs $ Representation Pointer
-    typeConvert readCPtr writePtr
-    case startOffset of
-        ArgInt 0 _ -> typeConvert readPtr newStruct
-        _ -> writeLLVMCall "add" [] [readPtr,startOffset,newStruct] Nothing
-
-
--- | Split parameter list into separate list of input, output, out-by-reference,
--- and take-reference arguments, ignoring any phantom parameters.
-partitionParams :: [PrimParam]
-                -> LLVM ([PrimParam],[PrimParam],[PrimParam],[PrimParam])
-partitionParams params = do
-    partitionByFlow primParamFlow <$> lift (realParams params)
-
-
--- | Split argument list into separate list of inputs and outputs, after
--- eliminating phantom arguments.  Report an error if there are any
--- out-by-reference or take-reference arguments.
-partitionArgs :: String -> [PrimArg] -> LLVM ([PrimArg],[PrimArg])
-partitionArgs op args = do
-    (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
-    unless (List.null oRefs) $ shouldnt $ "out-by-reference argument of " ++ op
-    unless (List.null iRefs) $ shouldnt $ "take-reference argument of " ++ op
-    return (ins,outs)
-
-
--- | Split the provided list of arguments into input, output, out-by-reference,
--- and take-reference arguments, after eliminating phantom arguments.
-partitionArgsWithRefs :: [PrimArg]
-                      -> LLVM ([PrimArg],[PrimArg],[PrimArg],[PrimArg])
-partitionArgsWithRefs args = do
-    realArgs <- lift $ filterM argIsReal args
-    return $ partitionByFlow argFlowDirection realArgs
-
-
--- | Split list of pairs of argument and something else into separate lists of
--- input, output, out-by-reference, and take-reference arguments, after
--- eliminating phantom arguments.
-partitionArgTuples :: String -> [(PrimArg,a)]
-                   -> LLVM ([(PrimArg,a)],[(PrimArg,a)])
-partitionArgTuples cfn args = do
-    realArgs <- lift $ filterM (notM . argIsPhantom . fst) args
-    let (ins,outs,oRefs,iRefs) =
-            partitionByFlow (argFlowDirection . fst) realArgs
-    unless (List.null oRefs)
-     $ nyi $ "out-by-reference argument in call to C function " ++ cfn
-    unless (List.null iRefs)
-     $ nyi $ "take-reference argument in call to C function " ++ cfn
-    return (ins,outs)
-
-
--- | Split the provided list into input, output, out-by-reference, and
--- take-reference arguments, given a function to determine the flow direction of
--- each element.  Out-by-reference means the flow is FlowOutByReference, which
--- denotes an argument that is notionally an output, but actually a reference
--- input that points to the location to write the output.  Take-reference
--- denotes a notional input argument that in actually produces the reference to
--- pass as an out-by-reference argument.  The key benefit of these flows comes
--- when the call with the out-by-reference argument precedes the one with the
--- take-reference argument (ie, the former notionally produces the value to use
--- in the latter):  if no other dependency forces this order of execution,
--- making these out-by-reference and take-reference allows us to swap their
--- order, potentially allowing last call optimisation.  The LastCallAnalysis
--- module contains the analysis and transformation introducing these flows.
-partitionByFlow :: (a -> PrimFlow) -> [a] -> ([a],[a],[a],[a])
-partitionByFlow fn lst =
-    (List.filter ((==FlowIn)  . fn) lst,
-     List.filter ((==FlowOut) . fn) lst,
-     List.filter ((==FlowOutByReference) . fn) lst,
-     List.filter ((==FlowTakeReference) . fn) lst)
-
-
--- | Work out the appropriate prefix for a call:  tail, musttail, or nothing.
--- The input specifies whether this call is has had out-by-ref arguments
--- converted to input pointers.
-tailMarker :: Bool -> LLVM String
-tailMarker must = do
-    didAlloca <- gets doesAlloca
-    return $ case (didAlloca, must) of
-        (True,_)      -> ""
-        (False,True)  -> "musttail "
-        (False,False) -> "tail "
 
 
 ----------------------------------------------------------------------------
