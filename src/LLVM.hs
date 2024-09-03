@@ -1444,7 +1444,8 @@ partitionByFlow fn lst =
 
 
 -- | Work out the appropriate prefix for a call:  tail, musttail, or nothing.
--- The input specifies whether 
+-- The input specifies whether this call is has had out-by-ref arguments
+-- converted to input pointers.
 tailMarker :: Bool -> LLVM String
 tailMarker must = do
     didAlloca <- gets doesAlloca
