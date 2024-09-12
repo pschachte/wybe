@@ -77,7 +77,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#resource_rollback.res" = global i64 undef
 @"resource#resource_rollback.ser" = global i64 undef
 
-define external fastcc void @"resource_rollback.<0>"() alwaysinline {
+define external fastcc void @"resource_rollback.<0>"() {
   %"res##0" = load i64, ptr @"resource#resource_rollback.res"
   call ccc void @print_int(i64 %"res##0")
   call ccc void @putchar(i8 10)
@@ -96,7 +96,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"resource_rollback.#cont#1<0>"() alwaysinline {
+define external fastcc void @"resource_rollback.#cont#1<0>"() {
   %"res##0" = load i64, ptr @"resource#resource_rollback.res"
   call ccc void @print_int(i64 %"res##0")
   call ccc void @putchar(i8 10)
@@ -106,7 +106,7 @@ define external fastcc void @"resource_rollback.#cont#1<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc {i64, i1} @"resource_rollback.foo<0>"(i64 %"call_source_location##0") alwaysinline {
+define external fastcc {i64, i1} @"resource_rollback.foo<0>"(i64 %"call_source_location##0") {
   %"tmp#7##0" = insertvalue {i64, i1} undef, i64 %"call_source_location##0", 0
   %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
   ret {i64, i1} %"tmp#8##0"

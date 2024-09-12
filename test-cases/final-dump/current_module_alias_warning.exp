@@ -55,20 +55,20 @@ declare external ccc void @print_float(double)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"current_module_alias_warning.<0>"() alwaysinline {
+define external fastcc void @"current_module_alias_warning.<0>"() {
   %"tmp#0##0" = tail call fastcc double @"current_module_alias_warning.toCelsius<0>"(double 1.0)
   call ccc void @print_float(double %"tmp#0##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc double @"current_module_alias_warning.toCelsius<0>"(double %"f##0") alwaysinline {
+define external fastcc double @"current_module_alias_warning.toCelsius<0>"(double %"f##0") {
   %"tmp#1##0" = fsub double %"f##0", 32.0
   %"tmp#6##0" = fdiv double %"tmp#1##0", 1.8
   ret double %"tmp#6##0"
 }
 
-define external fastcc double @"current_module_alias_warning.toCelsius<1>"(double %"f##0") alwaysinline {
+define external fastcc double @"current_module_alias_warning.toCelsius<1>"(double %"f##0") {
   %"tmp#1##0" = fsub double %"f##0", 32.0
   %"tmp#6##0" = fdiv double %"tmp#1##0", 1.8
   ret double %"tmp#6##0"
@@ -103,7 +103,7 @@ target triple    ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc double @"math.temperature.toCelsius<0>"(double %"f##0") alwaysinline {
+define external fastcc double @"math.temperature.toCelsius<0>"(double %"f##0") {
   %"tmp#1##0" = fsub double %"f##0", 32.0
   %"tmp#6##0" = fdiv double %"tmp#1##0", 1.8
   ret double %"tmp#6##0"

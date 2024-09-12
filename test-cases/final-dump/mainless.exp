@@ -30,6 +30,6 @@ target triple    ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i64 @"mainless.nothing_interesting<0>"() alwaysinline {
+define external fastcc i64 @"mainless.nothing_interesting<0>"() {
   ret i64 7
 }

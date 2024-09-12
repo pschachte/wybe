@@ -82,7 +82,7 @@ declare external ccc void @putchar(i8)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"io_flow_ok.<0>"() alwaysinline {
+define external fastcc void @"io_flow_ok.<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @putchar(i8 10)
   %"tmp#0##0" = tail call fastcc i1 @"io_flow_ok.unknown<0>"()
@@ -101,12 +101,12 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"io_flow_ok.aok<0>"() alwaysinline {
+define external fastcc void @"io_flow_ok.aok<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc i1 @"io_flow_ok.unknown<0>"() alwaysinline {
+define external fastcc i1 @"io_flow_ok.unknown<0>"() {
   ret i1 1
 }

@@ -581,7 +581,7 @@ writeProcSpeczLLVM pspec tmpCount params body = do
     llvmPutStrLn $
         "define external " ++ cc ++ " " ++ returnType ++ " "
             ++ name ++ "(" ++ intercalate ", " llParams ++ ")"
-            ++ " alwaysinline {"
+            ++ " {"
     writeAssemblyBody outs body
     llvmPutStrLn "}"
 
@@ -719,24 +719,24 @@ writeWybeCall wybeProc args pos = do
 
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
-writeHOCall callee args pos = do
+writeHOCall closure args pos = do
     -- XXX add special case for statically known callee
-    (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
-    let hoCall = PrimHigher 0 callee Pure args
-    unless (List.null iRefs)
-     $ shouldnt $ "Higher order call " ++ show hoCall
-                ++ " with take-reference arg"
+    (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs $ closure:args
     unless (List.null oRefs && List.null iRefs)
-     $ nyi $ "Higher order call with out-by-ref or take-ref argument "
-            ++ show hoCall
-    outTy <- llvmReturnType $ List.map argType outs
-    (writeArg,readArg) <- freshTempArgs $ Representation CPointer
-    typeConvert callee writeArg
-    fnVar <- llvmValue readArg
-    argList <- llvmArgumentList ins
-    prefix <- tailMarker False
-    llvmStoreResult outs $
-        prefix ++ "call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
+        $ nyi $ "Higher order call with out-by-ref or take-ref argument "
+                ++ show (PrimHigher 0 closure Pure args)
+    allPhantoms <- and <$> lift (mapM argIsPhantom outs)
+    let ty = argVarType closure
+    unless (allPhantoms && not (isResourcefulHigherOrder ty)
+                && modifierImpurity (higherTypeModifiers ty) <= Pure) $ do
+        outTy <- llvmReturnType $ List.map argType outs
+        (writeFnPtr,readFnPtr) <- freshTempArgs $ Representation CPointer
+        llvmLoad closure writeFnPtr
+        fnVar <- llvmValue readFnPtr
+        argList <- llvmArgumentList ins
+        prefix <- tailMarker False
+        llvmAssignResult outs $
+            prefix ++ "call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
 
 
 -- | Work out the appropriate prefix for a call:  tail, musttail, or nothing.
@@ -758,7 +758,7 @@ writeActualCall wybeProc ins outs tailKind = do
         outTy <- llvmReturnType $ List.map argType outs
         argList <- llvmArgumentList ins
         let (name,cc) = llvmProcName wybeProc
-        llvmStoreResult outs $
+        llvmAssignResult outs $
             tailKind ++ "call " ++ cc ++ " " ++ outTy ++ " " ++ name ++ argList
 
 
@@ -776,7 +776,7 @@ writeLLVMCall op flags args pos = do
             else if op `Map.member` llvmMapUnop then do
                 outTy <- llvmTypeRep <$> argTypeRep out
                 llvmArg <- llvmArgument arg
-                llvmStoreResult outs $ op ++ " " ++ llvmArg ++ " to " ++ outTy
+                llvmAssignResult outs $ op ++ " " ++ llvmArg ++ " to " ++ outTy
             else shouldnt $ "unknown unary llvm op " ++ op
         ([_,_],[out]) -> do
             let BinOpInfo {binOpInstr=instr,binOpArgSize=argSize,
@@ -784,7 +784,7 @@ writeLLVMCall op flags args pos = do
                     trustFromJust ("unknown binary llvm op " ++ op)
                     $ Map.lookup op llvmMapBinop
             (argList,outRep) <- llvmInstrArgumentList argSize out ins resultFn
-            llvmStoreConvertedResult out outRep $ instr ++ " " ++ argList
+            llvmAssignConvertedResult out outRep $ instr ++ " " ++ argList
         _ -> shouldnt $ "unknown llvm op " ++ op ++ " (arity "
                          ++ show (length ins) ++ ")"
 
@@ -824,10 +824,7 @@ writeLPVMCall "store" _ args pos = do
     args' <- partitionArgs "lpvm store instruction" args
     case args' of
         ([],[]) -> return ()
-        ([val,ptr],[]) -> do
-            llVal <- llvmArgument val
-            arg <- typeConverted CPointer ptr
-            llvmStoreResult [] $ "store " ++ llVal ++ ", " ++ arg
+        ([val,ptr],[]) -> llvmStore ptr val
         (ins, outs) ->
             shouldnt $ "lpvm store with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
@@ -845,7 +842,7 @@ writeLPVMCall "access" _ args pos = do
                         return readArg
             lltype <- llvmTypeRep <$> argTypeRep member
             arg <- typeConverted CPointer addrArg
-            llvmStoreResult outs $ "load " ++ lltype ++ ", " ++ arg
+            llvmAssignResult outs $ "load " ++ lltype ++ ", " ++ arg
         (ins,outs) ->
             shouldnt $ "lpvm access with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
@@ -877,10 +874,7 @@ writeLPVMCall "mutate" _ args pos = do
             case (restIns,iRefs) of
                 ([member],[]) -> do
                     logLLVM "Normal (non-take-reference) case"
-                    llMember <- llvmArgument member
-                    dest <- typeConverted CPointer ptrArg
-                    llvmPutStrLnIndented $ "store " ++ llMember
-                                            ++ ", " ++ dest
+                    llvmStore ptrArg member
                 ([],[takeRef]) -> do
                     -- FlowTakeReference case:  generate and record a fresh
                     -- local variable to hold the pointer to the location the
@@ -910,7 +904,7 @@ writeCCall cfn flags args pos = do
     (ins,outs) <- partitionArgs ("call to C function " ++ cfn) args
     outTy <- llvmReturnType $ List.map argType outs
     argList <- llvmArgumentList ins
-    llvmStoreResult outs $ "call ccc " ++ outTy ++ " " ++ llvmGlobalName cfn
+    llvmAssignResult outs $ "call ccc " ++ outTy ++ " " ++ llvmGlobalName cfn
                             ++ argList
 
 
@@ -1014,7 +1008,49 @@ llvmLoad :: PrimArg -> PrimArg -> LLVM ()
 llvmLoad ptr outVar = do
     lltype <- llvmTypeRep <$> argTypeRep outVar
     arg <- typeConverted CPointer ptr
-    llvmStoreResult [outVar] $ "load " ++ lltype ++ ", " ++ arg
+    llvmAssignResult [outVar] $ "load " ++ lltype ++ ", " ++ arg
+
+
+-- | Generate an LLVM store instruction to store the specified PrimArg into the
+-- specified address.
+llvmStore :: PrimArg -> PrimArg -> LLVM ()
+llvmStore ptr toStore = llvmArgument toStore >>= llvmStoreValue ptr
+
+
+-- | Generate an LLVM store instruction to store the specified LLVM argument
+-- into the specified address.
+llvmStoreValue :: PrimArg -> LLVMArg -> LLVM ()
+llvmStoreValue ptr llVal = do
+    cptr <- typeConverted CPointer ptr
+    llvmAssignResult [] $ "store " ++ llVal ++ ", " ++ cptr
+
+
+-- | Generate LLVM store instructions to store all elements of the specified
+-- list into words of memory beginning with the specified pointer.
+llvmStoreArray :: PrimArg -> [LLVMArg] -> LLVM ()
+llvmStoreArray ptr [] = return ()
+llvmStoreArray ptr (llVal:llVals) = do
+    llvmStoreValue ptr llVal
+    foldM_ (\p v -> do
+        cptr <- pointerOffset p wordSizeBytes
+        llvmStoreValue cptr llVal
+        return cptr
+      ) ptr llVals
+
+
+-- | Compute the specified offset to a pointer, returning the result as a
+-- CPointer ready to use for loading or storing.  The input pointer can be a
+-- Pointer or CPointer.
+pointerOffset :: PrimArg -> Int -> LLVM PrimArg
+pointerOffset ptr 0 = typeConvertedPrim CPointer ptr
+pointerOffset ptr offset = do
+    addr <- typeConvertedPrim Pointer ptr
+    addrArg <- llvmArgument addr
+    (writePtr,readPtr) <- freshTempArgs $ Representation Pointer
+    llvmAssignConvertedResult writePtr CPointer
+        $ "add " ++ addrArg ++ ", "
+            ++ llvmTypeRep Pointer ++ ", " ++ show offset
+    return readPtr
 
 
 -- | Generate code to copy a structure, given a tagged pointer, the tag, the
@@ -1088,24 +1124,24 @@ llvmInstrArgumentList argSize output inputs repFn = do
 
 -- | Write the LLVM translation of the specified output argument list as target
 -- for the specified instruction.  For multiple outputs, we must unpack a tuple.
-llvmStoreResult :: [PrimArg] -> String -> LLVM ()
-llvmStoreResult [] instr = llvmPutStrLnIndented instr
-llvmStoreResult [ArgVar{argVarName=varName}] instr = do
+llvmAssignResult :: [PrimArg] -> String -> LLVM ()
+llvmAssignResult [] instr = llvmPutStrLnIndented instr
+llvmAssignResult [ArgVar{argVarName=varName}] instr = do
     llVar <- varToWrite varName
     llvmPutStrLnIndented $ llVar ++ " = " ++ instr
-llvmStoreResult multiOuts instr = do
+llvmAssignResult multiOuts instr = do
     tuple <- llvmLocalName <$> makeTemp
     retType <- llvmReturnType $ argVarType <$> multiOuts
     llvmPutStrLnIndented $ tuple ++ " = " ++ instr
-    -- This uses llvmStoreResult to store each individual element of tuple
+    -- This uses llvmAssignResult to store each individual element of tuple
     zipWithM_ (unpackArg retType tuple) multiOuts [0..]
 
 
 -- | Write the LLVM translation of the specified single output variable as
 -- target for the specified instruction, converting from the specified type
 -- representation if necessary.
-llvmStoreConvertedResult :: PrimArg -> TypeRepresentation -> String -> LLVM ()
-llvmStoreConvertedResult arg@ArgVar{argVarName=varName,argVarType=ty}
+llvmAssignConvertedResult :: PrimArg -> TypeRepresentation -> String -> LLVM ()
+llvmAssignConvertedResult arg@ArgVar{argVarName=varName,argVarType=ty}
                          actualRep instr = do
     neededRep <- typeRep ty
     if neededRep == actualRep
@@ -1114,11 +1150,11 @@ llvmStoreConvertedResult arg@ArgVar{argVarName=varName,argVarType=ty}
             llvmPutStrLnIndented $ llVar ++ " = " ++ instr
         else do
             (writeArg,readArg) <- freshTempArgs $ Representation actualRep
-            llVar <- varToWrite $ argVar "in llvmStoreConvertedResult" writeArg
+            llVar <- varToWrite $ argVar "in llvmAssignConvertedResult" writeArg
             llvmPutStrLnIndented $ llVar ++ " = " ++ instr
             typeConvert readArg arg
-llvmStoreConvertedResult notAVar _ _ =
-    shouldnt $ "llvmStoreConvertedResult into non-variable " ++ show notAVar
+llvmAssignConvertedResult notAVar _ _ =
+    shouldnt $ "llvmAssignConvertedResult into non-variable " ++ show notAVar
 
 -- | Split parameter list into separate list of input, output, out-by-reference,
 -- and take-reference arguments, ignoring any phantom parameters.
@@ -1196,10 +1232,10 @@ marshallCallResult outArg@ArgVar{argVarName=varName} cType instr = do
             $ cTypeRepresentation cType
     outTypeRep <- argTypeRep outArg
     let instr' = "call ccc " ++ llvmTypeRep inTypeRep ++ " " ++ instr
-    if inTypeRep == outTypeRep then llvmStoreResult [outArg] instr'
+    if inTypeRep == outTypeRep then llvmAssignResult [outArg] instr'
     else do
         (writeTmp,readTmp) <- freshTempArgs $ Representation inTypeRep
-        llvmStoreResult [writeTmp] instr'
+        llvmAssignResult [writeTmp] instr'
         typeConvert readTmp outArg
 marshallCallResult outArg inTypeRep instr =
     shouldnt $ "Can't marshall result into non-variable " ++ show outArg
@@ -1210,7 +1246,7 @@ marshallCallResult outArg inTypeRep instr =
 unpackArg :: LLVMType -> LLVMName -> PrimArg -> Int -> LLVM ()
 unpackArg typ tuple arg argNum = do
     logLLVM $ "Extracting arg " ++ show argNum ++ " into " ++ show arg
-    llvmStoreResult [arg] $ "extractvalue " ++ typ
+    llvmAssignResult [arg] $ "extractvalue " ++ typ
                             ++ tuple ++ ", " ++ show argNum
 
 
@@ -1259,15 +1295,27 @@ llvmValue (ArgString str stringVariant _) = do
     convertedConstant
         (ArgGlobal (GlobalVariable glob) $ Representation CPointer) Pointer
 llvmValue (ArgChar val _) = return $ show $ fromEnum val
-llvmValue arg@(ArgClosure ps args ty) = do
+llvmValue arg@(ArgClosure pspec args ty) = do
     logLLVM $ "llvmValue of " ++ show arg
-    return $ nyi "closure argument " ++ show arg
-    -- args' <- neededFreeArgs ps args
+    -- args' <- neededFreeArgs pspec args
     -- if all argIsConst args'
     -- then do
-    --     noAlloca $ cons <$> cgenArgConst arg
+    -- XXX should handle fully constant closure as statically allocated struct,
+    -- or better yet, convert all constructions of fully constant data
+    -- structures into static allocated structures.  But the latter needs to be
+    -- done early enough in the compiler that alias tracking can see it.
     -- else do
-    --     fnOp <- cons <$> cgenFuncRef ps
+    (writePtr,readPtr) <- freshTempArgs $ Representation CPointer
+    fnRef <- funcRef pspec
+    alloca writePtr $ wordSizeBytes * (1 + length args)
+    llArgs <- mapM llvmArgument args
+    llvmStoreArray readPtr (fnRef:llArgs)
+    llvmValue readPtr
+    -- if all argIsConst args'
+    -- then do
+    --     cgenArgConst arg
+    -- else do
+    --     fnOp <- cons <$> cgenFuncRef pspec
     --     (envArgs, allocaTracking) <- cgenArgsFull (setArgType intType <$> args')
     --     mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args))
     --                                   `ArgInt` intType) address_t
@@ -1278,16 +1326,30 @@ llvmValue arg@(ArgClosure ps args ty) = do
     --         store accessPtr arg
     --         ) $ zip [0..] (fnOp:envArgs)
     --     return (mem, allocaTracking)
+    -- return $ nyi "closure argument " ++ show arg
 
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
 llvmValue (ArgUnneeded val _) = shouldnt "llvm value of unneeded arg"
 llvmValue (ArgUndef _) = return "undef"
 
 
+-- | The LLVMArg translation of a ProcSpec.
+funcRef :: ProcSpec -> LLVM LLVMArg
+funcRef pspec = return $ "ptr " ++ llvmGlobalName (show pspec)
+
+
 -- | The variable name of a PrimArg; report an error if not a variable.
 argVar :: String -> PrimArg -> PrimVarName
 argVar _ ArgVar{argVarName=var} =  var
 argVar msg _ = shouldnt $ "variable argument expected " ++ msg
+
+
+neededFreeArgs :: ProcSpec -> [PrimArg] -> LLVM [PrimArg]
+neededFreeArgs pspec args = lift $ do
+    params <- List.filter ((==Free) . primParamFlowType) . primProtoParams
+              . procImplnProto . procImpln <$> getProcDef pspec
+    List.map snd <$> filterM (paramIsReal . fst) (zip params args)
+
 
 
 ----------------------------------------------------------------------------
@@ -1321,6 +1383,10 @@ llvmTypeRep (Floating 128)  = "fp128"
 llvmTypeRep (Floating n)    = shouldnt $ "invalid float size " ++ show n
 -- XXX these should be made more accurate (use pointer and function types):
 llvmTypeRep (Func _ _)      = llvmTypeRep $ Bits wordSize
+-- llvmTypeRep (Func ins outs) = llvmRepReturnType outs
+--                                 ++ " ("
+--                                 ++ intercalate ", " (List.map llvmTypeRep ins)
+--                                 ++ ")"
 llvmTypeRep Pointer         = llvmTypeRep $ Bits wordSize
 llvmTypeRep CPointer        = "ptr"
 
@@ -1355,10 +1421,23 @@ typeConvert fromArg toArg = do
         ArgVar{argVarName=varName} | fromTy == toTy ->
             renameVariable varName fromVal
         _ ->
-            llvmStoreResult [toArg]
+            llvmAssignResult [toArg]
               $ typeConvertOp fromTy toTy ++ " "
                 ++ llvmTypeRep fromTy ++ " " ++ fromVal
                 ++ " to " ++ llvmTypeRep toTy
+
+
+-- | Convert the specified PrimArg to a PrimArg with the specified
+-- representation.
+typeConvertedPrim :: TypeRepresentation -> PrimArg -> LLVM PrimArg
+typeConvertedPrim toTy fromArg = do
+        argRep <- argTypeRep fromArg
+        if equivLLTypes argRep toTy
+            then return fromArg
+            else do
+                (writeArg,readArg) <- freshTempArgs $ Representation toTy
+                typeConvert fromArg writeArg
+                return readArg
 
 
 -- | LLVM code to convert PrimArg fromVal to representation toTy, returning an
@@ -1366,14 +1445,7 @@ typeConvert fromArg toArg = do
 typeConverted :: TypeRepresentation -> PrimArg -> LLVM LLVMArg
 typeConverted toTy fromArg
     | argIsConst fromArg = typedConvertedConstant fromArg toTy
-    | otherwise = do
-        argRep <- argTypeRep fromArg
-        if equivLLTypes argRep toTy
-            then llvmArgument fromArg
-            else do
-                (writeArg,readArg) <- freshTempArgs $ Representation toTy
-                typeConvert fromArg writeArg
-                llvmArgument readArg
+    | otherwise = typeConvertedPrim toTy fromArg >>= llvmArgument
 
 
 -- | LLVM code to convert PrimArg fromVal to representation toTy, returning a
@@ -1778,7 +1850,7 @@ convertOutByRefArg other =
 
 alloca :: PrimArg -> Int -> LLVM ()
 alloca result size = do
-    llvmStoreResult [result] $ "alloca ptr align " ++ show size
+    llvmAssignResult [result] $ "alloca ptr align " ++ show size
     modify $ \s -> s { doesAlloca = True }
 
 
@@ -1786,7 +1858,7 @@ alloca result size = do
 -- Formatting for LLVM                                                    --
 ----------------------------------------------------------------------------
 
--- | The LLVM name for a Wybe proc.
+-- | The LLVM name for a Wybe proc, with its LLVM calling convention.
 llvmProcName :: ProcSpec -> (LLVMName,String)
 llvmProcName ProcSpec{procSpecMod=[],procSpecName=""} =
     (llvmGlobalName "main", "ccc")

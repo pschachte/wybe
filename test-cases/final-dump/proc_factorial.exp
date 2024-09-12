@@ -72,19 +72,19 @@ declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"proc_factorial.<0>"() alwaysinline {
+define external fastcc void @"proc_factorial.<0>"() {
   %"tmp#0##0" = tail call fastcc i64 @"proc_factorial.factorial#cont#1<0>"(i64 5, i64 1)
   call ccc void @print_int(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc i64 @"proc_factorial.factorial<0>"(i64 %"n##0") alwaysinline {
+define external fastcc i64 @"proc_factorial.factorial<0>"(i64 %"n##0") {
   %"tmp#3##0" = tail call fastcc i64 @"proc_factorial.factorial#cont#1<0>"(i64 %"n##0", i64 1)
   ret i64 %"tmp#3##0"
 }
 
-define external fastcc i64 @"proc_factorial.factorial#cont#1<0>"(i64 %"n##0", i64 %"result##0") alwaysinline {
+define external fastcc i64 @"proc_factorial.factorial#cont#1<0>"(i64 %"n##0", i64 %"result##0") {
   %"tmp#2##0" = icmp sgt i64 %"n##0", 1
   br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -96,7 +96,7 @@ if.else.0:
   ret i64 %"result##0"
 }
 
-define external fastcc i64 @"proc_factorial.factorial#cont#2<0>"(i64 %"n##0", i64 %"result##0") alwaysinline {
+define external fastcc i64 @"proc_factorial.factorial#cont#2<0>"(i64 %"n##0", i64 %"result##0") {
   %"tmp#0##0" = mul i64 %"n##0", %"result##0"
   %"tmp#1##0" = sub i64 %"n##0", 1
   %"tmp#6##0" = tail call fastcc i64 @"proc_factorial.factorial#cont#1<0>"(i64 %"tmp#1##0", i64 %"tmp#0##0")

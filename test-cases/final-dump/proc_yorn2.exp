@@ -63,12 +63,12 @@ declare external ccc i8 @read_char()
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"proc_yorn2.yorn<0>"(i64 %"prompt##0") alwaysinline {
+define external fastcc i1 @"proc_yorn2.yorn<0>"(i64 %"prompt##0") {
   %"tmp#3##0" = tail call fastcc i1 @"proc_yorn2.yorn#cont#1<0>"(i64 %"prompt##0")
   ret i1 %"tmp#3##0"
 }
 
-define external fastcc i1 @"proc_yorn2.yorn#cont#1<0>"(i64 %"prompt##0") alwaysinline {
+define external fastcc i1 @"proc_yorn2.yorn#cont#1<0>"(i64 %"prompt##0") {
   tail call fastcc void @"wybe.string.print<0>"(i64 %"prompt##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
   %"response##0" = call ccc i8 @read_char()

@@ -41,12 +41,12 @@ declare external ccc i64 @ipow(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#exporter.res" = global i64 undef
 
-define external fastcc i64 @"exporter.fn<0>"(i64 %"i##0") alwaysinline {
+define external fastcc i64 @"exporter.fn<0>"(i64 %"i##0") {
   %"tmp#3##0" = call ccc i64 @ipow(i64 2, i64 %"i##0")
   ret i64 %"tmp#3##0"
 }
 
-define external fastcc i64 @"exporter.three<0>"() alwaysinline {
+define external fastcc i64 @"exporter.three<0>"() {
   %"tmp#1##0" = load i64, ptr @"resource#exporter.res"
   ret i64 %"tmp#1##0"
 }

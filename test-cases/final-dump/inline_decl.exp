@@ -79,7 +79,7 @@ target triple    ????
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"inline_decl.<0>"() alwaysinline {
+define external fastcc void @"inline_decl.<0>"() {
   call ccc void @putchar(i8 104)
   call ccc void @putchar(i8 101)
   call ccc void @putchar(i8 108)
@@ -96,12 +96,12 @@ define external fastcc void @"inline_decl.<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc void @"inline_decl.finish<0>"() alwaysinline {
+define external fastcc void @"inline_decl.finish<0>"() {
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc void @"inline_decl.long<0>"() alwaysinline {
+define external fastcc void @"inline_decl.long<0>"() {
   call ccc void @putchar(i8 104)
   call ccc void @putchar(i8 101)
   call ccc void @putchar(i8 108)

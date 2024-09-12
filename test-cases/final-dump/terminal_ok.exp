@@ -45,12 +45,12 @@ target triple    ????
 declare external ccc void @exit(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"terminal_ok.<0>"() alwaysinline {
+define external fastcc void @"terminal_ok.<0>"() {
   tail call fastcc void @"terminal_ok.exit_bool<0>"(i1 0)
   ret void
 }
 
-define external fastcc void @"terminal_ok.exit_bool<0>"(i1 %"b##0") alwaysinline {
+define external fastcc void @"terminal_ok.exit_bool<0>"(i1 %"b##0") {
   br i1 %"b##0", label %if.then.0, label %if.else.0
 if.then.0:
   call ccc void @exit(i64 1)

@@ -196,7 +196,7 @@ declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"cond_expr_no_else.<0>"() alwaysinline {
+define external fastcc void @"cond_expr_no_else.<0>"() {
   %"tmp#20##0" = tail call fastcc {i64, i1} @"cond_expr_no_else.to_count<0>"(i64 5)
   %"tmp#3##0" = extractvalue {i64, i1}%"tmp#20##0", 0
   %"tmp#19##0" = extractvalue {i64, i1}%"tmp#20##0", 1
@@ -209,7 +209,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"cond_expr_no_else.#cont#1<0>"(i64 %"tmp#2##0") alwaysinline {
+define external fastcc void @"cond_expr_no_else.#cont#1<0>"(i64 %"tmp#2##0") {
   %"tmp#1##0" = tail call fastcc i64 @"wybe.count.fmt<2>"(i64 %"tmp#2##0", i64 0, i8 32)
   %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#5" to i64 ), i64 %"tmp#1##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#0##0")
@@ -226,7 +226,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"cond_expr_no_else.#cont#2<0>"(i64 %"tmp#6##0") alwaysinline {
+define external fastcc void @"cond_expr_no_else.#cont#2<0>"(i64 %"tmp#6##0") {
   %"tmp#5##0" = tail call fastcc i64 @"wybe.count.fmt<2>"(i64 %"tmp#6##0", i64 0, i8 32)
   %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#4" to i64 ), i64 %"tmp#5##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#4##0")
@@ -243,7 +243,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"cond_expr_no_else.#cont#3<0>"(i64 %"tmp#10##0") alwaysinline {
+define external fastcc void @"cond_expr_no_else.#cont#3<0>"(i64 %"tmp#10##0") {
   %"tmp#9##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#10##0", i64 0, i8 32)
   %"tmp#8##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#6" to i64 ), i64 %"tmp#9##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#8##0")
@@ -260,7 +260,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"cond_expr_no_else.#cont#4<0>"(i64 %"tmp#14##0") alwaysinline {
+define external fastcc void @"cond_expr_no_else.#cont#4<0>"(i64 %"tmp#14##0") {
   %"tmp#13##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#14##0", i64 0, i8 32)
   %"tmp#12##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#7" to i64 ), i64 %"tmp#13##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#12##0")
@@ -268,7 +268,7 @@ define external fastcc void @"cond_expr_no_else.#cont#4<0>"(i64 %"tmp#14##0") al
   ret void
 }
 
-define external fastcc {i64, i1} @"cond_expr_no_else.to_count<0>"(i64 %"i##0") alwaysinline {
+define external fastcc {i64, i1} @"cond_expr_no_else.to_count<0>"(i64 %"i##0") {
   %"tmp#1##0" = icmp sge i64 %"i##0", 0
   br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -281,7 +281,7 @@ if.else.0:
   ret {i64, i1} %"tmp#7##0"
 }
 
-define external fastcc {i64, i1} @"cond_expr_no_else.vowel_num<0>"(i8 %"c##0") alwaysinline {
+define external fastcc {i64, i1} @"cond_expr_no_else.vowel_num<0>"(i8 %"c##0") {
   %"tmp#5##0" = icmp eq i8 %"c##0", 97
   br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:

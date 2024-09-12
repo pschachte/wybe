@@ -57,7 +57,7 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#bug228-okay.res" = global i64 undef
 
-define external fastcc void @"bug228-okay.<0>"() alwaysinline {
+define external fastcc void @"bug228-okay.<0>"() {
   call ccc void @print_int(i64 1)
   call ccc void @putchar(i8 10)
   call ccc void @print_int(i64 2)
@@ -65,7 +65,7 @@ define external fastcc void @"bug228-okay.<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc {i64, i64} @"bug228-okay.bar<0>"() alwaysinline {
+define external fastcc {i64, i64} @"bug228-okay.bar<0>"() {
   %"tmp#1##0" = load i64, ptr @"resource#bug228-okay.res"
   store i64 %"tmp#1##0", ptr @"resource#bug228-okay.res"
   %"tmp#2##0" = insertvalue {i64, i64} undef, i64 1, 0
@@ -73,7 +73,7 @@ define external fastcc {i64, i64} @"bug228-okay.bar<0>"() alwaysinline {
   ret {i64, i64} %"tmp#3##0"
 }
 
-define external fastcc void @"bug228-okay.init_res<0>"() alwaysinline {
+define external fastcc void @"bug228-okay.init_res<0>"() {
   store i64 2, ptr @"resource#bug228-okay.res"
   ret void
 }

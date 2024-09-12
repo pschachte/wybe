@@ -106,7 +106,7 @@ declare external fastcc i64 @"mytree.printTree1<0>"(i64, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"alias_fork1.<0>"() alwaysinline {
+define external fastcc void @"alias_fork1.<0>"() {
   %"tmp#23##0" = call ccc ptr @wybe_malloc(i32 24)
   %"tmp#10##0" = ptrtoint ptr %"tmp#23##0" to i64
   %"tmp#24##0" = inttoptr i64 %"tmp#10##0" to ptr
@@ -134,7 +134,7 @@ define external fastcc void @"alias_fork1.<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc i64 @"alias_fork1.simpleMerge<0>"(i64 %"tl##0", i64 %"tr##0") alwaysinline {
+define external fastcc i64 @"alias_fork1.simpleMerge<0>"(i64 %"tl##0", i64 %"tr##0") {
   %"tmp#15##0" = icmp ne i64 %"tl##0", 0
   br i1 %"tmp#15##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -205,7 +205,7 @@ if.else.0:
   ret i64 %"tmp#19##0"
 }
 
-define external fastcc i64 @"alias_fork1.simpleMerge#cont#1<0>"(i64 %"tmp#2##0") alwaysinline {
+define external fastcc i64 @"alias_fork1.simpleMerge#cont#1<0>"(i64 %"tmp#2##0") {
   ret i64 %"tmp#2##0"
 }
 
@@ -284,13 +284,13 @@ declare external ccc void @print_int(i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"mytree.printTree<0>"(i64 %"t##0") alwaysinline {
+define external fastcc void @"mytree.printTree<0>"(i64 %"t##0") {
   %"prefix##1" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"t##0", i64 ptrtoint( ptr @"string#4" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   ret void
 }
 
-define external fastcc i64 @"mytree.printTree1<0>"(i64 %"t##0", i64 %"prefix##0") alwaysinline {
+define external fastcc i64 @"mytree.printTree1<0>"(i64 %"t##0", i64 %"prefix##0") {
   %"tmp#2##0" = icmp ne i64 %"t##0", 0
   br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -528,7 +528,7 @@ target triple    ????
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"mytree.tree.=<0>"(i64 %"#left##0", i64 %"#right##0") alwaysinline {
+define external fastcc i1 @"mytree.tree.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#0##0" = icmp ne i64 %"#left##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -570,11 +570,11 @@ if.else.0:
   ret i1 %"tmp#24##0"
 }
 
-define external fastcc i64 @"mytree.tree.empty<0>"() alwaysinline {
+define external fastcc i64 @"mytree.tree.empty<0>"() {
   ret i64 0
 }
 
-define external fastcc {i64, i1} @"mytree.tree.key<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc {i64, i1} @"mytree.tree.key<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -590,7 +590,7 @@ if.else.0:
   ret {i64, i1} %"tmp#7##0"
 }
 
-define external fastcc {i64, i1} @"mytree.tree.key<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc {i64, i1} @"mytree.tree.key<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -610,7 +610,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"mytree.tree.left<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc {i64, i1} @"mytree.tree.left<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -625,7 +625,7 @@ if.else.0:
   ret {i64, i1} %"tmp#6##0"
 }
 
-define external fastcc {i64, i1} @"mytree.tree.left<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc {i64, i1} @"mytree.tree.left<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -644,7 +644,7 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc i64 @"mytree.tree.node<0>"(i64 %"left##0", i64 %"key##0", i64 %"right##0") alwaysinline {
+define external fastcc i64 @"mytree.tree.node<0>"(i64 %"left##0", i64 %"key##0", i64 %"right##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 24)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -658,7 +658,7 @@ define external fastcc i64 @"mytree.tree.node<0>"(i64 %"left##0", i64 %"key##0",
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64, i64, i1} @"mytree.tree.node<1>"(i64 %"#result##0") alwaysinline {
+define external fastcc {i64, i64, i64, i1} @"mytree.tree.node<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -683,7 +683,7 @@ if.else.0:
   ret {i64, i64, i64, i1} %"tmp#16##0"
 }
 
-define external fastcc {i64, i1} @"mytree.tree.right<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc {i64, i1} @"mytree.tree.right<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -699,7 +699,7 @@ if.else.0:
   ret {i64, i1} %"tmp#7##0"
 }
 
-define external fastcc {i64, i1} @"mytree.tree.right<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc {i64, i1} @"mytree.tree.right<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -719,7 +719,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc i1 @"mytree.tree.~=<0>"(i64 %"#left##0", i64 %"#right##0") alwaysinline {
+define external fastcc i1 @"mytree.tree.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#0##0" = tail call fastcc i1 @"mytree.tree.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"

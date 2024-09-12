@@ -56,13 +56,13 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"person5.<0>"() alwaysinline {
+define external fastcc void @"person5.<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   ret void
 }
 
-define external fastcc {i64, i64} @"person5.update_both<0>"(i64 %"p1##0", i64 %"p2##0") alwaysinline {
+define external fastcc {i64, i64} @"person5.update_both<0>"(i64 %"p1##0", i64 %"p2##0") {
   %"tmp#4##0" = inttoptr i64 %"p1##0" to ptr
   %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 16, i1 0)
@@ -199,7 +199,7 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"person5.person.=<0>"(i64 %"#left##0", i64 %"#right##0") alwaysinline {
+define external fastcc i1 @"person5.person.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#11##0" = inttoptr i64 %"#left##0" to ptr
   %"#left#firstname##0" = load i64, ptr %"tmp#11##0"
   %"tmp#12##0" = add i64 %"#left##0", 8
@@ -221,13 +221,13 @@ if.else.0:
   ret i1 0
 }
 
-define external fastcc i64 @"person5.person.firstname<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc i64 @"person5.person.firstname<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#0##0"
   ret i64 %"tmp#1##0"
 }
 
-define external fastcc i64 @"person5.person.firstname<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc i64 @"person5.person.firstname<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
@@ -237,14 +237,14 @@ define external fastcc i64 @"person5.person.firstname<1>"(i64 %"#rec##0", i64 %"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"person5.person.lastname<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc i64 @"person5.person.lastname<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 8
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#1##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"person5.person.lastname<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc i64 @"person5.person.lastname<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
@@ -255,7 +255,7 @@ define external fastcc i64 @"person5.person.lastname<1>"(i64 %"#rec##0", i64 %"#
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"person5.person.person<0>"(i64 %"firstname##0", i64 %"lastname##0") alwaysinline {
+define external fastcc i64 @"person5.person.person<0>"(i64 %"firstname##0", i64 %"lastname##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -266,7 +266,7 @@ define external fastcc i64 @"person5.person.person<0>"(i64 %"firstname##0", i64 
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64} @"person5.person.person<1>"(i64 %"#result##0") alwaysinline {
+define external fastcc {i64, i64} @"person5.person.person<1>"(i64 %"#result##0") {
   %"tmp#0##0" = inttoptr i64 %"#result##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#0##0"
   %"tmp#2##0" = add i64 %"#result##0", 8
@@ -277,7 +277,7 @@ define external fastcc {i64, i64} @"person5.person.person<1>"(i64 %"#result##0")
   ret {i64, i64} %"tmp#6##0"
 }
 
-define external fastcc i1 @"person5.person.~=<0>"(i64 %"#left##0", i64 %"#right##0") alwaysinline {
+define external fastcc i1 @"person5.person.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#10##0" = inttoptr i64 %"#left##0" to ptr
   %"tmp#3##0" = load i64, ptr %"tmp#10##0"
   %"tmp#11##0" = add i64 %"#left##0", 8

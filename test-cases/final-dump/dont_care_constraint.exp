@@ -33,7 +33,7 @@ target triple    ????
 declare external ccc i64 @read_line()
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"dont_care_constraint.<0>"() alwaysinline {
+define external fastcc void @"dont_care_constraint.<0>"() {
   %"tmp#2##0" = call ccc i64 @read_line()
   ret void
 }

@@ -425,7 +425,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#failure_backtrack.r" = global i64 undef
 @"resource#failure_backtrack.s" = global i64 undef
 
-define external fastcc void @"failure_backtrack.<0>"() alwaysinline {
+define external fastcc void @"failure_backtrack.<0>"() {
   %"tmp#139##0" = load i64, ptr @"resource#failure_backtrack.r"
   %"tmp#140##0" = load i64, ptr @"resource#failure_backtrack.s"
   store i64 7, ptr @"resource#failure_backtrack.r"
@@ -446,7 +446,7 @@ define external fastcc void @"failure_backtrack.<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc void @"failure_backtrack.#cont#1<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc void @"failure_backtrack.#cont#1<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") {
   %"tmp#12##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"r##0" = load i64, ptr @"resource#failure_backtrack.r"
   %"tmp#14##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"r##0", i64 0, i8 32)
@@ -481,7 +481,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"failure_backtrack.#cont#2<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc void @"failure_backtrack.#cont#2<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") {
   %"tmp#27##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"tmp#144##0" = load i64, ptr @"resource#failure_backtrack.r"
   %"tmp#29##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#144##0", i64 0, i8 32)
@@ -515,7 +515,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"failure_backtrack.#cont#3<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc void @"failure_backtrack.#cont#3<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") {
   %"tmp#42##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"r##0" = load i64, ptr @"resource#failure_backtrack.r"
   %"tmp#44##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"r##0", i64 0, i8 32)
@@ -577,7 +577,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"failure_backtrack.#cont#4<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc void @"failure_backtrack.#cont#4<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") {
   %"tmp#69##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"tmp#72##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"y##0", i64 0, i8 32)
   %"tmp#150##0" = load i64, ptr @"resource#failure_backtrack.r"
@@ -616,7 +616,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"failure_backtrack.#cont#5<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc void @"failure_backtrack.#cont#5<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") {
   %"tmp#91##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"tmp#94##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"y##0", i64 0, i8 32)
   %"r##0" = load i64, ptr @"resource#failure_backtrack.r"
@@ -665,7 +665,7 @@ if.else.1:
   ret void
 }
 
-define external fastcc void @"failure_backtrack.#cont#6<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc void @"failure_backtrack.#cont#6<0>"(i64 %"tmp#139##0", i64 %"tmp#140##0", i64 %"x##0", i64 %"y##0") {
   %"tmp#113##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"tmp#116##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"y##0", i64 0, i8 32)
   %"r##0" = load i64, ptr @"resource#failure_backtrack.r"
@@ -686,16 +686,16 @@ define external fastcc void @"failure_backtrack.#cont#6<0>"(i64 %"tmp#139##0", i
   ret void
 }
 
-define external fastcc i1 @"failure_backtrack.nope<0>"() alwaysinline {
+define external fastcc i1 @"failure_backtrack.nope<0>"() {
   ret i1 0
 }
 
-define external fastcc {i64, i1} @"failure_backtrack.nope2<0>"() alwaysinline {
+define external fastcc {i64, i1} @"failure_backtrack.nope2<0>"() {
   %"tmp#0##0" = insertvalue {i64, i1} undef, i64 2, 0
   %"tmp#1##0" = insertvalue {i64, i1} %"tmp#0##0", i1 0, 1
   ret {i64, i1} %"tmp#1##0"
 }
 
-define external fastcc i1 @"failure_backtrack.yup<0>"() alwaysinline {
+define external fastcc i1 @"failure_backtrack.yup<0>"() {
   ret i1 1
 }

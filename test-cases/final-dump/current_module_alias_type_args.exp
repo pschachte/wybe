@@ -145,7 +145,7 @@ declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"current_module_alias_type_args.<0>"() alwaysinline {
+define external fastcc void @"current_module_alias_type_args.<0>"() {
   %"tmp#14##0" = call ccc ptr @wybe_malloc(i32 16)
   %"tmp#6##0" = ptrtoint ptr %"tmp#14##0" to i64
   %"tmp#15##0" = inttoptr i64 %"tmp#6##0" to ptr
@@ -165,7 +165,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc i64 @"current_module_alias_type_args.cons<0>"(i64 %"head##0", i64 %"tail##0") alwaysinline {
+define external fastcc i64 @"current_module_alias_type_args.cons<0>"(i64 %"head##0", i64 %"tail##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -176,7 +176,7 @@ define external fastcc i64 @"current_module_alias_type_args.cons<0>"(i64 %"head#
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64, i1} @"current_module_alias_type_args.cons<1>"(i64 %"#result##0") alwaysinline {
+define external fastcc {i64, i64, i1} @"current_module_alias_type_args.cons<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -196,11 +196,11 @@ if.else.0:
   ret {i64, i64, i1} %"tmp#11##0"
 }
 
-define external fastcc i64 @"current_module_alias_type_args.empty<0>"() alwaysinline {
+define external fastcc i64 @"current_module_alias_type_args.empty<0>"() {
   ret i64 0
 }
 
-define external fastcc {i64, i1} @"current_module_alias_type_args.head<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc {i64, i1} @"current_module_alias_type_args.head<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -215,7 +215,7 @@ if.else.0:
   ret {i64, i1} %"tmp#6##0"
 }
 
-define external fastcc {i64, i1} @"current_module_alias_type_args.head<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc {i64, i1} @"current_module_alias_type_args.head<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -234,7 +234,7 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc {i64, i1} @"current_module_alias_type_args.tail<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc {i64, i1} @"current_module_alias_type_args.tail<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -250,7 +250,7 @@ if.else.0:
   ret {i64, i1} %"tmp#7##0"
 }
 
-define external fastcc {i64, i1} @"current_module_alias_type_args.tail<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc {i64, i1} @"current_module_alias_type_args.tail<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:

@@ -48,7 +48,7 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#out_only_global_flow.res" = global i64 undef
 
-define external fastcc void @"out_only_global_flow.<0>"() alwaysinline {
+define external fastcc void @"out_only_global_flow.<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#out_only_global_flow.res"
   tail call fastcc void @"out_only_global_flow.out<0>"()
   %"res##1" = load i64, ptr @"resource#out_only_global_flow.res"
@@ -58,7 +58,7 @@ define external fastcc void @"out_only_global_flow.<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc void @"out_only_global_flow.out<0>"() alwaysinline {
+define external fastcc void @"out_only_global_flow.out<0>"() {
   store i64 11, ptr @"resource#out_only_global_flow.res"
   ret void
 }

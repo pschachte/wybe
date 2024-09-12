@@ -57,18 +57,18 @@ target triple    ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i64 @"constfold.fold_add<0>"() alwaysinline {
+define external fastcc i64 @"constfold.fold_add<0>"() {
   ret i64 42
 }
 
-define external fastcc i64 @"constfold.fold_mult<0>"() alwaysinline {
+define external fastcc i64 @"constfold.fold_mult<0>"() {
   ret i64 42
 }
 
-define external fastcc i64 @"constfold.fold_test<0>"() alwaysinline {
+define external fastcc i64 @"constfold.fold_test<0>"() {
   ret i64 42
 }
 
-define external fastcc i64 @"constfold.fortytwo<0>"() alwaysinline {
+define external fastcc i64 @"constfold.fortytwo<0>"() {
   ret i64 42
 }

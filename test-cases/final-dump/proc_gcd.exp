@@ -86,18 +86,18 @@ declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"proc_gcd.<0>"() alwaysinline {
+define external fastcc void @"proc_gcd.<0>"() {
   %"r##0" = tail call fastcc i64 @"proc_gcd.gcd#cont#1<0>"(i64 18, i64 24)
   call ccc void @print_int(i64 %"r##0")
   ret void
 }
 
-define external fastcc i64 @"proc_gcd.gcd<0>"(i64 %"a##0", i64 %"b##0") alwaysinline {
+define external fastcc i64 @"proc_gcd.gcd<0>"(i64 %"a##0", i64 %"b##0") {
   %"tmp#1##0" = tail call fastcc i64 @"proc_gcd.gcd#cont#1<0>"(i64 %"a##0", i64 %"b##0")
   ret i64 %"tmp#1##0"
 }
 
-define external fastcc i64 @"proc_gcd.gcd#cont#1<0>"(i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc i64 @"proc_gcd.gcd#cont#1<0>"(i64 %"x##0", i64 %"y##0") {
   %"tmp#0##0" = icmp ne i64 %"y##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -108,13 +108,13 @@ if.else.0:
   ret i64 %"x##0"
 }
 
-define external fastcc i64 @"proc_gcd.gcd#cont#2<0>"(i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc i64 @"proc_gcd.gcd#cont#2<0>"(i64 %"x##0", i64 %"y##0") {
   %"y##1" = tail call fastcc i64 @"proc_gcd.mod<0>"(i64 %"x##0", i64 %"y##0")
   %"tmp#0##0" = tail call fastcc i64 @"proc_gcd.gcd#cont#1<0>"(i64 %"y##0", i64 %"y##1")
   ret i64 %"tmp#0##0"
 }
 
-define external fastcc i64 @"proc_gcd.mod<0>"(i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc i64 @"proc_gcd.mod<0>"(i64 %"x##0", i64 %"y##0") {
   call ccc void @putchar(i8 120)
   call ccc void @print_int(i64 %"x##0")
   call ccc void @putchar(i8 32)

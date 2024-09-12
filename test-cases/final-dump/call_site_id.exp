@@ -96,7 +96,7 @@ declare external ccc i64 @read_int()
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"call_site_id.<0>"() alwaysinline {
+define external fastcc void @"call_site_id.<0>"() {
   %"x##0" = call ccc i64 @read_int()
   %"y##0" = call ccc i64 @read_int()
   %"tmp#5##0" = icmp sgt i64 %"x##0", 0
@@ -126,12 +126,12 @@ if.else.2:
   ret void
 }
 
-define external fastcc void @"call_site_id.bar<0>"(i64 %"x##0") alwaysinline {
+define external fastcc void @"call_site_id.bar<0>"(i64 %"x##0") {
   tail call fastcc void @"call_site_id.foo<0>"(i64 %"x##0")
   ret void
 }
 
-define external fastcc void @"call_site_id.foo<0>"(i64 %"x##0") alwaysinline {
+define external fastcc void @"call_site_id.foo<0>"(i64 %"x##0") {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))

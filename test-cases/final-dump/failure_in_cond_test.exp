@@ -42,12 +42,12 @@ target triple    ????
 declare external ccc void @print_int(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"failure_in_cond_test.<0>"() alwaysinline {
+define external fastcc void @"failure_in_cond_test.<0>"() {
   call ccc void @print_int(i64 1)
   ret void
 }
 
-define external fastcc {i64, i1} @"failure_in_cond_test.foo<0>"() alwaysinline {
+define external fastcc {i64, i1} @"failure_in_cond_test.foo<0>"() {
   %"tmp#0##0" = insertvalue {i64, i1} undef, i64 1, 0
   %"tmp#1##0" = insertvalue {i64, i1} %"tmp#0##0", i1 1, 1
   ret {i64, i1} %"tmp#1##0"

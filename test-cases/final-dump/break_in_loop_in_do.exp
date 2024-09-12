@@ -61,21 +61,21 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#break_in_loop_in_do.counter" = global i64 undef
 
-define external fastcc void @"break_in_loop_in_do.<0>"() alwaysinline {
+define external fastcc void @"break_in_loop_in_do.<0>"() {
   %"tmp#3##0" = load i64, ptr @"resource#break_in_loop_in_do.counter"
   call ccc void @print_int(i64 %"tmp#3##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc void @"break_in_loop_in_do.#cont#1<0>"() alwaysinline {
+define external fastcc void @"break_in_loop_in_do.#cont#1<0>"() {
   %"tmp#1##0" = load i64, ptr @"resource#break_in_loop_in_do.counter"
   call ccc void @print_int(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc void @"break_in_loop_in_do.#cont#2<0>"(i64 %"tmp#1##0") alwaysinline {
+define external fastcc void @"break_in_loop_in_do.#cont#2<0>"(i64 %"tmp#1##0") {
   store i64 %"tmp#1##0", ptr @"resource#break_in_loop_in_do.counter"
   call ccc void @print_int(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)

@@ -72,7 +72,7 @@ declare external ccc void @putchar(i8)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"nested_loop.<0>"() alwaysinline {
+define external fastcc void @"nested_loop.<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
@@ -81,7 +81,7 @@ define external fastcc void @"nested_loop.<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc void @"nested_loop.#cont#1<0>"() alwaysinline {
+define external fastcc void @"nested_loop.#cont#1<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
@@ -90,7 +90,7 @@ define external fastcc void @"nested_loop.#cont#1<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc void @"nested_loop.#cont#2<0>"() alwaysinline {
+define external fastcc void @"nested_loop.#cont#2<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"nested_loop.#cont#2<0>"()

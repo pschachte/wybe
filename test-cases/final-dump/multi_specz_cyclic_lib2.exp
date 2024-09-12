@@ -96,7 +96,7 @@ declare external fastcc void @"multi_specz_cyclic_lib2.foo2<0>"(i64, i64, i64, i
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"multi_specz_cyclic_lib.foo1<0>"(i64 %"x1##0", i64 %"x2##0", i64 %"x3##0", i64 %"x4##0", i64 %"n##0") alwaysinline {
+define external fastcc void @"multi_specz_cyclic_lib.foo1<0>"(i64 %"x1##0", i64 %"x2##0", i64 %"x3##0", i64 %"x4##0", i64 %"n##0") {
   %"tmp#0##0" = sub i64 %"n##0", 1
   %"tmp#1##0" = icmp slt i64 %"tmp#0##0", 0
   br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
@@ -111,7 +111,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64 %"pos##0", i64 %"v##0") alwaysinline {
+define external fastcc void @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64 %"pos##0", i64 %"v##0") {
   %"tmp#2##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#3##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#3##0", ptr %"tmp#2##0", i64 16, i1 0)
@@ -122,7 +122,7 @@ define external fastcc void @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64 %"po
   ret void
 }
 
-define external fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64 %"pos##0") alwaysinline {
+define external fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64 %"pos##0") {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   %"tmp#13##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#13##0"
@@ -251,7 +251,7 @@ target triple    ????
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"multi_specz_cyclic_lib.position.=<0>"(i64 %"#left##0", i64 %"#right##0") alwaysinline {
+define external fastcc i1 @"multi_specz_cyclic_lib.position.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#9##0" = inttoptr i64 %"#left##0" to ptr
   %"#left#x##0" = load i64, ptr %"tmp#9##0"
   %"tmp#10##0" = add i64 %"#left##0", 8
@@ -271,7 +271,7 @@ if.else.0:
   ret i1 0
 }
 
-define external fastcc i64 @"multi_specz_cyclic_lib.position.position<0>"(i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc i64 @"multi_specz_cyclic_lib.position.position<0>"(i64 %"x##0", i64 %"y##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -282,7 +282,7 @@ define external fastcc i64 @"multi_specz_cyclic_lib.position.position<0>"(i64 %"
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64} @"multi_specz_cyclic_lib.position.position<1>"(i64 %"#result##0") alwaysinline {
+define external fastcc {i64, i64} @"multi_specz_cyclic_lib.position.position<1>"(i64 %"#result##0") {
   %"tmp#0##0" = inttoptr i64 %"#result##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#0##0"
   %"tmp#2##0" = add i64 %"#result##0", 8
@@ -293,13 +293,13 @@ define external fastcc {i64, i64} @"multi_specz_cyclic_lib.position.position<1>"
   ret {i64, i64} %"tmp#6##0"
 }
 
-define external fastcc i64 @"multi_specz_cyclic_lib.position.x<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc i64 @"multi_specz_cyclic_lib.position.x<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#0##0"
   ret i64 %"tmp#1##0"
 }
 
-define external fastcc i64 @"multi_specz_cyclic_lib.position.x<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc i64 @"multi_specz_cyclic_lib.position.x<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
@@ -309,14 +309,14 @@ define external fastcc i64 @"multi_specz_cyclic_lib.position.x<1>"(i64 %"#rec##0
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"multi_specz_cyclic_lib.position.y<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc i64 @"multi_specz_cyclic_lib.position.y<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 8
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#1##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"multi_specz_cyclic_lib.position.y<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc i64 @"multi_specz_cyclic_lib.position.y<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
@@ -327,7 +327,7 @@ define external fastcc i64 @"multi_specz_cyclic_lib.position.y<1>"(i64 %"#rec##0
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i1 @"multi_specz_cyclic_lib.position.~=<0>"(i64 %"#left##0", i64 %"#right##0") alwaysinline {
+define external fastcc i1 @"multi_specz_cyclic_lib.position.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#8##0" = inttoptr i64 %"#left##0" to ptr
   %"tmp#3##0" = load i64, ptr %"tmp#8##0"
   %"tmp#9##0" = add i64 %"#left##0", 8
@@ -392,7 +392,7 @@ declare external fastcc void @"multi_specz_cyclic_lib.foo1<0>"(i64, i64, i64, i6
 declare external fastcc void @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"multi_specz_cyclic_lib2.foo2<0>"(i64 %"x1##0", i64 %"x2##0", i64 %"x3##0", i64 %"x4##0", i64 %"n##0") alwaysinline {
+define external fastcc void @"multi_specz_cyclic_lib2.foo2<0>"(i64 %"x1##0", i64 %"x2##0", i64 %"x3##0", i64 %"x4##0", i64 %"n##0") {
   %"tmp#0##0" = sub i64 %"n##0", 1
   %"tmp#1##0" = icmp slt i64 %"tmp#0##0", 0
   br i1 %"tmp#1##0", label %if.then.0, label %if.else.0

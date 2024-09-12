@@ -59,12 +59,12 @@ declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"backwards_assign.<0>"() alwaysinline {
+define external fastcc void @"backwards_assign.<0>"() {
   tail call fastcc void @"backwards_assign.#cont#1<0>"(i64 0)
   ret void
 }
 
-define external fastcc void @"backwards_assign.#cont#1<0>"(i64 %"i##0") alwaysinline {
+define external fastcc void @"backwards_assign.#cont#1<0>"(i64 %"i##0") {
   call ccc void @print_int(i64 %"i##0")
   call ccc void @putchar(i8 10)
   %"i##1" = add i64 %"i##0", 1
@@ -77,7 +77,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc i64 @"backwards_assign.backwards_assign<0>"(i64 %"input##0") alwaysinline {
+define external fastcc i64 @"backwards_assign.backwards_assign<0>"(i64 %"input##0") {
   %"tmp#3##0" = add i64 %"input##0", 1
   ret i64 %"tmp#3##0"
 }

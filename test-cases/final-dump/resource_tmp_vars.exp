@@ -53,7 +53,7 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#resource_tmp_vars.counter" = global i64 undef
 
-define external fastcc void @"resource_tmp_vars.<0>"() alwaysinline {
+define external fastcc void @"resource_tmp_vars.<0>"() {
   %"tmp#1##0" = load i64, ptr @"resource#resource_tmp_vars.counter"
   call ccc void @print_int(i64 1)
   call ccc void @putchar(i8 10)
@@ -62,7 +62,7 @@ define external fastcc void @"resource_tmp_vars.<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc void @"resource_tmp_vars.#cont#1<0>"(i64 %"tmp#1##0") alwaysinline {
+define external fastcc void @"resource_tmp_vars.#cont#1<0>"(i64 %"tmp#1##0") {
   call ccc void @print_int(i64 1)
   call ccc void @putchar(i8 10)
   store i64 %"tmp#1##0", ptr @"resource#resource_tmp_vars.counter"

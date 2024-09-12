@@ -635,7 +635,7 @@ declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"common_fields.<0>"() alwaysinline {
+define external fastcc void @"common_fields.<0>"() {
   %"tmp#43##0" = call ccc ptr @wybe_malloc(i32 32)
   %"tmp#15##0" = ptrtoint ptr %"tmp#43##0" to i64
   %"tmp#44##0" = inttoptr i64 %"tmp#15##0" to ptr
@@ -698,7 +698,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc i1 @"common_fields.=<0>"(i64 %"#left##0", i64 %"#right##0") alwaysinline {
+define external fastcc i1 @"common_fields.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#23##0" = and i64 %"#left##0", 3
   switch i64 %"tmp#23##0", label %case.3.switch.0 [
     i64 0, label %case.0.switch.0
@@ -872,7 +872,7 @@ if.else.12:
   ret i1 0
 }
 
-define external fastcc i64 @"common_fields.DVD<0>"(i64 %"title##0", i64 %"director##0", i64 %"genre##0", i64 %"id##0") alwaysinline {
+define external fastcc i64 @"common_fields.DVD<0>"(i64 %"title##0", i64 %"director##0", i64 %"genre##0", i64 %"id##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -890,7 +890,7 @@ define external fastcc i64 @"common_fields.DVD<0>"(i64 %"title##0", i64 %"direct
   ret i64 %"tmp#8##0"
 }
 
-define external fastcc {i64, i64, i64, i64, i1} @"common_fields.DVD<1>"(i64 %"#result##0") alwaysinline {
+define external fastcc {i64, i64, i64, i64, i1} @"common_fields.DVD<1>"(i64 %"#result##0") {
   %"tmp#1##0" = and i64 %"#result##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 2
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -922,7 +922,7 @@ if.else.0:
   ret {i64, i64, i64, i64, i1} %"tmp#23##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.author<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc {i64, i1} @"common_fields.author<0>"(i64 %"#rec##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -939,7 +939,7 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.author<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc {i64, i1} @"common_fields.author<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -960,7 +960,7 @@ if.else.0:
   ret {i64, i1} %"tmp#10##0"
 }
 
-define external fastcc i64 @"common_fields.book<0>"(i64 %"title##0", i64 %"author##0", i64 %"genre##0", i64 %"id##0") alwaysinline {
+define external fastcc i64 @"common_fields.book<0>"(i64 %"title##0", i64 %"author##0", i64 %"genre##0", i64 %"id##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -977,7 +977,7 @@ define external fastcc i64 @"common_fields.book<0>"(i64 %"title##0", i64 %"autho
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64, i64, i64, i1} @"common_fields.book<1>"(i64 %"#result##0") alwaysinline {
+define external fastcc {i64, i64, i64, i64, i1} @"common_fields.book<1>"(i64 %"#result##0") {
   %"tmp#1##0" = and i64 %"#result##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -1008,7 +1008,7 @@ if.else.0:
   ret {i64, i64, i64, i64, i1} %"tmp#22##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.director<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc {i64, i1} @"common_fields.director<0>"(i64 %"#rec##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 2
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -1025,7 +1025,7 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.director<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc {i64, i1} @"common_fields.director<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 2
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -1048,7 +1048,7 @@ if.else.0:
   ret {i64, i1} %"tmp#12##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.frequency<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc {i64, i1} @"common_fields.frequency<0>"(i64 %"#rec##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -1065,7 +1065,7 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.frequency<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc {i64, i1} @"common_fields.frequency<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -1088,7 +1088,7 @@ if.else.0:
   ret {i64, i1} %"tmp#12##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.genre<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc {i64, i1} @"common_fields.genre<0>"(i64 %"#rec##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -1115,7 +1115,7 @@ if.else.1:
   ret {i64, i1} %"tmp#15##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.genre<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc {i64, i1} @"common_fields.genre<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -1152,7 +1152,7 @@ if.else.1:
   ret {i64, i1} %"tmp#21##0"
 }
 
-define external fastcc i64 @"common_fields.id<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc i64 @"common_fields.id<0>"(i64 %"#rec##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   switch i64 %"tmp#1##0", label %case.2.switch.0 [
     i64 0, label %case.0.switch.0
@@ -1175,7 +1175,7 @@ case.2.switch.0:
   ret i64 %"tmp#14##0"
 }
 
-define external fastcc i64 @"common_fields.id<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc i64 @"common_fields.id<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   switch i64 %"tmp#1##0", label %case.2.switch.0 [
     i64 0, label %case.0.switch.0
@@ -1214,7 +1214,7 @@ case.2.switch.0:
   ret i64 %"tmp#22##0"
 }
 
-define external fastcc i64 @"common_fields.id<1>[410bae77d3]"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc i64 @"common_fields.id<1>[410bae77d3]"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   switch i64 %"tmp#1##0", label %case.2.switch.0 [
     i64 0, label %case.0.switch.0
@@ -1237,7 +1237,7 @@ case.2.switch.0:
   ret i64 %"#rec##0"
 }
 
-define external fastcc i64 @"common_fields.magazine<0>"(i64 %"title##0", i64 %"frequency##0", i64 %"id##0") alwaysinline {
+define external fastcc i64 @"common_fields.magazine<0>"(i64 %"title##0", i64 %"frequency##0", i64 %"id##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 24)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1252,7 +1252,7 @@ define external fastcc i64 @"common_fields.magazine<0>"(i64 %"title##0", i64 %"f
   ret i64 %"tmp#6##0"
 }
 
-define external fastcc {i64, i64, i64, i1} @"common_fields.magazine<1>"(i64 %"#result##0") alwaysinline {
+define external fastcc {i64, i64, i64, i1} @"common_fields.magazine<1>"(i64 %"#result##0") {
   %"tmp#1##0" = and i64 %"#result##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -1279,7 +1279,7 @@ if.else.0:
   ret {i64, i64, i64, i1} %"tmp#18##0"
 }
 
-define external fastcc i64 @"common_fields.other<0>"(i64 %"title##0", i64 %"id##0") alwaysinline {
+define external fastcc i64 @"common_fields.other<0>"(i64 %"title##0", i64 %"id##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1291,7 +1291,7 @@ define external fastcc i64 @"common_fields.other<0>"(i64 %"title##0", i64 %"id##
   ret i64 %"tmp#4##0"
 }
 
-define external fastcc {i64, i64, i1} @"common_fields.other<1>"(i64 %"#result##0") alwaysinline {
+define external fastcc {i64, i64, i1} @"common_fields.other<1>"(i64 %"#result##0") {
   %"tmp#1##0" = and i64 %"#result##0", 3
   %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 3
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
@@ -1313,7 +1313,7 @@ if.else.0:
   ret {i64, i64, i1} %"tmp#13##0"
 }
 
-define external fastcc i64 @"common_fields.title<0>"(i64 %"#rec##0") alwaysinline {
+define external fastcc i64 @"common_fields.title<0>"(i64 %"#rec##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   switch i64 %"tmp#1##0", label %case.2.switch.0 [
     i64 0, label %case.0.switch.0
@@ -1335,7 +1335,7 @@ case.2.switch.0:
   ret i64 %"tmp#13##0"
 }
 
-define external fastcc i64 @"common_fields.title<1>"(i64 %"#rec##0", i64 %"#field##0") alwaysinline {
+define external fastcc i64 @"common_fields.title<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#1##0" = and i64 %"#rec##0", 3
   switch i64 %"tmp#1##0", label %case.2.switch.0 [
     i64 0, label %case.0.switch.0
@@ -1373,7 +1373,7 @@ case.2.switch.0:
   ret i64 %"tmp#21##0"
 }
 
-define external fastcc i1 @"common_fields.~=<0>"(i64 %"#left##0", i64 %"#right##0") alwaysinline {
+define external fastcc i1 @"common_fields.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#0##0" = tail call fastcc i1 @"common_fields.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"

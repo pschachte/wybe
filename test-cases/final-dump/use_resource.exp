@@ -86,7 +86,7 @@ declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#use_resource.count" = global i64 undef
 
-define external fastcc void @"use_resource.<0>"() alwaysinline {
+define external fastcc void @"use_resource.<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#use_resource.count"
   %"tmp#1##0" = add i64 %"tmp#0##0", 1
   %"tmp#2##0" = add i64 %"tmp#1##0", 1
@@ -102,14 +102,14 @@ define external fastcc void @"use_resource.<0>"() alwaysinline {
   ret void
 }
 
-define external fastcc void @"use_resource.inc_count<0>"() alwaysinline {
+define external fastcc void @"use_resource.inc_count<0>"() {
   %"count##0" = load i64, ptr @"resource#use_resource.count"
   %"tmp#0##0" = add i64 %"count##0", 1
   store i64 %"tmp#0##0", ptr @"resource#use_resource.count"
   ret void
 }
 
-define external fastcc void @"use_resource.use_test<0>"() alwaysinline {
+define external fastcc void @"use_resource.use_test<0>"() {
   %"tmp#2##0" = load i64, ptr @"resource#use_resource.count"
   %"tmp#3##0" = add i64 %"tmp#2##0", 1
   %"tmp#5##0" = add i64 %"tmp#3##0", 1

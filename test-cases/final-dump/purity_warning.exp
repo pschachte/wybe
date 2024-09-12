@@ -29,7 +29,7 @@ target triple    ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"purity_warning.<0>"() alwaysinline {
+define external fastcc void @"purity_warning.<0>"() {
   ret void
 }
 [93mfinal-dump/purity_warning.wybe:1:2: Calling proc wybe.list.length<0> with unneeded ! marker

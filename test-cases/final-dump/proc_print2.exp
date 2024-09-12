@@ -34,7 +34,7 @@ target triple    ????
 declare external ccc void @print_int(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"proc_print2.print2<0>"(i64 %"x##0", i64 %"y##0") alwaysinline {
+define external fastcc void @"proc_print2.print2<0>"(i64 %"x##0", i64 %"y##0") {
   call ccc void @print_int(i64 %"x##0")
   call ccc void @print_int(i64 %"y##0")
   ret void

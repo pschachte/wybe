@@ -40,11 +40,11 @@ target triple    ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"multi_out.<0>"() alwaysinline {
+define external fastcc void @"multi_out.<0>"() {
   ret void
 }
 
-define external fastcc {i64, i64, i64} @"multi_out.onetwothree<0>"() alwaysinline {
+define external fastcc {i64, i64, i64} @"multi_out.onetwothree<0>"() {
   %"tmp#0##0" = insertvalue {i64, i64, i64} undef, i64 1, 0
   %"tmp#1##0" = insertvalue {i64, i64, i64} %"tmp#0##0", i64 2, 1
   %"tmp#2##0" = insertvalue {i64, i64, i64} %"tmp#1##0", i64 3, 2

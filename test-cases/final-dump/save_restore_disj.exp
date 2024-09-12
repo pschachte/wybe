@@ -29,6 +29,6 @@ target triple    ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"save_restore_disj.<0>"() alwaysinline {
+define external fastcc void @"save_restore_disj.<0>"() {
   ret void
 }

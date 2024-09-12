@@ -59,20 +59,20 @@ target triple    ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"unbranch_bug.<0>"() alwaysinline {
+define external fastcc void @"unbranch_bug.<0>"() {
   tail call fastcc void @"unbranch_bug.#cont#3<0>"(i64 0)
   ret void
 }
 
-define external fastcc void @"unbranch_bug.#cont#1<0>"() alwaysinline {
+define external fastcc void @"unbranch_bug.#cont#1<0>"() {
   ret void
 }
 
-define external fastcc void @"unbranch_bug.#cont#2<0>"() alwaysinline {
+define external fastcc void @"unbranch_bug.#cont#2<0>"() {
   ret void
 }
 
-define external fastcc void @"unbranch_bug.#cont#3<0>"(i64 %"tmp#0##0") alwaysinline {
+define external fastcc void @"unbranch_bug.#cont#3<0>"(i64 %"tmp#0##0") {
   %"tmp#7##0" = icmp ne i64 %"tmp#0##0", 0
   br i1 %"tmp#7##0", label %if.then.0, label %if.else.0
 if.then.0:

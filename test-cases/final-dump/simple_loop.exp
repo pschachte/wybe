@@ -51,12 +51,12 @@ declare external ccc void @putchar(i8)
 declare external ccc i8 @read_char()
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"simple_loop.<0>"() alwaysinline {
+define external fastcc void @"simple_loop.<0>"() {
   tail call fastcc void @"simple_loop.#cont#1<0>"()
   ret void
 }
 
-define external fastcc void @"simple_loop.#cont#1<0>"() alwaysinline {
+define external fastcc void @"simple_loop.#cont#1<0>"() {
   %"c##0" = call ccc i8 @read_char()
   %"tmp#0##0" = icmp ne i8 %"c##0", 97
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
