@@ -1819,13 +1819,10 @@ releaseDeferredCall = do
             let allOld = and old
             tailKind <- tailMarker allOld
             writeActualCall wybeProc (ins++refIns) outs tailKind
-            unless allOld $ forM_ refIns $ \oRef -> do
-                let oVar = argVar "in releaseDeferredCall" oRef
-                (ptrArg,ty) <-
-                    trustFromJust "TakeReference pointer variable lost!"
-                    . Map.lookup oVar <$> gets takeRefVars
+            unless allOld $ zipWithM_ (\refIn oRef -> do
                 let byRefArg = setArgFlow FlowOut oRef
-                llvmLoad ptrArg byRefArg
+                llvmLoad refIn byRefArg
+              ) refIns oRefs
             modify $ \s -> s{ deferredCall = Nothing, takeRefVars = Map.empty }
 
 
@@ -1850,7 +1847,7 @@ convertOutByRefArg other =
 
 alloca :: PrimArg -> Int -> LLVM ()
 alloca result size = do
-    llvmAssignResult [result] $ "alloca ptr align " ++ show size
+    llvmAssignResult [result] $ "alloca ptr, align " ++ show size
     modify $ \s -> s { doesAlloca = True }
 
 
