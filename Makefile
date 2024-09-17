@@ -113,7 +113,7 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 
 
 test:	wybemk
-	@rm -f ERRS ; touch ERRS
+	@rm -f ERRS ; printf "Testing run " > ERRS ; date >> ERRS
 	@rm -f $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o
 	@echo -e "Building $(LIBDIR)/wybe/cbits.o"
 	@make $(LIBDIR)/wybe/cbits.o
