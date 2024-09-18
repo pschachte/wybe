@@ -591,7 +591,7 @@ define external fastcc void @"generic_use.<0>"() {
   call ccc void @putchar(i8 10)
   tail call fastcc void @"generic_use.print<0>"(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
-  %"tmp#24##0" = alloca ptr, align 8
+  %"tmp#24##0" = alloca i8, i64 8, align 8
   call fastcc void @"generic_use.concat<0>"(i64 %"tmp#0##0", i64 %"tmp#1##0", ptr %"tmp#24##0")
   %"tmp#2##0" = load i64, ptr %"tmp#24##0"
   call fastcc void @"generic_use.print<0>"(i64 %"tmp#2##0")
@@ -686,7 +686,7 @@ if.then.0:
   %"tmp#18##0" = add i64 %"tmp#11##0", 8
   %"tmp#19##0" = inttoptr i64 %"tmp#18##0" to ptr
   store i64 0, ptr %"tmp#19##0"
-  %"tmp#20##0" = alloca ptr, align 8
+  %"tmp#20##0" = alloca i8, i64 8, align 8
   call fastcc void @"generic_use.concat<0>[410bae77d3]"(i64 %"tmp#2##0", i64 %"tmp#11##0", ptr %"tmp#20##0")
   %"tmp#21##0" = load i64, ptr %"tmp#20##0"
   ret i64 %"tmp#21##0"
@@ -705,7 +705,7 @@ if.then.0:
   %"tmp#15##0" = add i64 %"lst##0", 8
   %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
   store i64 0, ptr %"tmp#16##0"
-  %"tmp#17##0" = alloca ptr, align 8
+  %"tmp#17##0" = alloca i8, i64 8, align 8
   call fastcc void @"generic_use.concat<0>[410bae77d3]"(i64 %"tmp#2##0", i64 %"lst##0", ptr %"tmp#17##0")
   %"tmp#18##0" = load i64, ptr %"tmp#17##0"
   ret i64 %"tmp#18##0"

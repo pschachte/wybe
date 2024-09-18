@@ -136,7 +136,7 @@ if.then.0:
   %"tmp#7##0" = add i64 %"tmp#1##0", 8
   %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
   %"tmp#1##1" = load i64, ptr %"tmp#8##0"
-  %"tmp#9##0" = alloca ptr, align 8
+  %"tmp#9##0" = alloca i8, i64 8, align 8
   call fastcc void @"higher_order_sort.insert<0>"(i64 %"<=##0", i64 %"x##0", i64 %"sorted##0", ptr %"tmp#9##0")
   %"sorted##1" = load i64, ptr %"tmp#9##0"
   %"tmp#10##0" = call fastcc i64 @"higher_order_sort.sort#cont#1<0>"(i64 %"<=##0", i64 %"sorted##1", i64 %"tmp#1##1")

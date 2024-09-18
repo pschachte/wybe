@@ -301,22 +301,25 @@ type PreScanState = (Set StringSpec, Set ExternSpec)
 
 -- | Collect the info we need from a single prim.
 preScanPrim :: ModSpec -> PreScanState -> Prim -> PreScanState
-preScanPrim mod (strings,externs) prim =
-    let strings' = foldLPVMPrimArgs argStrings strings prim
+preScanPrim mod state prim =
+    let (strings,externs) = foldLPVMPrimArgs prescanArg state prim
         externs' = addExtern mod prim externs
-    in (strings', externs')
+    in (strings, externs')
 
 
 -- | If the specified PrimArg is a string constant, add it to the set.  For Wybe
 -- strings, add both the Wybe string and the C string, since the Wybe string
 -- constant refers to the C string.
-argStrings :: Set StringSpec -> PrimArg -> Set StringSpec
-argStrings set (ArgString str WybeString _) =
-    Set.insert (WybeStringSpec str)
-    $ Set.insert (CStringSpec str) set
-argStrings set (ArgString str CString _) =
-    Set.insert (CStringSpec str) set
-argStrings set _ = set
+prescanArg :: PreScanState -> PrimArg -> PreScanState
+prescanArg state (ArgString str WybeString _) =
+    mapFst (Set.insert (WybeStringSpec str) . Set.insert (CStringSpec str))
+        state
+prescanArg state (ArgString str CString _) =
+    mapFst (Set.insert (CStringSpec str)) state
+prescanArg state (ArgClosure _ args _) =
+    mapSnd (Set.insert externAlloc) 
+        $ List.foldl prescanArg state args
+prescanArg state _ = state
 
 
 -- | If needed, add an extern declaration for a prim to the set.
@@ -631,8 +634,8 @@ writeAssemblyIfElse outs v thn els = do
     [thnlbl,elslbl] <- freshLables ["if.then.","if.else."]
     llvar <- varToRead v
     llvmPutStrLnIndented $ "br i1 " ++ llvar
-                    ++ ", " ++ llvmLableName thnlbl
-                    ++ ", " ++ llvmLableName elslbl
+                    ++ ", " ++ llvmLabelName thnlbl
+                    ++ ", " ++ llvmLabelName elslbl
     llvmPutStrLn $ thnlbl ++ ":"
     writeAssemblyBody outs thn
     llvmPutStrLn $ elslbl ++ ":"
@@ -656,9 +659,9 @@ writeAssemblySwitch outs v rep cases dflt = do
     llvar <- varToRead v
     logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
     llvmPutStrLnIndented $ "switch " ++ llType ++ " " ++ llvar ++ ", "
-        ++ llvmLableName dfltLabel ++ " [\n    "
+        ++ llvmLabelName dfltLabel ++ " [\n    "
         ++ intercalate "\n    "
-                [llType ++ " " ++ show n ++ ", " ++ llvmLableName lbl
+                [llType ++ " " ++ show n ++ ", " ++ llvmLabelName lbl
                 | (lbl,n) <- zip numLabels [0..]]
         ++ " ]"
     zipWithM_
@@ -795,10 +798,8 @@ writeLPVMCall "alloc" _ args pos = do
     releaseDeferredCall
     args' <- partitionArgs "lpvm alloc instruction" args
     case args' of
-        ([sz],[out]) ->
-            marshalledCCall mallocFn [] [sz,out] ["int","pointer"] pos
-        _ ->
-            shouldnt $ "lpvm alloc with arguments " ++ show args
+        ([sz],[out]) -> heapAlloc out sz pos
+        _            -> shouldnt $ "lpvm alloc with arguments " ++ show args
 writeLPVMCall "cast" _ args pos = do
     releaseDeferredCall
     args' <- partitionArgs "lpvm cast instruction" args
@@ -1307,10 +1308,14 @@ llvmValue arg@(ArgClosure pspec args ty) = do
     -- else do
     (writePtr,readPtr) <- freshTempArgs $ Representation CPointer
     fnRef <- funcRef pspec
-    alloca writePtr $ wordSizeBytes * (1 + length args)
+    let sizeVar =
+          ArgInt (fromIntegral (wordSizeBytes * (1 + length args))) intType
+    heapAlloc writePtr sizeVar Nothing
     llArgs <- mapM llvmArgument args
     llvmStoreArray readPtr (fnRef:llArgs)
-    llvmValue readPtr
+    rep <- typeRep ty
+    typeConvertedBare rep readPtr
+    -- llvmValue readPtr
     -- if all argIsConst args'
     -- then do
     --     cgenArgConst arg
@@ -1381,12 +1386,7 @@ llvmTypeRep (Floating 32)   = "float"
 llvmTypeRep (Floating 64)   = "double"
 llvmTypeRep (Floating 128)  = "fp128"
 llvmTypeRep (Floating n)    = shouldnt $ "invalid float size " ++ show n
--- XXX these should be made more accurate (use pointer and function types):
-llvmTypeRep (Func _ _)      = llvmTypeRep $ Bits wordSize
--- llvmTypeRep (Func ins outs) = llvmRepReturnType outs
---                                 ++ " ("
---                                 ++ intercalate ", " (List.map llvmTypeRep ins)
---                                 ++ ")"
+llvmTypeRep (Func _ _)      = llvmTypeRep Pointer
 llvmTypeRep Pointer         = llvmTypeRep $ Bits wordSize
 llvmTypeRep CPointer        = "ptr"
 
@@ -1515,6 +1515,8 @@ equivLLTypes (Bits b) Pointer      = b == wordSize
 equivLLTypes (Signed b) Pointer    = b == wordSize
 equivLLTypes (Signed b1) (Bits b2) = b1 == b2
 equivLLTypes (Bits b1) (Signed b2) = b1 == b2
+equivLLTypes Pointer Func{}        = True
+equivLLTypes Func{} Pointer        = True
 equivLLTypes t1 t2 = t1 == t2
 
 
@@ -1522,20 +1524,21 @@ equivLLTypes t1 t2 = t1 == t2
 typeConvertOp :: TypeRepresentation -> TypeRepresentation -> String
 typeConvertOp fromTy toTy
     | fromTy == toTy = "bitcast" -- use bitcast for no-op conversion
-typeConvertOp CPointer Pointer = "ptrtoint"
-typeConvertOp Pointer CPointer = "inttoptr"
-typeConvertOp Pointer toTy = typeConvertOp (Bits wordSize) toTy
+typeConvertOp Pointer toTy   = typeConvertOp (Bits wordSize) toTy
 typeConvertOp fromTy Pointer = typeConvertOp fromTy (Bits wordSize)
+typeConvertOp Func{} toTy    = typeConvertOp (Bits wordSize) toTy
+typeConvertOp fromTy Func{}  = typeConvertOp fromTy (Bits wordSize)
 typeConvertOp (Bits m) (Bits n)
     | m < n = "zext"
     | n < m = "trunc"
-    | otherwise = shouldnt "no-op unsigned int conversion"
+    | otherwise = shouldnt "no-op unsigned conversion"
 typeConvertOp (Bits m) (Signed n)
     | m < n = "sext"
     | n < m = "trunc"
     | otherwise = -- no instruction actually needed, but one is expected
         "bitcast"
 typeConvertOp (Bits m) (Floating n) = "uitofp"
+typeConvertOp (Bits _) CPointer = "inttoptr"
 typeConvertOp (Signed m) (Bits n)
     | m < n = "zext"
     | n < m = "trunc"
@@ -1552,7 +1555,7 @@ typeConvertOp (Floating m) (Floating n)
     | m < n = "fpext"
     | n < m = "fptrunc"
     | otherwise = shouldnt "no-op floating point conversion"
-typeConvertOp (Func _ _) CPointer = "inttoptr"
+typeConvertOp CPointer (Bits _) = "ptrtoint"
 typeConvertOp repIn toTy =
     shouldnt $ "Don't know how to convert from " ++ show repIn
                  ++ " to " ++ show toTy
@@ -1838,16 +1841,27 @@ convertOutByRefArg ArgVar{argVarName=name, argVarType=ty,
         Just (ptrArg,_) -> return (ptrArg,True)
         Nothing -> do
             (writeArg,readArg) <- freshTempArgs $ Representation CPointer
-            alloca writeArg wordSizeBytes
+            stackAlloc writeArg wordSizeBytes
             addTakeRefPointer name readArg ty
             return (readArg,False)
 convertOutByRefArg other =
     shouldnt $ "Expected out-by-reference argument: " ++ show other
 
+-- | Generate code to allocate heap memory, with the size in bytes specified as
+-- a PrimArg, so it can be a variable.  The result will be converted to the type
+-- of the result variable.
+heapAlloc :: PrimArg -> PrimArg -> OptPos -> LLVM ()
+heapAlloc result sizeVar =
+    marshalledCCall mallocFn [] [sizeVar,result] ["int","pointer"]
 
-alloca :: PrimArg -> Int -> LLVM ()
-alloca result size = do
-    llvmAssignResult [result] $ "alloca ptr, align " ++ show size
+
+-- | Generate code to allocate memory on the stack (alloca), with the size in
+-- bytes specified as an Int, so it must be a constant.    The result will be
+-- converted to the type of the result variable.
+stackAlloc :: PrimArg -> Int -> LLVM ()
+stackAlloc result size = do
+    llvmAssignResult [result] $ "alloca i8, i64 " ++ show size
+        ++ ", align " ++ show wordSizeBytes
     modify $ \s -> s { doesAlloca = True }
 
 
@@ -1900,8 +1914,8 @@ llvmLocalName varName =
 
 
 -- | Make an LLVM reference to the specified label.
-llvmLableName :: String -> String
-llvmLableName varName = "label %" ++ llvmQuoteIfNecessary varName
+llvmLabelName :: String -> String
+llvmLabelName varName = "label %" ++ llvmQuoteIfNecessary varName
 
 
 -- | Format a string as an LLVM string; the Bool indicates whether to add
@@ -1912,6 +1926,7 @@ showLLVMString str zeroTerminator =
         len = length str + length suffix
     in "[ " ++ show len ++ " x i8 ] c\""
         ++ concatMap showLLVMChar str ++ concatMap showLLVMChar suffix ++ "\""
+
 
 -- | Format a single character as a character in an LLVM string.
 showLLVMChar :: Char -> String
