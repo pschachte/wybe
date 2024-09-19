@@ -747,8 +747,13 @@ writeWybeCall wybeProc args pos = do
 
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
+writeHOCall (ArgClosure pspec closed _) args pos = do
+    -- NB:  this case doesn't seem to ever occur
+    pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
+    logLLVM $ "Compiling HO call as first order call to " ++ show pspec'
+              ++ " closed over " ++ show closed
+    writeWybeCall pspec' (closed ++ args) pos
 writeHOCall closure args pos = do
-    -- XXX add special case for statically known callee
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs $ closure:args
     unless (List.null oRefs && List.null iRefs)
         $ nyi $ "Higher order call with out-by-ref or take-ref argument "
