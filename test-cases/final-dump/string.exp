@@ -245,9 +245,9 @@ define external fastcc void @"string.<0>"() {
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   %"tmp#111##0" = zext i8 97 to i64
-  %"tmp#112##0" = shl i64 %"tmp#111##0", bitcast( i64 2 to i64 )
-  %"tmp#113##0" = or i64 %"tmp#112##0", bitcast( i64 1024 to i64 )
-  %"tmp#1##0" = or i64 %"tmp#113##0", bitcast( i64 3 to i64 )
+  %"tmp#112##0" = shl i64 %"tmp#111##0", 2
+  %"tmp#113##0" = or i64 %"tmp#112##0", 1024
+  %"tmp#1##0" = or i64 %"tmp#113##0", 3
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
   %"tmp#3##0" = tail call fastcc i64 @"wybe.range.construct<0>"(i64 1, i64 3, i64 100)
@@ -262,9 +262,9 @@ define external fastcc void @"string.<0>"() {
   call ccc void @print_string(i64 ptrtoint( ptr @"cstring#1" to i64 ))
   call ccc void @putchar(i8 10)
   %"tmp#72##0" = zext i8 100 to i64
-  %"tmp#73##0" = shl i64 %"tmp#72##0", bitcast( i64 2 to i64 )
-  %"tmp#74##0" = or i64 %"tmp#73##0", bitcast( i64 1024 to i64 )
-  %"tmp#10##0" = or i64 %"tmp#74##0", bitcast( i64 3 to i64 )
+  %"tmp#73##0" = shl i64 %"tmp#72##0", 2
+  %"tmp#74##0" = or i64 %"tmp#73##0", 1024
+  %"tmp#10##0" = or i64 %"tmp#74##0", 3
   %"tmp#12##0" = tail call fastcc i64 @"wybe.range...<0>"(i64 1, i64 2)
   %"tmp#11##0" = tail call fastcc i64 @"wybe.string.[]<1>"(i64 ptrtoint( ptr @"string#24" to i64 ), i64 %"tmp#12##0")
   %"tmp#9##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#10##0", i64 %"tmp#11##0")
@@ -301,13 +301,13 @@ define external fastcc void @"string.<0>"() {
   %"tmp#23##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#18" to i64 ), i64 %"tmp#1##0")
   tail call fastcc void @"string.test_index<0>"(i64 %"tmp#23##0", i64 2)
   %"tmp#115##0" = zext i8 98 to i64
-  %"tmp#116##0" = shl i64 %"tmp#115##0", bitcast( i64 2 to i64 )
-  %"tmp#117##0" = or i64 %"tmp#116##0", bitcast( i64 1024 to i64 )
-  %"tmp#29##0" = or i64 %"tmp#117##0", bitcast( i64 3 to i64 )
+  %"tmp#116##0" = shl i64 %"tmp#115##0", 2
+  %"tmp#117##0" = or i64 %"tmp#116##0", 1024
+  %"tmp#29##0" = or i64 %"tmp#117##0", 3
   %"tmp#119##0" = zext i8 99 to i64
-  %"tmp#120##0" = shl i64 %"tmp#119##0", bitcast( i64 2 to i64 )
-  %"tmp#121##0" = or i64 %"tmp#120##0", bitcast( i64 1024 to i64 )
-  %"tmp#30##0" = or i64 %"tmp#121##0", bitcast( i64 3 to i64 )
+  %"tmp#120##0" = shl i64 %"tmp#119##0", 2
+  %"tmp#121##0" = or i64 %"tmp#120##0", 1024
+  %"tmp#30##0" = or i64 %"tmp#121##0", 3
   %"tmp#28##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#29##0", i64 %"tmp#30##0")
   %"tmp#26##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#1##0", i64 %"tmp#28##0")
   %"tmp#31##0" = tail call fastcc i64 @"wybe.range...<0>"(i64 0, i64 2)

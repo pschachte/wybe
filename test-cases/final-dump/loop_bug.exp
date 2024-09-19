@@ -336,7 +336,7 @@ if.else.2:
 if.else.1:
   ret i1 0
 if.else.0:
-  %"tmp#19##0" = icmp eq i64 %"#right##0", bitcast( i64 0 to i64 )
+  %"tmp#19##0" = icmp eq i64 %"#right##0", 0
   ret i1 %"tmp#19##0"
 }
 
