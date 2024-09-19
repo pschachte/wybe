@@ -49,6 +49,6 @@ define external fastcc void @"higher_order_inline.<0>"() {
   ret void
 }
 
-define external fastcc i64 @"higher_order_inline.#closure#1<0>"(i64 %"a##0") {
+define external fastcc i64 @"higher_order_inline.#closure#1<0>"(i64 %"#env##0", i64 %"a##0") {
   ret i64 %"a##0"
 }

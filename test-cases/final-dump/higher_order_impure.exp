@@ -69,7 +69,7 @@ define external fastcc void @"higher_order_impure.#anon#1<0>"() {
   ret void
 }
 
-define external fastcc void @"higher_order_impure.#anon#1<1>"() {
+define external fastcc void @"higher_order_impure.#anon#1<1>"(i64 %"#env##0") {
   ret void
 }
 

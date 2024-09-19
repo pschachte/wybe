@@ -271,7 +271,7 @@ define external fastcc void @"benchmark_fib.#anon#1<0>"() {
   ret void
 }
 
-define external fastcc void @"benchmark_fib.#anon#1<1>"() {
+define external fastcc void @"benchmark_fib.#anon#1<1>"(i64 %"#env##0") {
   %"tmp#0##0" = tail call fastcc i64 @"benchmark_fib.naive_fib<0>"(i64 42)
   ret void
 }
