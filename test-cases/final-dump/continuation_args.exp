@@ -140,19 +140,19 @@ define external fastcc i1 @"continuation_args.=<0>"(i64 %"#left##0", i64 %"#righ
   %"tmp#0##0" = icmp ne i64 %"#left##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#7##0" = and i64 %"#left##0", bitcast( i64 1 to i64 )
+  %"tmp#7##0" = and i64 %"#left##0", 1
   %"#left#c##0" = trunc i64 %"tmp#7##0" to i1
   %"tmp#9##0" = icmp ne i64 %"#right##0", 0
   br i1 %"tmp#9##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#10##0" = and i64 %"#right##0", bitcast( i64 1 to i64 )
+  %"tmp#10##0" = and i64 %"#right##0", 1
   %"#right#c##0" = trunc i64 %"tmp#10##0" to i1
   %"tmp#14##0" = icmp eq i1 %"#left#c##0", %"#right#c##0"
   ret i1 %"tmp#14##0"
 if.else.1:
   ret i1 0
 if.else.0:
-  %"tmp#15##0" = icmp eq i64 %"#right##0", bitcast( i64 0 to i64 )
+  %"tmp#15##0" = icmp eq i64 %"#right##0", 0
   ret i1 %"tmp#15##0"
 }
 
@@ -162,7 +162,7 @@ define external fastcc i64 @"continuation_args.a<0>"() {
 
 define external fastcc i64 @"continuation_args.b<0>"(i1 %"c##0") {
   %"#temp##0" = zext i1 %"c##0" to i64
-  %"tmp#0##0" = or i64 %"#temp##0", bitcast( i64 2 to i64 )
+  %"tmp#0##0" = or i64 %"#temp##0", 2
   ret i64 %"tmp#0##0"
 }
 
@@ -170,7 +170,7 @@ define external fastcc {i1, i1} @"continuation_args.b<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"#temp2##0" = and i64 %"#result##0", bitcast( i64 1 to i64 )
+  %"#temp2##0" = and i64 %"#result##0", 1
   %"tmp#1##0" = trunc i64 %"#temp2##0" to i1
   %"tmp#2##0" = insertvalue {i1, i1} undef, i1 %"tmp#1##0", 0
   %"tmp#3##0" = insertvalue {i1, i1} %"tmp#2##0", i1 1, 1
@@ -185,7 +185,7 @@ define external fastcc {i1, i1} @"continuation_args.c<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"#field##0" = and i64 %"#rec##0", bitcast( i64 1 to i64 )
+  %"#field##0" = and i64 %"#rec##0", 1
   %"tmp#1##0" = trunc i64 %"#field##0" to i1
   %"tmp#2##0" = insertvalue {i1, i1} undef, i1 %"tmp#1##0", 0
   %"tmp#3##0" = insertvalue {i1, i1} %"tmp#2##0", i1 1, 1
@@ -200,7 +200,7 @@ define external fastcc {i64, i1} @"continuation_args.c<1>"(i64 %"#rec##0", i1 %"
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"#rec##1" = and i64 %"#rec##0", bitcast( i64 -2 to i64 )
+  %"#rec##1" = and i64 %"#rec##0", -2
   %"#temp##0" = zext i1 %"#field##0" to i64
   %"tmp#1##0" = or i64 %"#rec##1", %"#temp##0"
   %"tmp#2##0" = insertvalue {i64, i1} undef, i64 %"tmp#1##0", 0

@@ -1519,6 +1519,7 @@ typedConvertedConstant arg toTy = do
 
 -- Converting constants from the first type to the second is completely trivial,
 -- because the constant is automatically considered to have both types.
+trivialConstConversion :: TypeRepresentation -> TypeRepresentation -> Bool
 trivialConstConversion (Bits _) (Bits _)          = True
 trivialConstConversion (Bits _) (Signed _)        = True
 trivialConstConversion (Bits _) Pointer           = True
@@ -1526,6 +1527,7 @@ trivialConstConversion (Signed _) (Signed _)      = True
 trivialConstConversion (Signed _) (Bits _)        = True
 trivialConstConversion (Signed _) Pointer         = True
 trivialConstConversion (Floating _) (Floating _)  = True
+trivialConstConversion Pointer Pointer            = True
 trivialConstConversion Pointer (Bits b)           = b == wordSize
 trivialConstConversion Pointer (Signed b)         = b == wordSize
 trivialConstConversion _ _                        = False
