@@ -11,6 +11,7 @@
 module UnivSet (
     UnivSet(..), UnivSet.union, UnivSet.intersection, subtractUnivSet,
     UnivSet.member, isEmpty, isUniv, emptyUnivSet, UnivSet.singleton,
+    UnivSet.insert,
     UnivSet.fromList, UnivSet.toList, UnivSet.toSet, UnivSet.fromSet,
     showUnivSet, showSet,
     mapFromUnivSetM,
@@ -82,6 +83,12 @@ emptyUnivSet = FiniteSet S.empty
 -- | A singleton UnivSet
 singleton :: a -> UnivSet a
 singleton = FiniteSet . S.singleton
+
+
+-- | Insert an element into a UnivSet
+insert :: Ord a => a -> UnivSet a -> UnivSet a
+insert _ UniversalSet = UniversalSet
+insert elt (FiniteSet s) = FiniteSet $ S.insert elt s
 
 
 -- | Make a finite UnivSet from a list of elements

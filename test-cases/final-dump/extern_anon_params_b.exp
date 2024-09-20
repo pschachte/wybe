@@ -120,16 +120,13 @@ proc #anon#1 > {inline,impure} (1 calls)
 source_filename = "!ROOT!/final-dump/extern_anon_params_b.wybe"
 target triple    ????
 
+@"closure#0" = private unnamed_addr constant {ptr} { ptr @"extern_anon_params_b.#anon#1<1>" }, align 8
 
-declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc void @"extern_anon_params_a.run#anon#1<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"extern_anon_params_b.<0>"() {
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 8)
-  store ptr @"extern_anon_params_b.#anon#1<1>", ptr %"tmp#1##0"
-  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
-  tail call fastcc void @"extern_anon_params_a.run#anon#1<0>"(i64 %"tmp#2##0")
+  tail call fastcc void @"extern_anon_params_a.run#anon#1<0>"(ptr @"closure#0")
   ret void
 }
 

@@ -4,6 +4,7 @@
 --  Copyright: (c) 2024 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+{-# LANGUAGE TupleSections #-}
 
 
 module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM, BinOpInfo(..) ) where
@@ -17,7 +18,7 @@ import           Options
 import           Version
 import           CConfig
 import           Snippets
-import           Util                            ((|||))
+import           Util                            ((|||), showArguments)
 import           System.IO
 import           Data.Char                       (isAlphaNum)
 import           Data.Set                        as Set
@@ -277,11 +278,13 @@ preScanProcs = do
 -- bytes.
 data StaticConstSpec = CStringSpec String
                      | WybeStringSpec String
+                     | ClosureSpec ProcSpec [PrimArg]
     deriving (Eq,Ord)
 
 instance Show StaticConstSpec where
     show (CStringSpec str) = 'c' : show str
     show (WybeStringSpec str) = show str
+    show (ClosureSpec pspec args) = show pspec ++ showArguments args
 
 
 -- | If the specified PrimArg is a string constant, add it to the set.  For Wybe
@@ -293,10 +296,13 @@ prescanArg (ArgString str WybeString _) = do
     recordConst $ CStringSpec str
 prescanArg (ArgString str CString _) =
     recordConst $ CStringSpec str
-prescanArg (ArgClosure _ args _) = do
-    -- XXX only does a malloc if the closure contains non-constants
-    -- XXX make const closure if all args are constants
-    recordExternSpec externAlloc
+prescanArg (ArgClosure pspec args _) = do
+    args' <- neededFreeArgs pspec args
+    if all argIsConst args'
+    then
+        recordConst $ ClosureSpec pspec args
+    else
+        recordExternSpec externAlloc
 prescanArg _ = return ()
 
 
@@ -430,7 +436,7 @@ writeConstDeclaration spec@(WybeStringSpec str) n = do
     let stringName = specialName2 "string" $ show n
     modify $ \s -> s { constNames=Map.insert spec stringName
                                        $ constNames s}
-    textName <- lookupStringConstant $ CStringSpec str
+    textName <- lookupConstant $ CStringSpec str
     declareStructConstant stringName
         [ (ArgInt (fromIntegral $ length str) (Representation $ Bits wordSize)
           , Bits wordSize)
@@ -442,14 +448,30 @@ writeConstDeclaration spec@(CStringSpec str) n = do
     modify $ \s -> s { constNames=Map.insert spec textName
                                        $ constNames s}
     declareStringConstant textName str Nothing
+writeConstDeclaration spec@(ClosureSpec pspec args) n = do
+    let closureName = specialName2 "closure" $ show n
+    modify $ \s -> s { constNames=Map.insert spec closureName
+                                       $ constNames s}
+    let pname = show pspec
+    declareStructConstant closureName
+        ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
+        -- ((ArgInt 42 intType, Bits 64)
+         : List.map (,Pointer) args)
+        Nothing
 
 
 -- | Find the global constant that holds the value of the specified string
 -- constant.
-lookupStringConstant :: StaticConstSpec -> LLVM Ident
-lookupStringConstant spec =
-    gets $ trustFromJust ("lookupStringConstant " ++ show spec)
-            . Map.lookup spec . constNames
+lookupConstant :: StaticConstSpec -> LLVM Ident
+lookupConstant spec =
+    trustFromJust ("lookupConstant " ++ show spec) <$> tryLookupConstant spec
+
+
+-- | Find the global constant that holds the value of the specified string
+-- constant.
+tryLookupConstant :: StaticConstSpec -> LLVM (Maybe Ident)
+tryLookupConstant spec =
+    gets $ Map.lookup spec . constNames
 
 
 ----------------------------------------------------------------------------
@@ -1014,7 +1036,7 @@ declareStructConstant name fields section = do
 llvmConstStruct :: [ConstSpec] -> LLVM String
 llvmConstStruct fields = do
     llvmVals <- mapM (uncurry typedConvertedConstant) fields
-    return $ llvmRepReturnType (snd <$> fields)
+    return $ llvmStructType (snd <$> fields)
             ++ " { " ++ intercalate ", " llvmVals ++ " }"
 
 
@@ -1291,6 +1313,7 @@ argTypeRep :: PrimArg -> LLVM TypeRepresentation
 argTypeRep (ArgString _ WybeString _) = return Pointer
 argTypeRep (ArgString _ CString _)    = return Pointer
 argTypeRep ArgGlobal{}                = return CPointer
+argTypeRep ArgClosure{}               = return CPointer
 argTypeRep arg                        = typeRep $ argType arg
 
 
@@ -1311,55 +1334,36 @@ llvmValue (ArgString str stringVariant _) = do
     let spec = case stringVariant of
                 WybeString -> WybeStringSpec str
                 CString    -> CStringSpec str
-    glob <- lookupStringConstant spec
+    glob <- lookupConstant spec
     convertedConstant
         (ArgGlobal (GlobalVariable glob) $ Representation CPointer) Pointer
 llvmValue (ArgChar val _) = return $ show $ fromEnum val
 llvmValue arg@(ArgClosure pspec args ty) = do
     logLLVM $ "llvmValue of " ++ show arg
-    -- args' <- neededFreeArgs pspec args
-    -- if all argIsConst args'
-    -- then do
-    -- XXX should handle fully constant closure as statically allocated struct,
-    -- or better yet, convert all constructions of fully constant data
-    -- structures into static allocated structures.  But the latter needs to be
-    -- done early enough in the compiler that alias tracking can see it.
-    -- else do
-    (writePtr,readPtr) <- freshTempArgs $ Representation CPointer
-    fnRef <- funcRef pspec
-    let sizeVar =
-          ArgInt (fromIntegral (wordSizeBytes * (1 + length args))) intType
-    heapAlloc writePtr sizeVar Nothing
-    llArgs <- mapM llvmArgument args
-    llvmStoreArray readPtr (fnRef:llArgs)
-    rep <- typeRep ty
-    typeConvertedBare rep readPtr
-    -- llvmValue readPtr
-    -- if all argIsConst args'
-    -- then do
-    --     cgenArgConst arg
-    -- else do
-    --     fnOp <- cons <$> cgenFuncRef pspec
-    --     (envArgs, allocaTracking) <- cgenArgsFull (setArgType intType <$> args')
-    --     mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args))
-    --                                   `ArgInt` intType) address_t
-    --     memPtr <- inttoptr mem (ptr_t address_t)
-    --     mapM_ (\(idx,arg) -> do
-    --         let getEltPtr = getElementPtrInstr memPtr [idx]
-    --         accessPtr <- instr (ptr_t address_t) getEltPtr
-    --         store accessPtr arg
-    --         ) $ zip [0..] (fnOp:envArgs)
-    --     return (mem, allocaTracking)
-    -- return $ nyi "closure argument " ++ show arg
-
+    -- See if we've already allocated a constant for this closure
+    glob <- tryLookupConstant $ ClosureSpec pspec args
+    case glob of
+        Just constName ->
+            return $ llvmGlobalName constName
+        Nothing -> do
+            (writePtr,readPtr) <- freshTempArgs $ Representation CPointer
+            let fnRef = funcRef pspec
+            let sizeVar =
+                    ArgInt (fromIntegral (wordSizeBytes * (1 + length args)))
+                            intType
+            heapAlloc writePtr sizeVar Nothing
+            llArgs <- mapM llvmArgument args
+            llvmStoreArray readPtr (fnRef:llArgs)
+            rep <- typeRep ty
+            typeConvertedBare rep readPtr
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
 llvmValue (ArgUnneeded val _) = shouldnt "llvm value of unneeded arg"
 llvmValue (ArgUndef _) = return "undef"
 
 
 -- | The LLVMArg translation of a ProcSpec.
-funcRef :: ProcSpec -> LLVM LLVMArg
-funcRef pspec = return $ "ptr " ++ llvmGlobalName (show pspec)
+funcRef :: ProcSpec -> LLVMArg
+funcRef pspec = "ptr " ++ llvmGlobalName (show pspec)
 
 
 -- | The variable name of a PrimArg; report an error if not a variable.
@@ -1414,8 +1418,12 @@ llvmTypeRep CPointer        = "ptr"
 llvmRepReturnType :: [TypeRepresentation] -> LLVMType
 llvmRepReturnType [] = "void"
 llvmRepReturnType [ty] = llvmTypeRep ty
-llvmRepReturnType tys =
-    "{" ++ intercalate ", " (List.map llvmTypeRep tys) ++ "}"
+llvmRepReturnType tys = llvmStructType tys
+    
+
+-- | An LLVM structure type based on a list of LLVM type representations
+llvmStructType :: [TypeRepresentation] -> LLVMType
+llvmStructType tys = "{" ++ intercalate ", " (List.map llvmTypeRep tys) ++ "}"
 
 
 -- | The LLVM return type for proc with the specified list of output type specs.
@@ -1514,6 +1522,7 @@ typedConvertedConstant arg toTy = do
 -- Converting constants from the first type to the second is completely trivial,
 -- because the constant is automatically considered to have both types.
 trivialConstConversion :: TypeRepresentation -> TypeRepresentation -> Bool
+trivialConstConversion ty1 ty2 | ty1 == ty2       = True
 trivialConstConversion (Bits _) (Bits _)          = True
 trivialConstConversion (Bits _) (Signed _)        = True
 trivialConstConversion (Bits _) Pointer           = True
@@ -1521,7 +1530,6 @@ trivialConstConversion (Signed _) (Signed _)      = True
 trivialConstConversion (Signed _) (Bits _)        = True
 trivialConstConversion (Signed _) Pointer         = True
 trivialConstConversion (Floating _) (Floating _)  = True
-trivialConstConversion Pointer Pointer            = True
 trivialConstConversion Pointer (Bits b)           = b == wordSize
 trivialConstConversion Pointer (Signed b)         = b == wordSize
 trivialConstConversion _ _                        = False
@@ -1600,9 +1608,10 @@ type LLVMName = String
 -- | An LLVM value (constant or LLVMName), preceded by and LLVMType
 type LLVMArg = String
 
--- | Information we collect about external things referenced by this module, so we
--- can declare them.  For functions, this includes the LLVM calling convention, the LLVM name
--- of the function, and the input and output argument types.
+-- | Information we collect about external things referenced by this module, so
+-- we can declare them.  For functions, this includes the LLVM calling
+-- convention, the LLVM name of the function, and the input and output argument
+-- types.
 data ExternSpec =
     -- | An external function we call
     ExternFunction {

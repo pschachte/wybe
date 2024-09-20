@@ -177,6 +177,9 @@ target triple    ????
 @"cstring#1" = private unnamed_addr constant [ 3 x i8 ] c"> \00", align 8
 @"string#2" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"closure#4" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#1<1>" }, align 8
+@"closure#5" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#2<1>" }, align 8
+@"closure#6" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#2#closure#1<0>" }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -240,104 +243,98 @@ define external fastcc void @"higher_order_resources.<0>"() {
   store i64 %"tmp#55##0", ptr %"tmp#151##0"
   %"tmp#29##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  %"tmp#152##0" = call ccc ptr @wybe_malloc(i32 8)
-  store ptr @"higher_order_resources.#anon#1<1>", ptr %"tmp#152##0"
-  %"tmp#153##0" = ptrtoint ptr %"tmp#152##0" to i64
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 %"tmp#153##0", i64 %"tmp#59##0")
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(ptr @"closure#4", i64 %"tmp#59##0")
   %"maximum##1" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"maximum##1")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#154##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#72##0" = ptrtoint ptr %"tmp#154##0" to i64
-  %"tmp#155##0" = inttoptr i64 %"tmp#72##0" to ptr
-  store i64 3, ptr %"tmp#155##0"
-  %"tmp#156##0" = add i64 %"tmp#72##0", 8
-  %"tmp#157##0" = inttoptr i64 %"tmp#156##0" to ptr
-  store i64 0, ptr %"tmp#157##0"
-  %"tmp#158##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#76##0" = ptrtoint ptr %"tmp#158##0" to i64
-  %"tmp#159##0" = inttoptr i64 %"tmp#76##0" to ptr
-  store i64 2, ptr %"tmp#159##0"
-  %"tmp#160##0" = add i64 %"tmp#76##0", 8
-  %"tmp#161##0" = inttoptr i64 %"tmp#160##0" to ptr
-  store i64 %"tmp#72##0", ptr %"tmp#161##0"
-  %"tmp#162##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#80##0" = ptrtoint ptr %"tmp#162##0" to i64
-  %"tmp#163##0" = inttoptr i64 %"tmp#80##0" to ptr
-  store i64 1, ptr %"tmp#163##0"
-  %"tmp#164##0" = add i64 %"tmp#80##0", 8
-  %"tmp#165##0" = inttoptr i64 %"tmp#164##0" to ptr
-  store i64 %"tmp#76##0", ptr %"tmp#165##0"
-  %"tmp#166##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#84##0" = ptrtoint ptr %"tmp#166##0" to i64
-  %"tmp#167##0" = inttoptr i64 %"tmp#84##0" to ptr
-  store i64 2, ptr %"tmp#167##0"
-  %"tmp#168##0" = add i64 %"tmp#84##0", 8
-  %"tmp#169##0" = inttoptr i64 %"tmp#168##0" to ptr
-  store i64 0, ptr %"tmp#169##0"
-  %"tmp#170##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#88##0" = ptrtoint ptr %"tmp#170##0" to i64
-  %"tmp#171##0" = inttoptr i64 %"tmp#88##0" to ptr
-  store i64 1, ptr %"tmp#171##0"
-  %"tmp#172##0" = add i64 %"tmp#88##0", 8
-  %"tmp#173##0" = inttoptr i64 %"tmp#172##0" to ptr
-  store i64 %"tmp#84##0", ptr %"tmp#173##0"
-  %"tmp#174##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#92##0" = ptrtoint ptr %"tmp#174##0" to i64
-  %"tmp#175##0" = inttoptr i64 %"tmp#92##0" to ptr
-  store i64 2, ptr %"tmp#175##0"
-  %"tmp#176##0" = add i64 %"tmp#92##0", 8
-  %"tmp#177##0" = inttoptr i64 %"tmp#176##0" to ptr
-  store i64 %"tmp#88##0", ptr %"tmp#177##0"
-  %"tmp#178##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#96##0" = ptrtoint ptr %"tmp#178##0" to i64
-  %"tmp#179##0" = inttoptr i64 %"tmp#96##0" to ptr
-  store i64 1, ptr %"tmp#179##0"
-  %"tmp#180##0" = add i64 %"tmp#96##0", 8
-  %"tmp#181##0" = inttoptr i64 %"tmp#180##0" to ptr
-  store i64 %"tmp#92##0", ptr %"tmp#181##0"
-  %"tmp#182##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#100##0" = ptrtoint ptr %"tmp#182##0" to i64
-  %"tmp#183##0" = inttoptr i64 %"tmp#100##0" to ptr
-  store i64 1, ptr %"tmp#183##0"
-  %"tmp#184##0" = add i64 %"tmp#100##0", 8
-  %"tmp#185##0" = inttoptr i64 %"tmp#184##0" to ptr
-  store i64 0, ptr %"tmp#185##0"
-  %"tmp#186##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#104##0" = ptrtoint ptr %"tmp#186##0" to i64
-  %"tmp#187##0" = inttoptr i64 %"tmp#104##0" to ptr
-  store i64 5, ptr %"tmp#187##0"
-  %"tmp#188##0" = add i64 %"tmp#104##0", 8
-  %"tmp#189##0" = inttoptr i64 %"tmp#188##0" to ptr
-  store i64 %"tmp#100##0", ptr %"tmp#189##0"
-  %"tmp#190##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#108##0" = ptrtoint ptr %"tmp#190##0" to i64
-  %"tmp#191##0" = inttoptr i64 %"tmp#108##0" to ptr
-  store i64 %"tmp#104##0", ptr %"tmp#191##0"
-  %"tmp#192##0" = add i64 %"tmp#108##0", 8
-  %"tmp#193##0" = inttoptr i64 %"tmp#192##0" to ptr
-  store i64 0, ptr %"tmp#193##0"
-  %"tmp#194##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#112##0" = ptrtoint ptr %"tmp#194##0" to i64
-  %"tmp#195##0" = inttoptr i64 %"tmp#112##0" to ptr
-  store i64 %"tmp#96##0", ptr %"tmp#195##0"
-  %"tmp#196##0" = add i64 %"tmp#112##0", 8
-  %"tmp#197##0" = inttoptr i64 %"tmp#196##0" to ptr
-  store i64 %"tmp#108##0", ptr %"tmp#197##0"
-  %"tmp#198##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#116##0" = ptrtoint ptr %"tmp#198##0" to i64
-  %"tmp#199##0" = inttoptr i64 %"tmp#116##0" to ptr
-  store i64 %"tmp#80##0", ptr %"tmp#199##0"
-  %"tmp#200##0" = add i64 %"tmp#116##0", 8
-  %"tmp#201##0" = inttoptr i64 %"tmp#200##0" to ptr
-  store i64 %"tmp#112##0", ptr %"tmp#201##0"
+  %"tmp#152##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#72##0" = ptrtoint ptr %"tmp#152##0" to i64
+  %"tmp#153##0" = inttoptr i64 %"tmp#72##0" to ptr
+  store i64 3, ptr %"tmp#153##0"
+  %"tmp#154##0" = add i64 %"tmp#72##0", 8
+  %"tmp#155##0" = inttoptr i64 %"tmp#154##0" to ptr
+  store i64 0, ptr %"tmp#155##0"
+  %"tmp#156##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#76##0" = ptrtoint ptr %"tmp#156##0" to i64
+  %"tmp#157##0" = inttoptr i64 %"tmp#76##0" to ptr
+  store i64 2, ptr %"tmp#157##0"
+  %"tmp#158##0" = add i64 %"tmp#76##0", 8
+  %"tmp#159##0" = inttoptr i64 %"tmp#158##0" to ptr
+  store i64 %"tmp#72##0", ptr %"tmp#159##0"
+  %"tmp#160##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#80##0" = ptrtoint ptr %"tmp#160##0" to i64
+  %"tmp#161##0" = inttoptr i64 %"tmp#80##0" to ptr
+  store i64 1, ptr %"tmp#161##0"
+  %"tmp#162##0" = add i64 %"tmp#80##0", 8
+  %"tmp#163##0" = inttoptr i64 %"tmp#162##0" to ptr
+  store i64 %"tmp#76##0", ptr %"tmp#163##0"
+  %"tmp#164##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#84##0" = ptrtoint ptr %"tmp#164##0" to i64
+  %"tmp#165##0" = inttoptr i64 %"tmp#84##0" to ptr
+  store i64 2, ptr %"tmp#165##0"
+  %"tmp#166##0" = add i64 %"tmp#84##0", 8
+  %"tmp#167##0" = inttoptr i64 %"tmp#166##0" to ptr
+  store i64 0, ptr %"tmp#167##0"
+  %"tmp#168##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#88##0" = ptrtoint ptr %"tmp#168##0" to i64
+  %"tmp#169##0" = inttoptr i64 %"tmp#88##0" to ptr
+  store i64 1, ptr %"tmp#169##0"
+  %"tmp#170##0" = add i64 %"tmp#88##0", 8
+  %"tmp#171##0" = inttoptr i64 %"tmp#170##0" to ptr
+  store i64 %"tmp#84##0", ptr %"tmp#171##0"
+  %"tmp#172##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#92##0" = ptrtoint ptr %"tmp#172##0" to i64
+  %"tmp#173##0" = inttoptr i64 %"tmp#92##0" to ptr
+  store i64 2, ptr %"tmp#173##0"
+  %"tmp#174##0" = add i64 %"tmp#92##0", 8
+  %"tmp#175##0" = inttoptr i64 %"tmp#174##0" to ptr
+  store i64 %"tmp#88##0", ptr %"tmp#175##0"
+  %"tmp#176##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#96##0" = ptrtoint ptr %"tmp#176##0" to i64
+  %"tmp#177##0" = inttoptr i64 %"tmp#96##0" to ptr
+  store i64 1, ptr %"tmp#177##0"
+  %"tmp#178##0" = add i64 %"tmp#96##0", 8
+  %"tmp#179##0" = inttoptr i64 %"tmp#178##0" to ptr
+  store i64 %"tmp#92##0", ptr %"tmp#179##0"
+  %"tmp#180##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#100##0" = ptrtoint ptr %"tmp#180##0" to i64
+  %"tmp#181##0" = inttoptr i64 %"tmp#100##0" to ptr
+  store i64 1, ptr %"tmp#181##0"
+  %"tmp#182##0" = add i64 %"tmp#100##0", 8
+  %"tmp#183##0" = inttoptr i64 %"tmp#182##0" to ptr
+  store i64 0, ptr %"tmp#183##0"
+  %"tmp#184##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#104##0" = ptrtoint ptr %"tmp#184##0" to i64
+  %"tmp#185##0" = inttoptr i64 %"tmp#104##0" to ptr
+  store i64 5, ptr %"tmp#185##0"
+  %"tmp#186##0" = add i64 %"tmp#104##0", 8
+  %"tmp#187##0" = inttoptr i64 %"tmp#186##0" to ptr
+  store i64 %"tmp#100##0", ptr %"tmp#187##0"
+  %"tmp#188##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#108##0" = ptrtoint ptr %"tmp#188##0" to i64
+  %"tmp#189##0" = inttoptr i64 %"tmp#108##0" to ptr
+  store i64 %"tmp#104##0", ptr %"tmp#189##0"
+  %"tmp#190##0" = add i64 %"tmp#108##0", 8
+  %"tmp#191##0" = inttoptr i64 %"tmp#190##0" to ptr
+  store i64 0, ptr %"tmp#191##0"
+  %"tmp#192##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#112##0" = ptrtoint ptr %"tmp#192##0" to i64
+  %"tmp#193##0" = inttoptr i64 %"tmp#112##0" to ptr
+  store i64 %"tmp#96##0", ptr %"tmp#193##0"
+  %"tmp#194##0" = add i64 %"tmp#112##0", 8
+  %"tmp#195##0" = inttoptr i64 %"tmp#194##0" to ptr
+  store i64 %"tmp#108##0", ptr %"tmp#195##0"
+  %"tmp#196##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#116##0" = ptrtoint ptr %"tmp#196##0" to i64
+  %"tmp#197##0" = inttoptr i64 %"tmp#116##0" to ptr
+  store i64 %"tmp#80##0", ptr %"tmp#197##0"
+  %"tmp#198##0" = add i64 %"tmp#116##0", 8
+  %"tmp#199##0" = inttoptr i64 %"tmp#198##0" to ptr
+  store i64 %"tmp#112##0", ptr %"tmp#199##0"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  %"tmp#202##0" = call ccc ptr @wybe_malloc(i32 8)
-  store ptr @"higher_order_resources.#anon#2<1>", ptr %"tmp#202##0"
-  %"tmp#203##0" = ptrtoint ptr %"tmp#202##0" to i64
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 %"tmp#203##0", i64 %"tmp#116##0")
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(ptr @"closure#5", i64 %"tmp#116##0")
   %"maximum##3" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"maximum##3")
   call ccc void @putchar(i8 10)
@@ -360,10 +357,7 @@ define external fastcc void @"higher_order_resources.#anon#1<1>"(i64 %"#env##0",
 define external fastcc void @"higher_order_resources.#anon#2<0>"(i64 %"anon#2#1##0") {
   %"tmp#32##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  %"tmp#40##0" = call ccc ptr @wybe_malloc(i32 8)
-  store ptr @"higher_order_resources.#anon#2#closure#1<0>", ptr %"tmp#40##0"
-  %"tmp#41##0" = ptrtoint ptr %"tmp#40##0" to i64
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 %"tmp#41##0", i64 %"anon#2#1##0")
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(ptr @"closure#6", i64 %"anon#2#1##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   %"maximum##2" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"maximum##2")
@@ -377,10 +371,7 @@ define external fastcc void @"higher_order_resources.#anon#2<0>"(i64 %"anon#2#1#
 define external fastcc void @"higher_order_resources.#anon#2<1>"(i64 %"#env##0", i64 %"anon#2#1##0") {
   %"tmp#1##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  %"tmp#7##0" = call ccc ptr @wybe_malloc(i32 8)
-  store ptr @"higher_order_resources.#anon#2#closure#1<0>", ptr %"tmp#7##0"
-  %"tmp#8##0" = ptrtoint ptr %"tmp#7##0" to i64
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 %"tmp#8##0", i64 %"anon#2#1##0")
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(ptr @"closure#6", i64 %"anon#2#1##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   %"tmp#2##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"tmp#2##0")

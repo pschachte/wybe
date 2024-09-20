@@ -2219,9 +2219,9 @@ addGlobalResourceFlows (ResourceFlowSpec res flow) gFlows
 -- | Add a GlobalInfo to the set of global flows associated with the given flow
 addGlobalFlow :: GlobalInfo -> PrimFlow -> GlobalFlows -> GlobalFlows
 addGlobalFlow info FlowIn gFlows@GlobalFlows{globalFlowsIn=ins}
-    = gFlows{globalFlowsIn=whenFinite (Set.insert info) ins}
+    = gFlows{globalFlowsIn=USet.insert info ins}
 addGlobalFlow info FlowOut gFlows@GlobalFlows{globalFlowsOut=outs}
-    = gFlows{globalFlowsOut=whenFinite (Set.insert info) outs}
+    = gFlows{globalFlowsOut=USet.insert info outs}
 -- global flows don't use this flow type
 addGlobalFlow info FlowOutByReference gFlows = gFlows
 addGlobalFlow info FlowTakeReference gFlows = gFlows
