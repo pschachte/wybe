@@ -275,18 +275,13 @@ preScanProcs = do
 -- code.  Wybe string constants (usually) consist of a size and a pointer to a C
 -- string, while C strings are C pointers to 0-terminated packed arrays of
 -- bytes.
-data StaticConstSpec = CStringSpec String | WybeStringSpec String
+data StaticConstSpec = CStringSpec String
+                     | WybeStringSpec String
     deriving (Eq,Ord)
 
 instance Show StaticConstSpec where
     show (CStringSpec str) = 'c' : show str
     show (WybeStringSpec str) = show str
-
-
--- | return the StringVariant of a StaticConstSpec
-stringSpecVariant :: StaticConstSpec -> StringVariant
-stringSpecVariant CStringSpec{}    = CString
-stringSpecVariant WybeStringSpec{} = WybeString
 
 
 -- | If the specified PrimArg is a string constant, add it to the set.  For Wybe
@@ -298,15 +293,17 @@ prescanArg (ArgString str WybeString _) = do
     recordConst $ CStringSpec str
 prescanArg (ArgString str CString _) =
     recordConst $ CStringSpec str
--- XXX make const closure if all args are constants
-prescanArg (ArgClosure _ args _) = return ()
+prescanArg (ArgClosure _ args _) = do
+    -- XXX only does a malloc if the closure contains non-constants
+    -- XXX make const closure if all args are constants
+    recordExternSpec externAlloc
 prescanArg _ = return ()
 
 
 -- | Record that the specified constant needs to be declared in this LLVM module
 recordConst :: StaticConstSpec -> LLVM ()
 recordConst spec =
-    modify $ \s -> s {allStrings=Set.insert spec $ allStrings s}
+    modify $ \s -> s {allConsts=Set.insert spec $ allConsts s}
 
 
 
@@ -419,8 +416,8 @@ writeAssemblyPrologue = do
 writeAssemblyConstants :: LLVM ()
 writeAssemblyConstants = do
     logLLVM "writeAssemblyConstants"
-    strings <- gets $ Set.toList . allStrings
-    zipWithM_ declareString strings [0..]
+    strings <- gets $ Set.toList . allConsts
+    zipWithM_ writeConstDeclaration strings [0..]
     llvmBlankLine
 
 
@@ -428,11 +425,11 @@ writeAssemblyConstants = do
 -- assumes that the CString that a WybeString refers to has already been
 -- declared and recorded.  This will happen because sets are sorted
 -- alphabetically, and CString comes before WybeString.
-declareString :: StaticConstSpec -> Int -> LLVM ()
-declareString spec@(WybeStringSpec str) n = do
+writeConstDeclaration :: StaticConstSpec -> Int -> LLVM ()
+writeConstDeclaration spec@(WybeStringSpec str) n = do
     let stringName = specialName2 "string" $ show n
-    modify $ \s -> s { stringConstants=Map.insert spec stringName
-                                       $ stringConstants s}
+    modify $ \s -> s { constNames=Map.insert spec stringName
+                                       $ constNames s}
     textName <- lookupStringConstant $ CStringSpec str
     declareStructConstant stringName
         [ (ArgInt (fromIntegral $ length str) (Representation $ Bits wordSize)
@@ -440,10 +437,10 @@ declareString spec@(WybeStringSpec str) n = do
         , (ArgGlobal (GlobalVariable textName) (Representation CPointer)
           , Pointer)]
         Nothing
-declareString spec@(CStringSpec str) n = do
+writeConstDeclaration spec@(CStringSpec str) n = do
     let textName = specialName2 "cstring" $ show n
-    modify $ \s -> s { stringConstants=Map.insert spec textName
-                                       $ stringConstants s}
+    modify $ \s -> s { constNames=Map.insert spec textName
+                                       $ constNames s}
     declareStringConstant textName str Nothing
 
 
@@ -452,7 +449,7 @@ declareString spec@(CStringSpec str) n = do
 lookupStringConstant :: StaticConstSpec -> LLVM Ident
 lookupStringConstant spec =
     gets $ trustFromJust ("lookupStringConstant " ++ show spec)
-            . Map.lookup spec . stringConstants
+            . Map.lookup spec . constNames
 
 
 ----------------------------------------------------------------------------
@@ -1629,8 +1626,8 @@ type ConstSpec = (PrimArg,TypeRepresentation)
 
 -- | The LLVM State monad
 data LLVMState = LLVMState {
-        allStrings :: Set StaticConstSpec,
-                                     -- ^ String constants appearing in module
+        allConsts :: Set StaticConstSpec,
+                                     -- ^ Static constants appearing in module
         allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
         fileHandle :: Handle,       -- ^ The file handle we're writing to
         tmpCounter :: Int,          -- ^ Next temp var to make for current proc
@@ -1639,8 +1636,8 @@ data LLVMState = LLVMState {
                                     -- ^ Vars to rename on definition
         varUseRenaming :: Map PrimVarName LLVMName,
                                     -- ^ New action for some variables to read
-        stringConstants :: Map StaticConstSpec Ident,
-                                    -- ^ local name given to string constants
+        constNames :: Map StaticConstSpec Ident,
+                                    -- ^ local name given to static constants
         deferredCall :: Maybe (ProcSpec, [PrimArg], [PrimArg], [PrimArg]),
                                     -- ^ Wybe proc call deferred for
                                     -- out-by-reference arg, with in, out, and
