@@ -8,6 +8,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE EmptyCase #-}
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
@@ -70,8 +71,7 @@ module AST (
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
-  foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
-  foldLPVMPrims, foldLPVMPrimArgs,
+  foldStmts, foldExps, foldBodyPrims, foldBodyDistrib, mapLPVMBodyM,
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
@@ -2658,27 +2658,41 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
         $ bodies ++ maybeToList deflt
 
 
--- |Left fold a function over the LPVM Prims in a proc body.  This code does
--- nothing to track where in the proc body a Prim appears.
-foldLPVMPrims :: (a -> Prim -> a) -> a -> ProcBody -> a
-foldLPVMPrims fn a (ProcBody pprims fork) =
-    List.foldl fn (foldLPVMFork fn a fork) $ List.map content pprims
+-- |Traverse a ProcBody applying a monadic primFn to every Prim and applying a
+-- monadic argFn to every arg.  This code does nothing to track where the
+-- Prims and PrimArgs appear.
+mapLPVMBodyM :: Monad m => (Prim -> m ()) -> (PrimArg -> m ()) -> ProcBody
+             -> m ()
+mapLPVMBodyM primFn argFn (ProcBody pprims fork) = do
+    mapM_ (mapSinglePrimM primFn argFn . content) pprims
+    case fork of
+        NoFork -> return ()
+        (PrimFork _ _ _ bodies deflt) -> do
+            mapM_ (mapLPVMBodyM primFn argFn) bodies
+            maybe (return ()) (mapLPVMBodyM primFn argFn) deflt
 
 
--- |Left fold a function over the LPVM Prims in a PrimFork
-foldLPVMFork :: (a -> Prim -> a) -> a -> PrimFork -> a
-foldLPVMFork _  a NoFork = a
-foldLPVMFork fn a (PrimFork _ _ _ bodies deflt) =
-    List.foldl (foldLPVMPrims fn) (maybe a (foldLPVMPrims fn a) deflt) bodies
+-- |Handle a single Prim for mapLPVMBodyM doing the needful.
+mapSinglePrimM :: Monad m => (Prim -> m ()) -> (PrimArg -> m ()) -> Prim -> m ()
+mapSinglePrimM primFn argFn prim = do
+    primFn prim
+    case prim of
+        PrimForeign _ _ _ args -> mapM_ (mapSinglePrimArgM primFn argFn) args
+        PrimCall _ _ _ args _  -> mapM_ (mapSinglePrimArgM primFn argFn) args
+        PrimHigher _ fn _ args -> do
+            mapSinglePrimArgM primFn argFn fn
+            mapM_ (mapSinglePrimArgM primFn argFn) args
 
 
--- |Left fold a function over the LPVM PrimArgs in a prim.  This is useful in
--- the first argument to foldLPVMPrims to apply a function to every argument to
--- every instruction in a proc body, eg, foldLPVMPrims (foldLPVMPrimArgs fn) ...
-foldLPVMPrimArgs :: (a -> PrimArg -> a) -> a -> Prim -> a
-foldLPVMPrimArgs fn a (PrimCall _ _ _ args _)   = List.foldl fn a args
-foldLPVMPrimArgs fn a (PrimHigher _ hfn _ args) = List.foldl fn (fn a hfn) args
-foldLPVMPrimArgs fn a (PrimForeign _ _ _ args)  = List.foldl fn a args
+-- |Handle a single PrimArg for mapLPVMBodyM doing the needful.
+mapSinglePrimArgM :: Monad m => (Prim -> m ()) -> (PrimArg -> m ()) -> PrimArg
+                  -> m ()
+mapSinglePrimArgM primFn argFn arg = do
+    argFn arg
+    case arg of
+        ArgClosure _ args _ ->
+            mapM_ (mapSinglePrimArgM primFn argFn) args
+        _ -> return ()
 
 
 -- |Info about a proc call, including the ID, prototype, and an

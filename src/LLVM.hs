@@ -268,83 +268,76 @@ preScanProcs = do
     logLLVM $ "preScanProcs: "
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
     let bodies = concatMap (concatMap allProcBodies) procss
-    allStrings0 <- gets allStrings
-    allExterns0 <- gets allExterns
-    let (strings,externs) =
-            List.foldl (foldLPVMPrims (preScanPrim mod))
-                       (allStrings0, allExterns0) bodies
-    modify $ \s -> s{allStrings = strings, allExterns = externs}
+    mapM_ (mapLPVMBodyM (recordExtern mod) prescanArg) bodies
 
 
 -- | What's needed to identify a manifest constant string in generated LLVM
 -- code.  Wybe string constants (usually) consist of a size and a pointer to a C
 -- string, while C strings are C pointers to 0-terminated packed arrays of
 -- bytes.
-data StringSpec = CStringSpec String | WybeStringSpec String
+data StaticConstSpec = CStringSpec String | WybeStringSpec String
     deriving (Eq,Ord)
 
-instance Show StringSpec where
+instance Show StaticConstSpec where
     show (CStringSpec str) = 'c' : show str
     show (WybeStringSpec str) = show str
 
 
--- | return the StringVariant of a StringSpec
-stringSpecVariant :: StringSpec -> StringVariant
+-- | return the StringVariant of a StaticConstSpec
+stringSpecVariant :: StaticConstSpec -> StringVariant
 stringSpecVariant CStringSpec{}    = CString
 stringSpecVariant WybeStringSpec{} = WybeString
-
-
--- | All the info we accumulate through prescanning:  the literal strings and
--- external LLVM functions and global variables used.
-type PreScanState = (Set StringSpec, Set ExternSpec)
-
-
--- | Collect the info we need from a single prim.
-preScanPrim :: ModSpec -> PreScanState -> Prim -> PreScanState
-preScanPrim mod state prim =
-    let (strings,externs) = foldLPVMPrimArgs prescanArg state prim
-        externs' = addExtern mod prim externs
-    in (strings, externs')
 
 
 -- | If the specified PrimArg is a string constant, add it to the set.  For Wybe
 -- strings, add both the Wybe string and the C string, since the Wybe string
 -- constant refers to the C string.
-prescanArg :: PreScanState -> PrimArg -> PreScanState
-prescanArg state (ArgString str WybeString _) =
-    mapFst (Set.insert (WybeStringSpec str) . Set.insert (CStringSpec str))
-        state
-prescanArg state (ArgString str CString _) =
-    mapFst (Set.insert (CStringSpec str)) state
-prescanArg state (ArgClosure _ args _) =
-    mapSnd (Set.insert externAlloc) 
-        $ List.foldl prescanArg state args
-prescanArg state _ = state
+prescanArg :: PrimArg -> LLVM ()
+prescanArg (ArgString str WybeString _) = do
+    recordConst $ WybeStringSpec str
+    recordConst $ CStringSpec str
+prescanArg (ArgString str CString _) =
+    recordConst $ CStringSpec str
+-- XXX make const closure if all args are constants
+prescanArg (ArgClosure _ args _) = return ()
+prescanArg _ = return ()
+
+
+-- | Record that the specified constant needs to be declared in this LLVM module
+recordConst :: StaticConstSpec -> LLVM ()
+recordConst spec =
+    modify $ \s -> s {allStrings=Set.insert spec $ allStrings s}
+
 
 
 -- | If needed, add an extern declaration for a prim to the set.
-addExtern :: ModSpec -> Prim -> Set ExternSpec -> Set ExternSpec
-addExtern mod (PrimCall _ pspec _ args _) externs =
-    if mod /= [] && mod `isPrefixOf` procSpecMod pspec then externs
-    else let (nm,cc) = llvmProcName pspec
-         in recordExternFn cc nm args externs
-addExtern _ PrimHigher{} externs = externs
-addExtern _ (PrimForeign "llvm" _ _ _) externs = externs
-addExtern _ (PrimForeign "lpvm" "alloc" _ _) externs =
-    Set.insert externAlloc externs
-addExtern mod (PrimForeign "lpvm" "load" _ [ArgGlobal glob ty,_]) externs =
-    recordExternVar mod glob ty externs
-addExtern mod (PrimForeign "lpvm" "store" _ [_,ArgGlobal glob ty]) externs =
-    recordExternVar mod glob ty externs
-addExtern _ (PrimForeign "lpvm" "mutate" _ (_:_:destr:_)) externs =
+recordExtern :: ModSpec -> Prim -> LLVM ()
+recordExtern mod (PrimCall _ pspec _ args _) =
+    unless (mod /= [] && mod `isPrefixOf` procSpecMod pspec) $ do
+        let (nm,cc) = llvmProcName pspec
+        recordExternFn cc nm args
+recordExtern _ PrimHigher{} = return ()
+recordExtern _ (PrimForeign "llvm" _ _ _) = return ()
+recordExtern _ (PrimForeign "lpvm" "alloc" _ _) =
+    recordExternSpec externAlloc
+recordExtern mod (PrimForeign "lpvm" "load" _ [ArgGlobal glob ty,_]) =
+    recordExternVar mod glob ty
+recordExtern mod (PrimForeign "lpvm" "store" _ [_,ArgGlobal glob ty]) =
+    recordExternVar mod glob ty
+recordExtern _ (PrimForeign "lpvm" "mutate" _ (_:_:destr:_)) =
     case destr of
-        ArgInt 1 _ -> externs
-        _ -> Set.insert externAlloc externs
-addExtern _ (PrimForeign "lpvm" _ _ _) externs = externs
-addExtern _ (PrimForeign "c" name _ args) externs =
-    recordExternFn "ccc" (llvmForeignName name) args externs
-addExtern _ (PrimForeign other name _ args) externs =
+        ArgInt 1 _ -> return ()
+        _ -> recordExternSpec externAlloc
+recordExtern _ (PrimForeign "lpvm" _ _ _) = return ()
+recordExtern _ (PrimForeign "c" name _ args) =
+    recordExternFn "ccc" (llvmForeignName name) args
+recordExtern _ (PrimForeign other name _ args) =
     shouldnt $ "Unknown foreign language " ++ other
+
+
+recordExternSpec :: ExternSpec -> LLVM ()
+recordExternSpec spec =
+    modify $ \s -> s {allExterns=Set.insert spec $ allExterns s}
 
 
 externCFunction :: String -> [String] -> String -> ExternSpec
@@ -362,28 +355,27 @@ externAlloc :: ExternSpec
 externAlloc = externCFunction (llvmForeignName mallocFn) ["int"] "pointer"
 
 
--- | Insert the fact that the named function is an external function with the
--- specified argument types in the provided set, returning the resulting set.
-recordExternFn :: String -> LLVMName -> [PrimArg] -> Set ExternSpec
-             -> Set ExternSpec
-recordExternFn cc fName args externs =
+-- | Record the fact that the named function is an external function using the
+-- specified calling convention and taking the specified (input and output)
+-- argument types.
+recordExternFn :: String -> LLVMName -> [PrimArg] -> LLVM ()
+recordExternFn cc fName args =
     let (ins,outs,oRefs,iRefs) = partitionByFlow argFlowDirection args
         extern = ExternFunction cc fName
                  ((argType <$> ins) ++ (Representation CPointer <$ oRefs))
                  (argType <$> outs)
-    in if List.null iRefs then Set.insert extern externs
-       else shouldnt $ "Function " ++ fName ++ " has TakeReference parameters"
+    in if List.null iRefs && List.null oRefs
+        then recordExternSpec extern
+        else shouldnt $ "Function " ++ fName ++ " has TakeReference parameters"
 
 
 -- | Insert the fact that the named function is an external function with the
 -- specified argument types in the provided set, returning the resulting set.
 -- Only add the spec if it's for an external global var.
-recordExternVar :: ModSpec -> GlobalInfo -> TypeSpec
-                -> Set ExternSpec -> Set ExternSpec
-recordExternVar mspec global ty externs =
-    if globalIsLocal mspec global
-    then externs
-    else Set.insert (ExternVariable global ty) externs
+recordExternVar :: ModSpec -> GlobalInfo -> TypeSpec -> LLVM ()
+recordExternVar mspec global ty =
+    unless (globalIsLocal mspec global)
+        $ recordExternSpec (ExternVariable global ty)
 
 
 -- | Test if the GlobalInfo specifies a global variable defined in the current
@@ -436,7 +428,7 @@ writeAssemblyConstants = do
 -- assumes that the CString that a WybeString refers to has already been
 -- declared and recorded.  This will happen because sets are sorted
 -- alphabetically, and CString comes before WybeString.
-declareString :: StringSpec -> Int -> LLVM ()
+declareString :: StaticConstSpec -> Int -> LLVM ()
 declareString spec@(WybeStringSpec str) n = do
     let stringName = specialName2 "string" $ show n
     modify $ \s -> s { stringConstants=Map.insert spec stringName
@@ -457,7 +449,7 @@ declareString spec@(CStringSpec str) n = do
 
 -- | Find the global constant that holds the value of the specified string
 -- constant.
-lookupStringConstant :: StringSpec -> LLVM Ident
+lookupStringConstant :: StaticConstSpec -> LLVM Ident
 lookupStringConstant spec =
     gets $ trustFromJust ("lookupStringConstant " ++ show spec)
             . Map.lookup spec . stringConstants
@@ -1637,7 +1629,7 @@ type ConstSpec = (PrimArg,TypeRepresentation)
 
 -- | The LLVM State monad
 data LLVMState = LLVMState {
-        allStrings :: Set StringSpec,
+        allStrings :: Set StaticConstSpec,
                                      -- ^ String constants appearing in module
         allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
         fileHandle :: Handle,       -- ^ The file handle we're writing to
@@ -1647,7 +1639,7 @@ data LLVMState = LLVMState {
                                     -- ^ Vars to rename on definition
         varUseRenaming :: Map PrimVarName LLVMName,
                                     -- ^ New action for some variables to read
-        stringConstants :: Map StringSpec Ident,
+        stringConstants :: Map StaticConstSpec Ident,
                                     -- ^ local name given to string constants
         deferredCall :: Maybe (ProcSpec, [PrimArg], [PrimArg], [PrimArg]),
                                     -- ^ Wybe proc call deferred for
