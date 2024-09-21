@@ -69,11 +69,11 @@ target triple    ????
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 
-declare external ccc void @putchar(i8)
-declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc void @"student.printStudent<0>"(i64)
 declare external fastcc void @"student.printStudent<0>[410bae77d3]"(i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external ccc void @putchar(i8)
+declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"alias_data.<0>"() {
@@ -218,11 +218,11 @@ target triple    ????
 @"string#6" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"string#7" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 
+declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
-declare external fastcc void @"wybe.string.print<0>"(i64)
-declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"student.<0>"() {
@@ -403,8 +403,8 @@ source_filename = "!ROOT!/final-dump/student.wybe"
 target triple    ????
 
 
-declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
+declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc i1 @"student.course.=<0>"(i64 %"#left##0", i64 %"#right##0") {
@@ -643,8 +643,8 @@ source_filename = "!ROOT!/final-dump/student.wybe"
 target triple    ????
 
 
-declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
+declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc i1 @"student.student.=<0>"(i64 %"#left##0", i64 %"#right##0") {

@@ -185,10 +185,10 @@ target triple    ????
 @"string#16" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
 @"string#17" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
 
+declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_float(double)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
-declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"multictr2.print_t<0>"(i64 %"x##0") {

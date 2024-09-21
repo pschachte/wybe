@@ -138,8 +138,8 @@ target triple    ????
 @"string#8" = private unnamed_addr constant {i64, i64} { i64 7, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"string#9" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
 
-declare external ccc void @putchar(i8)
 declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"disjunctive-cond.<0>"() {

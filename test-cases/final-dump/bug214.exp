@@ -333,14 +333,14 @@ target triple    ????
 @"string#2" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 
+declare external fastcc i1 @"wybe.int.=<0>"(i64, i64)
+declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc i64 @"wybe.string.string<0>"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc i64 @read_int()
 declare external ccc i64 @read_line()
 declare external ccc ptr @wybe_malloc(i32)
-declare external fastcc i1 @"wybe.int.=<0>"(i64, i64)
-declare external fastcc void @"wybe.string.print<0>"(i64)
-declare external fastcc i64 @"wybe.string.string<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"bug214.<0>"() {
@@ -1079,9 +1079,9 @@ target triple    ????
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 
+declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc ptr @wybe_malloc(i32)
-declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc i1 @"bug214.position.=<0>"(i64 %"#left##0", i64 %"#right##0") {

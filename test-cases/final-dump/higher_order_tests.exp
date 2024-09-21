@@ -230,8 +230,8 @@ target triple    ????
 @"closure#10" = private unnamed_addr constant {ptr} { ptr @"higher_order_tests.#anon#1<1>" }, align 8
 @"closure#11" = private unnamed_addr constant {ptr} { ptr @"higher_order_tests.#anon#2<1>" }, align 8
 
-declare external ccc void @putchar(i8)
 declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"higher_order_tests.<0>"() {

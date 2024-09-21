@@ -57,8 +57,8 @@ target triple    ????
 @"cstring#0" = private unnamed_addr constant [ 34 x i8 ] c"Erroneous program argument vector\00", align 8
 @"cstring#1" = private unnamed_addr constant [ 19 x i8 ] c"command_line:18:15\00", align 8
 
-declare external ccc void @error_exit(i64, i64)
 declare external fastcc {i64, i64, i1} @"wybe.array.[|]<0>[785a827a1b]"(i64)
+declare external ccc void @error_exit(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#command_line.argc" = global i64 undef
 @"resource#command_line.arguments" = global i64 undef
@@ -133,11 +133,11 @@ target triple    ????
 @"cstring#0" = private unnamed_addr constant [ 5 x i8 ] c"v = \00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
-declare external ccc void @putchar(i8)
+@"resource#command_line.arguments" = external global i64
 declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
-@"resource#command_line.arguments" = external global i64
+declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"inline_pos.<0>"() {

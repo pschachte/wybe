@@ -36,6 +36,7 @@ import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
+import Distribution.TestSuite (TestInstance(name))
 
 
 -- BEGIN MAJOR DOC
@@ -339,8 +340,10 @@ recordExtern _ (PrimForeign other name _ args) =
 
 
 recordExternSpec :: ExternSpec -> LLVM ()
-recordExternSpec spec =
-    modify $ \s -> s {allExterns=Set.insert spec $ allExterns s}
+recordExternSpec spec = do
+    logLLVM $ "Recording external " ++ show spec
+    name <- externID spec
+    modify $ \s -> s {allExterns=Map.insert name spec $ allExterns s}
 
 
 externCFunction :: String -> [String] -> String -> ExternSpec
@@ -367,9 +370,10 @@ recordExternFn cc fName args =
         extern = ExternFunction cc fName
                  ((argType <$> ins) ++ (Representation CPointer <$ oRefs))
                  (argType <$> outs)
-    in if List.null iRefs && List.null oRefs
+    in if List.null iRefs
         then recordExternSpec extern
-        else shouldnt $ "Function " ++ fName ++ " has TakeReference parameters"
+        else shouldnt $ "Function " ++ fName
+                ++ " has TakeReference parameter(s) " ++ show iRefs
 
 
 -- | Insert the fact that the named function is an external function with the
@@ -510,7 +514,7 @@ writeAssemblyExterns = do
     copyFn <- llvmGlobalName <$> llvmMemcpyFn
     let spec = ExternFunction "ccc" copyFn
                 (Representation <$> [CPointer,CPointer,Bits wordSize,Bits 1]) []
-    externs <- Set.toList <$> gets allExterns
+    externs <- Map.elems <$> gets allExterns
     mapM_ declareExtern externs
     declareExtern spec
 
@@ -720,23 +724,23 @@ writeAssemblySwitch outs v rep cases dflt = do
 writeAssemblyPrim :: Prim -> OptPos -> LLVM ()
 writeAssemblyPrim instr@(PrimCall _ proc _ args _) pos = do
     releaseDeferredCall
-    logLLVM $ "Translating Wybe call " ++ show instr
+    logLLVM $ "* Translating Wybe call " ++ show instr
     writeWybeCall proc args pos
 writeAssemblyPrim instr@(PrimHigher _ fn _ args) pos = do
     releaseDeferredCall
-    logLLVM $ "Translating HO call " ++ show instr
+    logLLVM $ "* Translating HO call " ++ show instr
     writeHOCall fn args pos
 writeAssemblyPrim instr@(PrimForeign "llvm" op flags args) pos = do
     releaseDeferredCall
-    logLLVM $ "Translating LLVM instruction " ++ show instr
+    logLLVM $ "* Translating LLVM instruction " ++ show instr
     writeLLVMCall op flags args pos
 writeAssemblyPrim instr@(PrimForeign "lpvm" op flags args) pos = do
     -- Some of these should be handled before releasing deferred calls
-    logLLVM $ "Translating LPVM instruction " ++ show instr
+    logLLVM $ "* Translating LPVM instruction " ++ show instr
     writeLPVMCall op flags args pos
 writeAssemblyPrim instr@(PrimForeign "c" cfn flags args) pos = do
     releaseDeferredCall
-    logLLVM $ "Translating C call " ++ show instr
+    logLLVM $ "* Translating C call " ++ show instr
     writeCCall cfn flags args pos
 writeAssemblyPrim instr@(PrimForeign lang op flags args) pos = do
     shouldnt $ "unknown foreign language " ++ lang
@@ -1089,9 +1093,8 @@ pointerOffset ptr offset = do
     addr <- typeConvertedPrim Pointer ptr
     addrArg <- llvmArgument addr
     (writePtr,readPtr) <- freshTempArgs $ Representation Pointer
-    llvmAssignConvertedResult writePtr CPointer
-        $ "add " ++ addrArg ++ ", "
-            ++ llvmTypeRep Pointer ++ ", " ++ show offset
+    llvmAssignConvertedResult writePtr Pointer
+        $ "add " ++ addrArg ++ ", " ++ show offset
     return readPtr
 
 
@@ -1351,11 +1354,14 @@ llvmValue arg@(ArgClosure pspec args ty) = do
             let sizeVar =
                     ArgInt (fromIntegral (wordSizeBytes * (1 + length args)))
                             intType
+            logLLVM "Creating closure"
             heapAlloc writePtr sizeVar Nothing
             llArgs <- mapM llvmArgument args
             llvmStoreArray readPtr (fnRef:llArgs)
+            logLLVM $ "Finished creating closure; result is " ++ show readPtr
             rep <- typeRep ty
-            typeConvertedBare rep readPtr
+            logLLVM $ "Converting to representation " ++ show rep
+            llvmValue readPtr
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
 llvmValue (ArgUnneeded val _) = shouldnt "llvm value of unneeded arg"
 llvmValue (ArgUndef _) = return "undef"
@@ -1628,6 +1634,12 @@ data ExternSpec =
     deriving (Eq,Ord,Show)
 
 
+-- | Return the name of the thing that the EsternSpec declares
+externID :: ExternSpec -> LLVM LLVMName
+externID ExternFunction{extFnName=name}  = return name
+externID ExternVariable{extVarName=name} = llvmGlobalInfoName name
+
+
 -- | Information needed to specify one constant value, giving the representation
 -- to be stored and the (constant) value itself.
 type ConstSpec = (PrimArg,TypeRepresentation)
@@ -1637,7 +1649,8 @@ type ConstSpec = (PrimArg,TypeRepresentation)
 data LLVMState = LLVMState {
         allConsts :: Set StaticConstSpec,
                                      -- ^ Static constants appearing in module
-        allExterns :: Set ExternSpec, -- ^ Extern declarations needed by module
+        allExterns :: Map String ExternSpec,
+                                    -- ^ Extern declarations needed by module
         fileHandle :: Handle,       -- ^ The file handle we're writing to
         tmpCounter :: Int,          -- ^ Next temp var to make for current proc
         labelCounter :: Int,        -- ^ Next label number to use
@@ -1660,7 +1673,7 @@ data LLVMState = LLVMState {
 
 -- | Set up LLVM monad to translate a module into the given file handle
 initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState Set.empty Set.empty h 0 0 Set.empty
+initLLVMState h = LLVMState Set.empty Map.empty h 0 0 Set.empty
                      Map.empty Map.empty Nothing Map.empty False
 
 

@@ -181,13 +181,13 @@ target triple    ????
 @"closure#5" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#2<1>" }, align 8
 @"closure#6" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#2#closure#1<0>" }, align 8
 
-declare external ccc void @print_int(i64)
-declare external ccc void @putchar(i8)
-declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc i64 @"wybe.int.max<0>"(i64, i64)
 declare external fastcc i64 @"wybe.list.length1<0>"(i64, i64)
 declare external fastcc void @"wybe.list.map#cont#1<0>"(i64, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external ccc void @print_int(i64)
+declare external ccc void @putchar(i8)
+declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#higher_order_resources.maximum" = global i64 undef
 

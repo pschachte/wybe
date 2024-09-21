@@ -89,8 +89,8 @@ target triple    ????
 @"string#24" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#11" to i64 ) }, align 8
 @"string#25" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#12" to i64 ) }, align 8
 
-declare external ccc void @putchar(i8)
 declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"char-escape.<0>"() {

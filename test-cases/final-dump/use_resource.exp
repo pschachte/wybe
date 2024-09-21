@@ -80,9 +80,9 @@ target triple    ????
 @"string#2" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 
+declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
-declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#use_resource.count" = global i64 undef
 

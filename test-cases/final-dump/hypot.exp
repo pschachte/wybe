@@ -164,6 +164,7 @@ target triple    ????
 @"string#28" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#13" to i64 ) }, align 8
 @"string#29" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#14" to i64 ) }, align 8
 
+declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc double @llvm.ceil.f64(double)
 declare external ccc double @llvm.cos.f64(double)
 declare external ccc double @llvm.exp.f64(double)
@@ -177,7 +178,6 @@ declare external ccc double @llvm.sqrt.f64(double)
 declare external ccc void @print_float(double)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
-declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"hypot.<0>"() {

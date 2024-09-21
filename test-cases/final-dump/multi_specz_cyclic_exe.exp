@@ -69,11 +69,11 @@ target triple    ????
 @"string#2" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 
-declare external ccc void @putchar(i8)
-declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc void @"multi_specz_cyclic_lib.foo1<0>[7477e50a09]"(i64, i64, i64, i64, i64)
 declare external fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external ccc void @putchar(i8)
+declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"multi_specz_cyclic_exe.<0>"() {
@@ -239,13 +239,13 @@ target triple    ????
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 
-declare external ccc void @print_int(i64)
-declare external ccc void @putchar(i8)
-declare external ccc ptr @wybe_malloc(i32)
 declare external fastcc void @"multi_specz_cyclic_lib2.foo2<0>"(i64, i64, i64, i64, i64)
 declare external fastcc void @"multi_specz_cyclic_lib2.foo2<0>[d4b0b4930c]"(i64, i64, i64, i64, i64)
 declare external fastcc void @"multi_specz_cyclic_lib2.foo2<0>[ff3a297a4f]"(i64, i64, i64, i64, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external ccc void @print_int(i64)
+declare external ccc void @putchar(i8)
+declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"multi_specz_cyclic_lib.foo1<0>"(i64 %"x1##0", i64 %"x2##0", i64 %"x3##0", i64 %"x4##0", i64 %"n##0") {
