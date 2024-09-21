@@ -585,8 +585,8 @@ writeProcLLVM def procNum =
 closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
 closeClosure proto@PrimProto{primProtoParams=params}
              body@ProcBody{bodyPrims=prims} =
-    (proto{primProtoParams=
-            envPrimParam:(setPrimParamType AnyType <$> actualParams)},
+    (proto{primProtoParams=envPrimParam:actualParams},
+            -- envPrimParam:(setPrimParamType AnyType <$> actualParams)},
      body{bodyPrims=unpacker ++ prims})
   where
     (free, actualParams) = List.partition ((==Free) . primParamFlowType) params
