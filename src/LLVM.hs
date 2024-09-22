@@ -1173,6 +1173,7 @@ llvmAssignResult :: [PrimArg] -> String -> LLVM ()
 llvmAssignResult [] instr = llvmPutStrLnIndented instr
 llvmAssignResult [ArgVar{argVarName=varName}] instr = do
     llVar <- varToWrite varName
+    logLLVM $ "Assigning variable " ++ show varName ++ " (=> " ++ llVar ++ ")"
     llvmPutStrLnIndented $ llVar ++ " = " ++ instr
 llvmAssignResult multiOuts instr = do
     tuple <- llvmLocalName <$> makeTemp
