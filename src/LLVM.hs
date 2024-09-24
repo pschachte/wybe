@@ -640,7 +640,7 @@ recordProcOutByRef param@PrimParam{primParamName=p, primParamType=ty} = do
     let readCPtrArg = ArgVar tmp rep FlowIn Ordinary True
     let actualParam = param{primParamName=tmp, primParamType=rep,
                             primParamFlow=FlowIn}
-    addTakeRefPointer p readCPtrArg ty
+    addOutByRefPointer p readCPtrArg ty
     return actualParam
 
 
@@ -698,10 +698,10 @@ writeAssemblySwitch outs v rep cases dflt = do
     let llType = llvmTypeRep rep
     llvar <- varToRead v
     logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
-    llvmPutStrLnIndented $ "switch " ++ llType ++ " " ++ llvar ++ ", "
+    llvmPutStrLnIndented $ "switch " ++ makeLLVMArg llType llvar ++ ", "
         ++ llvmLabelName dfltLabel ++ " [\n    "
         ++ intercalate "\n    "
-                [llType ++ " " ++ show n ++ ", " ++ llvmLabelName lbl
+                [makeLLVMArg llType (show n) ++ ", " ++ llvmLabelName lbl
                 | (lbl,n) <- zip numLabels [0..]]
         ++ " ]"
     zipWithM_
@@ -898,7 +898,8 @@ writeLPVMCall "mutate" _ args pos = do
         (_,_,_:_,_) ->
              shouldnt $ "LPVM mutate instruction with out-by-reference arg: "
                         ++ show args
-        (struct:offset:destr:size:startOffset:restIns,[struct2],_,iRefs) -> do
+        (struct:offset:destr:size:startOffset:restIns,
+                [struct2@ArgVar{argVarName=struct2Name}],_,iRefs) -> do
             when (List.null iRefs) releaseDeferredCall
             case destr of
                 ArgInt 1 _ -> do
@@ -928,7 +929,7 @@ writeLPVMCall "mutate" _ args pos = do
                     logLLVM "Special take-reference case"
                     (writeCPtrArg,readCPtrArg) <-
                         freshTempArgs $ Representation CPointer
-                    let takeRefVar = argVar "in lpvm alloc" takeRef
+                    let takeRefVar = argVar "in lpvm mutate" takeRef
                     addTakeRefPointer takeRefVar readCPtrArg (argType takeRef)
                     takeRefs <- gets takeRefVars
                     logLLVM $ "take-ref pointers = " ++ show takeRefs
@@ -973,11 +974,11 @@ writeAssemblyReturn [] = llvmPutStrLnIndented "ret void"
 writeAssemblyReturn [PrimParam{primParamName=v, primParamType=ty}] = do
     llty <- llvmTypeRep <$> typeRep ty
     llvar <- varToRead v
-    llvmPutStrLnIndented $ "ret " ++ llty ++ " " ++ llvar
+    llvmPutStrLnIndented $ "ret " ++ makeLLVMArg llty llvar
 writeAssemblyReturn params = do
     retType <- llvmReturnType $ List.map primParamType params
     tuple <- buildTuple retType "undef" 0 params
-    llvmPutStrLnIndented $ "ret " ++ retType ++ " " ++ tuple
+    llvmPutStrLnIndented $ "ret " ++ makeLLVMArg retType tuple
 
 
 -- | Generate code to build a tuple to return for multi-output functions.
@@ -991,7 +992,7 @@ buildTuple outType tuple argNum
     llvar <- varToRead v
     nextVar <- llvmLocalName <$> makeTemp
     llvmPutStrLnIndented $ nextVar ++ " = insertvalue " ++ outType ++ " "
-                            ++ tuple ++ ", " ++ llty ++ " " ++ llvar
+                            ++ tuple ++ ", " ++ makeLLVMArg llty llvar
                             ++ ", " ++ show argNum
     buildTuple outType nextVar (argNum+1) params
 
@@ -1134,7 +1135,7 @@ llvmParameter PrimParam{primParamName=name, primParamType=ty,
                         primParamFlow=FlowIn} = do
     let llname = llvmLocalName name
     lltype <- llvmTypeRep <$> typeRep ty
-    return $ lltype ++ " " ++ llname
+    return $ makeLLVMArg lltype llname
 llvmParameter PrimParam{primParamName=name,
                         primParamFlow=FlowOutByReference} = do
     let llname = llvmLocalName name
@@ -1164,16 +1165,19 @@ llvmInstrArgumentList argSize output inputs repFn = do
     let outTyRep = repFn typeRep
     let llArgTyRep = llvmTypeRep typeRep
     argsString <- intercalate ", " <$> mapM (typeConvertedBare typeRep) inputs
-    return (llArgTyRep ++ " " ++ argsString, outTyRep)
+    return (makeLLVMArg llArgTyRep argsString, outTyRep)
 
 
 -- | Write the LLVM translation of the specified output argument list as target
 -- for the specified instruction.  For multiple outputs, we must unpack a tuple.
 llvmAssignResult :: [PrimArg] -> String -> LLVM ()
 llvmAssignResult [] instr = llvmPutStrLnIndented instr
-llvmAssignResult [ArgVar{argVarName=varName}] instr = do
-    llVar <- varToWrite varName
+llvmAssignResult [arg@ArgVar{argVarName=varName,argVarType=ty}] instr = do
+    llty <- llvmTypeRep <$> typeRep ty
+    llVar <- varToWrite varName llty
     llvmPutStrLnIndented $ llVar ++ " = " ++ instr
+    varValue <- llvmArgument arg
+    storeValueIfNeeded varName varValue
 llvmAssignResult multiOuts instr = do
     tuple <- llvmLocalName <$> makeTemp
     retType <- llvmReturnType $ argVarType <$> multiOuts
@@ -1191,12 +1195,10 @@ llvmAssignConvertedResult arg@ArgVar{argVarName=varName,argVarType=ty}
     neededRep <- typeRep ty
     if neededRep == actualRep
         then do
-            llVar <- varToWrite varName
-            llvmPutStrLnIndented $ llVar ++ " = " ++ instr
+            llvmAssignResult [arg] instr
         else do
             (writeArg,readArg) <- freshTempArgs $ Representation actualRep
-            llVar <- varToWrite $ argVar "in llvmAssignConvertedResult" writeArg
-            llvmPutStrLnIndented $ llVar ++ " = " ++ instr
+            llvmAssignResult [writeArg] instr
             typeConvert readArg arg
 llvmAssignConvertedResult notAVar _ _ =
     shouldnt $ "llvmAssignConvertedResult into non-variable " ++ show notAVar
@@ -1277,7 +1279,7 @@ marshallCallResult outArg@ArgVar{argVarName=varName} cType instr = do
             $ cTypeRepresentation cType
     outTypeRep <- argTypeRep outArg
     let instr' = "call ccc " ++ llvmTypeRep inTypeRep ++ " " ++ instr
-    if inTypeRep == outTypeRep then llvmAssignResult [outArg] instr'
+    if equivLLTypes inTypeRep outTypeRep then llvmAssignResult [outArg] instr'
     else do
         (writeTmp,readTmp) <- freshTempArgs $ Representation inTypeRep
         llvmAssignResult [writeTmp] instr'
@@ -1325,7 +1327,11 @@ llvmArgument :: PrimArg -> LLVM LLVMArg
 llvmArgument arg = do
     lltype <- llvmTypeRep <$> argTypeRep arg
     llVal <- llvmValue arg
-    return $ lltype ++ " " ++ llVal
+    return $ makeLLVMArg lltype llVal
+
+
+makeLLVMArg :: LLVMType -> String -> LLVMArg
+makeLLVMArg ty val = ty ++ " " ++ val
 
 
 -- | A PrimArg as portrayed in LLVM code
@@ -1452,11 +1458,11 @@ typeConvert fromArg toArg = do
                 ++ " to " ++ show toTy
     case toArg of
         ArgVar{argVarName=varName} | fromTy == toTy ->
-            renameVariable varName fromVal
+            renameVariable varName fromVal $ llvmTypeRep fromTy
         _ ->
             llvmAssignResult [toArg]
               $ typeConvertOp fromTy toTy ++ " "
-                ++ llvmTypeRep fromTy ++ " " ++ fromVal
+                ++ makeLLVMArg (llvmTypeRep fromTy) fromVal
                 ++ " to " ++ llvmTypeRep toTy
 
 
@@ -1667,6 +1673,10 @@ data LLVMState = LLVMState {
         takeRefVars :: Map PrimVarName (PrimArg,TypeSpec),
                                     -- ^ arg to read each take-reference ptr,
                                     -- plus the type of the original variable
+        outByRefVars :: Map PrimVarName (PrimArg,TypeSpec),
+                                    -- ^ ptr to write each out-by-reference var
+                                    -- to, when the var is written, plus the
+                                    -- type of the var
         doesAlloca :: Bool          -- Does current body do alloca?
 }
 
@@ -1674,7 +1684,7 @@ data LLVMState = LLVMState {
 -- | Set up LLVM monad to translate a module into the given file handle
 initLLVMState :: Handle -> LLVMState
 initLLVMState h = LLVMState Set.empty Map.empty h 0 0 Set.empty
-                     Map.empty Map.empty Nothing Map.empty False
+                     Map.empty Map.empty Nothing Map.empty Map.empty False
 
 
 -- | Reset the LLVM monad in preparation for translating a proc definition with
@@ -1687,6 +1697,7 @@ initialiseLLVMForProc tmpCount = do
                      , varUseRenaming = Map.empty
                      , deferredCall = Nothing
                      , takeRefVars = Map.empty
+                     , outByRefVars = Map.empty
                      , doesAlloca = False
                      }
 
@@ -1757,23 +1768,24 @@ setRenaming vars = do
 
 -- | Replace the specified variable with the specified new value in all
 -- following code.
-renameVariable :: PrimVarName -> LLVMName -> LLVM ()
-renameVariable var val =
+renameVariable :: PrimVarName -> LLVMName -> LLVMType -> LLVM ()
+renameVariable var val llty = do
     modify $ \s -> s { varUseRenaming = Map.insert var val $ varUseRenaming s }
+    storeValueIfNeeded var $ makeLLVMArg llty val
 
 
 -- | The LLVM name for a variable we are about to assign.  If this is one of the
 -- output parameters, rename it, otherwise leave it alone, and in either case,
 -- transform it to an LLVM local variable name.
-varToWrite :: PrimVarName -> LLVM LLVMName
-varToWrite v = do
+varToWrite :: PrimVarName -> LLVMType -> LLVM LLVMName
+varToWrite v llty = do
     mustRename <- Set.member v <$> gets varDefRenaming
     logLLVM $ "varToWrite " ++ show v ++ "; mustRename = " ++ show mustRename
     vdr <- gets varDefRenaming
     logLLVM $ "varDefRenaming = " ++ show vdr
     if mustRename then do
         tmp <- llvmLocalName <$> makeTemp
-        renameVariable v tmp
+        renameVariable v tmp llty
         return tmp
     else do
         -- rename v next time we try to assign it
@@ -1846,6 +1858,32 @@ addTakeRefPointer takeRefVar readPtrArg ty = do
             ++ ":" ++ show ty
     modify $ \s -> s{ takeRefVars =
                         Map.insert takeRefVar (readPtrArg,ty) $ takeRefVars s }
+
+
+-- | Record readPtrArg as the variable that holds the pointer to the place to
+-- store the value assigned when a value is assigned to var, along with the type
+-- of the value.
+addOutByRefPointer :: PrimVarName -> PrimArg -> TypeSpec -> LLVM ()
+addOutByRefPointer var readPtrArg ty = do
+    logLLVM $ "Recording out-by-ref pointer " ++ show readPtrArg
+            ++ " as place to store values assigned to " ++ show var
+            ++ ":" ++ show ty
+    modify $ \s -> s{ outByRefVars =
+                        Map.insert var (readPtrArg,ty) $ outByRefVars s }
+
+
+-- | The specified value is to be assigned to the specified variable.  If that
+-- variable is recorded as an out-by-reference, then store the value where we've
+-- recorded it should be stored.
+storeValueIfNeeded :: PrimVarName -> LLVMArg -> LLVM ()
+storeValueIfNeeded var val = do
+    rec <- gets $ Map.lookup var . outByRefVars
+    case rec of
+        Nothing -> return ()
+        Just (readPtrArg,ty) -> do
+            logLLVM $ "Storing value " ++ show val ++ ":" ++ show ty
+                    ++ " through pointer " ++ show readPtrArg
+            llvmStoreValue readPtrArg val
 
 
 -- | Emit the deferred instruction, if there is one.  If not, do nothing.  This

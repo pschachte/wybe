@@ -171,11 +171,13 @@ if.then.0:
   %"tmp#8##0" = ptrtoint ptr %"tmp#15##0" to i64
   %"tmp#16##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i64 %"h##0", ptr %"tmp#16##0"
+  store i64 %"tmp#8##0", ptr %"tmp#11##0"
   %"tmp#17##0" = add i64 %"tmp#8##0", 8
   %"tmp#18##0" = inttoptr i64 %"tmp#17##0" to ptr
   musttail call fastcc void @"type_list.,,<0>"(i64 %"t##0", i64 %"y##0", ptr %"tmp#18##0")
   ret void
 if.else.0:
+  store i64 %"y##0", ptr %"tmp#11##0"
   ret void
 }
 
@@ -186,11 +188,13 @@ if.then.0:
   %"tmp#12##0" = add i64 %"x##0", 8
   %"tmp#13##0" = inttoptr i64 %"tmp#12##0" to ptr
   %"t##0" = load i64, ptr %"tmp#13##0"
+  store i64 %"x##0", ptr %"tmp#11##0"
   %"tmp#14##0" = add i64 %"x##0", 8
   %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
   musttail call fastcc void @"type_list.,,<0>[410bae77d3]"(i64 %"t##0", i64 %"y##0", ptr %"tmp#15##0")
   ret void
 if.else.0:
+  store i64 %"y##0", ptr %"tmp#11##0"
   ret void
 }
 

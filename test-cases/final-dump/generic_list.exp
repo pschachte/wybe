@@ -189,11 +189,13 @@ if.then.0:
   %"tmp#8##0" = ptrtoint ptr %"tmp#14##0" to i64
   %"tmp#15##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i64 %"h##0", ptr %"tmp#15##0"
+  store i64 %"tmp#8##0", ptr %"tmp#10##0"
   %"tmp#16##0" = add i64 %"tmp#8##0", 8
   %"tmp#17##0" = inttoptr i64 %"tmp#16##0" to ptr
   musttail call fastcc void @"generic_list.append<0>"(i64 %"t##0", i64 %"y##0", ptr %"tmp#17##0")
   ret void
 if.else.0:
+  store i64 %"y##0", ptr %"tmp#10##0"
   ret void
 }
 
