@@ -1175,6 +1175,7 @@ llvmAssignResult [] instr = llvmPutStrLnIndented instr
 llvmAssignResult [arg@ArgVar{argVarName=varName,argVarType=ty}] instr = do
     llty <- llvmTypeRep <$> typeRep ty
     llVar <- varToWrite varName llty
+    logLLVM $ "Assigning variable " ++ show varName ++ " (=> " ++ llVar ++ ")"
     llvmPutStrLnIndented $ llVar ++ " = " ++ instr
     varValue <- llvmArgument arg
     storeValueIfNeeded varName varValue
