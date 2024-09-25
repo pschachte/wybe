@@ -265,7 +265,8 @@ forEachModule mods code =
 -- used by the module.
 preScanProcs :: LLVM ()
 preScanProcs = do
-    mod <- llvmGetModule modSpec
+    thisMod <- llvmGetModule modSpec
+    mod <- fromMaybe thisMod <$> llvmGetModule modRootModSpec
     procss <- lift $ getModuleImplementationField (Map.elems . modProcs)
     logLLVM $ "preScanProcs: "
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
@@ -316,8 +317,10 @@ recordConst spec =
 
 -- | If needed, add an extern declaration for a prim to the set.
 recordExtern :: ModSpec -> Prim -> LLVM ()
-recordExtern mod (PrimCall _ pspec _ args _) =
+recordExtern mod (PrimCall _ pspec _ args _) = do
+    logLLVM $ "Check if " ++ show pspec ++ " is extern to " ++ showModSpec mod
     unless (mod /= [] && mod `isPrefixOf` procSpecMod pspec) $ do
+        logLLVM " ... it is"
         let (nm,cc) = llvmProcName pspec
         recordExternFn cc nm args
 recordExtern _ PrimHigher{} = return ()
