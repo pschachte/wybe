@@ -454,13 +454,13 @@ writeConstDeclaration spec@(CStringSpec str) n = do
     declareStringConstant textName str Nothing
 writeConstDeclaration spec@(ClosureSpec pspec args) n = do
     let closureName = specialName2 "closure" $ show n
-    modify $ \s -> s { constNames=Map.insert spec closureName
-                                       $ constNames s}
+    modify $ \s -> s { constNames=Map.insert spec closureName $ constNames s}
     let pname = show pspec
+    argReps <- mapM argTypeRep args
     declareStructConstant closureName
         ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
         -- ((ArgInt 42 intType, Bits 64)
-         : List.map (,Pointer) args)
+         : zip args argReps)
         Nothing
 
 
@@ -1370,7 +1370,7 @@ llvmValue arg@(ArgClosure pspec args ty) = do
             logLLVM $ "Converting to representation " ++ show rep
             llvmValue readPtr
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
-llvmValue (ArgUnneeded val _) = shouldnt "llvm value of unneeded arg"
+llvmValue (ArgUnneeded val _) = return "undef"
 llvmValue (ArgUndef _) = return "undef"
 
 
@@ -1432,7 +1432,7 @@ llvmRepReturnType :: [TypeRepresentation] -> LLVMType
 llvmRepReturnType [] = "void"
 llvmRepReturnType [ty] = llvmTypeRep ty
 llvmRepReturnType tys = llvmStructType tys
-    
+
 
 -- | An LLVM structure type based on a list of LLVM type representations
 llvmStructType :: [TypeRepresentation] -> LLVMType
