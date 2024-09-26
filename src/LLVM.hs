@@ -1197,7 +1197,7 @@ llvmAssignConvertedResult :: PrimArg -> TypeRepresentation -> String -> LLVM ()
 llvmAssignConvertedResult arg@ArgVar{argVarName=varName,argVarType=ty}
                          actualRep instr = do
     neededRep <- typeRep ty
-    if neededRep == actualRep
+    if equivLLTypes neededRep actualRep
         then do
             llvmAssignResult [arg] instr
         else do
@@ -1397,7 +1397,7 @@ neededFreeArgs pspec args = lift $ do
 
 
 ----------------------------------------------------------------------------
--- Handling LLVM types and converting from Wybe types
+-- Converting Wybe types to LLVM types 
 ----------------------------------------------------------------------------
 
 -- | Return the representation for the specified type
@@ -1407,6 +1407,7 @@ typeRep ty =
       <$> lift (lookupTypeRepresentation ty)
 
 
+-- | Return the LLMV name and type representation of the specified resource.
 llvmResource :: ResourceSpec -> LLVM (LLVMName, TypeRepresentation)
 llvmResource res = do
     (res', ty) <-
@@ -1449,6 +1450,22 @@ llvmReturnType specs = llvmRepReturnType <$> mapM typeRep specs
 
 ----------------------------------------------------------------------------
 -- LLVM Type conversion
+--
+-- We convert between LLVM types in a few contexts:
+--
+--   * To pass Wybe values to C or return C values to Wybe
+--
+--   * To convert typed values to generic ones or vice versa
+--
+--   * To make LLVM binary operation argument types consistent (eg, to add an
+--     int to a char)
+--
+--   * To convert between CPointer and Pointer types for address arithmetic
+--
+--   * To implement the lpvm cast operation
+--
+-- This excludes explicit conversion, such as float:float or float:iround, which
+-- are handled by explicitly using LLVM intrinsics or instructions.
 ----------------------------------------------------------------------------
 
 -- | Emit an instruction to convert the specified input argument to the
@@ -1792,7 +1809,10 @@ varToWrite v llty = do
         renameVariable v tmp llty
         return tmp
     else do
-        -- rename v next time we try to assign it
+        -- rename v next time we try to assign it.  This can happen because LPVM
+        -- isn't quite *static* single assignment, so the same variable name can
+        -- be assigned in multiple branches.  In that case, rename later
+        -- assignments.
         modify $ \s -> s { varDefRenaming = Set.insert v $ varDefRenaming s }
         return $ llvmLocalName v
 
