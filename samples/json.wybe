@@ -73,10 +73,10 @@ def {test} json(?j:_) use !tokens {
 ## sequence/5
 # Parse a comma-separated sequence of things, with a preceding and 
 # following character, followed by whitespace.
-def {test} sequence(before:char, parse:{resource,test}(?X), ?xs:list(X), after:char) use !tokens {
+def {test} sequence(before:char, item:{resource,test}(?X), ?xs:list(X), after:char) use !tokens {
     !literal(before)
-    if { parse(?x) :: 
-        !sequence_tail(parse, ?xs)
+    if { item(?x) :: 
+        !sequence_tail(item, ?xs)
         ?xs = [x | xs]
       | else :: 
         ?xs = []
@@ -86,10 +86,10 @@ def {test} sequence(before:char, parse:{resource,test}(?X), ?xs:list(X), after:c
 
 ## sequence_tail/3
 # Parse the tail of a sequnece. Helper for sequence/2.
-def {test} sequence_tail(parse:{resource,test}(?X), ?xs:list(X)) use !tokens {
+def {test} sequence_tail(item:{resource,test}(?X), ?xs:list(X)) use !tokens {
     if { !literal(',') ::
-        !parse(?x)
-        !sequence_tail(parse, ?xs)
+        !item(?x)
+        !sequence_tail(item, ?xs)
         ?xs = [x | xs]
       | else ::
         ?xs = []
