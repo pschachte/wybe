@@ -73,10 +73,10 @@ def {test} json(?j:_) use !tokens {
 ## sequence/5
 # Parse a comma-separated sequence of things, with a preceding and 
 # following character, followed by whitespace.
-def {test} sequence(before:char, item:{resource,test}(?X), ?xs:list(X), after:char) use !tokens {
+def {test} sequence(before:char, parse_item:{resource,test}(?X), ?xs:list(X), after:char) use !tokens {
     !literal(before)
-    if { item(?x) :: 
-        !sequence_tail(item, ?xs)
+    if { parse_item(?x) :: 
+        !sequence_tail(parse_item, ?xs)
         ?xs = [x | xs]
       | else :: 
         ?xs = []
@@ -86,10 +86,10 @@ def {test} sequence(before:char, item:{resource,test}(?X), ?xs:list(X), after:ch
 
 ## sequence_tail/3
 # Parse the tail of a sequnece. Helper for sequence/2.
-def {test} sequence_tail(item:{resource,test}(?X), ?xs:list(X)) use !tokens {
+def {test} sequence_tail(parse_item:{resource,test}(?X), ?xs:list(X)) use !tokens {
     if { !literal(',') ::
-        !item(?x)
-        !sequence_tail(item, ?xs)
+        !parse_item(?x)
+        !sequence_tail(parse_item, ?xs)
         ?xs = [x | xs]
       | else ::
         ?xs = []
@@ -263,10 +263,15 @@ def print_list(start:char, printer:{resource}(int, X), ind:int, xs:list(X), end:
     !print(end)
 }
 
-?s = "{\"a\": [1, 1.2, 1e2, false, null], \"abc\ndef\": true}"
-if { parse(!s, ?j) :: 
-    !println("successfully parsed: ")
-    !print(j) 
+?str = "{\"a\": [1, 1.2, 1e2, false, null], \"abc\ndef\": true}"
+
+!print("Attempting to parse ")
+!escape(str)
+!nl
+
+if { parse(str, ?json) :: 
+    !println("Successfully parsed!")
+    !print(json) 
   | else :: 
-    !error("failed to parse $(s)") 
+    !error("failed to parse :(") 
 }
