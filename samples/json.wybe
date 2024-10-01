@@ -192,7 +192,12 @@ def {test} string_tail(?str:string) use !tokens {
 def {test} digits(?n:float, ?len:float) use !tokens {
     !digit(?n)
     ?len = 1.0
-    !digits_(!n, !len)
+    do {
+        !digit(?d) 
+        !len += 1.0 
+        ?n = n * 10.0 + d
+      | break
+    }
 }
 
 ## digits/1
@@ -201,16 +206,6 @@ def {test} digit(?d:float) use !tokens {
     !char(?c)
     '0' <= c & c <= '9'
     ?d = foreign llvm sitofp(ord(c) - ord('0'):int)
-}
-
-## digits_/2
-# Parse a sequence of zero or more digits. Helper for digits/2
-def {test} digits_(!n:float, !len:float) use !tokens {
-    !digit(?d)
-    !len += 1.0
-    ?n = n * 10.0 + d
-    !digits(!len, !n)
-  | pass
 }
 
 pub def print(x:_) use !io {
@@ -276,7 +271,7 @@ def print_list(start:char, printer:{resource}(int, X), ind:int, xs:list(X), end:
     !print(end)
 }
 
-?str = "{\"a\": [1, 1.2, 1e2, false, null],\n \"abc\\ndef\": true}"
+?str = "  {\"a\": [1, 1.020, 1e2, 01.2E3, false, { \"key\": null}],\n \"abc\\ndef\": true }  "
 
 !print("Attempting to parse ")
 !escape(str)
