@@ -253,7 +253,7 @@ procOrFuncItem vis = do
         then fail "unexpected return type in proc declaration"
         else do
             rs <- useResourceFlowSpecs
-            let proto' = proto { procProtoResources = Set.fromList rs }
+            let proto' = proto { procProtoResources = rs }
             case mbLanguage of
                 Just language -> return $ ForeignProcDecl vis language mods proto' $ Just pos
                 Nothing -> do
@@ -986,7 +986,7 @@ termToPrototype (Call pos mod name ParamIn rawParams) =
     if List.null mod
     then do
         params <- mapM termToParam $ parensToTerm rawParams
-        return (ProcProto name params Set.empty,AnyType)
+        return (ProcProto name params [],AnyType)
     else Left (pos, "module not permitted in proc declaration " ++ show mod)
 termToPrototype other =
     syntaxError (termPos other)
@@ -1302,7 +1302,7 @@ termToTypeFlow other =
 termToProto :: TranslateTo (Placed ProcProto)
 termToProto (Call pos [] name ParamIn params) = do
     params' <- mapM termToParam params
-    return $ Placed (ProcProto name params' Set.empty) pos
+    return $ Placed (ProcProto name params' []) pos
 termToProto other =
     syntaxError (termPos other) $ "invalid prototype " ++ show other
 
@@ -1322,7 +1322,7 @@ termToParam other =
 termToCtorDecl :: TranslateTo (Placed ProcProto)
 termToCtorDecl (Call pos [] name ParamIn fields) = do
     fields' <- mapM termToCtorField fields
-    return $ Placed (ProcProto name fields' Set.empty) pos
+    return $ Placed (ProcProto name fields' []) pos
 termToCtorDecl other =
     syntaxError (termPos other)
         $ "invalid constructor declaration " ++ show other

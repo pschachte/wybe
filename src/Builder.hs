@@ -1137,9 +1137,9 @@ buildMain :: [[ModSpec]] -> Compiler Item
 buildMain sccs = do
     logBuild "Generating main executable code"
     let cmdResource name = ResourceFlowSpec (ResourceSpec cmdLineModSpec name)
-    let mainRes = Set.fromList [cmdResource "argc" ParamIn,
-                                cmdResource "argv" ParamIn,
-                                cmdResource "exit_code" ParamOut]
+    let mainRes = [ cmdResource "argc" ParamIn
+                  , cmdResource "argv" ParamIn
+                  , cmdResource "exit_code" ParamOut]
     initPairs <- mapM sccInits sccs
     let initRes = concatMap fst initPairs
     let body = concatMap snd initPairs

@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: foreign_def.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @foreign_def:nn:nn
@@ -23,9 +23,9 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @foreign_def:nn:nn
 
 
-putchar > public {inline} (4 calls)
+proc putchar > public {inline} (4 calls)
 0: foreign_def.putchar<0>
-putchar(c##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+putchar(c##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%io##0:wybe.phantom) @foreign_def:nn:nn

@@ -131,9 +131,8 @@ canonicaliseProcResources pd _ = do
     logResources $ "Canonicalising resources used by " ++ showProcName name
     let proto = procProto pd
     let pos = procPos pd
-    let resources = Set.elems $ procProtoResources proto
-    resourceFlows <- Set.fromList
-                 <$> mapM (canonicaliseResourceFlow pos name) resources
+    let resources = procProtoResources proto
+    resourceFlows <- mapM (canonicaliseResourceFlow pos name) resources
     logResources $ "Available resources: " ++ show resourceFlows
     let proto' = proto {procProtoResources = resourceFlows}
     let pd' = pd {procProto = proto'}
@@ -231,11 +230,11 @@ transformProcResources pd _ = do
 -- This returns an updated list of Params, transformed list of Stmts (body),
 -- and the value of the tmpCtr after transforming the proc
 transformProc :: OptPos -> Maybe ProcName -> ProcVariant
-              -> Determinism -> [Placed Param] -> Set ResourceFlowSpec
+              -> Determinism -> [Placed Param] -> [ResourceFlowSpec]
               -> [Placed Stmt] -> Resourcer ([Placed Param], [Placed Stmt], Int)
 transformProc pos name variant detism params ress body = do
     logResourcer $ "Transforming proc " ++ fromMaybe "un-named (anon)" name
-    resTys <- concat <$> mapM (simpleResourceFlows pos) (Set.elems ress)
+    resTys <- concat <$> mapM (simpleResourceFlows pos) ress
     let allParams = params ++ List.map resourceParams resTys
     let hasHigherResources = any (paramIsResourceful . content) allParams
     let (resFlows, realParams) = partitionEithers $ eitherResourceParam <$> allParams
@@ -254,7 +253,7 @@ transformProc pos name variant detism params ress body = do
                      resIsExecMain=isExecMain}
     -- we must save and restore any non-out-flowing resources, as we cannot be
     -- sure theyre not mutated
-    let ress' = [res | ResourceFlowSpec res flow <- Set.toList ress
+    let ress' = [res | ResourceFlowSpec res flow <- ress
                 , not $ flowsOut flow
                 , not $ isSpecialResource res ]
     body' <- fst <$> transformStmts [UseResources ress' (Just Map.empty) body
@@ -318,7 +317,7 @@ transformStmt stmt@(ProcCall fn@(First m n mbId) d resourceful args) pos = do
     let (res, args') = partitionEithers $ placedApply eitherResourceExp <$> args
     unless (List.null res) $ shouldnt $ "statement with resource args " ++ show stmt
     (args'', ins, outs) <- transformExps args'
-    let callResFlows = Set.toList $ procProtoResources proto
+    let callResFlows = procProtoResources proto
     let callParamTys = paramType . content <$> procProtoParams proto
     let hasResfulHigherArgs = any isResourcefulHigherOrder callParamTys
     let usesResources = not (List.null callResFlows) || hasResfulHigherArgs
@@ -489,9 +488,7 @@ transformExp _ (AnonProc mods@(ProcModifiers detism _ _ _ resful)
          . List.filter (not . isSpecialResource)
          . Map.keys
         <$> gets resResources
-    let res' = if resful
-                then Set.fromList res
-                else Set.empty
+    let res' = if resful then res else []
     (params', body', _) <- transformProc pos Nothing AnonymousProc
                                 detism (Unplaced <$> params) res' body
     let clsd' = trustFromJust "gloablise anon proc without clsd" clsd

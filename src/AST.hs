@@ -2169,9 +2169,9 @@ univGlobalFlows = GlobalFlows UniversalSet UniversalSet UniversalSet
 -- In the case we have a higher order resourceful argument, we may not know
 -- exactly which global variables flow into or out of a procedure, and as such
 -- we take a conservative approach and assume all do.
-makeGlobalFlows :: [(ParameterID, PrimParam)] -> Set ResourceFlowSpec -> GlobalFlows
+makeGlobalFlows :: [(ParameterID, PrimParam)] -> [ResourceFlowSpec] -> GlobalFlows
 makeGlobalFlows params resFlows =
-    Set.fold addGlobalResourceFlows 
+    List.foldr addGlobalResourceFlows 
         (emptyGlobalFlows{globalFlowsParams=pFlows}) resFlows
   where
     pFlows = FiniteSet $ Set.fromList $ catMaybes $ List.map (uncurry paramFlow) params
@@ -2761,7 +2761,7 @@ data Constant = Int Int
 data ProcProto = ProcProto {
     procProtoName::ProcName,
     procProtoParams::[Placed Param],
-    procProtoResources::Set.Set ResourceFlowSpec
+    procProtoResources::[ResourceFlowSpec]
     } deriving (Eq, Generic)
 
 
@@ -3053,7 +3053,7 @@ data Exp
                -- these two must be the same.
       | Global GlobalInfo
       -- The following are eliminated during flattening
-      | AnonProc ProcModifiers [Param] [Placed Stmt] (Maybe VarDict) (Maybe (Set ResourceFlowSpec))
+      | AnonProc ProcModifiers [Param] [Placed Stmt] (Maybe VarDict) (Maybe [ResourceFlowSpec])
       | AnonFunc (Placed Exp)
       | AnonParamVar (Maybe Integer) FlowDirection
       | Where [Placed Stmt] (Placed Exp)
@@ -3932,11 +3932,10 @@ instance Show TypeSpec where
 
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
-showResources :: Set.Set ResourceFlowSpec -> String
+showResources :: [ResourceFlowSpec] -> String
 showResources resources
-  | Set.null resources = ""
-  | otherwise          = " use " ++ intercalate ", "
-                                    (List.map show $ Set.elems resources)
+  | List.null resources = ""
+  | otherwise           = " use " ++ intercalate ", " (List.map show resources)
 
 
 -- |How to show a proc prototype.

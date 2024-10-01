@@ -66,7 +66,7 @@ flattenProcBody pd _ = do
                  $ List.map paramName
                  $ List.filter (flowsIn . paramFlow)
                  $ content <$> params
-        resources = Set.map (resourceName . resourceFlowRes)
+        resources = List.map (resourceName . resourceFlowRes)
                   $ procProtoResources proto
         ProcDefSrc body = procImpln pd
 
@@ -74,7 +74,7 @@ flattenProcBody pd _ = do
         inlining = procInlining pd
         impurity = procImpurity pd
         variant = procVariant pd
-        resourceful = not $ Set.null resources
+        resourceful = not $ List.null resources
         mods = ProcModifiers detism inlining impurity variant resourceful
 
     logMsg Flatten
@@ -82,7 +82,7 @@ flattenProcBody pd _ = do
             ++ " {" ++ showBody 4 body ++ "}"
     mapM_ (placedApply $ flip explicitTypeSpecificationWarning . paramType) params
 
-    (body',tmpCtr) <- flattenBody body (inParams `Set.union` resources) detism
+    (body',tmpCtr) <- flattenBody body (inParams `Set.union` Set.fromList resources) detism
 
     return pd{procTmpCount = tmpCtr, procImpln = ProcDefSrc body'}
 
@@ -647,7 +647,7 @@ flattenExp (Typed exp ty castFrom) _ _ pos = do
 
 -- | Flatten something, and produce an anonymous procedure from the resultant flattened
 -- statements
-flattenAnon :: ProcModifiers -> (Maybe VarDict) -> (Maybe (Set ResourceFlowSpec))
+flattenAnon :: ProcModifiers -> (Maybe VarDict) -> (Maybe [ResourceFlowSpec])
             -> TypeSpec -> Maybe TypeSpec -> OptPos
             -> Flattener () -> Flattener (Placed Exp)
 flattenAnon mods clsd res ty castFrom pos inner = do
