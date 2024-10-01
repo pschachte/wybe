@@ -736,7 +736,7 @@ Wybe also supports an alternative syntax for invoking procedures, functions, or
 constructors that puts the (first) argument first, and the procedure, function,
 or constructor name, with its other arguments, if any, second:
 
-> *arg*`^`*operation*(*other args*)
+> *arg*`^`*operation*`(`*other args*`)`
 
 and in the special case of operations taking only one argument:
 
@@ -2064,7 +2064,7 @@ so be careful to get the call right.
 
 The form of a foreign call is:
 
-> `foreign` *language* *function*(*arg*, *arg*, ...)
+> `foreign` *language* *function*`(`*arg*, *arg*, ...`)`
 
 where *language* is the name of the foreign language the function is written in,
 *function* is the name of the foreign function to call, and the *arg*s are the
@@ -2092,7 +2092,7 @@ Foreign calls may optionally specify *modifiers* to provide extra information
 useful to the Wybe compiler.  If modifiers are to be specified, they are written 
 after the *language* name:
 
-> `foreign` *language* `{`*modifiers*`}` *function*(*arg*, *arg*, ...)
+> `foreign` *language* `{`*modifiers*`}` *function*`(`*arg*, *arg*, ...`)`
 
 where *modifiers* is a comma-separate sequence of identifiers specifying this
 information.  Supported modifiers in foreign calls are:
@@ -2122,6 +2122,23 @@ and the less than test for integers is defined as
 ```
 pub def {test} (x:_ <  y:_) { foreign llvm {test} icmp_slt(x,y) }
 ```
+
+##### Foriegn procedure definition short-hand
+
+For convenince, a short-hand syntax is provided to define a Wybe procedure to interface
+with a foriegn procedure. This syntax is as follows:
+
+> `def` `foreign` *language* *function*`(`*param*, *param*, ...`)`
+
+which is equivalent to defining the following:
+
+> `def` *function*`(`*param*, *param*, ...`)` `{` `foreign` *language* *function*`(`*param*, *param*, ...`)` `}`
+
+Note that all parameters must be typed.
+
+Resources can optionally be specified with a `use` clause, that follows the same syntax
+for a WYbe procedure definition. Resources are added as additonal arguments to the foreign call after the other arguments. Modifiers can also optionally be specified, 
+with the syntax being identical to a Wybe procedure definition, and are added to the foreign procedure call.
 
 
 #### Using LLVM instructions
