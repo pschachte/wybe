@@ -281,5 +281,5 @@ if { parse(str, ?json) ::
     !println("Successfully parsed!")
     !print(json) 
   | else :: 
-    !print("failed to parse :(") 
+    !print("Failed to parse :(") 
 }
