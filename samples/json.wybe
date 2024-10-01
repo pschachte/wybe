@@ -183,10 +183,8 @@ def {test} string_tail(?str:string) use !tokens {
            | else :: fail
         }
     }
-    !string_tail(?str:string)
-    # this should work...
-    # ?str = [c | str]
-    ?str = string(c) ,, str
+    !string_tail(?str)
+    ?str = c ,, str
 }
 
 ## digits/2
@@ -194,7 +192,7 @@ def {test} string_tail(?str:string) use !tokens {
 def {test} digits(?n:float, ?len:float) use !tokens {
     !digit(?n)
     ?len = 1.0
-    !digits(!n, !len)
+    !digits_(!n, !len)
 }
 
 ## digits/1
@@ -205,9 +203,9 @@ def {test} digit(?d:float) use !tokens {
     ?d = foreign llvm sitofp(ord(c) - ord('0'):int)
 }
 
-## digits/2
+## digits_/2
 # Parse a sequence of zero or more digits. Helper for digits/2
-def {test} digits(!n:float, !len:float) use !tokens {
+def {test} digits_(!n:float, !len:float) use !tokens {
     !digit(?d)
     !len += 1.0
     ?n = n * 10.0 + d
