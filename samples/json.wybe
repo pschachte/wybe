@@ -1,6 +1,3 @@
-use wybe.float
-use logging
-
 pub constructors jobject(list(pair)) 
                | jstring(string) 
                | jbool(bool) 
