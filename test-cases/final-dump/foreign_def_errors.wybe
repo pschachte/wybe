@@ -1,0 +1,4 @@
+def foreign c untyped(p, q:int)
+def foreign c {resource} bad_mods()
+
+pass 

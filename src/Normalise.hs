@@ -112,21 +112,26 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
               pos]
         pos)
 normaliseItem (ForeignProcDecl vis lang mods proto@(ProcProto name params resources) pos) = do
-    when (mods{modifierImpurity=Pure, modifierDetism=Det} /= defaultProcModifiers)
-        $ errmsg pos 
-        $ "foreign procedure declaration of " ++ name 
-            ++ " has illegal procedure modifiers. Only purity and determinism can be specified."
+    when (mods{modifierImpurity=Pure, modifierDetism=Det, modifierInline=MayInline} /= defaultProcModifiers)
+        $ errmsg pos
+        $ "Foreign procedure declaration of " ++ name
+            ++ " has illegal procedure modifiers. Only purity, determinism, and inlining can be specified."
+    mapM_ ((\(Param{paramType=ty, paramName=name}, pos) -> do
+            when (ty == AnyType)
+                $ errmsg pos
+                $ "Foreign procedure declaration parameters must be typed, but " ++ name ++ " is untyped."
+        ) . unPlace) params
+
     normaliseItem
-        (ProcDecl vis mods proto 
+        (ProcDecl vis mods proto
             [maybePlace (ForeignCall lang name mods' exps) pos] pos)
   where
-    mods' = [ imp | let imp = impurityName (modifierImpurity mods)
-            , imp /= "" ]
-         ++ [ detism | let detism = determinismName (modifierDetism mods)
-            , detism /= "" ]
+    mods' = List.filter (not . List.null) 
+                [ impurityName (modifierImpurity mods)
+                , determinismName (modifierDetism mods) ]
     exps = List.map (uncurry (flip rePlace . paramToVar) . unPlace) params
-        ++ List.map (\(ResourceFlowSpec rs@(ResourceSpec _ r) dir) -> 
-                        Var r dir (Resource rs) `maybePlace` pos) 
+        ++ List.map (\(ResourceFlowSpec rs@(ResourceSpec _ r) dir) ->
+                        Var r dir (Resource rs) `maybePlace` pos)
                     resources
 normaliseItem item@ProcDecl{} = do
     logNormalise $ "Recording proc without flattening:" ++ show item
@@ -305,7 +310,7 @@ validateModuleName what pos name =
 
 -- |Check that the specified module name is valid, reporting and error if not.
 validateModSpec :: OptPos -> ModSpec -> Compiler ()
-validateModSpec pos = mapM_ (validateModuleName "module" pos) 
+validateModSpec pos = mapM_ (validateModuleName "module" pos)
 
 
 -- | Information about a non-constant constructor
@@ -506,7 +511,7 @@ initResources modSCC = do
     -- because that would overwrite them.
     let cmdlineResources =
             if cmdLineModSpec == thisMod
-            then let cmdline = ResourceSpec cmdLineModSpec 
+            then let cmdline = ResourceSpec cmdLineModSpec
                  in [ResourceFlowSpec (cmdline "argc") ParamInOut
                     ,ResourceFlowSpec (cmdline "argv") ParamInOut]
             else []
