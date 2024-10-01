@@ -111,6 +111,23 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                  [result, varSet outputVariableName `maybePlace` pos])
               pos]
         pos)
+normaliseItem (ForeignProcDecl vis lang mods proto@(ProcProto name params resources) pos) = do
+    when (mods{modifierImpurity=Pure, modifierDetism=Det} /= defaultProcModifiers)
+        $ errmsg pos 
+        $ "foreign procedure declaration of " ++ name 
+            ++ " has illegal procedure modifiers. Only purity and determinism can be specified."
+    normaliseItem
+        (ProcDecl vis mods proto 
+            [maybePlace (ForeignCall lang name mods' exps) pos] pos)
+  where
+    mods' = [ imp | let imp = impurityName (modifierImpurity mods)
+            , imp /= "" ]
+         ++ [ detism | let detism = determinismName (modifierDetism mods)
+            , detism /= "" ]
+    exps = List.map (uncurry (flip rePlace . paramToVar) . unPlace) params
+        ++ List.map (\(ResourceFlowSpec rs@(ResourceSpec _ r) dir) -> 
+                        Var r dir (Resource rs) `maybePlace` pos) 
+                    (Set.toList resources)
 normaliseItem item@ProcDecl{} = do
     logNormalise $ "Recording proc without flattening:" ++ show item
     addProc 0 item

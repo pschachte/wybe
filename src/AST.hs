@@ -179,9 +179,9 @@ data Item
      | ImportForeign [FilePath] OptPos
      | ImportForeignLib [Ident] OptPos
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
-       -- The Bool in the next two indicates whether inlining is forced
      | FuncDecl Visibility ProcModifiers ProcProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility ProcModifiers ProcProto [Placed Stmt] OptPos
+     | ForeignProcDecl Visibility Ident ProcModifiers ProcProto OptPos
      | StmtDecl Stmt OptPos
      | PragmaDecl Pragma
      deriving (Generic, Eq)
@@ -3758,7 +3758,14 @@ instance Show Item where
     ++ showOptPos pos
     ++ " {"
     ++ showBody 4 stmts
-    ++ "\n  }"
+    ++ "\n  }"  
+  show (ForeignProcDecl vis lang modifiers proto pos) =
+    visibilityPrefix vis
+    ++ "def foreign "
+    ++ lang ++ " "
+    ++ showProcModifiers' modifiers
+    ++ show proto
+    ++ showOptPos pos
   show (StmtDecl stmt pos) =
     showStmt 4 stmt ++ showOptPos pos
   show (PragmaDecl prag) =
