@@ -37,21 +37,21 @@ def {noinline} rec_out_only_notail2 use !res {
 }
 
 def {noinline} higher_order_inout(f:{resource}(int)) use !res {
-    f(res)
+    !f(res)
     ?res = 1
 }
 
 def {noinline} higher_order_in(f:{resource}(int)) use !res {
-    f(res)
+    !f(res)
 }
 
 def {noinline} higher_order_out(f:{resource}(?int)) use !res {
-    f(?res)
+    !f(?res)
 }
 
 def {noinline} higher_order_only_out(f:{resource}(int)) use !res {
     ?res = 1
-    f(res)
+    !f(res)
 }
 
 def {noinline} higher_order_branch(b:bool, f:{resource}()) {

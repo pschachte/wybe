@@ -135,7 +135,7 @@ def {test} null(?null:_) use !tokens {
 # following character, followed by whitespace.
 def {test} sequence(before:char, parse_item:{resource,test}(?X), after:char, ?xs:list(X)) use !tokens {
     !literal(before)
-    if { parse_item(?x) :: 
+    if { !parse_item(?x) :: 
         !sequence_tail(parse_item, ?xs)
         ?xs = [x | xs]
       | else :: 

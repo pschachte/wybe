@@ -334,14 +334,18 @@ transformStmt stmt@(ProcCall fn@(First m n mbId) d resourceful args) pos = do
     return (loadStoreResources pos ins outs
                 [ProcCall fn d False (args'' ++ resArgs) `maybePlace` pos],
             usesResources || not (Map.null outs))
-transformStmt (ProcCall (Higher fn) d r args) pos = do
+transformStmt stmt@(ProcCall (Higher fn) d resourceful args) pos = do
     (fn':args', ins, outs) <- transformExps $ fn:args
-    let globals = case maybeExpType $ content fn' of
+    let usesResources = case maybeExpType $ content fn' of
                     Just (HigherOrderType mods _) -> modifierResourceful mods
                     _ -> shouldnt "glabalise badly typed higher"
+    when (usesResources && not resourceful)
+        $ lift $ errmsg pos
+               $ "Call to resourceful higher-order proc without ! resource marker: "
+                    ++ showStmt 4 stmt
     return (loadStoreResources pos ins outs
                 [ProcCall (Higher fn') d False args' `maybePlace` pos],
-            globals)
+            usesResources)
 transformStmt (ForeignCall lang name flags args) pos = do
     (args', ins, outs) <- transformExps args
     return (loadStoreResources pos ins outs
