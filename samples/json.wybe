@@ -55,7 +55,9 @@ def {test} literal(str:string) use !tokens {
 ## space/1
 # Parse zero or more whitespace characters from the input.
 def space() use !tokens {
-    !char(?c) & (c = ' ' | c = '\n' | c = '\r' | c = '\t')
+    !char(?c)
+    (c = ' ' | c = '\n' | c = '\r' | c = '\t')
+    !space
   | pass
 }
 
@@ -63,17 +65,75 @@ def space() use !tokens {
 # Parse a JSON object followed by whitespace.
 def {test} json(?j:_) use !tokens {
     !object(?j) 
-  | !string(?str) & ?j = jstring(str)
+  | !list(?j)
+  | !string(?j)
   | !bool(?j)
   | !number(?j)
-  | !list(?j)
-  | !null & ?j = jnull
+  | !null(?j)
 }
 
-## sequence/5
+## object/1
+# Parse a JSON object, followed by whitespace.
+def {test} object(?obj:_) use !tokens {
+    !sequence('{', {test,resource}{
+        !string(?key)
+        !literal(':')
+        !json(?value)
+        ?@ = pair(key, value)
+    }, '}', ?pairs)
+    ?obj = jobject(pairs)
+}
+
+## list/1
+# Parse a JSON list, followed by whitespace.
+def {test} list(?list:_) use !tokens {
+    !sequence('[', json, ']', ?jsons)
+    ?list = jlist(jsons)
+}
+
+## string/1
+# Parse a JSON string, followed by whitespace.
+def {test} string(?string:_) use !tokens {
+    !string(?str)
+    ?string = jstring(str)
+}
+
+## number/1
+# Parse a JSON number, followed by whitespace.
+def {test} number(?number:_) use !tokens {
+    !digits(?n, _)
+    if { !char('.') ::
+        !digits(?f, ?len)
+        !n += f / power(10.0, len)
+    }
+    if { { !char('e') | !char('E') } ::
+        !digits(?e, _)
+        !n *= power(10.0, e)
+    }
+    !space
+    ?number = jnumber(n)
+}
+
+## bool/1
+# Parse a JSON Boolean, followed by whitespace.
+def {test} bool(?bool:_) use !tokens {
+    !literal("false")
+    ?bool = jbool(false)
+  | !literal("true")
+    ?bool = jbool(true)
+}
+
+## null/1
+# Parse a JSON null, followed by whitespace.
+def {test} null(?null:_) use !tokens {
+    !literal("null")
+    ?null = jnull
+}
+
+## sequence/4
 # Parse a comma-separated sequence of things, with a preceding and 
 # following character, followed by whitespace.
-def {test} sequence(before:char, parse_item:{resource,test}(?X), ?xs:list(X), after:char) use !tokens {
+def {test} sequence(before:char, parse_item:{resource,test}(?X), after:char, ?xs:list(X)) use !tokens {
     !literal(before)
     if { parse_item(?x) :: 
         !sequence_tail(parse_item, ?xs)
@@ -84,8 +144,8 @@ def {test} sequence(before:char, parse_item:{resource,test}(?X), ?xs:list(X), af
     !literal(after)
 }
 
-## sequence_tail/3
-# Parse the tail of a sequnece. Helper for sequence/2.
+## sequence_tail/2
+# Parse the tail of a sequnece. Helper for sequence/4.
 def {test} sequence_tail(parse_item:{resource,test}(?X), ?xs:list(X)) use !tokens {
     if { !literal(',') ::
         !parse_item(?x)
@@ -96,19 +156,7 @@ def {test} sequence_tail(parse_item:{resource,test}(?X), ?xs:list(X)) use !token
     }
 }
 
-## object/2
-# Parse a JSON object, followed by whitespace.
-def {test} object(?obj:_) use !tokens {
-    !sequence('{', {test,resource}{
-        !string(?key)
-        !literal(':')
-        !json(?value)
-        ?@ = pair(key, value)
-    }, ?ps, '}')
-    ?obj = jobject(ps)
-}
-
-## string/2
+## string/1
 # Parse a string, followed by whitespace.
 def {test} string(?str:string) use !tokens {
     !char('\"')
@@ -116,8 +164,8 @@ def {test} string(?str:string) use !tokens {
     ?str = string(c_string(str))
 }
 
-## string_tail/2
-# Parse the tail of a string. Helper for string/2.
+## string_tail/1
+# Parse the tail of a string. Helper for string/1.
 def {test} string_tail(?str:string) use !tokens {
     !literal('\"')
     ?str = ""
@@ -141,45 +189,15 @@ def {test} string_tail(?str:string) use !tokens {
     ?str = string(c) ,, str
 }
 
-## bool/2
-# Parse a JSON Boolean, followed by whitespace.
-def {test} bool(?bool:_) use !tokens {
-    !literal("false")
-    ?bool = jbool(false)
-  | !literal("true")
-    ?bool = jbool(true)
-}
-
-## number/2
-# Parse a JSON number, followed by whitespace.
-def {test} number(?number:_) use !tokens {
+## digits/2
+# Parse a sequence of one or more digits
+def {test} digits(?n:float, ?len:float) use !tokens {
     !digit(?n)
-    !digits(_, !n)
-    if { !char('.') ::
-        !digit(?f)
-        !digits(?len, !f)
-        !n += f / power(10.0, len)
-    }
-    if { { !char('e') | !char('E') } ::
-        !digit(?e)
-        !digits(_, !e)
-        !n *= power(10.0, e)
-    }
-    !space
-    ?number = jnumber(n)
+    ?len = 1.0
+    !digits(!n, !len)
 }
 
-## digits/3
-# Parse a sequence of digits, outputting the number of digits parsed
-def {test} digits(?len:float, !n:float) use !tokens {
-    !digit(?d)
-    ?n = n * 10.0 + d
-    !digits(?len, !n)
-    !len += 1.0
-  | ?len = 1.0
-}
-
-## digits/3
+## digits/1
 # Parse a single digit
 def {test} digit(?d:float) use !tokens {
     !char(?c)
@@ -187,17 +205,14 @@ def {test} digit(?d:float) use !tokens {
     ?d = foreign llvm sitofp(ord(c) - ord('0'):int)
 }
 
-## list/2
-# Parse a JSON list, followed by whitespace.
-def {test} list(?list:_) use !tokens {
-    !sequence('[', json, ?js, ']')
-    ?list = jlist(js)
-}
-
-## null/2
-# Parse a JSON null, followed by whitespace.
-def {test} null() use !tokens {
-    !literal("null")
+## digits/2
+# Parse a sequence of zero or more digits. Helper for digits/2
+def {test} digits(!n:float, !len:float) use !tokens {
+    !digit(?d)
+    !len += 1.0
+    ?n = n * 10.0 + d
+    !digits(!len, !n)
+  | pass
 }
 
 pub def print(x:_) use !io {
@@ -263,7 +278,7 @@ def print_list(start:char, printer:{resource}(int, X), ind:int, xs:list(X), end:
     !print(end)
 }
 
-?str = "{\"a\": [1, 1.2, 1e2, false, null], \"abc\ndef\": true}"
+?str = "{\"a\": [1, 1.2, 1e2, false, null],\n \"abc\\ndef\": true}"
 
 !print("Attempting to parse ")
 !escape(str)
@@ -273,5 +288,5 @@ if { parse(str, ?json) ::
     !println("Successfully parsed!")
     !print(json) 
   | else :: 
-    !error("failed to parse :(") 
+    !print("failed to parse :(") 
 }
