@@ -2123,7 +2123,7 @@ and the less than test for integers is defined as
 pub def {test} (x:_ <  y:_) { foreign llvm {test} icmp_slt(x,y) }
 ```
 
-##### Foriegn procedure definition short-hand
+##### Foreign procedure definition short-hand
 
 For convenince, a short-hand syntax is provided to define a Wybe procedure to interface
 with a foriegn procedure. This syntax is as follows:
@@ -2137,8 +2137,20 @@ which is equivalent to defining the following:
 Note that all parameters must be typed.
 
 Resources can optionally be specified with a `use` clause, that follows the same syntax
-for a WYbe procedure definition. Resources are added as additonal arguments to the foreign call after the other arguments. Modifiers can also optionally be specified, 
-with the syntax being identical to a Wybe procedure definition, and are added to the foreign procedure call.
+for a regular Wybe procedure definition. Resources are added as additonal arguments to 
+the foreign call after the other arguments, in the order specified in the source code.
+If resources are repeated in the `use` clause, they are added as multiple arguments in 
+the generated foreign call.
+
+Modifiers can also optionally be specified, with the syntax being identical to a Wybe 
+procedure definition, and are added to the foreign procedure call. 
+In addition, inlining (`inline`, `noinline`) can be specified for the for a 
+foreign procedure, but only inline/don't inline the generated Wybe procedure, and don't 
+apply to the generated foreign call.
+
+With both resources and modifiers, this would be as follows:
+
+> `def` `foreign` *language* `{` *modifiers* `}` *function*`(`*param*, *param*, ...`)` `use` *resources*
 
 
 #### Using LLVM instructions
