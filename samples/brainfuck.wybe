@@ -1,6 +1,11 @@
+## brainfuck.wybe
+## Author: James Barnes
+#
+# A Brainfuck interpreter and LL(1) parser. 
+
+## instruction type
+# Enumeration of brainfuck instructions.
 type instruction {
-    ## instruction
-    # Enumeration of brainfuck instructions.
     pub constructors incr | decr | left | right | input | output | loop(list(_))
 
     ## `=`/2
@@ -26,7 +31,7 @@ type instruction {
                 # ']' should not occur if at top_level
                 ~top_level
                 ?instrs = []
-               | else ::
+              | else ::
                 ?instr = case c in {
                     '+' :: incr
                   | '-' :: decr
@@ -34,15 +39,12 @@ type instruction {
                   | '>' :: right
                   | ',' :: input
                   | '.' :: output
-                  | '[' :: loop(body) where { 
-                                # parse the body of a loop, no longer top_level 
-                                parse(false, !str, ?body) 
-                           }
+                  | '[' :: loop(body) where { parse(false, !str, ?body) } 
                 }
                 parse(top_level, !str, ?instrs)
                 ?instrs = [instr | instrs]
             }
-           | else :: 
+          | else :: 
             # str is empty, so must be at top_level
             top_level
             ?instrs = []
@@ -50,9 +52,9 @@ type instruction {
     }
 }
 
+## tape type
+# Infinite length tape type, with tape expanded when required.
 type tape {
-    ## tape
-    # Infinite length tape type, with tape expanded when required.
     pub tape(list(char), current:char, list(char))
     
     ## `=`/2
@@ -69,7 +71,7 @@ type tape {
         tape(?left, ?current, ?right) = tape
         if { right = [?r | ?right] :: 
             ?tape = tape([current | left], r, right)
-           | else :: 
+          | else :: 
             ?tape = tape([current | left], '\0', [])
         }
     }
@@ -80,7 +82,7 @@ type tape {
         tape(?left, ?current, ?right) = tape
         if { left = [?l | ?left] :: 
             ?tape = tape(left, l, [current | right])
-           | else :: 
+          | else :: 
             ?tape = tape([], '\0', [current | right])
         }
     }
@@ -130,6 +132,6 @@ def run(instrs:list(instruction), !state:tape) use !io {
 
 if { parse(str, ?instrs) ::
     !run(instrs, blank_tape)
-   | else ::
+  | else ::
     !error("parse error")
 }
