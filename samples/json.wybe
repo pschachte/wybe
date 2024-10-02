@@ -177,7 +177,7 @@ def {test} string_tail(?str:string) use !tokens {
     !literal('\"')
     ?str = ""
   | !char(?c)
-    if { c:char = '\\' :: 
+    if { c = '\\' :: 
         !char(?c)
         if { c = '"' :: pass
            | c = '\\' :: pass
@@ -195,7 +195,7 @@ def {test} string_tail(?str:string) use !tokens {
 }
 
 ## digits/2 use !tokens
-# Parse a sequence of one or more digits
+# Parse a sequence of one or more digits.
 def {test} digits(?n:float, ?len:float) use !tokens {
     !digit(?n)
     ?len = 1.0
@@ -208,7 +208,7 @@ def {test} digits(?n:float, ?len:float) use !tokens {
 }
 
 ## digits/1 use !tokens
-# Parse a single digit
+# Parse a single digit.
 def {test} digit(?d:float) use !tokens {
     !char(?c)
     '0' <= c & c <= '9'
@@ -216,15 +216,14 @@ def {test} digit(?d:float) use !tokens {
 }
 
 ## print/1 use !io
-# Pretty print a JSON value
+# Pretty print a JSON value.
 pub def print(x:_) use !io {
     !print(0, x)
     !nl
 }
 
 ## print/2 use !io
-# Pretty print a JSON value at a given indentation level.
-# Helper for print/1.
+# Pretty print a JSON value at a given indentation level. Helper for print/1.
 def print(ind:int, x:_) use !io {
     case x in {
         jobject(?pairs) :: 
@@ -247,7 +246,7 @@ def print(ind:int, x:_) use !io {
 }
 
 ## indent/1 use !io
-# Print a given amount of indentation
+# Print a given amount of indentation.
 def indent(ind:int) use !io {
     ind <= 0
   | !print(' ')
@@ -255,7 +254,7 @@ def indent(ind:int) use !io {
 }
 
 ## escape/1 use !io
-# Print an string, with quotes and necessary characters escaped
+# Print an string, with quotes and necessary characters escaped.
 def escape(s:string) use !io {
     !print('"')
     for ?c in s {
@@ -273,7 +272,7 @@ def escape(s:string) use !io {
 }
 
 ## print_list/1
-# Pretty print a list of things with a givn printer, surroundd by a start and end character
+# Pretty print a list of things with a givn printer, surrounded by a start and end character.
 def print_list(ind:int, start:char, printer:{resource}(int, X), end:char, xs:list(X)) use !io {
     !print(start)
     if { [?x | ?xs] = xs :: 
