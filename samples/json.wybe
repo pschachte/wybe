@@ -4,7 +4,7 @@
 # A recursive-descent parser for JSON documents in Wybe. 
 
 pub constructors 
-    jobject(list(pair)) 
+    jobject(list(pair(string, _)))
   | jlist(list(_)) 
   | jstring(string) 
   | jnumber(float) 
@@ -17,9 +17,14 @@ pub def {test} (a:_ = b:_) {
 }
 
 ## pair type
-# A pair containing a key and a JSON value.
-pub type pair {
-    pub pair(key:string, value:json)
+# A pair containing a key and a value.
+pub type pair(K, V) {
+    pub pair(key:K, value:V)
+
+    pub def {test} (a:_(K, V) = b:_(K, V)) { 
+        foreign lpvm cast(a^key):int = foreign lpvm cast(b^key):int
+        foreign lpvm cast(a^value):int = foreign lpvm cast(b^value):int
+    }
 }
 
 ## resource tokens
@@ -138,12 +143,12 @@ def {test} null(?null:_) use !tokens {
 }
 
 ## sequence/4 use !tokens
-# Parse a comma-separated sequence of things, with a preceding and 
+# Parse a comma-separated sequence of items, with a preceding and 
 # following character, followed by whitespace.
-def {test} sequence(before:char, parse_item:{resource,test}(?X), after:char, ?xs:list(X)) use !tokens {
+def {test} sequence(before:char, item:{resource,test}(?X), after:char, ?xs:list(X)) use !tokens {
     !literal(before)
-    if { !parse_item(?x) :: 
-        !sequence_tail(parse_item, ?xs)
+    if { !item(?x) :: 
+        !sequence_tail(item, ?xs)
         ?xs = [x | xs]
       | else :: 
         ?xs = []
@@ -153,10 +158,10 @@ def {test} sequence(before:char, parse_item:{resource,test}(?X), after:char, ?xs
 
 ## sequence_tail/2 use !tokens
 # Parse the tail of a sequnece. Helper for sequence/4.
-def {test} sequence_tail(parse_item:{resource,test}(?X), ?xs:list(X)) use !tokens {
+def {test} sequence_tail(item:{resource,test}(?X), ?xs:list(X)) use !tokens {
     if { !literal(',') ::
-        !parse_item(?x)
-        !sequence_tail(parse_item, ?xs)
+        !item(?x)
+        !sequence_tail(item, ?xs)
         ?xs = [x | xs]
       | else ::
         ?xs = []
@@ -292,24 +297,19 @@ def print_list(ind:int, start:char, printer:{resource}(int, X), end:char, xs:lis
 # TESTING
 ###########
 
-type test {
-    pub case(should_parse:bool, document:string)
-}
-
 ?tests = [
     # these should parse
-    case(true, "{}"),
-    case(true, "true"),
-    case(true, "[3.141596]"),
-    case(true, "  {\"a\": [1, 1.020, 1e2, 01.2E3, false, { \"key\": null}],\n \"abc\\ndef\": true }  "),
-    # these should fail
-    case(false, "definitely not JSON!"),
-    case(false, "\"abc"),
-    case(false, "{} {}")
+    pair(true, "{}"),
+    pair(true, "true"),
+    pair(true, "[3.141596]"),
+    pair(true, "  {\"a\": [1, 1.020, 1e2, 01.2E3, false, { \"key\": null}],\n \"abc\\ndef\": true }  "),
+    # these should fail to parse
+    pair(false, "definitely not JSON!"),
+    pair(false, "\"abc"),
+    pair(false, "{} {}")
 ]
 
-for ?test in tests {
-    case(?should_parse, ?document) = test
+for pair(?should_parse:bool, ?document) in tests {
     !print("Attempting to parse ")
     !escape(document)
     !nl
@@ -324,4 +324,3 @@ for ?test in tests {
 
     !nl
 } 
-
