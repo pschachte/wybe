@@ -29,7 +29,8 @@ import           Options                   (LogSelection (Resources))
 import           Snippets
 import           Util
 import           Debug.Trace
-import Control.Monad.Extra (unlessM)
+import Control.Monad.Extra (unlessM, concatMapM)
+import Data.List.Extra (nubOrd, groupOn, groupSortOn)
 
 
 
@@ -132,7 +133,9 @@ canonicaliseProcResources pd _ = do
     let proto = procProto pd
     let pos = procPos pd
     let resources = procProtoResources proto
-    resourceFlows <- mapM (canonicaliseResourceFlow pos name) resources
+    resourceFlows <- List.map collapseResourceFlows 
+                   . groupSortOn resourceFlowRes 
+                 <$> mapM (canonicaliseResourceFlow pos name) resources
     logResources $ "Available resources: " ++ show resourceFlows
     let proto' = proto {procProtoResources = resourceFlows}
     let pd' = pd {procProto = proto'}
@@ -144,12 +147,22 @@ canonicaliseProcResources pd _ = do
 -- spec
 canonicaliseResourceFlow :: OptPos -> ProcName -> ResourceFlowSpec
                          -> Compiler ResourceFlowSpec
-canonicaliseResourceFlow pos name spec = do
-    resTy <- canonicaliseResourceSpec pos
-                ("declaration of " ++ showProcName name)
-                $ resourceFlowRes spec
-    return $ spec { resourceFlowRes = fst resTy }
+canonicaliseResourceFlow pos name (ResourceFlowSpec res flow) = do
+    res' <- fst 
+        <$> canonicaliseResourceSpec pos 
+                ("declaration of " ++ showProcName name) 
+                res
+    return $ ResourceFlowSpec res' flow
 
+
+collapseResourceFlows :: [ResourceFlowSpec] -> ResourceFlowSpec
+collapseResourceFlows [] = shouldnt "empty resource group"
+collapseResourceFlows ress@(ResourceFlowSpec res flow:_) 
+    = ResourceFlowSpec res
+        $ case nubOrd ress of 
+            [_] -> flow
+            _ -> ParamInOut
+        
 
 --------- Transform resources into global variables ---------
 

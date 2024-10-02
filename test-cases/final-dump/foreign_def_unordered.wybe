@@ -1,11 +1,25 @@
 resource a:int
 resource b:int
 
-def foreign c a_before_b_1() use !a, !b
-def foreign c a_before_b_2() use !a, ?b
-def foreign c a_before_b_3() use ?a, b
-def foreign c b_before_a_1() use !b, !a
-def foreign c b_before_a_2() use ?b, !a
-def foreign c b_before_a_3() use b, a
+def foreign c a_in_b_in() use a, b
+def foreign c a_in_b_out() use a, ?b
+def foreign c a_in_b_inout() use a, !b
+def foreign c a_out_b_in() use ?a, b
+def foreign c a_out_b_out() use ?a, ?b
+def foreign c a_out_b_inout() use ?a, !b
+def foreign c a_inout_b_in() use !a, b
+def foreign c a_inout_b_out() use !a, ?b
+def foreign c a_inout_b_inout() use !a, !b
 
-pass 
+def foreign c b_in_a_in() use b, a
+def foreign c b_in_a_out() use b, ?a
+def foreign c b_in_a_inout() use b, !a
+def foreign c b_out_a_in() use ?b, a
+def foreign c b_out_a_out() use ?b, ?a
+def foreign c b_out_a_inout() use ?b, !a
+def foreign c b_inout_a_in() use !b, a
+def foreign c b_inout_a_out() use !b, ?a
+def foreign c b_inout_a_inout() use !b, !a
+
+def foreign c out_in() use ?a, a
+def foreign c repeated(x:int) use a, ?a, b, b, a
