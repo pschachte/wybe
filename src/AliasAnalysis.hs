@@ -340,7 +340,7 @@ _maybeAliasPrimArgs args = do
   where
     filterArg arg =
         case arg of
-        ArgVar{argVarName=var, argVarType=ty} -> maybeAddressAlias arg ty (LiveVar var)
+        ArgVar{argVarName=var, argVarType=ty} -> maybeAddressAlias arg ty $ LiveVar var
         ArgGlobal global ty -> maybeAddressAlias arg ty $ AliasByGlobal global
         _ -> return Nothing
     maybeAddressAlias arg ty item = do
