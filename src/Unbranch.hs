@@ -945,7 +945,7 @@ newProcProto name inVars res = do
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
     return $ ProcProto name (inParams ++ outParams)
-           $ Set.map (`ResourceFlowSpec` ParamInOut) res
+           $ List.map (`ResourceFlowSpec` ParamInOut) $ Set.toList res
 
 
 -- |Return the second value when the detism is SemiDet, otherwise the second.

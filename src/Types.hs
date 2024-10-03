@@ -867,7 +867,7 @@ expType' (Closure pspec closed) _ = do
         closedTypes <- mapM expType closed
         zipWithM_ (unifyTypes ReasonShouldnt) pTypes' closedTypes
         freeTypes <- mapM ultimateType (List.drop nClosed pTypes')
-        let resful = not $ Set.null res
+        let resful = not $ List.null res
         return $ HigherOrderType
                     (normaliseModifiers
                         $ ProcModifiers detism MayInline
@@ -1163,12 +1163,12 @@ typecheckProcDecl' pdef = do
     let outParams = Set.fromList $ paramName <$>
             List.filter (flowsOut . paramFlow) params
     let inResources =
-            Set.map (resourceName . resourceFlowRes)
-            $ Set.filter (flowsIn . resourceFlowFlow) resources
+            List.map (resourceName . resourceFlowRes)
+            $ List.filter (flowsIn . resourceFlowFlow) resources
     let outResources =
-            Set.map (resourceName . resourceFlowRes)
-            $ Set.filter (flowsIn . resourceFlowFlow) resources
-    let inputs = Set.union inParams inResources
+            List.map (resourceName . resourceFlowRes)
+            $ List.filter (flowsIn . resourceFlowFlow) resources
+    let inputs = Set.union inParams $ Set.fromList inResources
     when (vis == Public && any ((==AnyType) . paramType) params)
         $ typeError $ ReasonUndeclared name pos
     ifOK pdef $ do
@@ -1189,14 +1189,14 @@ typecheckProcDecl' pdef = do
                    ++ intercalate ", " (show <$> params)
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
         logTyped $ "Recording resource types: "
-                   ++ intercalate ", " (show <$> Set.toList resources)
+                   ++ intercalate ", " (show <$> resources)
         let (overloaded,okResources) =
               List.partition ((>1) . length . snd)
               $ List.map (mapSnd Set.toList)
               $ Map.toList
                 $ List.foldl (\map spec ->
                                 setMapInsert (resourceName spec) spec map)
-                    Map.empty $ resourceFlowRes <$> Set.toList resources
+                    Map.empty $ resourceFlowRes <$> resources
         lift
          $ mapM_ (errmsg pos . ("Overloaded resources "++) .
                 intercalate ", " . (show <$>) . snd)
@@ -1434,7 +1434,7 @@ firstInfo :: ProcDef -> ProcSpec -> Typed CallInfo
 firstInfo def proc = do
     let proto = procProto def
         params = content <$> procProtoParams proto
-        resources = Set.elems $ procProtoResources proto
+        resources = procProtoResources proto
         realParams = List.filter ((==Ordinary) . paramFlowType) params
         typeFlows = paramTypeFlow <$> realParams
         types = typeFlowType <$> typeFlows
@@ -1877,7 +1877,8 @@ initBindingState :: ProcDef -> BindingState
 initBindingState pdef =
     BindingState Det impurity resources emptyUnivSet UniversalSet Set.empty proc
     where impurity = expectedImpurity $ procImpurity pdef
-          resources = Set.map resourceFlowRes
+          resources = Set.fromList 
+                    $ List.map resourceFlowRes
                         (procProtoResources $ procProto pdef)
           proc = procName pdef
 
@@ -2091,11 +2092,13 @@ modeCheckProcDecl pdef = do
     let outParams = Set.fromList $ paramName <$>
             List.filter (flowsOut . paramFlow) params
     let inResources =
-            Set.map (resourceName . resourceFlowRes)
-            $ Set.filter (flowsIn . resourceFlowFlow) resources
+            Set.fromList 
+            $ List.map (resourceName . resourceFlowRes)
+            $ List.filter (flowsIn . resourceFlowFlow) resources
     let outResources =
-            Set.map (resourceName . resourceFlowRes)
-            $ Set.filter (flowsIn . resourceFlowFlow) resources
+            Set.fromList 
+            $ List.map (resourceName . resourceFlowRes)
+            $ List.filter (flowsIn . resourceFlowFlow) resources
     let inputs = Set.union inParams inResources
     logTyped $ "Now mode checking proc " ++ name
     let bound = addBindings inputs $ initBindingState pdef
