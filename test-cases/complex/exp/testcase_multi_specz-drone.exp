@@ -99,9 +99,8 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(0,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
     foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string))
-    wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
+    wybe.array.[|]<0>(?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @command_line:nn:nn
@@ -151,7 +150,7 @@ set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
 declare external ccc  void @error_exit(i64, i64)    
 
 
-declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>[785a827a1b]"(i64)    
+declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -163,7 +162,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 define external fastcc  void @"command_line.<0>"()    {
 entry:
   %0 = load  i64, i64* @"resource#command_line.arguments" 
-  %1 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %0)  
+  %1 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>"(i64  %0)  
   %2 = extractvalue {i64, i64, i1} %1, 0 
   %3 = extractvalue {i64, i64, i1} %1, 1 
   %4 = extractvalue {i64, i64, i1} %1, 2 
@@ -760,9 +759,8 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(0,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
     foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string))
-    wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
+    wybe.array.[|]<0>(?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @command_line:nn:nn
@@ -812,7 +810,7 @@ set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
 declare external ccc  void @error_exit(i64, i64)    
 
 
-declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>[785a827a1b]"(i64)    
+declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -824,7 +822,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 define external fastcc  void @"command_line.<0>"()    {
 entry:
   %0 = load  i64, i64* @"resource#command_line.arguments" 
-  %1 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %0)  
+  %1 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>"(i64  %0)  
   %2 = extractvalue {i64, i64, i1} %1, 0 
   %3 = extractvalue {i64, i64, i1} %1, 1 
   %4 = extractvalue {i64, i64, i1} %1, 2 
