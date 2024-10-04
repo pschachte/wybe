@@ -10,8 +10,12 @@ A JSON document parser.
 
 ## quine.wybe
 
-A [Quine](https://en.wikipedia.org/wiki/Quine_(computing)). To validate, run
+A [Quine](https://en.wikipedia.org/wiki/Quine_(computing)). 
 
+To validate:
 ```sh
-$ wybemk samples/quine && ./samples/quine | diff ./samples/quine.wybe -
+$ wybemk quine 
+$ ./quine | diff ./quine.wybe -
+$ echo $?
+0
 ```
