@@ -4,7 +4,6 @@
 --  Copyright: (c) 2024 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
-{-# LANGUAGE TupleSections #-}
 
 
 module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM, BinOpInfo(..) ) where
@@ -1137,7 +1136,9 @@ llvmParameter :: PrimParam -> LLVM String
 llvmParameter PrimParam{primParamName=name, primParamType=ty,
                         primParamFlow=FlowIn} = do
     let llname = llvmLocalName name
-    lltype <- llvmTypeRep <$> typeRep ty
+    tyRep <- typeRep ty
+    let lltype = llvmTypeRep tyRep
+    modify $ \s -> s { varTypes=Map.insert llname tyRep $ varTypes s }
     return $ makeLLVMArg lltype llname
 llvmParameter PrimParam{primParamName=name,
                         primParamFlow=FlowOutByReference} = do
@@ -1176,12 +1177,17 @@ llvmInstrArgumentList argSize output inputs repFn = do
 llvmAssignResult :: [PrimArg] -> String -> LLVM ()
 llvmAssignResult [] instr = llvmPutStrLnIndented instr
 llvmAssignResult [arg@ArgVar{argVarName=varName,argVarType=ty}] instr = do
-    llty <- llvmTypeRep <$> typeRep ty
+    tyRep <- typeRep ty
+    let llty = llvmTypeRep tyRep
     llVar <- varToWrite varName llty
     logLLVM $ "Assigning variable " ++ show varName ++ " (=> " ++ llVar ++ ")"
     llvmPutStrLnIndented $ llVar ++ " = " ++ instr
     varValue <- llvmArgument arg
     storeValueIfNeeded varName varValue
+    knownType <- gets $ Map.lookup llVar . varTypes
+    when (isJust knownType) $
+        shouldnt $ "Error generating LLVM:  reassigning LLVM variable " ++ llVar
+    modify $ \s -> s { varTypes = Map.insert llVar tyRep $ varTypes s}
 llvmAssignResult multiOuts instr = do
     tuple <- llvmLocalName <$> makeTemp
     retType <- llvmReturnType $ argVarType <$> multiOuts
@@ -1329,7 +1335,8 @@ argTypeRep arg                        = typeRep $ argType arg
 -- | The LLVM argument for the specified PrimArg as an LLVM type and value
 llvmArgument :: PrimArg -> LLVM LLVMArg
 llvmArgument arg = do
-    lltype <- llvmTypeRep <$> argTypeRep arg
+    tyRep <- argTypeRep arg
+    let lltype = llvmTypeRep tyRep
     llVal <- llvmValue arg
     return $ makeLLVMArg lltype llVal
 
@@ -1340,7 +1347,18 @@ makeLLVMArg ty val = ty ++ " " ++ val
 
 -- | A PrimArg as portrayed in LLVM code
 llvmValue :: PrimArg -> LLVM String
-llvmValue ArgVar{argVarName=var} = varToRead var
+llvmValue argVar@ArgVar{argVarName=var, argVarType=ty} = do
+    realVar <- varToRead var
+    thisRep <- typeRep ty
+    currRep <- gets $ Map.lookup realVar . varTypes
+    case (currRep,thisRep) of
+        (Nothing,_) -> do
+            logLLVM $ "Using unknown LLVM variable " ++ realVar
+            return realVar
+        -- (Nothing,_) -> shouldnt $ "Using unknown LLVM variable " ++ realVar
+        (Just defRep, useRep) | equivLLTypes defRep useRep -> return realVar
+        (Just defRep, useRep) ->
+            typeConvertedBare thisRep argVar{argVarType=Representation defRep}
 llvmValue (ArgInt val _) = return $ show val
 llvmValue (ArgFloat val _) = return $ show val
 llvmValue (ArgString str stringVariant _) = do
@@ -1491,13 +1509,14 @@ typeConvert fromArg toArg = do
 -- representation.
 typeConvertedPrim :: TypeRepresentation -> PrimArg -> LLVM PrimArg
 typeConvertedPrim toTy fromArg = do
-        argRep <- argTypeRep fromArg
-        if equivLLTypes argRep toTy
-            then return fromArg
-            else do
-                (writeArg,readArg) <- freshTempArgs $ Representation toTy
-                typeConvert fromArg writeArg
-                return readArg
+    logLLVM $ "Converting PrimArg " ++ show fromArg ++ " to " ++ show toTy
+    argRep <- argTypeRep fromArg
+    if equivLLTypes argRep toTy
+        then return fromArg
+        else do
+            (writeArg,readArg) <- freshTempArgs $ Representation toTy
+            typeConvert fromArg writeArg
+            return readArg
 
 
 -- | LLVM code to convert PrimArg fromVal to representation toTy, returning an
@@ -1577,6 +1596,7 @@ equivLLTypes (Bits b) Pointer      = b == wordSize
 equivLLTypes (Signed b) Pointer    = b == wordSize
 equivLLTypes (Signed b1) (Bits b2) = b1 == b2
 equivLLTypes (Bits b1) (Signed b2) = b1 == b2
+equivLLTypes Func{} Func{}         = True -- Since LLVM just considers them ptrs
 equivLLTypes Pointer Func{}        = True
 equivLLTypes Func{} Pointer        = True
 equivLLTypes t1 t2 = t1 == t2
@@ -1599,7 +1619,6 @@ typeConvertOp (Bits m) (Signed n)
     | n < m = "trunc"
     | otherwise = -- no instruction actually needed, but one is expected
         "bitcast"
-typeConvertOp (Bits m) (Floating n) = "uitofp"
 typeConvertOp (Bits _) CPointer = "inttoptr"
 typeConvertOp (Signed m) (Bits n)
     | m < n = "zext"
@@ -1610,14 +1629,18 @@ typeConvertOp (Signed m) (Signed n)
     | m < n = "sext"
     | n < m = "trunc"
     | otherwise = shouldnt "no-op signed int conversion"
-typeConvertOp (Signed m) (Floating n) = "sitofp"
-typeConvertOp (Floating m) (Bits n) = "fptoui"
-typeConvertOp (Floating m) (Signed n) = "fptosi"
 typeConvertOp (Floating m) (Floating n)
     | m < n = "fpext"
     | n < m = "fptrunc"
     | otherwise = shouldnt "no-op floating point conversion"
 typeConvertOp CPointer (Bits _) = "ptrtoint"
+-- These don't change representation, or change any bits.  They just
+-- re-interpret a FP number as an integer or vice versa.  This ensures we don't
+-- lose precision or waste time on round trip conversion.
+typeConvertOp (Bits m) (Floating n) = "bitcast"  
+typeConvertOp (Signed m) (Floating n) = "bitcast"
+typeConvertOp (Floating m) (Bits n) = "bitcast"
+typeConvertOp (Floating m) (Signed n) = "bitcast"
 typeConvertOp repIn toTy =
     shouldnt $ "Don't know how to convert from " ++ show repIn
                  ++ " to " ++ show toTy
@@ -1674,19 +1697,23 @@ type ConstSpec = (PrimArg,TypeRepresentation)
 
 -- | The LLVM State monad
 data LLVMState = LLVMState {
+        -- These values apply to a whole module (and submodules)
         allConsts :: Set StaticConstSpec,
                                      -- ^ Static constants appearing in module
+        constNames :: Map StaticConstSpec Ident,
+                                    -- ^ local name given to static constants
         allExterns :: Map String ExternSpec,
                                     -- ^ Extern declarations needed by module
         fileHandle :: Handle,       -- ^ The file handle we're writing to
+        -- These values apply to the single proc being translated
         tmpCounter :: Int,          -- ^ Next temp var to make for current proc
         labelCounter :: Int,        -- ^ Next label number to use
         varDefRenaming :: Set PrimVarName,
                                     -- ^ Vars to rename on definition
         varUseRenaming :: Map PrimVarName LLVMName,
                                     -- ^ New action for some variables to read
-        constNames :: Map StaticConstSpec Ident,
-                                    -- ^ local name given to static constants
+        varTypes :: Map LLVMName TypeRepresentation,
+                                    -- ^ The LLVM type rep of defined vars
         deferredCall :: Maybe (ProcSpec, [PrimArg], [PrimArg], [PrimArg]),
                                     -- ^ Wybe proc call deferred for
                                     -- out-by-reference arg, with in, out, and
@@ -1704,7 +1731,7 @@ data LLVMState = LLVMState {
 
 -- | Set up LLVM monad to translate a module into the given file handle
 initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState Set.empty Map.empty h 0 0 Set.empty
+initLLVMState h = LLVMState Set.empty Map.empty Map.empty h 0 0 Set.empty
                      Map.empty Map.empty Nothing Map.empty Map.empty False
 
 
@@ -1716,6 +1743,7 @@ initialiseLLVMForProc tmpCount = do
                      , labelCounter = 0
                      , varDefRenaming = Set.empty
                      , varUseRenaming = Map.empty
+                     , varTypes = Map.empty
                      , deferredCall = Nothing
                      , takeRefVars = Map.empty
                      , outByRefVars = Map.empty

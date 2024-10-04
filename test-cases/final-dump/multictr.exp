@@ -5060,22 +5060,22 @@ define external fastcc i1 @"multictr.length.=<0>"(i64 %"#left##0", i64 %"#right#
 }
 
 define external fastcc i64 @"multictr.length.metres<0>"(double %"value##0") {
-  %"tmp#0##0" = fptoui double %"value##0" to i64
+  %"tmp#0##0" = bitcast double %"value##0" to i64
   ret i64 %"tmp#0##0"
 }
 
 define external fastcc double @"multictr.length.metres<1>"(i64 %"#result##0") {
-  %"tmp#0##0" = uitofp i64 %"#result##0" to double
+  %"tmp#0##0" = bitcast i64 %"#result##0" to double
   ret double %"tmp#0##0"
 }
 
 define external fastcc double @"multictr.length.value<0>"(i64 %"#rec##0") {
-  %"tmp#0##0" = uitofp i64 %"#rec##0" to double
+  %"tmp#0##0" = bitcast i64 %"#rec##0" to double
   ret double %"tmp#0##0"
 }
 
 define external fastcc i64 @"multictr.length.value<1>"(double %"#field##0") {
-  %"tmp#0##0" = fptoui double %"#field##0" to i64
+  %"tmp#0##0" = bitcast double %"#field##0" to i64
   ret i64 %"tmp#0##0"
 }
 
