@@ -1,45 +1,55 @@
 ## quine.wybe
+## Author: James Barnes
 #
 # A Quine
 ?listing = [
-"## quine.wybe",
-"#",
-"# A Quine",
-"?listing = [",
-"]",
-"?lines = listing^length",
-"for _ in 0..4; ?line in listing {",
-"    !println line",
-"}",
-"for ?index in 0..lines; ?line in listing {",
-"    ?quote = 34:char",
-"    !print quote; !print line; !print quote",
-"    if { index < lines - 1 ::",
-"        !println ','",
-"      | else ::",
-"        !nl",
-"    }",
-"}",
-"for ?i in 4..lines {",
-"    if { ?line = listing[i] ::",
-"        !println(line)",
-"    }",
-"}"
+    "## quine.wybe",
+    "## Author: James Barnes",
+    "#",
+    "# A Quine",
+    "?listing = [",
+    "]",
+    "?n_lines = listing^length",
+    "?preamble_lines = 5",
+    "for _ in 0..preamble_lines; ?line in listing {",
+    "    !println line",
+    "}",
+    "for ?index in 0..n_lines; ?line in listing {",
+    "    for _ in 0..4 {",
+    "        !print ' '",
+    "    }",
+    "    ?quote = 34:char",
+    "    !print quote; !print line; !print quote",
+    "    if { index < n_lines - 1 ::",
+    "        !println ','",
+    "      | else ::",
+    "        !nl",
+    "    }",
+    "}",
+    "for ?i in preamble_lines..n_lines {",
+    "    if { ?line = listing[i] ::",
+    "        !println(line)",
+    "    }",
+    "}"
 ]
-?lines = listing^length
-for _ in 0..4; ?line in listing {
+?n_lines = listing^length
+?preamble_lines = 5
+for _ in 0..preamble_lines; ?line in listing {
     !println line
 }
-for ?index in 0..lines; ?line in listing {
+for ?index in 0..n_lines; ?line in listing {
+    for _ in 0..4 {
+        !print ' '
+    }
     ?quote = 34:char
     !print quote; !print line; !print quote
-    if { index < lines - 1 ::
+    if { index < n_lines - 1 ::
         !println ','
       | else ::
         !nl
     }
 }
-for ?i in 4..lines {
+for ?i in preamble_lines..n_lines {
     if { ?line = listing[i] ::
         !println(line)
     }
