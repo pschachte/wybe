@@ -1,0 +1,46 @@
+## quine.wybe
+#
+# A Quine
+?listing = [
+"## quine.wybe",
+"#",
+"# A Quine",
+"?listing = [",
+"]",
+"?lines = listing^length",
+"for _ in 0..4; ?line in listing {",
+"    !println line",
+"}",
+"for ?index in 0..lines; ?line in listing {",
+"    ?quote = 34:char",
+"    !print quote; !print line; !print quote",
+"    if { index < lines - 1 ::",
+"        !println ','",
+"      | else ::",
+"        !nl",
+"    }",
+"}",
+"for ?i in 4..lines {",
+"    if { ?line = listing[i] ::",
+"        !println(line)",
+"    }",
+"}"
+]
+?lines = listing^length
+for _ in 0..4; ?line in listing {
+    !println line
+}
+for ?index in 0..lines; ?line in listing {
+    ?quote = 34:char
+    !print quote; !print line; !print quote
+    if { index < lines - 1 ::
+        !println ','
+      | else ::
+        !nl
+    }
+}
+for ?i in 4..lines {
+    if { ?line = listing[i] ::
+        !println(line)
+    }
+}
