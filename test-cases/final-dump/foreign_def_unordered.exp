@@ -1,0 +1,414 @@
+======================================================================
+AFTER EVERYTHING:
+
+
+--------------------------------------------------
+ Module foreign_def_unordered
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : a: fromList [(foreign_def_unordered.a,wybe.int @foreign_def_unordered:nn:nn)]
+                    b: fromList [(foreign_def_unordered.b,wybe.int @foreign_def_unordered:nn:nn)]
+  procs           : 
+
+proc a_in_b_in > {inline} (0 calls)
+0: foreign_def_unordered.a_in_b_in<0>
+a_in_b_in()<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+
+
+proc a_in_b_inout > {inline} (0 calls)
+0: foreign_def_unordered.a_in_b_inout<0>
+a_in_b_inout()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c a_in_b_inout(~tmp#0##0:wybe.int, ~%b##0:wybe.int, ?%b##1:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##1:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc a_in_b_out > {inline} (0 calls)
+0: foreign_def_unordered.a_in_b_out<0>
+a_in_b_out()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c a_in_b_out(~tmp#0##0:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##0:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc a_inout_b_in > {inline} (0 calls)
+0: foreign_def_unordered.a_inout_b_in<0>
+a_inout_b_in()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c a_inout_b_in(~%a##0:wybe.int, ?%a##1:wybe.int, ~tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##1:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc a_inout_b_inout > {inline} (0 calls)
+0: foreign_def_unordered.a_inout_b_inout<0>
+a_inout_b_inout()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c a_inout_b_inout(~%a##0:wybe.int, ?%a##1:wybe.int, ~%b##0:wybe.int, ?%b##1:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##1:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##1:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc a_inout_b_out > {inline} (0 calls)
+0: foreign_def_unordered.a_inout_b_out<0>
+a_inout_b_out()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c a_inout_b_out(~%a##0:wybe.int, ?%a##1:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##1:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##0:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc a_out_b_in > {inline} (0 calls)
+0: foreign_def_unordered.a_out_b_in<0>
+a_out_b_in()<{<<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c a_out_b_in(?%a##0:wybe.int, ~tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##0:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc a_out_b_inout > {inline} (0 calls)
+0: foreign_def_unordered.a_out_b_inout<0>
+a_out_b_inout()<{<<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c a_out_b_inout(?%a##0:wybe.int, ~%b##0:wybe.int, ?%b##1:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##0:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##1:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc a_out_b_out > {inline} (0 calls)
+0: foreign_def_unordered.a_out_b_out<0>
+a_out_b_out()<{}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign c a_out_b_out(?%a##0:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##0:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##0:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc b_in_a_in > {inline} (0 calls)
+0: foreign_def_unordered.b_in_a_in<0>
+b_in_a_in()<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+
+
+proc b_in_a_inout > {inline} (0 calls)
+0: foreign_def_unordered.b_in_a_inout<0>
+b_in_a_inout()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c b_in_a_inout(~tmp#0##0:wybe.int, ~%a##0:wybe.int, ?%a##1:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##1:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc b_in_a_out > {inline} (0 calls)
+0: foreign_def_unordered.b_in_a_out<0>
+b_in_a_out()<{<<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c b_in_a_out(~tmp#0##0:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##0:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc b_inout_a_in > {inline} (0 calls)
+0: foreign_def_unordered.b_inout_a_in<0>
+b_inout_a_in()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c b_inout_a_in(~%b##0:wybe.int, ?%b##1:wybe.int, ~tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##1:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc b_inout_a_inout > {inline} (0 calls)
+0: foreign_def_unordered.b_inout_a_inout<0>
+b_inout_a_inout()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c b_inout_a_inout(~%b##0:wybe.int, ?%b##1:wybe.int, ~%a##0:wybe.int, ?%a##1:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##1:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##1:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc b_inout_a_out > {inline} (0 calls)
+0: foreign_def_unordered.b_inout_a_out<0>
+b_inout_a_out()<{<<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c b_inout_a_out(~%b##0:wybe.int, ?%b##1:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##0:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##1:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc b_out_a_in > {inline} (0 calls)
+0: foreign_def_unordered.b_out_a_in<0>
+b_out_a_in()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c b_out_a_in(?%b##0:wybe.int, ~tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##0:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc b_out_a_inout > {inline} (0 calls)
+0: foreign_def_unordered.b_out_a_inout<0>
+b_out_a_inout()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c b_out_a_inout(?%b##0:wybe.int, ~%a##0:wybe.int, ?%a##1:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##1:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##0:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc b_out_a_out > {inline} (0 calls)
+0: foreign_def_unordered.b_out_a_out<0>
+b_out_a_out()<{}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign c b_out_a_out(?%b##0:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##0:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%b##0:wybe.int, <<foreign_def_unordered.b>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc out_in > {inline} (0 calls)
+0: foreign_def_unordered.out_in<0>
+out_in()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.a>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c out_in(?%a##1:wybe.int, ~%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##1:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+
+
+proc repeated > {inline} (0 calls)
+0: foreign_def_unordered.repeated<0>
+repeated(x##0:wybe.int)<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign c repeated(~x##0:wybe.int, ~%a##0:wybe.int, ?%a##1:wybe.int, ~tmp#0##0:wybe.int, ~tmp#0##0:wybe.int, ~%a##0:wybe.int) @foreign_def_unordered:nn:nn
+    foreign lpvm store(~%a##1:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk 0.2 -- see https://github.com/pschachte/wybe
+; ModuleID = 'foreign_def_unordered'
+
+source_filename = "!ROOT!/final-dump/foreign_def_unordered.wybe"
+target triple    ????
+
+
+declare external ccc i64 @a_in_b_inout(i64, i64)
+declare external ccc i64 @a_in_b_out(i64)
+declare external ccc i64 @a_inout_b_in(i64, i64)
+declare external ccc {i64, i64} @a_inout_b_inout(i64, i64)
+declare external ccc {i64, i64} @a_inout_b_out(i64)
+declare external ccc i64 @a_out_b_in(i64)
+declare external ccc {i64, i64} @a_out_b_inout(i64)
+declare external ccc {i64, i64} @a_out_b_out()
+declare external ccc i64 @b_in_a_inout(i64, i64)
+declare external ccc i64 @b_in_a_out(i64)
+declare external ccc i64 @b_inout_a_in(i64, i64)
+declare external ccc {i64, i64} @b_inout_a_inout(i64, i64)
+declare external ccc {i64, i64} @b_inout_a_out(i64)
+declare external ccc i64 @b_out_a_in(i64)
+declare external ccc {i64, i64} @b_out_a_inout(i64)
+declare external ccc {i64, i64} @b_out_a_out()
+declare external ccc i64 @out_in(i64)
+declare external ccc i64 @repeated(i64, i64, i64, i64, i64)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#foreign_def_unordered.a" = global i64 undef
+@"resource#foreign_def_unordered.b" = global i64 undef
+
+define external fastcc void @"foreign_def_unordered.a_in_b_in<0>"() {
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.a_in_b_inout<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"b##1" = call ccc i64 @a_in_b_inout(i64 %"tmp#0##0", i64 %"b##0")
+  store i64 %"b##1", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.a_in_b_out<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"b##0" = call ccc i64 @a_in_b_out(i64 %"tmp#0##0")
+  store i64 %"b##0", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.a_inout_b_in<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"a##1" = call ccc i64 @a_inout_b_in(i64 %"a##0", i64 %"tmp#0##0")
+  store i64 %"a##1", ptr @"resource#foreign_def_unordered.a"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.a_inout_b_inout<0>"() {
+  %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"tmp#0##0" = call ccc {i64, i64} @a_inout_b_inout(i64 %"a##0", i64 %"b##0")
+  %"a##1" = extractvalue {i64, i64}%"tmp#0##0", 0
+  %"b##1" = extractvalue {i64, i64}%"tmp#0##0", 1
+  store i64 %"a##1", ptr @"resource#foreign_def_unordered.a"
+  store i64 %"b##1", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.a_inout_b_out<0>"() {
+  %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"tmp#0##0" = call ccc {i64, i64} @a_inout_b_out(i64 %"a##0")
+  %"a##1" = extractvalue {i64, i64}%"tmp#0##0", 0
+  %"b##0" = extractvalue {i64, i64}%"tmp#0##0", 1
+  store i64 %"a##1", ptr @"resource#foreign_def_unordered.a"
+  store i64 %"b##0", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.a_out_b_in<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"a##0" = call ccc i64 @a_out_b_in(i64 %"tmp#0##0")
+  store i64 %"a##0", ptr @"resource#foreign_def_unordered.a"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.a_out_b_inout<0>"() {
+  %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"tmp#0##0" = call ccc {i64, i64} @a_out_b_inout(i64 %"b##0")
+  %"a##0" = extractvalue {i64, i64}%"tmp#0##0", 0
+  %"b##1" = extractvalue {i64, i64}%"tmp#0##0", 1
+  store i64 %"a##0", ptr @"resource#foreign_def_unordered.a"
+  store i64 %"b##1", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.a_out_b_out<0>"() {
+  %"tmp#0##0" = call ccc {i64, i64} @a_out_b_out()
+  %"a##0" = extractvalue {i64, i64}%"tmp#0##0", 0
+  %"b##0" = extractvalue {i64, i64}%"tmp#0##0", 1
+  store i64 %"a##0", ptr @"resource#foreign_def_unordered.a"
+  store i64 %"b##0", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.b_in_a_in<0>"() {
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.b_in_a_inout<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"a##1" = call ccc i64 @b_in_a_inout(i64 %"tmp#0##0", i64 %"a##0")
+  store i64 %"a##1", ptr @"resource#foreign_def_unordered.a"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.b_in_a_out<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"a##0" = call ccc i64 @b_in_a_out(i64 %"tmp#0##0")
+  store i64 %"a##0", ptr @"resource#foreign_def_unordered.a"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.b_inout_a_in<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"b##1" = call ccc i64 @b_inout_a_in(i64 %"b##0", i64 %"tmp#0##0")
+  store i64 %"b##1", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.b_inout_a_inout<0>"() {
+  %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"tmp#0##0" = call ccc {i64, i64} @b_inout_a_inout(i64 %"b##0", i64 %"a##0")
+  %"b##1" = extractvalue {i64, i64}%"tmp#0##0", 0
+  %"a##1" = extractvalue {i64, i64}%"tmp#0##0", 1
+  store i64 %"a##1", ptr @"resource#foreign_def_unordered.a"
+  store i64 %"b##1", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.b_inout_a_out<0>"() {
+  %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"tmp#0##0" = call ccc {i64, i64} @b_inout_a_out(i64 %"b##0")
+  %"b##1" = extractvalue {i64, i64}%"tmp#0##0", 0
+  %"a##0" = extractvalue {i64, i64}%"tmp#0##0", 1
+  store i64 %"a##0", ptr @"resource#foreign_def_unordered.a"
+  store i64 %"b##1", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.b_out_a_in<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"b##0" = call ccc i64 @b_out_a_in(i64 %"tmp#0##0")
+  store i64 %"b##0", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.b_out_a_inout<0>"() {
+  %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"tmp#0##0" = call ccc {i64, i64} @b_out_a_inout(i64 %"a##0")
+  %"b##0" = extractvalue {i64, i64}%"tmp#0##0", 0
+  %"a##1" = extractvalue {i64, i64}%"tmp#0##0", 1
+  store i64 %"a##1", ptr @"resource#foreign_def_unordered.a"
+  store i64 %"b##0", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.b_out_a_out<0>"() {
+  %"tmp#0##0" = call ccc {i64, i64} @b_out_a_out()
+  %"b##0" = extractvalue {i64, i64}%"tmp#0##0", 0
+  %"a##0" = extractvalue {i64, i64}%"tmp#0##0", 1
+  store i64 %"a##0", ptr @"resource#foreign_def_unordered.a"
+  store i64 %"b##0", ptr @"resource#foreign_def_unordered.b"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.out_in<0>"() {
+  %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"a##1" = call ccc i64 @out_in(i64 %"a##0")
+  store i64 %"a##1", ptr @"resource#foreign_def_unordered.a"
+  ret void
+}
+
+define external fastcc void @"foreign_def_unordered.repeated<0>"(i64 %"x##0") {
+  %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
+  %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
+  %"a##1" = call ccc i64 @repeated(i64 %"x##0", i64 %"a##0", i64 %"tmp#0##0", i64 %"tmp#0##0", i64 %"a##0")
+  store i64 %"a##1", ptr @"resource#foreign_def_unordered.a"
+  ret void
+}

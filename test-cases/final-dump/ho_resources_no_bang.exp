@@ -1,0 +1,3 @@
+Error detected during resource checking of module(s) ho_resources_no_bang
+[91mfinal-dump/ho_resources_no_bang.wybe:6:1: Call to resourceful higher-order proc without ! resource marker: f:{resource}() @ho_resources_no_bang:nn:nn
+[0m

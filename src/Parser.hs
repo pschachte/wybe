@@ -242,19 +242,30 @@ fromUseItemParser v = do
 procOrFuncItem :: Visibility -> Parser Item
 procOrFuncItem vis = do
     pos <- tokenPosition <$> ident "def"
+    mbLanguage <- optionMaybe (ident "foreign" *> identString)
     mods <- modifierList >>= parseWith (processProcModifiers pos "procedure or function declaration")
-    (proto, returnType) <- limitedTerm prototypePrecedence
-                            >>= parseWith termToPrototype
+    (proto, returnType) <- limitedTerm prototypePrecedence >>= parseWith termToPrototype
     do
         body <- symbol "=" *> expr
-        return $ FuncDecl vis mods proto returnType body $ Just pos
-      <|> if returnType /= AnyType
-          then fail "unexpected return type in proc declaration"
-          else do
-            rs <- option [] (ident "use" *> resourceFlowSpec `sepBy1` comma)
-            let proto' = proto { procProtoResources = Set.fromList rs }
-            body <- embracedTerm >>= parseWith termToBody
-            return $ ProcDecl vis mods proto' body $ Just pos
+        if isNothing mbLanguage
+        then return $ FuncDecl vis mods proto returnType body $ Just pos
+        else fail "unexpected foreign language in function declaration"
+        <|> if returnType /= AnyType
+        then fail "unexpected return type in proc declaration"
+        else do
+            rs <- useResourceFlowSpecs
+            let proto' = proto { procProtoResources = rs }
+            case mbLanguage of
+                Just language -> return $ ForeignProcDecl vis language mods proto' $ Just pos
+                Nothing -> do
+                    body <- embracedTerm >>= parseWith termToBody
+                    return $ ProcDecl vis mods proto' body $ Just pos
+        
+
+
+-- | Parse an optional series of resource flows
+useResourceFlowSpecs :: Parser [ResourceFlowSpec]
+useResourceFlowSpecs = option [] (ident "use" *> resourceFlowSpec `sepBy1` comma)
 
 
 -- | Parse a specification of a resource and its flow direction.
@@ -308,7 +319,7 @@ processProcModifier ctx "pure"     = updateModsImpurity ctx "pure" PromisedPure
 processProcModifier ctx "semipure" = updateModsImpurity ctx "semipure" Semipure
 processProcModifier ctx "impure"   = updateModsImpurity ctx "impure" Impure
 processProcModifier ctx "resource" = updateModsResource ctx "resource" True
-processProcModifier ctx modName    = 
+processProcModifier ctx modName    =
     const $ Left $ "Unknown modifier '" ++ modName ++ "' in " ++ ctx
 
 
@@ -316,7 +327,7 @@ processProcModifier ctx modName    =
 -- | Update the ProcModifiers to specify the given determinism, which was
 -- specified with the given identifier.  Since Det is the default, and can't be
 -- explicitly specified, it's alway OK to change from Det to something else.
-updateModsDetism :: String -> String -> Determinism -> ProcModifiers 
+updateModsDetism :: String -> String -> Determinism -> ProcModifiers
                  -> Either String ProcModifiers
 updateModsDetism _ _ detism mods@ProcModifiers{modifierDetism=Det} =
     return mods {modifierDetism=detism}
@@ -328,30 +339,30 @@ updateModsDetism ctx modName detism mods =
 -- with the given identifier.  Since MayInline is the default, and can't be
 -- explicitly specified, it's alway OK to change from MayInline to something
 -- else.
-updateModsInlining :: String -> String -> Inlining -> ProcModifiers 
+updateModsInlining :: String -> String -> Inlining -> ProcModifiers
                    -> Either String ProcModifiers
 updateModsInlining _ _ inlining mods@ProcModifiers{modifierInline=MayInline} =
     return $ mods {modifierInline=inlining}
-updateModsInlining ctx modName _ mods =    
+updateModsInlining ctx modName _ mods =
     Left $ modifierConflictMsg modName ctx
-    
+
 
 -- | Update the ProcModifiers to specify the given Impurity, which was specified
 -- with the given identifier.  Since Pure is the default, and can't be
 -- explicitly specified, it's alway OK to change from Pure to something
 -- else.
-updateModsImpurity :: String -> String -> Impurity -> ProcModifiers 
+updateModsImpurity :: String -> String -> Impurity -> ProcModifiers
                    -> Either String ProcModifiers
 updateModsImpurity _ _ impurity mods@ProcModifiers{modifierImpurity=Pure} =
     return $ mods {modifierImpurity=impurity}
-updateModsImpurity ctx modName _ mods =    
+updateModsImpurity ctx modName _ mods =
     Left $ modifierConflictMsg modName ctx
 
 -- | Update the ProcModifiers to specify the given Resourcefulness, which was 
 -- specified with the given identifier.  Since resourceless is the default, 
 -- and can't be explicitly specified, it's alway OK to change from resourceless
 -- to resourceful.
-updateModsResource :: String -> String -> Bool -> ProcModifiers 
+updateModsResource :: String -> String -> Bool -> ProcModifiers
                    -> Either String ProcModifiers
 updateModsResource _ _ resful mods@ProcModifiers{modifierResourceful=False} =
     return $ mods {modifierResourceful=resful}
@@ -360,12 +371,12 @@ updateModsResource ctx modName _ mods =
 
 
 modifierConflictMsg :: String -> String -> String
-modifierConflictMsg mod ctx = 
+modifierConflictMsg mod ctx =
     "Modifier '" ++ mod ++ "' conflicts with earlier modifier in " ++ ctx
 
 
 modifierError :: SourcePos -> String -> String -> Either (SourcePos,String) a
-modifierError pos modName ctx = 
+modifierError pos modName ctx =
     syntaxError pos $ "Modifier '" ++ modName ++ "' cannot be used in a " ++ ctx
 
 -----------------------------------------------------------------------------
@@ -424,8 +435,8 @@ limitedTerm precedence = termFirst >>= termRest precedence
 -- Valid suffixes include parenthesised argument lists or square bracketed
 -- indices.  If both prefix and suffix are present, the suffix binds tighter.
 termFirst :: Parser Term
-termFirst = 
-    ((prefixOp >>= (primaryTerm >>=) . applyPrefixOp) <|> primaryTerm) 
+termFirst =
+    ((prefixOp >>= (primaryTerm >>=) . applyPrefixOp) <|> primaryTerm)
         >>= termSuffix
 
 
@@ -976,7 +987,7 @@ termToPrototype (Call pos mod name ParamIn rawParams) =
     if List.null mod
     then do
         params <- mapM termToParam $ parensToTerm rawParams
-        return (ProcProto name params Set.empty,AnyType)
+        return (ProcProto name params [],AnyType)
     else Left (pos, "module not permitted in proc declaration " ++ show mod)
 termToPrototype other =
     syntaxError (termPos other)
@@ -1199,9 +1210,9 @@ termToExp (Call pos [] sep ParamIn [])
 termToExp (Call pos [] var flow []) = -- looks like a var; assume it is
     return $ Placed (Var var flow Ordinary) pos
 termToExp (Call pos mod fn flow args)
-  | flow == ParamOut = 
+  | flow == ParamOut =
     syntaxError pos $ "invalid function call prefix " ++ flowPrefix flow
-  | otherwise = 
+  | otherwise =
     (`Placed` pos) . Fncall mod fn (flow == ParamInOut) <$> mapM termToExp args
 termToExp (Foreign pos lang inst flags args) =
     (`Placed` pos) . ForeignFn lang inst flags <$> mapM termToExp args
@@ -1226,7 +1237,7 @@ termToProcModifiers ctx (Embraced pos Brace mods _) = do
     idents <- mapM termToIdent mods
     processProcModifiers pos ctx idents
 termToProcModifiers ctx other
-    = syntaxError (termPos other) 
+    = syntaxError (termPos other)
     $ "invalid modifiers " ++ show other ++ " in " ++ ctx
 
 
@@ -1292,7 +1303,7 @@ termToTypeFlow other =
 termToProto :: TranslateTo (Placed ProcProto)
 termToProto (Call pos [] name ParamIn params) = do
     params' <- mapM termToParam params
-    return $ Placed (ProcProto name params' Set.empty) pos
+    return $ Placed (ProcProto name params' []) pos
 termToProto other =
     syntaxError (termPos other) $ "invalid prototype " ++ show other
 
@@ -1312,7 +1323,7 @@ termToParam other =
 termToCtorDecl :: TranslateTo (Placed ProcProto)
 termToCtorDecl (Call pos [] name ParamIn fields) = do
     fields' <- mapM termToCtorField fields
-    return $ Placed (ProcProto name fields' Set.empty) pos
+    return $ Placed (ProcProto name fields' []) pos
 termToCtorDecl other =
     syntaxError (termPos other)
         $ "invalid constructor declaration " ++ show other

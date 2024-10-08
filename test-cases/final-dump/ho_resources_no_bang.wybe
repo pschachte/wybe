@@ -1,0 +1,6 @@
+def foo() use !io {
+    pass
+}
+
+?f = foo
+f

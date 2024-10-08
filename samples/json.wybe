@@ -1,0 +1,326 @@
+## json.wybe
+## Author: James Barnes
+#
+# A recursive-descent parser for JSON documents in Wybe. 
+
+pub constructors 
+    jobject(list(pair(string, _)))
+  | jlist(list(_)) 
+  | jstring(string) 
+  | jnumber(float) 
+  | jbool(bool) 
+  | jnull
+    
+# XXX this can be removed once we get typeclasses
+pub def {test} (a:_ = b:_) { 
+    foreign lpvm cast(a):int = foreign lpvm cast(b):int
+}
+
+## pair type
+# A pair containing a key and a value.
+pub type pair(K, V) {
+    pub pair(key:K, value:V)
+
+    pub def {test} (a:_(K, V) = b:_(K, V)) { 
+        foreign lpvm cast(a^key):int = foreign lpvm cast(b^key):int
+        foreign lpvm cast(a^value):int = foreign lpvm cast(b^value):int
+    }
+}
+
+## resource tokens
+# Represents the tokens that remain to parse, a sequence of characters.
+resource tokens:string
+
+## parse/2
+# Parse a string into a JSON value. 
+# Fails if the string cannot be parsed.
+pub def {test} parse(tokens:string, ?json:_) {
+    use tokens in {
+        !space
+        !json(?json)
+        tokens = ""
+    }
+}
+
+## char/2 use !tokens
+# Parse a single character from the input string.
+def {test} char(?c:char) use !tokens {
+    tokens = [?c | ?tokens]
+}
+
+## literal/2 use !tokens
+# Parse a character literal followed by whitespace.
+def {test} literal(c:char) use !tokens {
+    !char(c)
+    !space
+}
+
+## literal/2 use !tokens
+# Parse a string literal followed by whitespace.
+def {test} literal(str:string) use !tokens {
+    for ?c in str {
+        !char(c)
+    }
+    !space
+}
+
+## space/1 use !tokens
+# Parse zero or more whitespace characters from the input.
+def space() use !tokens {
+    !char(?c)
+    (c = ' ' | c = '\n' | c = '\r' | c = '\t')
+    !space
+  | pass
+}
+
+## json/1 use !tokens
+# Parse a JSON value followed by whitespace.
+def {test} json(?j:_) use !tokens {
+    !object(?j) 
+  | !list(?j)
+  | !string(?j)
+  | !number(?j)
+  | !bool(?j)
+  | !null(?j)
+}
+
+## object/1 use !tokens
+# Parse a JSON object, followed by whitespace.
+def {test} object(?obj:_) use !tokens {
+    !sequence('{', {test,resource}{
+        !string(?key)
+        !literal(':')
+        !json(?value)
+        ?@ = pair(key, value)
+    }, '}', ?pairs)
+    ?obj = jobject(pairs)
+}
+
+## list/1 use !tokens
+# Parse a JSON list, followed by whitespace.
+def {test} list(?list:_) use !tokens {
+    !sequence('[', json, ']', ?jsons)
+    ?list = jlist(jsons)
+}
+
+## string/1 use !tokens
+# Parse a JSON string, followed by whitespace.
+def {test} string(?string:_) use !tokens {
+    !string(?str)
+    ?string = jstring(str)
+}
+
+## number/1 use !tokens
+# Parse a JSON number, followed by whitespace.
+def {test} number(?number:_) use !tokens {
+    !digits(?n, _)
+    if { !char('.') ::
+        !digits(?f, ?len)
+        !n += f / power(10.0, len)
+    }
+    if { { !char('e') | !char('E') } ::
+        !digits(?e, _)
+        !n *= power(10.0, e)
+    }
+    !space
+    ?number = jnumber(n)
+}
+
+## bool/1 use !tokens
+# Parse a JSON Boolean, followed by whitespace.
+def {test} bool(?bool:_) use !tokens {
+    !literal("false")
+    ?bool = jbool(false)
+  | !literal("true")
+    ?bool = jbool(true)
+}
+
+## null/1 use !tokens
+# Parse a JSON null, followed by whitespace.
+def {test} null(?null:_) use !tokens {
+    !literal("null")
+    ?null = jnull
+}
+
+## sequence/4 use !tokens
+# Parse a comma-separated sequence of items, with a preceding and 
+# following character, followed by whitespace.
+def {test} sequence(before:char, item:{resource,test}(?X), after:char, ?xs:list(X)) use !tokens {
+    !literal(before)
+    if { !item(?x) :: 
+        !sequence_tail(item, ?xs)
+        ?xs = [x | xs]
+      | else :: 
+        ?xs = []
+    }
+    !literal(after)
+}
+
+## sequence_tail/2 use !tokens
+# Parse the tail of a sequnece. Helper for sequence/4.
+def {test} sequence_tail(item:{resource,test}(?X), ?xs:list(X)) use !tokens {
+    if { !literal(',') ::
+        !item(?x)
+        !sequence_tail(item, ?xs)
+        ?xs = [x | xs]
+      | else ::
+        ?xs = []
+    }
+}
+
+## string/1 use !tokens
+# Parse a string, followed by whitespace.
+def {test} string(?str:string) use !tokens {
+    !char('\"')
+    !string_tail(?str)
+    ?str = string(c_string(str))
+}
+
+## string_tail/1 use !tokens
+# Parse the tail of a string. Helper for string/1.
+def {test} string_tail(?str:string) use !tokens {
+    !literal('\"')
+    ?str = ""
+  | !char(?c)
+    if { c = '\\' :: 
+        !char(?c)
+        if { c = '"' :: pass
+           | c = '\\' :: pass
+           | c = '/' :: pass
+           | c = 'b' :: ?c = '\b'
+           | c = 'f' :: ?c = '\f'
+           | c = 'n' :: ?c = '\n'
+           | c = 'r' :: ?c = '\r'
+           | c = 't' :: ?c = '\t'
+           | else :: fail
+        }
+    }
+    !string_tail(?str)
+    ?str = c ,, str
+}
+
+## digits/2 use !tokens
+# Parse a sequence of one or more digits.
+def {test} digits(?n:float, ?len:float) use !tokens {
+    !digit(?n)
+    ?len = 1.0
+    do {
+        !digit(?d) 
+        !len += 1.0 
+        ?n = n * 10.0 + d
+      | break
+    }
+}
+
+## digits/1 use !tokens
+# Parse a single digit.
+def {test} digit(?d:float) use !tokens {
+    !char(?c)
+    '0' <= c & c <= '9'
+    ?d = foreign llvm sitofp(ord(c) - ord('0'):int)
+}
+
+## print/1 use !io
+# Pretty print a JSON value.
+pub def print(x:_) use !io {
+    !print(0, x)
+    !nl
+}
+
+## print/2 use !io
+# Pretty print a JSON value at a given indentation level. Helper for print/1.
+def print(ind:int, x:_) use !io {
+    case x in {
+        jobject(?pairs) :: 
+        !print_list(ind, '{', {resource}{
+            !indent(@1)
+            !escape(@2^key)
+            !print(": ")
+            !print(@1, @2^value)
+        }, '}', pairs)
+      | jlist(?list) :: 
+        !print_list(ind, '[', {resource}{
+            !indent(@1)
+            !print(@1, @2)
+        }, ']', list)
+      | jstring(?s) :: !escape(s)
+      | jbool(?b) :: !print(b)
+      | jnumber(?n) :: !print(n)
+      | else :: !print("null")
+    }
+}
+
+## indent/1 use !io
+# Print a given amount of indentation.
+def indent(ind:int) use !io {
+    ind <= 0
+  | !print(' ')
+    !indent(ind - 1)
+}
+
+## escape/1 use !io
+# Print an string, with quotes and necessary characters escaped.
+def escape(s:string) use !io {
+    !print('"')
+    for ?c in s {
+        if { c = '"' :: !print("\\\"")
+           | c = '\\' :: !print("\\\\")
+           | c = '\b' :: !print("\\b")
+           | c = '\f' :: !print("\\f")
+           | c = '\n' :: !print("\\n")
+           | c = '\r' :: !print("\\r")
+           | c = '\t' :: !print("\\t")
+           | else :: !print(c)
+        }
+    }
+    !print('"')
+}
+
+## print_list/1
+# Pretty print a list of things with a givn printer, surrounded by a start and end character.
+def print_list(ind:int, start:char, printer:{resource}(int, X), end:char, xs:list(X)) use !io {
+    !print(start)
+    if { [?x | ?xs] = xs :: 
+        !nl
+        !printer(ind + 1, x)
+        for ?x in xs {
+            !println(',')
+            !printer(ind + 1, x)
+        }
+        !nl
+        !indent(ind)
+    }
+    !print(end)
+}
+
+###########
+# TESTING
+###########
+
+?tests = [
+    # these should parse
+    pair(true, "{}"),
+    pair(true, "true"),
+    pair(true, "[3.141596]"),
+    pair(true, "  {\"a\": [1, 1.020, 1e2, 01.2E3, false, { \"key\": null}],\n \"abc\\ndef\": true }  "),
+    # these should fail to parse
+    pair(false, "definitely not JSON!"),
+    pair(false, "\"abc"),
+    pair(false, "{} {}")
+]
+
+for pair(?should_parse:bool, ?document) in tests {
+    !print("Attempting to parse ")
+    !escape(document)
+    !nl
+    !println("Expecting $(if { should_parse :: "success" | else :: "failure" })")
+
+    if { parse(document, ?json) :: 
+        !println("Successfully parsed $(if { should_parse :: ":)" | else :: ":(" })")
+        !print(json) 
+    | else :: 
+        !println("Failed to parse $(if { should_parse :: ":(" | else :: ":)" })") 
+    }
+
+    !nl
+} 

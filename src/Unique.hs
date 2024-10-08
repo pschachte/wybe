@@ -23,6 +23,7 @@ import Data.Set                  as Set
 import Data.Map                  as Map
 import Data.Maybe
 import Data.Tuple.HT             (mapFst, swap)
+import qualified Data.ByteString.Builder.Prim as Set
 
 
 -- | Uniqueness error with specs of the variable
@@ -98,8 +99,7 @@ uniquenessCheckProc def _ = do
                        mapM (((tmUniqueness . typeModifiers . modInterface <$>) <$>)
                              <$> getLoadingModule)
                            (catMaybes $ typeModule . paramType . content <$> params)
-    resTys <- mapM (canonicaliseResourceSpec pos "uniqueness checking" . resourceFlowRes) 
-            $ Set.toList ress
+    resTys <- mapM (canonicaliseResourceSpec pos "uniqueness checking" . resourceFlowRes) ress
     someUniqueRes <- elem (Just True) <$>
                      mapM (((tmUniqueness . typeModifiers . modInterface <$>) <$>)
                            <$> getLoadingModule)
@@ -160,12 +160,12 @@ logUniqueness msg = do
 
 
 uniquenessCheckDef :: ProcName -> OptPos -> Determinism -> [Placed Stmt]
-                   -> [Placed Param] -> Set ResourceFlowSpec -> Compiler UniquenessState
+                   -> [Placed Param] -> [ResourceFlowSpec] -> Compiler UniquenessState
 uniquenessCheckDef name pos detism body params res =
     execStateT (do
         uniquenessCheckStmts body
         mapM_ (placedApply $ uniquenessCheckParam name) params
-        mapM_ (uniquenessCheckResourceParam name pos) $ Set.toList res
+        mapM_ (uniquenessCheckResourceParam name pos) res
     ) $ initUniquenessState detism
 
 
@@ -270,8 +270,7 @@ uniquenessCheckStmt call@(ProcCall (First mod name mbId) _ _ args) pos = do
     let proto = procProto def
     let params = procProtoParams proto
     zipWithM_ (uniquenessCheckArg mod name pos) (content <$> params) (content <$> args)
-    let resources = procProtoResources proto
-    mapM_ (uniquenessCheckResourceArg pos) $ Set.toList resources
+    mapM_ (uniquenessCheckResourceArg pos) $ procProtoResources proto
 uniquenessCheckStmt call@(ProcCall (Higher fn) _ _ args) pos = do
     logUniqueness $ "Uniqueness checking higher call " ++ show call
     mapM_ (defaultPlacedApply uniquenessCheckExp pos) $ fn:args
@@ -371,9 +370,10 @@ uniquenessCheckExp var@(AnonParamVar _ _) _ =
     shouldnt $ "AnonParamVar " ++ show var ++ " in uniqueness checking"
 uniquenessCheckExp (AnonProc mods params body clsd _) pos = do
     uniquenessCheckClosedMap clsd pos
-    errs <- uniquenessErrors <$> lift (uniquenessCheckDef "anonymous procedure" pos
-                                        (modifierDetism mods) body 
-                                        ((`maybePlace` pos) <$> params) Set.empty)
+    errs <- uniquenessErrors 
+        <$> lift (uniquenessCheckDef "anonymous procedure" pos
+                    (modifierDetism mods) body 
+                    ((`maybePlace` pos) <$> params) [])
     mapM_ uniquenessErr errs
 uniquenessCheckExp func@(AnonFunc _) _ = 
     shouldnt $ "AnonFunc " ++ show func ++ " in uniqueness checking"

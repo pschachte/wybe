@@ -25,6 +25,7 @@ import           Data.Tuple.Extra
 import           Flow          ((|>))
 import           Options       (LogSelection (Analysis))
 import           Util
+import           Config        (specialName2)
 
 
 -- This "AliasMapLocal" is used during analysis and it will be converted to
@@ -39,6 +40,7 @@ import           Util
 -- consider the corresponding parameter as interesting.
 data AliasMapLocalItem
     = LiveVar           PrimVarName
+    | AliasByGlobal     GlobalInfo
     | AliasByParam      PrimVarName
     | MaybeAliasByParam PrimVarName
     deriving (Eq, Ord, Show)
@@ -190,7 +192,7 @@ aliasedByFork caller body analysisInfo = do
         PrimFork _ _ _ fBodies deflt -> do
             logAlias ">>> Forking:"
             analysisInfos <-
-                mapM (\body' -> aliasedByBody caller body' analysisInfo) 
+                mapM (\body' -> aliasedByBody caller body' analysisInfo)
                     $ fBodies ++ maybeToList deflt
             return $ mergeAnalysisInfo analysisInfos
         NoFork -> do
@@ -294,8 +296,8 @@ updateAliasedByPrim aliasMap prim =
             -- Analyse simple prims
             logAlias $ "--- simple prim:  " ++ show prim
             let prim' = content prim
-            maybeAliasedVariables <- maybeAliasPrimArgs prim'
-            aliasedArgsInSimplePrim aliasMap maybeAliasedVariables
+            maybeAliasedPrimArgs <- maybeAliasPrimArgs prim'
+            aliasedArgsInSimplePrim aliasMap maybeAliasedPrimArgs
                                         (fst $ primArgs prim')
 
 
@@ -304,16 +306,16 @@ updateAliasedByPrim aliasMap prim =
 -- Not to compute aliasing from mutate instructions with the assumption that we
 -- always try to do nondestructive update.
 -- Retruns maybeAliasedVariables
-maybeAliasPrimArgs :: Prim -> Compiler [PrimVarName]
+maybeAliasPrimArgs :: Prim -> Compiler [AliasMapLocalItem]
 maybeAliasPrimArgs (PrimForeign "lpvm" "access" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign "lpvm" "cast" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign "llvm" "move" _ args) =
     _maybeAliasPrimArgs args
-maybeAliasPrimArgs (PrimForeign "llvm" "load" _ args) =
+maybeAliasPrimArgs (PrimForeign "lpvm" "load" _ args) =
     _maybeAliasPrimArgs args
-maybeAliasPrimArgs (PrimForeign "llvm" "store" _ args) =
+maybeAliasPrimArgs (PrimForeign "lpvm" "store" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs prim@(PrimForeign "lpvm" "mutate" flags args) = do
     let [fIn, fOut, _, _, _, _, mem] = args
@@ -330,7 +332,7 @@ maybeAliasPrimArgs prim = return []
 -- It filters the args and keeps those may aliased with others
 -- We don't care about the Flow of args
 -- since the aliasMap is undirectional
-_maybeAliasPrimArgs :: [PrimArg] -> Compiler [PrimVarName]
+_maybeAliasPrimArgs :: [PrimArg] -> Compiler [AliasMapLocalItem]
 _maybeAliasPrimArgs args = do
     args' <- mapM filterArg args
     let escapedVars = catMaybes args'
@@ -338,15 +340,16 @@ _maybeAliasPrimArgs args = do
   where
     filterArg arg =
         case arg of
-        ArgVar{argVarName=var, argVarType=ty}
-            -> do
-                isPhantom <- argIsPhantom arg
-                rep <- lookupTypeRepresentation ty
-                -- Only Pointer type will create alias
-                if not isPhantom && rep == Just Pointer
-                    then return $ Just var
-                    else return Nothing
-        _   -> return Nothing
+        ArgVar{argVarName=var, argVarType=ty} -> maybeAddressAlias arg ty $ LiveVar var
+        ArgGlobal global ty -> maybeAddressAlias arg ty $ AliasByGlobal global
+        _ -> return Nothing
+    maybeAddressAlias arg ty item = do
+        isPhantom <- argIsPhantom arg
+        rep <- lookupTypeRepresentation ty
+        -- Only Pointer type will create alias
+        if not isPhantom && rep == Just Pointer
+        then return $ Just item
+        else return Nothing
 
 
 -- Check Arg aliases in one of proc calls inside a ProcBody
@@ -361,18 +364,15 @@ aliasedArgsInPrimCall calleeArgsAliases currentAlias primArgs = do
 -- Check Arg aliases in one of the prims of a ProcBody.
 -- (maybeAliasedInput, maybeAliasedOutput, primArgs): argument in current prim
 -- that being analysed
-aliasedArgsInSimplePrim :: AliasMapLocal -> [PrimVarName] -> [PrimArg]
+aliasedArgsInSimplePrim :: AliasMapLocal -> [AliasMapLocalItem] -> [PrimArg]
         -> Compiler AliasMapLocal
 aliasedArgsInSimplePrim aliasMap [] primArgs =
         -- No new aliasing incurred but still need to cleanup final args
         return $ removeDeadVar aliasMap primArgs
-aliasedArgsInSimplePrim aliasMap
-                            maybeAliasedVariables primArgs = do
-        logAlias $ "      primArgs:           " ++ show primArgs
-        logAlias $ "      maybeAliasedVariables:  "
-                                    ++ show maybeAliasedVariables
-        let maybeAliasedVariables' = List.map LiveVar maybeAliasedVariables
-        let aliasMap' = addConnectedGroupToDS maybeAliasedVariables' aliasMap
+aliasedArgsInSimplePrim aliasMap maybeAliasedPrimArgs primArgs = do
+        logAlias $ "      primArgs:             " ++ show primArgs
+        logAlias $ "      maybeAliasedPrimArgs: " ++ show maybeAliasedPrimArgs
+        let aliasMap' = addConnectedGroupToDS maybeAliasedPrimArgs aliasMap
         return $ removeDeadVar aliasMap' primArgs
 
 
