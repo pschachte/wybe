@@ -1969,14 +1969,26 @@ releaseDeferredCall = do
 convertOutByRefArg :: PrimArg -> LLVM (PrimArg,Bool)
 convertOutByRefArg ArgVar{argVarName=name, argVarType=ty,
                         argVarFlow=FlowOutByReference} = do
-    maybePtrArg <- Map.lookup name <$> gets takeRefVars
+    logLLVM $ "Converting out-by-ref var " ++ show name
+    maybePtrArg <- gets $ Map.lookup name . takeRefVars
     case maybePtrArg of
-        Just (ptrArg,_) -> return (ptrArg,True)
+        Just (ptrArg,_) -> do
+            logLLVM $ " -> already a take-reference: returning " ++ show ptrArg
+            return (ptrArg,True)
         Nothing -> do
-            (writeArg,readArg) <- freshTempArgs $ Representation CPointer
-            stackAlloc writeArg wordSizeBytes
-            addTakeRefPointer name readArg ty
-            return (readArg,False)
+            logLLVM " -> Not a take-reference, checking for out-by-reference"
+            maybeOBRVar <- gets $ Map.lookup name . outByRefVars
+            case maybeOBRVar of
+                Just (ptrArg,_) -> do
+                    logLLVM $ " -> already out-by-reference: returning "
+                                ++ show ptrArg
+                    return (ptrArg,True)
+                Nothing -> do
+                    logLLVM " -> Not out-by-reference: making fresh alloca ptr"
+                    (writeArg,readArg) <- freshTempArgs $ Representation CPointer
+                    stackAlloc writeArg wordSizeBytes
+                    addTakeRefPointer name readArg ty
+                    return (readArg,False)
 convertOutByRefArg other =
     shouldnt $ "Expected out-by-reference argument: " ++ show other
 
