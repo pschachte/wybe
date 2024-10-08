@@ -1,0 +1,8 @@
+----------------------------------------------------------------------
+- program - output
+----------------------------------------------------------------------
+["[","]=?L;?q=34:char;if{L=[?a,?b|_]::for _ in L{!print a;!print q};!print',';for _ in L{!print q;!print b}}"]=?L;?q=34:char;if{L=[?a,?b|_]::for _ in L{!print a;!print q};!print',';for _ in L{!print q;!print b}}
+["[","]=?L;?q=34:char;if{L=[?a,?b|_]::for _ in L{!print a;!print q};!print',';for _ in L{!print q;!print b}}"]=?L;?q=34:char;if{L=[?a,?b|_]::for _ in L{!print a;!print q};!print',';for _ in L{!print q;!print b}}
+----------------------------------------------------------------------
+
+

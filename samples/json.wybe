@@ -1,4 +1,4 @@
-## json.Wybe
+## json.wybe
 ## Author: James Barnes
 #
 # A recursive-descent parser for JSON documents in Wybe. 
