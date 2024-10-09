@@ -22,7 +22,7 @@ import           Config                     (objectExtension, bitcodeExtension,
                                              llvmToObjectCommand,
                                              removeLPVMSection)
 import           Control.Monad ( (>=>), unless )
-import           Control.Monad.Trans        (liftIO)
+import           Control.Monad.Trans        (liftIO, lift)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
 import qualified Data.ByteString            as BS
@@ -42,7 +42,7 @@ import           System.IO                  (openFile, hClose, Handle,
                                              IOMode (WriteMode), hPutStrLn)
 import           System.Process             (proc, readCreateProcessWithExitCode)
 import           System.FilePath            ((-<.>))
-import           System.Directory           (getPermissions, writable, doesFileExist)
+import           System.Directory           (getPermissions, writable, doesFileExist, removeFile)
 import           Util                       (createLocalCacheFile)
 import           LLVM
 import Data.String
@@ -86,6 +86,7 @@ emitObjectFile m f = do
             liftIO $ createLocalCacheFile filename
     let (cmd,cmdLine) = llvmToObjectCommand llFilename filename userOptions
     runOSCmd cmd cmdLine
+    lift $ removeFile llFilename
 
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -99,10 +100,11 @@ emitBitcodeFile m f = do
     userOptions <- gets options
     let (cmd,cmdLine) = llvmToBitcodeCommand llFilename filename userOptions
     runOSCmd cmd cmdLine
+    lift $ removeFile llFilename
 
 
--- | With the LLVM AST representation of a LPVM Module, create a target LLVM
--- Assembly file.  This function forms the basis for all LLVM code generation.
+-- | Create a target LLVM Assembly (.ll) file.  This function forms the basis
+-- for all LLVM code generation.
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler FilePath
 emitAssemblyFile m f = do
     let filename = f -<.> Config.assemblyExtension

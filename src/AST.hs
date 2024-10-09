@@ -1600,7 +1600,6 @@ data ModuleImplementation = ModuleImplementation {
     modKnownProcs:: Map Ident (Set ProcSpec), -- ^Procs visible to this module
     modForeignObjects:: Set FilePath,         -- ^Foreign object files used
     modForeignLibs:: Set String               -- ^Foreign libraries used
-    -- modLLVM :: Maybe LLVMAST.Module           -- ^Module's LLVM representation
     } deriving (Generic)
 
 emptyImplementation :: ModuleImplementation
@@ -3432,7 +3431,9 @@ argIsVar ArgVar{} = True
 argIsVar _ = False
 
 
--- | Test if a PrimArg is a compile-time constant.
+-- | Test if a PrimArg is a compile-time constant.  This can include a
+-- compile-time constant pointer to mutable memory, so it doesn't mean
+-- *recursively* constant.
 argIsConst :: PrimArg -> Bool
 argIsConst ArgVar{}            = False
 argIsConst ArgInt{}            = True
@@ -3440,9 +3441,7 @@ argIsConst ArgFloat{}          = True
 argIsConst ArgString{}         = True
 argIsConst ArgChar{}           = True
 argIsConst (ArgClosure _ as _) = all argIsConst as
--- XXX Should we consider globals to be constants, since they are compile-time
--- constant pointers, even if what they point to might not be constant?
-argIsConst ArgGlobal{}         = False
+argIsConst ArgGlobal{}         = True
 argIsConst ArgUnneeded{}       = True
 argIsConst ArgUndef{}          = False
 

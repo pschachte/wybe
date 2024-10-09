@@ -288,9 +288,9 @@ instance Show StaticConstSpec where
     show (ClosureSpec pspec args) = show pspec ++ showArguments args
 
 
--- | If the specified PrimArg is a string constant, add it to the set.  For Wybe
--- strings, add both the Wybe string and the C string, since the Wybe string
--- constant refers to the C string.
+-- | If the specified PrimArg is a string constant or closure with only constant
+-- arguments, add it to the set.  For Wybe strings, add both the Wybe string and
+-- the C string, since the Wybe string constant refers to the C string.
 prescanArg :: PrimArg -> LLVM ()
 prescanArg (ArgString str WybeString _) = do
     recordConst $ WybeStringSpec str
@@ -755,9 +755,9 @@ writeWybeCall wybeProc args pos = do
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
     unless (List.null iRefs)
      $ shouldnt $ "Wybe call " ++ show wybeProc ++ " with take-reference arg"
-    prefix <- tailMarker False
+    tailKind <- tailMarker False
     if List.null oRefs then
-        writeActualCall wybeProc ins outs prefix
+        writeActualCall wybeProc ins outs tailKind
     else
         deferCall wybeProc ins outs oRefs
 

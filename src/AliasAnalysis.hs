@@ -344,10 +344,11 @@ _maybeAliasPrimArgs args = do
         ArgGlobal global ty -> maybeAddressAlias arg ty $ AliasByGlobal global
         _ -> return Nothing
     maybeAddressAlias arg ty item = do
-        isPhantom <- argIsPhantom arg
+        -- isPhantom <- argIsPhantom arg
         rep <- lookupTypeRepresentation ty
         -- Only Pointer type will create alias
-        if not isPhantom && rep == Just Pointer
+        -- if not isPhantom && rep == Just Pointer
+        if rep == Just Pointer
         then return $ Just item
         else return Nothing
 

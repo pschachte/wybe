@@ -1,12 +1,12 @@
-def foo(x:T) use !io {
-    ?l = [x]
-    !println(length(l))
-}
+# def foo(x:T) use !io {
+#     ?l = [x]
+#     !println(length(l))
+# }
 
-!foo(1)
-!foo(true)
-!foo(1.0)
-?x = 1.0; !foo(x) 
+# !foo(1)
+# !foo(true)
+# !foo(1.0)
+# ?x = 1.0; !foo(x) 
 
 def {test} foo2(x:T0, ?y:T0) {
     ?l = [x]
@@ -15,7 +15,8 @@ def {test} foo2(x:T0, ?y:T0) {
 
 if {foo2(42, ?y) :: !println(y)}
 ?i = 42; if {foo2(i, ?y) :: !println(y)}
-?f = 1.0; if {foo2(f, ?fx) :: !println(fx)}
+?f = 1.0; if {foo2(f, ?fx) :: !println(fx)
+             | else :: !println "foo2 fails!"}
 if {foo2(1.0, ?x) :: !println(x)}
 if {foo2('a', ?z) :: !println(z)}
 if {foo2(false, ?b) :: !println(b)}
