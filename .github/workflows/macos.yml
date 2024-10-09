@@ -22,8 +22,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
+        brew install llvm
         brew install bdw-gc
-        brew install llvm-hs/llvm/llvm-9
         brew install dwdiff
         brew install coreutils
 
