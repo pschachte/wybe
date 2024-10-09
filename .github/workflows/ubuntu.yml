@@ -27,6 +27,14 @@ jobs:
     # - name: Install Haskell Stack
     #   run: wget -qO- https://get.haskellstack.org/ | sh
 
+    - name: Verify dependencies
+      run: |
+        llvm-config --version
+        clang --version
+        dpkg -s libgc-dev
+        dpkg -s libtinfo-dev
+        dpkg -s dwdiff
+
     # cache Haskell Stack stuff
     - name: Cache stack global package db
       uses: actions/cache@v1
