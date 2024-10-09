@@ -461,7 +461,6 @@ writeConstDeclaration spec@(ClosureSpec pspec args) n = do
     argReps <- mapM argTypeRep args
     declareStructConstant closureName
         ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
-        -- ((ArgInt 42 intType, Bits 64)
          : zip args argReps)
         Nothing
 
@@ -592,7 +591,6 @@ closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
 closeClosure proto@PrimProto{primProtoParams=params}
              body@ProcBody{bodyPrims=prims} =
     (proto{primProtoParams=envPrimParam:actualParams},
-            -- envPrimParam:(setPrimParamType AnyType <$> actualParams)},
      body{bodyPrims=unpacker ++ prims})
   where
     (free, actualParams) = List.partition ((==Free) . primParamFlowType) params
@@ -713,7 +711,7 @@ writeAssemblySwitch outs v rep cases dflt = do
         Nothing -> return ()
         Just dfltCode -> do
             llvmPutStrLn $ dfltLabel ++ ":"
-    -- I don't think the Nothing case ever happens, but in case it does...
+            -- I don't think the Nothing case ever happens, but just in case...
             writeAssemblyBody outs dfltCode
 
 
@@ -737,7 +735,7 @@ writeAssemblyPrim instr@(PrimForeign "llvm" op flags args) pos = do
     logLLVM $ "* Translating LLVM instruction " ++ show instr
     writeLLVMCall op flags args pos
 writeAssemblyPrim instr@(PrimForeign "lpvm" op flags args) pos = do
-    -- Some of these should be handled before releasing deferred calls
+    -- Some of these must be handled before releasing deferred calls
     logLLVM $ "* Translating LPVM instruction " ++ show instr
     writeLPVMCall op flags args pos
 writeAssemblyPrim instr@(PrimForeign "c" cfn flags args) pos = do
@@ -867,7 +865,7 @@ writeLPVMCall "load" _ args pos = do
             shouldnt $ "lpvm load with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
 writeLPVMCall "store" _ args pos = do
-    -- XXX We could actually support take-reference for this op
+    -- TODO We could actually support take-reference for this op
     releaseDeferredCall
     args' <- partitionArgs "lpvm store instruction" args
     case args' of
@@ -1213,6 +1211,7 @@ llvmAssignConvertedResult arg@ArgVar{argVarName=varName,argVarType=ty}
 llvmAssignConvertedResult notAVar _ _ =
     shouldnt $ "llvmAssignConvertedResult into non-variable " ++ show notAVar
 
+
 -- | Split parameter list into separate list of input, output, out-by-reference,
 -- and take-reference arguments, ignoring any phantom parameters.
 partitionParams :: [PrimParam]
@@ -1355,7 +1354,6 @@ llvmValue argVar@ArgVar{argVarName=var, argVarType=ty} = do
         (Nothing,_) -> do
             logLLVM $ "Using unknown LLVM variable " ++ realVar
             return realVar
-        -- (Nothing,_) -> shouldnt $ "Using unknown LLVM variable " ++ realVar
         (Just defRep, useRep) | equivLLTypes defRep useRep -> return realVar
         (Just defRep, useRep) ->
             typeConvertedBare thisRep argVar{argVarType=Representation defRep}
@@ -1540,6 +1538,7 @@ typeConvertedBare toTy fromArg
                 (writeArg,readArg) <- freshTempArgs $ Representation toTy
                 typeConvert fromArg writeArg
                 llvmValue readArg
+
 
 -- | An LLVM constant expression of the specified type toTy, when the constant
 -- is initially of the specified type fromTy.  This may take the form of an
@@ -1992,6 +1991,7 @@ convertOutByRefArg ArgVar{argVarName=name, argVarType=ty,
 convertOutByRefArg other =
     shouldnt $ "Expected out-by-reference argument: " ++ show other
 
+
 -- | Generate code to allocate heap memory, with the size in bytes specified as
 -- a PrimArg, so it can be a variable.  The result will be converted to the type
 -- of the result variable.
@@ -2026,7 +2026,6 @@ llvmProcName pspec = (llvmGlobalName $ show pspec, "fastcc")
 llvmGlobalName :: String -> LLVMName
 llvmGlobalName s =
     '@' : llvmQuoteIfNecessary s
-
 
 
 -- | Wrap quotes around the specified string, using character escapes for any
