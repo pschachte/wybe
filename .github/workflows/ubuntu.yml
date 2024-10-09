@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v2
@@ -19,7 +19,6 @@ jobs:
         sudo apt-get install llvm
         sudo apt-get install clang
         sudo apt-get install libgc-dev
-        sudo apt-get install llvm-9-dev
         sudo apt-get install libtinfo-dev
         sudo apt-get install dwdiff
 
