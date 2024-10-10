@@ -19,7 +19,6 @@ jobs:
         sudo apt-get install llvm
         sudo apt-get install clang
         sudo apt-get install libgc-dev
-        sudo apt-get install libtinfo-dev
         sudo apt-get install dwdiff
 
     # GitHub-hosted runners provide Haskell Stack
@@ -29,11 +28,13 @@ jobs:
 
     - name: Verify dependencies
       run: |
-        llvm-config --version
-        clang --version
+        dpkg -s llvm
+        dpkg -s clang
         dpkg -s libgc-dev
-        dpkg -s libtinfo-dev
         dpkg -s dwdiff
+        llc --version
+        clang --version
+        llvm-config --version
 
     # cache Haskell Stack stuff
     - name: Cache stack global package db
