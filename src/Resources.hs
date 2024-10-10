@@ -24,7 +24,6 @@ import           Data.Either               as Either
 import           Data.Either.Extra         (mapLeft)
 import           Data.Tuple.HT             (mapFst, mapSnd)
 import           Data.Tuple.Extra          ((***))
-import           LLVM.Prelude              (ifM)
 import           Options                   (LogSelection (Resources))
 import           Snippets
 import           Util

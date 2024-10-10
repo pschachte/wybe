@@ -23,6 +23,7 @@ do
 	    | sed -e 's/@\([A-Za-z0-9_]*\):[0-9:]*/@\1:nn:nn/g' \
             -e "s|`pwd`|!ROOT!|g" \
             -e 's/\[[0-9][0-9]* x i8\]/[?? x i8]/g' \
+			-e 's/^\(target triple *\)=.*/\1 ????/' \
         > $out
 	# Add a newline to the end of a file if there isn't to resolve platform differences.
 	ed -s $out <<< w > /dev/null 2>&1

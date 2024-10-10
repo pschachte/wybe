@@ -1,0 +1,7 @@
+# purpose: Standard opaque pointer type, mostly used for interfacing to other
+#          programming languages.
+# since  : 0.2
+
+pragma no_standard_library # Standard library can't depend on itself!
+
+representation is opaque

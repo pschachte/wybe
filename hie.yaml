@@ -9,9 +9,6 @@ cradle:
     - path: "./src/BinaryFactory.hs"
       component: "wybe:exe:wybemk"
 
-    - path: "./src/Blocks.hs"
-      component: "wybe:exe:wybemk"
-
     - path: "./src/BodyBuilder.hs"
       component: "wybe:exe:wybemk"
 
@@ -22,9 +19,6 @@ cradle:
       component: "wybe:exe:wybemk"
 
     - path: "./src/Clause.hs"
-      component: "wybe:exe:wybemk"
-
-    - path: "./src/Codegen.hs"
       component: "wybe:exe:wybemk"
 
     - path: "./src/Config.hs"

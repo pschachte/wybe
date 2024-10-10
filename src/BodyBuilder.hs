@@ -251,12 +251,14 @@ buildBody :: Int -> VarSubstitution -> [PrimParam] -> BodyBuilder a
 buildBody tmp oSubst params builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     (a, st) <- runStateT builder $ initState tmp oSubst params
+    let tmp = tmpCount st
     logMsg BodyBuilder ">>>> Finished building a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
+    logMsg BodyBuilder $ "  tmpCount = " ++ show tmp
     st' <- fuseBodies st
-    (tmp', used, stored, varFlows, body) <- currBody (ProcBody [] NoFork) st'
-    return (a, tmp', used, stored, varFlows, body)
+    (_, used, stored, varFlows, body) <- currBody (ProcBody [] NoFork) st'
+    return (a, tmp, used, stored, varFlows, body)
 
 
 -- |Start a new fork on var of type ty
@@ -273,8 +275,9 @@ buildFork var ty = do
       Unforked -> do
         logBuild $ "     (expands to " ++ show var' ++ ")"
         case var' of
-          ArgInt n _ -> -- fork variable value known at compile-time
+          ArgInt n _ -> do -- fork variable value known at compile-time
             put $ childState st $ Forked var ty (Just n) False [] Nothing False
+            gets tmpCount >>= logBuild . ("  tmpCount = "++) . show
           ArgVar{argVarName=var'',argVarType=varType} -> do
             -- statically unknown result
             consts <- gets forkConsts
@@ -284,6 +287,7 @@ buildFork var ty = do
                        ++ (if fused then "WILL " else "will NOT ")
                        ++ "be fused with parent"
             put $ st {buildState=Forked var'' ty Nothing fused [] Nothing False}
+            gets tmpCount >>= logBuild . ("  tmpCount = "++) . show
           _ -> shouldnt "switch on non-integer variable"
         logState
 
@@ -299,6 +303,7 @@ completeFork = do
         shouldnt "Completing an un-built fork"
       Forked var ty val fused bods deflt False -> do
         logBuild $ ">>>> ending fork on " ++ show var
+        gets tmpCount >>= logBuild . ("  tmpCount = "++) . show
         let allBods = bods ++ maybeToList deflt
         -- let branchMap = List.foldr1 (Map.intersectionWith Set.union)
         --                 (Map.map Set.singleton
@@ -1125,17 +1130,17 @@ simplifyOp "fdiv" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
 simplifyOp "fdiv" _ [arg, ArgFloat 1 _, output] =
   primMove arg output
 -- Float comparisons
-simplifyOp "fcmp_eq" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_oeq" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1==n2) output
-simplifyOp "fcmp_ne" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_one" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1/=n2) output
-simplifyOp "fcmp_slt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_olt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1<n2) output
-simplifyOp "fcmp_sle" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_ole" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1<=n2) output
-simplifyOp "fcmp_sgt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_ogt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>n2) output
-simplifyOp "fcmp_sge" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_oge" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>=n2) output
 simplifyOp name flags args = PrimForeign "llvm" name flags args
 
