@@ -17,6 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install llvm-18
+        sudo apt-get install llvm-18-dev
         sudo apt-get install clang-18
         sudo apt-get install libgc-dev
         sudo apt-get install dwdiff
