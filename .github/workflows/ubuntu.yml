@@ -16,8 +16,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        sudo apt-get install llvm
-        sudo apt-get install clang
+        sudo apt-get install llvm-18
+        sudo apt-get install clang-18
         sudo apt-get install libgc-dev
         sudo apt-get install dwdiff
 
@@ -28,8 +28,8 @@ jobs:
 
     - name: Verify dependencies
       run: |
-        dpkg -s llvm
-        dpkg -s clang
+        dpkg -s llvm-18
+        dpkg -s clang-18
         dpkg -s libgc-dev
         dpkg -s dwdiff
         llc --version
