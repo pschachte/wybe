@@ -126,9 +126,9 @@ find_test(modulus##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/test_loop.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 5 x i8 ] c" is \00", align 8
-@"cstring#1" = private unnamed_addr constant [ 40 x i8 ] c"Couldn't find even number divisible by \00", align 8
-@"cstring#2" = private unnamed_addr constant [ 32 x i8 ] c"First even number divisible by \00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" is \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"Couldn't find even number divisible by \00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"First even number divisible by \00", align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 39, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 31, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

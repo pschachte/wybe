@@ -75,8 +75,8 @@ use_test()<{<<use_resource.count>>, <<wybe.io.io>>}; {<<use_resource.count>>, <<
 source_filename = "!ROOT!/final-dump/use_resource.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 18 x i8 ] c"Inner count (4): \00", align 8
-@"cstring#1" = private unnamed_addr constant [ 18 x i8 ] c"Outer count (1): \00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Inner count (4): \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"Outer count (1): \00", align 8
 @"string#2" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 

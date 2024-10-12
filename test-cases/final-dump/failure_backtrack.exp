@@ -377,25 +377,25 @@ yup(?#success##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/failure_backtrack.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 7 x i8 ] c", r = \00", align 8
-@"cstring#1" = private unnamed_addr constant [ 7 x i8 ] c", s = \00", align 8
-@"cstring#2" = private unnamed_addr constant [ 7 x i8 ] c", y = \00", align 8
-@"cstring#3" = private unnamed_addr constant [ 24 x i8 ] c"after conditional; x = \00", align 8
-@"cstring#4" = private unnamed_addr constant [ 30 x i8 ] c"after first disjunction: x = \00", align 8
-@"cstring#5" = private unnamed_addr constant [ 31 x i8 ] c"after fourth conditional; x = \00", align 8
-@"cstring#6" = private unnamed_addr constant [ 31 x i8 ] c"after second conditional; x = \00", align 8
-@"cstring#7" = private unnamed_addr constant [ 31 x i8 ] c"after second disjunction: x = \00", align 8
-@"cstring#8" = private unnamed_addr constant [ 30 x i8 ] c"after third conditional; x = \00", align 8
-@"cstring#9" = private unnamed_addr constant [ 25 x i8 ] c"before conditional: x = \00", align 8
-@"cstring#10" = private unnamed_addr constant [ 31 x i8 ] c"before first disjunction: x = \00", align 8
-@"cstring#11" = private unnamed_addr constant [ 32 x i8 ] c"before fourth conditional: x = \00", align 8
-@"cstring#12" = private unnamed_addr constant [ 32 x i8 ] c"before second conditional: x = \00", align 8
-@"cstring#13" = private unnamed_addr constant [ 32 x i8 ] c"before second disjunction: x = \00", align 8
-@"cstring#14" = private unnamed_addr constant [ 31 x i8 ] c"before third conditional: x = \00", align 8
-@"cstring#15" = private unnamed_addr constant [ 17 x i8 ] c"nope fails; x = \00", align 8
-@"cstring#16" = private unnamed_addr constant [ 15 x i8 ] c"nope succeeds!\00", align 8
-@"cstring#17" = private unnamed_addr constant [ 18 x i8 ] c"nope2 fails; x = \00", align 8
-@"cstring#18" = private unnamed_addr constant [ 16 x i8 ] c"nope2 succeeds!\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c", r = \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c", s = \00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c", y = \00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"after conditional; x = \00", align 8
+@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"after first disjunction: x = \00", align 8
+@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"after fourth conditional; x = \00", align 8
+@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"after second conditional; x = \00", align 8
+@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"after second disjunction: x = \00", align 8
+@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"after third conditional; x = \00", align 8
+@"cstring#9" = private unnamed_addr constant [ ?? x i8 ] c"before conditional: x = \00", align 8
+@"cstring#10" = private unnamed_addr constant [ ?? x i8 ] c"before first disjunction: x = \00", align 8
+@"cstring#11" = private unnamed_addr constant [ ?? x i8 ] c"before fourth conditional: x = \00", align 8
+@"cstring#12" = private unnamed_addr constant [ ?? x i8 ] c"before second conditional: x = \00", align 8
+@"cstring#13" = private unnamed_addr constant [ ?? x i8 ] c"before second disjunction: x = \00", align 8
+@"cstring#14" = private unnamed_addr constant [ ?? x i8 ] c"before third conditional: x = \00", align 8
+@"cstring#15" = private unnamed_addr constant [ ?? x i8 ] c"nope fails; x = \00", align 8
+@"cstring#16" = private unnamed_addr constant [ ?? x i8 ] c"nope succeeds!\00", align 8
+@"cstring#17" = private unnamed_addr constant [ ?? x i8 ] c"nope2 fails; x = \00", align 8
+@"cstring#18" = private unnamed_addr constant [ ?? x i8 ] c"nope2 succeeds!\00", align 8
 @"string#19" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#20" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#21" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

@@ -10,6 +10,7 @@ module ObjectInterface (extractLPVMData, getWrappedBitcode) where
 import           AST
 import Options (LogSelection(Builder))
 import           BinaryFactory
+import           Config (lpvmSectionName)
 import           Control.Monad
 import           Data.Binary
 import           Data.Binary.Get
@@ -71,7 +72,7 @@ extractLPVMDataLinux tmpDir objFile = do
     let lpvmFile = tmpDir </> modFile
     -- [objcopy] tries to write to the file even we only need read permission.
     -- We force it to write to /dev/null so it's "read-only".
-    let args = ["--dump-section", "__LPVM.__lpvm=" ++ lpvmFile] ++ [objFile]
+    let args = ["--dump-section", lpvmSectionName ++ "=" ++ lpvmFile] ++ [objFile]
                ++ ["/dev/null"]
     (exCode, _, serr) <- readCreateProcessWithExitCode (proc "objcopy" args) ""
     case exCode of

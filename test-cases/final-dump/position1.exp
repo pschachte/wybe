@@ -50,9 +50,9 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/position.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c" (\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 2 x i8 ] c",\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" (\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c")\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c",\00", align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
@@ -320,7 +320,7 @@ module top-level code > public {semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/position1.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 22 x i8 ] c"expect posA(111,112):\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"expect posA(111,112):\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 21, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external fastcc void @"position.printPosition<0>"(i64)

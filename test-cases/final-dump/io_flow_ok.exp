@@ -71,9 +71,9 @@ unknown(?#success##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/io_flow_ok.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c"OK\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 12 x i8 ] c"That's odd!\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 13 x i8 ] c"hello world!\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"OK\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"That's odd!\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"hello world!\00", align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 11, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

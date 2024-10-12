@@ -180,10 +180,10 @@ vowel_num(c##0:wybe.char, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; 
 source_filename = "!ROOT!/final-dump/cond_expr_no_else.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 11 x i8 ] c"-5:int -> \00", align 8
-@"cstring#1" = private unnamed_addr constant [ 10 x i8 ] c"5:int -> \00", align 8
-@"cstring#2" = private unnamed_addr constant [ 19 x i8 ] c"e is vowel number \00", align 8
-@"cstring#3" = private unnamed_addr constant [ 19 x i8 ] c"f is vowel number \00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"-5:int -> \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"5:int -> \00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"e is vowel number \00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"f is vowel number \00", align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#6" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

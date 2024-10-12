@@ -133,21 +133,21 @@ hypot(s1##0:wybe.float, s2##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/hypot.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 4 x i8 ] c" = \00", align 8
-@"cstring#1" = private unnamed_addr constant [ 11 x i8 ] c"area(5) = \00", align 8
-@"cstring#2" = private unnamed_addr constant [ 17 x i8 ] c"base 2 log(e) = \00", align 8
-@"cstring#3" = private unnamed_addr constant [ 12 x i8 ] c"ceil(pi) = \00", align 8
-@"cstring#4" = private unnamed_addr constant [ 17 x i8 ] c"common log(e) = \00", align 8
-@"cstring#5" = private unnamed_addr constant [ 19 x i8 ] c"cos(30 degrees) = \00", align 8
-@"cstring#6" = private unnamed_addr constant [ 11 x i8 ] c"cos(30) = \00", align 8
-@"cstring#7" = private unnamed_addr constant [ 5 x i8 ] c"e = \00", align 8
-@"cstring#8" = private unnamed_addr constant [ 13 x i8 ] c"floor(pi) = \00", align 8
-@"cstring#9" = private unnamed_addr constant [ 14 x i8 ] c"hypot(3,4) = \00", align 8
-@"cstring#10" = private unnamed_addr constant [ 14 x i8 ] c"iround(pi) = \00", align 8
-@"cstring#11" = private unnamed_addr constant [ 9 x i8 ] c"ln(e) = \00", align 8
-@"cstring#12" = private unnamed_addr constant [ 13 x i8 ] c"round(pi) = \00", align 8
-@"cstring#13" = private unnamed_addr constant [ 19 x i8 ] c"sin(30 degrees) = \00", align 8
-@"cstring#14" = private unnamed_addr constant [ 11 x i8 ] c"sin(30) = \00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" = \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"area(5) = \00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"base 2 log(e) = \00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"ceil(pi) = \00", align 8
+@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"common log(e) = \00", align 8
+@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"cos(30 degrees) = \00", align 8
+@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"cos(30) = \00", align 8
+@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"e = \00", align 8
+@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"floor(pi) = \00", align 8
+@"cstring#9" = private unnamed_addr constant [ ?? x i8 ] c"hypot(3,4) = \00", align 8
+@"cstring#10" = private unnamed_addr constant [ ?? x i8 ] c"iround(pi) = \00", align 8
+@"cstring#11" = private unnamed_addr constant [ ?? x i8 ] c"ln(e) = \00", align 8
+@"cstring#12" = private unnamed_addr constant [ ?? x i8 ] c"round(pi) = \00", align 8
+@"cstring#13" = private unnamed_addr constant [ ?? x i8 ] c"sin(30 degrees) = \00", align 8
+@"cstring#14" = private unnamed_addr constant [ ?? x i8 ] c"sin(30) = \00", align 8
 @"string#15" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#16" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#17" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

@@ -18,7 +18,8 @@ def test_case(func) -> None:
 
 def normalise(output: str) -> str:
     output = re.sub(r"@([A-Za-z_]\w*):[0-9:]*", r"@\1:nn:nn", output)
-    output = re.sub(r"\[[0-9][0-9]* x i8\]", "[?? x i8]", output)
+    output = re.sub(r"\[ [0-9][0-9]* x i8 \]", "[ ?? x i8 ]", output)
+    output = re.sub(r"target triple   =.*", r"target triple   = ???", output)
     return output
 
 

@@ -77,12 +77,12 @@ replicate1(p1##0:position.position, ?p2##2:position.position)<{<<wybe.io.io>>}; 
 source_filename = "!ROOT!/final-dump/alias3.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 31 x i8 ] c"--- After calling replicate1: \00", align 8
-@"cstring#1" = private unnamed_addr constant [ 32 x i8 ] c"--- After calling x(!p1, 555): \00", align 8
-@"cstring#2" = private unnamed_addr constant [ 24 x i8 ] c"--- Inside replicate1: \00", align 8
-@"cstring#3" = private unnamed_addr constant [ 16 x i8 ] c"expect p1(1,1):\00", align 8
-@"cstring#4" = private unnamed_addr constant [ 18 x i8 ] c"expect p1(555,1):\00", align 8
-@"cstring#5" = private unnamed_addr constant [ 16 x i8 ] c"expect p2(2,2):\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"--- After calling replicate1: \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"--- After calling x(!p1, 555): \00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside replicate1: \00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(1,1):\00", align 8
+@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(555,1):\00", align 8
+@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"expect p2(2,2):\00", align 8
 @"string#6" = private unnamed_addr constant {i64, i64} { i64 30, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#7" = private unnamed_addr constant {i64, i64} { i64 31, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#8" = private unnamed_addr constant {i64, i64} { i64 23, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
@@ -196,9 +196,9 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/position.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c" (\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 2 x i8 ] c",\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" (\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c")\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c",\00", align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

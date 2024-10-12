@@ -40,8 +40,10 @@ def main() -> None:
             # the behavior of other scripts. We should consider using
             # things like "filecmp.cmp" for portability and efficiency.
             code = subprocess.run(
-                ["diff", "-q", "-I", "^source_filename =.*",
-                    "-I", "^target triple", out_file_path, exp_file_path],
+                ["diff", "-q", 
+                    "-I", "^source_filename *=.*",
+                    "-I", "^target triple *=.*", 
+                    out_file_path, exp_file_path],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
             if code == 0:
                 print(".", end="")

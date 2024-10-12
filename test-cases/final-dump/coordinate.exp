@@ -63,8 +63,8 @@ fcopy(crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate)<{}; {}; 
 source_filename = "!ROOT!/final-dump/coordinate.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 21 x i8 ] c"expect crd1^z=8000: \00", align 8
-@"cstring#1" = private unnamed_addr constant [ 21 x i8 ] c"expect crd2^z=1000: \00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"expect crd1^z=8000: \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"expect crd2^z=1000: \00", align 8
 @"string#2" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 

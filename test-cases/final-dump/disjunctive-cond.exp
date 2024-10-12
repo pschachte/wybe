@@ -127,11 +127,11 @@ proc #cont#3 > {semipure} (7 calls)
 source_filename = "!ROOT!/final-dump/disjunctive-cond.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 9 x i8 ] c"all good\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 10 x i8 ] c"also good\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 10 x i8 ] c"more good\00", align 8
-@"cstring#3" = private unnamed_addr constant [ 8 x i8 ] c"no good\00", align 8
-@"cstring#4" = private unnamed_addr constant [ 11 x i8 ] c"still good\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"all good\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"also good\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"more good\00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"no good\00", align 8
+@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"still good\00", align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#6" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#7" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

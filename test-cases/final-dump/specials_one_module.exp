@@ -95,9 +95,9 @@ show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.
 source_filename = "!ROOT!/final-dump/specials_one_module.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 21 x i8 ] c" (should be line 28)\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 20 x i8 ] c"specials_one_module\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 25 x i8 ] c"specials_one_module:29:2\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" (should be line 28)\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"specials_one_module\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"specials_one_module:29:2\00", align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)

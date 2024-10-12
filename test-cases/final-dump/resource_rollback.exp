@@ -68,7 +68,7 @@ foo(?s##0:wybe.c_string, ?#success##0:wybe.bool, %call_source_location##0:wybe.c
 source_filename = "!ROOT!/final-dump/resource_rollback.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 23 x i8 ] c"resource_rollback:15:7\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"resource_rollback:15:7\00", align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @print_string(i64)
