@@ -124,4 +124,4 @@ test:	wybemk
 
 clean:
 	stack clean
-	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi $(SRCDIR)/Version.lhs documentation/*.pdf publications/*.pdf $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o test-cases/*.o
+	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi $(SRCDIR)/Version.lhs $(SRCDIR)/CConfig.hs documentation/*.pdf publications/*.pdf $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o test-cases/*.o
