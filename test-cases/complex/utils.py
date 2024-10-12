@@ -16,12 +16,6 @@ def test_case(func) -> None:
     TEST_CASES.append((func.__name__, filename, func))
     return func
 
-def normalise(output: str) -> str:
-    output = re.sub(r"@([A-Za-z_]\w*):[0-9:]*", r"@\1:nn:nn", output)
-    output = re.sub(r"\[ [0-9][0-9]* x i8 \]", "[ ?? x i8 ]", output)
-    output = re.sub(r"target triple   =.*", r"target triple   = ???", output)
-    return output
-
 
 class Context:
     def __init__(self, tmp_dir: str, out_file: TextIOWrapper) -> None:
@@ -106,7 +100,14 @@ class Context:
                 self.write_section("ERROR OUTPUT", r.stdout.decode("utf-8"))
                 r.check_returncode()
 
-        return (r.returncode, normalise(r.stdout.decode("utf-8")))
+        return (r.returncode, self.normalise(r.stdout.decode("utf-8")))
+    
+    def normalise(self, output: str) -> str:
+        output = re.sub(r"@([A-Za-z_]\w*):[0-9:]*", r"@\1:nn:nn", output)
+        output = re.sub(r"\[ [0-9][0-9]* x i8 \]", "[ ?? x i8 ]", output)
+        output = re.sub(r"(target triple *= *).*", r"\1???", output)
+        output = output.replace(self.tmp_dir, "!ROOT!")
+        return output
 
     def execute_program(self, exe: str, check: bool,
             input: Optional[str] = None,
