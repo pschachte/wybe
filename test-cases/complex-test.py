@@ -7,6 +7,7 @@ from complex import utils
 
 
 def main() -> None:
+    cwd = sys.argv[1]
     # set work directory
     root_path = os.path.dirname(os.path.realpath(__file__))
     os.chdir(root_path)
@@ -24,7 +25,7 @@ def main() -> None:
         exp_file_path = "./complex/exp/{}.exp".format(test_name)
         with open(out_file_path, "w") as out_file:
             with tempfile.TemporaryDirectory() as tmp_dir:
-                ctx = utils.Context(tmp_dir, out_file)
+                ctx = utils.Context(tmp_dir, cwd, out_file)
                 # execute test case
                 try:
                     test_func(ctx)

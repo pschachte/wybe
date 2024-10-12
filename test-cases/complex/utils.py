@@ -18,8 +18,9 @@ def test_case(func) -> None:
 
 
 class Context:
-    def __init__(self, tmp_dir: str, out_file: TextIOWrapper) -> None:
+    def __init__(self, tmp_dir: str, root_dir: str, out_file: TextIOWrapper) -> None:
         self.tmp_dir = tmp_dir
+        self.root_dir = root_dir
         self.out_file = out_file
         self.files_hash = defaultdict(str)
 
@@ -106,7 +107,8 @@ class Context:
         output = re.sub(r"@([A-Za-z_]\w*):[0-9:]*", r"@\1:nn:nn", output)
         output = re.sub(r"\[ [0-9][0-9]* x i8 \]", "[ ?? x i8 ]", output)
         output = re.sub(r"(target triple *= *).*", r"\1???", output)
-        output = output.replace(self.tmp_dir, "!ROOT!")
+        output = output.replace(self.tmp_dir, "!TMP!")
+        output = output.replace(self.root_dir, "!ROOT!")
         return output
 
     def execute_program(self, exe: str, check: bool,
