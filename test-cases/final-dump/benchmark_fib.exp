@@ -225,15 +225,15 @@ naive_fib1(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/benchmark_fib.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 20 x i8 ] c"Elapsed time (s):  \00", align 8
-@"cstring#1" = private unnamed_addr constant [ 20 x i8 ] c"benchmark_fib:18:21\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 19 x i8 ] c"benchmark_fib:30:2\00", align 8
-@"cstring#3" = private unnamed_addr constant [ 19 x i8 ] c"benchmark_fib:32:2\00", align 8
-@"cstring#4" = private unnamed_addr constant [ 19 x i8 ] c"benchmark_fib:35:2\00", align 8
-@"cstring#5" = private unnamed_addr constant [ 19 x i8 ] c"benchmark_fib:37:2\00", align 8
-@"cstring#6" = private unnamed_addr constant [ 19 x i8 ] c"benchmark_fib:40:2\00", align 8
-@"cstring#7" = private unnamed_addr constant [ 19 x i8 ] c"benchmark_fib:5:21\00", align 8
-@"cstring#8" = private unnamed_addr constant [ 30 x i8 ] c"n should be strictly positive\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Elapsed time (s):  \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:18:21\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:30:2\00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:32:2\00", align 8
+@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:35:2\00", align 8
+@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:37:2\00", align 8
+@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:40:2\00", align 8
+@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:5:21\00", align 8
+@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"n should be strictly positive\00", align 8
 @"string#9" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)

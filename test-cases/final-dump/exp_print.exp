@@ -40,8 +40,8 @@ module top-level code > public {semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/exp_print.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 42 x i8 ] c"print(x:string) creates a newline already\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 46 x i8 ] c"println(x:string) generates an extra newline?\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"print(x:string) creates a newline already\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"println(x:string) generates an extra newline?\00", align 8
 @"string#2" = private unnamed_addr constant {i64, i64} { i64 41, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 45, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 

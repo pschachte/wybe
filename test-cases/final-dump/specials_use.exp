@@ -171,10 +171,10 @@ module top-level code > public {semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/specials_use.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 75 x i8 ] c"!ROOT!/final-dump/specials_use.wybe\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 79 x i8 ] c"!ROOT!/final-dump/specials_use.wybe:8:2\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 13 x i8 ] c"specials_use\00", align 8
-@"cstring#3" = private unnamed_addr constant [ 17 x i8 ] c"specials_use:7:2\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"!ROOT!/final-dump/specials_use.wybe\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"!ROOT!/final-dump/specials_use.wybe:8:2\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"specials_use\00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"specials_use:7:2\00", align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @print_string(i64)

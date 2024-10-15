@@ -74,7 +74,7 @@ beer99#cont#2(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/proc_beer.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 29 x i8 ] c" bottles of beer on the wall\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" bottles of beer on the wall\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 28, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)

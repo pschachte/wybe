@@ -139,13 +139,13 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@multi_specz_reverse.81 =    constant [29 x i8] c"============================\00"
+@multi_specz_reverse.81 =    constant [?? x i8] c"============================\00"
 
 
 declare external ccc  void @print_int(i64)    
 
 
-@multi_specz_reverse.90 =    constant [2 x i8] c" \00"
+@multi_specz_reverse.90 =    constant [?? x i8] c" \00"
 
 
 declare external ccc  ptr @wybe_malloc(i32)    
@@ -259,7 +259,7 @@ entry:
   %"1#foo##1" = tail call fastcc  i64  @"multi_specz_reverse.list_reverse_helper<0>[04d1467a4d]"(i64  %75, i64  0)  
   tail call fastcc  void  @"multi_specz_reverse.list_print<0>"(i64  %"1#foo##1")  
   call ccc  void  @putchar(i8  10)  
-  %82 = ptrtoint ptr getelementptr inbounds ([29 x i8], ptr @multi_specz_reverse.81, i32 0, i32 0) to i64 
+  %82 = ptrtoint ptr getelementptr inbounds ([?? x i8], ptr @multi_specz_reverse.81, i32 0, i32 0) to i64 
   call ccc  void  @print_string(i64  %82)  
   call ccc  void  @putchar(i8  10)  
   %"1#foo##2" = tail call fastcc  i64  @"multi_specz_reverse.list_reverse_helper<0>"(i64  %"1#foo##1", i64  0)  
@@ -284,7 +284,7 @@ if.then:
   %88 = getelementptr  i64, ptr %87, i64 0 
   %89 = load  i64, ptr %88 
   call ccc  void  @print_int(i64  %85)  
-  %91 = ptrtoint ptr getelementptr inbounds ([2 x i8], ptr @multi_specz_reverse.90, i32 0, i32 0) to i64 
+  %91 = ptrtoint ptr getelementptr inbounds ([?? x i8], ptr @multi_specz_reverse.90, i32 0, i32 0) to i64 
   call ccc  void  @print_string(i64  %91)  
   tail call fastcc  void  @"multi_specz_reverse.list_print<0>"(i64  %89)  
   ret void 

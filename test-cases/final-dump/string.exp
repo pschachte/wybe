@@ -191,21 +191,21 @@ test_index(s##0:wybe.string, i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; 
 source_filename = "!ROOT!/final-dump/string.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 1 x i8 ] c"\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 32 x i8 ] c"\0ATESTING CONVERSION TO c_string\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 18 x i8 ] c"\0ATESTING INDEXING\00", align 8
-@"cstring#3" = private unnamed_addr constant [ 15 x i8 ] c"\0ATESTING LOOPS\00", align 8
-@"cstring#4" = private unnamed_addr constant [ 13 x i8 ] c"OUT OF RANGE\00", align 8
-@"cstring#5" = private unnamed_addr constant [ 21 x i8 ] c"TESTING CONSTRUCTION\00", align 8
-@"cstring#6" = private unnamed_addr constant [ 2 x i8 ] c"a\00", align 8
-@"cstring#7" = private unnamed_addr constant [ 3 x i8 ] c"ab\00", align 8
-@"cstring#8" = private unnamed_addr constant [ 4 x i8 ] c"abc\00", align 8
-@"cstring#9" = private unnamed_addr constant [ 9 x i8 ] c"abcdefgh\00", align 8
-@"cstring#10" = private unnamed_addr constant [ 10 x i8 ] c"abcdefghi\00", align 8
-@"cstring#11" = private unnamed_addr constant [ 13 x i8 ] c"abcdefghijkl\00", align 8
-@"cstring#12" = private unnamed_addr constant [ 27 x i8 ] c"abcdefghijklmnopqrstuvwxyz\00", align 8
-@"cstring#13" = private unnamed_addr constant [ 3 x i8 ] c"cd\00", align 8
-@"cstring#14" = private unnamed_addr constant [ 4 x i8 ] c"efg\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"\0ATESTING CONVERSION TO c_string\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"\0ATESTING INDEXING\00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"\0ATESTING LOOPS\00", align 8
+@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"OUT OF RANGE\00", align 8
+@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"TESTING CONSTRUCTION\00", align 8
+@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"a\00", align 8
+@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"ab\00", align 8
+@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"abc\00", align 8
+@"cstring#9" = private unnamed_addr constant [ ?? x i8 ] c"abcdefgh\00", align 8
+@"cstring#10" = private unnamed_addr constant [ ?? x i8 ] c"abcdefghi\00", align 8
+@"cstring#11" = private unnamed_addr constant [ ?? x i8 ] c"abcdefghijkl\00", align 8
+@"cstring#12" = private unnamed_addr constant [ ?? x i8 ] c"abcdefghijklmnopqrstuvwxyz\00", align 8
+@"cstring#13" = private unnamed_addr constant [ ?? x i8 ] c"cd\00", align 8
+@"cstring#14" = private unnamed_addr constant [ ?? x i8 ] c"efg\00", align 8
 @"string#15" = private unnamed_addr constant {i64, i64} { i64 0, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#16" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
 @"string#17" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8

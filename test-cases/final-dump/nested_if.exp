@@ -60,10 +60,10 @@ nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/nested_if.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 21 x i8 ] c"one thousand and one\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 6 x i8 ] c"other\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 4 x i8 ] c"two\00", align 8
-@"cstring#3" = private unnamed_addr constant [ 5 x i8 ] c"zero\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"one thousand and one\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"other\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"two\00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"zero\00", align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#6" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

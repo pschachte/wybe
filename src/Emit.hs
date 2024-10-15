@@ -241,7 +241,8 @@ makeExec :: [FilePath]          -- Object Files
 makeExec ofiles target = do
     let options = "-no-pie" : Config.linkerDeadStripArgs
     -- let options = linkerDeadStripArgs
-    let args = options ++ ofiles ++ ["-o", target]
+    let args = List.filter (not . List.null) 
+             $ options ++ ofiles ++ ["-o", target]
     logEmit $ "Generating final executable with command line: cc "
               ++ unwords args
     (exCode, _, serr) <- liftIO $

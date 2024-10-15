@@ -62,9 +62,9 @@ bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/alias_data.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 12 x i8 ] c"intro to cs\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 9 x i8 ] c"student1\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 9 x i8 ] c"student2\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"intro to cs\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"student1\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"student2\00", align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 11, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
@@ -209,10 +209,10 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/student.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 24 x i8 ] c"Declarative Programming\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 14 x i8 ] c"course code: \00", align 8
-@"cstring#2" = private unnamed_addr constant [ 14 x i8 ] c"course name: \00", align 8
-@"cstring#3" = private unnamed_addr constant [ 13 x i8 ] c"student id: \00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Declarative Programming\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"course code: \00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"course name: \00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"student id: \00", align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 23, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#6" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

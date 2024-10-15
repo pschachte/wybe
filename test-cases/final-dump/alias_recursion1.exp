@@ -82,15 +82,15 @@ if_test(a##0:position.position, b##0:position.position, ?r##0:position.position)
 source_filename = "!ROOT!/final-dump/alias_recursion1.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 58 x i8 ] c"--- after calling if_test, pa and pb should be the same: \00", align 8
-@"cstring#1" = private unnamed_addr constant [ 23 x i8 ] c"--- before proc call: \00", align 8
-@"cstring#2" = private unnamed_addr constant [ 39 x i8 ] c"--- expected result to be same as pb: \00", align 8
-@"cstring#3" = private unnamed_addr constant [ 18 x i8 ] c"--- modify pa^x: \00", align 8
-@"cstring#4" = private unnamed_addr constant [ 22 x i8 ] c"expect pa(-1000,101):\00", align 8
-@"cstring#5" = private unnamed_addr constant [ 20 x i8 ] c"expect pa(100,101):\00", align 8
-@"cstring#6" = private unnamed_addr constant [ 22 x i8 ] c"expect pb(-200,-201):\00", align 8
-@"cstring#7" = private unnamed_addr constant [ 28 x i8 ] c"expect r still (-200,-201):\00", align 8
-@"cstring#8" = private unnamed_addr constant [ 21 x i8 ] c"expect r(-200,-201):\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"--- after calling if_test, pa and pb should be the same: \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"--- before proc call: \00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"--- expected result to be same as pb: \00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"--- modify pa^x: \00", align 8
+@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"expect pa(-1000,101):\00", align 8
+@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"expect pa(100,101):\00", align 8
+@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"expect pb(-200,-201):\00", align 8
+@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"expect r still (-200,-201):\00", align 8
+@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"expect r(-200,-201):\00", align 8
 @"string#9" = private unnamed_addr constant {i64, i64} { i64 57, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#10" = private unnamed_addr constant {i64, i64} { i64 22, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#11" = private unnamed_addr constant {i64, i64} { i64 38, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
@@ -214,9 +214,9 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/position.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c" (\00", align 8
-@"cstring#1" = private unnamed_addr constant [ 2 x i8 ] c")\00", align 8
-@"cstring#2" = private unnamed_addr constant [ 2 x i8 ] c",\00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" (\00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c")\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c",\00", align 8
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8

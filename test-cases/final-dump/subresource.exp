@@ -36,7 +36,7 @@ module top-level code > public {semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/subresource.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 7 x i8 ] c"res = \00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"res = \00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)

@@ -199,10 +199,7 @@ llvmToObjectCommand llFile oFile options =
 -- | The section name of the LPVM object file section.  This includes the
 -- segment name, as well, and the format varies depending on object file format.
 lpvmSectionName :: String
-lpvmSectionName = case buildOS of
-    OSX   -> "__LPVM,__lpvm"
-    Linux -> "__LPVM.__lpvm"
-    os    -> error $ "Unsupported OS: " ++ show os
+lpvmSectionName = "__LPVM,__lpvm"
 
 
 -- | Remove the lpvm section from the given file. It's only effective on Linux,
@@ -212,7 +209,7 @@ removeLPVMSection target =
     case buildOS of
         OSX   -> return $ Right ()
         Linux -> do
-            let args = ["--remove-section", "__LPVM.__lpvm", target]
+            let args = ["--remove-section", lpvmSectionName, target]
             (exCode, _, serr) <-
                     readCreateProcessWithExitCode (proc "objcopy" args) ""
             case exCode of

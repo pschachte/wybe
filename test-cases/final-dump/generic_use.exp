@@ -577,7 +577,7 @@ reverse1(lst##0:generic_list(T) <{}; {}; {0}>, suffix##0:generic_list(T) <{}; {}
 source_filename = "!ROOT!/final-dump/generic_use.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ 3 x i8 ] c", \00", align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
