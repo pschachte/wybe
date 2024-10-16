@@ -130,6 +130,7 @@ emitNativeAssemblyFile m f = do
     let (cmd,cmdLine) =
             llvmToNativeAssemblerCommand llFilename filename userOptions
     runOSCmd cmd cmdLine
+    lift $ removeFile llFilename
 
 
 -- | Compile the specified .ll file to the specified output file, using the
