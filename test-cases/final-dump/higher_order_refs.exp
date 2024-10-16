@@ -147,22 +147,26 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"higher_order_refs.<0>"() {
-  %"tmp#0##0" = tail call fastcc double @"higher_order_refs.app<0>"(ptr @"closure#0", double 1.0)
+  %"tmp#34##0" = tail call fastcc i64 @"higher_order_refs.app<0>"(i64 ptrtoint( ptr @"closure#0" to i64 ), i64 bitcast( double 1.0 to i64 ))
+  %"tmp#0##0" = bitcast i64 %"tmp#34##0" to double
   call ccc void @print_float(double %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  %"tmp#1##0" = tail call fastcc double @"higher_order_refs.app<0>"(ptr @"closure#1", double 1.0)
+  %"tmp#35##0" = tail call fastcc i64 @"higher_order_refs.app<0>"(i64 ptrtoint( ptr @"closure#1" to i64 ), i64 bitcast( double 1.0 to i64 ))
+  %"tmp#1##0" = bitcast i64 %"tmp#35##0" to double
   call ccc void @print_float(double %"tmp#1##0")
   call ccc void @putchar(i8 10)
-  %"tmp#3##0" = tail call fastcc double @"higher_order_refs.app<0>"(ptr @"closure#2", double 1.0)
+  %"tmp#36##0" = tail call fastcc i64 @"higher_order_refs.app<0>"(i64 ptrtoint( ptr @"closure#2" to i64 ), i64 bitcast( double 1.0 to i64 ))
+  %"tmp#3##0" = bitcast i64 %"tmp#36##0" to double
   call ccc void @print_float(double %"tmp#3##0")
   call ccc void @putchar(i8 10)
-  %"tmp#5##0" = tail call fastcc double @"higher_order_refs.app<0>"(ptr @"closure#3", double 1.0)
+  %"tmp#37##0" = tail call fastcc i64 @"higher_order_refs.app<0>"(i64 ptrtoint( ptr @"closure#3" to i64 ), i64 bitcast( double 1.0 to i64 ))
+  %"tmp#5##0" = bitcast i64 %"tmp#37##0" to double
   call ccc void @print_float(double %"tmp#5##0")
   call ccc void @putchar(i8 10)
-  %"tmp#6##0" = tail call fastcc i64 @"higher_order_refs.app<0>"(ptr @"closure#4", i64 1)
+  %"tmp#6##0" = tail call fastcc i64 @"higher_order_refs.app<0>"(i64 ptrtoint( ptr @"closure#4" to i64 ), i64 1)
   call ccc void @print_int(i64 %"tmp#6##0")
   call ccc void @putchar(i8 10)
-  %"tmp#8##0" = tail call fastcc i64 @"higher_order_refs.app<0>"(ptr @"closure#5", i64 1)
+  %"tmp#8##0" = tail call fastcc i64 @"higher_order_refs.app<0>"(i64 ptrtoint( ptr @"closure#5" to i64 ), i64 1)
   call ccc void @print_int(i64 %"tmp#8##0")
   call ccc void @putchar(i8 10)
   ret void

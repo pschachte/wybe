@@ -240,10 +240,10 @@ define external fastcc void @"higher_order_tests.<0>"() {
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#1<0>"(ptr @"closure#10")
+  tail call fastcc void @"higher_order_tests.#cont#1<0>"(i64 ptrtoint( ptr @"closure#10" to i64 ))
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#1<0>"(ptr @"closure#10")
+  tail call fastcc void @"higher_order_tests.#cont#1<0>"(i64 ptrtoint( ptr @"closure#10" to i64 ))
   ret void
 }
 
@@ -318,10 +318,10 @@ define external fastcc void @"higher_order_tests.#cont#4<0>"() {
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#5<0>"(ptr @"closure#11")
+  tail call fastcc void @"higher_order_tests.#cont#5<0>"(i64 ptrtoint( ptr @"closure#11" to i64 ))
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#5<0>"(ptr @"closure#11")
+  tail call fastcc void @"higher_order_tests.#cont#5<0>"(i64 ptrtoint( ptr @"closure#11" to i64 ))
   ret void
 }
 
