@@ -211,18 +211,18 @@ define external fastcc i64 @"higher_order_append.#anon#1<0>"(i64 %"cons##0", i64
   ret i64 %"tmp#16##0"
 }
 
-define external fastcc i64 @"higher_order_append.#anon#1<1>"(i64 %"#env##0", i64 %"anon#1#1##0") {
+define external fastcc i64 @"higher_order_append.#anon#1<1>"(i64 %"#env##0", i64 %"generic#anon#1#1##0") {
   %"tmp#2##0" = add i64 %"#env##0", 8
   %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"cons##0" = load i64, ptr %"tmp#3##0"
+  %"generic#cons##0" = load i64, ptr %"tmp#3##0"
   %"tmp#4##0" = alloca i8, i64 8, align 8
-  call fastcc void @"higher_order_append.append<0>"(i64 %"anon#1#1##0", i64 %"cons##0", ptr %"tmp#4##0")
-  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
-  ret i64 %"tmp#5##0"
+  call fastcc void @"higher_order_append.append<0>"(i64 %"generic#anon#1#1##0", i64 %"generic#cons##0", ptr %"tmp#4##0")
+  %"anon#1#2##0" = load i64, ptr %"tmp#4##0"
+  ret i64 %"anon#1#2##0"
 }
 
-define external fastcc void @"higher_order_append.#closure#1<0>"(i64 %"#env##0", i64 %"l##0") {
-  tail call fastcc void @"wybe.list.print<0>"(i64 ptrtoint( ptr @"closure#1" to i64 ), i64 %"l##0")
+define external fastcc void @"higher_order_append.#closure#1<0>"(i64 %"#env##0", i64 %"generic#l##0") {
+  tail call fastcc void @"wybe.list.print<0>"(i64 ptrtoint( ptr @"closure#1" to i64 ), i64 %"generic#l##0")
   ret void
 }
 
@@ -254,7 +254,7 @@ define external fastcc void @"higher_order_append.print_list_of_ints<0>"(i64 %"l
   ret void
 }
 
-define external fastcc void @"higher_order_append.print_list_of_ints#closure#1<0>"(i64 %"#env##0", i64 %"x##0") {
-  call ccc void @print_int(i64 %"x##0")
+define external fastcc void @"higher_order_append.print_list_of_ints#closure#1<0>"(i64 %"#env##0", i64 %"generic#x##0") {
+  call ccc void @print_int(i64 %"generic#x##0")
   ret void
 }

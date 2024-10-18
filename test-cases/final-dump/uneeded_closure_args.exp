@@ -65,8 +65,8 @@ define external fastcc void @"uneeded_closure_args.<0>"() {
   ret void
 }
 
-define external fastcc i64 @"uneeded_closure_args.#closure#1<0>"(i64 %"#env##0", i64 %"b##0") {
-  ret i64 %"b##0"
+define external fastcc i64 @"uneeded_closure_args.#closure#1<0>"(i64 %"#env##0", i64 %"generic#b##0") {
+  ret i64 %"generic#b##0"
 }
 
 define external fastcc i64 @"uneeded_closure_args.call<0>"(i64 %"f##0", i64 %"a##0") {

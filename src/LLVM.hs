@@ -558,9 +558,15 @@ writeProcLLVM def procNum =
     case procImpln def of
         ProcDefPrim {procImplnProcSpec=pspec, procImplnProto=proto,
                      procImplnBody=body, procImplnSpeczBodies=specz} -> do
-            let (proto', body') = if isClosureVariant $ procVariant def
-                        then closeClosure proto body
-                        else (proto, body)
+            (proto', body') <- if isClosureVariant $ procVariant def
+                        then do
+                            logLLVM $ "Compiling closure variant for proc "
+                                        ++ showProcName (procName def) ++ ":"
+                            let (p',b') = closeClosure proto body
+                            logLLVM $ "Params: " ++ show p'
+                            logLLVM $ "Body  : " ++ show b'
+                            return (p',b')
+                        else return (proto, body)
             let params = primProtoParams proto'
             let tmpCount = procTmpCount def
             -- XXX overriding procSpeczVersion should not be needed, but it is!
@@ -590,10 +596,13 @@ writeProcLLVM def procNum =
 closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
 closeClosure proto@PrimProto{primProtoParams=params}
              body@ProcBody{bodyPrims=prims} =
-    (proto{primProtoParams=envPrimParam:actualParams},
-     body{bodyPrims=unpacker ++ prims})
+    (proto{primProtoParams=envPrimParam:genericParams},
+     body{bodyPrims=unpacker ++ inwardConverter ++ prims ++ outwardConverter})
   where
     (free, actualParams) = List.partition ((==Free) . primParamFlowType) params
+    genericParams = [p {primParamType=AnyType
+                       ,primParamName=genericVarName (primParamName p)}
+                    | p <- actualParams]
     neededFree = List.filter (not . paramInfoUnneeded
                                   . primParamInfo) free
     unpacker = Unplaced <$>
@@ -601,8 +610,23 @@ closeClosure proto@PrimProto{primProtoParams=params}
                              (ArgInt (i * toInteger wordSizeBytes) intType)
                              (ArgInt (toInteger wordSize) intType)
                              (ArgInt 0 intType)
-                             (ArgVar nm ty FlowOut Free False)
-                | (i,PrimParam nm ty _ _ _) <- zip [1..] neededFree ]
+                             (ArgVar genName AnyType FlowOut Free False)
+                | (i,PrimParam nm ty _ _ _) <- zip [1..] neededFree
+                , let genName = genericVarName nm]
+    inwardConverter = Unplaced <$>
+                [ PrimForeign "llvm" "move" [] [
+                    ArgVar (genericVarName nm) AnyType FlowIn Ordinary False,
+                    ArgVar nm ty FlowOut Ordinary False]
+                | PrimParam nm ty FlowIn _ _ <- actualParams ++ neededFree ]
+    outwardConverter = Unplaced <$>
+                [ PrimForeign "llvm" "move" [] [
+                    ArgVar nm ty FlowIn Ordinary False,
+                    ArgVar (genericVarName nm) AnyType FlowOut Ordinary False]
+                | PrimParam nm ty FlowOut _ _ <- actualParams ]
+
+-- | Create a name for the generic type version of a variable/parameter
+genericVarName :: PrimVarName -> PrimVarName
+genericVarName p@PrimVarName{primVarName=v} = p {primVarName="generic#" ++ v}
 
 
 -- | Write out the LLVM code for a single LPVM proc specialisation (including no
@@ -1225,8 +1249,8 @@ llvmAssignResult notAVar instr = do
 -- necessary.
 llvmAssignConvertedResults :: [PrimArg] -> [TypeRepresentation] -> String
                            -> LLVM ()
-llvmAssignConvertedResults [] [] instr = llvmPutStrLnIndented instr
-llvmAssignConvertedResults [arg] [actualRep] instr =
+llvmAssignConvertedResults [] _ instr = llvmPutStrLnIndented instr
+llvmAssignConvertedResults [arg] (actualRep:_) instr =
      llvmAssignConvertedResult arg actualRep instr
 llvmAssignConvertedResults multiOuts multiReps instr = do
     tuple <- llvmLocalName <$> makeTemp
@@ -1547,7 +1571,7 @@ typeConvert fromArg toArg = do
     logLLVM $ "typeConvert " ++ fromVal ++ " from " ++ show fromTy
                 ++ " to " ++ show toTy
     case toArg of
-        ArgVar{argVarName=varName} | fromTy == toTy ->
+        ArgVar{argVarName=varName} | equivLLTypes fromTy toTy ->
             renameVariable varName fromVal $ llvmTypeRep fromTy
         _ ->
             llvmAssignResult toArg

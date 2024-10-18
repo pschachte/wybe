@@ -5747,23 +5747,19 @@ define external fastcc i1 @"multictr.perhaps.=<0>"(i64 %"#left##0", i64 %"#right
 }
 
 define external fastcc i64 @"multictr.perhaps.content<0>"(i64 %"#rec##0") {
-  %"tmp#0##0" = bitcast i64 %"#rec##0" to i64
-  ret i64 %"tmp#0##0"
+  ret i64 %"#rec##0"
 }
 
 define external fastcc i64 @"multictr.perhaps.content<1>"(i64 %"#field##0") {
-  %"tmp#0##0" = bitcast i64 %"#field##0" to i64
-  ret i64 %"tmp#0##0"
+  ret i64 %"#field##0"
 }
 
 define external fastcc i64 @"multictr.perhaps.perhaps<0>"(i64 %"content##0") {
-  %"tmp#0##0" = bitcast i64 %"content##0" to i64
-  ret i64 %"tmp#0##0"
+  ret i64 %"content##0"
 }
 
 define external fastcc i64 @"multictr.perhaps.perhaps<1>"(i64 %"#result##0") {
-  %"tmp#0##0" = bitcast i64 %"#result##0" to i64
-  ret i64 %"tmp#0##0"
+  ret i64 %"#result##0"
 }
 
 define external fastcc i1 @"multictr.perhaps.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
