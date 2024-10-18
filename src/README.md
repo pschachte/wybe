@@ -25,13 +25,11 @@ The source files in this directory and their purposes are:
 | [AliasAnalysis.hs](#AliasAnalysis) | Alias analysis for a single module |
 | [Analysis.hs](#Analysis) | Entry point of all kinds of analysis for a single module |
 | [BinaryFactory.hs](#BinaryFactory) | Deriving AST Types to be Binary instances |
-| [Blocks.hs](#Blocks) | Transform a clausal form (LPVM) module to LLVM |
 | [BodyBuilder.hs](#BodyBuilder) | A monad to build up a procedure Body, with copy propagation |
 | [Builder.hs](#Builder) | Handles compilation at the module level. |
-| [CConfig.hs](#CConfig) |  |
+| [CConfig.hs](#CConfig) | Relate C types to Wybe types for foreign interface |
 | [Callers.hs](#Callers) | Find all callers for each proc and count static calls per caller |
 | [Clause.hs](#Clause) | Convert Wybe code to clausal (LPVM) form |
-| [Codegen.hs](#Codegen) | Generate and emit LLVM from basic blocks of a module |
 | [Config.hs](#Config) | Configuration for wybe compiler |
 | [Emit.hs](#Emit)     | Emit LLVM code |
 | [Expansion.hs](#Expansion) | Replace certain procedure calls with others |
@@ -68,8 +66,6 @@ The source files in this directory and their purposes are:
 ## Analysis <a id=Analysis></a>
 
 ## BinaryFactory <a id=BinaryFactory></a>
-
-## Blocks <a id=Blocks></a>
 
 ## BodyBuilder <a id=BodyBuilder></a>
 
@@ -258,8 +254,6 @@ order, we call compileModSCC, which does the following:
 
 ## Clause <a id=Clause></a>
 
-## Codegen <a id=Codegen></a>
-
 ## Config <a id=Config></a>
 
 ## Emit <a id=Emit></a>
@@ -297,27 +291,27 @@ transformed to f(x,y,?t); p(!t,z); f(!x,y,t).
 # Generating LLVM code
 
 We generate a `.ll` text file directly for each Wybe `.wybe` file, compiling
-this as necessary to build `.o`, `.bc` or executable files.  For each
+this as necessary to build `.o`, `.bc` `.s`, or executable files.  For each
 generated `.ll` file, we produce the following, in order:
 
 * **Prologue** — contains an introductory comment and any configuration info
-   needed for LLVM.
+  needed for LLVM.
 
 * **Constants** — LLVM definitions of the manifest constants used in this
-    module; mostly used for strings.
+  module; mostly used for strings.
 
 * **Global variables** —  LLVM declarations of the global variables used to
-   implement the resources defined in this module.
+  implement the resources defined in this module.
 
-* **Externs** — Extern declarations for all symbols used, but not defined, in
- this module; this includes imported Wybe procedures, C functions,  and
-   global variables.
+* **Externs** — Extern declarations for all symbols used, but not defined,
+  in this module; this includes imported Wybe procedures, C functions,  and
+  global variables.
 
 * **Definitions** — Definitions of the procs of this module.
 
 * **Exports** — Everything needed by the Wybe compiler to compile users of
- this module; currently this is represented as a serialisation of the Module
- data structure, placed in the LLVM section.
+  this module; currently this is represented as a serialisation of the
+  Module data structure, placed in the LLVM section.
 
 
 ## LastCallAnalysis <a id=LastCallAnalysis></a>

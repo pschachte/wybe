@@ -43,7 +43,7 @@ import Distribution.TestSuite (TestInstance(name))
 -- # Generating LLVM code
 -- 
 -- We generate a `.ll` text file directly for each Wybe `.wybe` file, compiling
--- this as necessary to build `.o`, `.bc` or executable files.  For each
+-- this as necessary to build `.o`, `.bc` `.s`, or executable files.  For each
 -- generated `.ll` file, we produce the following, in order:
 -- 
 --  * **Prologue** — contains an introductory comment and any configuration info

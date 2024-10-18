@@ -86,7 +86,8 @@ doc:	src/README.md
 
 
 # Assemble README markdown source file automatically
-src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
+src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro \
+		src/Compiler.png src/Detail.png
 	cat src/README.md.intro > "$@"
 
 	printf "The source files in this directory and their purposes are:\n\n" >> "$@"
