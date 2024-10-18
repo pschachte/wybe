@@ -12,12 +12,10 @@ import           AST
 import           Control.Monad
 import           Crypto.Hash
 import           Data.Binary          as B
--- import qualified Data.ByteString.Char8 as BL
 import           Config               (magicVersion)
 import           UnivSet
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.List            as List
--- import qualified LLVM.AST             as LLVMAST
 import           Text.Parsec.Pos      (SourcePos, newPos, sourceColumn,
                                        sourceLine, sourceName)
 import           Util
@@ -93,18 +91,6 @@ instance Binary SourcePos where
                put $ sourceColumn pos
 
   get = liftM3 newPos get get get
-
-
--- instance Binary LLVMAST.Definition where
---   put = put . show
---   get = do def <- get
---            return (read def :: LLVMAST.Definition)
-
--- instance Binary LLVMAST.Module where
---   put = put . show
---   get = do def <- get
---            return (read def :: LLVMAST.Module)
-
 
 
 -- * Encoding

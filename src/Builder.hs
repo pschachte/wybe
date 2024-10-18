@@ -194,8 +194,6 @@ module Builder (buildTargets) where
 import           Analysis
 import           AST
 import           ASTShow                   (logDump, logDumpWith)
--- import           Blocks                    (blockTransformModule,
---                                             concatLLVMASTModules)
 import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
@@ -239,7 +237,6 @@ import           Text.Parsec.Error
 import           BinaryFactory
 import           LLVM                      (writeLLVM)
 import qualified Data.ByteString.Char8 as BS
--- import qualified LLVM.AST              as LLVMAST
 
 import           Debug.Trace
 import LastCallAnalysis (lastCallAnalyseMod)
@@ -1053,7 +1050,6 @@ buildExecutable orderedSCCs targetMod target = do
             let tmpMainOFile = tmpDir </> "tmpMain.o"
             -- main module only contain a single proc that doesn't have a specz
             -- version, we build it first.
-            -- blockTransformModule mainMod
             stopOnError $ "translating " ++ showModSpecs [mainMod]
             emitObjectFile mainMod tmpMainOFile
 

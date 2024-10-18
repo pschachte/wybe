@@ -20,7 +20,6 @@ import Control.Monad
 import Control.Monad.Trans (lift,liftIO)
 import Control.Monad.Trans.State
 import System.IO
--- import LLVM.Pretty (ppllvm)
 import qualified Data.Text.Lazy as TL
 
 

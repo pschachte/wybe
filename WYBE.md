@@ -2303,7 +2303,7 @@ declaration has the form:
 
 where *rep* has one of these forms:
 
-- `address`
+- `pointer`
  the type is the address of a Wybe data structure.  Foreign code should not
 treat this as an ordinary pointer.
 - `opaque`
