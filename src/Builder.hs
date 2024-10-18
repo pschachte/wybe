@@ -194,8 +194,6 @@ module Builder (buildTargets) where
 import           Analysis
 import           AST
 import           ASTShow                   (logDump, logDumpWith)
-import           Blocks                    (blockTransformModule,
-                                            concatLLVMASTModules)
 import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
@@ -237,11 +235,12 @@ import           Util                      (sccElts, useLocalCacheFileIfPossible
 import           Snippets
 import           Text.Parsec.Error
 import           BinaryFactory
+import           LLVM                      (writeLLVM)
 import qualified Data.ByteString.Char8 as BS
-import qualified LLVM.AST              as LLVMAST
 
 import           Debug.Trace
 import LastCallAnalysis (lastCallAnalyseMod)
+import Data.Ord (comparing, Down (..))
 
 ------------------------ Handling dependencies ------------------------
 
@@ -251,10 +250,7 @@ buildTargets targets = do
     mapM_ buildTarget targets
     showMessages
     stopOnError "building outputs"
-    dumpOpt <- option optDumpOptLLVM
-    let dumper = if dumpOpt then logDumpWith ((Just <$>) . extractLLVM)
-                            else logDump
-    dumper FinalDump FinalDump "EVERYTHING"
+    logDumpWith writeLLVM FinalDump FinalDump "EVERYTHING"
 
 
 
@@ -280,7 +276,7 @@ buildTarget target = do
                        ++ " Module: " ++ showModSpec modspec
             -- target should be in the working directory, lib dir will be added
             -- later
-            depGraph <- loadAllNeededModules modspec True 
+            depGraph <- loadAllNeededModules modspec True
                         (tType == ExecutableFile) [(dir,False)]
 
             -- topological sort (bottom-up)
@@ -328,6 +324,8 @@ buildTarget target = do
                             (emitMod emitBitcodeFile bitcodeExtension) targets
                         AssemblyFile -> mapM_
                             (emitMod emitAssemblyFile assemblyExtension) targets
+                        NativeAssemblyFile -> mapM_
+                            (emitMod emitNativeAssemblyFile nativeAssemblyExtension) targets
                         -- ArchiveFile -> do
                         --     mapM_ (uncurry emitObjectFile) targets
                         --     buildArchive target
@@ -360,10 +358,10 @@ loadAllNeededModules modspec isTarget isExec possDirs = do
     let possDirs' = if isTarget
         then possDirs ++ ((,True) <$> optLibDirs opts)
         else possDirs
-    mods' <- if isExec 
+    mods' <- if isExec
         then do
             cmdLineMods <- loadModuleIfNeeded force cmdLineModSpec possDirs'
-            return $ nub $ cmdLineMods ++ mods 
+            return $ nub $ cmdLineMods ++ mods
         else return mods
     logBuild $ "Loading module " ++ showModSpec modspec
                ++ " ... got " ++ showModSpecs mods'
@@ -653,7 +651,7 @@ loadLPVMFromObjFile objFile required = do
         Left err -> return $ Left $ "Error decoding object file data: " ++ err
         Right modBS -> do
             logBuild "No error decoding object file data."
-            logBuild $ "Extracted LPVM data"
+            logBuild "Extracted LPVM data"
             (List.map (\m -> m { modOrigin = objFile } ) <$>)
               <$> decodeModule required modBS
 
@@ -783,7 +781,7 @@ prepareToCompileModSCC modSCC = do
                     Error <!> "Source: " ++ src ++ " has been changed during "
                               ++ "the compilation."
                 else
-                    loadModuleFromSrcFile rootM src Nothing >> return ()
+                    void (loadModuleFromSrcFile rootM src Nothing)
             else Error <!>
                     "Unable to find corresponding source for object: " ++ obj
                     ++ ". Failed to reload modules:" ++ showModSpecs ms
@@ -1024,7 +1022,7 @@ buildExecutable orderedSCCs targetMod target = do
     --     depends = sortOn (modTopoOrder topoMap . fst) dependsUnsorted
 
     -- order each SCC such that submodules come before their parents
-    let orderedSCCs' = List.map (reverse . sort) orderedSCCs
+    let orderedSCCs' = List.map (sortBy (comparing Data.Ord.Down)) orderedSCCs
     let depends = concat orderedSCCs'
     if "" `elem` procs || "<0>" `elem` procs
         then do
@@ -1052,7 +1050,6 @@ buildExecutable orderedSCCs targetMod target = do
             let tmpMainOFile = tmpDir </> "tmpMain.o"
             -- main module only contain a single proc that doesn't have a specz
             -- version, we build it first.
-            blockTransformModule mainMod
             stopOnError $ "translating " ++ showModSpecs [mainMod]
             emitObjectFile mainMod tmpMainOFile
 
@@ -1088,25 +1085,28 @@ emitObjectFilesIfNeeded depends = do
     logBuild $ "Unchanged Set: " ++ show unchangedSet
     mapM (\m -> do
         reenterModule m
-        -- package (directory mod) won't be included in "depends", no need to
-        -- handle it
-        subMods <- Map.elems <$> getModuleImplementationField modSubmods
-        source <- getSource
-        let objFile = source -<.> objectExtension
-        logBuild $ "Ready to emit module: " ++ showModSpec m ++
-                    " with sub-modules: " ++ showModSpecs subMods
-        let changed = List.any (`Set.notMember` unchangedSet) (m:subMods)
-        if changed
-        then do
-            logBuild $ "emitting to: " ++ objFile
-            emitObjectFile m objFile
-        else
-            logBuild $ "unchanged, skip it: " ++ objFile
-        reexitModule
+        rootMod <- getModule modRootModSpec
+        if rootMod == Just m then do
+            -- package (directory mod) won't be included in "depends", no need to
+            -- handle it
+            subMods <- Map.elems <$> getModuleImplementationField modSubmods
+            source <- getSource
+            let objFile = source -<.> objectExtension
+            logBuild $ "Ready to emit module: " ++ showModSpec m ++
+                        " with sub-modules: " ++ showModSpecs subMods
+            let changed = List.any (`Set.notMember` unchangedSet) (m:subMods)
+            if changed
+            then do
+                logBuild $ "emitting to: " ++ objFile
+                emitObjectFile m objFile
+            else
+                logBuild $ "unchanged, skip it: " ++ objFile
+            reexitModule
 
-        -- we might use the local cache file instead of the actual file
-        -- check and overwrite the file name
-        liftIO $ useLocalCacheFileIfPossible objFile
+            -- we might use the local cache file instead of the actual file
+            -- check and overwrite the file name
+            liftIO $ useLocalCacheFileIfPossible objFile
+        else return []
         ) depends
 
 
@@ -1162,21 +1162,21 @@ sccInits mods = do
     logBuild $ "Collecting initialisations for modules:  " ++ showModSpecs mods
     initialisedRes <- mapM (initialisedResources `inModule`) mods
     logBuild $ "Initialised resources:  " ++ show initialisedRes
-    let initRes = concat (Map.keys <$> initialisedRes)
+    let initRes = concatMap Map.keys initialisedRes
     let resInits = [maybePlace
                     (ForeignCall "llvm" "move" []
                         [initVal, Unplaced (varSet resName)])
                     (resourcePos def)
-                   | (spec,def) <- concat $ Map.toList <$> initialisedRes
-                   , let resName = resourceName spec 
+                   | (spec,def) <- concatMap Map.toList initialisedRes
+                   , let resName = resourceName spec
                    , let maybeInit = resourceInit def
                    , isJust maybeInit
                    , let initVal = fromJust maybeInit]
-    initMods <- filterM 
+    initMods <- filterM
                     ((isJust . Map.lookup ""
                         <$> getModuleImplementationField modProcs) `inModule`)
                 mods
-    let initProcCalls = [Unplaced 
+    let initProcCalls = [Unplaced
                             $ ProcCall (First modSpec "" Nothing) Det True []
                         | modSpec <- initMods
                         ]
@@ -1274,7 +1274,7 @@ multiSpeczTopDownPass orderedSCCs = do
         -- XXX we can do a bit better by handling modules that has llvm code
         -- with some new specz versions.
         let scc' = List.filter (`Set.notMember` unchanged) scc
-        mapM_ blockTransformModule scc'
+        -- mapM_ blockTransformModule scc'
         logBuild $ "Finished block transform SCC:  " ++ showModSpecs scc'
         stopOnError $ "translating: " ++ showModSpecs scc'
         ) (List.reverse orderedSCCs)
@@ -1410,7 +1410,8 @@ isModuleDirectory path = do
 -- |The different sorts of files that could be specified on the
 --  command line.
 data TargetType = ObjectFile | BitcodeFile | AssemblyFile
-                | ArchiveFile | ExecutableFile | UnknownFile
+                | NativeAssemblyFile | ExecutableFile
+                | ArchiveFile | UnknownFile
                 deriving (Show,Eq)
 
 
@@ -1418,12 +1419,13 @@ data TargetType = ObjectFile | BitcodeFile | AssemblyFile
 --  file need not exist.
 targetType :: FilePath -> TargetType
 targetType filename
-  | ext == objectExtension     = ObjectFile
-  | ext == bitcodeExtension    = BitcodeFile
-  | ext == assemblyExtension   = AssemblyFile
-  | ext == archiveExtension    = ArchiveFile
-  | ext == executableExtension = ExecutableFile
-  | otherwise                   = UnknownFile
+  | ext == objectExtension         = ObjectFile
+  | ext == bitcodeExtension        = BitcodeFile
+  | ext == assemblyExtension       = AssemblyFile
+  | ext == nativeAssemblyExtension = NativeAssemblyFile
+  | ext == archiveExtension        = ArchiveFile
+  | ext == executableExtension     = ExecutableFile
+  | otherwise                      = UnknownFile
       where ext = dropWhile (=='.') $ takeExtension filename
 
 

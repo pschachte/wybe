@@ -7,9 +7,13 @@
 INSTALLBIN=/usr/local/bin
 INSTALLLIB=/usr/local/lib/wybe
 
+# Configure any extra C library and include directories
+EXTRALIBS=-L /usr/local/lib -L /opt/homebrew/lib
+EXTRAINCLUDES=-I /usr/local/include -I /opt/homebrew/include
+
 
 # You shouldn't need to edit anything below here
-VERSION = 0.1
+VERSION = 0.2
 SRCDIR = src
 LIBDIR = wybelibs
 WYBELIBS = wybe.o command_line.o logging.o random.o benchmark.o
@@ -40,7 +44,7 @@ install:	wybemk
 	"$(INSTALLBIN)/wybemk" --force-all $(addsuffix ", $(addprefix "$(INSTALLLIB)/,$(WYBELIBS)))
 
 
-wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
+wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/CConfig.hs $(SRCDIR)/Version.lhs
 	stack -j3 build && cp "`stack path --local-install-root`/bin/$@" "$@"
 
 libs:	$(addprefix $(LIBDIR)/,$(LIBS))
@@ -53,7 +57,7 @@ $(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe/*.wybe
 
 
 $(LIBDIR)/wybe/cbits.o: $(LIBDIR)/wybe/cbits.c
-	clang $(ISSYSROOT) -I /usr/local/include -c "$<" -o "$@"
+	clang $(ISSYSROOT) $(EXTRAINCLUDES) -c "$<" -o "$@"
 
 
 $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
@@ -61,29 +65,38 @@ $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@rm -f "$@"
 	@printf "Version.lhs automatically generated:  DO NOT EDIT\n" > "$@"
 	@printf "\n" >> "$@"
-	@printf "> module Version (version,gitHash,buildDate,libDir) where\n\n" >> "$@"
+	@printf "> module Version (version,gitHash,buildDate,libDir,defaultTriple) where\n\n" >> "$@"
 	@printf "> version :: String\n> version = \"%s\"\n\n" "$(VERSION)" >> "$@"
 	@printf "> gitHash :: String\n> gitHash = \"%s\"\n\n" "`git rev-parse --short HEAD`" >> "$@"
 	@printf "> buildDate :: String\n> buildDate = \"%s\"\n\n" "`date`" >> "$@"
 	@printf "> libDir :: String\n> libDir = \"%s\"\n\n" "$(INSTALLLIB)" >> "$@"
+	@printf "> defaultTriple :: String\n> defaultTriple = \"" >> "$@"
+	@clang --version | sed -n 's/Target: *\(.*\)/\1\"/p' >> "$@"
+	@printf "\n\n" >> "$@"
+
+$(SRCDIR)/CConfig.hs:	$(SRCDIR)/c_config
+	$< > $@
+
+$(SRCDIR)/c_config:	$(SRCDIR)/c_config.c
+	clang $(ISSYSROOT) $(EXTRAINCLUDES) -o $@ $<
+
 
 .PHONY:	doc
 doc:	src/README.md
 
 
 # Assemble README markdown source file automatically
-src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
+src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro \
+		src/Compiler.png src/Detail.png
 	cat src/README.md.intro > "$@"
 
 	printf "The source files in this directory and their purposes are:\n\n" >> "$@"
-	printf "| File                         " >> "$@"
-	printf "| Purpose                                                  |\n" >> "$@"
-	printf "| ---------------------------- " >> "$@"
-	printf "| -------------------------------------------------------- |\n" >> "$@"
+	printf "| File | Purpose                                      |\n" >> "$@"
+	printf "| ---- | -------------------------------------------- |\n" >> "$@"
 	for f in src/*.hs ; do \
       b=`basename $$f` ; \
       m=`basename $$f .hs` ; \
-	    printf "| `printf '%-29s' [$$b]\(#$$m\)`| " ; \
+	    printf "| `printf '%-20s' [$$b]\(#$$m\)` | " ; \
 	    sed -n "s/^-- *Purpose *: *\(.*\)/\1/p" $$f | tr -d '\n' ; \
 	    printf " |\n" ; \
 	done >> "$@"
@@ -92,7 +105,8 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 	for f in src/*.hs ; do \
       m=`basename $$f .hs` ; \
 	    echo -e ; \
-	    sed -E -e '/^-- *Purpose *:/{s/^-- *Purpose *:/## '"$$m -- "'/; G; p;}' -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
+	    echo -e "## $$m <a id="$$m"></a>" ; \
+	    sed -E -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
 	done >> "$@"
 
 	printf "\n\n" >> "$@"
@@ -100,7 +114,7 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 
 
 test:	wybemk
-	@rm -f ERRS ; touch ERRS
+	@rm -f ERRS ; printf "Testing run " > ERRS ; date >> ERRS
 	@rm -f $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o
 	@echo -e "Building $(LIBDIR)/wybe/cbits.o"
 	@make $(LIBDIR)/wybe/cbits.o
@@ -111,4 +125,4 @@ test:	wybemk
 
 clean:
 	stack clean
-	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi $(SRCDIR)/Version.lhs documentation/*.pdf publications/*.pdf $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o test-cases/*.o
+	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi $(SRCDIR)/Version.lhs $(SRCDIR)/CConfig.hs documentation/*.pdf publications/*.pdf $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o test-cases/*.o

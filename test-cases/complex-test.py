@@ -24,7 +24,7 @@ def main() -> None:
         exp_file_path = "./complex/exp/{}.exp".format(test_name)
         with open(out_file_path, "w") as out_file:
             with tempfile.TemporaryDirectory() as tmp_dir:
-                ctx = utils.Context(tmp_dir, out_file)
+                ctx = utils.Context(tmp_dir, os.path.dirname(root_path), out_file)
                 # execute test case
                 try:
                     test_func(ctx)
@@ -40,7 +40,10 @@ def main() -> None:
             # the behavior of other scripts. We should consider using
             # things like "filecmp.cmp" for portability and efficiency.
             code = subprocess.run(
-                ["diff", "-q", out_file_path, exp_file_path],
+                ["diff", "-q", 
+                    "-I", "^source_filename *=.*",
+                    "-I", "^target triple *=.*", 
+                    out_file_path, exp_file_path],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
             if code == 0:
                 print(".", end="")

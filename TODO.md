@@ -19,7 +19,7 @@
 
 
 ## Error checking:
-* Error if foreign call has no outputs; suggest use !I/O.
+* Error if foreign call has no outputs; suggest `use !io` or make it impure.
 * Ensure no statement binds the same variable multiple times
 
 
@@ -38,11 +38,8 @@
 * Fix the syntax!
     * Support curley braces to specify sets and maps
     * Interpolation (in strings, arrays, sets, and maps)
-        * "...@foo..." means "..." `,,` foo `,,` "..."
-	* "...@(foo(bar,baz))..." means "..." `,,` foo(bar,baz) `,,` "..."
-	* [foo,@bar(baz),zip] means [foo] `,,` bar(baz) `,,` [zip]
-	* if `,,` can run backwards, then [?foo,@?bar] and [@?foo,bar] can be patterns
-    	* with this, do we need `[ ... | ...]` syntax?
+	* "...$(foo(bar,baz))..." means "..." `,,` foo(bar,baz) `,,` "..."
+	* [foo,$bar(baz),zip] means [foo] `,,` bar(baz) `,,` [zip]
 * Support "commutative" resources, which don't need to be threaded everywhere
 * Support unicode
 * Investigate situation calculus
@@ -86,5 +83,4 @@
 
 
 ## Porting:
-* to Windows
 * Rewrite compiler in Wybe

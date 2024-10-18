@@ -93,6 +93,10 @@ int64_t isqrt(int64_t x) {
     return (int64_t)s;
 }
 
+int64_t signum(int64_t x) {
+    return (x > 0) - (x < 0); 
+}
+
 
 // Boehm GC
 void *wybe_malloc(int64_t size) {

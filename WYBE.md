@@ -95,7 +95,9 @@ Hello, World!
 
 Note that `wybemk` is like `make` in that you give it the name of the
 file you want it to build, and it figures out what files it needs
-to compile.
+to compile.  Currently, the Wybe compiler can generate an executable file, an
+object (.o) file, an LLVM assembler (.ll) file, an LLVM bitcode (.bc), and a
+native assembly language (.s) file from a wybe source file.
 
 ### Compiler Options
 
@@ -108,8 +110,8 @@ can be found with the following:
 
 #### Optimisation Options
 
-The `--llvm-opt-level` (`-O`) options specifies the level of optimisation used
-within the LLVM compiler during the compilations stage of a Wybe module. By default, this is set to 3, yet supports the values 0, 1, 2, or 3. More information
+The `--llvm-opt-level` (-O) option specifies the level of optimisation used
+within the LLVM compiler during the compilation stage of a Wybe module. By default, this is set to 3, yet supports the values 0, 1, 2, or 3. More information
 can be found [here](https://llvm.org/docs/CommandGuide/llc.html#id1).
 
 
@@ -2243,18 +2245,38 @@ Floating point multiplication
 Floating point division
 - `foreign llvm frem(`arg1:float, arg2:float`)`:float
 Floating point remainder
-- `foreign llvm fcmp_eq(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_ord(`arg1:float, arg2:float`)`:bool
+Floating point ordered (neither is a NaN)
+- `foreign llvm fcmp_oeq(`arg1:float, arg2:float`)`:bool
 Floating point equality
-- `foreign llvm fcmp_ne(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_one(`arg1:float, arg2:float`)`:bool
 Floating point disequality
-- `foreign llvm fcmp_slt(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_olt(`arg1:float, arg2:float`)`:bool
 Floating point (signed) strictly less
-- `foreign llvm fcmp_sle(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_ole(`arg1:float, arg2:float`)`:bool
 Floating point (signed) less or equal
-- `foreign llvm fcmp_sgt(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_ogt(`arg1:float, arg2:float`)`:bool
 Floating point (signed) strictly greater
-- `foreign llvm fcmp_sge(`arg1:float, arg2:float`)`:bool
+- `foreign llvm fcmp_oge(`arg1:float, arg2:float`)`:bool
 Floating point (signed) greater or equal
+- `foreign llvm fcmp_ord(`arg1:float, arg2:float`)`:bool
+Floating point unordered (either is a NaN)
+- `foreign llvm fcmp_ueq(`arg1:float, arg2:float`)`:bool
+Floating point unordered or equal
+- `foreign llvm fcmp_une(`arg1:float, arg2:float`)`:bool
+Floating point unordered or not equal
+- `foreign llvm fcmp_ult(`arg1:float, arg2:float`)`:bool
+Floating point unordered or strictly less
+- `foreign llvm fcmp_ule(`arg1:float, arg2:float`)`:bool
+Floating point unordered or less or equal
+- `foreign llvm fcmp_ugt(`arg1:float, arg2:float`)`:bool
+Floating point unordered or strictly greater
+- `foreign llvm fcmp_uge(`arg1:float, arg2:float`)`:bool
+Floating point unordered or greater or equal
+- `foreign llvm fcmp_true(`arg1:float, arg2:float`)`:bool
+Always returns true with no comparison
+- `foreign llvm fcmp_false(`arg1:float, arg2:float`)`:bool
+Always returns false with no comparison
 
 #####  <a name="conversion"></a>Integer/floating point conversion
 
@@ -2281,17 +2303,20 @@ declaration has the form:
 
 where *rep* has one of these forms:
 
-- `address`
-the type is a machine address, similar to the `void *` type in C.
-- *n* `bit` *numbertype*
-a primitive number type comprising *n* bits, where *n* is any non-negative
-integer and *numbertype* is one of:
-  - `signed`
-  a signed integer type
-  - `unsigned`
-  an unsigned integer type
-  - `float`
-  a floating point number; *n* must be 16, 32, 64, or 128.
+- `pointer`
+ the type is the address of a Wybe data structure.  Foreign code should not
+treat this as an ordinary pointer.
+- `opaque`
+the type is a machine address, similar to the `void *` type in C.  Wybe treats such values as opaque.
+- *n* `bit signed`
+a signed primitive number type comprising *n* bits, where *n* is any non-negative
+integer.  Represents integers between -2<sup>*n*-1</sup> and 2<sup>*n*-1</sup>-1 inclusive.
+- *n* `bit unsigned`
+an unsigned primitive number type comprising *n* bits, where *n* is any non-negative
+integer. Represents integers between 0 and 2<sup>*n*</sup>-1 inclusive.
+- *n* `bit float`
+a floating point number type comprising *n* bits, where *n* is one of 16, 32,
+64, or 128.  
 
 Like a `constructor` declaration, a `representation` declaration makes the
 enclosing module into type.  Also like a `constructor` declaration, a submodule

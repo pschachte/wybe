@@ -10,22 +10,31 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
+        sudo apt-get install llvm
         sudo apt-get install clang
         sudo apt-get install libgc-dev
-        sudo apt-get install llvm-9-dev
-        sudo apt-get install libtinfo-dev
         sudo apt-get install dwdiff
 
     # GitHub-hosted runners provide Haskell Stack
     # https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md
     # - name: Install Haskell Stack
     #   run: wget -qO- https://get.haskellstack.org/ | sh
+
+    - name: Verify dependencies
+      run: |
+        dpkg -s llvm
+        dpkg -s clang
+        dpkg -s libgc-dev
+        dpkg -s dwdiff
+        llvm-config --version
+        llc --version
+        clang --version
 
     # cache Haskell Stack stuff
     - name: Cache stack global package db

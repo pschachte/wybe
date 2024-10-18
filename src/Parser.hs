@@ -14,7 +14,7 @@ import AST hiding (option)
 import Data.Set as Set
 import Data.List as List
 import Data.Maybe as Maybe
-import Data.Bits
+import Data.Bits (complement)
 import Data.Either.Extra (mapLeft)
 import Control.Monad.Identity (Identity)
 import Scanner
@@ -159,7 +159,8 @@ typeImpln = do
 -- | Type declaration body where representation and items are given
 typeRep :: Parser TypeRepresentation
 typeRep = do
-    ident "address" $> Address
+    ident "address" $> Pointer
+    <|> ident "opaque" $> CPointer
     <|> do bits <- option wordSize
                    (fromIntegral . content <$> intLiteral <* ident "bit")
            ident "unsigned" $> Bits bits

@@ -18,7 +18,7 @@ module Options (Options(..),
                 defaultOptions) where
 
 import           Data.List             as List
-import           Data.List.Extra
+import           Data.List.Extra       (lower)
 import           Data.Map              as Map
 import           Data.Set              as Set
 import           Data.Either           as Either
@@ -50,7 +50,6 @@ data Options = Options
     , optVerbose       :: Bool     -- ^Be verbose in compiler output
     , optNoFont        :: Bool     -- ^Disable ISO font change codes in messages
     , optNoVerifyLLVM  :: Bool     -- ^Don't run LLVM verification
-    , optDumpOptLLVM   :: Bool     -- ^Dump optimised LLVM code
     , optErrors        :: Set String 
                                    -- ^Erroneous flag error messages
     } deriving Show
@@ -73,7 +72,6 @@ defaultOptions = Options
   , optVerbose       = False
   , optNoFont        = False
   , optNoVerifyLLVM  = False
-  , optDumpOptLLVM   = False
   , optErrors        = Set.empty
   }
 
@@ -95,7 +93,7 @@ class (Ord a) => Toggleable a where
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
-  | Unbranch | Codegen | Blocks | Emit | Analysis | Transform | Uniqueness
+  | Unbranch | LLVM | Emit | Analysis | Transform | Uniqueness
   | LastCallAnalysis
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
@@ -147,10 +145,8 @@ logSelectionDescription Types
     = "Log type checking"
 logSelectionDescription Unbranch
     = "Log transformation of loops and selections into clausal form"
-logSelectionDescription Codegen
+logSelectionDescription LLVM
     = "Log generation of LLVM code"
-logSelectionDescription Blocks
-    = "Log translation of LPVM procedures into LLVM"
 logSelectionDescription Emit
     = "Log emission of LLVM IR from the definitions created"
 logSelectionDescription Analysis
@@ -166,6 +162,11 @@ logSelectionDescription LastCallAnalysis
 -- | Enumeration of compiler optimisations
 data OptFlag = LLVMOpt | MultiSpecz | TailCallModCons
     deriving (Eq, Ord, Enum, Bounded, Show)
+
+-- | Default optimisations enabled:  all of them
+defaultOptFlags :: Set OptFlag
+defaultOptFlags = Set.fromList [minBound..maxBound]
+
 
 instance Toggleable OptFlag where
     parseFlag flag = maybe (Left flag) Right $ optMap Map.!? lower flag
@@ -186,11 +187,6 @@ addOptFlags = toggle "unknown optimisation flag: "
 -- | Check if a given OptFlag is enabled 
 optimisationEnabled :: OptFlag -> Options -> Bool
 optimisationEnabled flag Options{optOptimisations=opts} = flag `Set.member` opts
-
-
--- | Default optimisations enabled
-defaultOptFlags :: Set OptFlag
-defaultOptFlags = Set.fromList [minBound..maxBound]
 
 
 -- | Description of an OptFlag
@@ -258,9 +254,6 @@ options =
     , Option []    ["no-verify-llvm"]
         (NoArg (\opts -> opts { optNoVerifyLLVM = True }))
         "disable verification of generated LLVM code"
-    , Option []    ["dump-opt-llvm"]
-        (NoArg (\opts -> opts { optDumpOptLLVM = True }))
-        "dump optimised LLVM code"
     ]
 
 

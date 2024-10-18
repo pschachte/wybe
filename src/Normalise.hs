@@ -22,7 +22,7 @@ import Data.List as List
 import Data.Map as Map
 import Data.Maybe
 import Data.Set as Set
-import Data.Bits
+import Data.Bits (complement, bit, shiftL)
 import Data.Graph
 import Data.Tuple.HT
 import Data.Tuple.Select
@@ -297,7 +297,7 @@ completeTypeSCC (CyclicSCC modTypeDefs) = do
              logNormalise $ "   " ++ showModSpec mod ++ " = " ++ show typedef)
           modTypeDefs
     -- First set representations to addresses, then layout types
-    mapM_ ((setTypeRep Address `inModule`) . fst) modTypeDefs
+    mapM_ ((setTypeRep Pointer `inModule`) . fst) modTypeDefs
     mapM_ (uncurry completeType) modTypeDefs
 
 
@@ -456,7 +456,7 @@ typeRepresentation :: [TypeRepresentation] -> Int -> TypeRepresentation
 typeRepresentation [] numConsts =
     Bits $ ceiling $ logBase 2 $ fromIntegral numConsts
 typeRepresentation [rep] 0      = rep
-typeRepresentation _ _          = Address
+typeRepresentation _ _          = Pointer
 
 
 ----------------------------------------------------------------
@@ -612,12 +612,12 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
         let (fields,size) = layoutRecord paramInfos tag tagLimit
         logNormalise $ "Laid out structure size " ++ show size
             ++ ": " ++ show fields
-        let ptrCount = length $ List.filter ((==Address) . paramInfoTypeRep) paramInfos
+        let ptrCount = length $ List.filter ((==Pointer) . paramInfoTypeRep) paramInfos
         logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
                         ++ show numConsts ++ " const constructors, "
                         ++ show numNonConsts ++ " non-const constructors"
         let params = paramInfoParam <$> paramInfos
-        return (Address,
+        return (Pointer,
                 constructorItems vis ctorName typeSpec params fields
                     size tag tagLimit pos
                 ++ deconstructorItems uniq vis ctorName typeSpec params numConsts
@@ -795,9 +795,9 @@ boxedGetterSetterStmts vis rectype numConsts numNonConsts ptrCount size
     let startOffset = if tag > tagLimit then tagLimit+1 else tag
         detism = deconstructorDetism numConsts numNonConsts
         -- Set the "noalias" flag when all other fields (exclude the one
-        -- that is being changed) in this struct aren't [Address].
+        -- that is being changed) in this struct aren't [Pointer].
         -- This flag is used in [AliasAnalysis.hs]
-        otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
+        otherPtrCount = if rep == Pointer then ptrCount-1 else ptrCount
         flags = ["noalias" | otherPtrCount == 0]
     in [( field
         , GetterSetterInfo pos vis fieldtype
@@ -843,8 +843,11 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          -- Shift each field into place and or with the result
          List.concatMap
           (\(FieldInfo var pPos _ ty _ shift sz) ->
-               [maybePlace (ForeignCall "llvm" "shl" []
-                 [castFromTo ty typeSpec (varGet var) `maybePlace` pPos,
+               [maybePlace (ForeignCall "lpvm" "cast" []
+                 [varGetTyped var ty `maybePlace` pPos,
+                  varSetTyped tmpName1 typeSpec `maybePlace` pos]) pos,
+                maybePlace (ForeignCall "llvm" "shl" []
+                 [varGetTyped tmpName1 typeSpec `maybePlace` pPos,
                   iVal shift `castTo` typeSpec `maybePlace` pos,
                   varSetTyped tmpName1 typeSpec `maybePlace` pos]) pos,
                 maybePlace (ForeignCall "llvm" "or" []
@@ -922,32 +925,35 @@ unboxedGetterSetterStmts vis recType numConsts numNonConsts tag tagBits
     in [ ( field
          , GetterSetterInfo pos vis fieldType
            (tagCheck pos numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing recName)
-           [maybePlace (ForeignCall "llvm" "lshr" [] -- The getter:
-                [varGetTyped recName recType `maybePlace` pos,
-                    iVal shift `withType` recType `maybePlace` pos,
-                    varSetTyped recName recType `maybePlace` pos]) pos,
-                -- XXX Don't need to do this for the most significant field:
-                maybePlace (ForeignCall "llvm" "and" []
-                [varGetTyped recName recType `maybePlace` pos,
-                    iVal fieldMask `withType` recType `maybePlace` pos,
-                    varSetTyped fieldName recType `maybePlace` pos]) pos,
-                maybePlace (ForeignCall "lpvm" "cast" []
-                [varGetTyped fieldName recType `maybePlace` pos,
-                    varSetTyped outputVariableName fieldType `maybePlace` pos]) pos
-                ]
-            [maybePlace (ForeignCall "llvm" "and" []
-                [varGetTyped recName recType `maybePlace` pos,
-                    iVal shiftedHoleMask `withType` recType `maybePlace` pos,
-                    varSetTyped recName recType `maybePlace` pos]) pos,
-                maybePlace (ForeignCall "llvm" "shl" []
-                [castFromTo fieldType recType (varGet fieldName) `maybePlace` pos,
-                    iVal shift `castTo` recType `maybePlace` pos,
-                    varSetTyped tmpName1 recType `maybePlace` pos]) pos,
-                maybePlace (ForeignCall "llvm" "or" []
-                [varGetTyped tmpName1 recType `maybePlace` pos,
-                    varGetTyped recName recType `maybePlace` pos,
-                    varSetTyped recName recType `maybePlace` pos]) pos
-                ]
+           [ForeignCall "llvm" "lshr" [] -- The getter:
+               [varGetTyped recName recType `maybePlace` pos,
+                iVal shift `withType` recType `maybePlace` pos,
+                varSetTyped recName recType `maybePlace` pos] `maybePlace` pos,
+            -- XXX Don't need to do this for the most significant field:
+            ForeignCall "llvm" "and" []
+               [varGetTyped recName recType `maybePlace` pos,
+                iVal fieldMask `withType` recType `maybePlace` pos,
+                varSetTyped fieldName recType `maybePlace` pos] `maybePlace` pos,
+            ForeignCall "lpvm" "cast" []
+               [varGetTyped fieldName recType `maybePlace` pos,
+                varSetTyped outputVariableName fieldType `maybePlace` pos] `maybePlace` pos
+            ]
+           [ForeignCall "llvm" "and" []
+               [varGetTyped recName recType `maybePlace` pos,
+                iVal shiftedHoleMask `withType` recType `maybePlace` pos,
+                varSetTyped recName recType `maybePlace` pos] `maybePlace` pos,
+            ForeignCall "lpvm" "cast" []
+               [varGetTyped fieldName fieldType `maybePlace` pos,
+                varSetTyped tmpName1 recType `maybePlace` pos] `maybePlace` pos,
+            ForeignCall "llvm" "shl" []
+               [varGetTyped tmpName1 recType `maybePlace` pos,
+                iVal shift `castTo` recType `maybePlace` pos,
+                varSetTyped tmpName1 recType `maybePlace` pos] `maybePlace` pos,
+            ForeignCall "llvm" "or" []
+               [varGetTyped tmpName1 recType `maybePlace` pos,
+                varGetTyped recName recType `maybePlace` pos,
+                varSetTyped recName recType `maybePlace` pos] `maybePlace` pos
+            ]
             )]
 
 

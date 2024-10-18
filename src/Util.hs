@@ -235,10 +235,12 @@ intersectMapIdentity = merge dropMissing dropMissing
                        (zipWithMaybeMatched
                         $ \_ v1 v2 -> if v1 == v2 then Just v1 else Nothing)
 
+
 -- | a `orElse` b returns a if it's a Just, otherwise b
 orElse :: Maybe a -> Maybe a -> Maybe a
 orElse Nothing b  = b
 orElse a@Just{} _ = a
+
 
 -- | apply two functions to the same input and combine the results
 apply2way :: (a->b->c) -> (d->a) -> (d->b) -> d -> c
@@ -318,7 +320,7 @@ _getFileHash file = do
 
 
 -- | Given a file path and return the actual file that should be used.
--- It can the original file or a local cache file.
+-- It can be the original file or a local cache file.
 useLocalCacheFileIfPossible :: FilePath -> IO FilePath
 useLocalCacheFileIfPossible file = do
     (cacheFile, meta) <- _localCachePathOfFile file
@@ -339,7 +341,7 @@ useLocalCacheFileIfPossible file = do
         return file
 
 
--- | Given a file path and return the file path to the local cache
+-- | Given a file path, return the file path to the local cache
 -- file of the actual file.
 createLocalCacheFile :: FilePath -> IO FilePath
 createLocalCacheFile file = do

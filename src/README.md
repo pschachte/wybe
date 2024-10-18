@@ -18,67 +18,58 @@ optimisation.  This part can be seen in more detail as several separate passes:
 # Wybe compiler source directory
 The source files in this directory and their purposes are:
 
-| File                         | Purpose                                                  |
-| ---------------------------- | -------------------------------------------------------- |
-| [AliasAnalysis.hs](#AliasAnalysis)| Alias analysis for a single module |
-| [Analysis.hs](#Analysis)     | Entry point of all kinds of analysis for a single module |
-| [AST.hs](#AST)               | Wybe Abstract Syntax Tree and LPVM representation |
-| [ASTShow.hs](#ASTShow)       | Show Wybe intermediate representation |
-| [BinaryFactory.hs](#BinaryFactory)| Deriving AST Types to be Binary instances |
-| [Blocks.hs](#Blocks)         | Transform a clausal form (LPVM) module to LLVM |
-| [BodyBuilder.hs](#BodyBuilder)| A monad to build up a procedure Body, with copy propagation |
-| [Builder.hs](#Builder)       | Handles compilation at the module level. |
-| [Callers.hs](#Callers)       | Find all callers for each proc and count static calls per caller |
-| [Clause.hs](#Clause)         | Convert Wybe code to clausal (LPVM) form |
-| [Codegen.hs](#Codegen)       | Generate and emit LLVM from basic blocks of a module |
-| [Config.hs](#Config)         | Configuration for wybe compiler |
-| [Emit.hs](#Emit)             | Emit LLVM code |
-| [Expansion.hs](#Expansion)   | Replace certain procedure calls with others |
-| [Flatten.hs](#Flatten)       | Flatten function calls (expressions) into procedure calls |
-| [Macho.hs](#Macho)           | Extended version of parser for Mach-O object format files |
-| [Normalise.hs](#Normalise)   | Convert parse tree into an AST |
-| [ObjectInterface.hs](#ObjectInterface)| Parse and edit a object file. |
-| [Optimise.hs](#Optimise)     | Framework to optimise a single module |
-| [Options.hs](#Options)       | Handle compiler options/switches |
-| [Parser.hs](#Parser)         | Parser for the Wybe language using Parsec. |
-| [Resources.hs](#Resources)   | Resource checker for Wybe |
-| [Scanner.hs](#Scanner)       | Lexical scanner for the Wybe language |
-| [Snippets.hs](#Snippets)     | Convenience functions for generation of Wybe AST |
-| [Transform.hs](#Transform)   | Transform LPVM after alias analysis |
-| [Types.hs](#Types)           | Type checker/inferencer for Wybe |
-| [Unbranch.hs](#Unbranch)     | Turn loops and conditionals into separate procedures |
-| [Unique.hs](#Unique)         | The unique typing system for Wybe |
-| [UnivSet.hs](#UnivSet)       | Provide a set type supporting the universal set. |
-| [Util.hs](#Util)             | Various small utility functions |
-| [wybemk.hs](#wybemk)         | Wybe compiler/builder main code |
+| File | Purpose                                      |
+| ---- | -------------------------------------------- |
+| [AST.hs](#AST)       | Wybe Abstract Syntax Tree and LPVM representation |
+| [ASTShow.hs](#ASTShow) | Show Wybe intermediate representation |
+| [AliasAnalysis.hs](#AliasAnalysis) | Alias analysis for a single module |
+| [Analysis.hs](#Analysis) | Entry point of all kinds of analysis for a single module |
+| [BinaryFactory.hs](#BinaryFactory) | Deriving AST Types to be Binary instances |
+| [BodyBuilder.hs](#BodyBuilder) | A monad to build up a procedure Body, with copy propagation |
+| [Builder.hs](#Builder) | Handles compilation at the module level. |
+| [CConfig.hs](#CConfig) | Relate C types to Wybe types for foreign interface |
+| [Callers.hs](#Callers) | Find all callers for each proc and count static calls per caller |
+| [Clause.hs](#Clause) | Convert Wybe code to clausal (LPVM) form |
+| [Config.hs](#Config) | Configuration for wybe compiler |
+| [Emit.hs](#Emit)     | Emit LLVM code |
+| [Expansion.hs](#Expansion) | Replace certain procedure calls with others |
+| [Flatten.hs](#Flatten) | Flatten function calls (expressions) into procedure calls |
+| [LLVM.hs](#LLVM)     | Generate LLVM code from LPVM form |
+| [LastCallAnalysis.hs](#LastCallAnalysis) | Transform proc bodies and their output arguments so that |
+| [Macho.hs](#Macho)   | Extended version of parser for Mach-O object format files |
+| [Normalise.hs](#Normalise) | Convert parse tree into an AST |
+| [ObjectInterface.hs](#ObjectInterface) | Parse and edit a object file. |
+| [Optimise.hs](#Optimise) | Framework to optimise a single module |
+| [Options.hs](#Options) | Handle compiler options/switches |
+| [Parser.hs](#Parser) | Parser for the Wybe language using Parsec. |
+| [Resources.hs](#Resources) | Resource checker for Wybe |
+| [Scanner.hs](#Scanner) | Lexical scanner for the Wybe language |
+| [Snippets.hs](#Snippets) | Convenience functions for generation of Wybe AST |
+| [Transform.hs](#Transform) | Transform LPVM after alias analysis |
+| [Types.hs](#Types)   | Type checker/inferencer for Wybe |
+| [Unbranch.hs](#Unbranch) | Turn loops and conditionals into separate procedures |
+| [Unique.hs](#Unique) | The unique typing system for Wybe |
+| [UnivSet.hs](#UnivSet) | Provide a set type supporting the universal set. |
+| [Util.hs](#Util)     | Various small utility functions |
+| [wybemk.hs](#wybemk) | Wybe compiler/builder main code |
 
 
 # Modules in more detail
 
 
-## AliasAnalysis --  Alias analysis for a single module
+## AST <a id=AST></a>
 
+## ASTShow <a id=ASTShow></a>
 
-## Analysis --  Entry point of all kinds of analysis for a single module
+## AliasAnalysis <a id=AliasAnalysis></a>
 
+## Analysis <a id=Analysis></a>
 
-## AST --  Wybe Abstract Syntax Tree and LPVM representation
+## BinaryFactory <a id=BinaryFactory></a>
 
+## BodyBuilder <a id=BodyBuilder></a>
 
-## ASTShow --  Show Wybe intermediate representation
-
-
-## BinaryFactory --  Deriving AST Types to be Binary instances
-
-
-## Blocks --  Transform a clausal form (LPVM) module to LLVM
-
-
-## BodyBuilder --  A monad to build up a procedure Body, with copy propagation
-
-
-## Builder --  Handles compilation at the module level.
-
+## Builder <a id=Builder></a>
 The wybe compiler handles module dependencies, and builds
 executables by itself, without the need for build tools like
 make.  The function buildTarget is responsible for determining
@@ -257,26 +248,19 @@ order, we call compileModSCC, which does the following:
        2. Optimise procs (Optimise)
 
 
-## Callers --  Find all callers for each proc and count static calls per caller
+## CConfig <a id=CConfig></a>
 
+## Callers <a id=Callers></a>
 
-## Clause --  Convert Wybe code to clausal (LPVM) form
+## Clause <a id=Clause></a>
 
+## Config <a id=Config></a>
 
-## Codegen --  Generate and emit LLVM from basic blocks of a module
+## Emit <a id=Emit></a>
 
+## Expansion <a id=Expansion></a>
 
-## Config --  Configuration for wybe compiler
-
-
-## Emit --  Emit LLVM code
-
-
-## Expansion --  Replace certain procedure calls with others
-
-
-## Flatten --  Flatten function calls (expressions) into procedure calls
-
+## Flatten <a id=Flatten></a>
 We transform away all expression types except for constants and
 variables.  Where, let, conditional, and function call
 expressions are turned into statements that bind a variable, and
@@ -302,67 +286,106 @@ the initial value of the expression, and a second to assign it
 the specified new value.  For example, a statement p(f(!x,y),z) is
 transformed to f(x,y,?t); p(!t,z); f(!x,y,t).
 
-## Macho --  Extended version of parser for Mach-O object format files
+## LLVM <a id=LLVM></a>
+
+# Generating LLVM code
+
+We generate a `.ll` text file directly for each Wybe `.wybe` file, compiling
+this as necessary to build `.o`, `.bc` `.s`, or executable files.  For each
+generated `.ll` file, we produce the following, in order:
+
+* **Prologue** — contains an introductory comment and any configuration info
+  needed for LLVM.
+
+* **Constants** — LLVM definitions of the manifest constants used in this
+  module; mostly used for strings.
+
+* **Global variables** —  LLVM declarations of the global variables used to
+  implement the resources defined in this module.
+
+* **Externs** — Extern declarations for all symbols used, but not defined,
+  in this module; this includes imported Wybe procedures, C functions,  and
+  global variables.
+
+* **Definitions** — Definitions of the procs of this module.
+
+* **Exports** — Everything needed by the Wybe compiler to compile users of
+  this module; currently this is represented as a serialisation of the
+  Module data structure, placed in the LLVM section.
 
 
-## Normalise --  Convert parse tree into an AST
+## LastCallAnalysis <a id=LastCallAnalysis></a>
+
+# Last Call Optimisation
+
+The compiler relies on the LLVM compiler to perform last call optimisation,
+turning the last call in a procedure body into a jump, if no other
+instructions follow the last call.  This module tries to increase the number
+of procedures where this optimisation applies by moving code that follows the
+last call before it, whenever all the inputs to those instructions are
+available before the last call.
+
+One particular trick employed to make this possible is
+last-call-module-construction optimisation.  The idea here is to invert the
+direction of data flow, turing an output into an input, by passing in the
+address to which to write the output.  When the instruction following the
+last call in a body simply writes an output of that call into one memory
+location, without using it in any other way, and when the called procedure is
+defined in the module currently being compiled (so we can transform it), we
+can change that output argument into a pointer input, and modify the
+procedure definition to write the output value to memory through that
+pointer.  This is done by changing that parameter from FlowOut to
+FlowOutByReference, and similarly changing the corresponding argument in all
+calls to that procedure.  Likewise, we change the instruction intended to
+write the procedure output to memory from FlowIn to FlowTakeReference.
+
+Note that this transformation leaves the call that notionally produces the
+output before the instruction that notionally writes the value to memory,
+despite the fact that now the latter actually takes the address to be written
+to, and the former actually passes that address into a procedure call.
+Therefore, when the LLVM code is actually generated, the procedure call must
+be deferred until after the address is taken.  This is performed by the LLVM
+module.
 
 
-## ObjectInterface --  Parse and edit a object file.
+## Macho <a id=Macho></a>
 
+## Normalise <a id=Normalise></a>
 
-## Optimise --  Framework to optimise a single module
+## ObjectInterface <a id=ObjectInterface></a>
 
+## Optimise <a id=Optimise></a>
 
-## Options --  Handle compiler options/switches
+## Options <a id=Options></a>
 
+## Parser <a id=Parser></a>
 
-## Parser --  Parser for the Wybe language using Parsec.
-
-
-## Resources --  Resource checker for Wybe
-
+## Resources <a id=Resources></a>
 ###                 Resource Transformations.
 
-There are three passes related to resources within the Wybe compiler.
+There are two passes related to resources within the Wybe compiler.
 
 The first pass canonicalises the `use` declarations in procedure prototypes.
 This resolves the module which each resource refers to.
 
 The second, performed after type checking, transforms resource usage into
-regular parameters/arguments. Here, each procedure is modifed to include
-parameters corresponding to each resource and respective flow.
-Each call is also transformed to include the resources as arguments.
-The order of arguments is dictated by the ordering of the `ResourceSpec`
-type, ordering by module then name. `use` blocks are also transformed to
-contain LPVM `move` instructions of respectively used resources, to save
-and subsequently restore the value of each resource variable.
-
-The final pass tranforms resource into global variables. This pass must be
-performed after uniqueness checking, as uniqueness checking assumes only the
-second pass has been performed. The additional parameters and arguments
-introduced in the second pass are removed here, as they are now passed in
-global variables. Each reference to an in scope resource by name is
-transformed into a load (input) or a store (output), or both (in/out).
+references to global variables. Each reference to an in scope resource by 
+name is transformed into a load (input) or a store (output), or both (in/out). 
 Finally, `use` blocks are also transformed to save (load) and then restore
 (store) each out-of-scope resource.
 
-The final two passes assume that type and mode checking has occured. Type
+The final pass assume that type and mode checking has occured. Type
 checking ensures that resources have the correct types, and mode checking
 ensures that resources, where applicable are in scope.
 
 
-## Scanner --  Lexical scanner for the Wybe language
+## Scanner <a id=Scanner></a>
 
+## Snippets <a id=Snippets></a>
 
-## Snippets --  Convenience functions for generation of Wybe AST
+## Transform <a id=Transform></a>
 
-
-## Transform --  Transform LPVM after alias analysis
-
-
-## Types --  Type checker/inferencer for Wybe
-
+## Types <a id=Types></a>
 ###                 Type Checking Module SCCs
 
 Our type inference is flow sensitive, that is, types flow from callees to
@@ -393,8 +416,7 @@ be transformed.  Therefore, type checking must be prepared to handle both
 calls that have had resources transformed to parameters and calls that
 haven't.
 
-## Unbranch --  Turn loops and conditionals into separate procedures
-
+## Unbranch <a id=Unbranch></a>
 This code transforms loops into fresh recursive procs, and ensures
 that all conditionals are the last statements in their respective
 bodies. Note that conditionals can be nested, but at the end of
@@ -449,17 +471,13 @@ AST form with the following requirements:
     TestBool, and whose branches are bodies satisfying these
     same conditions.
 
-## Unique --  The unique typing system for Wybe
+## Unique <a id=Unique></a>
 
+## UnivSet <a id=UnivSet></a>
 
-## UnivSet --  Provide a set type supporting the universal set.
+## Util <a id=Util></a>
 
-
-## Util --  Various small utility functions
-
-
-## wybemk --  Wybe compiler/builder main code
-
+## wybemk <a id=wybemk></a>
 
 
 # This Document

@@ -36,7 +36,7 @@ agree () {
         case "$action" in
             [dD]*)
                 (prefix "$1" 'Output Changes' ; \
-	         dwdiff -c -d '()<>~!@:?.%#' "$3" "$2" ) | $destination ;;
+	         dwdiff -c -d '()<>~!@:?.%#,\"' "$3" "$2" ) | $destination ;;
             [uU]*)
                 (prefix "$1" 'Output Changes' ; \
 	         diff -u "$3" "$2" ) | $destination ;;

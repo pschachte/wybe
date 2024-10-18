@@ -13,9 +13,10 @@ def {test} foo2(x:T0, ?y:T0) {
     [?y|_] = l
 }
 
-if {foo2(1, ?y) :: !println(y)}
-?i = 1; if {foo2(i, ?y) :: !println(y)}
-?f = 1.0; if {foo2(f, ?fx) :: !println(fx)}
+if {foo2(42, ?y) :: !println(y)}
+?i = 42; if {foo2(i, ?y) :: !println(y)}
+?f = 1.0; if {foo2(f, ?fx) :: !println(fx)
+             | else :: !println "foo2 fails!"}
 if {foo2(1.0, ?x) :: !println(x)}
 if {foo2('a', ?z) :: !println(z)}
 if {foo2(false, ?b) :: !println(b)}
