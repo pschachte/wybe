@@ -337,8 +337,7 @@ define external fastcc i1 @"explicit_type_warning.~=<0>"(i64 %"#left##0", i64 %"
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"
 }
-[93mfinal-dump/explicit_type_warning.wybe:3:31: Explicit specification of current type explicit_type_warning,
+final-dump/explicit_type_warning.wybe:3:31: Explicit specification of current type explicit_type_warning,
   it is recommended to specify type as _
-[0m[93mfinal-dump/explicit_type_warning.wybe:5:11: Explicit specification of current type explicit_type_warning,
+final-dump/explicit_type_warning.wybe:5:11: Explicit specification of current type explicit_type_warning,
   it is recommended to specify type as _
-[0m

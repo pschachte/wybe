@@ -1219,10 +1219,9 @@ typecheckProcDecl' pdef = do
                         typeError $ ReasonUndef name callee $ place pcall
                     _ -> shouldnt "typecheckProcDecl'"
                 ) badCalls
-            ifOK pdef $ do
-                typecheckCalls calls' [] False
-                    $ List.filter (isForeign . content) calls
-                ifOK pdef $ modeCheckProcDecl pdef
+            typecheckCalls calls' [] False
+                $ List.filter (isForeign . content) calls
+            ifOK pdef $ modeCheckProcDecl pdef
 
 
 -- | If no type errors have been recorded, execute the enclosed code; otherwise

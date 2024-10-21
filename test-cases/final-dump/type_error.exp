@@ -1,4 +1,3 @@
 Error detected during type checking of module(s) type_error
-[91mfinal-dump/type_error.wybe:1:30: Type error in call to proc *, argument 1
-[0m[91mfinal-dump/type_error.wybe:1:30: Type error in call to proc *, argument 2
-[0m
+final-dump/type_error.wybe:1:30: Type error in call to proc *, argument 1
+final-dump/type_error.wybe:1:30: Type error in call to proc *, argument 2

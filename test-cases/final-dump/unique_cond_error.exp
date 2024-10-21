@@ -1,3 +1,2 @@
 Error detected during uniqueness checking of module(s) unique_cond_error
-[91mfinal-dump/unique_cond_error.wybe:11:9: Reuse of unique variable a:unique_cond_error
-[0m
+final-dump/unique_cond_error.wybe:11:9: Reuse of unique variable a:unique_cond_error

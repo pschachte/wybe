@@ -1,3 +1,2 @@
 Error detected during final normalisation of module(s) type_error2, type_error2.foo
-[91mfinal-dump/type_error2.wybe:1:16: In constructor parameter, unknown type notatype
-[0m
+final-dump/type_error2.wybe:1:16: In constructor parameter, unknown type notatype

@@ -1,4 +1,3 @@
 Error detected during final normalisation of module(s) ctor_field_errors, ctor_field_errors.mixed_type, ctor_field_errors.mixed_vis
-[91mfinal-dump/ctor_field_errors.wybe:1:39: field 'a' declared with multiple types
-[0m[91mfinal-dump/ctor_field_errors.wybe:3:26: field 'a' declared with multiple visibilities
-[0m
+final-dump/ctor_field_errors.wybe:1:39: field 'a' declared with multiple types
+final-dump/ctor_field_errors.wybe:3:26: field 'a' declared with multiple visibilities

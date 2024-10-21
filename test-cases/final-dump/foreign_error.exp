@@ -1,8 +1,7 @@
 Error detected during type checking of module(s) foreign_error
-[91mfinal-dump/foreign_error.wybe:4:5: Unknown llvm instruction 'no_such'
-[0m[91mfinal-dump/foreign_error.wybe:7:5: Unknown llvm instruction 'no_such2'
-[0m[91mfinal-dump/foreign_error.wybe:11:5: Foreign call 'blah' with unknown language 'no_such_language'
-[0m[91mfinal-dump/foreign_error.wybe:14:5: Foreign call 'blah' with unknown language 'no_such_language2'
-[0m[91mfinal-dump/foreign_error.wybe:18:5: Foreign call 'add' with arity 2; should be 3
-[0m[91mfinal-dump/foreign_error.wybe:21:5: Foreign call 'add' with arity 4; should be 3
-[0m
+final-dump/foreign_error.wybe:4:5: Unknown llvm instruction 'no_such'
+final-dump/foreign_error.wybe:7:5: Unknown llvm instruction 'no_such2'
+final-dump/foreign_error.wybe:11:5: Foreign call 'blah' with unknown language 'no_such_language'
+final-dump/foreign_error.wybe:14:5: Foreign call 'blah' with unknown language 'no_such_language2'
+final-dump/foreign_error.wybe:18:5: Foreign call 'add' with arity 2; should be 3
+final-dump/foreign_error.wybe:21:5: Foreign call 'add' with arity 4; should be 3

@@ -58,5 +58,4 @@ define external fastcc void @"early_exit2.my_exit<0>"(i64 %"code##0") {
   call ccc void @exit(i64 %"code##0")
   ret void
 }
-[93mfinal-dump/early_exit2.wybe:3:2: In module top-level code, this statement is unreachable
-[0m
+final-dump/early_exit2.wybe:3:2: In module top-level code, this statement is unreachable

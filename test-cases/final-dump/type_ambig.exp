@@ -1,5 +1,5 @@
 Error detected during type checking of module(s) type_ambig
-[91mfinal-dump/type_ambig.wybe:1:25: Ambiguous overloading: call could refer to:
+final-dump/type_ambig.wybe:1:25: Ambiguous overloading: call could refer to:
     wybe.string.print<0>
     wybe.int.print<0>
     wybe.float.print<0>
@@ -7,4 +7,3 @@ Error detected during type checking of module(s) type_ambig
     wybe.char.print<0>
     wybe.c_string.print<0>
     wybe.bool.print<0>
-[0m

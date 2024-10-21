@@ -1,3 +1,2 @@
 Error detected during checking parameter type declarations in module(s) func_no_types
-[91mfinal-dump/func_no_types.wybe:1:5: Public proc double with undeclared parameter or return type
-[0m
+final-dump/func_no_types.wybe:1:5: Public proc double with undeclared parameter or return type

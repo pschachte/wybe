@@ -108,9 +108,8 @@ define external fastcc double @"math.temperature.toCelsius<0>"(double %"f##0") {
   %"tmp#6##0" = fdiv double %"tmp#1##0", 1.8
   ret double %"tmp#6##0"
 }
-[93mfinal-dump/current_module_alias_warning.wybe:6:10: Multiple procedures match this call's types and flows:
+final-dump/current_module_alias_warning.wybe:6:10: Multiple procedures match this call's types and flows:
     current_module_alias_warning.toCelsius<0>
     current_module_alias_warning.toCelsius<1>
     math.temperature.toCelsius<0>
 Defaulting to: current_module_alias_warning.toCelsius<0>
-[0m

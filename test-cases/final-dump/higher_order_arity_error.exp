@@ -1,3 +1,2 @@
 Error detected during type checking of module(s) higher_order_arity_error
-[91mfinal-dump/higher_order_arity_error.wybe:2:5: Call from proc a to proc f with 1 argument(s), expected 2
-[0m
+final-dump/higher_order_arity_error.wybe:2:5: Call from proc a to proc f with 1 argument(s), expected 2

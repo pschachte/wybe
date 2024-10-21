@@ -1,0 +1,15 @@
+# test case for illegal resource usage
+
+resource r:int = 10
+
+def add_to_r(n:int) use !r { !r + n }
+
+def {noinline} app1(f:{resource}(I), i:I) { !f(i) }
+
+def naughty(fn:{resource}(int)) use !io {
+    !app1(fn, 32)
+}
+
+!println(r)
+!naughty(add_to_r)
+!println(r)
