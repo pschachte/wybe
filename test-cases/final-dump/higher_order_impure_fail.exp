@@ -1,4 +1,3 @@
 Error detected during type checking of module(s) higher_order_impure_fail
-[91mfinal-dump/higher_order_impure_fail.wybe:2:5: Calling impure higher-order term func, expecting at least semipure
-[0m[91mfinal-dump/higher_order_impure_fail.wybe:2:5: Calling impure higher-order term func without ! non-purity marker
-[0m
+final-dump/higher_order_impure_fail.wybe:2:5: Calling impure higher-order term func, expecting at least semipure
+final-dump/higher_order_impure_fail.wybe:2:5: Calling impure higher-order term func without ! non-purity marker

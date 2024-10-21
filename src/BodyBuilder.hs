@@ -19,6 +19,7 @@ import Snippets ( boolType, intType, primMove )
 import Util
 import Config (minimumSwitchCases, wordSize)
 import Options (LogSelection(BodyBuilder))
+import Data.Char ( ord )
 import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
@@ -232,11 +233,6 @@ instance Show Constraint where
         = show v ++ ":" ++ show t ++ " = " ++ show a
     show (NotEqual v t a)
         = show v ++ ":" ++ show t ++ " ~= " ++ show a
-
-
--- negateConstraint :: Constraint -> Constraint
--- negateConstraint (Equal v n)    = NotEqual v n
--- negateConstraint (NotEqual v n) = Equal v n
 
 
 ----------------------------------------------------------------
@@ -954,6 +950,7 @@ updateVariableFlows prim = do
 --  performing the operation at compile-time.
 simplifyForeign ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
 simplifyForeign "llvm" op flags args = simplifyOp op flags args
+simplifyForeign "lpvm" op flags args = simplifyLPVM op flags args
 simplifyForeign lang op flags args = PrimForeign lang op flags args
 
 
@@ -1130,6 +1127,8 @@ simplifyOp "fdiv" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
 simplifyOp "fdiv" _ [arg, ArgFloat 1 _, output] =
   primMove arg output
 -- Float comparisons
+simplifyOp "fcmp_ord" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant True) output
 simplifyOp "fcmp_oeq" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1==n2) output
 simplifyOp "fcmp_one" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
@@ -1142,7 +1141,37 @@ simplifyOp "fcmp_ogt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>n2) output
 simplifyOp "fcmp_oge" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>=n2) output
+simplifyOp "fcmp_ord" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant True) output
+simplifyOp "fcmp_oeq" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1==n2) output
+simplifyOp "fcmp_une" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1/=n2) output
+simplifyOp "fcmp_ult" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1<n2) output
+simplifyOp "fcmp_ule" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1<=n2) output
+simplifyOp "fcmp_ugt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1>n2) output
+simplifyOp "fcmp_uge" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1>=n2) output
+simplifyOp "fcmp_true" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant True) output
+simplifyOp "fcmp_false" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant False) output
 simplifyOp name flags args = PrimForeign "llvm" name flags args
+
+
+-- | Simplify and canonicalise llpm instructions where possible.  For now, this only 
+--   handles cast instructions for constants.
+simplifyLPVM :: ProcName -> [Ident] -> [PrimArg] -> Prim
+simplifyLPVM "cast" _ [ArgInt n _, output] =
+  primMove (ArgInt n (argType output)) output
+simplifyLPVM "cast" _ [ArgChar ch _, output] =
+  primMove (ArgInt (fromIntegral $ ord ch) (argType output)) output
+simplifyLPVM "cast" _ [ArgFloat n _, output] =
+  primMove (ArgFloat n (argType output)) output
+simplifyLPVM name flags args = PrimForeign "lpvm" name flags args
 
 
 boolConstant :: Bool -> PrimArg

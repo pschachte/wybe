@@ -1,3 +1,2 @@
 Error detected during resource checking of module(s) resource_error
-[91mfinal-dump/resource_error.wybe:2:5: Call to resourceful proc without ! resource marker: wybe.string.<0>println("shouldn't work: no ! before println call":wybe.string @resource_error:nn:nn)
-[0m
+final-dump/resource_error.wybe:2:5: Call to resourceful proc without ! resource marker: wybe.string.<0>println("shouldn't work: no ! before println call":wybe.string @resource_error:nn:nn)

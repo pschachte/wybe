@@ -1,3 +1,2 @@
 Error detected during preliminary processing of module badmodname
-[91mfinal-dump/badmodname.wybe:6:1: invalid character in module name `a.b`
-[0m
+final-dump/badmodname.wybe:6:1: invalid character in module name `a.b`

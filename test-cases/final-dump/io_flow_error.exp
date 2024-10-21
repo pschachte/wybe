@@ -1,6 +1,5 @@
 Error detected during uniqueness checking of module(s) io_flow_error
-[91mUnique resource wybe.io.io live at end of module top-level code
-[0m[91mfinal-dump/io_flow_error.wybe:8:6: Reuse of unique resource wybe.io.io
-[0m[91mfinal-dump/io_flow_error.wybe:11:7: Reuse of unique resource wybe.io.io
-[0m[91mfinal-dump/io_flow_error.wybe:11:7: Unique resource wybe.io.io assigned in a test context
-[0m
+Unique resource wybe.io.io live at end of module top-level code
+final-dump/io_flow_error.wybe:8:6: Reuse of unique resource wybe.io.io
+final-dump/io_flow_error.wybe:11:7: Reuse of unique resource wybe.io.io
+final-dump/io_flow_error.wybe:11:7: Unique resource wybe.io.io assigned in a test context

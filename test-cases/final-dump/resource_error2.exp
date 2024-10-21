@@ -1,5 +1,4 @@
 Error detected during type checking of module(s) resource_error2
-[91mfinal-dump/resource_error2.wybe:2:7: Resource wybe.io.io not in scope at call to proc println
-[0m[91mfinal-dump/resource_error2.wybe:17:7: Resource res_decl.count not in scope at call to proc use_resource
-[0m[91mfinal-dump/resource_error2.wybe:25:14: proc call_source_file_name unknown in proc bad_special_use
-[0m
+final-dump/resource_error2.wybe:2:7: Resource wybe.io.io not in scope at call to proc println
+final-dump/resource_error2.wybe:17:7: Resource res_decl.count not in scope at call to proc use_resource
+final-dump/resource_error2.wybe:25:14: proc call_source_file_name unknown in proc bad_special_use

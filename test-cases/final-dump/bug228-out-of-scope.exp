@@ -1,3 +1,2 @@
 Error detected during type checking of module(s) bug228-out-of-scope
-[91mfinal-dump/bug228-out-of-scope.wybe:3:6: Resource wybe.io.io not in scope at call to proc read
-[0m
+final-dump/bug228-out-of-scope.wybe:3:6: Resource wybe.io.io not in scope at call to proc read

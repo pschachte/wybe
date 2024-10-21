@@ -1,5 +1,4 @@
 Error detected during final normalisation of module(s) higher_order_anon_errs
-[91mfinal-dump/higher_order_anon_errs.wybe:1:17: Mixed use of numbered and un-numbered anonymous parameters
-[0m[91mfinal-dump/higher_order_anon_errs.wybe:3:14: Anonymous function cannot contain output variables: @, bar
-[0m[91mfinal-dump/higher_order_anon_errs.wybe:4:14: Anonymous function cannot contain output variables: @
-[0m
+final-dump/higher_order_anon_errs.wybe:1:17: Mixed use of numbered and un-numbered anonymous parameters
+final-dump/higher_order_anon_errs.wybe:3:14: Anonymous function cannot contain output variables: @, bar
+final-dump/higher_order_anon_errs.wybe:4:14: Anonymous function cannot contain output variables: @

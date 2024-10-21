@@ -9,7 +9,7 @@ use wybe.control, wybe.io
 # Private constructors.
 # This ensures that strings can only be manipulated with public procedures,
 # providing a more typical interface
-constructors empty
+constructors pub empty
              # ^ An empty string
            | buffer(len:int, raw:c_string) 
              # ^ A wrapper for a c_string
@@ -18,7 +18,7 @@ constructors empty
              # ^ A concatenation of two strings
            | slice(base:_, range:range)
              # ^ A slice of a string under the given range
-           | singleton(c:char)
+           | pub singleton(c:char)
              # ^ A singleton string, a single char
 
 
@@ -168,6 +168,7 @@ pub def print(x:_) use !io {
       | concat(?left, ?right) :: !print(left); !print(right)
       | slice(_, _) :: for ?c in x { !print(c) }
       | singleton(?c) :: !print(c)
+      | empty :: pass
       | else :: !shouldnt
     }
 }

@@ -1,3 +1,2 @@
 Error detected during type checking of module(s) call_unknown
-[91mfinal-dump/call_unknown.wybe:1:26: proc nonexistent_proc unknown in proc foo
-[0m
+final-dump/call_unknown.wybe:1:26: proc nonexistent_proc unknown in proc foo

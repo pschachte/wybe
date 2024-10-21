@@ -57,105 +57,106 @@ proc print_t > public (0 calls)
 print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(x##0:wybe.int, 7:wybe.int, ?tmp#9##0:wybe.int) @multictr2:nn:nn
-    case ~tmp#9##0:wybe.int of
+  MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(10,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(16,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(22,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(28,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(34,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(40,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(50,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    foreign llvm and(x##0:wybe.int, 7:wybe.int, ?tmp#17##0:wybe.int) @multictr2:nn:nn
+    case ~tmp#17##0:wybe.int of
     0:
         foreign lpvm access(~x##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @multictr2:nn:nn
         wybe.string.print<0>("c01(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#76##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_int(~a##0:wybe.int, ~tmp#76##0:wybe.phantom, ?tmp#77##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#77##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#78##0:wybe.phantom) @multictr2:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#78##0:wybe.phantom, ?tmp#79##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#79##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#112##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##0:wybe.int, ~tmp#112##0:wybe.phantom, ?tmp#113##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#113##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#118##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#118##0:wybe.phantom, ?tmp#119##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#119##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
     1:
         foreign lpvm access(~x##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?a##1:wybe.int) @multictr2:nn:nn
-        wybe.string.print<0>("c03(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#71##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_int(~a##1:wybe.int, ~tmp#71##0:wybe.phantom, ?tmp#72##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#72##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @multictr2:nn:nn
+        wybe.string.print<0>("c03(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#103##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##1:wybe.int, ~tmp#103##0:wybe.phantom, ?tmp#104##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#104##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#109##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#109##0:wybe.phantom, ?tmp#110##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#110##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+
+    2:
+        foreign lpvm access(~x##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int) @multictr2:nn:nn
+        wybe.string.print<0>("c03(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#94##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##2:wybe.int, ~tmp#94##0:wybe.phantom, ?tmp#95##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#95##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#100##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#100##0:wybe.phantom, ?tmp#101##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#101##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+
+    3:
+        foreign lpvm access(~x##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?a##3:wybe.int) @multictr2:nn:nn
+        wybe.string.print<0>("c04(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#85##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##3:wybe.int, ~tmp#85##0:wybe.phantom, ?tmp#86##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#86##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#91##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#91##0:wybe.phantom, ?tmp#92##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#92##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+
+    4:
+        foreign lpvm access(~x##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?a##4:wybe.int) @multictr2:nn:nn
+        wybe.string.print<0>("c05(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#76##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##4:wybe.int, ~tmp#76##0:wybe.phantom, ?tmp#77##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#77##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#82##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#82##0:wybe.phantom, ?tmp#83##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#83##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+
+    5:
+        foreign lpvm access(~x##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?a##5:wybe.int) @multictr2:nn:nn
+        wybe.string.print<0>("c06(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#67##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##5:wybe.int, ~tmp#67##0:wybe.phantom, ?tmp#68##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#68##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #34 @multictr2:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#73##0:wybe.phantom) @multictr2:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#73##0:wybe.phantom, ?tmp#74##0:wybe.phantom) @multictr2:nn:nn
         foreign lpvm store(~%tmp#74##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
-    2:
-        foreign lpvm access(~x##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int) @multictr2:nn:nn
-        wybe.string.print<0>("c03(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#66##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_int(~a##2:wybe.int, ~tmp#66##0:wybe.phantom, ?tmp#67##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#67##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#68##0:wybe.phantom) @multictr2:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#69##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-
-    3:
-        foreign lpvm access(~x##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?a##3:wybe.int) @multictr2:nn:nn
-        wybe.string.print<0>("c04(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#61##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_int(~a##3:wybe.int, ~tmp#61##0:wybe.phantom, ?tmp#62##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#62##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom) @multictr2:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#63##0:wybe.phantom, ?tmp#64##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#64##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-
-    4:
-        foreign lpvm access(~x##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?a##4:wybe.int) @multictr2:nn:nn
-        wybe.string.print<0>("c05(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_int(~a##4:wybe.int, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#58##0:wybe.phantom) @multictr2:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#58##0:wybe.phantom, ?tmp#59##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#59##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-
-    5:
-        foreign lpvm access(~x##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?a##5:wybe.int) @multictr2:nn:nn
-        wybe.string.print<0>("c06(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#51##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_int(~a##5:wybe.int, ~tmp#51##0:wybe.phantom, ?tmp#52##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#52##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @multictr2:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-
     6:
         foreign lpvm access(~x##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?a##6:wybe.int) @multictr2:nn:nn
-        wybe.string.print<0>("c07(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#46##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_int(~a##6:wybe.int, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#47##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#48##0:wybe.phantom) @multictr2:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#48##0:wybe.phantom, ?tmp#49##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#49##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>("c07(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #37 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#58##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##6:wybe.int, ~tmp#58##0:wybe.phantom, ?tmp#59##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#59##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#64##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#64##0:wybe.phantom, ?tmp#65##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#65##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
     7:
         foreign lpvm access(x##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?a##7:wybe.int) @multictr2:nn:nn
         foreign lpvm access(x##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?b##0:wybe.int) @multictr2:nn:nn
         foreign lpvm access(~x##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?c##0:wybe.float) @multictr2:nn:nn
-        wybe.string.print<0>("c08(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #36 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#35##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_int(~a##7:wybe.int, ~tmp#35##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#36##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #38 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_int(~b##0:wybe.int, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#41##0:wybe.phantom) @multictr2:nn:nn
-        foreign c print_float(~c##0:wybe.float, ~tmp#41##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @multictr2:nn:nn
-        foreign lpvm store(~%tmp#42##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
-        wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #42 @multictr2:nn:nn
+        wybe.string.print<0>("c08(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #43 @multictr2:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#43##0:wybe.phantom) @multictr2:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##7:wybe.int, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @multictr2:nn:nn
         foreign lpvm store(~%tmp#44##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #45 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#46##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~b##0:wybe.int, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#47##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #47 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#49##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_float(~c##0:wybe.float, ~tmp#49##0:wybe.phantom, ?tmp#50##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#50##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
+        wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @multictr2:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#55##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#55##0:wybe.phantom, ?tmp#56##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#56##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
 
   LLVM code       :
@@ -166,34 +167,33 @@ print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/multictr2.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c")\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"c01(\00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"c03(\00", align 8
-@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"c04(\00", align 8
-@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"c05(\00", align 8
-@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"c06(\00", align 8
-@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"c07(\00", align 8
-@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"c08(\00", align 8
-@"string#9" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#10" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#11" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#12" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
-@"string#13" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
-@"string#14" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
-@"string#15" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
-@"string#16" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
-@"string#17" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"c01(\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"c03(\00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"c04(\00", align 8
+@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"c05(\00", align 8
+@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"c06(\00", align 8
+@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"c07(\00", align 8
+@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"c08(\00", align 8
+@"string#8" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#9" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#10" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#11" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
+@"string#12" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
+@"string#13" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
+@"string#14" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
+@"string#15" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_float(double)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"multictr2.print_t<0>"(i64 %"x##0") {
-  %"tmp#9##0" = and i64 %"x##0", 7
-  switch i64 %"tmp#9##0", label %case.7.switch.0 [
+  %"tmp#17##0" = and i64 %"x##0", 7
+  switch i64 %"tmp#17##0", label %case.7.switch.0 [
     i64 0, label %case.0.switch.0
     i64 1, label %case.1.switch.0
     i64 2, label %case.2.switch.0
@@ -203,84 +203,84 @@ define external fastcc void @"multictr2.print_t<0>"(i64 %"x##0") {
     i64 6, label %case.6.switch.0
     i64 7, label %case.7.switch.0 ]
 case.0.switch.0:
-  %"tmp#80##0" = inttoptr i64 %"x##0" to ptr
-  %"a##0" = load i64, ptr %"tmp#80##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
-  call ccc void @print_int(i64 %"a##0")
+  %"tmp#120##0" = inttoptr i64 %"x##0" to ptr
+  %"a##0" = load i64, ptr %"tmp#120##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  call ccc void @print_int(i64 %"a##0")
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.1.switch.0:
-  %"tmp#81##0" = add i64 %"x##0", -1
-  %"tmp#82##0" = inttoptr i64 %"tmp#81##0" to ptr
-  %"a##1" = load i64, ptr %"tmp#82##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#12" to i64 ))
+  %"tmp#121##0" = add i64 %"x##0", -1
+  %"tmp#122##0" = inttoptr i64 %"tmp#121##0" to ptr
+  %"a##1" = load i64, ptr %"tmp#122##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
   call ccc void @print_int(i64 %"a##1")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.2.switch.0:
-  %"tmp#83##0" = add i64 %"x##0", -2
-  %"tmp#84##0" = inttoptr i64 %"tmp#83##0" to ptr
-  %"a##2" = load i64, ptr %"tmp#84##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#12" to i64 ))
+  %"tmp#123##0" = add i64 %"x##0", -2
+  %"tmp#124##0" = inttoptr i64 %"tmp#123##0" to ptr
+  %"a##2" = load i64, ptr %"tmp#124##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
   call ccc void @print_int(i64 %"a##2")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.3.switch.0:
-  %"tmp#85##0" = add i64 %"x##0", -3
-  %"tmp#86##0" = inttoptr i64 %"tmp#85##0" to ptr
-  %"a##3" = load i64, ptr %"tmp#86##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#13" to i64 ))
+  %"tmp#125##0" = add i64 %"x##0", -3
+  %"tmp#126##0" = inttoptr i64 %"tmp#125##0" to ptr
+  %"a##3" = load i64, ptr %"tmp#126##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
   call ccc void @print_int(i64 %"a##3")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.4.switch.0:
-  %"tmp#87##0" = add i64 %"x##0", -4
-  %"tmp#88##0" = inttoptr i64 %"tmp#87##0" to ptr
-  %"a##4" = load i64, ptr %"tmp#88##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#14" to i64 ))
+  %"tmp#127##0" = add i64 %"x##0", -4
+  %"tmp#128##0" = inttoptr i64 %"tmp#127##0" to ptr
+  %"a##4" = load i64, ptr %"tmp#128##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#12" to i64 ))
   call ccc void @print_int(i64 %"a##4")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.5.switch.0:
-  %"tmp#89##0" = add i64 %"x##0", -5
-  %"tmp#90##0" = inttoptr i64 %"tmp#89##0" to ptr
-  %"a##5" = load i64, ptr %"tmp#90##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
+  %"tmp#129##0" = add i64 %"x##0", -5
+  %"tmp#130##0" = inttoptr i64 %"tmp#129##0" to ptr
+  %"a##5" = load i64, ptr %"tmp#130##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#13" to i64 ))
   call ccc void @print_int(i64 %"a##5")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.6.switch.0:
-  %"tmp#91##0" = add i64 %"x##0", -6
-  %"tmp#92##0" = inttoptr i64 %"tmp#91##0" to ptr
-  %"a##6" = load i64, ptr %"tmp#92##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#16" to i64 ))
+  %"tmp#131##0" = add i64 %"x##0", -6
+  %"tmp#132##0" = inttoptr i64 %"tmp#131##0" to ptr
+  %"a##6" = load i64, ptr %"tmp#132##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#14" to i64 ))
   call ccc void @print_int(i64 %"a##6")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.7.switch.0:
-  %"tmp#93##0" = add i64 %"x##0", -7
-  %"tmp#94##0" = inttoptr i64 %"tmp#93##0" to ptr
-  %"a##7" = load i64, ptr %"tmp#94##0"
-  %"tmp#95##0" = add i64 %"x##0", 1
-  %"tmp#96##0" = inttoptr i64 %"tmp#95##0" to ptr
-  %"b##0" = load i64, ptr %"tmp#96##0"
-  %"tmp#97##0" = add i64 %"x##0", 9
-  %"tmp#98##0" = inttoptr i64 %"tmp#97##0" to ptr
-  %"c##0" = load double, ptr %"tmp#98##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#17" to i64 ))
+  %"tmp#133##0" = add i64 %"x##0", -7
+  %"tmp#134##0" = inttoptr i64 %"tmp#133##0" to ptr
+  %"a##7" = load i64, ptr %"tmp#134##0"
+  %"tmp#135##0" = add i64 %"x##0", 1
+  %"tmp#136##0" = inttoptr i64 %"tmp#135##0" to ptr
+  %"b##0" = load i64, ptr %"tmp#136##0"
+  %"tmp#137##0" = add i64 %"x##0", 9
+  %"tmp#138##0" = inttoptr i64 %"tmp#137##0" to ptr
+  %"c##0" = load double, ptr %"tmp#138##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
   call ccc void @print_int(i64 %"a##7")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
   call ccc void @print_int(i64 %"b##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
   call ccc void @print_float(double %"c##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 }

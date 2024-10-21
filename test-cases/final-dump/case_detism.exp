@@ -1,3 +1,2 @@
 Error detected during type checking of module(s) case_detism
-[91mmodule top-level code has test determinism, but declared normal (total)
-[0m
+module top-level code has test determinism, but declared normal (total)

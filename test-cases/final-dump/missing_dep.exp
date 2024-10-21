@@ -1,6 +1,5 @@
 Error detected during loading module: does_not_exist
-[91mCould not find source for module does_not_exist
+Could not find source for module does_not_exist
 in directories:
     !ROOT!/final-dump
     !ROOT!/../wybelibs
-[0m

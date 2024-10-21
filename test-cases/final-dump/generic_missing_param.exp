@@ -1,3 +1,2 @@
 Error detected during preliminary processing of module generic_missing_param
-[91mfinal-dump/generic_missing_param.wybe:1:27: Constructors for type generic_missing_param use unbound type variable(s) ?U
-[0m
+final-dump/generic_missing_param.wybe:1:27: Constructors for type generic_missing_param use unbound type variable(s) ?U

@@ -1,4 +1,3 @@
 Error detected during loading module: backquote_control_char
-[91mfinal-dump/backquote_control_char.wybe:1:5: Syntax error: unexpected control character in a backquoted symbol
+final-dump/backquote_control_char.wybe:1:5: Syntax error: unexpected control character in a backquoted symbol
 expecting simple expression
-[0m

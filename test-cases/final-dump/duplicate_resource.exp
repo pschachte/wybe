@@ -1,4 +1,3 @@
 Error detected during preliminary processing of module duplicate_resource
-[91mfinal-dump/duplicate_resource.wybe:2:1: Duplicate declaration of resource 'foo'
-[0m[91mfinal-dump/duplicate_resource.wybe:3:1: Duplicate declaration of resource 'foo'
-[0m
+final-dump/duplicate_resource.wybe:2:1: Duplicate declaration of resource 'foo'
+final-dump/duplicate_resource.wybe:3:1: Duplicate declaration of resource 'foo'
