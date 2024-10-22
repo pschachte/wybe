@@ -1,3 +1,2 @@
 Error detected during type checking of module(s) bad_reification
-[91mfinal-dump/bad_reification.wybe:3:1: Can't reify call to test proc foo with outputs
-[0m
+final-dump/bad_reification.wybe:3:1: Can't reify call to test proc foo with outputs

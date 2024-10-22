@@ -1,5 +1,4 @@
 Error detected during type checking of module(s) detism_error
-[91mfinal-dump/detism_error.wybe:3:5: proc not_really_det has test determinism, but declared normal (total)
-[0m[91mfinal-dump/detism_error.wybe:4:6: Calling test proc wybe.int.=<0> in a normal (total) context
-[0m[91mfinal-dump/detism_error.wybe:16:5: proc not_really_terminal has normal (total) determinism, but declared terminal
-[0m
+final-dump/detism_error.wybe:3:5: proc not_really_det has test determinism, but declared normal (total)
+final-dump/detism_error.wybe:4:6: Calling test proc wybe.int.=<0> in a normal (total) context
+final-dump/detism_error.wybe:16:5: proc not_really_terminal has normal (total) determinism, but declared terminal

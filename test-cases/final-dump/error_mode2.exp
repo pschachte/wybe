@@ -1,5 +1,4 @@
 Error detected during type checking of module(s) error_mode2
-[91mfinal-dump/error_mode2.wybe:3:5: proc non_terminal has normal (total) determinism, but declared terminal
-[0m[91mfinal-dump/error_mode2.wybe:7:5: proc non_terminal2 has failing determinism, but declared terminal
-[0m[91mfinal-dump/error_mode2.wybe:15:5: proc non_failing has normal (total) determinism, but declared failing
-[0m
+final-dump/error_mode2.wybe:3:5: proc non_terminal has normal (total) determinism, but declared terminal
+final-dump/error_mode2.wybe:7:5: proc non_terminal2 has failing determinism, but declared terminal
+final-dump/error_mode2.wybe:15:5: proc non_failing has normal (total) determinism, but declared failing

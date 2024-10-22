@@ -6,20 +6,21 @@ pragma no_standard_library
 use wybe.c_string, wybe.range, wybe.int, wybe.char, wybe.bool, wybe.comparison
 use wybe.control, wybe.io 
 
-# Private constructors.
-# This ensures that strings can only be manipulated with public procedures,
-# providing a more typical interface
-constructors empty
-             # ^ An empty string
-           | buffer(len:int, raw:c_string) 
+# Private constructors. This ensures that strings can only be manipulated with
+# public procedures, providing a more typical interface.  The `empty` and
+# `singleton` constructors are public so that short manifest constant strings
+# can be optimised to use those constructors.  This happens in Expansion.hs.
+constructors buffer(len:int, raw:c_string) 
              # ^ A wrapper for a c_string
              # Note: must be first non-const ctor
            | concat(left:_, right:_)
              # ^ A concatenation of two strings
            | slice(base:_, range:range)
              # ^ A slice of a string under the given range
-           | singleton(c:char)
+           | pub singleton(c:char)
              # ^ A singleton string, a single char
+           | pub empty
+             # ^ An empty string
 
 
 ## Conversion procedures.
@@ -168,6 +169,7 @@ pub def print(x:_) use !io {
       | concat(?left, ?right) :: !print(left); !print(right)
       | slice(_, _) :: for ?c in x { !print(c) }
       | singleton(?c) :: !print(c)
+      | empty :: pass
       | else :: !shouldnt
     }
 }

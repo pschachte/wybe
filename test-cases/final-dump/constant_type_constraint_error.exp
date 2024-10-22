@@ -1,6 +1,6 @@
 Error detected during type checking of module(s) constant_type_constraint_error, constant_type_constraint_error.my_float, constant_type_constraint_error.my_int
-[91mfinal-dump/constant_type_constraint_error.wybe:4:6: Type constraint (:int) in call from module top-level code to =, argument 2, is incompatible with expression "s"
-[0m[91mfinal-dump/constant_type_constraint_error.wybe:5:6: Type constraint (:string) in call from module top-level code to =, argument 2, is incompatible with expression 1
-[0m[91mfinal-dump/constant_type_constraint_error.wybe:6:6: Type constraint (:float) in call from module top-level code to =, argument 2, is incompatible with expression "1.0"
-[0m[91mfinal-dump/constant_type_constraint_error.wybe:13:6: Type constraint (:my_int) in call from module top-level code to =, argument 2, is incompatible with expression 1.0
-[0m
+final-dump/constant_type_constraint_error.wybe:4:6: Type constraint (:int) in call from module top-level code to =, argument 2, is incompatible with expression "s"
+final-dump/constant_type_constraint_error.wybe:5:6: Type constraint (:string) in call from module top-level code to =, argument 2, is incompatible with expression 1
+final-dump/constant_type_constraint_error.wybe:6:6: Type constraint (:float) in call from module top-level code to =, argument 2, is incompatible with expression "1.0"
+final-dump/constant_type_constraint_error.wybe:12:2: Type error in call to proc =, argument 2
+final-dump/constant_type_constraint_error.wybe:13:6: Type constraint (:my_int) in call from module top-level code to =, argument 2, is incompatible with expression 1.0

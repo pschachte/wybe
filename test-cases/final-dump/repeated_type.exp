@@ -1,3 +1,2 @@
 Error detected during loading module: repeated_type
-[91mfinal-dump/repeated_type.wybe:2:23: Syntax error: unexpected newline
-[0m
+final-dump/repeated_type.wybe:2:23: Syntax error: unexpected newline

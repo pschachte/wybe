@@ -1,3 +1,2 @@
 Error detected during handling loops and conditionals in module(s) break_outside_loop
-[91mfinal-dump/break_outside_loop.wybe:1:1: Break outside of a loop
-[0m
+final-dump/break_outside_loop.wybe:1:1: Break outside of a loop

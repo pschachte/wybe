@@ -1,3 +1,2 @@
 Error detected during preliminary processing of module generic_resource
-[91mfinal-dump/generic_resource.wybe:1:1: Resource type cannot contain type variables: list(F00)
-[0m
+final-dump/generic_resource.wybe:1:1: Resource type cannot contain type variables: list(F00)

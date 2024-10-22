@@ -2245,38 +2245,46 @@ Floating point multiplication
 Floating point division
 - `foreign llvm frem(`arg1:float, arg2:float`)`:float
 Floating point remainder
-- `foreign llvm fcmp_ord(`arg1:float, arg2:float`)`:bool
-Floating point ordered (neither is a NaN)
+
+
+##### Floating point comparisons
+
+Floating point comparisons are either *ordered* or *unordered*, the former
+returning false if either comparand is not a number (NaN), while the latter sort
+return true in that case.
+
+- `foreign llvm fcmp_false(`arg1:float, arg2:float`)`:bool
+Always returns false with no comparison
 - `foreign llvm fcmp_oeq(`arg1:float, arg2:float`)`:bool
 Floating point equality
+- `foreign llvm fcmp_ogt(`arg1:float, arg2:float`)`:bool
+Floating point strictly greater
+- `foreign llvm fcmp_oge(`arg1:float, arg2:float`)`:bool
+Floating point greater or equal
+- `foreign llvm fcmp_olt(`arg1:float, arg2:float`)`:bool
+Floating point strictly less
+- `foreign llvm fcmp_ole(`arg1:float, arg2:float`)`:bool
+Floating point less or equal
 - `foreign llvm fcmp_one(`arg1:float, arg2:float`)`:bool
 Floating point disequality
-- `foreign llvm fcmp_olt(`arg1:float, arg2:float`)`:bool
-Floating point (signed) strictly less
-- `foreign llvm fcmp_ole(`arg1:float, arg2:float`)`:bool
-Floating point (signed) less or equal
-- `foreign llvm fcmp_ogt(`arg1:float, arg2:float`)`:bool
-Floating point (signed) strictly greater
-- `foreign llvm fcmp_oge(`arg1:float, arg2:float`)`:bool
-Floating point (signed) greater or equal
 - `foreign llvm fcmp_ord(`arg1:float, arg2:float`)`:bool
-Floating point unordered (either is a NaN)
+Floating point ordered (neither is a NaN)
 - `foreign llvm fcmp_ueq(`arg1:float, arg2:float`)`:bool
 Floating point unordered or equal
-- `foreign llvm fcmp_une(`arg1:float, arg2:float`)`:bool
-Floating point unordered or not equal
-- `foreign llvm fcmp_ult(`arg1:float, arg2:float`)`:bool
-Floating point unordered or strictly less
-- `foreign llvm fcmp_ule(`arg1:float, arg2:float`)`:bool
-Floating point unordered or less or equal
 - `foreign llvm fcmp_ugt(`arg1:float, arg2:float`)`:bool
 Floating point unordered or strictly greater
 - `foreign llvm fcmp_uge(`arg1:float, arg2:float`)`:bool
 Floating point unordered or greater or equal
+- `foreign llvm fcmp_ult(`arg1:float, arg2:float`)`:bool
+Floating point unordered or strictly less
+- `foreign llvm fcmp_ule(`arg1:float, arg2:float`)`:bool
+Floating point unordered or less or equal
+- `foreign llvm fcmp_une(`arg1:float, arg2:float`)`:bool
+Floating point unordered or not equal
+- `foreign llvm fcmp_uno(`arg1:float, arg2:float`)`:bool
+Floating point unordered (either is a NaN)
 - `foreign llvm fcmp_true(`arg1:float, arg2:float`)`:bool
 Always returns true with no comparison
-- `foreign llvm fcmp_false(`arg1:float, arg2:float`)`:bool
-Always returns false with no comparison
 
 #####  <a name="conversion"></a>Integer/floating point conversion
 
@@ -2309,7 +2317,7 @@ treat this as an ordinary pointer.
 - `opaque`
 the type is a machine address, similar to the `void *` type in C.  Wybe treats such values as opaque.
 - *n* `bit signed`
-a signed primitive number type comprising *n* bits, where *n* is any non-negative
+a signed primitive number type comprising *n* bits, where *n* is any positive
 integer.  Represents integers between -2<sup>*n*-1</sup> and 2<sup>*n*-1</sup>-1 inclusive.
 - *n* `bit unsigned`
 an unsigned primitive number type comprising *n* bits, where *n* is any non-negative

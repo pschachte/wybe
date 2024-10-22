@@ -1,3 +1,2 @@
 Error detected during uniqueness checking of module(s) unique_pos_error, unique_pos_error.unique_position
-[91mfinal-dump/unique_pos_error.wybe:15:16: Reuse of unique variable p:unique_pos_error.unique_position
-[0m
+final-dump/unique_pos_error.wybe:15:16: Reuse of unique variable p:unique_pos_error.unique_position

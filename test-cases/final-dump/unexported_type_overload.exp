@@ -1,3 +1,2 @@
 Error detected during checking parameter type declarations in module(s) unexported_type_overload, unexported_type_overload.sub, unexported_type_overload.sub.hidden
-[91mfinal-dump/unexported_type_overload.wybe:8:5: Public proc proc2 with undeclared parameter or return type
-[0m
+final-dump/unexported_type_overload.wybe:8:5: Public proc proc2 with undeclared parameter or return type

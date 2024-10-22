@@ -1,4 +1,3 @@
 Error detected during loading module: backquote_hash
-[91mfinal-dump/backquote_hash.wybe:1:5: Syntax error: unexpected hash character (#) in backquoted symbol
+final-dump/backquote_hash.wybe:1:5: Syntax error: unexpected hash character (#) in backquoted symbol
 expecting simple expression
-[0m

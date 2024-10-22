@@ -7,7 +7,7 @@
 
 module Snippets (castFromTo, castTo, withType, intType, intCast,
                  tagType, tagCast, phantomType, stringType, cStringType,
-                 isTypeVar,
+                 charType, isTypeVar,
                  varSet, varGet, varGetSet,
                  varSetTyped, varGetTyped, varGetSetTyped,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
@@ -83,6 +83,10 @@ stringType = TypeSpec ["wybe"] "string" []
 -- | The c_string type, a C string
 cStringType :: TypeSpec
 cStringType = TypeSpec ["wybe"] "c_string" []
+
+-- | The char type, a single character constant
+charType :: TypeSpec
+charType = TypeSpec ["wybe"] "char" []
 
 -- | Is the given string a type variable name
 isTypeVar :: String -> Bool

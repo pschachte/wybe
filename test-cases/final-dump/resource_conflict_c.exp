@@ -1,3 +1,2 @@
 Error detected during type checking of module(s) resource_conflict_c
-[91mOverloaded resources resource_conflict_a.res, resource_conflict_b.res
-[0m
+Overloaded resources resource_conflict_a.res, resource_conflict_b.res

@@ -1,5 +1,4 @@
 Error detected during type checking of module(s) use_before_def
-[91mfinal-dump/use_before_def.wybe:1:5: Output parameter result not defined by proc use_before_def
-[0m[91mfinal-dump/use_before_def.wybe:2:9: Uninitialised argument in call to proc =, argument 2
-[0m[91mfinal-dump/use_before_def.wybe:2:18: Uninitialised argument in call to proc +, argument 1
-[0m
+final-dump/use_before_def.wybe:1:5: Output parameter result not defined by proc use_before_def
+final-dump/use_before_def.wybe:2:9: Uninitialised argument in call to proc =, argument 2
+final-dump/use_before_def.wybe:2:18: Uninitialised argument in call to proc +, argument 1

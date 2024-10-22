@@ -1,3 +1,2 @@
 Error detected during type checking of module(s) bad_assign
-[91mfinal-dump/bad_assign.wybe:5:1: proc l unknown in module top-level code
-[0m
+final-dump/bad_assign.wybe:5:1: proc l unknown in module top-level code

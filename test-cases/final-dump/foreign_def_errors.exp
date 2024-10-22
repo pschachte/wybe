@@ -1,4 +1,3 @@
 Error detected during preliminary processing of module foreign_def_errors
-[91mfinal-dump/foreign_def_errors.wybe:1:23: Foreign procedure declaration parameters must be typed, but p is untyped.
-[0m[91mfinal-dump/foreign_def_errors.wybe:2:1: Foreign procedure declaration of bad_mods has illegal procedure modifiers. Only purity, determinism, and inlining can be specified.
-[0m
+final-dump/foreign_def_errors.wybe:1:23: Foreign procedure declaration parameters must be typed, but p is untyped.
+final-dump/foreign_def_errors.wybe:2:1: Foreign procedure declaration of bad_mods has illegal procedure modifiers. Only purity, determinism, and inlining can be specified.

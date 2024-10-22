@@ -1003,17 +1003,18 @@ proc print > public (0 calls)
 print(pos##0:bug214.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @bug214:nn:nn
+  MultiSpeczDepInfo: [(0,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.string.print<0>[410bae77d3](1187:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @bug214:nn:nn
     foreign lpvm access(pos##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @bug214:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @bug214:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @bug214:nn:nn
-    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
-    wybe.string.print<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @bug214:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @bug214:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @bug214:nn:nn
+    foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
+    wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @bug214:nn:nn
     foreign lpvm access(~pos##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @bug214:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @bug214:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @bug214:nn:nn
-    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
-    wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @bug214:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @bug214:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @bug214:nn:nn
+    foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
+    wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @bug214:nn:nn
 
 
 proc x > public {inline} (1 calls)
@@ -1072,14 +1073,8 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/bug214.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"(\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c")\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c",\00", align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 1, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -1138,16 +1133,16 @@ define external fastcc {i64, i64} @"bug214.position.position<1>"(i64 %"#result##
 }
 
 define external fastcc void @"bug214.position.print<0>"(i64 %"pos##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
-  %"tmp#10##0" = inttoptr i64 %"pos##0" to ptr
-  %"tmp#0##0" = load i64, ptr %"tmp#10##0"
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1187)
+  %"tmp#25##0" = inttoptr i64 %"pos##0" to ptr
+  %"tmp#0##0" = load i64, ptr %"tmp#25##0"
   call ccc void @print_int(i64 %"tmp#0##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
-  %"tmp#11##0" = add i64 %"pos##0", 8
-  %"tmp#12##0" = inttoptr i64 %"tmp#11##0" to ptr
-  %"tmp#1##0" = load i64, ptr %"tmp#12##0"
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1203)
+  %"tmp#26##0" = add i64 %"pos##0", 8
+  %"tmp#27##0" = inttoptr i64 %"tmp#26##0" to ptr
+  %"tmp#1##0" = load i64, ptr %"tmp#27##0"
   call ccc void @print_int(i64 %"tmp#1##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   ret void
 }
 

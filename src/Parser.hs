@@ -171,7 +171,7 @@ typeRep = do
 -- | Type declaration body where visibility, constructors, and items are given
 typeCtors :: Parser (TypeImpln,[Item])
 typeCtors = betweenB Brace $ do
-    vis <- option Private 
+    vis <- option Private
         $ try (visibility <* (ident "constructor" <|> ident "constructors"))
     ctors <- TypeCtors vis <$> ctorDecls
     items <- option [] (separator *> items)
@@ -260,7 +260,7 @@ procOrFuncItem vis = do
                 Nothing -> do
                     body <- embracedTerm >>= parseWith termToBody
                     return $ ProcDecl vis mods proto' body $ Just pos
-        
+
 
 
 -- | Parse an optional series of resource flows
@@ -1171,9 +1171,9 @@ termToExp (Call pos [] "@" flow exps) = do
     exps' <- mapM termToExp exps
     case content <$> exps' of
         [] -> return $ Placed (AnonParamVar Nothing flow) pos
-        [IntValue i] | i > 0 
+        [IntValue i] | i > 0
             -> return $ Placed (AnonParamVar (Just i) flow) pos
-        [exp] 
+        [exp]
             -> return $ Placed (AnonFunc $ head exps') pos
         _ -> syntaxError pos "invalid anonymous parameter/function expression"
 termToExp (Call pos [] "|" ParamIn [exp1,exp2]) = do

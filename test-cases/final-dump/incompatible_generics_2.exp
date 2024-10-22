@@ -1,4 +1,3 @@
 Error detected during type checking of module(s) incompatible_generics_2
-[91mfinal-dump/incompatible_generics_2.wybe:1:27: Type error in call to proc +, argument 1
-[0m[91mfinal-dump/incompatible_generics_2.wybe:1:27: Type error in call to proc +, argument 2
-[0m
+final-dump/incompatible_generics_2.wybe:1:27: Type error in call to proc +, argument 1
+final-dump/incompatible_generics_2.wybe:1:27: Type error in call to proc +, argument 2

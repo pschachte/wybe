@@ -1,10 +1,9 @@
 Error detected during uniqueness checking of module(s) unique_generic, unique_generic.u
-[91mfinal-dump/unique_generic.wybe:7:8: Call to wybe.list.[|] binds type variable T to unique type unique_generic.u
-[0m[91mfinal-dump/unique_generic.wybe:7:11: Call to wybe.list.[|] binds type variable T to unique type unique_generic.u
-[0m[91mfinal-dump/unique_generic.wybe:7:14: Call to wybe.list.[] binds type variable T to unique type unique_generic.u
-[0m[91mfinal-dump/unique_generic.wybe:8:9: Call to wybe.list.reverse binds type variable T to unique type unique_generic.u
-[0m[91mfinal-dump/unique_generic.wybe:10:9: Parameter lst of bla has type with unique type parameter unique_generic.u
-[0m[91mfinal-dump/unique_generic.wybe:11:9: Call to wybe.list.[|] binds type variable T to unique type unique_generic.u
-[0m[91mfinal-dump/unique_generic.wybe:11:17: Unique variable h:unique_generic.u assigned in a test context
-[0m[91mfinal-dump/unique_generic.wybe:18:1: Call to unique_generic.foo binds inferred variable type to unique type unique_generic.u
-[0m
+final-dump/unique_generic.wybe:7:8: Call to wybe.list.[|] binds type variable T to unique type unique_generic.u
+final-dump/unique_generic.wybe:7:11: Call to wybe.list.[|] binds type variable T to unique type unique_generic.u
+final-dump/unique_generic.wybe:7:14: Call to wybe.list.[] binds type variable T to unique type unique_generic.u
+final-dump/unique_generic.wybe:8:9: Call to wybe.list.reverse binds type variable T to unique type unique_generic.u
+final-dump/unique_generic.wybe:10:9: Parameter lst of bla has type with unique type parameter unique_generic.u
+final-dump/unique_generic.wybe:11:9: Call to wybe.list.[|] binds type variable T to unique type unique_generic.u
+final-dump/unique_generic.wybe:11:17: Unique variable h:unique_generic.u assigned in a test context
+final-dump/unique_generic.wybe:18:1: Call to unique_generic.foo binds inferred variable type to unique type unique_generic.u
