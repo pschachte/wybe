@@ -1127,38 +1127,38 @@ simplifyOp "fdiv" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
 simplifyOp "fdiv" _ [arg, ArgFloat 1 _, output] =
   primMove arg output
 -- Float comparisons
-simplifyOp "fcmp_ord" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
-  primMove (boolConstant True) output
+simplifyOp "fcmp_false" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant False) output
 simplifyOp "fcmp_oeq" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1==n2) output
-simplifyOp "fcmp_one" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
-  primMove (boolConstant $ n1/=n2) output
-simplifyOp "fcmp_olt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
-  primMove (boolConstant $ n1<n2) output
-simplifyOp "fcmp_ole" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
-  primMove (boolConstant $ n1<=n2) output
 simplifyOp "fcmp_ogt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>n2) output
 simplifyOp "fcmp_oge" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>=n2) output
+simplifyOp "fcmp_olt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1<n2) output
+simplifyOp "fcmp_ole" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1<=n2) output
+simplifyOp "fcmp_one" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1/=n2) output
 simplifyOp "fcmp_ord" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant True) output
-simplifyOp "fcmp_oeq" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_ueq" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1==n2) output
-simplifyOp "fcmp_une" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
-  primMove (boolConstant $ n1/=n2) output
-simplifyOp "fcmp_ult" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
-  primMove (boolConstant $ n1<n2) output
-simplifyOp "fcmp_ule" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
-  primMove (boolConstant $ n1<=n2) output
 simplifyOp "fcmp_ugt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>n2) output
 simplifyOp "fcmp_uge" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>=n2) output
+simplifyOp "fcmp_ult" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1<n2) output
+simplifyOp "fcmp_ule" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1<=n2) output
+simplifyOp "fcmp_une" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant $ n1/=n2) output
+simplifyOp "fcmp_uno" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
+  primMove (boolConstant False) output
 simplifyOp "fcmp_true" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant True) output
-simplifyOp "fcmp_false" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
-  primMove (boolConstant False) output
 simplifyOp name flags args = PrimForeign "llvm" name flags args
 
 

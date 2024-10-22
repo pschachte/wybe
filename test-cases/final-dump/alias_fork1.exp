@@ -235,8 +235,8 @@ proc printTree > public {inline} (0 calls)
 printTree(t##0:mytree.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    mytree.printTree1<0>(~t##0:mytree.tree, 1519:wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @mytree:nn:nn
-    wybe.string.print<0>(1527:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @mytree:nn:nn
+    mytree.printTree1<0>(~t##0:mytree.tree, 1519:wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @mytree:nn:nn
+    wybe.string.print<0>(1527:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @mytree:nn:nn
 
 
 proc printTree1 > public (3 calls)

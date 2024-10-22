@@ -1219,11 +1219,6 @@ termToExp (Foreign pos lang inst flags args) =
 termToExp (IntConst pos num) = Right $ Placed (IntValue num) pos
 termToExp (FloatConst pos num) = Right $ Placed (FloatValue num) pos
 termToExp (CharConst pos char) = Right $ Placed (CharValue char) pos
-termToExp (StringConst pos "" DoubleQuote)
-    = return $ Placed (Fncall ["wybe","string"] "empty" False []) pos
-termToExp (StringConst pos [chr] DoubleQuote)
-    = return $ Placed (Fncall ["wybe","string"] "singleton" False
-                        [Unplaced (CharValue chr)]) pos
 termToExp (StringConst pos str DoubleQuote)
     = return $ Placed (StringValue str WybeString) pos
 termToExp (StringConst pos str (IdentQuote "c" DoubleQuote))
