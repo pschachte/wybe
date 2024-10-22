@@ -35,7 +35,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("ten = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @caret:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom) @caret:nn:nn
     foreign c print_int(~ten##0:wybe.int, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @caret:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @caret:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @caret:nn:nn
     foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @caret:nn:nn
     caret.#cont#1<0>[410bae77d3](~tmp#25##0:caret.region)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8
 
@@ -53,7 +53,7 @@ proc #cont#1 > {semipure} (2 calls)
     wybe.string.print<0>("now ten = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @caret:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @caret:nn:nn
     foreign c print_int(~ten##0:wybe.int, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @caret:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @caret:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @caret:nn:nn
     foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @caret:nn:nn
  [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm access(~reg##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:position.position) @caret:nn:nn
@@ -64,7 +64,7 @@ proc #cont#1 > {semipure} (2 calls)
     wybe.string.print<0>("now ten = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @caret:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @caret:nn:nn
     foreign c print_int(~ten##0:wybe.int, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @caret:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @caret:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @caret:nn:nn
     foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @caret:nn:nn
 
 
@@ -622,7 +622,7 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
     wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @position:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @position:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @position:nn:nn
     foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
 
   LLVM code       :

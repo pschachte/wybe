@@ -457,7 +457,7 @@ print(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
         foreign lpvm access(~x##0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:int_list.int_list) @int_list:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int_list:nn:nn
         foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int_list:nn:nn
-        foreign c putchar(' ':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int_list:nn:nn
+        foreign c putchar(32:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int_list:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list:nn:nn
         int_list.print<0>(~t##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @int_list:nn:nn
 
@@ -470,7 +470,7 @@ println(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     int_list.print<0>(~x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @int_list:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @int_list:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#0##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @int_list:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#0##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @int_list:nn:nn
     foreign lpvm store(~%tmp#1##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list:nn:nn
 
 
@@ -784,29 +784,29 @@ module top-level code > public {semipure} (0 calls)
     int_list.range#cont#1<0>[410bae77d3](0:int_list.int_list, 3:wybe.int, 3:wybe.int, 30:wybe.int, ?tmp#2##0:int_list.int_list) #36 @int_list_test:nn:nn
     wybe.string.print<0>("x y z:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #37 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#0##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #38 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#1##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #39 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#26##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc2##0:wybe.int) @int_list_test:nn:nn
     foreign llvm sub(~mc2##0:wybe.int, ~mc1##0:wybe.int, ?tmp#3##0:wybe.int) @int_list_test:nn:nn
     wybe.string.print<0>("--------------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #41 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#31##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>("tests with alias":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #42 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc1##1:wybe.int) @int_list_test:nn:nn
     int_list_test.test_int_list<0>(tmp#0##0:int_list.int_list, tmp#1##0:int_list.int_list, tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @int_list_test:nn:nn
@@ -814,31 +814,31 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm sub(~mc2##1:wybe.int, ~mc1##1:wybe.int, ?tmp#4##0:wybe.int) @int_list_test:nn:nn
     wybe.string.print<0>("original x y z:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #43 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#0##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #44 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#41##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#41##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#41##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#42##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#1##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #45 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#44##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#44##0:wybe.phantom, ?tmp#45##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#44##0:wybe.phantom, ?tmp#45##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#45##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #46 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#47##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#47##0:wybe.phantom, ?tmp#48##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#47##0:wybe.phantom, ?tmp#48##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#48##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>("--------------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #47 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#50##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#50##0:wybe.phantom, ?tmp#51##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#50##0:wybe.phantom, ?tmp#51##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#51##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>("--------------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #48 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>("tests without alias":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #49 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc1##2:wybe.int) @int_list_test:nn:nn
     int_list_test.test_int_list<0>[9e35cb823b](~tmp#0##0:int_list.int_list, ~tmp#1##0:int_list.int_list, ~tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @int_list_test:nn:nn
@@ -846,22 +846,22 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm sub(~mc2##2:wybe.int, ~mc1##2:wybe.int, ?tmp#5##0:wybe.int) @int_list_test:nn:nn
     wybe.string.print<0>("--------------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#61##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#61##0:wybe.phantom, ?tmp#62##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#61##0:wybe.phantom, ?tmp#62##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#62##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of building lists: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#64##0:wybe.phantom) @int_list_test:nn:nn
     foreign c print_int(~tmp#3##0:wybe.int, ~tmp#64##0:wybe.phantom, ?tmp#65##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#65##0:wybe.phantom, ?tmp#66##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#65##0:wybe.phantom, ?tmp#66##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#66##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of test(aliased): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#68##0:wybe.phantom) @int_list_test:nn:nn
     foreign c print_int(~tmp#4##0:wybe.int, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#69##0:wybe.phantom, ?tmp#70##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#69##0:wybe.phantom, ?tmp#70##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#70##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of test(non-aliased): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#72##0:wybe.phantom) @int_list_test:nn:nn
     foreign c print_int(~tmp#5##0:wybe.int, ~tmp#72##0:wybe.phantom, ?tmp#73##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#73##0:wybe.phantom, ?tmp#74##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#73##0:wybe.phantom, ?tmp#74##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#74##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
 
 
@@ -876,49 +876,49 @@ test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_
     int_list.append<0>(~y##0:int_list.int_list, 99:wybe.int, ?tmp#0##0:int_list.int_list) #2 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(x##1:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#0##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(z##1:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.extend<0>[410bae77d3](~x##1:int_list.int_list, ~tmp#0##0:int_list.int_list, outByReference tmp#1##0:int_list.int_list) #7 @int_list_test:nn:nn
     int_list.extend<0>[410bae77d3](~tmp#1##0:int_list.int_list, ~z##1:int_list.int_list, outByReference tmp#2##0:int_list.int_list) #8 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#32##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#34##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#35##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.insert<0>[410bae77d3](~tmp#2##0:int_list.int_list, 4:wybe.int, 78:wybe.int, outByReference tmp#3##0:int_list.int_list) #11 @int_list_test:nn:nn
     int_list.pop<0>[410bae77d3](~tmp#3##0:int_list.int_list, 20:wybe.int, outByReference tmp#4##0:int_list.int_list) #12 @int_list_test:nn:nn
     int_list.remove<0>[410bae77d3](~tmp#4##0:int_list.int_list, 2:wybe.int, outByReference tmp#5##0:int_list.int_list) #13 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#42##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#43##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#5##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#45##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#45##0:wybe.phantom, ?tmp#46##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#45##0:wybe.phantom, ?tmp#46##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#46##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.sort<0>[410bae77d3](~tmp#5##0:int_list.int_list, ?l##5:int_list.int_list) #16 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(~l##5:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #34 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
 
   LLVM code       :
@@ -1444,7 +1444,7 @@ print(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
         foreign lpvm access(~x##0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:int_list.int_list) @int_list:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int_list:nn:nn
         foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int_list:nn:nn
-        foreign c putchar(' ':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int_list:nn:nn
+        foreign c putchar(32:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int_list:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list:nn:nn
         int_list.print<0>(~t##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @int_list:nn:nn
 
@@ -1457,7 +1457,7 @@ println(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     int_list.print<0>(~x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @int_list:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @int_list:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#0##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @int_list:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#0##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @int_list:nn:nn
     foreign lpvm store(~%tmp#1##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list:nn:nn
 
 
@@ -2555,29 +2555,29 @@ module top-level code > public {semipure} (0 calls)
     int_list.range#cont#1<0>[410bae77d3](0:int_list.int_list, 3:wybe.int, 3:wybe.int, 30:wybe.int, ?tmp#2##0:int_list.int_list) #36 @int_list_test:nn:nn
     wybe.string.print<0>("x y z:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #37 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#0##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #38 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#1##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #39 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#26##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc2##0:wybe.int) @int_list_test:nn:nn
     foreign llvm sub(~mc2##0:wybe.int, ~mc1##0:wybe.int, ?tmp#3##0:wybe.int) @int_list_test:nn:nn
     wybe.string.print<0>("--------------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #41 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#31##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>("tests with alias":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #42 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc1##1:wybe.int) @int_list_test:nn:nn
     int_list_test.test_int_list<0>(tmp#0##0:int_list.int_list, tmp#1##0:int_list.int_list, tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @int_list_test:nn:nn
@@ -2585,31 +2585,31 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm sub(~mc2##1:wybe.int, ~mc1##1:wybe.int, ?tmp#4##0:wybe.int) @int_list_test:nn:nn
     wybe.string.print<0>("original x y z:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #43 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#0##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #44 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#41##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#41##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#41##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#42##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#1##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #45 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#44##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#44##0:wybe.phantom, ?tmp#45##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#44##0:wybe.phantom, ?tmp#45##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#45##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #46 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#47##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#47##0:wybe.phantom, ?tmp#48##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#47##0:wybe.phantom, ?tmp#48##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#48##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>("--------------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #47 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#50##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#50##0:wybe.phantom, ?tmp#51##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#50##0:wybe.phantom, ?tmp#51##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#51##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>("--------------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #48 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>("tests without alias":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #49 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc1##2:wybe.int) @int_list_test:nn:nn
     int_list_test.test_int_list<0>[9e35cb823b](~tmp#0##0:int_list.int_list, ~tmp#1##0:int_list.int_list, ~tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @int_list_test:nn:nn
@@ -2617,22 +2617,22 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm sub(~mc2##2:wybe.int, ~mc1##2:wybe.int, ?tmp#5##0:wybe.int) @int_list_test:nn:nn
     wybe.string.print<0>("--------------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#61##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#61##0:wybe.phantom, ?tmp#62##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#61##0:wybe.phantom, ?tmp#62##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#62##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of building lists: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#64##0:wybe.phantom) @int_list_test:nn:nn
     foreign c print_int(~tmp#3##0:wybe.int, ~tmp#64##0:wybe.phantom, ?tmp#65##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#65##0:wybe.phantom, ?tmp#66##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#65##0:wybe.phantom, ?tmp#66##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#66##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of test(aliased): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#68##0:wybe.phantom) @int_list_test:nn:nn
     foreign c print_int(~tmp#4##0:wybe.int, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#69##0:wybe.phantom, ?tmp#70##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#69##0:wybe.phantom, ?tmp#70##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#70##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of test(non-aliased): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#72##0:wybe.phantom) @int_list_test:nn:nn
     foreign c print_int(~tmp#5##0:wybe.int, ~tmp#72##0:wybe.phantom, ?tmp#73##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#73##0:wybe.phantom, ?tmp#74##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#73##0:wybe.phantom, ?tmp#74##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#74##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
 
 
@@ -2647,49 +2647,49 @@ test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_
     int_list.append<0>(~y##0:int_list.int_list, 99:wybe.int, ?tmp#0##0:int_list.int_list) #2 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(x##1:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#0##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(z##1:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.extend<0>[410bae77d3](~x##1:int_list.int_list, ~tmp#0##0:int_list.int_list, outByReference tmp#1##0:int_list.int_list) #7 @int_list_test:nn:nn
     int_list.extend<0>[410bae77d3](~tmp#1##0:int_list.int_list, ~z##1:int_list.int_list, outByReference tmp#2##0:int_list.int_list) #8 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#32##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#34##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#35##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.insert<0>[410bae77d3](~tmp#2##0:int_list.int_list, 4:wybe.int, 78:wybe.int, outByReference tmp#3##0:int_list.int_list) #11 @int_list_test:nn:nn
     int_list.pop<0>[410bae77d3](~tmp#3##0:int_list.int_list, 20:wybe.int, outByReference tmp#4##0:int_list.int_list) #12 @int_list_test:nn:nn
     int_list.remove<0>[410bae77d3](~tmp#4##0:int_list.int_list, 2:wybe.int, outByReference tmp#5##0:int_list.int_list) #13 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#42##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#43##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#5##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#45##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#45##0:wybe.phantom, ?tmp#46##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#45##0:wybe.phantom, ?tmp#46##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#46##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.sort<0>[410bae77d3](~tmp#5##0:int_list.int_list, ?l##5:int_list.int_list) #16 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(~l##5:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #34 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
  [9e35cb823b] [NonAliasedParam 0,NonAliasedParam 1,NonAliasedParam 2] :
     int_list.reverse_helper<0>[410bae77d3](~x##0:int_list.int_list, 0:int_list.int_list, ?x##1:int_list.int_list) #19 @int_list_test:nn:nn
@@ -2697,49 +2697,49 @@ test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_
     int_list.append<0>[410bae77d3](~y##0:int_list.int_list, 99:wybe.int, ?tmp#0##0:int_list.int_list) #2 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(x##1:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#0##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(z##1:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.extend<0>[410bae77d3](~x##1:int_list.int_list, ~tmp#0##0:int_list.int_list, outByReference tmp#1##0:int_list.int_list) #7 @int_list_test:nn:nn
     int_list.extend<0>[410bae77d3](~tmp#1##0:int_list.int_list, ~z##1:int_list.int_list, outByReference tmp#2##0:int_list.int_list) #8 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#32##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#2##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#34##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#35##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.insert<0>[410bae77d3](~tmp#2##0:int_list.int_list, 4:wybe.int, 78:wybe.int, outByReference tmp#3##0:int_list.int_list) #11 @int_list_test:nn:nn
     int_list.pop<0>[410bae77d3](~tmp#3##0:int_list.int_list, 20:wybe.int, outByReference tmp#4##0:int_list.int_list) #12 @int_list_test:nn:nn
     int_list.remove<0>[410bae77d3](~tmp#4##0:int_list.int_list, 2:wybe.int, outByReference tmp#5##0:int_list.int_list) #13 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#42##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#43##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(tmp#5##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#45##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#45##0:wybe.phantom, ?tmp#46##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#45##0:wybe.phantom, ?tmp#46##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#46##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.sort<0>[410bae77d3](~tmp#5##0:int_list.int_list, ?l##5:int_list.int_list) #16 @int_list_test:nn:nn
     wybe.string.print<0>[410bae77d3](1207:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     int_list.print<0>(~l##5:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #34 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
 
   LLVM code       :

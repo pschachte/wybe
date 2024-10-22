@@ -25,7 +25,7 @@ module top-level code > public {semipure} (0 calls)
     1:
         wybe.string.print<0>("*1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @higher_order_tests:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @higher_order_tests:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
         higher_order_tests.#cont#1<0>(higher_order_tests.#anon#1<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
@@ -73,7 +73,7 @@ proc #cont#1 > {semipure} (2 calls)
     1:
         wybe.string.print<0>[410bae77d3](1223:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @higher_order_tests:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @higher_order_tests:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
         higher_order_tests.#cont#2<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
@@ -92,7 +92,7 @@ proc #cont#2 > {semipure} (2 calls)
     1:
         wybe.string.print<0>("*2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @higher_order_tests:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @higher_order_tests:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
         higher_order_tests.#cont#3<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
@@ -112,7 +112,7 @@ proc #cont#3 > {semipure} (2 calls)
     1:
         wybe.string.print<0>[410bae77d3](1227:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @higher_order_tests:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @higher_order_tests:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
         higher_order_tests.#cont#4<0>(_:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
@@ -125,7 +125,7 @@ proc #cont#4 > {semipure} (2 calls)
   InterestingCallProperties: []
     wybe.string.print<0>("------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @higher_order_tests:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @higher_order_tests:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @higher_order_tests:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @higher_order_tests:nn:nn
     foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
     higher_order_tests.#anon#2<0>(1:wybe.int, ?tmp#4##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -135,7 +135,7 @@ proc #cont#4 > {semipure} (2 calls)
     1:
         wybe.string.print<0>("*1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @higher_order_tests:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @higher_order_tests:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
         higher_order_tests.#cont#5<0>(higher_order_tests.#anon#2<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
@@ -155,7 +155,7 @@ proc #cont#5 > {semipure} (2 calls)
     1:
         wybe.string.print<0>[410bae77d3](1223:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @higher_order_tests:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @higher_order_tests:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
         higher_order_tests.#cont#6<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
@@ -174,7 +174,7 @@ proc #cont#6 > {semipure} (2 calls)
     1:
         wybe.string.print<0>("*2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @higher_order_tests:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @higher_order_tests:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
         higher_order_tests.#cont#7<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
@@ -193,7 +193,7 @@ proc #cont#7 > {semipure} (2 calls)
     1:
         wybe.string.print<0>[410bae77d3](1227:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @higher_order_tests:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @higher_order_tests:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
 
 

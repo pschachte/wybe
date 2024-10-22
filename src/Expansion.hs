@@ -29,6 +29,7 @@ import           Data.Maybe                as Maybe
 import           Options                   (LogSelection (Expansion))
 import Distribution.Simple.Setup (emptyGlobalFlags)
 import Snippets
+import Data.Char (ord)
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
@@ -367,7 +368,7 @@ expandArg arg@(ArgString [ch] WybeString ty) = do
     callID <- genCallSiteID
     let emptyStringProc = ProcSpec ["wybe","string"] "singleton" 0 Set.empty
     expandPrim (PrimCall callID emptyStringProc Pure
-                [ArgChar ch charType, defVar] emptyGlobalFlows) Nothing
+                [ArgInt (fromIntegral $ ord ch) charType, defVar] emptyGlobalFlows) Nothing
     logExpansion $ "Singleton string variable = " ++ show useVar
     return useVar
 expandArg arg@(ArgVar var ty flow ft _) = do

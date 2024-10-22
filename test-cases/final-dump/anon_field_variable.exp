@@ -27,7 +27,7 @@ module top-level code > public {semipure} (0 calls)
     1:
         wybe.string.print<0>("foo":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @anon_field_variable:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @anon_field_variable:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @anon_field_variable:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @anon_field_variable:nn:nn
         foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field_variable:nn:nn
 
 

@@ -3346,7 +3346,6 @@ data PrimArg
      | ArgInt Integer TypeSpec                 -- ^Constant integer arg
      | ArgFloat Double TypeSpec                -- ^Constant floating point arg
      | ArgString String StringVariant TypeSpec -- ^Constant string arg
-     | ArgChar Char TypeSpec                   -- ^Constant character arg
      | ArgClosure ProcSpec [PrimArg] TypeSpec  -- ^Closure, with closed args
      | ArgGlobal GlobalInfo TypeSpec           -- ^Constant global reference
      | ArgUnneeded PrimFlow TypeSpec           -- ^Unneeded input or output
@@ -3439,7 +3438,6 @@ argIsConst ArgVar{}            = False
 argIsConst ArgInt{}            = True
 argIsConst ArgFloat{}          = True
 argIsConst ArgString{}         = True
-argIsConst ArgChar{}           = True
 argIsConst (ArgClosure _ as _) = all argIsConst as
 argIsConst ArgGlobal{}         = True
 argIsConst ArgUnneeded{}       = True
@@ -3453,7 +3451,6 @@ argIsReal ArgVar{argVarType=ty} = not <$> typeIsPhantom ty
 argIsReal (ArgInt _ ty)         = not <$> typeIsPhantom ty -- 0 is a valid phantom constant
 argIsReal ArgFloat{}            = return True
 argIsReal ArgString{}           = return True
-argIsReal ArgChar{}             = return True
 argIsReal (ArgClosure _ as _)   = return True
 argIsReal (ArgGlobal _ ty)      = not <$> typeIsPhantom ty
 argIsReal ArgUnneeded{}         = return False
@@ -3488,7 +3485,6 @@ argFlowDirection ArgVar{argVarFlow=flow} = flow
 argFlowDirection ArgInt{} = FlowIn
 argFlowDirection ArgFloat{} = FlowIn
 argFlowDirection ArgString{} = FlowIn
-argFlowDirection ArgChar{} = FlowIn
 argFlowDirection ArgClosure{} = FlowIn
 argFlowDirection ArgGlobal{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
@@ -3501,7 +3497,6 @@ argType ArgVar{argVarType=typ} = typ
 argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgString _ _ typ) = typ
-argType (ArgChar _ typ) = typ
 argType (ArgClosure _ _ typ) = typ
 argType (ArgGlobal _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
@@ -3514,7 +3509,6 @@ setArgType typ arg@ArgVar{} = arg{argVarType=typ}
 setArgType typ (ArgInt i _) = ArgInt i typ
 setArgType typ (ArgFloat f _) = ArgFloat f typ
 setArgType typ (ArgString s v ty) = ArgString s v typ
-setArgType typ (ArgChar c _) = ArgChar c typ
 setArgType typ (ArgClosure ms as _) = ArgClosure ms as typ
 setArgType typ (ArgGlobal rs _) = ArgGlobal rs typ
 setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
@@ -3548,7 +3542,6 @@ argDescription (ArgVar var _ flow ftype _) =
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription arg@ArgString{} = "constant argument " ++ show arg
-argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgClosure ms as _)
     = "closure of '" ++ show ms ++ "' with <"
     ++ intercalate ", " (argDescription <$> as) ++ "> closed arguments"
@@ -3725,7 +3718,6 @@ varsInPrimArg dir (ArgClosure _ as _)
 varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty
 varsInPrimArg _ ArgString{}   = Set.empty
-varsInPrimArg _ ArgChar{}     = Set.empty
 varsInPrimArg _ ArgGlobal{}   = Set.empty
 varsInPrimArg _ ArgUnneeded{} = Set.empty
 varsInPrimArg _ ArgUndef{}    = Set.empty
@@ -4222,7 +4214,6 @@ instance Show PrimArg where
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ Nothing
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
   show (ArgString s v typ) = show v ++ show s ++ showTypeSuffix typ Nothing
-  show (ArgChar c typ)   = show c ++ showTypeSuffix typ Nothing
   show (ArgClosure ms as typ) = show ms ++ "<" ++ intercalate ", " (show <$> as)
                              ++ ">" ++ showTypeSuffix typ Nothing
   show (ArgGlobal info typ) = show info ++ showTypeSuffix typ Nothing

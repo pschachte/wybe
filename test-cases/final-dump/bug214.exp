@@ -39,23 +39,23 @@ proc #cont#1 > {inline,semipure} (0 calls)
     wybe.string.print<0>("Part 1: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @bug214:nn:nn
     bug214.position.print<0>(pos##0:bug214.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @bug214:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @bug214:nn:nn
-    foreign c putchar(' ':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @bug214:nn:nn
+    foreign c putchar(32:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm access(pos##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int) @bug214:nn:nn
     foreign lpvm access(~pos##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.int) @bug214:nn:nn
     foreign llvm mul(~tmp#6##0:wybe.int, ~tmp#7##0:wybe.int, ?tmp#5##0:wybe.int) @bug214:nn:nn
     foreign c print_int(~tmp#5##0:wybe.int, ~tmp#16##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @bug214:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @bug214:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
     wybe.string.print<0>("Part 2: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @bug214:nn:nn
     foreign lpvm access(~sub##0:bug214, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##0:bug214.position) @bug214:nn:nn
     bug214.position.print<0>(tmp#8##0:bug214.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @bug214:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @bug214:nn:nn
-    foreign c putchar(' ':wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @bug214:nn:nn
+    foreign c putchar(32:wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm access(tmp#8##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int) @bug214:nn:nn
     foreign lpvm access(~tmp#8##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#12##0:wybe.int) @bug214:nn:nn
     foreign llvm mul(~tmp#10##0:wybe.int, ~tmp#12##0:wybe.int, ?tmp#9##0:wybe.int) @bug214:nn:nn
     foreign c print_int(~tmp#9##0:wybe.int, ~tmp#28##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @bug214:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#37##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @bug214:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#37##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm store(~%tmp#38##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
 
 

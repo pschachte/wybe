@@ -94,7 +94,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @benchmark_fib:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign c print_float(~time##0:wybe.float, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @benchmark_fib:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
     foreign c {impure} benchmark_start(c"benchmark_fib:35:2":wybe.c_string) @benchmark_fib:nn:nn
     benchmark_fib.fib<0>(42:wybe.int, ?res##1:wybe.int) #6 @benchmark_fib:nn:nn
@@ -102,7 +102,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @benchmark_fib:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign c print_float(~time##1:wybe.float, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @benchmark_fib:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
     foreign c {impure} benchmark_start(c"benchmark_fib:40:2":wybe.c_string) @benchmark_fib:nn:nn
     benchmark_fib.#anon#1<0> #0 @benchmark_fib:nn:nn
@@ -110,7 +110,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @benchmark_fib:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign c print_float(~time##2:wybe.float, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @benchmark_fib:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
 
 

@@ -97,7 +97,7 @@ proc #cont#2 > {semipure} (2 calls)
         foreign llvm or(~tmp#13##0:card, ~tmp#14##0:card, ?tmp#4##0:card) @card:nn:nn
         card.print<0>(~tmp#4##0:card)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @card:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @card:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @card:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @card:nn:nn
         foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @card:nn:nn
         card.#cont#2<0>(~s##0:card.suit, ~tmp#0##0:wybe.list(card.suit), ~tmp#2##1:wybe.list(card.rank))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @card:nn:nn
 
@@ -366,43 +366,43 @@ char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
   InterestingCallProperties: []
     case ~r##0:card.rank of
     0:
-        foreign llvm move('2':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(50:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     1:
-        foreign llvm move('3':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(51:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     2:
-        foreign llvm move('4':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(52:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     3:
-        foreign llvm move('5':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(53:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     4:
-        foreign llvm move('6':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(54:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     5:
-        foreign llvm move('7':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(55:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     6:
-        foreign llvm move('8':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(56:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     7:
-        foreign llvm move('9':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(57:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     8:
-        foreign llvm move('T':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(84:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     9:
-        foreign llvm move('J':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(74:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     10:
-        foreign llvm move('Q':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(81:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     11:
-        foreign llvm move('K':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(75:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     12:
-        foreign llvm move('A':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(65:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
 
 
@@ -821,16 +821,16 @@ char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
   InterestingCallProperties: []
     case ~s##0:card.suit of
     0:
-        foreign llvm move('C':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(67:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     1:
-        foreign llvm move('D':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(68:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     2:
-        foreign llvm move('H':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(72:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
     3:
-        foreign llvm move('S':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+        foreign llvm move(83:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
 
 

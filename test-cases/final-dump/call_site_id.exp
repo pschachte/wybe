@@ -77,7 +77,7 @@ foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign llvm add(~tmp#1##0:wybe.int, 10:wybe.int, ?tmp#0##0:wybe.int) @call_site_id:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#42##0:wybe.phantom) @call_site_id:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @call_site_id:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @call_site_id:nn:nn
     foreign lpvm store(~%tmp#44##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @call_site_id:nn:nn
 
   LLVM code       :

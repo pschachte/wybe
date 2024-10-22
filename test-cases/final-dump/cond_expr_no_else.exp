@@ -33,11 +33,11 @@ proc #cont#1 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.count.fmt<2>(~tmp#2##0:wybe.count, 0:wybe.int, ' ':wybe.char, ?tmp#1##0:wybe.string) #6 @cond_expr_no_else:nn:nn
+    wybe.count.fmt<2>(~tmp#2##0:wybe.count, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #6 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("5:int -> ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #1 @cond_expr_no_else:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @cond_expr_no_else:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @cond_expr_no_else:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @cond_expr_no_else:nn:nn
     cond_expr_no_else.to_count<0>(-5:wybe.int, ?tmp#7##0:wybe.count, ?tmp#18##0:wybe.bool) #3 @cond_expr_no_else:nn:nn
     case ~tmp#18##0:wybe.bool of
@@ -55,13 +55,13 @@ proc #cont#2 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.count.fmt<2>(~tmp#6##0:wybe.count, 0:wybe.int, ' ':wybe.char, ?tmp#5##0:wybe.string) #6 @cond_expr_no_else:nn:nn
+    wybe.count.fmt<2>(~tmp#6##0:wybe.count, 0:wybe.int, 32:wybe.char, ?tmp#5##0:wybe.string) #6 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("-5:int -> ":wybe.string, ~tmp#5##0:wybe.string, ?tmp#4##0:wybe.string) #1 @cond_expr_no_else:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @cond_expr_no_else:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @cond_expr_no_else:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @cond_expr_no_else:nn:nn
-    cond_expr_no_else.vowel_num<0>('e':wybe.char, ?tmp#11##0:wybe.int, ?tmp#17##0:wybe.bool) #3 @cond_expr_no_else:nn:nn
+    cond_expr_no_else.vowel_num<0>(101:wybe.char, ?tmp#11##0:wybe.int, ?tmp#17##0:wybe.bool) #3 @cond_expr_no_else:nn:nn
     case ~tmp#17##0:wybe.bool of
     0:
         cond_expr_no_else.#cont#3<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
@@ -77,13 +77,13 @@ proc #cont#3 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.int.fmt<2>(~tmp#10##0:wybe.int, 0:wybe.int, ' ':wybe.char, ?tmp#9##0:wybe.string) #6 @cond_expr_no_else:nn:nn
+    wybe.int.fmt<2>(~tmp#10##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#9##0:wybe.string) #6 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("e is vowel number ":wybe.string, ~tmp#9##0:wybe.string, ?tmp#8##0:wybe.string) #1 @cond_expr_no_else:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#8##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @cond_expr_no_else:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @cond_expr_no_else:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @cond_expr_no_else:nn:nn
-    cond_expr_no_else.vowel_num<0>('f':wybe.char, ?tmp#15##0:wybe.int, ?tmp#16##0:wybe.bool) #3 @cond_expr_no_else:nn:nn
+    cond_expr_no_else.vowel_num<0>(102:wybe.char, ?tmp#15##0:wybe.int, ?tmp#16##0:wybe.bool) #3 @cond_expr_no_else:nn:nn
     case ~tmp#16##0:wybe.bool of
     0:
         cond_expr_no_else.#cont#4<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
@@ -99,11 +99,11 @@ proc #cont#4 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.int.fmt<2>(~tmp#14##0:wybe.int, 0:wybe.int, ' ':wybe.char, ?tmp#13##0:wybe.string) #3 @cond_expr_no_else:nn:nn
+    wybe.int.fmt<2>(~tmp#14##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#13##0:wybe.string) #3 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("f is vowel number ":wybe.string, ~tmp#13##0:wybe.string, ?tmp#12##0:wybe.string) #1 @cond_expr_no_else:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#12##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @cond_expr_no_else:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @cond_expr_no_else:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @cond_expr_no_else:nn:nn
 
 
@@ -129,19 +129,19 @@ proc vowel_num > (6 calls)
 vowel_num(c##0:wybe.char, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_eq(c##0:wybe.char, 'a':wybe.char, ?tmp#5##0:wybe.bool) @cond_expr_no_else:nn:nn
+    foreign llvm icmp_eq(c##0:wybe.char, 97:wybe.char, ?tmp#5##0:wybe.bool) @cond_expr_no_else:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(c##0:wybe.char, 'e':wybe.char, ?tmp#4##0:wybe.bool) @cond_expr_no_else:nn:nn
+        foreign llvm icmp_eq(c##0:wybe.char, 101:wybe.char, ?tmp#4##0:wybe.bool) @cond_expr_no_else:nn:nn
         case ~tmp#4##0:wybe.bool of
         0:
-            foreign llvm icmp_eq(c##0:wybe.char, 'i':wybe.char, ?tmp#3##0:wybe.bool) @cond_expr_no_else:nn:nn
+            foreign llvm icmp_eq(c##0:wybe.char, 105:wybe.char, ?tmp#3##0:wybe.bool) @cond_expr_no_else:nn:nn
             case ~tmp#3##0:wybe.bool of
             0:
-                foreign llvm icmp_eq(c##0:wybe.char, 'o':wybe.char, ?tmp#2##0:wybe.bool) @cond_expr_no_else:nn:nn
+                foreign llvm icmp_eq(c##0:wybe.char, 111:wybe.char, ?tmp#2##0:wybe.bool) @cond_expr_no_else:nn:nn
                 case ~tmp#2##0:wybe.bool of
                 0:
-                    foreign llvm icmp_eq(~c##0:wybe.char, 'u':wybe.char, ?tmp#1##0:wybe.bool) @cond_expr_no_else:nn:nn
+                    foreign llvm icmp_eq(~c##0:wybe.char, 117:wybe.char, ?tmp#1##0:wybe.bool) @cond_expr_no_else:nn:nn
                     case ~tmp#1##0:wybe.bool of
                     0:
                         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)

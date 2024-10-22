@@ -29,11 +29,11 @@ print(lst##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @loop_bug:nn:nn
-    foreign c putchar('[':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @loop_bug:nn:nn
+    foreign c putchar(91:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @loop_bug:nn:nn
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool) @loop_bug:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
-        foreign c putchar(']':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @loop_bug:nn:nn
+        foreign c putchar(93:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @loop_bug:nn:nn
         foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
 
     1:
@@ -54,7 +54,7 @@ print#cont#1([h##0:wybe.int], t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.
     case ~tmp#4##0:wybe.bool of
     0:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @loop_bug:nn:nn
-        foreign c putchar(']':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @loop_bug:nn:nn
+        foreign c putchar(93:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @loop_bug:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
 
     1:

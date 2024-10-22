@@ -25,6 +25,7 @@ import           Util
 import           Resources
 import UnivSet (emptyUnivSet)
 import AST (emptyGlobalFlows)
+import Data.Char (ord)
 
 
 ----------------------------------------------------------------
@@ -311,7 +312,7 @@ compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp [PrimArg]
 compileArg' typ (IntValue int) _ = return [ArgInt int typ]
 compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
 compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
-compileArg' typ (CharValue char) _ = return [ArgChar char typ]
+compileArg' typ (CharValue char) _ = return [ArgInt (fromIntegral $ ord char) typ]
 compileArg' typ (Global info) _ = return [ArgGlobal info typ]
 compileArg' typ (Closure ms es) _ = do
     as <- concat <$> mapM (placedApply compileArg) es

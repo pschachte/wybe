@@ -542,7 +542,6 @@ mkInput (ArgVar name ty _ _ lst) =
 mkInput arg@ArgInt{} = arg
 mkInput arg@ArgFloat{} = arg
 mkInput arg@ArgString{} = arg
-mkInput arg@ArgChar{} = arg
 mkInput arg@ArgClosure{} = arg
 mkInput (ArgUnneeded _ ty) = ArgUnneeded FlowIn ty
 mkInput arg@ArgGlobal{} = arg
@@ -797,7 +796,6 @@ canonicaliseArg (ArgClosure ms as _) =
 canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
 canonicaliseArg (ArgString v r _)   = ArgString v r AnyType
-canonicaliseArg (ArgChar v _)       = ArgChar v AnyType
 canonicaliseArg (ArgGlobal info _)  = ArgGlobal info AnyType
 canonicaliseArg (ArgUnneeded dir _) = ArgUnneeded dir AnyType
 canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
@@ -814,7 +812,6 @@ validateArg instr ArgVar{argVarType=ty} = validateType ty instr
 validateArg instr (ArgInt    _ ty)      = validateType ty instr
 validateArg instr (ArgFloat  _ ty)      = validateType ty instr
 validateArg instr (ArgString _ _ ty)    = validateType ty instr
-validateArg instr (ArgChar   _ ty)      = validateType ty instr
 validateArg instr (ArgClosure _ _ ty)   = validateType ty instr
 validateArg instr (ArgGlobal _ ty)      = validateType ty instr
 validateArg instr (ArgUnneeded _ ty)    = validateType ty instr
@@ -1167,8 +1164,6 @@ simplifyOp name flags args = PrimForeign "llvm" name flags args
 simplifyLPVM :: ProcName -> [Ident] -> [PrimArg] -> Prim
 simplifyLPVM "cast" _ [ArgInt n _, output] =
   primMove (ArgInt n (argType output)) output
-simplifyLPVM "cast" _ [ArgChar ch _, output] =
-  primMove (ArgInt (fromIntegral $ ord ch) (argType output)) output
 simplifyLPVM "cast" _ [ArgFloat n _, output] =
   primMove (ArgFloat n (argType output)) output
 simplifyLPVM name flags args = PrimForeign "lpvm" name flags args

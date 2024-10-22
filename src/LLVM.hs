@@ -1443,7 +1443,6 @@ llvmValue (ArgString str stringVariant _) = do
     glob <- lookupConstant spec
     convertedConstant
         (ArgGlobal (GlobalVariable glob) $ Representation CPointer) Pointer
-llvmValue (ArgChar val _) = return $ show $ fromEnum val
 llvmValue arg@(ArgClosure pspec args ty) = do
     logLLVM $ "llvmValue of " ++ show arg
     -- See if we've already allocated a constant for this closure

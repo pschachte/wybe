@@ -106,11 +106,11 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string)) @inline_pos:nn:nn
     foreign lpvm access(~arguments##0:wybe.array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @inline_pos:nn:nn
     foreign llvm add(~tmp#0##0:wybe.int, 1:wybe.int, ?v##1:wybe.int) @inline_pos:nn:nn
-    wybe.int.fmt<2>(~v##1:wybe.int, 0:wybe.int, ' ':wybe.char, ?tmp#2##0:wybe.string) #5 @inline_pos:nn:nn
+    wybe.int.fmt<2>(~v##1:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#2##0:wybe.string) #5 @inline_pos:nn:nn
     wybe.string.,,<0>("v = ":wybe.string, ~tmp#2##0:wybe.string, ?tmp#1##0:wybe.string) #3 @inline_pos:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @inline_pos:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @inline_pos:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @inline_pos:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @inline_pos:nn:nn
     foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @inline_pos:nn:nn
 
 

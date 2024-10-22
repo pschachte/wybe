@@ -48,70 +48,70 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     wybe.string.print<0>("single_generator:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.single_generator<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stmt_for:nn:nn
     wybe.string.print<0>("\nmultiple_generator":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.multiple_generator<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @stmt_for:nn:nn
     wybe.string.print<0>("\nshortest_generator_termination":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.shortest_generator_termination<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_break":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #29 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.using_break<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_next":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.using_next<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_while":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.using_while<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_until":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.using_until<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_when":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.using_when<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_unless":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #34 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#26##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.using_unless<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_xrange":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #35 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#30##0:stmt_for.int_sequence) #36 @stmt_for:nn:nn
     stmt_for.using_xrange#cont#1<0>(~tmp#30##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #37 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_xrange_reverse":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #38 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#34##0:stmt_for.int_sequence) #39 @stmt_for:nn:nn
     stmt_for.using_xrange_reverse#cont#1<0>(~tmp#34##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_irange":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #41 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#36##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#36##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#37##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#38##0:stmt_for.int_sequence) #42 @stmt_for:nn:nn
     stmt_for.using_irange#cont#1<0>(~tmp#38##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #43 @stmt_for:nn:nn
     wybe.string.print<0>("\nusing_irange_reverse":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #44 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#40##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#41##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#41##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#41##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
     stmt_for.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#42##0:stmt_for.int_sequence) #45 @stmt_for:nn:nn
     stmt_for.using_irange_reverse#cont#1<0>(~tmp#42##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #46 @stmt_for:nn:nn
@@ -187,9 +187,9 @@ multiple_generator#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.
             foreign lpvm access(~tmp#9##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##1:wybe.list(wybe.int)) @stmt_for:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~j##0:wybe.int, ~tmp#21##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @stmt_for:nn:nn
             foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
             stmt_for.multiple_generator#cont#1<0>(~tmp#8##1:wybe.list(wybe.int), ~tmp#9##1:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_for:nn:nn
 
@@ -274,9 +274,9 @@ shortest_generator_termination#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wyb
             foreign lpvm access(~tmp#9##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##1:wybe.list(wybe.int)) @stmt_for:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~j##0:wybe.int, ~tmp#21##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @stmt_for:nn:nn
             foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
             stmt_for.shortest_generator_termination#cont#1<0>(~tmp#8##1:wybe.list(wybe.int), ~tmp#9##1:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_for:nn:nn
 
@@ -314,7 +314,7 @@ single_generator#cont#1(tmp#4##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.
         foreign lpvm access(~tmp#4##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @stmt_for:nn:nn
         foreign c print_int(~i##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @stmt_for:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @stmt_for:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @stmt_for:nn:nn
         foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
         stmt_for.single_generator#cont#1<0>(~tmp#4##1:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @stmt_for:nn:nn
 
@@ -357,7 +357,7 @@ using_break#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
         0:
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
             foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
             stmt_for.using_break#cont#1<0>(~tmp#5##1:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @stmt_for:nn:nn
 
@@ -387,7 +387,7 @@ using_irange#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @stmt_for:nn:nn
         foreign c print_int(~i##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @stmt_for:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @stmt_for:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @stmt_for:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
         stmt_for.using_irange#cont#1<0>(~tmp#0##1:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @stmt_for:nn:nn
 
@@ -414,7 +414,7 @@ using_irange_reverse#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @stmt_for:nn:nn
         foreign c print_int(~i##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @stmt_for:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @stmt_for:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @stmt_for:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
         stmt_for.using_irange_reverse#cont#1<0>(~tmp#0##1:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @stmt_for:nn:nn
 
@@ -457,7 +457,7 @@ using_next#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>
         0:
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
             foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
             stmt_for.using_next#cont#1<0>(~tmp#5##1:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_for:nn:nn
 
@@ -504,7 +504,7 @@ using_unless#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.i
         0:
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
             foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
             stmt_for.using_unless#cont#1<0>(~tmp#5##1:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_for:nn:nn
 
@@ -551,7 +551,7 @@ using_until#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
         0:
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
             foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
             stmt_for.using_until#cont#1<0>(~tmp#5##1:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @stmt_for:nn:nn
 
@@ -600,7 +600,7 @@ using_when#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>
         1:
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
             foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
             stmt_for.using_when#cont#1<0>(~tmp#5##1:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @stmt_for:nn:nn
 
@@ -646,7 +646,7 @@ using_while#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
         1:
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @stmt_for:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @stmt_for:nn:nn
             foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
             stmt_for.using_while#cont#1<0>(~tmp#5##1:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @stmt_for:nn:nn
 
@@ -674,7 +674,7 @@ using_xrange#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @stmt_for:nn:nn
         foreign c print_int(~i##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @stmt_for:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @stmt_for:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @stmt_for:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
         stmt_for.using_xrange#cont#1<0>(~tmp#0##1:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @stmt_for:nn:nn
 
@@ -701,7 +701,7 @@ using_xrange_reverse#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @stmt_for:nn:nn
         foreign c print_int(~i##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @stmt_for:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @stmt_for:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @stmt_for:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
         stmt_for.using_xrange_reverse#cont#1<0>(~tmp#0##1:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @stmt_for:nn:nn
 

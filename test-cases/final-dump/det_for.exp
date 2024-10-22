@@ -28,7 +28,7 @@ proc #cont#1 > {semipure} (2 calls)
     foreign llvm add(tmp#0##0:wybe.int, 1:wybe.int, ?tmp#0##1:wybe.int) @det_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @det_for:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @det_for:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @det_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @det_for:nn:nn
     foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @det_for:nn:nn
     det_for.#cont#1<0>(~tmp#0##1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @det_for:nn:nn
 
