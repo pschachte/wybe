@@ -312,7 +312,6 @@ completeFork = do
         -- Variables with a constant value in each branch.  These can be
         -- used later to fuse branches of subsequent forks on those variables
         -- with this fork.
-        
         let consts = List.foldr1 Set.union
                      $ List.map Map.keysSet branchMaps
         logBuild $ "     definite variables in all branches: " ++ show consts
@@ -477,9 +476,15 @@ instr' prim@(PrimForeign "lpvm" "cast" []
     logBuild $ "  Expanding cast(" ++ show from ++ ", " ++ show to ++ ")"
     unless (argFlowDirection from == FlowIn && flow == FlowOut) $
         shouldnt "cast instruction with wrong flow"
-    if argType from == argType to
+    let toTy = argType to
+    if argType from == toTy
     then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
-    else ordinaryInstr prim pos
+    else case from of
+        ArgInt i _ ->
+            instr' (PrimForeign "llvm" "move" [] [ArgInt i toTy, to]) pos
+        ArgFloat f _ ->
+            instr' (PrimForeign "llvm" "move" [] [ArgFloat f toTy, to]) pos
+        _ -> ordinaryInstr prim pos
 instr' prim@(PrimForeign "lpvm" "load" _ [ArgGlobal info _, var]) pos = do
     logBuild $ "  Checking if we know the value of " ++ show info
     loaded <- gets globalsLoaded
@@ -872,7 +877,7 @@ updateGlobalsLoaded prim = do
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         PrimForeign "lpvm" "store" _ [var, ArgGlobal info _] ->
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
-        PrimHigher _ (ArgVar name _ _ _ _) _ _ -> 
+        PrimHigher _ (ArgVar name _ _ _ _) _ _ ->
             case Map.lookup name varFlows of
               Just gFlows -> do
                 let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
@@ -925,14 +930,14 @@ updateVariableFlows prim = do
                          then inFlows
                          else emptyGlobalFlows)) outs
         PrimForeign "lpvm" "load" _ [_, ArgVar name ty flow _ _]
-            | isResourcefulHigherOrder ty -> 
+            | isResourcefulHigherOrder ty ->
           return $ Map.singleton name univGlobalFlows
         PrimForeign{} -> do
-          return $ Map.fromList $ List.map 
+          return $ Map.fromList $ List.map
             (\ArgVar{argVarName=name, argVarType=ty} ->
               (name, if isResourcefulHigherOrder ty || genericType ty
                      then inFlows
-                     else emptyGlobalFlows)) 
+                     else emptyGlobalFlows))
                 $ List.filter argIsVar $ outs
     when (any (/= emptyGlobalFlows) $ Map.elems newFlows) $
         logBuild $ "New Variable Flows: " ++ simpleShowMap newFlows
@@ -947,7 +952,6 @@ updateVariableFlows prim = do
 --  performing the operation at compile-time.
 simplifyForeign ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
 simplifyForeign "llvm" op flags args = simplifyOp op flags args
-simplifyForeign "lpvm" op flags args = simplifyLPVM op flags args
 simplifyForeign lang op flags args = PrimForeign lang op flags args
 
 
@@ -1159,16 +1163,6 @@ simplifyOp "fcmp_true" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
 simplifyOp name flags args = PrimForeign "llvm" name flags args
 
 
--- | Simplify and canonicalise llpm instructions where possible.  For now, this only 
---   handles cast instructions for constants.
-simplifyLPVM :: ProcName -> [Ident] -> [PrimArg] -> Prim
-simplifyLPVM "cast" _ [ArgInt n _, output] =
-  primMove (ArgInt n (argType output)) output
-simplifyLPVM "cast" _ [ArgFloat n _, output] =
-  primMove (ArgFloat n (argType output)) output
-simplifyLPVM name flags args = PrimForeign "lpvm" name flags args
-
-
 boolConstant :: Bool -> PrimArg
 boolConstant bool = ArgInt (fromIntegral $ fromEnum bool) boolType
 
@@ -1224,7 +1218,7 @@ addBodyContinuation prev@BodyState{buildState=Unforked, currBuild=bld,
                                    outSubst=osubst, varGlobalFlows=vFlows} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after unforked body:" ++ fst (showState 4 prev)
-    addSelectedContinuation bld subst defs osubst vFlows next 
+    addSelectedContinuation bld subst defs osubst vFlows next
 addBodyContinuation prev@BodyState{buildState=Forked{}, varGlobalFlows=vFlows} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after forked body:" ++ fst (showState 4 prev)
@@ -1553,7 +1547,7 @@ bkwdBuildStmt defs prim pos = do
             purity <- lift $ primImpurity prim
             -- Filter out pure instructions that produce no needed outputs nor 
             -- out flowing globals that arent stored to later
-            when (purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs)
+            when (purity > Pure || any ((`Set.member` usedLater) . argVarName) outs
                                 || not (USet.isEmpty $ whenFinite (Set.\\ gStored) gOuts)
                                 || not (USet.isEmpty $ globalFlowsParams gFlows))
               $ do
