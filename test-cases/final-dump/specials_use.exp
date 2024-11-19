@@ -13,6 +13,7 @@ AFTER EVERYTHING:
                     specials.show_full_location<0>
                     specials.show_line<0>
                     specials.show_location<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
@@ -138,6 +139,10 @@ define external fastcc void @"specials.show_location<0>"(i64 %"call_source_locat
   public submods  : 
   public resources: 
   public procs    : specials_use.<0>
+  constants       : 0:: CStringInfo {cstringChars = "specials_use"}
+                    1:: CStringInfo {cstringChars = "!ROOT!/final-dump/specials_use.wybe"}
+                    2:: CStringInfo {cstringChars = "specials_use:7:2"}
+                    3:: CStringInfo {cstringChars = "!ROOT!/final-dump/specials_use.wybe:8:2"}
   imports         : use specials
                     use wybe
   resources       : 
@@ -171,10 +176,10 @@ module top-level code > public {semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/specials_use.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"!ROOT!/final-dump/specials_use.wybe\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"!ROOT!/final-dump/specials_use.wybe:8:2\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"specials_use\00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"specials_use:7:2\00", align 8
+@"specials_use#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"specials_use\00", align 8
+@"specials_use#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"!ROOT!/final-dump/specials_use.wybe\00", align 8
+@"specials_use#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"specials_use:7:2\00", align 8
+@"specials_use#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"!ROOT!/final-dump/specials_use.wybe:8:2\00", align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @print_string(i64)
@@ -182,17 +187,17 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"specials_use.<0>"() {
-  call ccc void @print_string(i64 ptrtoint( ptr @"cstring#2" to i64 ))
+  call ccc void @print_string(i64 ptrtoint( ptr @"specials_use#constant#0" to i64 ))
   call ccc void @putchar(i8 10)
-  call ccc void @print_string(i64 ptrtoint( ptr @"cstring#0" to i64 ))
+  call ccc void @print_string(i64 ptrtoint( ptr @"specials_use#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   call ccc void @print_int(i64 5)
   call ccc void @putchar(i8 10)
   call ccc void @print_int(i64 2)
   call ccc void @putchar(i8 10)
-  call ccc void @print_string(i64 ptrtoint( ptr @"cstring#3" to i64 ))
+  call ccc void @print_string(i64 ptrtoint( ptr @"specials_use#constant#2" to i64 ))
   call ccc void @putchar(i8 10)
-  call ccc void @print_string(i64 ptrtoint( ptr @"cstring#1" to i64 ))
+  call ccc void @print_string(i64 ptrtoint( ptr @"specials_use#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

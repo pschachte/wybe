@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : simple_loop.<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

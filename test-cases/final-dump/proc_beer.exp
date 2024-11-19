@@ -9,6 +9,8 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : proc_beer.<0>
                     proc_beer.beer99<0>
+  constants       : 0:: CStringInfo {cstringChars = " bottles of beer on the wall"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 28 8,PointerStructMember proc_beer#constant#0]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -74,8 +76,8 @@ beer99#cont#2(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/proc_beer.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" bottles of beer on the wall\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 28, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"proc_beer#constant#0" = private unnamed_addr constant [ ?? x i8 ] c" bottles of beer on the wall\00", align 8
+@"proc_beer#constant#1" = private unnamed_addr constant {i64, ptr} { i64 28, ptr @"proc_beer#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
@@ -97,7 +99,7 @@ define external fastcc void @"proc_beer.beer99#cont#1<0>"(i64 %"count##0") {
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
   call ccc void @print_int(i64 %"count##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"proc_beer#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   %"tmp#8##0" = sub i64 %"count##0", 1
   tail call fastcc void @"proc_beer.beer99#cont#1<0>"(i64 %"tmp#8##0")
@@ -108,7 +110,7 @@ if.else.0:
 
 define external fastcc void @"proc_beer.beer99#cont#2<0>"(i64 %"count##0") {
   call ccc void @print_int(i64 %"count##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"proc_beer#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   %"count##1" = sub i64 %"count##0", 1
   tail call fastcc void @"proc_beer.beer99#cont#1<0>"(i64 %"count##1")

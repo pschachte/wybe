@@ -9,6 +9,9 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : higher_order_impure.<0>
                     higher_order_impure.measure<0>
+  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember higher_order_impure#constant#0]}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_impure#constant#1]}
   imports         : use wybe
   resources       : 
   procs           : 

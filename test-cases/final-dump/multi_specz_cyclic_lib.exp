@@ -18,6 +18,8 @@ AFTER EVERYTHING:
                     multi_specz_cyclic_lib.position.y<0>
                     multi_specz_cyclic_lib.position.y<1>
                     multi_specz_cyclic_lib.position.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = " ("}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember multi_specz_cyclic_lib#constant#0]}
   imports         : public use multi_specz_cyclic_lib.position
                     use multi_specz_cyclic_lib2
                     use wybe
@@ -83,8 +85,8 @@ printPosition(pos##0:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.
 source_filename = "!ROOT!/final-dump/multi_specz_cyclic_lib.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" (\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"multi_specz_cyclic_lib#constant#0" = private unnamed_addr constant [ ?? x i8 ] c" (\00", align 8
+@"multi_specz_cyclic_lib#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"multi_specz_cyclic_lib#constant#0" }, align 8
 
 declare external fastcc void @"multi_specz_cyclic_lib2.foo2<0>"(i64, i64, i64, i64, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -121,7 +123,7 @@ define external fastcc void @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64 %"po
 }
 
 define external fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64 %"pos##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_lib#constant#1" to i64 ))
   %"tmp#23##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#23##0"
   call ccc void @print_int(i64 %"tmp#0##0")
@@ -148,6 +150,7 @@ define external fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64 %"pos
                     multi_specz_cyclic_lib.position.y<0>
                     multi_specz_cyclic_lib.position.y<1>
                     multi_specz_cyclic_lib.position.~=<0>
+  constants       : 
   imports         : use multi_specz_cyclic_lib
                     use wybe
   resources       : 
@@ -353,6 +356,7 @@ if.else.0:
   public submods  : 
   public resources: 
   public procs    : multi_specz_cyclic_lib2.foo2<0>
+  constants       : 
   imports         : use multi_specz_cyclic_lib
                     use wybe
   resources       : 

@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : import_in_sub_mod_lib.foo<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
@@ -47,6 +48,7 @@ define external fastcc void @"import_in_sub_mod_lib.foo<0>"(i64 %"v##0") {
   public submods  : 
   public resources: 
   public procs    : import_in_sub_mod_main.<0>
+  constants       : 
   imports         : use import_in_sub_mod_main.sub
                     use wybe
   resources       : 
@@ -88,6 +90,7 @@ define external fastcc void @"import_in_sub_mod_main.<0>"() {
   public submods  : 
   public resources: 
   public procs    : import_in_sub_mod_main.sub.bar<0>
+  constants       : 
   imports         : use import_in_sub_mod_lib
                     use import_in_sub_mod_main
                     use wybe

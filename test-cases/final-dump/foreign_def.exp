@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : foreign_def.<0>
                     foreign_def.putchar<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

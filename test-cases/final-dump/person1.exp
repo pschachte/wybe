@@ -16,6 +16,8 @@ AFTER EVERYTHING:
                     person1.person.person<0>
                     person1.person.person<1>
                     person1.person.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "Wang"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember person1#constant#0]}
   imports         : public use person1.person
                     use wybe
   resources       : 
@@ -37,14 +39,14 @@ module top-level code > public {inline,semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/person1.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Wang\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"person1#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Wang\00", align 8
+@"person1#constant#1" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"person1#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"person1.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"person1#constant#1" to i64 ))
   ret void
 }
 
@@ -61,6 +63,7 @@ define external fastcc void @"person1.<0>"() {
                     person1.person.person<0>
                     person1.person.person<1>
                     person1.person.~=<0>
+  constants       : 
   imports         : use person1
                     use wybe
   resources       : 

@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : out_only_global_flow.<0>
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(out_only_global_flow.res,wybe.int @out_only_global_flow:nn:nn)]
   procs           : 

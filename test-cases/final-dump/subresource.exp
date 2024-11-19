@@ -8,6 +8,8 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : subresource.<0>
+  constants       : 0:: CStringInfo {cstringChars = "res = "}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember subresource#constant#0]}
   imports         : use subresource.a
                     use wybe
   resources       : 
@@ -36,8 +38,8 @@ module top-level code > public {semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/subresource.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"res = \00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"subresource#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"res = \00", align 8
+@"subresource#constant#1" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"subresource#constant#0" }, align 8
 
 declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
@@ -48,7 +50,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 define external fastcc void @"subresource.<0>"() {
   %"res##0" = load i64, ptr @"resource#subresource.a.res"
   %"tmp#1##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"res##0", i64 0, i8 32)
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#1" to i64 ), i64 %"tmp#1##0")
+  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"subresource#constant#1" to i64 ), i64 %"tmp#1##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   ret void
@@ -60,6 +62,7 @@ define external fastcc void @"subresource.<0>"() {
   public submods  : 
   public resources: res: subresource.a.res
   public procs    : 
+  constants       : 
   imports         : use subresource
                     use wybe
   resources       : res: fromList [(subresource.a.res,wybe.int = 42 @subresource:nn:nn @subresource:nn:nn)]

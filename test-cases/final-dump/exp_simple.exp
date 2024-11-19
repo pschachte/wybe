@@ -8,6 +8,8 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : exp_simple.<0>
+  constants       : 0:: CStringInfo {cstringChars = "hello"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember exp_simple#constant#0]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -50,8 +52,8 @@ foreign_add(?#result##0:wybe.int)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/exp_simple.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"hello\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"exp_simple#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"hello\00", align 8
+@"exp_simple#constant#1" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"exp_simple#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_float(double)
@@ -66,7 +68,7 @@ define external fastcc void @"exp_simple.<0>"() {
   call ccc void @putchar(i8 10)
   call ccc void @putchar(i8 104)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"exp_simple#constant#1" to i64 ))
   call ccc void @print_int(i64 3)
   call ccc void @putchar(i8 10)
   call ccc void @print_int(i64 1001)

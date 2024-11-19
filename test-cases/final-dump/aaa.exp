@@ -8,6 +8,8 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : aaa.<0>
+  constants       : 0:: CStringInfo {cstringChars = "AAA: Init"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember aaa#constant#0]}
   imports         : use bbb
                     use ccc
                     use wybe
@@ -32,15 +34,15 @@ module top-level code > public {inline,semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/aaa.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"AAA: Init\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"aaa#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"AAA: Init\00", align 8
+@"aaa#constant#1" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"aaa#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"aaa.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"aaa#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -51,6 +53,8 @@ define external fastcc void @"aaa.<0>"() {
   public submods  : 
   public resources: 
   public procs    : bbb.<0>
+  constants       : 0:: CStringInfo {cstringChars = "BBB: Init"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember bbb#constant#0]}
   imports         : use ddd
                     use wybe
   resources       : 
@@ -74,15 +78,15 @@ module top-level code > public {inline,semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/bbb.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"BBB: Init\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"bbb#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"BBB: Init\00", align 8
+@"bbb#constant#1" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"bbb#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"bbb.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"bbb#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -93,6 +97,8 @@ define external fastcc void @"bbb.<0>"() {
   public submods  : 
   public resources: 
   public procs    : ccc.<0>
+  constants       : 0:: CStringInfo {cstringChars = "CCC: Init"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember ccc#constant#0]}
   imports         : use ddd
                     use wybe
   resources       : 
@@ -116,15 +122,15 @@ module top-level code > public {inline,semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/ccc.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"CCC: Init\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"ccc#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"CCC: Init\00", align 8
+@"ccc#constant#1" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"ccc#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"ccc.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"ccc#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -135,6 +141,8 @@ define external fastcc void @"ccc.<0>"() {
   public submods  : 
   public resources: 
   public procs    : ddd.<0>
+  constants       : 0:: CStringInfo {cstringChars = "DDD: Init"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember ddd#constant#0]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -157,15 +165,15 @@ module top-level code > public {inline,semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/ddd.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"DDD: Init\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"ddd#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"DDD: Init\00", align 8
+@"ddd#constant#1" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"ddd#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"ddd.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"ddd#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

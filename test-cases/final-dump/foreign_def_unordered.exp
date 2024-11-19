@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use wybe
   resources       : a: fromList [(foreign_def_unordered.a,wybe.int @foreign_def_unordered:nn:nn)]
                     b: fromList [(foreign_def_unordered.b,wybe.int @foreign_def_unordered:nn:nn)]

@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : import_in_sub_mod_lib.foo<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

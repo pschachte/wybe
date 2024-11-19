@@ -392,7 +392,7 @@ completeType modspec (TypeDef params ctors) = do
           tagBits tagLimit)
          infos
 
-    let rep = typeRepresentation reps numConsts
+    let rep = newTypeRep reps numConsts
     setTypeRep rep
     logNormalise $ "Representation of type " ++ showModSpec modspec
                    ++ " is " ++ show rep
@@ -452,11 +452,11 @@ fixAnonFieldName _ _ param pos = (param `maybePlace` pos, False)
 -- | Determine the appropriate representation for a type based on a list of
 -- the representations of all the non-constant constructors and the number
 -- of constant constructors.
-typeRepresentation :: [TypeRepresentation] -> Int -> TypeRepresentation
-typeRepresentation [] numConsts =
+newTypeRep :: [TypeRepresentation] -> Int -> TypeRepresentation
+newTypeRep [] numConsts =
     Bits $ ceiling $ logBase 2 $ fromIntegral numConsts
-typeRepresentation [rep] 0      = rep
-typeRepresentation _ _          = Pointer
+newTypeRep [rep] 0      = rep
+newTypeRep _ _          = Pointer
 
 
 ----------------------------------------------------------------

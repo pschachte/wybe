@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : stmt_unless.<0>
                     stmt_unless.mod<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : func_factorial.<0>
                     func_factorial.factorial<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

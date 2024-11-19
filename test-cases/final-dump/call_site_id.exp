@@ -10,6 +10,7 @@ AFTER EVERYTHING:
   public procs    : call_site_id.<0>
                     call_site_id.bar<0>
                     call_site_id.foo<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

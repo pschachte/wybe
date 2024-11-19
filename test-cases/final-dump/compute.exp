@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : compute.<0>
+  constants       : 
   imports         : use math
                     use wybe
   resources       : 
@@ -59,6 +60,7 @@ define external fastcc void @"compute.<0>"() {
   public procs    : math.temperature.toCelsius<0>
                     math.utils.<0>
                     math.utils.factorial<0>
+  constants       : 
   imports         : public use math.temperature
                     public use math.utils
                     use wybe
@@ -84,6 +86,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
   public submods  : 
   public resources: 
   public procs    : math.temperature.toCelsius<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
@@ -120,6 +123,8 @@ define external fastcc double @"math.temperature.toCelsius<0>"(double %"f##0") {
   public resources: 
   public procs    : math.utils.<0>
                     math.utils.factorial<0>
+  constants       : 0:: CStringInfo {cstringChars = "Utils has been initialised."}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 27 8,PointerStructMember math.utils#constant#0]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -159,15 +164,15 @@ factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/math/utils.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Utils has been initialised.\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 27, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"math.utils#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Utils has been initialised.\00", align 8
+@"math.utils#constant#1" = private unnamed_addr constant {i64, ptr} { i64 27, ptr @"math.utils#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"math.utils.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"math.utils#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

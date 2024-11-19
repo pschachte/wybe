@@ -10,6 +10,7 @@ AFTER EVERYTHING:
   public procs    : inline_decl.<0>
                     inline_decl.finish<0>
                     inline_decl.long<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

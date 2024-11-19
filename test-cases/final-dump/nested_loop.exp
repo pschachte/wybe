@@ -8,6 +8,10 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : nested_loop.<0>
+  constants       : 0:: CStringInfo {cstringChars = "Outer"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember nested_loop#constant#0]}
+                    2:: CStringInfo {cstringChars = "Inner"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember nested_loop#constant#2]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -63,35 +67,35 @@ proc #cont#2 > {inline,semipure} (2 calls)
 source_filename = "!ROOT!/final-dump/nested_loop.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Inner\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"Outer\00", align 8
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"nested_loop#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Outer\00", align 8
+@"nested_loop#constant#1" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"nested_loop#constant#0" }, align 8
+@"nested_loop#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"Inner\00", align 8
+@"nested_loop#constant#3" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"nested_loop#constant#2" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"nested_loop.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"nested_loop.#cont#2<0>"()
   ret void
 }
 
 define external fastcc void @"nested_loop.#cont#1<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"nested_loop.#cont#2<0>"()
   ret void
 }
 
 define external fastcc void @"nested_loop.#cont#2<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"nested_loop.#cont#2<0>"()
   ret void

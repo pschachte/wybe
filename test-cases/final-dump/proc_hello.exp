@@ -8,6 +8,8 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : proc_hello.print2<0>
+  constants       : 0:: CStringInfo {cstringChars = "hello, world"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember proc_hello#constant#0]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -30,15 +32,15 @@ print2([x##0:wybe.int], [y##0:wybe.int])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>
 source_filename = "!ROOT!/final-dump/proc_hello.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"hello, world\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"proc_hello#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"hello, world\00", align 8
+@"proc_hello#constant#1" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"proc_hello#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"proc_hello.print2<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"proc_hello#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

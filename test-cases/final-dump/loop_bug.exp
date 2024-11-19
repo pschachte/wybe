@@ -17,6 +17,8 @@ AFTER EVERYTHING:
                     loop_bug.int_list.tail<0>
                     loop_bug.int_list.tail<1>
                     loop_bug.int_list.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = ", "}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember loop_bug#constant#0]}
   imports         : public use loop_bug.int_list
                     use wybe
   resources       : 
@@ -87,8 +89,8 @@ print#cont#2(h##0:wybe.int, t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io
 source_filename = "!ROOT!/final-dump/loop_bug.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"loop_bug#constant#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
+@"loop_bug#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"loop_bug#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
@@ -122,7 +124,7 @@ if.then.0:
   %"tmp#13##0" = add i64 %"t##0", 8
   %"tmp#14##0" = inttoptr i64 %"tmp#13##0" to ptr
   %"t##1" = load i64, ptr %"tmp#14##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"loop_bug#constant#1" to i64 ))
   call ccc void @print_int(i64 %"h##1")
   tail call fastcc void @"loop_bug.print#cont#1<0>"(i64 %"t##1")
   ret void
@@ -132,7 +134,7 @@ if.else.0:
 }
 
 define external fastcc void @"loop_bug.print#cont#2<0>"(i64 %"h##0", i64 %"t##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"loop_bug#constant#1" to i64 ))
   call ccc void @print_int(i64 %"h##0")
   tail call fastcc void @"loop_bug.print#cont#1<0>"(i64 %"t##0")
   ret void
@@ -152,6 +154,7 @@ define external fastcc void @"loop_bug.print#cont#2<0>"(i64 %"h##0", i64 %"t##0"
                     loop_bug.int_list.tail<0>
                     loop_bug.int_list.tail<1>
                     loop_bug.int_list.~=<0>
+  constants       : 
   imports         : use loop_bug
                     use wybe
   resources       : 

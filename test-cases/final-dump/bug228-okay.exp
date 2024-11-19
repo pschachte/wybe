@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : bug228-okay.<0>
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(bug228-okay.res,wybe.int @bug228-okay:1:1)]
   procs           : 

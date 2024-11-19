@@ -10,6 +10,7 @@ AFTER EVERYTHING:
   public procs    : proc_gcd.<0>
                     proc_gcd.gcd<0>
                     proc_gcd.mod<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

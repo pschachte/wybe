@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : out_global_overwritten.<0>
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(out_global_overwritten.res,wybe.int @out_global_overwritten:nn:nn)]
   procs           : 

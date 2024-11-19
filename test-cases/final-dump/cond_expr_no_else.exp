@@ -8,6 +8,14 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : cond_expr_no_else.<0>
+  constants       : 0:: CStringInfo {cstringChars = "5:int -> "}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember cond_expr_no_else#constant#0]}
+                    2:: CStringInfo {cstringChars = "-5:int -> "}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember cond_expr_no_else#constant#2]}
+                    4:: CStringInfo {cstringChars = "e is vowel number "}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember cond_expr_no_else#constant#4]}
+                    6:: CStringInfo {cstringChars = "f is vowel number "}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember cond_expr_no_else#constant#6]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -180,14 +188,14 @@ vowel_num(c##0:wybe.char, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; 
 source_filename = "!ROOT!/final-dump/cond_expr_no_else.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"-5:int -> \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"5:int -> \00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"e is vowel number \00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"f is vowel number \00", align 8
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#6" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#7" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
+@"cond_expr_no_else#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"5:int -> \00", align 8
+@"cond_expr_no_else#constant#1" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"cond_expr_no_else#constant#0" }, align 8
+@"cond_expr_no_else#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"-5:int -> \00", align 8
+@"cond_expr_no_else#constant#3" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"cond_expr_no_else#constant#2" }, align 8
+@"cond_expr_no_else#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"e is vowel number \00", align 8
+@"cond_expr_no_else#constant#5" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"cond_expr_no_else#constant#4" }, align 8
+@"cond_expr_no_else#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"f is vowel number \00", align 8
+@"cond_expr_no_else#constant#7" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"cond_expr_no_else#constant#6" }, align 8
 
 declare external fastcc i64 @"wybe.count.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
@@ -211,7 +219,7 @@ if.else.0:
 
 define external fastcc void @"cond_expr_no_else.#cont#1<0>"(i64 %"tmp#2##0") {
   %"tmp#1##0" = tail call fastcc i64 @"wybe.count.fmt<2>"(i64 %"tmp#2##0", i64 0, i8 32)
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#5" to i64 ), i64 %"tmp#1##0")
+  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"cond_expr_no_else#constant#1" to i64 ), i64 %"tmp#1##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   %"tmp#23##0" = tail call fastcc {i64, i1} @"cond_expr_no_else.to_count<0>"(i64 -5)
@@ -228,7 +236,7 @@ if.else.0:
 
 define external fastcc void @"cond_expr_no_else.#cont#2<0>"(i64 %"tmp#6##0") {
   %"tmp#5##0" = tail call fastcc i64 @"wybe.count.fmt<2>"(i64 %"tmp#6##0", i64 0, i8 32)
-  %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#4" to i64 ), i64 %"tmp#5##0")
+  %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"cond_expr_no_else#constant#3" to i64 ), i64 %"tmp#5##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)
   %"tmp#22##0" = tail call fastcc {i64, i1} @"cond_expr_no_else.vowel_num<0>"(i8 101)
@@ -245,7 +253,7 @@ if.else.0:
 
 define external fastcc void @"cond_expr_no_else.#cont#3<0>"(i64 %"tmp#10##0") {
   %"tmp#9##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#10##0", i64 0, i8 32)
-  %"tmp#8##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#6" to i64 ), i64 %"tmp#9##0")
+  %"tmp#8##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"cond_expr_no_else#constant#5" to i64 ), i64 %"tmp#9##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#8##0")
   call ccc void @putchar(i8 10)
   %"tmp#21##0" = tail call fastcc {i64, i1} @"cond_expr_no_else.vowel_num<0>"(i8 102)
@@ -262,7 +270,7 @@ if.else.0:
 
 define external fastcc void @"cond_expr_no_else.#cont#4<0>"(i64 %"tmp#14##0") {
   %"tmp#13##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#14##0", i64 0, i8 32)
-  %"tmp#12##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#7" to i64 ), i64 %"tmp#13##0")
+  %"tmp#12##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"cond_expr_no_else#constant#7" to i64 ), i64 %"tmp#13##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#12##0")
   call ccc void @putchar(i8 10)
   ret void

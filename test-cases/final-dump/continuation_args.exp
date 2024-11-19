@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : continuation_args.=<0>
                     continuation_args.~=<0>
+  constants       : 
   imports         : use continuation_args.d
                     use wybe
   resources       : 
@@ -230,6 +231,7 @@ define external fastcc i1 @"continuation_args.~=<0>"(i64 %"#left##0", i64 %"#rig
   public procs    : continuation_args.d.=<0>
                     continuation_args.d.e<0>
                     continuation_args.d.~=<0>
+  constants       : 
   imports         : use continuation_args
                     use wybe
   resources       : 

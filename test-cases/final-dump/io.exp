@@ -10,6 +10,7 @@ AFTER EVERYTHING:
   public procs    : io.<0>
                     io.myprint_a<0>
                     io.myprint_b<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

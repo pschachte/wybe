@@ -20,6 +20,8 @@ AFTER EVERYTHING:
                     mytree.tree.right<0>
                     mytree.tree.right<1>
                     mytree.tree.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = ", "}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember mytree#constant#0]}
   imports         : public use mytree.tree
                     use wybe
   resources       : 
@@ -66,8 +68,8 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
 source_filename = "!ROOT!/final-dump/mytree.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"mytree#constant#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
+@"mytree#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"mytree#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
@@ -94,7 +96,7 @@ if.then.0:
   %"prefix##1" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"l##0", i64 %"prefix##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"prefix##1")
   call ccc void @print_int(i64 %"k##0")
-  %"tmp#11##0" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"r##0", i64 ptrtoint( ptr @"string#1" to i64 ))
+  %"tmp#11##0" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"r##0", i64 ptrtoint( ptr @"mytree#constant#1" to i64 ))
   ret i64 %"tmp#11##0"
 if.else.0:
   ret i64 %"prefix##0"
@@ -116,6 +118,7 @@ if.else.0:
                     mytree.tree.right<0>
                     mytree.tree.right<1>
                     mytree.tree.~=<0>
+  constants       : 
   imports         : use mytree
                     use wybe
   resources       : 

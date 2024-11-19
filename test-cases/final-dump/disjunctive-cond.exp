@@ -8,6 +8,16 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : disjunctive-cond.<0>
+  constants       : 0:: CStringInfo {cstringChars = "all good"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember disjunctive-cond#constant#0]}
+                    2:: CStringInfo {cstringChars = "no good"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember disjunctive-cond#constant#2]}
+                    4:: CStringInfo {cstringChars = "also good"}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember disjunctive-cond#constant#4]}
+                    6:: CStringInfo {cstringChars = "more good"}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember disjunctive-cond#constant#6]}
+                    8:: CStringInfo {cstringChars = "still good"}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember disjunctive-cond#constant#8]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -127,23 +137,23 @@ proc #cont#3 > {semipure} (7 calls)
 source_filename = "!ROOT!/final-dump/disjunctive-cond.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"all good\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"also good\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"more good\00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"no good\00", align 8
-@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"still good\00", align 8
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#6" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#7" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#8" = private unnamed_addr constant {i64, i64} { i64 7, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
-@"string#9" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
+@"disjunctive-cond#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"all good\00", align 8
+@"disjunctive-cond#constant#1" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"disjunctive-cond#constant#0" }, align 8
+@"disjunctive-cond#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"no good\00", align 8
+@"disjunctive-cond#constant#3" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"disjunctive-cond#constant#2" }, align 8
+@"disjunctive-cond#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"also good\00", align 8
+@"disjunctive-cond#constant#5" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"disjunctive-cond#constant#4" }, align 8
+@"disjunctive-cond#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"more good\00", align 8
+@"disjunctive-cond#constant#7" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"disjunctive-cond#constant#6" }, align 8
+@"disjunctive-cond#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"still good\00", align 8
+@"disjunctive-cond#constant#9" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"disjunctive-cond#constant#8" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"disjunctive-cond.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"disjunctive-cond#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"disjunctive-cond.#cont#1<0>"(i1 1, i1 0)
   ret void
@@ -152,19 +162,19 @@ define external fastcc void @"disjunctive-cond.<0>"() {
 define external fastcc void @"disjunctive-cond.#cont#1<0>"(i1 %"a##0", i1 %"b##0") {
   br i1 %"a##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"disjunctive-cond#constant#5" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"disjunctive-cond.#cont#2<0>"(i1 1, i1 %"b##0")
   ret void
 if.else.0:
   br i1 %"b##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"disjunctive-cond#constant#5" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"disjunctive-cond.#cont#2<0>"(i1 0, i1 1)
   ret void
 if.else.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"disjunctive-cond#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"disjunctive-cond.#cont#2<0>"(i1 0, i1 0)
   ret void
@@ -175,12 +185,12 @@ define external fastcc void @"disjunctive-cond.#cont#2<0>"(i1 %"a##0", i1 %"b##0
 if.then.0:
   br i1 %"b##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"disjunctive-cond#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"disjunctive-cond.#cont#3<0>"(i1 1, i1 1)
   ret void
 if.else.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"disjunctive-cond#constant#7" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"disjunctive-cond.#cont#3<0>"(i1 1, i1 0)
   ret void
@@ -200,15 +210,15 @@ define external fastcc void @"disjunctive-cond.#cont#3<0>"(i1 %"a##0", i1 %"b##0
 if.then.0:
   br i1 %"b##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"disjunctive-cond#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"disjunctive-cond#constant#9" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"disjunctive-cond#constant#9" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

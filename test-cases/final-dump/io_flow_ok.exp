@@ -8,6 +8,12 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : io_flow_ok.<0>
+  constants       : 0:: CStringInfo {cstringChars = "hello world!"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember io_flow_ok#constant#0]}
+                    2:: CStringInfo {cstringChars = "That's odd!"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember io_flow_ok#constant#2]}
+                    4:: CStringInfo {cstringChars = "OK"}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember io_flow_ok#constant#4]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -71,38 +77,38 @@ unknown(?#success##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/io_flow_ok.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"OK\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"That's odd!\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"hello world!\00", align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 11, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"io_flow_ok#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"hello world!\00", align 8
+@"io_flow_ok#constant#1" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"io_flow_ok#constant#0" }, align 8
+@"io_flow_ok#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"That's odd!\00", align 8
+@"io_flow_ok#constant#3" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"io_flow_ok#constant#2" }, align 8
+@"io_flow_ok#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"OK\00", align 8
+@"io_flow_ok#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"io_flow_ok#constant#4" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"io_flow_ok.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   %"tmp#0##0" = tail call fastcc i1 @"io_flow_ok.unknown<0>"()
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#5" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
 
 define external fastcc void @"io_flow_ok.aok<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

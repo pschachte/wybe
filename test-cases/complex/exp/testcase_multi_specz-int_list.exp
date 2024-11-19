@@ -99,6 +99,7 @@ AFTER BUILDING MAIN:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use command_line
                     use int_list
                     use int_list.int_list
@@ -160,6 +161,8 @@ module top-level code > {terminal,inline,impure} (0 calls)
                     exit_code: command_line.exit_code
   public procs    : command_line.<0>
                     command_line.set_exit_code<0>
+  constants       : 0:: CStringInfo {cstringChars = "command_line:18:15"}
+                    1:: CStringInfo {cstringChars = "Erroneous program argument vector"}
   imports         : use wybe
   resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
                     arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
@@ -221,6 +224,7 @@ set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
                     int_list.int_list.tail<0>
                     int_list.int_list.tail<1>
                     int_list.int_list.~=<0>
+  constants       : 
   imports         : public use int_list.int_list
                     use wybe
   resources       : 
@@ -612,6 +616,7 @@ sort(lst##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}; {}>:
                     int_list.int_list.tail<0>
                     int_list.int_list.tail<1>
                     int_list.int_list.~=<0>
+  constants       : 
   imports         : use int_list
                     use wybe
   resources       : 
@@ -766,6 +771,7 @@ proc ~= > public {inline} (0 calls)
   public submods  : 
   public resources: 
   public procs    : int_list_test.<0>
+  constants       : 
   imports         : use command_line
                     use int_list
                     use wybe
@@ -933,6 +939,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 0:: CStringInfo {cstringChars = ""}
   imports         : use command_line
                     use int_list
                     use int_list.int_list
@@ -988,7 +995,7 @@ module top-level code > {terminal,inline,impure} (0 calls)
 source_filename = "/private!TMP!/int_list_test"
 target triple   = ???
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"\00", align 8
+@"*main* module#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"\00", align 8
 
 declare external fastcc void @"command_line.<0>"()
 declare external fastcc void @"int_list_test.<0>"()
@@ -1015,7 +1022,7 @@ define external ccc i64 @main(i64 %"argc##0", i64 %"argv##0") {
   %"tmp#14##0" = inttoptr i64 %"tmp#13##0" to ptr
   store i64 %"argv##0", ptr %"tmp#14##0"
   store i64 %"tmp#9##0", ptr @"resource#command_line.arguments"
-  store i64 ptrtoint( ptr @"cstring#0" to i64 ), ptr @"resource#command_line.command"
+  store i64 ptrtoint( ptr @"*main* module#constant#0" to i64 ), ptr @"resource#command_line.command"
   store i64 0, ptr @"resource#command_line.exit_code"
   tail call fastcc void @"command_line.<0>"()
   call ccc void @exit(i64 0)
@@ -1033,6 +1040,8 @@ define external ccc i64 @main(i64 %"argc##0", i64 %"argv##0") {
                     exit_code: command_line.exit_code
   public procs    : command_line.<0>
                     command_line.set_exit_code<0>
+  constants       : 0:: CStringInfo {cstringChars = "command_line:18:15"}
+                    1:: CStringInfo {cstringChars = "Erroneous program argument vector"}
   imports         : use wybe
   resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
                     arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
@@ -1073,8 +1082,8 @@ set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
 source_filename = "!ROOT!/wybelibs/command_line.o"
 target triple   = ???
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Erroneous program argument vector\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"command_line:18:15\00", align 8
+@"command_line#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"command_line:18:15\00", align 8
+@"command_line#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"Erroneous program argument vector\00", align 8
 
 declare external fastcc {i64, i64, i1} @"wybe.array.[|]<0>"(i64)
 declare external ccc void @error_exit(i64, i64)
@@ -1097,7 +1106,7 @@ if.then.0:
   store i64 %"command##1", ptr @"resource#command_line.command"
   ret void
 if.else.0:
-  call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 ptrtoint( ptr @"cstring#0" to i64 ))
+  call ccc void @error_exit(i64 ptrtoint( ptr @"command_line#constant#0" to i64 ), i64 ptrtoint( ptr @"command_line#constant#1" to i64 ))
   ret void
 }
 
@@ -1132,6 +1141,7 @@ define external fastcc void @"command_line.set_exit_code<0>"(i64 %"code##0") {
                     int_list.int_list.tail<0>
                     int_list.int_list.tail<1>
                     int_list.int_list.~=<0>
+  constants       : 
   imports         : public use int_list.int_list
                     use wybe
   resources       : 
@@ -2232,6 +2242,7 @@ if.else.0:
                     int_list.int_list.tail<0>
                     int_list.int_list.tail<1>
                     int_list.int_list.~=<0>
+  constants       : 
   imports         : use int_list
                     use wybe
   resources       : 
@@ -2537,6 +2548,22 @@ define external fastcc i1 @"int_list.int_list.~=<0>"(i64 %"#left##0", i64 %"#rig
   public submods  : 
   public resources: 
   public procs    : int_list_test.<0>
+  constants       : 0:: CStringInfo {cstringChars = "x y z:"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember int_list_test#constant#0]}
+                    2:: CStringInfo {cstringChars = "--------------------"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 20 8,PointerStructMember int_list_test#constant#2]}
+                    4:: CStringInfo {cstringChars = "tests with alias"}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember int_list_test#constant#4]}
+                    6:: CStringInfo {cstringChars = "original x y z:"}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 15 8,PointerStructMember int_list_test#constant#6]}
+                    8:: CStringInfo {cstringChars = "tests without alias"}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember int_list_test#constant#8]}
+                    10:: CStringInfo {cstringChars = " ** malloc count of building lists: "}
+                    11:: StructInfo {structSize = 16, structData = [IntStructMember 36 8,PointerStructMember int_list_test#constant#10]}
+                    12:: CStringInfo {cstringChars = " ** malloc count of test(aliased): "}
+                    13:: StructInfo {structSize = 16, structData = [IntStructMember 35 8,PointerStructMember int_list_test#constant#12]}
+                    14:: CStringInfo {cstringChars = " ** malloc count of test(non-aliased): "}
+                    15:: StructInfo {structSize = 16, structData = [IntStructMember 39 8,PointerStructMember int_list_test#constant#14]}
   imports         : use command_line
                     use int_list
                     use wybe
@@ -2750,22 +2777,22 @@ test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_
 source_filename = "/private!TMP!/int_list_test.wybe"
 target triple   = ???
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" ** malloc count of building lists: \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c" ** malloc count of test(aliased): \00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c" ** malloc count of test(non-aliased): \00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"--------------------\00", align 8
-@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"original x y z:\00", align 8
-@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"tests with alias\00", align 8
-@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"tests without alias\00", align 8
-@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"x y z:\00", align 8
-@"string#8" = private unnamed_addr constant {i64, i64} { i64 36, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#9" = private unnamed_addr constant {i64, i64} { i64 35, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#10" = private unnamed_addr constant {i64, i64} { i64 39, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#11" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
-@"string#12" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
-@"string#13" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
-@"string#14" = private unnamed_addr constant {i64, i64} { i64 19, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
-@"string#15" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
+@"int_list_test#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"x y z:\00", align 8
+@"int_list_test#constant#1" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"int_list_test#constant#0" }, align 8
+@"int_list_test#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"--------------------\00", align 8
+@"int_list_test#constant#3" = private unnamed_addr constant {i64, ptr} { i64 20, ptr @"int_list_test#constant#2" }, align 8
+@"int_list_test#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"tests with alias\00", align 8
+@"int_list_test#constant#5" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"int_list_test#constant#4" }, align 8
+@"int_list_test#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"original x y z:\00", align 8
+@"int_list_test#constant#7" = private unnamed_addr constant {i64, ptr} { i64 15, ptr @"int_list_test#constant#6" }, align 8
+@"int_list_test#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"tests without alias\00", align 8
+@"int_list_test#constant#9" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"int_list_test#constant#8" }, align 8
+@"int_list_test#constant#10" = private unnamed_addr constant [ ?? x i8 ] c" ** malloc count of building lists: \00", align 8
+@"int_list_test#constant#11" = private unnamed_addr constant {i64, ptr} { i64 36, ptr @"int_list_test#constant#10" }, align 8
+@"int_list_test#constant#12" = private unnamed_addr constant [ ?? x i8 ] c" ** malloc count of test(aliased): \00", align 8
+@"int_list_test#constant#13" = private unnamed_addr constant {i64, ptr} { i64 35, ptr @"int_list_test#constant#12" }, align 8
+@"int_list_test#constant#14" = private unnamed_addr constant [ ?? x i8 ] c" ** malloc count of test(non-aliased): \00", align 8
+@"int_list_test#constant#15" = private unnamed_addr constant {i64, ptr} { i64 39, ptr @"int_list_test#constant#14" }, align 8
 
 declare external fastcc i64 @"int_list.append<0>"(i64, i64)
 declare external fastcc i64 @"int_list.append<0>[410bae77d3]"(i64, i64)
@@ -2790,7 +2817,7 @@ define external fastcc void @"int_list_test.<0>"() {
   %"tmp#0##0" = tail call fastcc i64 @"int_list.range#cont#1<0>[410bae77d3]"(i64 0, i64 1, i64 1, i64 10)
   %"tmp#1##0" = tail call fastcc i64 @"int_list.range#cont#1<0>[410bae77d3]"(i64 0, i64 2, i64 2, i64 20)
   %"tmp#2##0" = tail call fastcc i64 @"int_list.range#cont#1<0>[410bae77d3]"(i64 0, i64 3, i64 3, i64 30)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"int_list.print<0>"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
@@ -2800,15 +2827,15 @@ define external fastcc void @"int_list_test.<0>"() {
   call ccc void @putchar(i8 10)
   %"mc2##0" = call ccc i64 @malloc_count()
   %"tmp#3##0" = sub i64 %"mc2##0", %"mc1##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#13" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#5" to i64 ))
   call ccc void @putchar(i8 10)
   %"mc1##1" = call ccc i64 @malloc_count()
   tail call fastcc void @"int_list_test.test_int_list<0>"(i64 %"tmp#0##0", i64 %"tmp#1##0", i64 %"tmp#2##0")
   %"mc2##1" = call ccc i64 @malloc_count()
   %"tmp#4##0" = sub i64 %"mc2##1", %"mc1##1"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#12" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#7" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"int_list.print<0>"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
@@ -2816,25 +2843,25 @@ define external fastcc void @"int_list_test.<0>"() {
   call ccc void @putchar(i8 10)
   tail call fastcc void @"int_list.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#14" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#9" to i64 ))
   call ccc void @putchar(i8 10)
   %"mc1##2" = call ccc i64 @malloc_count()
   tail call fastcc void @"int_list_test.test_int_list<0>[9e35cb823b]"(i64 %"tmp#0##0", i64 %"tmp#1##0", i64 %"tmp#2##0")
   %"mc2##2" = call ccc i64 @malloc_count()
   %"tmp#5##0" = sub i64 %"mc2##2", %"mc1##2"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#11" to i64 ))
   call ccc void @print_int(i64 %"tmp#3##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#13" to i64 ))
   call ccc void @print_int(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"int_list_test#constant#15" to i64 ))
   call ccc void @print_int(i64 %"tmp#5##0")
   call ccc void @putchar(i8 10)
   ret void

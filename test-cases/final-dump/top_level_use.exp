@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : top_level_use.<0>
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(top_level_use.res,wybe.int = 0 @top_level_use:nn:nn @top_level_use:nn:nn)]
   procs           : 

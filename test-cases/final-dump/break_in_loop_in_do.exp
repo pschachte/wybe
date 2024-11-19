@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : break_in_loop_in_do.<0>
+  constants       : 
   imports         : use wybe
   resources       : counter: fromList [(break_in_loop_in_do.counter,wybe.int = 10 @break_in_loop_in_do:nn:nn @break_in_loop_in_do:nn:nn)]
   procs           : 

@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: res: exporter.res
   public procs    : exporter.fn<0>
                     exporter.three<0>
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(exporter.res,wybe.int = 3 @exporter:nn:nn @exporter:nn:nn)]
   procs           : 
@@ -57,6 +58,10 @@ define external fastcc i64 @"exporter.three<0>"() {
   public submods  : 
   public resources: 
   public procs    : importer.<0>
+  constants       : 0:: CStringInfo {cstringChars = " = "}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember importer#constant#0]}
+                    2:: CStringInfo {cstringChars = "2^"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember importer#constant#2]}
   imports         : use pub_importer
                     use wybe
   resources       : 
@@ -103,10 +108,10 @@ my_three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
 source_filename = "!ROOT!/final-dump/importer.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" = \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"2^\00", align 8
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"importer#constant#0" = private unnamed_addr constant [ ?? x i8 ] c" = \00", align 8
+@"importer#constant#1" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"importer#constant#0" }, align 8
+@"importer#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"2^\00", align 8
+@"importer#constant#3" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"importer#constant#2" }, align 8
 
 @"resource#exporter.res" = external global i64
 declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
@@ -122,14 +127,14 @@ define external fastcc void @"importer.<0>"() {
   %"tmp#20##0" = call ccc i64 @ipow(i64 2, i64 %"tmp#19##0")
   %"tmp#3##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#19##0", i64 0, i8 32)
   %"tmp#5##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#20##0", i64 0, i8 32)
-  %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#5##0")
+  %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"importer#constant#1" to i64 ), i64 %"tmp#5##0")
   %"tmp#2##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#3##0", i64 %"tmp#4##0")
-  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#2##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"importer#constant#3" to i64 ), i64 %"tmp#2##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
-  %"tmp#10##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#2" to i64 ), i64 %"tmp#5##0")
+  %"tmp#10##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"importer#constant#1" to i64 ), i64 %"tmp#5##0")
   %"tmp#8##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#3##0", i64 %"tmp#10##0")
-  %"tmp#7##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#8##0")
+  %"tmp#7##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"importer#constant#3" to i64 ), i64 %"tmp#8##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#7##0")
   call ccc void @putchar(i8 10)
   ret void
@@ -147,6 +152,7 @@ define external fastcc i64 @"importer.my_three<0>"() {
   public resources: res: exporter.res
   public procs    : exporter.fn<0>
                     exporter.three<0>
+  constants       : 
   imports         : public use exporter
                     use wybe
   resources       : 

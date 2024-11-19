@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : current_module_alias_fail.<0>
                     current_module_alias_fail.toCelsius<0>
+  constants       : 
   imports         : use math.temperature
                     use wybe
   resources       : 
@@ -66,6 +67,7 @@ define external fastcc double @"current_module_alias_fail.toCelsius<0>"(double %
   public submods  : 
   public resources: 
   public procs    : math.temperature.toCelsius<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

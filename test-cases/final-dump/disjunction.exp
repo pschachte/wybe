@@ -11,6 +11,7 @@ AFTER EVERYTHING:
                     disjunction.member<0>
                     disjunction.saturating_tail<0>
                     disjunction.saturating_tail2<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

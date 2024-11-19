@@ -13,6 +13,7 @@ AFTER EVERYTHING:
                     specials.show_full_location<0>
                     specials.show_line<0>
                     specials.show_location<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

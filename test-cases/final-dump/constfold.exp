@@ -11,6 +11,7 @@ AFTER EVERYTHING:
                     constfold.fold_mult<0>
                     constfold.fold_test<0>
                     constfold.fortytwo<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

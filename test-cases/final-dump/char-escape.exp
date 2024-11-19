@@ -8,6 +8,32 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : char-escape.<0>
+  constants       : 0:: CStringInfo {cstringChars = "null"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember char-escape#constant#0]}
+                    2:: CStringInfo {cstringChars = "bell"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember char-escape#constant#2]}
+                    4:: CStringInfo {cstringChars = "backspace"}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember char-escape#constant#4]}
+                    6:: CStringInfo {cstringChars = "escape"}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember char-escape#constant#6]}
+                    8:: CStringInfo {cstringChars = "formfeed"}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember char-escape#constant#8]}
+                    10:: CStringInfo {cstringChars = "newline"}
+                    11:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember char-escape#constant#10]}
+                    12:: CStringInfo {cstringChars = "carriage return"}
+                    13:: StructInfo {structSize = 16, structData = [IntStructMember 15 8,PointerStructMember char-escape#constant#12]}
+                    14:: CStringInfo {cstringChars = "horizontal tab"}
+                    15:: StructInfo {structSize = 16, structData = [IntStructMember 14 8,PointerStructMember char-escape#constant#14]}
+                    16:: CStringInfo {cstringChars = "vertical tab"}
+                    17:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember char-escape#constant#16]}
+                    18:: CStringInfo {cstringChars = "hex"}
+                    19:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember char-escape#constant#18]}
+                    20:: CStringInfo {cstringChars = "\astring with hex character escapes!\n"}
+                    21:: StructInfo {structSize = 16, structData = [IntStructMember 36 8,PointerStructMember char-escape#constant#20]}
+                    22:: CStringInfo {cstringChars = " char escapes don't work"}
+                    23:: StructInfo {structSize = 16, structData = [IntStructMember 24 8,PointerStructMember char-escape#constant#22]}
+                    24:: CStringInfo {cstringChars = " char escapes work"}
+                    25:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember char-escape#constant#24]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -62,49 +88,49 @@ test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {
 source_filename = "!ROOT!/final-dump/char-escape.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"\07string with hex character escapes!\0A\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c" char escapes don't work\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c" char escapes work\00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"backspace\00", align 8
-@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"bell\00", align 8
-@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"carriage return\00", align 8
-@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"escape\00", align 8
-@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"formfeed\00", align 8
-@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"hex\00", align 8
-@"cstring#9" = private unnamed_addr constant [ ?? x i8 ] c"horizontal tab\00", align 8
-@"cstring#10" = private unnamed_addr constant [ ?? x i8 ] c"newline\00", align 8
-@"cstring#11" = private unnamed_addr constant [ ?? x i8 ] c"null\00", align 8
-@"cstring#12" = private unnamed_addr constant [ ?? x i8 ] c"vertical tab\00", align 8
-@"string#13" = private unnamed_addr constant {i64, i64} { i64 36, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#14" = private unnamed_addr constant {i64, i64} { i64 24, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#15" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#16" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
-@"string#17" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
-@"string#18" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
-@"string#19" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
-@"string#20" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
-@"string#21" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
-@"string#22" = private unnamed_addr constant {i64, i64} { i64 14, i64 ptrtoint( ptr @"cstring#9" to i64 ) }, align 8
-@"string#23" = private unnamed_addr constant {i64, i64} { i64 7, i64 ptrtoint( ptr @"cstring#10" to i64 ) }, align 8
-@"string#24" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#11" to i64 ) }, align 8
-@"string#25" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#12" to i64 ) }, align 8
+@"char-escape#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"null\00", align 8
+@"char-escape#constant#1" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"char-escape#constant#0" }, align 8
+@"char-escape#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"bell\00", align 8
+@"char-escape#constant#3" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"char-escape#constant#2" }, align 8
+@"char-escape#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"backspace\00", align 8
+@"char-escape#constant#5" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"char-escape#constant#4" }, align 8
+@"char-escape#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"escape\00", align 8
+@"char-escape#constant#7" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"char-escape#constant#6" }, align 8
+@"char-escape#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"formfeed\00", align 8
+@"char-escape#constant#9" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"char-escape#constant#8" }, align 8
+@"char-escape#constant#10" = private unnamed_addr constant [ ?? x i8 ] c"newline\00", align 8
+@"char-escape#constant#11" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"char-escape#constant#10" }, align 8
+@"char-escape#constant#12" = private unnamed_addr constant [ ?? x i8 ] c"carriage return\00", align 8
+@"char-escape#constant#13" = private unnamed_addr constant {i64, ptr} { i64 15, ptr @"char-escape#constant#12" }, align 8
+@"char-escape#constant#14" = private unnamed_addr constant [ ?? x i8 ] c"horizontal tab\00", align 8
+@"char-escape#constant#15" = private unnamed_addr constant {i64, ptr} { i64 14, ptr @"char-escape#constant#14" }, align 8
+@"char-escape#constant#16" = private unnamed_addr constant [ ?? x i8 ] c"vertical tab\00", align 8
+@"char-escape#constant#17" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"char-escape#constant#16" }, align 8
+@"char-escape#constant#18" = private unnamed_addr constant [ ?? x i8 ] c"hex\00", align 8
+@"char-escape#constant#19" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"char-escape#constant#18" }, align 8
+@"char-escape#constant#20" = private unnamed_addr constant [ ?? x i8 ] c"\07string with hex character escapes!\0A\00", align 8
+@"char-escape#constant#21" = private unnamed_addr constant {i64, ptr} { i64 36, ptr @"char-escape#constant#20" }, align 8
+@"char-escape#constant#22" = private unnamed_addr constant [ ?? x i8 ] c" char escapes don't work\00", align 8
+@"char-escape#constant#23" = private unnamed_addr constant {i64, ptr} { i64 24, ptr @"char-escape#constant#22" }, align 8
+@"char-escape#constant#24" = private unnamed_addr constant [ ?? x i8 ] c" char escapes work\00", align 8
+@"char-escape#constant#25" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"char-escape#constant#24" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"char-escape.<0>"() {
-  tail call fastcc void @"char-escape.test<0>"(i8 0, i64 0, i64 ptrtoint( ptr @"string#24" to i64 ))
-  tail call fastcc void @"char-escape.test<0>"(i8 7, i64 7, i64 ptrtoint( ptr @"string#17" to i64 ))
-  tail call fastcc void @"char-escape.test<0>"(i8 8, i64 8, i64 ptrtoint( ptr @"string#16" to i64 ))
-  tail call fastcc void @"char-escape.test<0>"(i8 27, i64 27, i64 ptrtoint( ptr @"string#19" to i64 ))
-  tail call fastcc void @"char-escape.test<0>"(i8 12, i64 12, i64 ptrtoint( ptr @"string#20" to i64 ))
-  tail call fastcc void @"char-escape.test<0>"(i8 10, i64 10, i64 ptrtoint( ptr @"string#23" to i64 ))
-  tail call fastcc void @"char-escape.test<0>"(i8 13, i64 13, i64 ptrtoint( ptr @"string#18" to i64 ))
-  tail call fastcc void @"char-escape.test<0>"(i8 9, i64 9, i64 ptrtoint( ptr @"string#22" to i64 ))
-  tail call fastcc void @"char-escape.test<0>"(i8 11, i64 11, i64 ptrtoint( ptr @"string#25" to i64 ))
-  tail call fastcc void @"char-escape.test<0>"(i8 32, i64 32, i64 ptrtoint( ptr @"string#21" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#13" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 0, i64 0, i64 ptrtoint( ptr @"char-escape#constant#1" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 7, i64 7, i64 ptrtoint( ptr @"char-escape#constant#3" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 8, i64 8, i64 ptrtoint( ptr @"char-escape#constant#5" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 27, i64 27, i64 ptrtoint( ptr @"char-escape#constant#7" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 12, i64 12, i64 ptrtoint( ptr @"char-escape#constant#9" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 10, i64 10, i64 ptrtoint( ptr @"char-escape#constant#11" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 13, i64 13, i64 ptrtoint( ptr @"char-escape#constant#13" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 9, i64 9, i64 ptrtoint( ptr @"char-escape#constant#15" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 11, i64 11, i64 ptrtoint( ptr @"char-escape#constant#17" to i64 ))
+  tail call fastcc void @"char-escape.test<0>"(i8 32, i64 32, i64 ptrtoint( ptr @"char-escape#constant#19" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"char-escape#constant#21" to i64 ))
   ret void
 }
 
@@ -114,12 +140,12 @@ define external fastcc void @"char-escape.test<0>"(i8 %"ch##0", i64 %"code##0", 
   br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 %"name##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"char-escape#constant#25" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 %"name##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#14" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"char-escape#constant#23" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

@@ -16,6 +16,7 @@ AFTER EVERYTHING:
                     generic_list.cons<1>
                     generic_list.length<0>
                     generic_list.nil<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
@@ -335,6 +336,8 @@ define external fastcc i64 @"generic_list.nil<0>"() {
                     generic_use.nrev<0>
                     generic_use.reverse<0>
                     generic_use.reverse1<0>
+  constants       : 0:: CStringInfo {cstringChars = ", "}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember generic_use#constant#0]}
   imports         : use generic_list
                     use wybe
   resources       : 
@@ -577,8 +580,8 @@ reverse1(lst##0:generic_list(T) <{}; {}; {0}>, suffix##0:generic_list(T) <{}; {}
 source_filename = "!ROOT!/final-dump/generic_use.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"generic_use#constant#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
+@"generic_use#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"generic_use#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
@@ -747,7 +750,7 @@ if.then.0:
   %"tmp#7##0" = add i64 %"lst##0", 8
   %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
   %"t##0" = load i64, ptr %"tmp#8##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"generic_use#constant#1" to i64 ))
   call ccc void @print_int(i64 %"h##0")
   tail call fastcc void @"generic_use.print_tail<0>"(i64 %"t##0")
   ret void

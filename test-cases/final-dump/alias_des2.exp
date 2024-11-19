@@ -8,6 +8,9 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : alias_des2.<0>
+  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 100 8,IntStructMember 100 8]}
+                    1:: CStringInfo {cstringChars = "expect pos(200,100):"}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 20 8,PointerStructMember alias_des2#constant#1]}
   imports         : use position
                     use wybe
   resources       : 
@@ -18,10 +21,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position) @alias_des2:nn:nn
-    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @alias_des2:nn:nn
-    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @alias_des2:nn:nn
-    foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?pos##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int) @alias_des2:nn:nn
+    foreign lpvm {noalias} mutate(alias_des2#constant#0:position.position, ?pos##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int) @alias_des2:nn:nn
     wybe.string.print<0>("expect pos(200,100):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @alias_des2:nn:nn
     position.printPosition<0>(~pos##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @alias_des2:nn:nn
 
@@ -33,8 +33,9 @@ module top-level code > public {semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/alias_des2.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"expect pos(200,100):\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"alias_des2#constant#0" = private unnamed_addr constant {i64, i64} { i64 100, i64 100 }, align 8
+@"alias_des2#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"expect pos(200,100):\00", align 8
+@"alias_des2#constant#2" = private unnamed_addr constant {i64, ptr} { i64 20, ptr @"alias_des2#constant#1" }, align 8
 
 declare external fastcc void @"position.printPosition<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -42,17 +43,13 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"alias_des2.<0>"() {
-  %"tmp#7##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#3##0" = ptrtoint ptr %"tmp#7##0" to i64
-  %"tmp#8##0" = inttoptr i64 %"tmp#3##0" to ptr
-  store i64 100, ptr %"tmp#8##0"
-  %"tmp#9##0" = add i64 %"tmp#3##0", 8
+  %"tmp#8##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#8##0", ptr @"alias_des2#constant#0", i64 16, i1 0)
+  %"tmp#9##0" = ptrtoint ptr %"tmp#8##0" to i64
   %"tmp#10##0" = inttoptr i64 %"tmp#9##0" to ptr
-  store i64 100, ptr %"tmp#10##0"
-  %"tmp#11##0" = inttoptr i64 %"tmp#3##0" to ptr
-  store i64 200, ptr %"tmp#11##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#3##0")
+  store i64 200, ptr %"tmp#10##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias_des2#constant#2" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#9##0")
   ret void
 }
 
@@ -70,6 +67,8 @@ define external fastcc void @"alias_des2.<0>"() {
                     position.position.y<0>
                     position.position.y<1>
                     position.position.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = " ("}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember position#constant#0]}
   imports         : public use position.position
                     use wybe
   resources       : 
@@ -105,8 +104,8 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/position.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" (\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"position#constant#0" = private unnamed_addr constant [ ?? x i8 ] c" (\00", align 8
+@"position#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"position#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
@@ -115,7 +114,7 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"position.printPosition<0>"(i64 %"pos##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"position#constant#1" to i64 ))
   %"tmp#23##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#23##0"
   call ccc void @print_int(i64 %"tmp#0##0")
@@ -142,6 +141,7 @@ define external fastcc void @"position.printPosition<0>"(i64 %"pos##0") {
                     position.position.y<0>
                     position.position.y<1>
                     position.position.~=<0>
+  constants       : 
   imports         : use position
                     use wybe
   resources       : 

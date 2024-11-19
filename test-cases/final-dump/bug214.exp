@@ -10,6 +10,10 @@ AFTER EVERYTHING:
   public procs    : bug214.<0>
                     bug214.=<0>
                     bug214.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "Part 1: "}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember bug214#constant#0]}
+                    2:: CStringInfo {cstringChars = "Part 2: "}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember bug214#constant#2]}
   imports         : use bug214.direction
                     use bug214.position
                     use wybe
@@ -328,10 +332,10 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/bug214.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Part 1: \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"Part 2: \00", align 8
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"bug214#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Part 1: \00", align 8
+@"bug214#constant#1" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"bug214#constant#0" }, align 8
+@"bug214#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"Part 2: \00", align 8
+@"bug214#constant#3" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"bug214#constant#2" }, align 8
 
 declare external fastcc i1 @"wybe.int.=<0>"(i64, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -358,7 +362,7 @@ define external fastcc void @"bug214.<0>"() {
 }
 
 define external fastcc void @"bug214.#cont#1<0>"(i64 %"pos##0", i64 %"sub##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"bug214#constant#1" to i64 ))
   tail call fastcc void @"bug214.position.print<0>"(i64 %"pos##0")
   call ccc void @putchar(i8 32)
   %"tmp#39##0" = inttoptr i64 %"pos##0" to ptr
@@ -369,7 +373,7 @@ define external fastcc void @"bug214.#cont#1<0>"(i64 %"pos##0", i64 %"sub##0") {
   %"tmp#5##0" = mul i64 %"tmp#6##0", %"tmp#7##0"
   call ccc void @print_int(i64 %"tmp#5##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"bug214#constant#3" to i64 ))
   %"tmp#42##0" = inttoptr i64 %"sub##0" to ptr
   %"tmp#8##0" = load i64, ptr %"tmp#42##0"
   tail call fastcc void @"bug214.position.print<0>"(i64 %"tmp#8##0")
@@ -780,6 +784,12 @@ if.else.0:
                     bug214.direction.parse_direction<0>
                     bug214.direction.up<0>
                     bug214.direction.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "forward"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember bug214.direction#constant#0]}
+                    2:: CStringInfo {cstringChars = "down"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember bug214.direction#constant#2]}
+                    4:: CStringInfo {cstringChars = "up"}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember bug214.direction#constant#4]}
   imports         : use bug214
                     use wybe
   resources       : 
@@ -869,12 +879,12 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/bug214.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"down\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"forward\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"up\00", align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 7, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"bug214.direction#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"forward\00", align 8
+@"bug214.direction#constant#1" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"bug214.direction#constant#0" }, align 8
+@"bug214.direction#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"down\00", align 8
+@"bug214.direction#constant#3" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"bug214.direction#constant#2" }, align 8
+@"bug214.direction#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"up\00", align 8
+@"bug214.direction#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"bug214.direction#constant#4" }, align 8
 
 declare external fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -893,7 +903,7 @@ define external fastcc i2 @"bug214.direction.fwd<0>"() {
 }
 
 define external fastcc {i2, i1} @"bug214.direction.parse_direction<0>"(i64 %"str##0") {
-  %"tmp#8##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 ptrtoint( ptr @"string#4" to i64 ), i64 %"str##0", i64 ptrtoint( ptr @"string#4" to i64 ), i64 %"str##0")
+  %"tmp#8##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 ptrtoint( ptr @"bug214.direction#constant#1" to i64 ), i64 %"str##0", i64 ptrtoint( ptr @"bug214.direction#constant#1" to i64 ), i64 %"str##0")
   %"tmp#5##0" = icmp eq i2 %"tmp#8##0", 1
   br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -901,7 +911,7 @@ if.then.0:
   %"tmp#16##0" = insertvalue {i2, i1} %"tmp#15##0", i1 1, 1
   ret {i2, i1} %"tmp#16##0"
 if.else.0:
-  %"tmp#11##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"str##0", i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"str##0")
+  %"tmp#11##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 ptrtoint( ptr @"bug214.direction#constant#3" to i64 ), i64 %"str##0", i64 ptrtoint( ptr @"bug214.direction#constant#3" to i64 ), i64 %"str##0")
   %"tmp#4##0" = icmp eq i2 %"tmp#11##0", 1
   br i1 %"tmp#4##0", label %if.then.1, label %if.else.1
 if.then.1:
@@ -909,7 +919,7 @@ if.then.1:
   %"tmp#18##0" = insertvalue {i2, i1} %"tmp#17##0", i1 1, 1
   ret {i2, i1} %"tmp#18##0"
 if.else.1:
-  %"tmp#14##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 ptrtoint( ptr @"string#5" to i64 ), i64 %"str##0", i64 ptrtoint( ptr @"string#5" to i64 ), i64 %"str##0")
+  %"tmp#14##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 ptrtoint( ptr @"bug214.direction#constant#5" to i64 ), i64 %"str##0", i64 ptrtoint( ptr @"bug214.direction#constant#5" to i64 ), i64 %"str##0")
   %"tmp#3##0" = icmp eq i2 %"tmp#14##0", 1
   br i1 %"tmp#3##0", label %if.then.2, label %if.else.2
 if.then.2:
@@ -947,6 +957,7 @@ define external fastcc i1 @"bug214.direction.~=<0>"(i2 %"#left##0", i2 %"#right#
                     bug214.position.y<0>
                     bug214.position.y<1>
                     bug214.position.~=<0>
+  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 0 8]}
   imports         : use bug214
                     use wybe
   resources       : 
@@ -971,14 +982,12 @@ proc = > public {inline} (1 calls)
 
 
 
-proc origin > public (0 calls)
+proc origin > public {inline} (0 calls)
 0: bug214.position.origin<0>
 origin(?#result##0:bug214.position)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:bug214.position) @bug214:nn:nn
-    foreign lpvm mutate(~tmp#3##0:bug214.position, ?tmp#4##0:bug214.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @bug214:nn:nn
-    foreign lpvm mutate(~tmp#4##0:bug214.position, ?#result##0:bug214.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @bug214:nn:nn
+    foreign llvm move(bug214.position#constant#0:bug214.position, ?#result##0:bug214.position) @bug214:nn:nn
 
 
 proc position > public {inline} (1 calls)
@@ -1073,6 +1082,7 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/bug214.wybe"
 target triple    ????
 
+@"bug214.position#constant#0" = private unnamed_addr constant {i64, i64} { i64 0, i64 0 }, align 8
 
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_int(i64)
@@ -1100,14 +1110,8 @@ if.else.0:
 }
 
 define external fastcc i64 @"bug214.position.origin<0>"() {
-  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#3##0" = ptrtoint ptr %"tmp#5##0" to i64
-  %"tmp#6##0" = inttoptr i64 %"tmp#3##0" to ptr
-  store i64 0, ptr %"tmp#6##0"
-  %"tmp#7##0" = add i64 %"tmp#3##0", 8
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 0, ptr %"tmp#8##0"
-  ret i64 %"tmp#3##0"
+  %"tmp#5##0" = ptrtoint ptr @"bug214.position#constant#0" to i64
+  ret i64 %"tmp#5##0"
 }
 
 define external fastcc i64 @"bug214.position.position<0>"(i64 %"x##0", i64 %"y##0") {

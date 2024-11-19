@@ -8,6 +8,36 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : hypot.<0>
+  constants       : 0:: CStringInfo {cstringChars = "hypot(3,4) = "}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember hypot#constant#0]}
+                    2:: CStringInfo {cstringChars = "area(5) = "}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember hypot#constant#2]}
+                    4:: CStringInfo {cstringChars = "e = "}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember hypot#constant#4]}
+                    6:: CStringInfo {cstringChars = " = "}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember hypot#constant#6]}
+                    8:: CStringInfo {cstringChars = "sin(30) = "}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember hypot#constant#8]}
+                    10:: CStringInfo {cstringChars = "cos(30) = "}
+                    11:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember hypot#constant#10]}
+                    12:: CStringInfo {cstringChars = "sin(30 degrees) = "}
+                    13:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember hypot#constant#12]}
+                    14:: CStringInfo {cstringChars = "cos(30 degrees) = "}
+                    15:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember hypot#constant#14]}
+                    16:: CStringInfo {cstringChars = "ln(e) = "}
+                    17:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember hypot#constant#16]}
+                    18:: CStringInfo {cstringChars = "common log(e) = "}
+                    19:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember hypot#constant#18]}
+                    20:: CStringInfo {cstringChars = "base 2 log(e) = "}
+                    21:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember hypot#constant#20]}
+                    22:: CStringInfo {cstringChars = "floor(pi) = "}
+                    23:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember hypot#constant#22]}
+                    24:: CStringInfo {cstringChars = "ceil(pi) = "}
+                    25:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember hypot#constant#24]}
+                    26:: CStringInfo {cstringChars = "round(pi) = "}
+                    27:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember hypot#constant#26]}
+                    28:: CStringInfo {cstringChars = "iround(pi) = "}
+                    29:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember hypot#constant#28]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -133,36 +163,36 @@ hypot(s1##0:wybe.float, s2##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/hypot.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" = \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"area(5) = \00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"base 2 log(e) = \00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"ceil(pi) = \00", align 8
-@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"common log(e) = \00", align 8
-@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"cos(30 degrees) = \00", align 8
-@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"cos(30) = \00", align 8
-@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"e = \00", align 8
-@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"floor(pi) = \00", align 8
-@"cstring#9" = private unnamed_addr constant [ ?? x i8 ] c"hypot(3,4) = \00", align 8
-@"cstring#10" = private unnamed_addr constant [ ?? x i8 ] c"iround(pi) = \00", align 8
-@"cstring#11" = private unnamed_addr constant [ ?? x i8 ] c"ln(e) = \00", align 8
-@"cstring#12" = private unnamed_addr constant [ ?? x i8 ] c"round(pi) = \00", align 8
-@"cstring#13" = private unnamed_addr constant [ ?? x i8 ] c"sin(30 degrees) = \00", align 8
-@"cstring#14" = private unnamed_addr constant [ ?? x i8 ] c"sin(30) = \00", align 8
-@"string#15" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#16" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#17" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#18" = private unnamed_addr constant {i64, i64} { i64 11, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
-@"string#19" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
-@"string#20" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
-@"string#21" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
-@"string#22" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
-@"string#23" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
-@"string#24" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#9" to i64 ) }, align 8
-@"string#25" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#10" to i64 ) }, align 8
-@"string#26" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#11" to i64 ) }, align 8
-@"string#27" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#12" to i64 ) }, align 8
-@"string#28" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#13" to i64 ) }, align 8
-@"string#29" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#14" to i64 ) }, align 8
+@"hypot#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"hypot(3,4) = \00", align 8
+@"hypot#constant#1" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"hypot#constant#0" }, align 8
+@"hypot#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"area(5) = \00", align 8
+@"hypot#constant#3" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"hypot#constant#2" }, align 8
+@"hypot#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"e = \00", align 8
+@"hypot#constant#5" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"hypot#constant#4" }, align 8
+@"hypot#constant#6" = private unnamed_addr constant [ ?? x i8 ] c" = \00", align 8
+@"hypot#constant#7" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"hypot#constant#6" }, align 8
+@"hypot#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"sin(30) = \00", align 8
+@"hypot#constant#9" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"hypot#constant#8" }, align 8
+@"hypot#constant#10" = private unnamed_addr constant [ ?? x i8 ] c"cos(30) = \00", align 8
+@"hypot#constant#11" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"hypot#constant#10" }, align 8
+@"hypot#constant#12" = private unnamed_addr constant [ ?? x i8 ] c"sin(30 degrees) = \00", align 8
+@"hypot#constant#13" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"hypot#constant#12" }, align 8
+@"hypot#constant#14" = private unnamed_addr constant [ ?? x i8 ] c"cos(30 degrees) = \00", align 8
+@"hypot#constant#15" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"hypot#constant#14" }, align 8
+@"hypot#constant#16" = private unnamed_addr constant [ ?? x i8 ] c"ln(e) = \00", align 8
+@"hypot#constant#17" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"hypot#constant#16" }, align 8
+@"hypot#constant#18" = private unnamed_addr constant [ ?? x i8 ] c"common log(e) = \00", align 8
+@"hypot#constant#19" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"hypot#constant#18" }, align 8
+@"hypot#constant#20" = private unnamed_addr constant [ ?? x i8 ] c"base 2 log(e) = \00", align 8
+@"hypot#constant#21" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"hypot#constant#20" }, align 8
+@"hypot#constant#22" = private unnamed_addr constant [ ?? x i8 ] c"floor(pi) = \00", align 8
+@"hypot#constant#23" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"hypot#constant#22" }, align 8
+@"hypot#constant#24" = private unnamed_addr constant [ ?? x i8 ] c"ceil(pi) = \00", align 8
+@"hypot#constant#25" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"hypot#constant#24" }, align 8
+@"hypot#constant#26" = private unnamed_addr constant [ ?? x i8 ] c"round(pi) = \00", align 8
+@"hypot#constant#27" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"hypot#constant#26" }, align 8
+@"hypot#constant#28" = private unnamed_addr constant [ ?? x i8 ] c"iround(pi) = \00", align 8
+@"hypot#constant#29" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"hypot#constant#28" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc double @llvm.ceil.f64(double)
@@ -181,60 +211,60 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"hypot.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#24" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#1" to i64 ))
   %"tmp#0##0" = call ccc double @llvm.sqrt.f64(double 25.0)
   call ccc void @print_float(double %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#16" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#3" to i64 ))
   call ccc void @print_float(double 78.53981633974483)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#5" to i64 ))
   call ccc void @print_float(double 2.7182818284590455)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#7" to i64 ))
   %"tmp#3##0" = call ccc double @llvm.exp.f64(double 1.0)
   call ccc void @print_float(double %"tmp#3##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#29" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#9" to i64 ))
   %"tmp#4##0" = call ccc double @llvm.sin.f64(double 30.0)
   call ccc void @print_float(double %"tmp#4##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#11" to i64 ))
   %"tmp#5##0" = call ccc double @llvm.cos.f64(double 30.0)
   call ccc void @print_float(double %"tmp#5##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#28" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#13" to i64 ))
   %"tmp#6##0" = call ccc double @llvm.sin.f64(double 0.5235987755982988)
   call ccc void @print_float(double %"tmp#6##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#20" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#15" to i64 ))
   %"tmp#10##0" = call ccc double @llvm.cos.f64(double 0.5235987755982988)
   call ccc void @print_float(double %"tmp#10##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#17" to i64 ))
   %"tmp#14##0" = call ccc double @llvm.log.f64(double 2.7182818284590455)
   call ccc void @print_float(double %"tmp#14##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#19" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#19" to i64 ))
   %"tmp#16##0" = call ccc double @llvm.log10.f64(double 2.7182818284590455)
   call ccc void @print_float(double %"tmp#16##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#17" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#21" to i64 ))
   %"tmp#18##0" = call ccc double @llvm.log2.f64(double 2.7182818284590455)
   call ccc void @print_float(double %"tmp#18##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#23" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#23" to i64 ))
   %"tmp#20##0" = call ccc double @llvm.floor.f64(double 3.141592653589793)
   call ccc void @print_float(double %"tmp#20##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#18" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#25" to i64 ))
   %"tmp#22##0" = call ccc double @llvm.ceil.f64(double 3.141592653589793)
   call ccc void @print_float(double %"tmp#22##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#27" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#27" to i64 ))
   %"tmp#24##0" = call ccc double @llvm.round.f64(double 3.141592653589793)
   call ccc void @print_float(double %"tmp#24##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#25" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"hypot#constant#29" to i64 ))
   %"tmp#26##0" = fptosi double %"tmp#24##0" to i64
   call ccc void @print_int(i64 %"tmp#26##0")
   call ccc void @putchar(i8 10)

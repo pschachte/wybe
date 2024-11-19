@@ -10,6 +10,12 @@ AFTER EVERYTHING:
   public procs    : alias_data.<0>
                     alias_data.backup<0>
                     alias_data.bar<0>
+  constants       : 0:: CStringInfo {cstringChars = "intro to cs"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember alias_data#constant#0]}
+                    2:: CStringInfo {cstringChars = "student1"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember alias_data#constant#2]}
+                    4:: CStringInfo {cstringChars = "student2"}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember alias_data#constant#4]}
   imports         : use student
                     use wybe
   resources       : 
@@ -62,12 +68,12 @@ bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/alias_data.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"intro to cs\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"student1\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"student2\00", align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 11, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"alias_data#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"intro to cs\00", align 8
+@"alias_data#constant#1" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"alias_data#constant#0" }, align 8
+@"alias_data#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"student1\00", align 8
+@"alias_data#constant#3" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"alias_data#constant#2" }, align 8
+@"alias_data#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"student2\00", align 8
+@"alias_data#constant#5" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"alias_data#constant#4" }, align 8
 
 declare external fastcc void @"student.printStudent<0>"(i64)
 declare external fastcc void @"student.printStudent<0>[410bae77d3]"(i64)
@@ -92,7 +98,7 @@ define external fastcc void @"alias_data.bar<0>"() {
   store i64 101, ptr %"tmp#18##0"
   %"tmp#19##0" = add i64 %"tmp#4##0", 8
   %"tmp#20##0" = inttoptr i64 %"tmp#19##0" to ptr
-  store i64 ptrtoint( ptr @"string#3" to i64 ), ptr %"tmp#20##0"
+  store i64 ptrtoint( ptr @"alias_data#constant#1" to i64 ), ptr %"tmp#20##0"
   %"tmp#21##0" = call ccc ptr @wybe_malloc(i32 16)
   %"tmp#8##0" = ptrtoint ptr %"tmp#21##0" to i64
   %"tmp#22##0" = inttoptr i64 %"tmp#8##0" to ptr
@@ -100,10 +106,10 @@ define external fastcc void @"alias_data.bar<0>"() {
   %"tmp#23##0" = add i64 %"tmp#8##0", 8
   %"tmp#24##0" = inttoptr i64 %"tmp#23##0" to ptr
   store i64 %"tmp#4##0", ptr %"tmp#24##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias_data#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"student.printStudent<0>"(i64 %"tmp#8##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias_data#constant#5" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"student.printStudent<0>[410bae77d3]"(i64 %"tmp#8##0")
   ret void
@@ -133,6 +139,14 @@ define external fastcc void @"alias_data.bar<0>"() {
                     student.student.student<0>
                     student.student.student<1>
                     student.student.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "Declarative Programming"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 23 8,PointerStructMember student#constant#0]}
+                    2:: CStringInfo {cstringChars = "student id: "}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember student#constant#2]}
+                    4:: CStringInfo {cstringChars = "course code: "}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember student#constant#4]}
+                    6:: CStringInfo {cstringChars = "course name: "}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember student#constant#6]}
   imports         : public use student.course
                     public use student.student
                     use wybe
@@ -209,14 +223,14 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/student.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Declarative Programming\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"course code: \00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"course name: \00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"student id: \00", align 8
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 23, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#6" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#7" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
+@"student#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Declarative Programming\00", align 8
+@"student#constant#1" = private unnamed_addr constant {i64, ptr} { i64 23, ptr @"student#constant#0" }, align 8
+@"student#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"student id: \00", align 8
+@"student#constant#3" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"student#constant#2" }, align 8
+@"student#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"course code: \00", align 8
+@"student#constant#5" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"student#constant#4" }, align 8
+@"student#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"course name: \00", align 8
+@"student#constant#7" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"student#constant#6" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
@@ -232,7 +246,7 @@ define external fastcc void @"student.<0>"() {
   store i64 90048, ptr %"tmp#13##0"
   %"tmp#14##0" = add i64 %"tmp#4##0", 8
   %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
-  store i64 ptrtoint( ptr @"string#4" to i64 ), ptr %"tmp#15##0"
+  store i64 ptrtoint( ptr @"student#constant#1" to i64 ), ptr %"tmp#15##0"
   %"tmp#16##0" = call ccc ptr @wybe_malloc(i32 16)
   %"tmp#9##0" = ptrtoint ptr %"tmp#16##0" to i64
   %"tmp#17##0" = inttoptr i64 %"tmp#9##0" to ptr
@@ -245,7 +259,7 @@ define external fastcc void @"student.<0>"() {
 }
 
 define external fastcc void @"student.printStudent<0>"(i64 %"stu##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"student#constant#3" to i64 ))
   %"tmp#19##0" = inttoptr i64 %"stu##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#19##0"
   call ccc void @print_int(i64 %"tmp#0##0")
@@ -253,12 +267,12 @@ define external fastcc void @"student.printStudent<0>"(i64 %"stu##0") {
   %"tmp#20##0" = add i64 %"stu##0", 8
   %"tmp#21##0" = inttoptr i64 %"tmp#20##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#21##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"student#constant#5" to i64 ))
   %"tmp#22##0" = inttoptr i64 %"tmp#1##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#22##0"
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"student#constant#7" to i64 ))
   %"tmp#23##0" = add i64 %"tmp#1##0", 8
   %"tmp#24##0" = inttoptr i64 %"tmp#23##0" to ptr
   %"tmp#3##0" = load i64, ptr %"tmp#24##0"
@@ -268,7 +282,7 @@ define external fastcc void @"student.printStudent<0>"(i64 %"stu##0") {
 }
 
 define external fastcc void @"student.printStudent<0>[410bae77d3]"(i64 %"stu##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"student#constant#3" to i64 ))
   %"tmp#19##0" = inttoptr i64 %"stu##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#19##0"
   call ccc void @print_int(i64 %"tmp#0##0")
@@ -276,12 +290,12 @@ define external fastcc void @"student.printStudent<0>[410bae77d3]"(i64 %"stu##0"
   %"tmp#20##0" = add i64 %"stu##0", 8
   %"tmp#21##0" = inttoptr i64 %"tmp#20##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#21##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"student#constant#5" to i64 ))
   %"tmp#22##0" = inttoptr i64 %"tmp#1##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#22##0"
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"student#constant#7" to i64 ))
   %"tmp#23##0" = add i64 %"tmp#1##0", 8
   %"tmp#24##0" = inttoptr i64 %"tmp#23##0" to ptr
   %"tmp#3##0" = load i64, ptr %"tmp#24##0"
@@ -303,6 +317,7 @@ define external fastcc void @"student.printStudent<0>[410bae77d3]"(i64 %"stu##0"
                     student.course.name<0>
                     student.course.name<1>
                     student.course.~=<0>
+  constants       : 
   imports         : use student
                     use wybe
   resources       : 
@@ -520,6 +535,7 @@ if.else.0:
                     student.student.student<0>
                     student.student.student<1>
                     student.student.~=<0>
+  constants       : 
   imports         : use student
                     use wybe
   resources       : 

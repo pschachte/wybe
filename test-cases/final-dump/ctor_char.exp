@@ -10,6 +10,7 @@ AFTER EVERYTHING:
   public procs    : ctor_char.<0>
                     ctor_char.=<0>
                     ctor_char.~=<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

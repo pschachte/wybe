@@ -46,6 +46,22 @@ AFTER EVERYTHING:
                     multictr2.t.f08_c<0>
                     multictr2.t.f08_c<1>
                     multictr2.t.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "c01("}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember multictr2#constant#0]}
+                    2:: CStringInfo {cstringChars = "c03("}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember multictr2#constant#2]}
+                    4:: CStringInfo {cstringChars = "c04("}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember multictr2#constant#4]}
+                    6:: CStringInfo {cstringChars = "c05("}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember multictr2#constant#6]}
+                    8:: CStringInfo {cstringChars = "c06("}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember multictr2#constant#8]}
+                    10:: CStringInfo {cstringChars = "c07("}
+                    11:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember multictr2#constant#10]}
+                    12:: CStringInfo {cstringChars = "c08("}
+                    13:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember multictr2#constant#12]}
+                    14:: CStringInfo {cstringChars = ", "}
+                    15:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember multictr2#constant#14]}
   imports         : public use multictr2.t
                     use wybe
   resources       : 
@@ -167,22 +183,22 @@ print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/multictr2.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"c01(\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"c03(\00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"c04(\00", align 8
-@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"c05(\00", align 8
-@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"c06(\00", align 8
-@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"c07(\00", align 8
-@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"c08(\00", align 8
-@"string#8" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#9" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#10" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#11" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
-@"string#12" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
-@"string#13" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
-@"string#14" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
-@"string#15" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
+@"multictr2#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"c01(\00", align 8
+@"multictr2#constant#1" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"multictr2#constant#0" }, align 8
+@"multictr2#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"c03(\00", align 8
+@"multictr2#constant#3" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"multictr2#constant#2" }, align 8
+@"multictr2#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"c04(\00", align 8
+@"multictr2#constant#5" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"multictr2#constant#4" }, align 8
+@"multictr2#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"c05(\00", align 8
+@"multictr2#constant#7" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"multictr2#constant#6" }, align 8
+@"multictr2#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"c06(\00", align 8
+@"multictr2#constant#9" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"multictr2#constant#8" }, align 8
+@"multictr2#constant#10" = private unnamed_addr constant [ ?? x i8 ] c"c07(\00", align 8
+@"multictr2#constant#11" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"multictr2#constant#10" }, align 8
+@"multictr2#constant#12" = private unnamed_addr constant [ ?? x i8 ] c"c08(\00", align 8
+@"multictr2#constant#13" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"multictr2#constant#12" }, align 8
+@"multictr2#constant#14" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
+@"multictr2#constant#15" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"multictr2#constant#14" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
@@ -205,7 +221,7 @@ define external fastcc void @"multictr2.print_t<0>"(i64 %"x##0") {
 case.0.switch.0:
   %"tmp#120##0" = inttoptr i64 %"x##0" to ptr
   %"a##0" = load i64, ptr %"tmp#120##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#1" to i64 ))
   call ccc void @print_int(i64 %"a##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -214,7 +230,7 @@ case.1.switch.0:
   %"tmp#121##0" = add i64 %"x##0", -1
   %"tmp#122##0" = inttoptr i64 %"tmp#121##0" to ptr
   %"a##1" = load i64, ptr %"tmp#122##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#3" to i64 ))
   call ccc void @print_int(i64 %"a##1")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -223,7 +239,7 @@ case.2.switch.0:
   %"tmp#123##0" = add i64 %"x##0", -2
   %"tmp#124##0" = inttoptr i64 %"tmp#123##0" to ptr
   %"a##2" = load i64, ptr %"tmp#124##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#3" to i64 ))
   call ccc void @print_int(i64 %"a##2")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -232,7 +248,7 @@ case.3.switch.0:
   %"tmp#125##0" = add i64 %"x##0", -3
   %"tmp#126##0" = inttoptr i64 %"tmp#125##0" to ptr
   %"a##3" = load i64, ptr %"tmp#126##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#5" to i64 ))
   call ccc void @print_int(i64 %"a##3")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -241,7 +257,7 @@ case.4.switch.0:
   %"tmp#127##0" = add i64 %"x##0", -4
   %"tmp#128##0" = inttoptr i64 %"tmp#127##0" to ptr
   %"a##4" = load i64, ptr %"tmp#128##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#12" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#7" to i64 ))
   call ccc void @print_int(i64 %"a##4")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -250,7 +266,7 @@ case.5.switch.0:
   %"tmp#129##0" = add i64 %"x##0", -5
   %"tmp#130##0" = inttoptr i64 %"tmp#129##0" to ptr
   %"a##5" = load i64, ptr %"tmp#130##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#13" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#9" to i64 ))
   call ccc void @print_int(i64 %"a##5")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -259,7 +275,7 @@ case.6.switch.0:
   %"tmp#131##0" = add i64 %"x##0", -6
   %"tmp#132##0" = inttoptr i64 %"tmp#131##0" to ptr
   %"a##6" = load i64, ptr %"tmp#132##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#14" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#11" to i64 ))
   call ccc void @print_int(i64 %"a##6")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -274,11 +290,11 @@ case.7.switch.0:
   %"tmp#137##0" = add i64 %"x##0", 9
   %"tmp#138##0" = inttoptr i64 %"tmp#137##0" to ptr
   %"c##0" = load double, ptr %"tmp#138##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#13" to i64 ))
   call ccc void @print_int(i64 %"a##7")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#15" to i64 ))
   call ccc void @print_int(i64 %"b##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#15" to i64 ))
   call ccc void @print_float(double %"c##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -328,6 +344,7 @@ case.7.switch.0:
                     multictr2.t.f08_c<0>
                     multictr2.t.f08_c<1>
                     multictr2.t.~=<0>
+  constants       : 
   imports         : use multictr2
                     use wybe
   resources       : 
