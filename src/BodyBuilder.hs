@@ -623,6 +623,9 @@ instr' prim@(PrimForeign "lpvm" "mutate" _
             [ArgVar{argVarName=old}, ArgVar{argVarName=new},ArgInt offset _,
              _,_,ArgInt 0 _,val]) pos = do
     -- TODO for now we only handle untagged pointers to structures
+    -- XXX handle non-destructive mutate of small constant structures, simply
+    -- building a new constant structure or one on the heap, depending on
+    -- whether the new value is constant
     ordinaryInstr prim pos
     constantValue val >>= \case
         Just val' -> do
