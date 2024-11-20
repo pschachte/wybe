@@ -348,7 +348,7 @@ buildBody tmp oSubst params builder = do
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
     logMsg BodyBuilder $ "  tmpCount = " ++ show tmp
-    structs <- getModule modStructs 
+    structs <- getModule modStructs
     logMsg BodyBuilder $ "Recorded structs: "
         ++ showMap "{" ", " "}" ((++"::") .show) show structs
     st' <- fuseBodies st
@@ -642,12 +642,25 @@ constantValue (ArgInt i ty) =
     typeSize ty <&> (Just . IntStructMember i)
 constantValue (ArgFloat f ty) =
     typeSize ty <&> (Just . FloatStructMember f)
-constantValue ArgClosure{} = return Nothing
+constantValue (ArgClosure pspec args _) =
+    (PointerStructMember <$>) <$> closureStructId pspec args
 constantValue (ArgConstRef structID ty) =
     return $ Just $ PointerStructMember structID
 constantValue ArgGlobal{} = return Nothing
 constantValue ArgString{} = return Nothing -- XXX Must handle or remove this
 constantValue _ = return Nothing
+
+
+-- | Generate a StructId for a closure, if all its arguments are constants.
+closureStructId :: ProcSpec -> [PrimArg] -> BodyBuilder (Maybe StructID)
+closureStructId pspec args = do
+    mapM constantValue args >>= (\case
+        Just args' -> do
+          let sz = wordSizeBytes * (length args' + 1)
+          Just <$> lift (recordConstStruct $ StructInfo sz
+                    $ FnPointerStructMember pspec
+                        : List.map GenericStructMember args')
+        _ -> return Nothing) . sequence
 
 
 -- | Return the size of a member of the specified type in bytes.
@@ -1008,8 +1021,8 @@ expandArg cnst arg@ArgVar{argVarName=var, argVarFlow=flow} | isInputFlow flow
     let ty = argVarType arg
     let var'' = setArgType ty <$> var'
     maybe
-      (logBuild ("Expanded " ++ show var ++ " to " ++ show var'') >>      
-       expandConstStruct cnst arg) 
+      (logBuild ("Expanded " ++ show var ++ " to " ++ show var'') >>
+       expandConstStruct cnst arg)
       (expandArg cnst)
       var''
 expandArg _ arg@ArgVar{argVarName=var, argVarFlow=flow} | isOutputFlow flow = do
@@ -1020,7 +1033,11 @@ expandArg _ arg@ArgVar{argVarName=var, argVarFlow=flow} | isOutputFlow flow = do
     return arg{argVarName=var'}
 expandArg cnst arg@(ArgClosure ps as ty) = do
     as' <- mapM (expandArg cnst) as
-    return $ ArgClosure ps as' ty
+    if cnst
+      then closureStructId ps as' >>= \case
+        Just structID -> return $ ArgConstRef structID ty
+        _ -> return $ ArgClosure ps as' ty
+      else return $ ArgClosure ps as' ty
 expandArg _ arg = return arg
 
 

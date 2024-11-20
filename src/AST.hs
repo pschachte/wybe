@@ -52,7 +52,6 @@ module AST (
   StructID, structConstName, recordConstStruct,
   lookupConstStruct, lookupConstInfo,
   StructInfo(..), ConstValue(..), constValueSize, constValueRepresentation,
-  argConstValue,
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules, sameOriginModules,
   refersTo,
@@ -2123,8 +2122,12 @@ primImpurity (PrimHigher _ (ArgClosure pspec _ _) impurity _)
 primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType
                     ProcModifiers{modifierImpurity=modimpurity} _} impurity _)
     = return $ max impurity modimpurity
-primImpurity (PrimHigher _ fn _ _)
-    = shouldnt $ "primImpurity of" ++ show fn
+primImpurity (PrimHigher _ (ArgConstRef structID _) impurity _) = do
+    lookupConstInfo structID >>= \case
+        Just (StructInfo _ (FnPointerStructMember pspec:t)) ->
+            max impurity . procImpurity <$> getProcDef pspec
+        _ -> return impurity
+primImpurity (PrimHigher _ fn impurity _) = return impurity
 primImpurity (PrimForeign _ _ flags _)
     = return $ flagsImpurity flags
 
@@ -3457,48 +3460,10 @@ data ConstValue =
     IntStructMember Integer Int         -- ^An integer field with size in bytes
   | FloatStructMember Double Int        -- ^A floating point field and byte size
   | PointerStructMember StructID        -- ^A Pointer to another struct
-  | GlobalNameMember String             -- ^Reference to a global var or fn
+  | FnPointerStructMember ProcSpec      -- ^Reference to a Wybe fn
   | UndefStructMember Int               -- ^An undefined chunk of memory
+  | GenericStructMember ConstValue      -- ^A struct member converted to Pointer
   deriving (Eq,Ord,Show,Generic)
-
-
--- | Produce a StructMember from a PrimArg, if it's a constant.  This may record
--- new constants in the current module.
-argConstValue :: PrimArg -> Compiler (Maybe ConstValue)
-argConstValue ArgVar{} = return Nothing
-argConstValue (ArgInt n ty) = do
-    sz <- typeRepSize <$> typeRepresentation ty
-    return $ Just $ IntStructMember n (sz `div` 8)
-argConstValue (ArgFloat n ty) = do
-    sz <- typeRepSize <$> typeRepresentation ty
-    return $ Just $ FloatStructMember n (sz `div` 8)
-argConstValue (ArgString s CString _) = do
-    structID <- recordConstStruct $ CStringInfo s
-    return $ Just $ PointerStructMember structID
-argConstValue (ArgString s WybeString _) = do
-    cstringID <- recordConstStruct $ CStringInfo s
-    wstringID <- recordConstStruct $ StructInfo (wordSizeBytes * 2)
-        [IntStructMember (toInteger $ length s) wordSizeBytes,
-         PointerStructMember cstringID]
-    return $ Just $ PointerStructMember wstringID
-argConstValue (ArgClosure pspec args _) = do
-    args' <- neededFreeArgs pspec args
-    mapM argConstValue args' >>= (\case
-        Just argReps@(_:_) -> do
-            structID <- recordConstStruct
-                $ StructInfo (wordSizeBytes*length argReps) argReps
-            return $ Just $ PointerStructMember structID
-        _ -> return Nothing) . sequence
-argConstValue (ArgGlobal info _) = do
-    -- XXX is ArgGlobal a constant?  Does it give the address, or value, of the
-    -- global?
-    return Nothing
-argConstValue (ArgConstRef structID _) = do
-    return $ Just $ PointerStructMember structID
-argConstValue ArgUnneeded{} = return Nothing
-argConstValue (ArgUndef ty) = do
-    sz <- typeRepSize <$> typeRepresentation ty
-    return $ Just $ UndefStructMember (sz `div` 8)
 
 
 -- | Filter a list of PrimArgs, keeping the free needed ones.
@@ -3514,8 +3479,9 @@ constValueSize :: ConstValue -> Int
 constValueSize (IntStructMember _ size) = size
 constValueSize (FloatStructMember _ size) = size
 constValueSize (PointerStructMember _) = wordSizeBytes
-constValueSize (GlobalNameMember _) = wordSizeBytes
+constValueSize (FnPointerStructMember _) = wordSizeBytes
 constValueSize (UndefStructMember size) = size
+constValueSize (GenericStructMember _) = wordSizeBytes
 
 
 -- | Return the representation of a StructMember
@@ -3523,8 +3489,9 @@ constValueRepresentation :: ConstValue -> TypeRepresentation
 constValueRepresentation (IntStructMember _ size) = Bits $ size * 8
 constValueRepresentation (FloatStructMember _ size) = Floating $ size * 8
 constValueRepresentation (PointerStructMember _) = Pointer
-constValueRepresentation (GlobalNameMember _) = CPointer
+constValueRepresentation (FnPointerStructMember _) = CPointer
 constValueRepresentation (UndefStructMember size) = Bits $ size * 8
+constValueRepresentation (GenericStructMember _) = Pointer
 
 
 -- |Returns a list of all arguments to a prim, including global flows
