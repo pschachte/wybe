@@ -959,7 +959,8 @@ writeLPVMCall "access" _ args pos = do
                 ArgInt 0 _ -> return struct
                 _ -> do
                         (writeArg,readArg) <- freshTempArgs $ argType struct
-                        writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
+                        struct' <- typeConvertedPrim Pointer struct
+                        writeLLVMCall "add" [] [struct',offset,writeArg] Nothing
                         return readArg
             lltype <- llvmTypeRep <$> argTypeRep member
             arg <- typeConvertedArg CPointer addrArg

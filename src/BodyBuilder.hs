@@ -1220,10 +1220,18 @@ simplifyOp "lshr" _ [arg, ArgInt 0 _, output] =
 -- Integer comparisons, including special handling of unsigned comparison to 0
 simplifyOp "icmp_eq" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1==n2) output
+simplifyOp "icmp_eq" _ [ArgInt 0 _, ArgConstRef _ _, output] =
+  primMove (boolConstant False) output
+simplifyOp "icmp_eq" _ [ArgConstRef _ _, ArgInt 0 _, output] =
+  primMove (boolConstant False) output
 simplifyOp "icmp_eq" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "icmp_eq" flags [arg2, arg1, output]
 simplifyOp "icmp_ne" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1/=n2) output
+simplifyOp "icmp_ne" _ [ArgInt 0 _, ArgConstRef _ _, output] =
+  primMove (boolConstant True) output
+simplifyOp "icmp_ne" _ [ArgConstRef _ _, ArgInt 0 _, output] =
+  primMove (boolConstant True) output
 simplifyOp "icmp_ne" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "icmp_ne" flags [arg2, arg1, output]
 simplifyOp "icmp_slt" _ [ArgInt n1 _, ArgInt n2 _, output] =
