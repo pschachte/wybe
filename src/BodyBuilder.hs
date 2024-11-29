@@ -282,21 +282,6 @@ deleteConstStruct var = do
     modify $ \s -> s{constStructs=Map.delete var $ constStructs s}
 
 
--- -- | Does the specified variable hold a constant structure?
--- getConstStruct :: PrimArg -> BodyBuilder PrimArg
--- getConstStruct arg@(ArgVar var ty FlowIn _ _) = do
---     logBuild $ "Checking if " ++ show var ++ " is a constant structure"
---     gets (Map.lookup var . constStructs) >>= \case
---         Just blockinfo -> do
---             logBuild $ "  it is, with BlockInfo " ++ show blockinfo
---             return arg
---         Nothing -> do
---             logBuild "  it's not"
---             return arg
-
--- getConstStruct arg = return arg 
-
-
 -- | Add a field to a constant structure.  If var is a candidate constant
 -- structure, adds newVar as a candidate constant structure extending the old
 -- var while deleting var as a candidate.
@@ -608,7 +593,6 @@ instr' prim@(PrimForeign "lpvm" "store" _ [var, ArgGlobal info _]) pos = do
         _ -> do
             logBuild " ... it isn't, we need to store"
             ordinaryInstr prim pos
--- XXX handle lpvm access for constant structures, turning into constant value
 instr' prim@(PrimForeign "lpvm" "access" _
             [cnst, ArgInt offset _,_,_,valArg]) pos = do
     -- access(struct:type, offset:int, size:int, start_offset:int, ?member:type2)
