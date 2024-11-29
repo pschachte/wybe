@@ -284,7 +284,7 @@ deleteConstStruct var = do
 
 -- | Add a field to a constant structure.  If var is a candidate constant
 -- structure, adds newVar as a candidate constant structure extending the old
--- var while deleting var as a candidate.
+-- var.  Keep the fields in reverse order.
 updateConstStruct :: PrimVarName -> PrimVarName -> Int -> ConstValue
                   -> BodyBuilder ()
 updateConstStruct newVar var offset value = do
@@ -295,7 +295,11 @@ updateConstStruct newVar var offset value = do
       Just (BlockInfo sz fields) -> do
         logBuild $ "Updating constant structure " ++ show var
                    ++ " into new variable " ++ show newVar
-        let newFields =  (offset,value):fields
+        let (before,after) = List.partition ((>=offset) . fst) fields
+        let before' = case before of
+                        (o,_):rest | o == offset -> rest
+                        _ -> before
+        let newFields =  before' ++ (offset,value):after
         let newMapping = Map.insert newVar (BlockInfo sz newFields) mapping
         logBuild $ "Offsets & values = " ++ show newFields
         logBuild $ "All constants = " ++ show newMapping
@@ -614,9 +618,6 @@ instr' prim@(PrimForeign "lpvm" "mutate" _
             [ArgVar{argVarName=old}, ArgVar{argVarName=new},ArgInt offset _,
              _,_,ArgInt 0 _,val]) pos = do
     -- TODO for now we only handle untagged pointers to structures
-    -- TODO handle non-destructive mutate of small constant structures, simply
-    -- building a new constant structure or one on the heap, depending on
-    -- whether the new value is constant
     ordinaryInstr prim pos
     constantValue val >>= \case
         Just val' -> do
@@ -1555,7 +1556,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             rebuildBody $ selectElt val bods
             mapM_ (placedApply (bkwdBuildStmt defs)) prims
           Nothing -> do
-            -- XXX Perhaps we should generate a new proc for the parent par in
+            -- TODO Perhaps we should generate a new proc for the parent par in
             -- cases where it's more than a few prims.
             (prims', var', ty', bods', deflt')
                 <- rebuildSwitch prims var ty bods d reif
@@ -1697,7 +1698,7 @@ completeSwitch prims var ty deflt cases
             else do
                 logBkwd $ "Not producing switch:  non-dense cases "
                           ++ show (fst <$> cases')
-                return Nothing -- XXX generalise to handle more switches
+                return Nothing -- TODO generalise to handle more switches
     | otherwise = do
         logBkwd $ "Not producing switch (only " ++ show (Map.size cases)
                 ++ " case(s))"
