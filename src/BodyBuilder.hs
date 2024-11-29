@@ -1744,7 +1744,7 @@ bkwdBuildStmt defs prim pos = do
                                                 $ bkwdRenaming s }
         _ -> do
             let (ins, outs) = splitArgsByMode $ List.filter argIsVar
-                                              $ flattenArgs args'
+                                              $ concatMap flattenArg args'
             let gOuts = globalFlowsOut gFlows
             purity <- lift $ primImpurity prim
             -- Filter out pure instructions that produce no needed outputs nor 
@@ -1786,11 +1786,9 @@ renameArg (ArgClosure ps args ts) = do
     return $ ArgClosure ps args' ts
 renameArg arg = return arg
 
-flattenArgs :: [PrimArg] -> [PrimArg]
-flattenArgs = concatMap flattenArg
 
 flattenArg :: PrimArg -> [PrimArg]
-flattenArg arg@(ArgClosure _ as ts) = arg:flattenArgs as
+flattenArg arg@(ArgClosure _ as ts) = arg:concatMap flattenArg as
 flattenArg arg = [arg]
 
 

@@ -750,7 +750,7 @@ reexitModule :: Compiler ()
 reexitModule = do
     mod <- getModule id
     modify
-      (\comp -> comp { underCompilation = 
+      (\comp -> comp { underCompilation =
             List.map (\m-> if modSpec m == modSpec mod then mod else m)
                 $ List.tail (underCompilation comp) })
     updateModules $ Map.insert (modSpec mod) mod
@@ -1473,7 +1473,7 @@ recordConstStruct info = do
                                                     (modStructs s)
                                    , modStructID = Map.insert info structID
                                                     (modStructID s) }
-            structs <- getModule modStructs 
+            structs <- getModule modStructs
             logAST $ "Recorded structs: "
                 ++ showMap "{" ", " "}" ((++"::") .show) show structs
             return structID
@@ -3454,8 +3454,10 @@ data StructInfo
 
 -- | The value of a field in a constant memory block, including its size in
 -- bytes.  PointerStructMember specifies a reference to another constant struct.
--- Floats must be of a valid floating point size, and PointerStructMember must
--- be a valid size for a pointer.
+-- Floats must be of a valid floating point size, and PointerStructMember
+-- denotes a value the size of a pointer.  Note that FnPointerStructMember
+-- specifies the function pointer part of a closure, where all the following
+-- structure members are the closed values.
 data ConstValue =
     IntStructMember Integer Int         -- ^An integer field with size in bytes
   | FloatStructMember Double Int        -- ^A floating point field and byte size
@@ -3545,12 +3547,47 @@ argGlobalFlow varFlows (ArgClosure pspec args _) = do
         gFlows <- getProcGlobalFlows pspec
         argFlows <- argsGlobalFlows varFlows args
         return $ effectiveGlobalFlows argFlows gFlows
+argGlobalFlow varFlows (ArgConstRef structID _) = do
+    lookupConstInfo structID >>= (\case
+            StructInfo _ fields -> constsGlobalFlows fields
+            CStringInfo _ -> return emptyGlobalFlows)
+        . trustFromJust "lookupConstStruct"
 argGlobalFlow _ _ = return emptyGlobalFlows
+
 
 -- Get the corresponding GlobalFlows and Flows of the given PrimArgs
 argsGlobalFlows :: Map PrimVarName GlobalFlows -> [PrimArg] -> Compiler [(GlobalFlows, PrimFlow)]
 argsGlobalFlows varFlows
     = mapM (\a -> (, argFlowDirection a) <$> argGlobalFlow varFlows a)
+
+
+-- | Get the GlobalFlows of a list of constant values.  Specifically, this looks
+-- for constant structures that begin with a FnPointerStructMember, and treats
+-- that as if it were an ArgClosure.  It also traverses the structure looking
+-- for nested structures beginning with a FnPointerStructMember.  Since this is
+-- a completely static input structure, that's the only way to get GlobalFlows.
+constsGlobalFlows :: [ConstValue] -> Compiler GlobalFlows
+constsGlobalFlows (FnPointerStructMember pspec:fields) = do
+    params <- getPrimParams pspec
+    let nArgs = length fields
+        (closedParams, freeParams) = List.splitAt nArgs params
+    if any (\(PrimParam _ ty flow _ _) ->
+            isInputFlow flow && isResourcefulHigherOrder ty) freeParams
+    then return univGlobalFlows
+    else do
+        gFlows <- getProcGlobalFlows pspec
+        globalFlowsUnions . (gFlows:) <$> mapM constGlobalFlows fields
+constsGlobalFlows fields = return emptyGlobalFlows -- XXX need to recurse!
+
+
+-- | Compute the GlobalFlows of a single constant value.
+constGlobalFlows :: ConstValue -> Compiler GlobalFlows
+constGlobalFlows (PointerStructMember structID) = do
+    lookupConstInfo structID >>= (\case
+            StructInfo _ fields -> constsGlobalFlows fields
+            CStringInfo _ -> return emptyGlobalFlows)
+        . trustFromJust "lookupConstStruct"
+constGlobalFlows _ = return emptyGlobalFlows
 
 
 -- | Gather the effective GlobalFLows of a given set of GlobalGlows, 
