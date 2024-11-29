@@ -2,4 +2,4 @@ n: energy: -0.169075
 energy: -0.169088
 
 malloc count: (should be 5005 with multi-specz and 10006 without it)
-5005
+5001

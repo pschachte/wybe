@@ -14,36 +14,37 @@ AFTER EVERYTHING:
                     alias1.replicate<0>
   constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 0 8]}
                     1:: StructInfo {structSize = 16, structData = [IntStructMember 101 8,IntStructMember 102 8]}
-                    2:: CStringInfo {cstringChars = "-------------- Calling foo: "}
-                    3:: StructInfo {structSize = 16, structData = [IntStructMember 28 8,PointerStructMember alias1#constant#2]}
-                    4:: CStringInfo {cstringChars = "-------------- Calling bar: "}
-                    5:: StructInfo {structSize = 16, structData = [IntStructMember 28 8,PointerStructMember alias1#constant#4]}
-                    6:: CStringInfo {cstringChars = "-------------- Calling baz: "}
-                    7:: StructInfo {structSize = 16, structData = [IntStructMember 28 8,PointerStructMember alias1#constant#6]}
-                    8:: CStringInfo {cstringChars = "--- Inside bar: "}
-                    9:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember alias1#constant#8]}
-                    10:: CStringInfo {cstringChars = "expect p1(101,102):"}
-                    11:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember alias1#constant#10]}
-                    12:: CStringInfo {cstringChars = "expect p2(101,102):"}
-                    13:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember alias1#constant#12]}
-                    14:: CStringInfo {cstringChars = "--- Inside bar, after calling x(!p2, 555): "}
-                    15:: StructInfo {structSize = 16, structData = [IntStructMember 43 8,PointerStructMember alias1#constant#14]}
-                    16:: CStringInfo {cstringChars = "expect p2(555,102):"}
-                    17:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember alias1#constant#16]}
-                    18:: CStringInfo {cstringChars = "--- Inside baz: "}
-                    19:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember alias1#constant#18]}
-                    20:: CStringInfo {cstringChars = "expect p3(33333333,102):"}
-                    21:: StructInfo {structSize = 16, structData = [IntStructMember 24 8,PointerStructMember alias1#constant#20]}
-                    22:: CStringInfo {cstringChars = "--- Inside baz, after calling x(!p1, 555): "}
-                    23:: StructInfo {structSize = 16, structData = [IntStructMember 43 8,PointerStructMember alias1#constant#22]}
-                    24:: CStringInfo {cstringChars = "expect p1(555,102):"}
-                    25:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember alias1#constant#24]}
-                    26:: CStringInfo {cstringChars = "--- Inside foo: "}
-                    27:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember alias1#constant#26]}
-                    28:: CStringInfo {cstringChars = "--- Inside foo, after calling x(!p1, 555): "}
-                    29:: StructInfo {structSize = 16, structData = [IntStructMember 43 8,PointerStructMember alias1#constant#28]}
-                    30:: CStringInfo {cstringChars = "random print"}
-                    31:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember alias1#constant#30]}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 33333333 8,IntStructMember 102 8]}
+                    3:: CStringInfo {cstringChars = "-------------- Calling foo: "}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 28 8,PointerStructMember alias1#constant#3]}
+                    5:: CStringInfo {cstringChars = "-------------- Calling bar: "}
+                    6:: StructInfo {structSize = 16, structData = [IntStructMember 28 8,PointerStructMember alias1#constant#5]}
+                    7:: CStringInfo {cstringChars = "-------------- Calling baz: "}
+                    8:: StructInfo {structSize = 16, structData = [IntStructMember 28 8,PointerStructMember alias1#constant#7]}
+                    9:: CStringInfo {cstringChars = "random print"}
+                    10:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember alias1#constant#9]}
+                    11:: CStringInfo {cstringChars = "--- Inside bar: "}
+                    12:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember alias1#constant#11]}
+                    13:: CStringInfo {cstringChars = "expect p1(101,102):"}
+                    14:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember alias1#constant#13]}
+                    15:: CStringInfo {cstringChars = "expect p2(101,102):"}
+                    16:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember alias1#constant#15]}
+                    17:: CStringInfo {cstringChars = "--- Inside bar, after calling x(!p2, 555): "}
+                    18:: StructInfo {structSize = 16, structData = [IntStructMember 43 8,PointerStructMember alias1#constant#17]}
+                    19:: CStringInfo {cstringChars = "expect p2(555,102):"}
+                    20:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember alias1#constant#19]}
+                    21:: CStringInfo {cstringChars = "--- Inside baz: "}
+                    22:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember alias1#constant#21]}
+                    23:: CStringInfo {cstringChars = "expect p3(33333333,102):"}
+                    24:: StructInfo {structSize = 16, structData = [IntStructMember 24 8,PointerStructMember alias1#constant#23]}
+                    25:: CStringInfo {cstringChars = "--- Inside baz, after calling x(!p1, 555): "}
+                    26:: StructInfo {structSize = 16, structData = [IntStructMember 43 8,PointerStructMember alias1#constant#25]}
+                    27:: CStringInfo {cstringChars = "expect p1(555,102):"}
+                    28:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember alias1#constant#27]}
+                    29:: CStringInfo {cstringChars = "--- Inside foo: "}
+                    30:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember alias1#constant#29]}
+                    31:: CStringInfo {cstringChars = "--- Inside foo, after calling x(!p1, 555): "}
+                    32:: StructInfo {structSize = 16, structData = [IntStructMember 43 8,PointerStructMember alias1#constant#31]}
   imports         : use position
                     use wybe
   resources       : 
@@ -76,20 +77,24 @@ proc bar > public (1 calls)
 bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    alias1.replicate<0>(alias1#constant#1:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias1:nn:nn
-    wybe.string.print<0>("--- Inside bar: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @alias1:nn:nn
+    wybe.string.print<0>("random print":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @alias1:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @alias1:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @alias1:nn:nn
-    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
+    foreign c print_int(0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @alias1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @alias1:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
+    wybe.string.print<0>("--- Inside bar: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @alias1:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @alias1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @alias1:nn:nn
+    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
     wybe.string.print<0>("expect p1(101,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @alias1:nn:nn
     position.printPosition<0>(alias1#constant#1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @alias1:nn:nn
     wybe.string.print<0>("expect p2(101,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @alias1:nn:nn
-    position.printPosition<0>(p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @alias1:nn:nn
-    foreign lpvm {noalias} mutate(~p2##0:position.position, ?p2##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 555:wybe.int) @alias1:nn:nn
-    wybe.string.print<0>("--- Inside bar, after calling x(!p2, 555): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @alias1:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @alias1:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @alias1:nn:nn
-    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
+    position.printPosition<0>(alias1#constant#1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @alias1:nn:nn
+    foreign lpvm {noalias} mutate(alias1#constant#1:position.position, ?p2##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 555:wybe.int) @alias1:nn:nn
+    wybe.string.print<0>("--- Inside bar, after calling x(!p2, 555): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @alias1:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @alias1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @alias1:nn:nn
+    foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
     wybe.string.print<0>("expect p1(101,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @alias1:nn:nn
     position.printPosition<0>(alias1#constant#1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @alias1:nn:nn
     wybe.string.print<0>("expect p2(555,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @alias1:nn:nn
@@ -101,32 +106,32 @@ proc baz > public (1 calls)
 baz()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    alias1.replicate<0>(alias1#constant#1:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias1:nn:nn
-    wybe.string.print<0>("--- Inside baz: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @alias1:nn:nn
+    wybe.string.print<0>("random print":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @alias1:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @alias1:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @alias1:nn:nn
-    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
+    foreign c print_int(0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @alias1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @alias1:nn:nn
+    foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
+    wybe.string.print<0>("--- Inside baz: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #20 @alias1:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @alias1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @alias1:nn:nn
+    foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
     wybe.string.print<0>("expect p1(101,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @alias1:nn:nn
     position.printPosition<0>(alias1#constant#1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @alias1:nn:nn
     wybe.string.print<0>("expect p2(101,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @alias1:nn:nn
-    position.printPosition<0>(p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @alias1:nn:nn
-    foreign lpvm access(p2##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @alias1:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#13##0:position.position) @alias1:nn:nn
-    foreign lpvm mutate(~tmp#13##0:position.position, ?tmp#14##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 33333333:wybe.int) @alias1:nn:nn
-    foreign lpvm mutate(~tmp#14##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.int) @alias1:nn:nn
+    position.printPosition<0>(alias1#constant#1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @alias1:nn:nn
     wybe.string.print<0>("expect p3(33333333,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @alias1:nn:nn
-    position.printPosition<0>(tmp#1##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @alias1:nn:nn
+    position.printPosition<0>(alias1#constant#2:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @alias1:nn:nn
     foreign lpvm {noalias} mutate(alias1#constant#1:position.position, ?p1##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 555:wybe.int) @alias1:nn:nn
-    wybe.string.print<0>("--- Inside baz, after calling x(!p1, 555): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #20 @alias1:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @alias1:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @alias1:nn:nn
-    foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
+    wybe.string.print<0>("--- Inside baz, after calling x(!p1, 555): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @alias1:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @alias1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @alias1:nn:nn
+    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
     wybe.string.print<0>("expect p1(555,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @alias1:nn:nn
     position.printPosition<0>(~p1##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @alias1:nn:nn
     wybe.string.print<0>("expect p2(101,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @alias1:nn:nn
-    position.printPosition<0>(~p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @alias1:nn:nn
+    position.printPosition<0>(alias1#constant#1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @alias1:nn:nn
     wybe.string.print<0>("expect p3(33333333,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @alias1:nn:nn
-    position.printPosition<0>(~tmp#1##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @alias1:nn:nn
+    position.printPosition<0>(alias1#constant#2:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @alias1:nn:nn
 
 
 proc foo > public (1 calls)
@@ -134,35 +139,38 @@ proc foo > public (1 calls)
 foo()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    alias1.replicate<0>(alias1#constant#1:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias1:nn:nn
-    wybe.string.print<0>("--- Inside foo: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @alias1:nn:nn
+    wybe.string.print<0>("random print":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @alias1:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @alias1:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @alias1:nn:nn
-    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
+    foreign c print_int(0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @alias1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @alias1:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
+    wybe.string.print<0>("--- Inside foo: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @alias1:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @alias1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @alias1:nn:nn
+    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
     wybe.string.print<0>("expect p1(101,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @alias1:nn:nn
     position.printPosition<0>(alias1#constant#1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @alias1:nn:nn
     wybe.string.print<0>("expect p2(101,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @alias1:nn:nn
-    position.printPosition<0>(p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @alias1:nn:nn
+    position.printPosition<0>(alias1#constant#1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @alias1:nn:nn
     foreign lpvm {noalias} mutate(alias1#constant#1:position.position, ?p1##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 555:wybe.int) @alias1:nn:nn
-    wybe.string.print<0>("--- Inside foo, after calling x(!p1, 555): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @alias1:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @alias1:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @alias1:nn:nn
-    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
+    wybe.string.print<0>("--- Inside foo, after calling x(!p1, 555): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @alias1:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @alias1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @alias1:nn:nn
+    foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
     wybe.string.print<0>("expect p1(555,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @alias1:nn:nn
     position.printPosition<0>(~p1##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @alias1:nn:nn
     wybe.string.print<0>("expect p2(101,102):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @alias1:nn:nn
-    position.printPosition<0>(~p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @alias1:nn:nn
+    position.printPosition<0>(alias1#constant#1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @alias1:nn:nn
 
 
-proc replicate > public (3 calls)
+proc replicate > public {inline} (3 calls)
 0: alias1.replicate<0>
 replicate(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: [(p1##0,p2##0)]
+  AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print<0>("random print":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias1:nn:nn
-    foreign lpvm access(alias1#constant#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @alias1:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @alias1:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @alias1:nn:nn
+    foreign c print_int(0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @alias1:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @alias1:nn:nn
     foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias1:nn:nn
     foreign llvm move(~p1##0:position.position, ?p2##0:position.position) @alias1:nn:nn
@@ -175,38 +183,38 @@ replicate(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {
 source_filename = "!ROOT!/final-dump/alias1.wybe"
 target triple    ????
 
-@"alias1#constant#0" = private unnamed_addr constant {i64, i64} { i64 0, i64 0 }, align 8
 @"alias1#constant#1" = private unnamed_addr constant {i64, i64} { i64 101, i64 102 }, align 8
-@"alias1#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"-------------- Calling foo: \00", align 8
-@"alias1#constant#3" = private unnamed_addr constant {i64, ptr} { i64 28, ptr @"alias1#constant#2" }, align 8
-@"alias1#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"-------------- Calling bar: \00", align 8
-@"alias1#constant#5" = private unnamed_addr constant {i64, ptr} { i64 28, ptr @"alias1#constant#4" }, align 8
-@"alias1#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"-------------- Calling baz: \00", align 8
-@"alias1#constant#7" = private unnamed_addr constant {i64, ptr} { i64 28, ptr @"alias1#constant#6" }, align 8
-@"alias1#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside bar: \00", align 8
-@"alias1#constant#9" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"alias1#constant#8" }, align 8
-@"alias1#constant#10" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(101,102):\00", align 8
-@"alias1#constant#11" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias1#constant#10" }, align 8
-@"alias1#constant#12" = private unnamed_addr constant [ ?? x i8 ] c"expect p2(101,102):\00", align 8
-@"alias1#constant#13" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias1#constant#12" }, align 8
-@"alias1#constant#14" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside bar, after calling x(!p2, 555): \00", align 8
-@"alias1#constant#15" = private unnamed_addr constant {i64, ptr} { i64 43, ptr @"alias1#constant#14" }, align 8
-@"alias1#constant#16" = private unnamed_addr constant [ ?? x i8 ] c"expect p2(555,102):\00", align 8
-@"alias1#constant#17" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias1#constant#16" }, align 8
-@"alias1#constant#18" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside baz: \00", align 8
-@"alias1#constant#19" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"alias1#constant#18" }, align 8
-@"alias1#constant#20" = private unnamed_addr constant [ ?? x i8 ] c"expect p3(33333333,102):\00", align 8
-@"alias1#constant#21" = private unnamed_addr constant {i64, ptr} { i64 24, ptr @"alias1#constant#20" }, align 8
-@"alias1#constant#22" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside baz, after calling x(!p1, 555): \00", align 8
-@"alias1#constant#23" = private unnamed_addr constant {i64, ptr} { i64 43, ptr @"alias1#constant#22" }, align 8
-@"alias1#constant#24" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(555,102):\00", align 8
-@"alias1#constant#25" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias1#constant#24" }, align 8
-@"alias1#constant#26" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside foo: \00", align 8
-@"alias1#constant#27" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"alias1#constant#26" }, align 8
-@"alias1#constant#28" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside foo, after calling x(!p1, 555): \00", align 8
-@"alias1#constant#29" = private unnamed_addr constant {i64, ptr} { i64 43, ptr @"alias1#constant#28" }, align 8
-@"alias1#constant#30" = private unnamed_addr constant [ ?? x i8 ] c"random print\00", align 8
-@"alias1#constant#31" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"alias1#constant#30" }, align 8
+@"alias1#constant#2" = private unnamed_addr constant {i64, i64} { i64 33333333, i64 102 }, align 8
+@"alias1#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"-------------- Calling foo: \00", align 8
+@"alias1#constant#4" = private unnamed_addr constant {i64, ptr} { i64 28, ptr @"alias1#constant#3" }, align 8
+@"alias1#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"-------------- Calling bar: \00", align 8
+@"alias1#constant#6" = private unnamed_addr constant {i64, ptr} { i64 28, ptr @"alias1#constant#5" }, align 8
+@"alias1#constant#7" = private unnamed_addr constant [ ?? x i8 ] c"-------------- Calling baz: \00", align 8
+@"alias1#constant#8" = private unnamed_addr constant {i64, ptr} { i64 28, ptr @"alias1#constant#7" }, align 8
+@"alias1#constant#9" = private unnamed_addr constant [ ?? x i8 ] c"random print\00", align 8
+@"alias1#constant#10" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"alias1#constant#9" }, align 8
+@"alias1#constant#11" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside bar: \00", align 8
+@"alias1#constant#12" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"alias1#constant#11" }, align 8
+@"alias1#constant#13" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(101,102):\00", align 8
+@"alias1#constant#14" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias1#constant#13" }, align 8
+@"alias1#constant#15" = private unnamed_addr constant [ ?? x i8 ] c"expect p2(101,102):\00", align 8
+@"alias1#constant#16" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias1#constant#15" }, align 8
+@"alias1#constant#17" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside bar, after calling x(!p2, 555): \00", align 8
+@"alias1#constant#18" = private unnamed_addr constant {i64, ptr} { i64 43, ptr @"alias1#constant#17" }, align 8
+@"alias1#constant#19" = private unnamed_addr constant [ ?? x i8 ] c"expect p2(555,102):\00", align 8
+@"alias1#constant#20" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias1#constant#19" }, align 8
+@"alias1#constant#21" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside baz: \00", align 8
+@"alias1#constant#22" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"alias1#constant#21" }, align 8
+@"alias1#constant#23" = private unnamed_addr constant [ ?? x i8 ] c"expect p3(33333333,102):\00", align 8
+@"alias1#constant#24" = private unnamed_addr constant {i64, ptr} { i64 24, ptr @"alias1#constant#23" }, align 8
+@"alias1#constant#25" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside baz, after calling x(!p1, 555): \00", align 8
+@"alias1#constant#26" = private unnamed_addr constant {i64, ptr} { i64 43, ptr @"alias1#constant#25" }, align 8
+@"alias1#constant#27" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(555,102):\00", align 8
+@"alias1#constant#28" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias1#constant#27" }, align 8
+@"alias1#constant#29" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside foo: \00", align 8
+@"alias1#constant#30" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"alias1#constant#29" }, align 8
+@"alias1#constant#31" = private unnamed_addr constant [ ?? x i8 ] c"--- Inside foo, after calling x(!p1, 555): \00", align 8
+@"alias1#constant#32" = private unnamed_addr constant {i64, ptr} { i64 43, ptr @"alias1#constant#31" }, align 8
 
 declare external fastcc void @"position.printPosition<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -216,99 +224,97 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"alias1.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#4" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"alias1.foo<0>"()
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#6" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"alias1.bar<0>"()
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#7" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#8" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"alias1.baz<0>"()
   ret void
 }
 
 define external fastcc void @"alias1.bar<0>"() {
-  %"p2##0" = tail call fastcc i64 @"alias1.replicate<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#9" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#10" to i64 ))
+  call ccc void @print_int(i64 0)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#11" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#13" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
-  %"tmp#13##0" = inttoptr i64 %"p2##0" to ptr
-  store i64 555, ptr %"tmp#13##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#15" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#12" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#14" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#17" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#16" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
+  %"tmp#18##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#18##0", ptr @"alias1#constant#1", i64 16, i1 0)
+  %"tmp#19##0" = ptrtoint ptr %"tmp#18##0" to i64
+  %"tmp#20##0" = inttoptr i64 %"tmp#19##0" to ptr
+  store i64 555, ptr %"tmp#20##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#18" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#14" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#20" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#19##0")
   ret void
 }
 
 define external fastcc void @"alias1.baz<0>"() {
-  %"p2##0" = tail call fastcc i64 @"alias1.replicate<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#19" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#10" to i64 ))
+  call ccc void @print_int(i64 0)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#22" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#14" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#13" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
-  %"tmp#20##0" = add i64 %"p2##0", 8
-  %"tmp#21##0" = inttoptr i64 %"tmp#20##0" to ptr
-  %"tmp#2##0" = load i64, ptr %"tmp#21##0"
-  %"tmp#22##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#13##0" = ptrtoint ptr %"tmp#22##0" to i64
-  %"tmp#23##0" = inttoptr i64 %"tmp#13##0" to ptr
-  store i64 33333333, ptr %"tmp#23##0"
-  %"tmp#24##0" = add i64 %"tmp#13##0", 8
-  %"tmp#25##0" = inttoptr i64 %"tmp#24##0" to ptr
-  store i64 %"tmp#2##0", ptr %"tmp#25##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#21" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#13##0")
-  %"tmp#27##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#27##0", ptr @"alias1#constant#1", i64 16, i1 0)
-  %"tmp#28##0" = ptrtoint ptr %"tmp#27##0" to i64
-  %"tmp#29##0" = inttoptr i64 %"tmp#28##0" to ptr
-  store i64 555, ptr %"tmp#29##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#23" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#16" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#24" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#2" to i64 ))
+  %"tmp#25##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#25##0", ptr @"alias1#constant#1", i64 16, i1 0)
+  %"tmp#26##0" = ptrtoint ptr %"tmp#25##0" to i64
+  %"tmp#27##0" = inttoptr i64 %"tmp#26##0" to ptr
+  store i64 555, ptr %"tmp#27##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#26" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#25" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#28##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#13" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#21" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#13##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#28" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#26##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#16" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#24" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#2" to i64 ))
   ret void
 }
 
 define external fastcc void @"alias1.foo<0>"() {
-  %"p2##0" = tail call fastcc i64 @"alias1.replicate<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#27" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#10" to i64 ))
+  call ccc void @print_int(i64 0)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#11" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#30" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#14" to i64 ))
   tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#13" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
-  %"tmp#14##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#14##0", ptr @"alias1#constant#1", i64 16, i1 0)
-  %"tmp#15##0" = ptrtoint ptr %"tmp#14##0" to i64
-  %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
-  store i64 555, ptr %"tmp#16##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#29" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#16" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
+  %"tmp#18##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#18##0", ptr @"alias1#constant#1", i64 16, i1 0)
+  %"tmp#19##0" = ptrtoint ptr %"tmp#18##0" to i64
+  %"tmp#20##0" = inttoptr i64 %"tmp#19##0" to ptr
+  store i64 555, ptr %"tmp#20##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#32" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#25" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#15##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#13" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#28" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#19##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#16" to i64 ))
+  tail call fastcc void @"position.printPosition<0>"(i64 ptrtoint( ptr @"alias1#constant#1" to i64 ))
   ret void
 }
 
 define external fastcc i64 @"alias1.replicate<0>"(i64 %"p1##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#31" to i64 ))
-  %"tmp#1##0" = load i64, ptr @"alias1#constant#0"
-  call ccc void @print_int(i64 %"tmp#1##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias1#constant#10" to i64 ))
+  call ccc void @print_int(i64 0)
   call ccc void @putchar(i8 10)
   ret i64 %"p1##0"
 }

@@ -74,20 +74,28 @@ proc replicate1 > public (1 calls)
 replicate1(p1##0:position.position, ?p2##1:position.position, ?p3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: [(p1##0,p3##0)]
   InterestingCallProperties: []
-    alias_multifunc1.replicate2<0>(~p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @alias_multifunc1:nn:nn
-    alias_multifunc1.replicate2<0>(p2##0:position.position, ?p3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias_multifunc1:nn:nn
-    foreign lpvm {noalias} mutate(~p2##0:position.position, ?p2##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 22:wybe.int) @alias_multifunc1:nn:nn
+    wybe.string.print<0>("some noise...":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @alias_multifunc1:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @alias_multifunc1:nn:nn
+    foreign c print_int(0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @alias_multifunc1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @alias_multifunc1:nn:nn
+    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_multifunc1:nn:nn
+    wybe.string.print<0>("some noise...":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @alias_multifunc1:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @alias_multifunc1:nn:nn
+    foreign c print_int(0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @alias_multifunc1:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @alias_multifunc1:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_multifunc1:nn:nn
+    foreign llvm move(p1##0:position.position, ?p3##0:position.position) @alias_multifunc1:nn:nn
+    foreign lpvm {noalias} mutate(~p1##0:position.position, ?p2##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 22:wybe.int) @alias_multifunc1:nn:nn
 
 
-proc replicate2 > public (2 calls)
+proc replicate2 > public {inline} (2 calls)
 0: alias_multifunc1.replicate2<0>
 replicate2(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: [(p1##0,p2##0)]
+  AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print<0>("some noise...":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias_multifunc1:nn:nn
-    foreign lpvm access(alias_multifunc1#constant#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @alias_multifunc1:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @alias_multifunc1:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @alias_multifunc1:nn:nn
+    foreign c print_int(0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @alias_multifunc1:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @alias_multifunc1:nn:nn
     foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_multifunc1:nn:nn
     foreign llvm move(~p1##0:position.position, ?p2##0:position.position) @alias_multifunc1:nn:nn
@@ -100,7 +108,6 @@ replicate2(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; 
 source_filename = "!ROOT!/final-dump/alias_multifunc1.wybe"
 target triple    ????
 
-@"alias_multifunc1#constant#0" = private unnamed_addr constant {i64, i64} { i64 0, i64 0 }, align 8
 @"alias_multifunc1#constant#1" = private unnamed_addr constant {i64, i64} { i64 10, i64 10 }, align 8
 @"alias_multifunc1#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"--- After calling replicate1: \00", align 8
 @"alias_multifunc1#constant#3" = private unnamed_addr constant {i64, ptr} { i64 30, ptr @"alias_multifunc1#constant#2" }, align 8
@@ -161,23 +168,26 @@ define external fastcc void @"alias_multifunc1.<0>"() {
 }
 
 define external fastcc {i64, i64} @"alias_multifunc1.replicate1<0>"(i64 %"p1##0") {
-  %"p2##0" = tail call fastcc i64 @"alias_multifunc1.replicate2<0>"(i64 %"p1##0")
-  %"tmp#2##0" = tail call fastcc i64 @"alias_multifunc1.replicate2<0>"(i64 %"p2##0")
-  %"tmp#3##0" = inttoptr i64 %"p2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 16, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = inttoptr i64 %"tmp#5##0" to ptr
-  store i64 22, ptr %"tmp#6##0"
-  %"tmp#7##0" = insertvalue {i64, i64} undef, i64 %"tmp#5##0", 0
-  %"tmp#8##0" = insertvalue {i64, i64} %"tmp#7##0", i64 %"tmp#2##0", 1
-  ret {i64, i64} %"tmp#8##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias_multifunc1#constant#19" to i64 ))
+  call ccc void @print_int(i64 0)
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias_multifunc1#constant#19" to i64 ))
+  call ccc void @print_int(i64 0)
+  call ccc void @putchar(i8 10)
+  %"tmp#10##0" = inttoptr i64 %"p1##0" to ptr
+  %"tmp#11##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#11##0", ptr %"tmp#10##0", i64 16, i1 0)
+  %"tmp#12##0" = ptrtoint ptr %"tmp#11##0" to i64
+  %"tmp#13##0" = inttoptr i64 %"tmp#12##0" to ptr
+  store i64 22, ptr %"tmp#13##0"
+  %"tmp#14##0" = insertvalue {i64, i64} undef, i64 %"tmp#12##0", 0
+  %"tmp#15##0" = insertvalue {i64, i64} %"tmp#14##0", i64 %"p1##0", 1
+  ret {i64, i64} %"tmp#15##0"
 }
 
 define external fastcc i64 @"alias_multifunc1.replicate2<0>"(i64 %"p1##0") {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias_multifunc1#constant#19" to i64 ))
-  %"tmp#1##0" = load i64, ptr @"alias_multifunc1#constant#0"
-  call ccc void @print_int(i64 %"tmp#1##0")
+  call ccc void @print_int(i64 0)
   call ccc void @putchar(i8 10)
   ret i64 %"p1##0"
 }

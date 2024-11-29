@@ -80,7 +80,7 @@ bar(p1##0:position.position, ?p3##1:position.position)<{<<wybe.io.io>>}; {<<wybe
 proc foo > public (2 calls)
 0: alias_scc_proc.foo<0>
 foo(p1##0:position.position, ?p2##0:position.position, ?p3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: [(p1##0,p2##0)]
+  AliasPairs: [(p1##0,p2##0),(p1##0,p3##0),(p2##0,p3##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(8,(alias_scc_proc.bar<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @alias_scc_proc:nn:nn

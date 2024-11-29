@@ -119,7 +119,7 @@ if.else.0:
 proc foo > public (0 calls)
 0: alias_mfoo.foo<0>[410bae77d3]
 foo(p1##0:position.position, ?p2##0:position.position, ?p3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: [(p1##0,p2##0)]
+  AliasPairs: [(p1##0,p2##0),(p1##0,p3##0),(p2##0,p3##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(8,(alias_mbar.bar<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @alias_mfoo:nn:nn
