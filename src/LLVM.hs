@@ -1794,6 +1794,8 @@ typeConvertOp (Floating m) (Floating n)
     | n < m = "fptrunc"
     | otherwise = shouldnt "no-op floating point conversion"
 typeConvertOp CPointer (Bits _) = "ptrtoint"
+-- because CPointer is used for generic data
+typeConvertOp CPointer (Signed _) = "ptrtoint"
 -- These don't change representation, or change any bits.  They just
 -- re-interpret a FP number as an integer or vice versa.  This ensures we don't
 -- lose precision or waste time on round trip conversion.

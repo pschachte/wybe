@@ -609,21 +609,28 @@ instr' prim@(PrimForeign "lpvm" "store" _ [var, ArgGlobal info _]) pos = do
             logBuild " ... it isn't, we need to store"
             ordinaryInstr prim pos
 -- XXX handle lpvm access for constant structures, turning into constant value
--- instr' prim@(PrimForeign "lpvm" "access" _
---             [cnst, ArgInt offset _,_,_,val]) pos = do
---     -- access(struct:type, offset:int, size:int, start_offset:int, ?member:type2)
---     ordinaryInstr prim pos
---     constantValue val >>= \case
---         Just val' -> do
---           let ty = argType val
---           size <- typeSize ty
---           updateConstStruct new old (fromIntegral offset) val'
---         _ -> deleteConstStruct old
+instr' prim@(PrimForeign "lpvm" "access" _
+            [cnst, ArgInt offset _,_,_,valArg]) pos = do
+    -- access(struct:type, offset:int, size:int, start_offset:int, ?member:type2)
+    constantValue cnst >>= \case
+        Just (PointerStructMember structID) -> do
+          logBuild $ "  Expanding access(" ++ show cnst ++ ", " ++ show offset
+                     ++ ", struct " ++ show structID ++ ")"
+          lift (lookupConstInfo structID) >>= \case
+            Just structInfo -> do
+              case constValueAtOffset structInfo (fromIntegral offset) of
+                Just val -> do
+                  let constArg = constValuePrimArg val (argType valArg)
+                  instr' (PrimForeign "llvm" "move" [] [constArg, valArg]) pos
+                Nothing -> ordinaryInstr prim pos
+            Nothing -> shouldnt $ "access of unknown constant structure"
+                                 ++ show structID
+        _ -> ordinaryInstr prim pos
 instr' prim@(PrimForeign "lpvm" "mutate" _
             [ArgVar{argVarName=old}, ArgVar{argVarName=new},ArgInt offset _,
              _,_,ArgInt 0 _,val]) pos = do
     -- TODO for now we only handle untagged pointers to structures
-    -- XXX handle non-destructive mutate of small constant structures, simply
+    -- TODO handle non-destructive mutate of small constant structures, simply
     -- building a new constant structure or one on the heap, depending on
     -- whether the new value is constant
     ordinaryInstr prim pos

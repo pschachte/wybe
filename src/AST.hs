@@ -52,6 +52,7 @@ module AST (
   StructID, structConstName, recordConstStruct,
   lookupConstStruct, lookupConstInfo,
   StructInfo(..), ConstValue(..), constValueSize, constValueRepresentation,
+  constValueAtOffset, constValuePrimArg,
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules, sameOriginModules,
   refersTo,
@@ -142,13 +143,38 @@ import           Crypto.Hash
 import qualified Data.Binary
 import qualified Data.ByteString.Lazy as BL
 import           Data.List as List
-import           Data.List.Extra (nubOrd,splitOn, disjoint)
-import           Data.Map as Map
+import           Data.List.Extra (nubOrd,splitOn, disjoint, (!?), cons)
+import Data.Map as Map
+    ( (!),
+      adjust,
+      alter,
+      assocs,
+      elems,
+      empty,
+      filter,
+      filterWithKey,
+      findWithDefault,
+      foldr,
+      fromList,
+      insert,
+      keys,
+      keysSet,
+      lookup,
+      map,
+      member,
+      singleton,
+      toAscList,
+      toList,
+      union,
+      unionWith,
+      unions,
+      Map )
 import           Data.Maybe
 import           Data.Set as Set
 import           UnivSet as USet
 import           Data.Tuple.HT ( mapSnd, mapFst )
 import           Data.Word (Word8)
+import           Data.Char
 import           Text.Read (readMaybe)
 import           Flow             ((|>))
 import           Numeric          (showHex)
@@ -3494,6 +3520,27 @@ constValueRepresentation (PointerStructMember _) = Pointer
 constValueRepresentation (FnPointerStructMember _) = CPointer
 constValueRepresentation (UndefStructMember size) = Bits $ size * 8
 constValueRepresentation (GenericStructMember _) = Pointer
+
+
+-- | Return the ConstValue at the specified offset of the specified struct.
+constValueAtOffset :: StructInfo -> Int -> Maybe ConstValue
+constValueAtOffset (StructInfo _ fields) offset = go fields offset
+    where go (field:fields) off
+            | off == 0 = Just field
+            | off < 0 = Nothing
+            | otherwise = go fields (off - constValueSize field)
+          go [] _ = Nothing
+constValueAtOffset (CStringInfo chars) offset =
+    (`IntStructMember` 1) . toInteger . ord <$> (chars !? offset)
+
+-- | Turn a ConstValue into the equivalent constant PrimArg
+constValuePrimArg :: ConstValue -> TypeSpec -> PrimArg
+constValuePrimArg (IntStructMember i _) ty = ArgInt i ty
+constValuePrimArg (FloatStructMember f _) ty = ArgFloat f ty
+constValuePrimArg (PointerStructMember structID) ty = ArgConstRef structID ty
+constValuePrimArg (FnPointerStructMember pspec) ty = ArgClosure pspec [] ty
+constValuePrimArg (UndefStructMember _) ty = ArgUndef ty
+constValuePrimArg (GenericStructMember cnst) ty = constValuePrimArg cnst ty
 
 
 -- |Returns a list of all arguments to a prim, including global flows
