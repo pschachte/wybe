@@ -36,10 +36,11 @@ import Data.Text.Array (new)
 import Data.Functor ( (<&>) )
 
 
-----------------------------------------------------------------
---                       The BodyBuilder Monad
+--  BEGIN MAJOR DOC
+-- # The BodyBuilder Monad
 --
--- This monad is used to build up a ProcBody one instruction at a time.
+-- This monad is used to build up a ProcBody one instruction at a time,
+-- optimising it as it goes.
 --
 -- buildBody runs the monad, producing a ProcBody.
 -- instr adds a single instruction to then end of the procBody being built.
@@ -49,14 +50,14 @@ import Data.Functor ( (<&>) )
 --    endBranch     ends the current branch
 --    completeFork  completes the current fork
 --
--- A ProcBody is considered to have a unique continuation if it either
--- does not end in a branch, or if all but at most one of the branches
--- it ends with ends with a definite failure (a PrimTest (ArgInt 0 _)).
---
 -- No instructions can be added between buildFork and beginBranch, or
 -- between endBranch and beginBranch, or if the current state does not have
 -- a unique continuation. A new fork can be built within a branch, but must
 -- be completed before the branch is ended.
+--
+-- A ProcBody is considered to have a unique continuation if it either
+-- does not end in a branch, or if all but at most one of the branches
+-- it ends with ends with a definite failure (a PrimTest (ArgInt 0 _)).
 --
 -- The ProcBody type does not support having anything follow a fork. Once a
 -- ProcBody forks, the branches do not join again. Instead, each branch of
@@ -87,7 +88,7 @@ import Data.Functor ( (<&>) )
 -- particular, we keep track of variable=variable assignments, and replace
 -- references to the destination (left) variable with the source (right)
 -- variable.  This usually leaves the assignment dead, to be removed in
--- a later pass.  We also keep track of previous instructions, and later
+-- the backward pass.  We also keep track of previous instructions, and later
 -- calls to the same instructions with the same inputs are replaced by
 -- assignments to the outputs with the old outputs.  We also handle some
 -- arithmetic equivalences, entailments, and tautologies (eg, on a branch
@@ -120,7 +121,8 @@ import Data.Functor ( (<&>) )
 --
 --     completeFork is called when the state is Forked.  It doesn't
 --     change the state.
-----------------------------------------------------------------
+--  END MAJOR DOC
+
 
 type BodyBuilder = StateT BodyState Compiler
 
@@ -532,6 +534,21 @@ instr prim pos = do
         shouldnt "instr in Forked context"
 
 
+--  BEGIN MAJOR DOC
+-- ## Inferring constant structures
+--
+-- We keep track of memory structures as they are constructed, so we can detect
+-- when a structure contains only constants.  A fresh allocation is considered
+-- to be fully constant, and any mutation of a constant structure to store a
+-- constant value is considered to create a new constant structure (regardless
+-- of whether the mutation is destructive).  Any other mutation of a constant
+-- does not produce a new constant.  We track which variables hold constant
+-- structures, and the contents of those structures.  References to such
+-- variables are replaced with references to the constant data.  Constant
+-- structures are registered with the module; this is handled in AST.hs.
+-- END MAJOR DOC
+
+
 -- Actually do the work of instr, handling special cases.
 instr' :: Prim -> OptPos -> BodyBuilder ()
 instr' prim@(PrimForeign "llvm" "move" []
@@ -599,7 +616,6 @@ instr' prim@(PrimForeign "lpvm" "store" _ [var, ArgGlobal info _]) pos = do
             ordinaryInstr prim pos
 instr' prim@(PrimForeign "lpvm" "access" _
             [cnst, ArgInt offset _,_,_,valArg]) pos = do
-    -- access(struct:type, offset:int, size:int, start_offset:int, ?member:type2)
     constantValue cnst >>= \case
         Just (PointerStructMember structID) -> do
           logBuild $ "  Expanding access(" ++ show cnst ++ ", " ++ show offset
@@ -734,6 +750,7 @@ argExpandedPrim (PrimForeign "lpvm" "mutate" flags (arg1:args)) = do
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM (expandArg True) args
     return $ simplifyForeign lang nm flags args'
+
 
 -- |Replace any unneeded arguments corresponding to unneeded parameters with
 --  ArgUnneeded.  For unneeded *output* parameters, there must be an
@@ -1047,6 +1064,40 @@ expandConstStruct True arg@ArgVar{argVarName=var, argVarType=ty} = do
           return $ ArgConstRef structID ty
         _ -> return arg
 expandConstStruct _ arg = return arg
+
+
+-- BEGIN MAJOR DOC
+-- ## Tracking Global Flows
+-- Global flows track where global variables (holding resource values) are used
+-- and modified in the program.  This allows us to determine when a global
+-- variable must be loaded from memory, when it must be stored back to memory,
+-- and when we can omit these operations and instead use local variable values.
+
+-- Global flows are a triple, <ins, outs, params>. ins is the (possibly
+-- infinite) inwards flowing resources (read: globals) and outs is obviously the
+-- outwards flowing globals. params is a set of indexes, for the arguments that
+-- may be called when a proc is called. These sets are used in the body builder
+-- to track which globals are known (and hence don't need to be read again) and
+-- may not need to be written to (if they are not read inside the proc).
+
+-- These sets are initially set quite liberally, being the set of inwards
+-- flowing resources, outwards flowing, and the indexes of all resourceful HO
+-- parameters. I believe in the body builder, there's some analysis that
+-- restricts these sets where possible. If a HO param is never called (for
+-- whatever reason), then you can remove that param from the set of indexes; if
+-- a global is never written to, then you can remove it from outs for a proc.
+
+-- When it comes to calling a proc, we first take the global flows of each
+-- argument -- if a HO parameter is a known proc then you take the global flows
+-- of that proc; if it's a parameter of the proc then it's <{}, {}, {idx}>; else
+-- it's a triple of universal sets. With the union of the global flows of the
+-- arguments, and the (non-params) global flows of the called proc. Inside the
+-- body builder, sets of "known" globals that were recently written to in the
+-- execution path are stored. After the call, these resources that are
+-- referenced in the outs are removed from the "known" globals, and must be read
+-- again -- this is because the proc may clobber the global. 
+
+-- END MAJOR DOC
 
 
 -- |Update the set of global variables that are curently loaded after adding
@@ -1478,8 +1529,8 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
     known `orElse` (Map.lookup var subst >>= argIntegerValue)
 
 
-----------------------------------------------------------------
---                  Reassembling the ProcBody
+-- BEGIN MAJOR DOC
+-- ## Reassembling the ProcBody
 --
 -- Once we've built up a BodyState, this code assembles it into a new ProcBody.
 -- While we're at it, we also mark the last use of each variable, eliminate
@@ -1488,7 +1539,16 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
 -- move and not used after the move.  Most other move instructions were removed
 -- while building BodyState, but that approach cannot eliminate moves to output
 -- parameters.
-----------------------------------------------------------------
+
+-- All of this is mediated by the BkwdBuilder monad.  This monad is used to run
+-- backwards through the body we are currently building, keeping track of the
+-- variables that are used later in the computation but not defined later.
+-- We also try to detect nexted branches on the same variable, and fuse them
+-- into a single switch.
+
+-- In the end, this produces a new ProcBody equivalent to the initial one, but
+-- somewhat optimised.
+-- END MAJOR DOC
 
 currBody :: ProcBody -> BodyState
          -> Compiler (Int,Set PrimVarName,Set GlobalInfo,
