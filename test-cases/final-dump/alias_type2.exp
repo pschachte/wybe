@@ -25,6 +25,8 @@ AFTER EVERYTHING:
                     alias_type2.posrec.posrec<0>
                     alias_type2.posrec.posrec<1>
                     alias_type2.posrec.~=<0>
+  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 100 8,IntStructMember 100 8]}
+                    1:: StructInfo {structSize = 16, structData = [PointerStructMember alias_type2#constant#0,IntStructMember 1 8]}
   imports         : public use alias_type2.position
                     public use alias_type2.posrec
                     use wybe
@@ -37,14 +39,8 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#7##0:alias_type2.position) @alias_type2:nn:nn
-    foreign lpvm mutate(~tmp#7##0:alias_type2.position, ?tmp#8##0:alias_type2.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @alias_type2:nn:nn
-    foreign lpvm mutate(~tmp#8##0:alias_type2.position, ?tmp#9##0:alias_type2.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @alias_type2:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#12##0:alias_type2.posrec) @alias_type2:nn:nn
-    foreign lpvm mutate(~tmp#12##0:alias_type2.posrec, ?tmp#13##0:alias_type2.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#9##0:alias_type2.position) @alias_type2:nn:nn
-    foreign lpvm mutate(~tmp#13##0:alias_type2.posrec, ?tmp#14##0:alias_type2.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @alias_type2:nn:nn
-    foreign lpvm mutate(~tmp#14##0:alias_type2.posrec, ?rec##1:alias_type2.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @alias_type2:nn:nn
-    foreign lpvm {noalias} mutate(~tmp#9##0:alias_type2.position, ?pos##1:alias_type2.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int) @alias_type2:nn:nn
+    foreign lpvm mutate(alias_type2#constant#1:alias_type2.posrec, ?rec##1:alias_type2.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @alias_type2:nn:nn
+    foreign lpvm {noalias} mutate(alias_type2#constant#0:alias_type2.position, ?pos##1:alias_type2.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int) @alias_type2:nn:nn
     foreign lpvm access(~pos##1:alias_type2.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @alias_type2:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @alias_type2:nn:nn
     foreign c print_int(~tmp#2##0:wybe.int, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @alias_type2:nn:nn
@@ -63,6 +59,8 @@ module top-level code > public {semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/alias_type2.wybe"
 target triple    ????
 
+@"alias_type2#constant#0" = private unnamed_addr constant {i64, i64} { i64 100, i64 100 }, align 8
+@"alias_type2#constant#1" = private unnamed_addr constant {ptr, i64} { ptr @"alias_type2#constant#0", i64 1 }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -70,41 +68,25 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"alias_type2.<0>"() {
-  %"tmp#30##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#7##0" = ptrtoint ptr %"tmp#30##0" to i64
-  %"tmp#31##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 100, ptr %"tmp#31##0"
-  %"tmp#32##0" = add i64 %"tmp#7##0", 8
-  %"tmp#33##0" = inttoptr i64 %"tmp#32##0" to ptr
-  store i64 100, ptr %"tmp#33##0"
-  %"tmp#34##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#12##0" = ptrtoint ptr %"tmp#34##0" to i64
-  %"tmp#35##0" = inttoptr i64 %"tmp#12##0" to ptr
-  store i64 %"tmp#7##0", ptr %"tmp#35##0"
-  %"tmp#36##0" = add i64 %"tmp#12##0", 8
-  %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
-  store i64 1, ptr %"tmp#37##0"
-  %"tmp#38##0" = inttoptr i64 %"tmp#12##0" to ptr
-  %"tmp#39##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#39##0", ptr %"tmp#38##0", i64 16, i1 0)
-  %"tmp#40##0" = ptrtoint ptr %"tmp#39##0" to i64
-  %"tmp#41##0" = add i64 %"tmp#40##0", 8
-  %"tmp#42##0" = inttoptr i64 %"tmp#41##0" to ptr
-  store i64 2, ptr %"tmp#42##0"
-  %"tmp#43##0" = inttoptr i64 %"tmp#7##0" to ptr
-  %"tmp#44##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#44##0", ptr %"tmp#43##0", i64 16, i1 0)
-  %"tmp#45##0" = ptrtoint ptr %"tmp#44##0" to i64
-  %"tmp#46##0" = inttoptr i64 %"tmp#45##0" to ptr
-  store i64 200, ptr %"tmp#46##0"
-  %"tmp#47##0" = inttoptr i64 %"tmp#45##0" to ptr
-  %"tmp#2##0" = load i64, ptr %"tmp#47##0"
+  %"tmp#31##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#31##0", ptr @"alias_type2#constant#1", i64 16, i1 0)
+  %"tmp#32##0" = ptrtoint ptr %"tmp#31##0" to i64
+  %"tmp#33##0" = add i64 %"tmp#32##0", 8
+  %"tmp#34##0" = inttoptr i64 %"tmp#33##0" to ptr
+  store i64 2, ptr %"tmp#34##0"
+  %"tmp#36##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#36##0", ptr @"alias_type2#constant#0", i64 16, i1 0)
+  %"tmp#37##0" = ptrtoint ptr %"tmp#36##0" to i64
+  %"tmp#38##0" = inttoptr i64 %"tmp#37##0" to ptr
+  store i64 200, ptr %"tmp#38##0"
+  %"tmp#39##0" = inttoptr i64 %"tmp#37##0" to ptr
+  %"tmp#2##0" = load i64, ptr %"tmp#39##0"
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
-  %"tmp#48##0" = inttoptr i64 %"tmp#40##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#48##0"
-  %"tmp#49##0" = inttoptr i64 %"tmp#3##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#49##0"
+  %"tmp#40##0" = inttoptr i64 %"tmp#32##0" to ptr
+  %"tmp#3##0" = load i64, ptr %"tmp#40##0"
+  %"tmp#41##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#41##0"
   call ccc void @print_int(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)
   ret void
@@ -123,6 +105,7 @@ define external fastcc void @"alias_type2.<0>"() {
                     alias_type2.position.y<0>
                     alias_type2.position.y<1>
                     alias_type2.position.~=<0>
+  constants       : 
   imports         : use alias_type2
                     use wybe
   resources       : 
@@ -335,6 +318,7 @@ if.else.0:
                     alias_type2.posrec.posrec<0>
                     alias_type2.posrec.posrec<1>
                     alias_type2.posrec.~=<0>
+  constants       : 
   imports         : use alias_type2
                     use wybe
   resources       : 
