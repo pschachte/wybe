@@ -17,8 +17,8 @@ AFTER EVERYTHING:
                     anon_field.quux.quuz<1>
                     anon_field.quux.~=<0>
   constants       : 0:: StructInfo {structSize = 8, structData = [IntStructMember 1 8]}
-                    1:: StructInfo {structSize = 24, structData = [IntStructMember 0 1,UndefStructMember 7,IntStructMember 1 8,IntStructMember 1 8]}
-                    2:: StructInfo {structSize = 24, structData = [IntStructMember 0 1,UndefStructMember 7,IntStructMember 2 8,IntStructMember 1 8]}
+                    1:: StructInfo {structSize = 24, structData = [IntStructMember 0 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,IntStructMember 1 8,IntStructMember 1 8]}
+                    2:: StructInfo {structSize = 24, structData = [IntStructMember 0 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,IntStructMember 2 8,IntStructMember 1 8]}
                     3:: CStringInfo {cstringChars = "uh oh"}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember anon_field#constant#3]}
                     5:: CStringInfo {cstringChars = "good"}
@@ -352,8 +352,8 @@ source_filename = "!ROOT!/final-dump/anon_field.wybe"
 target triple    ????
 
 @"anon_field#constant#0" = private unnamed_addr constant {i64} { i64 1 }, align 8
-@"anon_field#constant#1" = private unnamed_addr constant {i8, i56, i64, i64} { i8 0, i56 undef, i64 1, i64 1 }, align 8
-@"anon_field#constant#2" = private unnamed_addr constant {i8, i56, i64, i64} { i8 0, i56 undef, i64 2, i64 1 }, align 8
+@"anon_field#constant#1" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, i64, i64} { i8 0, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i64 1, i64 1 }, align 8
+@"anon_field#constant#2" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, i64, i64} { i8 0, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i64 2, i64 1 }, align 8
 @"anon_field#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"uh oh\00", align 8
 @"anon_field#constant#4" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"anon_field#constant#3" }, align 8
 @"anon_field#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"good\00", align 8

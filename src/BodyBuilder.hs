@@ -34,6 +34,7 @@ import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
 import Data.Text.Array (new)
 import Data.Functor ( (<&>) )
+import Crypto.KDF.Scrypt (Parameters(n))
 
 
 --  BEGIN MAJOR DOC
@@ -310,16 +311,28 @@ updateConstStruct newVar var offset value = do
 
 -- |Translate a reverse ordered list of offsets and struct members, with
 -- possible holes, into a reverse ordered list of contiguous struct members.
+-- Because LLVM aligns ints, we can't just fill a hole with a single undef the
+-- right size; we need to fill it with the right number of 1-byte undefs,
+-- followed by as many word-sized undefs as needed.
 structMembers :: Int -> [(Int, ConstValue)] -> [ConstValue]
 structMembers 0 [] = []
-structMembers sz [] = [UndefStructMember sz]
+structMembers sz [] = fillHole sz
 structMembers sz ((offset,mem):mems) =
     let memberSize = constValueSize mem
         holeSize = max 0 $ sz - (offset + memberSize)
         rest = mem:structMembers (sz-holeSize-memberSize) mems
     in  if holeSize > 0
-        then UndefStructMember holeSize:rest
+        then fillHole holeSize ++ rest
         else rest
+
+
+-- |Return a list of undefined constant values to exactly fill zs bytes, without
+-- triggering LLVM to pad the structure.  The list is in reverse order, so the
+-- 1-byte undefs come last.
+fillHole :: Int -> [ConstValue]
+fillHole sz =
+    replicate (sz `div` wordSizeBytes) (UndefStructMember wordSizeBytes)
+    ++ replicate (sz `mod` wordSizeBytes) (UndefStructMember 1)
 
 
 ----------------------------------------------------------------
