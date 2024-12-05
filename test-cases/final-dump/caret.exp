@@ -9,6 +9,13 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : caret.<0>
                     caret.expand_region<0>
+  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 1 8]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,IntStructMember 12 8]}
+                    2:: StructInfo {structSize = 16, structData = [PointerStructMember caret#constant#0,PointerStructMember caret#constant#1]}
+                    3:: CStringInfo {cstringChars = "ten = "}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember caret#constant#3]}
+                    5:: CStringInfo {cstringChars = "now ten = "}
+                    6:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember caret#constant#5]}
   imports         : use caret.region
                     use position
                     use wybe
@@ -21,23 +28,12 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(8,(caret.#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:position.position) @caret:nn:nn
-    foreign lpvm mutate(~tmp#15##0:position.position, ?tmp#16##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @caret:nn:nn
-    foreign lpvm mutate(~tmp#16##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @caret:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:position.position) @caret:nn:nn
-    foreign lpvm mutate(~tmp#19##0:position.position, ?tmp#20##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int) @caret:nn:nn
-    foreign lpvm mutate(~tmp#20##0:position.position, ?tmp#2##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12:wybe.int) @caret:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:caret.region) @caret:nn:nn
-    foreign lpvm mutate(~tmp#23##0:caret.region, ?tmp#24##0:caret.region, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:position.position) @caret:nn:nn
-    foreign lpvm mutate(~tmp#24##0:caret.region, ?tmp#25##0:caret.region, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#2##0:position.position) @caret:nn:nn
-    foreign lpvm access(~tmp#2##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int) @caret:nn:nn
     wybe.string.print<0>("ten = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @caret:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom) @caret:nn:nn
-    foreign c print_int(~ten##0:wybe.int, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @caret:nn:nn
+    foreign c print_int(10:wybe.int, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @caret:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @caret:nn:nn
     foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @caret:nn:nn
-    caret.#cont#1<0>[410bae77d3](~tmp#25##0:caret.region)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8
+    caret.#cont#1<0>(caret#constant#2:caret.region)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8
 
 
 proc #cont#1 > {semipure} (2 calls)
@@ -49,17 +45,6 @@ proc #cont#1 > {semipure} (2 calls)
     foreign lpvm access(tmp#6##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @caret:nn:nn
     foreign llvm add(~tmp#5##0:wybe.int, 1:wybe.int, ?tmp#5##1:wybe.int) @caret:nn:nn
     foreign lpvm {noalias} mutate(~tmp#6##0:position.position, ?tmp#6##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##1:wybe.int) @caret:nn:nn
-    foreign lpvm access(~tmp#6##1:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int) @caret:nn:nn
-    wybe.string.print<0>("now ten = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @caret:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @caret:nn:nn
-    foreign c print_int(~ten##0:wybe.int, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @caret:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @caret:nn:nn
-    foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @caret:nn:nn
- [410bae77d3] [NonAliasedParam 0] :
-    foreign lpvm access(~reg##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:position.position) @caret:nn:nn
-    foreign lpvm access(tmp#6##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @caret:nn:nn
-    foreign llvm add(~tmp#5##0:wybe.int, 1:wybe.int, ?tmp#5##1:wybe.int) @caret:nn:nn
-    foreign lpvm {noalias} mutate(~tmp#6##0:position.position, ?tmp#6##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##1:wybe.int) @caret:nn:nn
     foreign lpvm access(~tmp#6##1:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int) @caret:nn:nn
     wybe.string.print<0>("now ten = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @caret:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @caret:nn:nn
@@ -102,10 +87,13 @@ expand_region(reg##0:caret.region, ?reg##4:caret.region, point##0:position.posit
 source_filename = "!ROOT!/final-dump/caret.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"now ten = \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"ten = \00", align 8
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"caret#constant#0" = private unnamed_addr constant {i64, i64} { i64 0, i64 1 }, align 8
+@"caret#constant#1" = private unnamed_addr constant {i64, i64} { i64 10, i64 12 }, align 8
+@"caret#constant#2" = private unnamed_addr constant {ptr, ptr} { ptr @"caret#constant#0", ptr @"caret#constant#1" }, align 8
+@"caret#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"ten = \00", align 8
+@"caret#constant#4" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"caret#constant#3" }, align 8
+@"caret#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"now ten = \00", align 8
+@"caret#constant#6" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"caret#constant#5" }, align 8
 
 declare external fastcc i64 @"wybe.int.max<0>"(i64, i64)
 declare external fastcc i64 @"wybe.int.min<0>"(i64, i64)
@@ -116,33 +104,10 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"caret.<0>"() {
-  %"tmp#34##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#15##0" = ptrtoint ptr %"tmp#34##0" to i64
-  %"tmp#35##0" = inttoptr i64 %"tmp#15##0" to ptr
-  store i64 0, ptr %"tmp#35##0"
-  %"tmp#36##0" = add i64 %"tmp#15##0", 8
-  %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
-  store i64 1, ptr %"tmp#37##0"
-  %"tmp#38##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#19##0" = ptrtoint ptr %"tmp#38##0" to i64
-  %"tmp#39##0" = inttoptr i64 %"tmp#19##0" to ptr
-  store i64 10, ptr %"tmp#39##0"
-  %"tmp#40##0" = add i64 %"tmp#19##0", 8
-  %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
-  store i64 12, ptr %"tmp#41##0"
-  %"tmp#42##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#23##0" = ptrtoint ptr %"tmp#42##0" to i64
-  %"tmp#43##0" = inttoptr i64 %"tmp#23##0" to ptr
-  store i64 %"tmp#15##0", ptr %"tmp#43##0"
-  %"tmp#44##0" = add i64 %"tmp#23##0", 8
-  %"tmp#45##0" = inttoptr i64 %"tmp#44##0" to ptr
-  store i64 %"tmp#19##0", ptr %"tmp#45##0"
-  %"tmp#46##0" = inttoptr i64 %"tmp#19##0" to ptr
-  %"ten##0" = load i64, ptr %"tmp#46##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
-  call ccc void @print_int(i64 %"ten##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"caret#constant#4" to i64 ))
+  call ccc void @print_int(i64 10)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"caret.#cont#1<0>[410bae77d3]"(i64 %"tmp#23##0")
+  tail call fastcc void @"caret.#cont#1<0>"(i64 ptrtoint( ptr @"caret#constant#2" to i64 ))
   ret void
 }
 
@@ -161,24 +126,7 @@ define external fastcc void @"caret.#cont#1<0>"(i64 %"reg##0") {
   store i64 %"tmp#5##1", ptr %"tmp#31##0"
   %"tmp#32##0" = inttoptr i64 %"tmp#30##0" to ptr
   %"ten##0" = load i64, ptr %"tmp#32##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
-  call ccc void @print_int(i64 %"ten##0")
-  call ccc void @putchar(i8 10)
-  ret void
-}
-
-define external fastcc void @"caret.#cont#1<0>[410bae77d3]"(i64 %"reg##0") {
-  %"tmp#25##0" = add i64 %"reg##0", 8
-  %"tmp#26##0" = inttoptr i64 %"tmp#25##0" to ptr
-  %"tmp#6##0" = load i64, ptr %"tmp#26##0"
-  %"tmp#27##0" = inttoptr i64 %"tmp#6##0" to ptr
-  %"tmp#5##0" = load i64, ptr %"tmp#27##0"
-  %"tmp#5##1" = add i64 %"tmp#5##0", 1
-  %"tmp#28##0" = inttoptr i64 %"tmp#6##0" to ptr
-  store i64 %"tmp#5##1", ptr %"tmp#28##0"
-  %"tmp#29##0" = inttoptr i64 %"tmp#6##0" to ptr
-  %"ten##0" = load i64, ptr %"tmp#29##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"caret#constant#6" to i64 ))
   call ccc void @print_int(i64 %"ten##0")
   call ccc void @putchar(i8 10)
   ret void
@@ -277,6 +225,7 @@ define external fastcc i64 @"caret.expand_region<0>"(i64 %"reg##0", i64 %"point#
                     caret.region.upper_right<0>
                     caret.region.upper_right<1>
                     caret.region.~=<0>
+  constants       : 
   imports         : use caret
                     use wybe
   resources       : 
@@ -598,6 +547,8 @@ if.else.0:
                     position.position.y<0>
                     position.position.y<1>
                     position.position.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = " ("}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember position#constant#0]}
   imports         : public use position.position
                     use wybe
   resources       : 
@@ -633,8 +584,8 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/position.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" (\00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"position#constant#0" = private unnamed_addr constant [ ?? x i8 ] c" (\00", align 8
+@"position#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"position#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
@@ -643,7 +594,7 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"position.printPosition<0>"(i64 %"pos##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"position#constant#1" to i64 ))
   %"tmp#23##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#23##0"
   call ccc void @print_int(i64 %"tmp#0##0")
@@ -670,6 +621,7 @@ define external fastcc void @"position.printPosition<0>"(i64 %"pos##0") {
                     position.position.y<0>
                     position.position.y<1>
                     position.position.~=<0>
+  constants       : 
   imports         : use position
                     use wybe
   resources       : 

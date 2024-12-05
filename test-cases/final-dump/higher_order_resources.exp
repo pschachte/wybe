@@ -8,6 +8,26 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : higher_order_resources.<0>
+  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_resources.#anon#2#closure#1<0>]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember higher_order_resources#constant#1]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,IntStructMember 0 8]}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember higher_order_resources#constant#3]}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_resources#constant#2]}
+                    6:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#4,IntStructMember 0 8]}
+                    7:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#5,PointerStructMember higher_order_resources#constant#6]}
+                    8:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_resources.#anon#1<1>]}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,IntStructMember 0 8]}
+                    10:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_resources#constant#9]}
+                    11:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember higher_order_resources#constant#10]}
+                    12:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_resources#constant#11]}
+                    13:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#12,PointerStructMember higher_order_resources#constant#6]}
+                    14:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#5,PointerStructMember higher_order_resources#constant#13]}
+                    15:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_resources.#anon#2<1>]}
+                    16:: CStringInfo {cstringChars = "*****"}
+                    17:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember higher_order_resources#constant#16]}
+                    18:: CStringInfo {cstringChars = "> "}
+                    19:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember higher_order_resources#constant#18]}
   imports         : use wybe
   resources       : maximum: fromList [(higher_order_resources.maximum,wybe.int @higher_order_resources:nn:nn)]
   procs           : 
@@ -17,30 +37,9 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#35##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#35##0:wybe.list(T), ?tmp#36##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#36##0:wybe.list(T), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#39##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#39##0:wybe.list(T), ?tmp#40##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#40##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#43##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#43##0:wybe.list(T), ?tmp#44##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#44##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#47##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#47##0:wybe.list(T), ?tmp#48##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#48##0:wybe.list(T), ?tmp#7##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#51##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#51##0:wybe.list(T), ?tmp#52##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 5:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#52##0:wybe.list(T), ?tmp#6##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#7##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#55##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#55##0:wybe.list(T), ?tmp#56##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#56##0:wybe.list(T), ?tmp#5##0:wybe.list(wybe.list(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#59##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#59##0:wybe.list(T), ?tmp#60##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#60##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.list(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:wybe.list(T)) @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#29##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
-    wybe.list.map#cont#1<0>(higher_order_resources.#anon#1<1><>:{resource}(T), ~tmp#0##0:wybe.list(T))<{}; {}; {0, 1}> #31 @higher_order_resources:nn:nn
+    wybe.list.map#cont#1<0>(higher_order_resources#constant#8:{resource}(T), higher_order_resources#constant#7:wybe.list(T))<{}; {}; {0, 1}> #31 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##1:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#64##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c print_int(~maximum##1:wybe.int, ~tmp#64##0:wybe.phantom, ?tmp#65##0:wybe.phantom) @higher_order_resources:nn:nn
@@ -50,44 +49,8 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#68##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~%tmp#69##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#72##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#72##0:wybe.list(T), ?tmp#73##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#73##0:wybe.list(T), ?tmp#14##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#76##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#76##0:wybe.list(T), ?tmp#77##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#77##0:wybe.list(T), ?tmp#13##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#14##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#80##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#80##0:wybe.list(T), ?tmp#81##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#81##0:wybe.list(T), ?tmp#12##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#13##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#84##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#84##0:wybe.list(T), ?tmp#85##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#85##0:wybe.list(T), ?tmp#20##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#88##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#88##0:wybe.list(T), ?tmp#89##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#89##0:wybe.list(T), ?tmp#19##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#20##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#92##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#92##0:wybe.list(T), ?tmp#93##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#93##0:wybe.list(T), ?tmp#18##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#19##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#96##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#96##0:wybe.list(T), ?tmp#97##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#97##0:wybe.list(T), ?tmp#17##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#18##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#100##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#100##0:wybe.list(T), ?tmp#101##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#101##0:wybe.list(T), ?tmp#24##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#104##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#104##0:wybe.list(T), ?tmp#105##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 5:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#105##0:wybe.list(T), ?tmp#23##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#24##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#108##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#108##0:wybe.list(T), ?tmp#109##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#23##0:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#109##0:wybe.list(T), ?tmp#22##0:wybe.list(wybe.list(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#112##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#112##0:wybe.list(T), ?tmp#113##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#17##0:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#113##0:wybe.list(T), ?tmp#16##0:wybe.list(wybe.list(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#22##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#116##0:wybe.list(T)) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#116##0:wybe.list(T), ?tmp#117##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#12##0:T) @higher_order_resources:nn:nn
-    foreign lpvm mutate(~tmp#117##0:wybe.list(T), ?tmp#11##0:wybe.list(wybe.list(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.list(T)) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
-    wybe.list.map#cont#1<0>(higher_order_resources.#anon#2<1><>:{resource}(T), ~tmp#11##0:wybe.list(T))<{}; {}; {0, 1}> #33 @higher_order_resources:nn:nn
+    wybe.list.map#cont#1<0>(higher_order_resources#constant#15:{resource}(T), higher_order_resources#constant#14:wybe.list(T))<{}; {}; {0, 1}> #33 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##3:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#121##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c print_int(~maximum##3:wybe.int, ~tmp#121##0:wybe.phantom, ?tmp#122##0:wybe.phantom) @higher_order_resources:nn:nn
@@ -119,7 +82,7 @@ proc #anon#2 > {inline} (1 calls)
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#32##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
-    wybe.list.map#cont#1<0>(higher_order_resources.#anon#2#closure#1<0><>:{resource}(T), anon#2#1##0:wybe.list(T))<{}; {}; {0, 1}> #5 @higher_order_resources:nn:nn
+    wybe.list.map#cont#1<0>(higher_order_resources#constant#0:{resource}(T), anon#2#1##0:wybe.list(T))<{}; {}; {0, 1}> #5 @higher_order_resources:nn:nn
     wybe.string.print<0>("> ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##2:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom) @higher_order_resources:nn:nn
@@ -136,7 +99,7 @@ proc #anon#2 > {inline} (1 calls)
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#1##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
-    wybe.list.map#cont#1<0>(higher_order_resources.#anon#2#closure#1<0><>:{resource}(T), anon#2#1##0:wybe.list(T))<{}; {}; {0, 1}> #1 @higher_order_resources:nn:nn
+    wybe.list.map#cont#1<0>(higher_order_resources#constant#0:{resource}(T), anon#2#1##0:wybe.list(T))<{}; {}; {0, 1}> #1 @higher_order_resources:nn:nn
     wybe.string.print<0>("> ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#2##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @higher_order_resources:nn:nn
@@ -173,13 +136,26 @@ take_max(i##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_re
 source_filename = "!ROOT!/final-dump/higher_order_resources.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"*****\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"> \00", align 8
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"closure#4" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#1<1>" }, align 8
-@"closure#5" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#2<1>" }, align 8
-@"closure#6" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#2#closure#1<0>" }, align 8
+@"higher_order_resources#constant#0" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#2#closure#1<0>" }, align 8
+@"higher_order_resources#constant#1" = private unnamed_addr constant {i64, i64} { i64 3, i64 0 }, align 8
+@"higher_order_resources#constant#2" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"higher_order_resources#constant#1" }, align 8
+@"higher_order_resources#constant#3" = private unnamed_addr constant {i64, i64} { i64 1, i64 0 }, align 8
+@"higher_order_resources#constant#4" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"higher_order_resources#constant#3" }, align 8
+@"higher_order_resources#constant#5" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"higher_order_resources#constant#2" }, align 8
+@"higher_order_resources#constant#6" = private unnamed_addr constant {ptr, i64} { ptr @"higher_order_resources#constant#4", i64 0 }, align 8
+@"higher_order_resources#constant#7" = private unnamed_addr constant {ptr, ptr} { ptr @"higher_order_resources#constant#5", ptr @"higher_order_resources#constant#6" }, align 8
+@"higher_order_resources#constant#8" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#1<1>" }, align 8
+@"higher_order_resources#constant#9" = private unnamed_addr constant {i64, i64} { i64 2, i64 0 }, align 8
+@"higher_order_resources#constant#10" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"higher_order_resources#constant#9" }, align 8
+@"higher_order_resources#constant#11" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"higher_order_resources#constant#10" }, align 8
+@"higher_order_resources#constant#12" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"higher_order_resources#constant#11" }, align 8
+@"higher_order_resources#constant#13" = private unnamed_addr constant {ptr, ptr} { ptr @"higher_order_resources#constant#12", ptr @"higher_order_resources#constant#6" }, align 8
+@"higher_order_resources#constant#14" = private unnamed_addr constant {ptr, ptr} { ptr @"higher_order_resources#constant#5", ptr @"higher_order_resources#constant#13" }, align 8
+@"higher_order_resources#constant#15" = private unnamed_addr constant {ptr} { ptr @"higher_order_resources.#anon#2<1>" }, align 8
+@"higher_order_resources#constant#16" = private unnamed_addr constant [ ?? x i8 ] c"*****\00", align 8
+@"higher_order_resources#constant#17" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"higher_order_resources#constant#16" }, align 8
+@"higher_order_resources#constant#18" = private unnamed_addr constant [ ?? x i8 ] c"> \00", align 8
+@"higher_order_resources#constant#19" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"higher_order_resources#constant#18" }, align 8
 
 declare external fastcc i64 @"wybe.int.max<0>"(i64, i64)
 declare external fastcc i64 @"wybe.list.length1<0>"(i64, i64)
@@ -187,154 +163,20 @@ declare external fastcc void @"wybe.list.map#cont#1<0>"(i64, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
-declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#higher_order_resources.maximum" = global i64 undef
 
 define external fastcc void @"higher_order_resources.<0>"() {
-  %"tmp#124##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#35##0" = ptrtoint ptr %"tmp#124##0" to i64
-  %"tmp#125##0" = inttoptr i64 %"tmp#35##0" to ptr
-  store i64 3, ptr %"tmp#125##0"
-  %"tmp#126##0" = add i64 %"tmp#35##0", 8
-  %"tmp#127##0" = inttoptr i64 %"tmp#126##0" to ptr
-  store i64 0, ptr %"tmp#127##0"
-  %"tmp#128##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#39##0" = ptrtoint ptr %"tmp#128##0" to i64
-  %"tmp#129##0" = inttoptr i64 %"tmp#39##0" to ptr
-  store i64 2, ptr %"tmp#129##0"
-  %"tmp#130##0" = add i64 %"tmp#39##0", 8
-  %"tmp#131##0" = inttoptr i64 %"tmp#130##0" to ptr
-  store i64 %"tmp#35##0", ptr %"tmp#131##0"
-  %"tmp#132##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#43##0" = ptrtoint ptr %"tmp#132##0" to i64
-  %"tmp#133##0" = inttoptr i64 %"tmp#43##0" to ptr
-  store i64 1, ptr %"tmp#133##0"
-  %"tmp#134##0" = add i64 %"tmp#43##0", 8
-  %"tmp#135##0" = inttoptr i64 %"tmp#134##0" to ptr
-  store i64 %"tmp#39##0", ptr %"tmp#135##0"
-  %"tmp#136##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#47##0" = ptrtoint ptr %"tmp#136##0" to i64
-  %"tmp#137##0" = inttoptr i64 %"tmp#47##0" to ptr
-  store i64 1, ptr %"tmp#137##0"
-  %"tmp#138##0" = add i64 %"tmp#47##0", 8
-  %"tmp#139##0" = inttoptr i64 %"tmp#138##0" to ptr
-  store i64 0, ptr %"tmp#139##0"
-  %"tmp#140##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#51##0" = ptrtoint ptr %"tmp#140##0" to i64
-  %"tmp#141##0" = inttoptr i64 %"tmp#51##0" to ptr
-  store i64 5, ptr %"tmp#141##0"
-  %"tmp#142##0" = add i64 %"tmp#51##0", 8
-  %"tmp#143##0" = inttoptr i64 %"tmp#142##0" to ptr
-  store i64 %"tmp#47##0", ptr %"tmp#143##0"
-  %"tmp#144##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#55##0" = ptrtoint ptr %"tmp#144##0" to i64
-  %"tmp#145##0" = inttoptr i64 %"tmp#55##0" to ptr
-  store i64 %"tmp#51##0", ptr %"tmp#145##0"
-  %"tmp#146##0" = add i64 %"tmp#55##0", 8
-  %"tmp#147##0" = inttoptr i64 %"tmp#146##0" to ptr
-  store i64 0, ptr %"tmp#147##0"
-  %"tmp#148##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#59##0" = ptrtoint ptr %"tmp#148##0" to i64
-  %"tmp#149##0" = inttoptr i64 %"tmp#59##0" to ptr
-  store i64 %"tmp#43##0", ptr %"tmp#149##0"
-  %"tmp#150##0" = add i64 %"tmp#59##0", 8
-  %"tmp#151##0" = inttoptr i64 %"tmp#150##0" to ptr
-  store i64 %"tmp#55##0", ptr %"tmp#151##0"
   %"tmp#29##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"closure#4" to i64 ), i64 %"tmp#59##0")
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#8" to i64 ), i64 ptrtoint( ptr @"higher_order_resources#constant#7" to i64 ))
   %"maximum##1" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"maximum##1")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#17" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#152##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#72##0" = ptrtoint ptr %"tmp#152##0" to i64
-  %"tmp#153##0" = inttoptr i64 %"tmp#72##0" to ptr
-  store i64 3, ptr %"tmp#153##0"
-  %"tmp#154##0" = add i64 %"tmp#72##0", 8
-  %"tmp#155##0" = inttoptr i64 %"tmp#154##0" to ptr
-  store i64 0, ptr %"tmp#155##0"
-  %"tmp#156##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#76##0" = ptrtoint ptr %"tmp#156##0" to i64
-  %"tmp#157##0" = inttoptr i64 %"tmp#76##0" to ptr
-  store i64 2, ptr %"tmp#157##0"
-  %"tmp#158##0" = add i64 %"tmp#76##0", 8
-  %"tmp#159##0" = inttoptr i64 %"tmp#158##0" to ptr
-  store i64 %"tmp#72##0", ptr %"tmp#159##0"
-  %"tmp#160##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#80##0" = ptrtoint ptr %"tmp#160##0" to i64
-  %"tmp#161##0" = inttoptr i64 %"tmp#80##0" to ptr
-  store i64 1, ptr %"tmp#161##0"
-  %"tmp#162##0" = add i64 %"tmp#80##0", 8
-  %"tmp#163##0" = inttoptr i64 %"tmp#162##0" to ptr
-  store i64 %"tmp#76##0", ptr %"tmp#163##0"
-  %"tmp#164##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#84##0" = ptrtoint ptr %"tmp#164##0" to i64
-  %"tmp#165##0" = inttoptr i64 %"tmp#84##0" to ptr
-  store i64 2, ptr %"tmp#165##0"
-  %"tmp#166##0" = add i64 %"tmp#84##0", 8
-  %"tmp#167##0" = inttoptr i64 %"tmp#166##0" to ptr
-  store i64 0, ptr %"tmp#167##0"
-  %"tmp#168##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#88##0" = ptrtoint ptr %"tmp#168##0" to i64
-  %"tmp#169##0" = inttoptr i64 %"tmp#88##0" to ptr
-  store i64 1, ptr %"tmp#169##0"
-  %"tmp#170##0" = add i64 %"tmp#88##0", 8
-  %"tmp#171##0" = inttoptr i64 %"tmp#170##0" to ptr
-  store i64 %"tmp#84##0", ptr %"tmp#171##0"
-  %"tmp#172##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#92##0" = ptrtoint ptr %"tmp#172##0" to i64
-  %"tmp#173##0" = inttoptr i64 %"tmp#92##0" to ptr
-  store i64 2, ptr %"tmp#173##0"
-  %"tmp#174##0" = add i64 %"tmp#92##0", 8
-  %"tmp#175##0" = inttoptr i64 %"tmp#174##0" to ptr
-  store i64 %"tmp#88##0", ptr %"tmp#175##0"
-  %"tmp#176##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#96##0" = ptrtoint ptr %"tmp#176##0" to i64
-  %"tmp#177##0" = inttoptr i64 %"tmp#96##0" to ptr
-  store i64 1, ptr %"tmp#177##0"
-  %"tmp#178##0" = add i64 %"tmp#96##0", 8
-  %"tmp#179##0" = inttoptr i64 %"tmp#178##0" to ptr
-  store i64 %"tmp#92##0", ptr %"tmp#179##0"
-  %"tmp#180##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#100##0" = ptrtoint ptr %"tmp#180##0" to i64
-  %"tmp#181##0" = inttoptr i64 %"tmp#100##0" to ptr
-  store i64 1, ptr %"tmp#181##0"
-  %"tmp#182##0" = add i64 %"tmp#100##0", 8
-  %"tmp#183##0" = inttoptr i64 %"tmp#182##0" to ptr
-  store i64 0, ptr %"tmp#183##0"
-  %"tmp#184##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#104##0" = ptrtoint ptr %"tmp#184##0" to i64
-  %"tmp#185##0" = inttoptr i64 %"tmp#104##0" to ptr
-  store i64 5, ptr %"tmp#185##0"
-  %"tmp#186##0" = add i64 %"tmp#104##0", 8
-  %"tmp#187##0" = inttoptr i64 %"tmp#186##0" to ptr
-  store i64 %"tmp#100##0", ptr %"tmp#187##0"
-  %"tmp#188##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#108##0" = ptrtoint ptr %"tmp#188##0" to i64
-  %"tmp#189##0" = inttoptr i64 %"tmp#108##0" to ptr
-  store i64 %"tmp#104##0", ptr %"tmp#189##0"
-  %"tmp#190##0" = add i64 %"tmp#108##0", 8
-  %"tmp#191##0" = inttoptr i64 %"tmp#190##0" to ptr
-  store i64 0, ptr %"tmp#191##0"
-  %"tmp#192##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#112##0" = ptrtoint ptr %"tmp#192##0" to i64
-  %"tmp#193##0" = inttoptr i64 %"tmp#112##0" to ptr
-  store i64 %"tmp#96##0", ptr %"tmp#193##0"
-  %"tmp#194##0" = add i64 %"tmp#112##0", 8
-  %"tmp#195##0" = inttoptr i64 %"tmp#194##0" to ptr
-  store i64 %"tmp#108##0", ptr %"tmp#195##0"
-  %"tmp#196##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#116##0" = ptrtoint ptr %"tmp#196##0" to i64
-  %"tmp#197##0" = inttoptr i64 %"tmp#116##0" to ptr
-  store i64 %"tmp#80##0", ptr %"tmp#197##0"
-  %"tmp#198##0" = add i64 %"tmp#116##0", 8
-  %"tmp#199##0" = inttoptr i64 %"tmp#198##0" to ptr
-  store i64 %"tmp#112##0", ptr %"tmp#199##0"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"closure#5" to i64 ), i64 %"tmp#116##0")
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#15" to i64 ), i64 ptrtoint( ptr @"higher_order_resources#constant#14" to i64 ))
   %"maximum##3" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"maximum##3")
   call ccc void @putchar(i8 10)
@@ -357,8 +199,8 @@ define external fastcc void @"higher_order_resources.#anon#1<1>"(i64 %"#env##0",
 define external fastcc void @"higher_order_resources.#anon#2<0>"(i64 %"anon#2#1##0") {
   %"tmp#32##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"closure#6" to i64 ), i64 %"anon#2#1##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#0" to i64 ), i64 %"anon#2#1##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#19" to i64 ))
   %"maximum##2" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"maximum##2")
   call ccc void @putchar(i8 10)
@@ -371,8 +213,8 @@ define external fastcc void @"higher_order_resources.#anon#2<0>"(i64 %"anon#2#1#
 define external fastcc void @"higher_order_resources.#anon#2<1>"(i64 %"#env##0", i64 %"generic#anon#2#1##0") {
   %"tmp#1##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"closure#6" to i64 ), i64 %"generic#anon#2#1##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#0" to i64 ), i64 %"generic#anon#2#1##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#19" to i64 ))
   %"tmp#2##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)

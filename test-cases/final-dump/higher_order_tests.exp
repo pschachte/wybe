@@ -8,6 +8,14 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : higher_order_tests.<0>
+  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_tests.#anon#2<1>]}
+                    1:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_tests.#anon#1<1>]}
+                    2:: CStringInfo {cstringChars = "*1"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember higher_order_tests#constant#2]}
+                    4:: CStringInfo {cstringChars = "*2"}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember higher_order_tests#constant#4]}
+                    6:: CStringInfo {cstringChars = "------"}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember higher_order_tests#constant#6]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -17,17 +25,17 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    higher_order_tests.#anon#1<0>(_:wybe.int, ?tmp#8##0:wybe.bool) #0 @higher_order_tests:nn:nn
+    higher_order_tests#constant#1:(I, ?wybe.bool)(1:I, ?tmp#8##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
-        higher_order_tests.#cont#1<0>(higher_order_tests.#anon#1<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
+        higher_order_tests.#cont#1<0>(higher_order_tests#constant#1:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
         wybe.string.print<0>("*1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
-        higher_order_tests.#cont#1<0>(higher_order_tests.#anon#1<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
+        higher_order_tests.#cont#1<0>(higher_order_tests#constant#1:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
@@ -127,17 +135,17 @@ proc #cont#4 > {semipure} (2 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @higher_order_tests:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @higher_order_tests:nn:nn
     foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
-    higher_order_tests.#anon#2<0>(1:wybe.int, ?tmp#4##0:wybe.bool) #0 @higher_order_tests:nn:nn
+    higher_order_tests#constant#0:(I, ?wybe.bool)(1:I, ?tmp#4##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
-        higher_order_tests.#cont#5<0>(higher_order_tests.#anon#2<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
+        higher_order_tests.#cont#5<0>(higher_order_tests#constant#0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
 
     1:
         wybe.string.print<0>("*1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @higher_order_tests:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @higher_order_tests:nn:nn
         foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_tests:nn:nn
-        higher_order_tests.#cont#5<0>(higher_order_tests.#anon#2<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
+        higher_order_tests.#cont#5<0>(higher_order_tests#constant#0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
 
 
@@ -221,14 +229,14 @@ do_test2(f##0:(I, ?wybe.bool) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#success##0:
 source_filename = "!ROOT!/final-dump/higher_order_tests.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"*1\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"*2\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"------\00", align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"closure#6" = private unnamed_addr constant {ptr} { ptr @"higher_order_tests.#anon#1<1>" }, align 8
-@"closure#7" = private unnamed_addr constant {ptr} { ptr @"higher_order_tests.#anon#2<1>" }, align 8
+@"higher_order_tests#constant#0" = private unnamed_addr constant {ptr} { ptr @"higher_order_tests.#anon#2<1>" }, align 8
+@"higher_order_tests#constant#1" = private unnamed_addr constant {ptr} { ptr @"higher_order_tests.#anon#1<1>" }, align 8
+@"higher_order_tests#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"*1\00", align 8
+@"higher_order_tests#constant#3" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"higher_order_tests#constant#2" }, align 8
+@"higher_order_tests#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"*2\00", align 8
+@"higher_order_tests#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"higher_order_tests#constant#4" }, align 8
+@"higher_order_tests#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"------\00", align 8
+@"higher_order_tests#constant#7" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"higher_order_tests#constant#6" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
@@ -236,15 +244,16 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"higher_order_tests.<0>"() {
-  %"tmp#8##0" = tail call fastcc i1 @"higher_order_tests.#anon#1<0>"()
+  %"tmp#14##0" = load ptr, ptr @"higher_order_tests#constant#1"
+  %"tmp#8##0" = tail call fastcc i1 %"tmp#14##0"(ptr @"higher_order_tests#constant#1", i64 1)
   br i1 %"tmp#8##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#1<0>"(i64 ptrtoint( ptr @"closure#6" to i64 ))
+  tail call fastcc void @"higher_order_tests.#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#1" to i64 ))
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#1<0>"(i64 ptrtoint( ptr @"closure#6" to i64 ))
+  tail call fastcc void @"higher_order_tests.#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#1" to i64 ))
   ret void
 }
 
@@ -289,7 +298,7 @@ define external fastcc void @"higher_order_tests.#cont#2<0>"(i64 %"t##0") {
   %"tmp#6##0" = tail call fastcc i1 %"tmp#12##0"(i64 %"t##0", i64 2)
   br i1 %"tmp#6##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#5" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"higher_order_tests.#cont#3<0>"(i64 %"t##0")
   ret void
@@ -314,17 +323,18 @@ if.else.0:
 }
 
 define external fastcc void @"higher_order_tests.#cont#4<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#7" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#4##0" = tail call fastcc i1 @"higher_order_tests.#anon#2<0>"(i64 1)
+  %"tmp#13##0" = load ptr, ptr @"higher_order_tests#constant#0"
+  %"tmp#4##0" = tail call fastcc i1 %"tmp#13##0"(ptr @"higher_order_tests#constant#0", i64 1)
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#5<0>"(i64 ptrtoint( ptr @"closure#7" to i64 ))
+  tail call fastcc void @"higher_order_tests.#cont#5<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#0" to i64 ))
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#5<0>"(i64 ptrtoint( ptr @"closure#7" to i64 ))
+  tail call fastcc void @"higher_order_tests.#cont#5<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#0" to i64 ))
   ret void
 }
 
@@ -349,7 +359,7 @@ define external fastcc void @"higher_order_tests.#cont#6<0>"(i64 %"t##0") {
   %"tmp#2##0" = tail call fastcc i1 %"tmp#8##0"(i64 %"t##0", i64 2)
   br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#5" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"higher_order_tests.#cont#7<0>"(i64 %"t##0")
   ret void

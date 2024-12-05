@@ -19,6 +19,11 @@ AFTER EVERYTHING:
                     thistype.tail<0>
                     thistype.tail<1>
                     thistype.~=<0>
+  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember thistype#constant#0]}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember thistype#constant#1]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 200 8,IntStructMember 0 8]}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 100 8,PointerStructMember thistype#constant#3]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -28,23 +33,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(7,(thistype.concat<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:thistype) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#11##0:thistype, ?tmp#12##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#12##0:thistype, ?tmp#2##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:thistype) @thistype:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:thistype) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#15##0:thistype, ?tmp#16##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#16##0:thistype, ?tmp#1##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype) @thistype:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:thistype) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#19##0:thistype, ?tmp#20##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#20##0:thistype, ?tmp#0##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:thistype) @thistype:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:thistype) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#23##0:thistype, ?tmp#24##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#24##0:thistype, ?tmp#5##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:thistype) @thistype:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#27##0:thistype) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#27##0:thistype, ?tmp#28##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @thistype:nn:nn
-    foreign lpvm mutate(~tmp#28##0:thistype, ?tmp#4##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:thistype) @thistype:nn:nn
-    thistype.concat<0>[410bae77d3](~tmp#0##0:thistype, ~tmp#4##0:thistype, outByReference tmp#8##0:thistype) #7 @thistype:nn:nn
+    thistype.concat<0>(thistype#constant#2:thistype, thistype#constant#4:thistype, outByReference tmp#8##0:thistype) #7 @thistype:nn:nn
     thistype.length<0>(~tmp#8##0:thistype, ?tmp#7##0:wybe.int) #8 @thistype:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @thistype:nn:nn
     foreign c print_int(~tmp#7##0:wybe.int, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @thistype:nn:nn
@@ -103,17 +92,6 @@ concat(x##0:thistype, y##0:thistype, outByReference #result##0:thistype)<{}; {};
         foreign lpvm mutate(~tmp#8##0:thistype, ?tmp#9##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:wybe.int) @thistype:nn:nn
         thistype.concat<0>(~t##0:thistype, ~y##0:thistype, outByReference tmp#2##0:thistype) #1 @thistype:nn:nn
         foreign lpvm mutate(~tmp#9##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference tmp#2##0:thistype) @thistype:nn:nn
-
- [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @thistype:nn:nn
-    case ~tmp#5##0:wybe.bool of
-    0:
-        foreign llvm move(~y##0:thistype, ?#result##0:thistype) @thistype:nn:nn
-
-    1:
-        foreign lpvm access(x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype) @thistype:nn:nn
-        thistype.concat<0>[410bae77d3](~t##0:thistype, ~y##0:thistype, outByReference tmp#2##0:thistype) #1 @thistype:nn:nn
-        foreign lpvm mutate(~x##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference tmp#2##0:thistype) @thistype:nn:nn
 
 
 
@@ -249,6 +227,11 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/thistype.wybe"
 target triple    ????
 
+@"thistype#constant#0" = private unnamed_addr constant {i64, i64} { i64 3, i64 0 }, align 8
+@"thistype#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"thistype#constant#0" }, align 8
+@"thistype#constant#2" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"thistype#constant#1" }, align 8
+@"thistype#constant#3" = private unnamed_addr constant {i64, i64} { i64 200, i64 0 }, align 8
+@"thistype#constant#4" = private unnamed_addr constant {i64, ptr} { i64 100, ptr @"thistype#constant#3" }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -256,44 +239,9 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"thistype.<0>"() {
-  %"tmp#33##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#11##0" = ptrtoint ptr %"tmp#33##0" to i64
-  %"tmp#34##0" = inttoptr i64 %"tmp#11##0" to ptr
-  store i64 3, ptr %"tmp#34##0"
-  %"tmp#35##0" = add i64 %"tmp#11##0", 8
-  %"tmp#36##0" = inttoptr i64 %"tmp#35##0" to ptr
-  store i64 0, ptr %"tmp#36##0"
-  %"tmp#37##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#15##0" = ptrtoint ptr %"tmp#37##0" to i64
-  %"tmp#38##0" = inttoptr i64 %"tmp#15##0" to ptr
-  store i64 2, ptr %"tmp#38##0"
-  %"tmp#39##0" = add i64 %"tmp#15##0", 8
-  %"tmp#40##0" = inttoptr i64 %"tmp#39##0" to ptr
-  store i64 %"tmp#11##0", ptr %"tmp#40##0"
-  %"tmp#41##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#19##0" = ptrtoint ptr %"tmp#41##0" to i64
-  %"tmp#42##0" = inttoptr i64 %"tmp#19##0" to ptr
-  store i64 1, ptr %"tmp#42##0"
-  %"tmp#43##0" = add i64 %"tmp#19##0", 8
-  %"tmp#44##0" = inttoptr i64 %"tmp#43##0" to ptr
-  store i64 %"tmp#15##0", ptr %"tmp#44##0"
-  %"tmp#45##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#23##0" = ptrtoint ptr %"tmp#45##0" to i64
-  %"tmp#46##0" = inttoptr i64 %"tmp#23##0" to ptr
-  store i64 200, ptr %"tmp#46##0"
-  %"tmp#47##0" = add i64 %"tmp#23##0", 8
-  %"tmp#48##0" = inttoptr i64 %"tmp#47##0" to ptr
-  store i64 0, ptr %"tmp#48##0"
-  %"tmp#49##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#27##0" = ptrtoint ptr %"tmp#49##0" to i64
-  %"tmp#50##0" = inttoptr i64 %"tmp#27##0" to ptr
-  store i64 100, ptr %"tmp#50##0"
-  %"tmp#51##0" = add i64 %"tmp#27##0", 8
-  %"tmp#52##0" = inttoptr i64 %"tmp#51##0" to ptr
-  store i64 %"tmp#23##0", ptr %"tmp#52##0"
-  %"tmp#53##0" = alloca i8, i64 8, align 8
-  call fastcc void @"thistype.concat<0>[410bae77d3]"(i64 %"tmp#19##0", i64 %"tmp#27##0", ptr %"tmp#53##0")
-  %"tmp#8##0" = load i64, ptr %"tmp#53##0"
+  %"tmp#33##0" = alloca i8, i64 8, align 8
+  call fastcc void @"thistype.concat<0>"(i64 ptrtoint( ptr @"thistype#constant#2" to i64 ), i64 ptrtoint( ptr @"thistype#constant#4" to i64 ), ptr %"tmp#33##0")
+  %"tmp#8##0" = load i64, ptr %"tmp#33##0"
   %"tmp#7##0" = call fastcc i64 @"thistype.length<0>"(i64 %"tmp#8##0")
   call ccc void @print_int(i64 %"tmp#7##0")
   call ccc void @putchar(i8 10)
@@ -348,23 +296,6 @@ if.then.0:
   %"tmp#16##0" = add i64 %"tmp#8##0", 8
   %"tmp#17##0" = inttoptr i64 %"tmp#16##0" to ptr
   musttail call fastcc void @"thistype.concat<0>"(i64 %"t##0", i64 %"y##0", ptr %"tmp#17##0")
-  ret void
-if.else.0:
-  store i64 %"y##0", ptr %"tmp#10##0"
-  ret void
-}
-
-define external fastcc void @"thistype.concat<0>[410bae77d3]"(i64 %"x##0", i64 %"y##0", ptr %"tmp#10##0") {
-  %"tmp#5##0" = icmp ne i64 %"x##0", 0
-  br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"tmp#11##0" = add i64 %"x##0", 8
-  %"tmp#12##0" = inttoptr i64 %"tmp#11##0" to ptr
-  %"t##0" = load i64, ptr %"tmp#12##0"
-  store i64 %"x##0", ptr %"tmp#10##0"
-  %"tmp#13##0" = add i64 %"x##0", 8
-  %"tmp#14##0" = inttoptr i64 %"tmp#13##0" to ptr
-  musttail call fastcc void @"thistype.concat<0>[410bae77d3]"(i64 %"t##0", i64 %"y##0", ptr %"tmp#14##0")
   ret void
 if.else.0:
   store i64 %"y##0", ptr %"tmp#10##0"

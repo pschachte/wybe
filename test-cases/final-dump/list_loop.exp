@@ -17,27 +17,23 @@ AFTER EVERYTHING:
                     list_loop.intlist.tail<0>
                     list_loop.intlist.tail<1>
                     list_loop.intlist.~=<0>
+  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember list_loop#constant#0]}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember list_loop#constant#1]}
+                    3:: CStringInfo {cstringChars = "    "}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember list_loop#constant#3]}
   imports         : public use list_loop.intlist
                     use wybe
   resources       : 
   submodules      : list_loop.intlist
   procs           : 
 
-module top-level code > public {semipure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: list_loop.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#10##0:list_loop.intlist) @list_loop:nn:nn
-    foreign lpvm mutate(~tmp#10##0:list_loop.intlist, ?tmp#11##0:list_loop.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @list_loop:nn:nn
-    foreign lpvm mutate(~tmp#11##0:list_loop.intlist, ?tmp#12##0:list_loop.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:list_loop.intlist) @list_loop:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:list_loop.intlist) @list_loop:nn:nn
-    foreign lpvm mutate(~tmp#15##0:list_loop.intlist, ?tmp#16##0:list_loop.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @list_loop:nn:nn
-    foreign lpvm mutate(~tmp#16##0:list_loop.intlist, ?tmp#17##0:list_loop.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#12##0:list_loop.intlist) @list_loop:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#20##0:list_loop.intlist) @list_loop:nn:nn
-    foreign lpvm mutate(~tmp#20##0:list_loop.intlist, ?tmp#21##0:list_loop.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @list_loop:nn:nn
-    foreign lpvm mutate(~tmp#21##0:list_loop.intlist, ?tmp#22##0:list_loop.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#17##0:list_loop.intlist) @list_loop:nn:nn
-    list_loop.#cont#1<0>(~tmp#22##0:list_loop.intlist, ~tmp#22##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @list_loop:nn:nn
+    list_loop.#cont#1<0>(list_loop#constant#2:list_loop.intlist, list_loop#constant#2:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @list_loop:nn:nn
 
 
 proc #cont#1 > {semipure} (2 calls)
@@ -123,39 +119,20 @@ proc #cont#4 > {inline,semipure} (1 calls)
 source_filename = "!ROOT!/final-dump/list_loop.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"    \00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"list_loop#constant#0" = private unnamed_addr constant {i64, i64} { i64 3, i64 0 }, align 8
+@"list_loop#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"list_loop#constant#0" }, align 8
+@"list_loop#constant#2" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"list_loop#constant#1" }, align 8
+@"list_loop#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"    \00", align 8
+@"list_loop#constant#4" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"list_loop#constant#3" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
-declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"list_loop.<0>"() {
-  %"tmp#23##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#10##0" = ptrtoint ptr %"tmp#23##0" to i64
-  %"tmp#24##0" = inttoptr i64 %"tmp#10##0" to ptr
-  store i64 3, ptr %"tmp#24##0"
-  %"tmp#25##0" = add i64 %"tmp#10##0", 8
-  %"tmp#26##0" = inttoptr i64 %"tmp#25##0" to ptr
-  store i64 0, ptr %"tmp#26##0"
-  %"tmp#27##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#15##0" = ptrtoint ptr %"tmp#27##0" to i64
-  %"tmp#28##0" = inttoptr i64 %"tmp#15##0" to ptr
-  store i64 2, ptr %"tmp#28##0"
-  %"tmp#29##0" = add i64 %"tmp#15##0", 8
-  %"tmp#30##0" = inttoptr i64 %"tmp#29##0" to ptr
-  store i64 %"tmp#10##0", ptr %"tmp#30##0"
-  %"tmp#31##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#20##0" = ptrtoint ptr %"tmp#31##0" to i64
-  %"tmp#32##0" = inttoptr i64 %"tmp#20##0" to ptr
-  store i64 1, ptr %"tmp#32##0"
-  %"tmp#33##0" = add i64 %"tmp#20##0", 8
-  %"tmp#34##0" = inttoptr i64 %"tmp#33##0" to ptr
-  store i64 %"tmp#15##0", ptr %"tmp#34##0"
-  tail call fastcc void @"list_loop.#cont#1<0>"(i64 %"tmp#20##0", i64 %"tmp#20##0")
+  tail call fastcc void @"list_loop.#cont#1<0>"(i64 ptrtoint( ptr @"list_loop#constant#2" to i64 ), i64 ptrtoint( ptr @"list_loop#constant#2" to i64 ))
   ret void
 }
 
@@ -192,7 +169,7 @@ if.then.0:
   %"tmp#20##0" = add i64 %"l2##0", 8
   %"tmp#21##0" = inttoptr i64 %"tmp#20##0" to ptr
   %"l2##1" = load i64, ptr %"tmp#21##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"list_loop#constant#4" to i64 ))
   call ccc void @print_int(i64 %"h##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1155)
   call ccc void @print_int(i64 %"h2##0")
@@ -205,7 +182,7 @@ if.else.0:
 }
 
 define external fastcc void @"list_loop.#cont#4<0>"(i64 %"h##0", i64 %"h2##0", i64 %"l##0", i64 %"l2##0", i64 %"x##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"list_loop#constant#4" to i64 ))
   call ccc void @print_int(i64 %"h##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 1155)
   call ccc void @print_int(i64 %"h2##0")
@@ -228,6 +205,7 @@ define external fastcc void @"list_loop.#cont#4<0>"(i64 %"h##0", i64 %"h2##0", i
                     list_loop.intlist.tail<0>
                     list_loop.intlist.tail<1>
                     list_loop.intlist.~=<0>
+  constants       : 
   imports         : use list_loop
                     use wybe
   resources       : 
