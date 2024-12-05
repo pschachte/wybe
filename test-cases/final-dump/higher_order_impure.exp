@@ -12,16 +12,17 @@ AFTER EVERYTHING:
   constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
                     1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember higher_order_impure#constant#0]}
                     2:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_impure#constant#1]}
+                    3:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_impure.#anon#1<1>,GenericStructMember (PointerStructMember higher_order_impure#constant#2)]}
   imports         : use wybe
   resources       : 
   procs           : 
 
-module top-level code > public {inline,semipure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: higher_order_impure.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    higher_order_impure.#anon#1<0>(_:wybe.list(wybe.int)) #0 @higher_order_impure:nn:nn
+    higher_order_impure#constant#3:{impure}() #0 @higher_order_impure:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @higher_order_impure:nn:nn
     foreign c print_float(3.0:wybe.float, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @higher_order_impure:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @higher_order_impure:nn:nn
@@ -56,13 +57,18 @@ measure(func##0:{impure}(), ?seconds_elapsed##0:wybe.float)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/higher_order_impure.wybe"
 target triple    ????
 
+@"higher_order_impure#constant#0" = private unnamed_addr constant {i64, i64} { i64 3, i64 0 }, align 8
+@"higher_order_impure#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"higher_order_impure#constant#0" }, align 8
+@"higher_order_impure#constant#2" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"higher_order_impure#constant#1" }, align 8
+@"higher_order_impure#constant#3" = private unnamed_addr constant {ptr, i64} { ptr @"higher_order_impure.#anon#1<1>", i64 ptrtoint( ptr @"higher_order_impure#constant#2" to i64 ) }, align 8
 
 declare external ccc void @print_float(double)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"higher_order_impure.<0>"() {
-  tail call fastcc void @"higher_order_impure.#anon#1<0>"()
+  %"tmp#21##0" = load ptr, ptr @"higher_order_impure#constant#3"
+  tail call fastcc void %"tmp#21##0"(ptr @"higher_order_impure#constant#3")
   call ccc void @print_float(double 3.0)
   call ccc void @putchar(i8 10)
   ret void

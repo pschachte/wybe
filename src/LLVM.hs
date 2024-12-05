@@ -300,6 +300,8 @@ recordIfConst (PointerStructMember structID) = do
     logLLVM $ "Recording const " ++ show structID
                 ++ " ( -> " ++ show constInfo ++ ")"
     recordConst structID
+recordIfConst (GenericStructMember member) =
+    recordIfConst member
 recordIfConst _ = return ()
 
 
@@ -318,7 +320,8 @@ recordConst spec = do
 -- | Record the pointer parts of a constant structure.
 recordConstParts :: StructInfo -> LLVM ()
 recordConstParts CStringInfo{} = return ()
-recordConstParts StructInfo{structData=members} =
+recordConstParts StructInfo{structData=members} = do
+    logLLVM $ "Recording parts of constant struct " ++ show members
     mapM_ recordIfConst members
 
 
