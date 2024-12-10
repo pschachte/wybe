@@ -50,9 +50,9 @@ module AST (
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..),
   InterfaceHash, PubProcInfo(..),
   StructID, structConstName, recordConstStruct,
-  lookupConstStruct, lookupConstInfo,
+  lookupConstStruct, lookupConstInfo, stringExpr, cStringExpr,
   StructInfo(..), ConstValue(..), constValueSize, constValueRepresentation,
-  constValueAtOffset, constValuePrimArg,
+  constValueAtOffset, constValuePrimArg, constValueExp,
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules, sameOriginModules,
   refersTo,
@@ -1079,17 +1079,15 @@ lookupResource res@(ResourceSpec mod name) = do
 
 -- |All the "special" resources, which Wybe automatically generates where they
 -- are used, if necessary.
-specialResources :: Map VarName (Placed Stmt -> Exp,TypeSpec)
+specialResources :: Map VarName (Placed Stmt -> Compiler Exp, TypeSpec)
 specialResources =
-    let cStrType = TypeSpec ["wybe"] "c_string" []
-        intType = TypeSpec ["wybe"] "int" []
-    in Map.fromList [
-        ("call_source_file_name",(callFileName,cStrType)),
-        ("call_source_file_full_name",(callFileFullName,cStrType)),
+    Map.fromList [
+        ("call_source_file_name",(callFileName,cStringType)),
+        ("call_source_file_full_name",(callFileFullName,cStringType)),
         ("call_source_line_number",(callLineNumber,intType)),
         ("call_source_column_number",(callColumnNumber,intType)),
-        ("call_source_location",(callSourceLocation False,cStrType)),
-        ("call_source_full_location",(callSourceLocation True,cStrType))
+        ("call_source_location",(callSourceLocation False,cStringType)),
+        ("call_source_full_location",(callSourceLocation True,cStringType))
         ]
 
 
@@ -1103,28 +1101,27 @@ isSpecialResource :: ResourceSpec -> Bool
 isSpecialResource res = res `Set.member` specialResourcesSet
 
 
-callFileName :: Placed Stmt -> Exp
+callFileName :: Placed Stmt -> Compiler Exp
 callFileName pstmt =
-    (`StringValue` CString)
-    $ maybe "Unknown file" (takeBaseName . sourceName) (place pstmt)
+    cStringExpr $ maybe "Unknown file" (takeBaseName . sourceName) (place pstmt)
 
-callFileFullName :: Placed Stmt -> Exp
+callFileFullName :: Placed Stmt -> Compiler Exp
 callFileFullName pstmt =
-    (`StringValue` CString)
-    $ maybe "Unknown file" sourceName (place pstmt)
+    cStringExpr $ maybe "Unknown file" sourceName (place pstmt)
 
-callLineNumber :: Placed Stmt -> Exp
+callLineNumber :: Placed Stmt -> Compiler Exp
 callLineNumber pstmt =
-    IntValue $ fromIntegral $ maybe 0 sourceLine (place pstmt)
+    return $ Typed (IntValue $ fromIntegral $ maybe 0 sourceLine (place pstmt))
+                intType Nothing
 
-callColumnNumber :: Placed Stmt -> Exp
+callColumnNumber :: Placed Stmt -> Compiler Exp
 callColumnNumber pstmt =
-    IntValue $ fromIntegral $ maybe 0 sourceColumn (place pstmt)
+    return $ Typed (IntValue $ fromIntegral $ maybe 0 sourceColumn (place pstmt))
+                intType Nothing
 
-callSourceLocation :: Bool -> Placed Stmt -> Exp
+callSourceLocation :: Bool -> Placed Stmt -> Compiler Exp
 callSourceLocation full pstmt =
-    (`StringValue` CString)
-    $ maybe "unknown location" (showSourcePos full) (place pstmt)
+    cStringExpr $ maybe "unknown location" (showSourcePos full) (place pstmt)
 
 
 -- |Is the specified resource exported by the current module.
@@ -1466,22 +1463,23 @@ emptyModule = Module
 
 
 -- | Used to identify a global constant structure
-data StructID = StructID ModSpec Int deriving (Eq, Ord, Generic)
+data StructID = StructID ModSpec Int (Maybe Exp) deriving (Eq, Ord, Generic)
 
 instance Show StructID where
-    show = structConstName
+    show structID@(StructID _ _ (Just exp))= show exp
+    show structID = structConstName structID
 
 
 -- | The LLVM constant name for the specified StructID
 structConstName :: StructID -> Ident
-structConstName (StructID md num) =
+structConstName (StructID md num _) =
     specialName2 (showModSpec md) $ "constant" ++ specialChar : show num
 
 
 -- | Intern a constant struct, returning its StructID.  If it is identical to an
 -- already existing struct, return its StructID, otherwise create a fresh one.
-recordConstStruct :: StructInfo -> Compiler StructID
-recordConstStruct info = do
+recordConstStruct :: StructInfo -> Maybe Exp -> Compiler StructID
+recordConstStruct info exp = do
     currMod <- getModule modSpec
     logAST $ "Recording const data in module " ++ showModSpec currMod
     lookupConstStruct info >>= \case
@@ -1491,7 +1489,7 @@ recordConstStruct info = do
             return structID
         Nothing -> do
             num <- getModule modStructCount
-            let structID = StructID currMod num
+            let structID = StructID currMod num exp
             logAST $ "Recording new struct "
                     ++ show structID ++ " = " ++ show info
             updateModule $ \s -> s { modStructCount = num + 1
@@ -1512,11 +1510,38 @@ lookupConstStruct info = getModule $ Map.lookup info . modStructID
 
 -- | Find the StructInfo for the specified StructID, if it exists.
 lookupConstInfo :: StructID -> Compiler (Maybe StructInfo)
-lookupConstInfo (StructID mspec n) = do
+lookupConstInfo (StructID mspec n _) = do
     md <- trustFromJustM
             ("in lookupConstInfo, unknown module " ++ showModSpec mspec) $
             getLoadingModule mspec
     return $ Map.lookup n $ modStructs md
+
+
+-- | Give a Placed Exp that produces the specified Wybe String, with explicit
+-- type.  The resulting Exp does not use a StringValue constructor.
+stringExpr :: String -> Compiler Exp
+stringExpr [] =
+    return $ Typed (Fncall ["wybe","string"] "empty" False [])
+                stringType Nothing
+stringExpr [ch] = do
+    let arg = Unplaced $ CharValue ch
+    return $ Typed (Fncall ["wybe","string"] "singleton" False [arg])
+                stringType Nothing
+stringExpr str = do
+    cStringArg <- Unplaced <$> cStringExpr str
+    return $ Typed
+            (Fncall ["wybe","string"] "unsafe_cstring_to_string" False
+                [cStringArg, Unplaced $ IntValue $ fromIntegral $ length str])
+            stringType Nothing
+
+
+-- | Give a Placed Exp that produces the specified C String, with explicit type.
+-- The resulting Exp does not use a StringValue constructor.
+cStringExpr :: String -> Compiler Exp
+cStringExpr str = do
+    structID <- recordConstStruct (CStringInfo str) 
+                        (Just $ StringValue str CString)
+    return $ Typed (ConstStruct structID) cStringType Nothing
 
 
 isRootModule :: ModSpec -> Compiler Bool
@@ -2675,6 +2700,7 @@ foldExp' :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
          -> Exp -> OptPos -> a
 foldExp' _   _   val IntValue{} pos = val
 foldExp' _   _   val FloatValue{} pos = val
+foldExp' _   _   val ConstStruct{} pos = val
 foldExp' _   _   val StringValue{} pos = val
 foldExp' _   _   val CharValue{} pos = val
 foldExp' _   _   val Var{} pos = val
@@ -3220,7 +3246,7 @@ data Exp
       = IntValue Integer
       | FloatValue Double
       | CharValue Char
-      | StringValue String StringVariant
+      | ConstStruct StructID
       | FailExpr -- ^ an expression with no value, because it always fails
       | Var VarName FlowDirection ArgFlowType
       | Closure ProcSpec [Placed Exp]
@@ -3230,6 +3256,7 @@ data Exp
                -- these two must be the same.
       | Global GlobalInfo
       -- The following are eliminated during flattening
+      | StringValue String StringVariant
       | AnonProc ProcModifiers [Param] [Placed Stmt] (Maybe VarDict) (Maybe [ResourceFlowSpec])
       | AnonFunc (Placed Exp)
       | AnonParamVar (Maybe Integer) FlowDirection
@@ -3276,12 +3303,13 @@ expIsVar _               = False
 
 -- | Return the FlowDirection of an Exp, assuming it has been flattened.
 flattenedExpFlow :: Exp -> FlowDirection
-flattenedExpFlow (IntValue _)          = ParamIn
-flattenedExpFlow (FloatValue _)        = ParamIn
-flattenedExpFlow (CharValue _)         = ParamIn
-flattenedExpFlow (StringValue _ _)     = ParamIn
+flattenedExpFlow IntValue{}            = ParamIn
+flattenedExpFlow FloatValue{}          = ParamIn
+flattenedExpFlow CharValue{}           = ParamIn
+flattenedExpFlow StringValue{}         = ParamIn
+flattenedExpFlow ConstStruct{}         = ParamIn
 flattenedExpFlow AnonProc{}            = ParamIn
-flattenedExpFlow (Closure _ _)         = ParamIn
+flattenedExpFlow Closure{}             = ParamIn
 flattenedExpFlow (Var _ flow _)        = flow
 flattenedExpFlow (AnonParamVar _ flow) = flow
 flattenedExpFlow FailExpr              = ParamIn
@@ -3453,7 +3481,6 @@ data PrimArg
               }
      | ArgInt Integer TypeSpec                 -- ^Constant integer arg
      | ArgFloat Double TypeSpec                -- ^Constant floating point arg
-     | ArgString String StringVariant TypeSpec -- ^Constant string arg
      | ArgClosure ProcSpec [PrimArg] TypeSpec  -- ^Closure, with closed args
      | ArgGlobal GlobalInfo TypeSpec           -- ^Constant global reference
      | ArgConstRef StructID TypeSpec           -- ^Ref to constant memory block
@@ -3541,6 +3568,19 @@ constValuePrimArg (PointerStructMember structID) ty = ArgConstRef structID ty
 constValuePrimArg (FnPointerStructMember pspec) ty = ArgClosure pspec [] ty
 constValuePrimArg (UndefStructMember _) ty = ArgUndef ty
 constValuePrimArg (GenericStructMember cnst) ty = constValuePrimArg cnst ty
+
+
+-- | Turn a ConstValue into the equivalent constant Exp
+constValueExp :: ConstValue -> Exp
+constValueExp (IntStructMember i _) = IntValue i
+constValueExp (FloatStructMember f _) = FloatValue f
+constValueExp (PointerStructMember structID) = ConstStruct structID
+constValueExp (FnPointerStructMember pspec) =
+    shouldnt "constValueExp of FnPointerStructMember"
+constValueExp (UndefStructMember _) =
+    shouldnt "constValueExp of UndefStructMember"
+constValueExp (GenericStructMember cnst) =
+    shouldnt "constValueExp of GenericStructMember"
 
 
 -- |Returns a list of all arguments to a prim, including global flows
@@ -3661,7 +3701,6 @@ argIsConst :: PrimArg -> Bool
 argIsConst ArgVar{}            = False
 argIsConst ArgInt{}            = True
 argIsConst ArgFloat{}          = True
-argIsConst ArgString{}         = True
 argIsConst (ArgClosure _ as _) = all argIsConst as
 argIsConst ArgGlobal{}         = True
 argIsConst ArgConstRef{}       = True
@@ -3675,7 +3714,6 @@ argIsReal :: PrimArg -> Compiler Bool
 argIsReal ArgVar{argVarType=ty} = not <$> typeIsPhantom ty
 argIsReal (ArgInt _ ty)         = not <$> typeIsPhantom ty -- 0 is a valid phantom constant
 argIsReal ArgFloat{}            = return True
-argIsReal ArgString{}           = return True
 argIsReal (ArgClosure _ as _)   = return True
 argIsReal (ArgGlobal _ ty)      = not <$> typeIsPhantom ty
 argIsReal (ArgConstRef _ ty)    = return True
@@ -3710,7 +3748,6 @@ argFlowDirection :: PrimArg -> PrimFlow
 argFlowDirection ArgVar{argVarFlow=flow} = flow
 argFlowDirection ArgInt{} = FlowIn
 argFlowDirection ArgFloat{} = FlowIn
-argFlowDirection ArgString{} = FlowIn
 argFlowDirection ArgClosure{} = FlowIn
 argFlowDirection ArgGlobal{} = FlowIn
 argFlowDirection ArgConstRef{} = FlowIn
@@ -3723,7 +3760,6 @@ argType :: PrimArg -> TypeSpec
 argType ArgVar{argVarType=typ} = typ
 argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
-argType (ArgString _ _ typ) = typ
 argType (ArgClosure _ _ typ) = typ
 argType (ArgGlobal _ typ) = typ
 argType (ArgConstRef _ typ) = typ
@@ -3736,7 +3772,6 @@ setArgType :: TypeSpec -> PrimArg -> PrimArg
 setArgType typ arg@ArgVar{} = arg{argVarType=typ}
 setArgType typ (ArgInt i _) = ArgInt i typ
 setArgType typ (ArgFloat f _) = ArgFloat f typ
-setArgType typ (ArgString s v ty) = ArgString s v typ
 setArgType typ (ArgClosure ms as _) = ArgClosure ms as typ
 setArgType typ (ArgGlobal rs _) = ArgGlobal rs typ
 setArgType typ (ArgConstRef ms _) = ArgConstRef ms typ
@@ -3770,7 +3805,6 @@ argDescription (ArgVar var _ flow ftype _) =
           Free           -> " closure argument ")
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
-argDescription arg@ArgString{} = "constant argument " ++ show arg
 argDescription (ArgClosure ms as _)
     = "closure of '" ++ show ms ++ "' with <"
     ++ intercalate ", " (argDescription <$> as) ++ "> closed arguments"
@@ -3835,20 +3869,21 @@ stmtsInputs = foldStmts (const . const)
 -- |Return the set of variables that might be freshly assigned by the
 -- specified expr.
 expOutputs :: Exp -> Set VarName
-expOutputs (IntValue _) = Set.empty
-expOutputs (FloatValue _) = Set.empty
-expOutputs (StringValue _ _) = Set.empty
-expOutputs (CharValue _) = Set.empty
+expOutputs IntValue{} = Set.empty
+expOutputs FloatValue{} = Set.empty
+expOutputs StringValue{} = Set.empty
+expOutputs ConstStruct{} = Set.empty
+expOutputs CharValue{} = Set.empty
 expOutputs (Var "_" ParamIn _) = Set.singleton "_" -- special _ variable is out
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
 expOutputs FailExpr = Set.empty
 expOutputs (AnonParamVar mbNum flow) =
     if flowsOut flow then Set.singleton ("@" ++ maybe "" show mbNum) else Set.empty
-expOutputs (Global _) = Set.empty
+expOutputs Global{} = Set.empty
 expOutputs AnonProc{} = Set.empty
 expOutputs AnonFunc{} = Set.empty
-expOutputs (Closure _ _) = Set.empty
+expOutputs Closure{} = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Where _ pexp) = expOutputs $ content pexp
@@ -3867,20 +3902,21 @@ pexpListOutputs = List.foldr (Set.union . expOutputs . content) Set.empty
 
 -- |Return the set of variables that are inputs to the given expr.
 expInputs :: Exp -> Set VarName
-expInputs (IntValue _) = Set.empty
-expInputs (FloatValue _) = Set.empty
-expInputs (StringValue _ _) = Set.empty
-expInputs (CharValue _) = Set.empty
+expInputs IntValue{} = Set.empty
+expInputs FloatValue{} = Set.empty
+expInputs StringValue{} = Set.empty
+expInputs ConstStruct{} = Set.empty
+expInputs CharValue{} = Set.empty
 expInputs (Var "_" ParamIn _) = Set.empty
 expInputs (Var name flow _) =
     if flowsIn flow then Set.singleton name else Set.empty
 expInputs FailExpr = Set.empty
 expInputs (AnonParamVar mbNum flow) =
     if flowsIn flow then Set.singleton (show mbNum) else Set.empty
-expInputs (Global _) = Set.empty
+expInputs Global{} = Set.empty
 expInputs AnonProc{} = Set.empty
 expInputs AnonFunc{} = Set.empty
-expInputs (Closure _ _) = Set.empty
+expInputs Closure{} = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
 expInputs (Where _ pexp) = expInputs $ content pexp
 expInputs (DisjExp pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
@@ -3947,7 +3983,6 @@ varsInPrimArg dir (ArgClosure _ as _)
     = Set.unions $ Set.fromList (varsInPrimArg dir <$> as)
 varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty
-varsInPrimArg _ ArgString{}   = Set.empty
 varsInPrimArg _ ArgGlobal{}   = Set.empty
 varsInPrimArg _ ArgConstRef{} = Set.empty
 varsInPrimArg _ ArgUnneeded{} = Set.empty
@@ -3983,6 +4018,18 @@ envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False e
 
 makeGlobalResourceName :: ResourceSpec -> String
 makeGlobalResourceName spec = specialName2 "resource" $ show spec
+
+-- These are defined in Snippets.hs, but we can't import that as it imports AST
+
+stringType :: TypeSpec
+stringType = TypeSpec ["wybe"] "string" []
+
+cStringType :: TypeSpec
+cStringType = TypeSpec ["wybe"] "c_string" []
+
+intType :: TypeSpec
+intType = TypeSpec ["wybe"] "int" []
+
 
 ----------------------------------------------------------------
 --                      Showing Compiler State
@@ -4444,7 +4491,6 @@ instance Show PrimArg where
       show name ++ showTypeSuffix typ Nothing
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ Nothing
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
-  show (ArgString s v typ) = show v ++ show s ++ showTypeSuffix typ Nothing
   show (ArgClosure ms as typ) = show ms ++ "<" ++ intercalate ", " (show <$> as)
                              ++ ">" ++ showTypeSuffix typ Nothing
   show (ArgGlobal info typ) = show info ++ showTypeSuffix typ Nothing
@@ -4459,6 +4505,7 @@ instance Show Exp where
   show (IntValue i) = show i
   show (FloatValue f) = show f
   show (StringValue s v) = show v ++ show s
+  show (ConstStruct s) = show s
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
   show FailExpr = "fail"

@@ -11,7 +11,7 @@ AFTER EVERYTHING:
                     numbers.factorial<0>
                     numbers.toCelsius<0>
   constants       : 0:: CStringInfo {cstringChars = "Numbers has been initialised."}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 29 8,PointerStructMember numbers#constant#0]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 29 8,PointerStructMember c"Numbers has been initialised."]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -21,10 +21,10 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("Numbers has been initialised.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @numbers:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @numbers:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @numbers:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @numbers:nn:nn
+    wybe.string.print<0>("Numbers has been initialised.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @numbers:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @numbers:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @numbers:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @numbers:nn:nn
 
 
 proc factorial > public (1 calls)

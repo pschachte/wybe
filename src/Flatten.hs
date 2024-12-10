@@ -505,8 +505,14 @@ flattenExp expr@(IntValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(FloatValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
-flattenExp expr@(StringValue _ _) ty castFrom pos =
+flattenExp expr@(ConstStruct _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
+flattenExp expr@(StringValue str WybeString) ty castFrom pos = do
+    exp' <- lift $ stringExpr str
+    flattenExp exp' ty castFrom pos
+flattenExp expr@(StringValue cstr CString) _ castFrom pos = do
+    exp' <- lift $ cStringExpr cstr
+    flattenExp exp' cStringType castFrom pos
 flattenExp expr@(CharValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(Var "_" flow _) ty castFrom pos = do
@@ -745,6 +751,7 @@ typeAndPlace exp ty castFrom = maybePlace (maybeType exp ty castFrom)
 
 
 maybeType :: Exp -> TypeSpec -> Maybe TypeSpec -> Exp
+maybeType (Typed exp _ _) ty castFrom = Typed exp ty castFrom
 maybeType exp AnyType Nothing = exp
 maybeType exp ty castFrom = Typed exp ty castFrom
 

@@ -10,8 +10,8 @@ AFTER EVERYTHING:
   public procs    : higher_order_loop.<0>
   constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_loop.#closure#1<0>]}
                     1:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_loop.#closure#2<0>]}
-                    2:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_loop#constant#1,IntStructMember 0 8]}
-                    3:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_loop#constant#0,PointerStructMember higher_order_loop#constant#2]}
+                    2:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_loop.#closure#2<0><>,IntStructMember 0 8]}
+                    3:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_loop.#closure#1<0><>,PointerStructMember higher_order_loop#constant#2]}
   imports         : use wybe
   resources       : 
   procs           : 

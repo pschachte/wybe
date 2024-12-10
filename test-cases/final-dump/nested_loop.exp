@@ -9,9 +9,9 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : nested_loop.<0>
   constants       : 0:: CStringInfo {cstringChars = "Outer"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember nested_loop#constant#0]}
-                    2:: CStringInfo {cstringChars = "Inner"}
-                    3:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember nested_loop#constant#2]}
+                    1:: CStringInfo {cstringChars = "Inner"}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"Inner"]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"Outer"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -22,13 +22,13 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print<0>("Outer":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @nested_loop:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @nested_loop:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#0##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @nested_loop:nn:nn
-    foreign lpvm store(~%tmp#1##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
-    wybe.string.print<0>("Inner":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @nested_loop:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @nested_loop:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @nested_loop:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
+    wybe.string.print<0>("Inner":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @nested_loop:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @nested_loop:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @nested_loop:nn:nn
+    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
     nested_loop.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @nested_loop:nn:nn
 
 
@@ -37,15 +37,15 @@ proc #cont#1 > {inline,semipure} (1 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("Outer":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @nested_loop:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @nested_loop:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @nested_loop:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
-    wybe.string.print<0>("Inner":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @nested_loop:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @nested_loop:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @nested_loop:nn:nn
-    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
-    nested_loop.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @nested_loop:nn:nn
+    wybe.string.print<0>("Outer":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @nested_loop:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @nested_loop:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @nested_loop:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
+    wybe.string.print<0>("Inner":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @nested_loop:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @nested_loop:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @nested_loop:nn:nn
+    foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
+    nested_loop.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @nested_loop:nn:nn
 
 
 proc #cont#2 > {inline,semipure} (2 calls)
@@ -53,11 +53,11 @@ proc #cont#2 > {inline,semipure} (2 calls)
 #cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("Inner":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @nested_loop:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @nested_loop:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @nested_loop:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
-    nested_loop.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @nested_loop:nn:nn
+    wybe.string.print<0>("Inner":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @nested_loop:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @nested_loop:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @nested_loop:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
+    nested_loop.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @nested_loop:nn:nn
 
   LLVM code       :
 
@@ -68,34 +68,34 @@ source_filename = "!ROOT!/final-dump/nested_loop.wybe"
 target triple    ????
 
 @"nested_loop#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Outer\00", align 8
-@"nested_loop#constant#1" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"nested_loop#constant#0" }, align 8
-@"nested_loop#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"Inner\00", align 8
-@"nested_loop#constant#3" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"nested_loop#constant#2" }, align 8
+@"nested_loop#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"Inner\00", align 8
+@"nested_loop#constant#2" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"nested_loop#constant#1" }, align 8
+@"nested_loop#constant#3" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"nested_loop#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"nested_loop.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#1" to i64 ))
-  call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#3" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#2" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"nested_loop.#cont#2<0>"()
   ret void
 }
 
 define external fastcc void @"nested_loop.#cont#1<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#1" to i64 ))
-  call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#3" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#2" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"nested_loop.#cont#2<0>"()
   ret void
 }
 
 define external fastcc void @"nested_loop.#cont#2<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_loop#constant#2" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"nested_loop.#cont#2<0>"()
   ret void

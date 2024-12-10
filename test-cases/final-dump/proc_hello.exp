@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : proc_hello.print2<0>
   constants       : 0:: CStringInfo {cstringChars = "hello, world"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember proc_hello#constant#0]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"hello, world"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -19,10 +19,10 @@ proc print2 > public {inline} (0 calls)
 print2([x##0:wybe.int], [y##0:wybe.int])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("hello, world":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @proc_hello:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @proc_hello:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @proc_hello:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_hello:nn:nn
+    wybe.string.print<0>("hello, world":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_hello:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @proc_hello:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @proc_hello:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_hello:nn:nn
 
   LLVM code       :
 

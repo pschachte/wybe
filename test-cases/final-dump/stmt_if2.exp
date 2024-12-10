@@ -20,9 +20,9 @@ AFTER EVERYTHING:
                     stmt_if2.tree.right<0>
                     stmt_if2.tree.right<1>
                     stmt_if2.tree.~=<0>
-  constants       : 0:: StructInfo {structSize = 24, structData = [IntStructMember 0 8,IntStructMember 1 8,IntStructMember 0 8]}
-                    1:: CStringInfo {cstringChars = "found"}
-                    2:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember stmt_if2#constant#1]}
+  constants       : 0:: CStringInfo {cstringChars = "found"}
+                    1:: StructInfo {structSize = 24, structData = [IntStructMember 0 8,IntStructMember 1 8,IntStructMember 0 8]}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"found"]}
   imports         : public use stmt_if2.tree
                     use wybe
   resources       : 
@@ -34,12 +34,12 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_if2.lookup<0>(1:wybe.int, stmt_if2#constant#0:stmt_if2.tree, ?tmp#3##0:wybe.bool) #3 @stmt_if2:nn:nn
-    case ~tmp#3##0:wybe.bool of
+    stmt_if2.lookup<0>(1:wybe.int, stmt_if2#constant#1:stmt_if2.tree, ?tmp#4##0:wybe.bool) #3 @stmt_if2:nn:nn
+    case ~tmp#4##0:wybe.bool of
     0:
 
     1:
-        wybe.string.print<0>("found":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_if2:nn:nn
+        wybe.string.print<0>("found":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_if2:nn:nn
 
 
 
@@ -97,16 +97,16 @@ lookup#cont#1(tmp#4##0:wybe.bool, ?#result##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/stmt_if2.wybe"
 target triple    ????
 
-@"stmt_if2#constant#0" = private unnamed_addr constant {i64, i64, i64} { i64 0, i64 1, i64 0 }, align 8
-@"stmt_if2#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"found\00", align 8
-@"stmt_if2#constant#2" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"stmt_if2#constant#1" }, align 8
+@"stmt_if2#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"found\00", align 8
+@"stmt_if2#constant#1" = private unnamed_addr constant {i64, i64, i64} { i64 0, i64 1, i64 0 }, align 8
+@"stmt_if2#constant#2" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"stmt_if2#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"stmt_if2.<0>"() {
-  %"tmp#3##0" = tail call fastcc i1 @"stmt_if2.lookup<0>"(i64 1, i64 ptrtoint( ptr @"stmt_if2#constant#0" to i64 ))
-  br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
+  %"tmp#4##0" = tail call fastcc i1 @"stmt_if2.lookup<0>"(i64 1, i64 ptrtoint( ptr @"stmt_if2#constant#1" to i64 ))
+  br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_if2#constant#2" to i64 ))
   ret void

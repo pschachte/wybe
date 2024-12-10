@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : bbb.<0>
   constants       : 0:: CStringInfo {cstringChars = "BBB: Init"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember bbb#constant#0]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember c"BBB: Init"]}
   imports         : use ddd
                     use wybe
   resources       : 
@@ -20,10 +20,10 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("BBB: Init":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @bbb:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @bbb:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @bbb:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bbb:nn:nn
+    wybe.string.print<0>("BBB: Init":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @bbb:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @bbb:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @bbb:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bbb:nn:nn
 
   LLVM code       :
 
@@ -53,7 +53,7 @@ define external fastcc void @"bbb.<0>"() {
   public resources: 
   public procs    : ddd.<0>
   constants       : 0:: CStringInfo {cstringChars = "DDD: Init"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember ddd#constant#0]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember c"DDD: Init"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -63,10 +63,10 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("DDD: Init":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @ddd:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @ddd:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @ddd:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @ddd:nn:nn
+    wybe.string.print<0>("DDD: Init":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @ddd:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @ddd:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @ddd:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @ddd:nn:nn
 
   LLVM code       :
 

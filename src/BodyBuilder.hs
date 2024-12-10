@@ -668,7 +668,6 @@ constantValue (ArgClosure pspec args _) =
 constantValue (ArgConstRef structID ty) =
     return $ Just $ PointerStructMember structID
 constantValue ArgGlobal{} = return Nothing
-constantValue ArgString{} = return Nothing -- XXX Must handle or remove this
 constantValue _ = return Nothing
 
 
@@ -678,9 +677,13 @@ closureStructId pspec args = do
     mapM constantValue args >>= (\case
         Just args' -> do
           let sz = wordSizeBytes * (length args' + 1)
-          Just <$> lift (recordConstStruct $ StructInfo sz
+          Just <$> lift (
+            recordConstStruct
+                (StructInfo sz
                     $ FnPointerStructMember pspec
                         : List.map GenericStructMember args')
+                (Just $ Closure pspec
+                        (List.map (Unplaced . constValueExp) args')))
         _ -> return Nothing) . sequence
 
 
@@ -729,7 +732,6 @@ mkInput (ArgVar name ty _ _ lst) =
     ArgVar name ty FlowIn Ordinary False
 mkInput arg@ArgInt{} = arg
 mkInput arg@ArgFloat{} = arg
-mkInput arg@ArgString{} = arg
 mkInput arg@ArgClosure{} = arg
 mkInput (ArgUnneeded _ ty) = ArgUnneeded FlowIn ty
 mkInput arg@ArgGlobal{} = arg
@@ -988,7 +990,6 @@ canonicaliseArg (ArgClosure ms as _) =
     ArgClosure ms (canonicaliseArg <$> as) AnyType
 canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
-canonicaliseArg (ArgString v r _)   = ArgString v r AnyType
 canonicaliseArg (ArgGlobal info _)  = ArgGlobal info AnyType
 canonicaliseArg (ArgConstRef ms _)  = ArgConstRef ms AnyType
 canonicaliseArg (ArgUnneeded dir _) = ArgUnneeded dir AnyType
@@ -1005,7 +1006,6 @@ validateArg :: Prim -> PrimArg -> BodyBuilder ()
 validateArg instr ArgVar{argVarType=ty} = validateType ty instr
 validateArg instr (ArgInt    _ ty)      = validateType ty instr
 validateArg instr (ArgFloat  _ ty)      = validateType ty instr
-validateArg instr (ArgString _ _ ty)    = validateType ty instr
 validateArg instr (ArgClosure _ _ ty)   = validateType ty instr
 validateArg instr (ArgGlobal _ ty)      = validateType ty instr
 validateArg instr (ArgConstRef _ ty)    = validateType ty instr
@@ -1071,12 +1071,37 @@ expandConstStruct True arg@ArgVar{argVarName=var, argVarType=ty} = do
     val <- Map.lookup var <$> gets constStructs
     case val of
         Just (BlockInfo sz contents@(_:_)) -> do
+          guessedExp <- guessExp contents
           structID <- lift $ recordConstStruct
-                      $ StructInfo sz $ reverse $ structMembers sz contents
+                        (StructInfo sz $ reverse $ structMembers sz contents)
+                        guessedExp
           logBuild $ "Recording " ++ show sz ++ " byte const structure " ++ show contents ++ " as " ++ show structID
           return $ ArgConstRef structID ty
         _ -> return arg
 expandConstStruct _ arg = return arg
+
+
+-- | Try to guess the original expression that led to the specified constant
+-- structure members.  Note that members are in reverse order.  This code relies
+-- on the current implementations of some library types and functions.
+guessExp :: [(Int, ConstValue)] -> BodyBuilder (Maybe Exp)
+guessExp members = do
+    logBuild $ "Guessing expression for structure members " ++ show members
+    case members of
+      [(n,PointerStructMember id),(0,IntStructMember len _)] ->
+        lift (lookupConstInfo id) >>= \case
+          Just (CStringInfo str) | len == fromIntegral (length str) -> do
+            return $ Just $ StringValue str WybeString
+          _ -> return Nothing
+      _ -> return Nothing
+-- guessExp [(n,PointerStructMember id),(0,IntStructMember len _)] = do
+--     structInfo <- lift $ lookupConstInfo id
+--     case structInfo of
+--         Just (StructInfo _ (FnPointerStructMember pspec:args)) -> do
+--             args' <- mapM guessExp args
+--             return $ Nothing
+--         _ -> return Nothing
+
 
 
 -- BEGIN MAJOR DOC

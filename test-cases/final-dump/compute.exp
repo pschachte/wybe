@@ -124,7 +124,7 @@ define external fastcc double @"math.temperature.toCelsius<0>"(double %"f##0") {
   public procs    : math.utils.<0>
                     math.utils.factorial<0>
   constants       : 0:: CStringInfo {cstringChars = "Utils has been initialised."}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 27 8,PointerStructMember math.utils#constant#0]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 27 8,PointerStructMember c"Utils has been initialised."]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -134,10 +134,10 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("Utils has been initialised.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @utils:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @utils:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @utils:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @utils:nn:nn
+    wybe.string.print<0>("Utils has been initialised.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @utils:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @utils:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @utils:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @utils:nn:nn
 
 
 proc factorial > public (1 calls)

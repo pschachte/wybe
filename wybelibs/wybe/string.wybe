@@ -8,8 +8,9 @@ use wybe.control, wybe.io
 
 # Private constructors. This ensures that strings can only be manipulated with
 # public procedures, providing a more typical interface.  The `empty` and
-# `singleton` constructors are public so that short manifest constant strings
-# can be optimised to use those constructors.  This happens in Expansion.hs.
+# `singleton` constructors are public so that manifest constant strings
+# can be optimised to use those constructors.  Longer Wybe strings are converted
+# to calls to unsafe_cstring_to_string.  This happens in Flatten.hs.
 constructors buffer(len:int, raw:c_string) 
              # ^ A wrapper for a c_string
              # Note: must be first non-const ctor
@@ -24,6 +25,11 @@ constructors buffer(len:int, raw:c_string)
 
 
 ## Conversion procedures.
+
+# low-level function to convert a c_string that's known not to be empty or a
+# singleton into a string.  This is used by the compiler.
+pub def {inline} unsafe_cstring_to_string(str:c_string, len:int):_ =
+    buffer(len, str)
 
 # Convert a c_string into a string
 pub def string(str:c_string):_ = s where {

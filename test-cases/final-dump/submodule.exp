@@ -35,9 +35,9 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
   public resources: 
   public procs    : submodule.privatetest.semi_hidden<0>
   constants       : 0:: CStringInfo {cstringChars = "private proc in a private module"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 32 8,PointerStructMember submodule.privatetest#constant#0]}
-                    2:: CStringInfo {cstringChars = "public proc in a private module"}
-                    3:: StructInfo {structSize = 16, structData = [IntStructMember 31 8,PointerStructMember submodule.privatetest#constant#2]}
+                    1:: CStringInfo {cstringChars = "public proc in a private module"}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 31 8,PointerStructMember c"public proc in a private module"]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 32 8,PointerStructMember c"private proc in a private module"]}
   imports         : use submodule
                     use wybe
   resources       : 
@@ -48,7 +48,7 @@ proc hidden > {inline} (0 calls)
 hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("private proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @submodule:nn:nn
+    wybe.string.print<0>("private proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
 
 proc semi_hidden > public {inline} (0 calls)
@@ -56,7 +56,7 @@ proc semi_hidden > public {inline} (0 calls)
 semi_hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("public proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @submodule:nn:nn
+    wybe.string.print<0>("public proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
   LLVM code       :
 
@@ -67,20 +67,20 @@ source_filename = "!ROOT!/final-dump/submodule.wybe"
 target triple    ????
 
 @"submodule.privatetest#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"private proc in a private module\00", align 8
-@"submodule.privatetest#constant#1" = private unnamed_addr constant {i64, ptr} { i64 32, ptr @"submodule.privatetest#constant#0" }, align 8
-@"submodule.privatetest#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"public proc in a private module\00", align 8
-@"submodule.privatetest#constant#3" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"submodule.privatetest#constant#2" }, align 8
+@"submodule.privatetest#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"public proc in a private module\00", align 8
+@"submodule.privatetest#constant#2" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"submodule.privatetest#constant#1" }, align 8
+@"submodule.privatetest#constant#3" = private unnamed_addr constant {i64, ptr} { i64 32, ptr @"submodule.privatetest#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"submodule.privatetest.hidden<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.privatetest#constant#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.privatetest#constant#3" to i64 ))
   ret void
 }
 
 define external fastcc void @"submodule.privatetest.semi_hidden<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.privatetest#constant#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.privatetest#constant#2" to i64 ))
   ret void
 }
 
@@ -91,9 +91,9 @@ define external fastcc void @"submodule.privatetest.semi_hidden<0>"() {
   public resources: 
   public procs    : submodule.publictest.visible<0>
   constants       : 0:: CStringInfo {cstringChars = "private proc in a public module"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 31 8,PointerStructMember submodule.publictest#constant#0]}
-                    2:: CStringInfo {cstringChars = "public proc in a public module"}
-                    3:: StructInfo {structSize = 16, structData = [IntStructMember 30 8,PointerStructMember submodule.publictest#constant#2]}
+                    1:: CStringInfo {cstringChars = "public proc in a public module"}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 30 8,PointerStructMember c"public proc in a public module"]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 31 8,PointerStructMember c"private proc in a public module"]}
   imports         : use submodule
                     use wybe
   resources       : 
@@ -104,7 +104,7 @@ proc semi_visible > {inline} (0 calls)
 semi_visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("private proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @submodule:nn:nn
+    wybe.string.print<0>("private proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
 
 proc visible > public {inline} (0 calls)
@@ -112,7 +112,7 @@ proc visible > public {inline} (0 calls)
 visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("public proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @submodule:nn:nn
+    wybe.string.print<0>("public proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
   LLVM code       :
 
@@ -123,19 +123,19 @@ source_filename = "!ROOT!/final-dump/submodule.wybe"
 target triple    ????
 
 @"submodule.publictest#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"private proc in a public module\00", align 8
-@"submodule.publictest#constant#1" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"submodule.publictest#constant#0" }, align 8
-@"submodule.publictest#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"public proc in a public module\00", align 8
-@"submodule.publictest#constant#3" = private unnamed_addr constant {i64, ptr} { i64 30, ptr @"submodule.publictest#constant#2" }, align 8
+@"submodule.publictest#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"public proc in a public module\00", align 8
+@"submodule.publictest#constant#2" = private unnamed_addr constant {i64, ptr} { i64 30, ptr @"submodule.publictest#constant#1" }, align 8
+@"submodule.publictest#constant#3" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"submodule.publictest#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"submodule.publictest.semi_visible<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.publictest#constant#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.publictest#constant#3" to i64 ))
   ret void
 }
 
 define external fastcc void @"submodule.publictest.visible<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.publictest#constant#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.publictest#constant#2" to i64 ))
   ret void
 }

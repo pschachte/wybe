@@ -9,9 +9,9 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : exp_print.<0>
   constants       : 0:: CStringInfo {cstringChars = "print(x:string) creates a newline already"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 41 8,PointerStructMember exp_print#constant#0]}
-                    2:: CStringInfo {cstringChars = "println(x:string) generates an extra newline?"}
-                    3:: StructInfo {structSize = 16, structData = [IntStructMember 45 8,PointerStructMember exp_print#constant#2]}
+                    1:: CStringInfo {cstringChars = "println(x:string) generates an extra newline?"}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 41 8,PointerStructMember c"print(x:string) creates a newline already"]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 45 8,PointerStructMember c"println(x:string) generates an extra newline?"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -21,20 +21,20 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("print(x:string) creates a newline already":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @exp_print:nn:nn
-    wybe.string.print<0>("println(x:string) generates an extra newline?":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @exp_print:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @exp_print:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @exp_print:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @exp_print:nn:nn
-    wybe.string.print<0>("println(x:string) generates an extra newline?":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @exp_print:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @exp_print:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @exp_print:nn:nn
-    foreign c putchar(99:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @exp_print:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @exp_print:nn:nn
-    foreign c print_int(1:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @exp_print:nn:nn
+    wybe.string.print<0>("print(x:string) creates a newline already":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @exp_print:nn:nn
+    wybe.string.print<0>("println(x:string) generates an extra newline?":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @exp_print:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @exp_print:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @exp_print:nn:nn
-    foreign c print_int(1:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @exp_print:nn:nn
-    foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @exp_print:nn:nn
+    foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @exp_print:nn:nn
+    wybe.string.print<0>("println(x:string) generates an extra newline?":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @exp_print:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @exp_print:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @exp_print:nn:nn
+    foreign c putchar(99:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @exp_print:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @exp_print:nn:nn
+    foreign c print_int(1:wybe.int, ~tmp#24##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @exp_print:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @exp_print:nn:nn
+    foreign c print_int(1:wybe.int, ~tmp#28##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @exp_print:nn:nn
+    foreign lpvm store(~%tmp#31##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @exp_print:nn:nn
 
   LLVM code       :
 
@@ -45,9 +45,9 @@ source_filename = "!ROOT!/final-dump/exp_print.wybe"
 target triple    ????
 
 @"exp_print#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"print(x:string) creates a newline already\00", align 8
-@"exp_print#constant#1" = private unnamed_addr constant {i64, ptr} { i64 41, ptr @"exp_print#constant#0" }, align 8
-@"exp_print#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"println(x:string) generates an extra newline?\00", align 8
-@"exp_print#constant#3" = private unnamed_addr constant {i64, ptr} { i64 45, ptr @"exp_print#constant#2" }, align 8
+@"exp_print#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"println(x:string) generates an extra newline?\00", align 8
+@"exp_print#constant#2" = private unnamed_addr constant {i64, ptr} { i64 41, ptr @"exp_print#constant#0" }, align 8
+@"exp_print#constant#3" = private unnamed_addr constant {i64, ptr} { i64 45, ptr @"exp_print#constant#1" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
@@ -55,7 +55,7 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"exp_print.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"exp_print#constant#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"exp_print#constant#2" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"exp_print#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"exp_print#constant#3" to i64 ))

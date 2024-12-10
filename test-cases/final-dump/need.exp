@@ -20,7 +20,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    need#constant#0:{impure}() #0 @need:nn:nn
+    need.#anon#1<1><>:{impure}() #0 @need:nn:nn
 
 
 proc #anon#1 > {inline,impure} (1 calls)

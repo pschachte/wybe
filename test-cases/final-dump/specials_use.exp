@@ -187,17 +187,17 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"specials_use.<0>"() {
-  call ccc void @print_string(i64 ptrtoint( ptr @"specials_use#constant#0" to i64 ))
+  call ccc void @print_string(ptr @"specials_use#constant#0")
   call ccc void @putchar(i8 10)
-  call ccc void @print_string(i64 ptrtoint( ptr @"specials_use#constant#1" to i64 ))
+  call ccc void @print_string(ptr @"specials_use#constant#1")
   call ccc void @putchar(i8 10)
   call ccc void @print_int(i64 5)
   call ccc void @putchar(i8 10)
   call ccc void @print_int(i64 2)
   call ccc void @putchar(i8 10)
-  call ccc void @print_string(i64 ptrtoint( ptr @"specials_use#constant#2" to i64 ))
+  call ccc void @print_string(ptr @"specials_use#constant#2")
   call ccc void @putchar(i8 10)
-  call ccc void @print_string(i64 ptrtoint( ptr @"specials_use#constant#3" to i64 ))
+  call ccc void @print_string(ptr @"specials_use#constant#3")
   call ccc void @putchar(i8 10)
   ret void
 }

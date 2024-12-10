@@ -335,22 +335,15 @@ argConstValue (ArgInt n ty) = do
 argConstValue (ArgFloat n ty) = do
     sz <- typeRepSize <$> lift (typeRepresentation ty)
     return $ Just $ FloatStructMember n (sz `div` 8)
-argConstValue (ArgString s CString _) = do
-    structID <- lift $ recordConstStruct $ CStringInfo s
-    return $ Just $ PointerStructMember structID
-argConstValue (ArgString s WybeString _) = do
-    cstringID <- lift $ recordConstStruct $ CStringInfo s
-    wstringID <- lift $ recordConstStruct $ StructInfo (wordSizeBytes * 2)
-        [IntStructMember (toInteger $ length s) wordSizeBytes,
-         PointerStructMember cstringID]
-    return $ Just $ PointerStructMember wstringID
 argConstValue (ArgClosure pspec args _) = do
     args' <- neededFreeArgs pspec args
     mapM argConstValue args' >>= (\case
         Just argReps@(_:_) -> do
             let fnPtr = FnPointerStructMember pspec
-            structID <- lift $ recordConstStruct
-                $ StructInfo (wordSizeBytes*(length argReps+1)) argReps
+            structID <- lift
+                $ recordConstStruct
+                    (StructInfo (wordSizeBytes*(length argReps+1)) argReps)
+                    Nothing
             return $ Just $ PointerStructMember structID
         _ -> return Nothing) . sequence
 argConstValue (ArgGlobal info _) = do
@@ -1480,8 +1473,6 @@ marshallArgument arg cType = do
 -- globals, closures, and structure constants are C pointers.  Other kinds of
 -- args are represented however their types say they are.
 argTypeRep :: PrimArg -> LLVM TypeRepresentation
-argTypeRep (ArgString _ WybeString _) = return Pointer
-argTypeRep (ArgString _ CString _)    = return Pointer
 argTypeRep ArgGlobal{}                = return CPointer
 argTypeRep ArgClosure{}               = return CPointer
 argTypeRep ArgConstRef{}              = return CPointer
@@ -1516,10 +1507,6 @@ llvmValue argVar@ArgVar{argVarName=var, argVarType=ty} = do
             typeConverted thisRep argVar{argVarType=Representation defRep}
 llvmValue (ArgInt val _) = return $ show val
 llvmValue (ArgFloat val _) = return $ show val
-llvmValue arg@(ArgString str stringVariant _) = do
-    const <- trustFromJust "argStructMember of string"
-                    <$> argConstValue arg
-    convertedConstant const Pointer
 llvmValue arg@(ArgClosure pspec args ty) = do
     logLLVM $ "llvmValue of " ++ show arg
     -- See if we've already allocated a constant for this closure

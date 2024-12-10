@@ -21,7 +21,7 @@ AFTER EVERYTHING:
                     mytree.tree.right<1>
                     mytree.tree.~=<0>
   constants       : 0:: CStringInfo {cstringChars = ", "}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember mytree#constant#0]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c", "]}
   imports         : public use mytree.tree
                     use wybe
   resources       : 
@@ -33,8 +33,8 @@ proc printTree > public {inline} (0 calls)
 printTree(t##0:mytree.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    mytree.printTree1<0>(~t##0:mytree.tree, 1519:wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @mytree:nn:nn
-    wybe.string.print<0>(1527:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @mytree:nn:nn
+    mytree.printTree1<0>(~t##0:mytree.tree, 1519:wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @mytree:nn:nn
+    wybe.string.print<0>(1527:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @mytree:nn:nn
 
 
 proc printTree1 > public (3 calls)
@@ -43,8 +43,8 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
   AliasPairs: [(prefix##0,prefix##3)]
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(1,(mytree.printTree1<0>,fromList [NonAliasedParamCond 1 [1]])),(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [1]]))]
-    foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @mytree:nn:nn
-    case ~tmp#2##0:wybe.bool of
+    foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @mytree:nn:nn
+    case ~tmp#3##0:wybe.bool of
     0:
         foreign llvm move(~prefix##0:wybe.string, ?prefix##3:wybe.string)
 
@@ -54,10 +54,10 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
         foreign lpvm access(~t##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?r##0:mytree.tree) @mytree:nn:nn
         mytree.printTree1<0>(~l##0:mytree.tree, ~prefix##0:wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @mytree:nn:nn
         wybe.string.print<0>(~prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @mytree:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @mytree:nn:nn
-        foreign c print_int(~k##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @mytree:nn:nn
-        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mytree:nn:nn
-        mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?prefix##3:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @mytree:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @mytree:nn:nn
+        foreign c print_int(~k##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @mytree:nn:nn
+        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mytree:nn:nn
+        mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?prefix##3:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @mytree:nn:nn
 
 
   LLVM code       :
@@ -82,22 +82,22 @@ define external fastcc void @"mytree.printTree<0>"(i64 %"t##0") {
 }
 
 define external fastcc i64 @"mytree.printTree1<0>"(i64 %"t##0", i64 %"prefix##0") {
-  %"tmp#2##0" = icmp ne i64 %"t##0", 0
-  br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
+  %"tmp#3##0" = icmp ne i64 %"t##0", 0
+  br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#6##0" = inttoptr i64 %"t##0" to ptr
-  %"l##0" = load i64, ptr %"tmp#6##0"
-  %"tmp#7##0" = add i64 %"t##0", 8
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  %"k##0" = load i64, ptr %"tmp#8##0"
-  %"tmp#9##0" = add i64 %"t##0", 16
-  %"tmp#10##0" = inttoptr i64 %"tmp#9##0" to ptr
-  %"r##0" = load i64, ptr %"tmp#10##0"
+  %"tmp#11##0" = inttoptr i64 %"t##0" to ptr
+  %"l##0" = load i64, ptr %"tmp#11##0"
+  %"tmp#12##0" = add i64 %"t##0", 8
+  %"tmp#13##0" = inttoptr i64 %"tmp#12##0" to ptr
+  %"k##0" = load i64, ptr %"tmp#13##0"
+  %"tmp#14##0" = add i64 %"t##0", 16
+  %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
+  %"r##0" = load i64, ptr %"tmp#15##0"
   %"prefix##1" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"l##0", i64 %"prefix##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"prefix##1")
   call ccc void @print_int(i64 %"k##0")
-  %"tmp#11##0" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"r##0", i64 ptrtoint( ptr @"mytree#constant#1" to i64 ))
-  ret i64 %"tmp#11##0"
+  %"tmp#16##0" = tail call fastcc i64 @"mytree.printTree1<0>"(i64 %"r##0", i64 ptrtoint( ptr @"mytree#constant#1" to i64 ))
+  ret i64 %"tmp#16##0"
 if.else.0:
   ret i64 %"prefix##0"
 }

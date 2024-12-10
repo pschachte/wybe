@@ -9,14 +9,14 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : multi_specz_cyclic_exe.<0>
                     multi_specz_cyclic_exe.main<0>
-  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 1 8]}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 2 8]}
-                    2:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 3 8]}
-                    3:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 4 8]}
-                    4:: CStringInfo {cstringChars = "============="}
-                    5:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember multi_specz_cyclic_exe#constant#4]}
-                    6:: CStringInfo {cstringChars = "-------------"}
-                    7:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember multi_specz_cyclic_exe#constant#6]}
+  constants       : 0:: CStringInfo {cstringChars = "============="}
+                    1:: CStringInfo {cstringChars = "-------------"}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 1 8]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 2 8]}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 3 8]}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 4 8]}
+                    6:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember c"============="]}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember c"-------------"]}
   imports         : use multi_specz_cyclic_lib
                     use wybe
   resources       : 
@@ -35,21 +35,21 @@ proc main > public (1 calls)
 main()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("=============":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @multi_specz_cyclic_exe:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
-    foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
-    multi_specz_cyclic_lib.foo1<0>(multi_specz_cyclic_exe#constant#0:multi_specz_cyclic_lib.position, multi_specz_cyclic_exe#constant#1:multi_specz_cyclic_lib.position, multi_specz_cyclic_exe#constant#2:multi_specz_cyclic_lib.position, multi_specz_cyclic_exe#constant#3:multi_specz_cyclic_lib.position, 3:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @multi_specz_cyclic_exe:nn:nn
-    wybe.string.print<0>("-------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @multi_specz_cyclic_exe:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
-    foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
-    multi_specz_cyclic_lib.printPosition<0>(multi_specz_cyclic_exe#constant#2:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @multi_specz_cyclic_exe:nn:nn
-    multi_specz_cyclic_lib.printPosition<0>(multi_specz_cyclic_exe#constant#3:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @multi_specz_cyclic_exe:nn:nn
-    wybe.string.print<0>("=============":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @multi_specz_cyclic_exe:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
-    foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
+    wybe.string.print<0>("=============":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @multi_specz_cyclic_exe:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
+    foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
+    multi_specz_cyclic_lib.foo1<0>(multi_specz_cyclic_exe#constant#2:multi_specz_cyclic_lib.position, multi_specz_cyclic_exe#constant#3:multi_specz_cyclic_lib.position, multi_specz_cyclic_exe#constant#4:multi_specz_cyclic_lib.position, multi_specz_cyclic_exe#constant#5:multi_specz_cyclic_lib.position, 3:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @multi_specz_cyclic_exe:nn:nn
+    wybe.string.print<0>("-------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @multi_specz_cyclic_exe:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#35##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#35##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
+    foreign lpvm store(~%tmp#36##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
+    multi_specz_cyclic_lib.printPosition<0>(multi_specz_cyclic_exe#constant#4:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @multi_specz_cyclic_exe:nn:nn
+    multi_specz_cyclic_lib.printPosition<0>(multi_specz_cyclic_exe#constant#5:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @multi_specz_cyclic_exe:nn:nn
+    wybe.string.print<0>("=============":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @multi_specz_cyclic_exe:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#42##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
+    foreign lpvm store(~%tmp#43##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_exe:nn:nn
 
   LLVM code       :
 
@@ -59,14 +59,14 @@ main()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/multi_specz_cyclic_exe.wybe"
 target triple    ????
 
-@"multi_specz_cyclic_exe#constant#0" = private unnamed_addr constant {i64, i64} { i64 0, i64 1 }, align 8
-@"multi_specz_cyclic_exe#constant#1" = private unnamed_addr constant {i64, i64} { i64 0, i64 2 }, align 8
-@"multi_specz_cyclic_exe#constant#2" = private unnamed_addr constant {i64, i64} { i64 0, i64 3 }, align 8
-@"multi_specz_cyclic_exe#constant#3" = private unnamed_addr constant {i64, i64} { i64 0, i64 4 }, align 8
-@"multi_specz_cyclic_exe#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"=============\00", align 8
-@"multi_specz_cyclic_exe#constant#5" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"multi_specz_cyclic_exe#constant#4" }, align 8
-@"multi_specz_cyclic_exe#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"-------------\00", align 8
-@"multi_specz_cyclic_exe#constant#7" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"multi_specz_cyclic_exe#constant#6" }, align 8
+@"multi_specz_cyclic_exe#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"=============\00", align 8
+@"multi_specz_cyclic_exe#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"-------------\00", align 8
+@"multi_specz_cyclic_exe#constant#2" = private unnamed_addr constant {i64, i64} { i64 0, i64 1 }, align 8
+@"multi_specz_cyclic_exe#constant#3" = private unnamed_addr constant {i64, i64} { i64 0, i64 2 }, align 8
+@"multi_specz_cyclic_exe#constant#4" = private unnamed_addr constant {i64, i64} { i64 0, i64 3 }, align 8
+@"multi_specz_cyclic_exe#constant#5" = private unnamed_addr constant {i64, i64} { i64 0, i64 4 }, align 8
+@"multi_specz_cyclic_exe#constant#6" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"multi_specz_cyclic_exe#constant#0" }, align 8
+@"multi_specz_cyclic_exe#constant#7" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"multi_specz_cyclic_exe#constant#1" }, align 8
 
 declare external fastcc void @"multi_specz_cyclic_lib.foo1<0>"(i64, i64, i64, i64, i64)
 declare external fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64)
@@ -80,14 +80,14 @@ define external fastcc void @"multi_specz_cyclic_exe.<0>"() {
 }
 
 define external fastcc void @"multi_specz_cyclic_exe.main<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#6" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"multi_specz_cyclic_lib.foo1<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#0" to i64 ), i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#1" to i64 ), i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#2" to i64 ), i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#3" to i64 ), i64 3)
+  tail call fastcc void @"multi_specz_cyclic_lib.foo1<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#2" to i64 ), i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#3" to i64 ), i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#4" to i64 ), i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#5" to i64 ), i64 3)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#7" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#2" to i64 ))
-  tail call fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#3" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#5" to i64 ))
+  tail call fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#4" to i64 ))
+  tail call fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_exe#constant#6" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -109,7 +109,7 @@ define external fastcc void @"multi_specz_cyclic_exe.main<0>"() {
                     multi_specz_cyclic_lib.position.y<1>
                     multi_specz_cyclic_lib.position.~=<0>
   constants       : 0:: CStringInfo {cstringChars = " ("}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember multi_specz_cyclic_lib#constant#0]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c" ("]}
   imports         : public use multi_specz_cyclic_lib.position
                     use multi_specz_cyclic_lib2
                     use wybe
@@ -151,21 +151,21 @@ proc printPosition > public (1 calls)
 printPosition(pos##0:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(9,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.string.print<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm access(pos##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
-    wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm access(~pos##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
-    wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+  MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(10,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.string.print<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm access(pos##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm access(~pos##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
 
   LLVM code       :
 
@@ -214,14 +214,14 @@ define external fastcc void @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64 %"po
 
 define external fastcc void @"multi_specz_cyclic_lib.printPosition<0>"(i64 %"pos##0") {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multi_specz_cyclic_lib#constant#1" to i64 ))
-  %"tmp#23##0" = inttoptr i64 %"pos##0" to ptr
-  %"tmp#0##0" = load i64, ptr %"tmp#23##0"
-  call ccc void @print_int(i64 %"tmp#0##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1203)
-  %"tmp#24##0" = add i64 %"pos##0", 8
-  %"tmp#25##0" = inttoptr i64 %"tmp#24##0" to ptr
-  %"tmp#1##0" = load i64, ptr %"tmp#25##0"
+  %"tmp#28##0" = inttoptr i64 %"pos##0" to ptr
+  %"tmp#1##0" = load i64, ptr %"tmp#28##0"
   call ccc void @print_int(i64 %"tmp#1##0")
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1203)
+  %"tmp#29##0" = add i64 %"pos##0", 8
+  %"tmp#30##0" = inttoptr i64 %"tmp#29##0" to ptr
+  %"tmp#3##0" = load i64, ptr %"tmp#30##0"
+  call ccc void @print_int(i64 %"tmp#3##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void

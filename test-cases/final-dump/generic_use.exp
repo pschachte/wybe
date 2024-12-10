@@ -337,7 +337,7 @@ define external fastcc i64 @"generic_list.nil<0>"() {
                     generic_use.reverse<0>
                     generic_use.reverse1<0>
   constants       : 0:: CStringInfo {cstringChars = ", "}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember generic_use#constant#0]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c", "]}
   imports         : use generic_list
                     use wybe
   resources       : 
@@ -507,18 +507,18 @@ proc print_tail > (2 calls)
 print_tail(lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @generic_use:nn:nn
-    case ~tmp#2##0:wybe.bool of
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @generic_use:nn:nn
+    case ~tmp#3##0:wybe.bool of
     0:
 
     1:
         foreign lpvm access(lst##0:generic_list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @generic_use:nn:nn
         foreign lpvm access(~lst##0:generic_list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(wybe.int)) @generic_use:nn:nn
-        wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @generic_use:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @generic_use:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @generic_use:nn:nn
-        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @generic_use:nn:nn
-        generic_use.print_tail<0>(~t##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @generic_use:nn:nn
+        wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @generic_use:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @generic_use:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @generic_use:nn:nn
+        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @generic_use:nn:nn
+        generic_use.print_tail<0>(~t##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @generic_use:nn:nn
 
 
 
@@ -742,14 +742,14 @@ if.else.0:
 }
 
 define external fastcc void @"generic_use.print_tail<0>"(i64 %"lst##0") {
-  %"tmp#2##0" = icmp ne i64 %"lst##0", 0
-  br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
+  %"tmp#3##0" = icmp ne i64 %"lst##0", 0
+  br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#6##0" = inttoptr i64 %"lst##0" to ptr
-  %"h##0" = load i64, ptr %"tmp#6##0"
-  %"tmp#7##0" = add i64 %"lst##0", 8
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  %"t##0" = load i64, ptr %"tmp#8##0"
+  %"tmp#11##0" = inttoptr i64 %"lst##0" to ptr
+  %"h##0" = load i64, ptr %"tmp#11##0"
+  %"tmp#12##0" = add i64 %"lst##0", 8
+  %"tmp#13##0" = inttoptr i64 %"tmp#12##0" to ptr
+  %"t##0" = load i64, ptr %"tmp#13##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"generic_use#constant#1" to i64 ))
   call ccc void @print_int(i64 %"h##0")
   tail call fastcc void @"generic_use.print_tail<0>"(i64 %"t##0")

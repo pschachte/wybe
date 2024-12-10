@@ -8,14 +8,14 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : nested_if.nested_if<0>
-  constants       : 0:: CStringInfo {cstringChars = "other"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember nested_if#constant#0]}
+  constants       : 0:: CStringInfo {cstringChars = "zero"}
+                    1:: CStringInfo {cstringChars = "one thousand and one"}
                     2:: CStringInfo {cstringChars = "two"}
-                    3:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember nested_if#constant#2]}
-                    4:: CStringInfo {cstringChars = "one thousand and one"}
-                    5:: StructInfo {structSize = 16, structData = [IntStructMember 20 8,PointerStructMember nested_if#constant#4]}
-                    6:: CStringInfo {cstringChars = "zero"}
-                    7:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember nested_if#constant#6]}
+                    3:: CStringInfo {cstringChars = "other"}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"other"]}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"two"]}
+                    6:: StructInfo {structSize = 16, structData = [IntStructMember 20 8,PointerStructMember c"one thousand and one"]}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"zero"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -25,39 +25,39 @@ proc nested_if > public (0 calls)
 nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_eq(i##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @nested_if:nn:nn
-    case ~tmp#3##0:wybe.bool of
+    foreign llvm icmp_eq(i##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @nested_if:nn:nn
+    case ~tmp#7##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(i##0:wybe.int, 1001:wybe.int, ?tmp#2##0:wybe.bool) @nested_if:nn:nn
-        case ~tmp#2##0:wybe.bool of
+        foreign llvm icmp_eq(i##0:wybe.int, 1001:wybe.int, ?tmp#6##0:wybe.bool) @nested_if:nn:nn
+        case ~tmp#6##0:wybe.bool of
         0:
-            foreign llvm icmp_eq(~i##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool) @nested_if:nn:nn
-            case ~tmp#1##0:wybe.bool of
+            foreign llvm icmp_eq(~i##0:wybe.int, 2:wybe.int, ?tmp#5##0:wybe.bool) @nested_if:nn:nn
+            case ~tmp#5##0:wybe.bool of
             0:
-                wybe.string.print<0>("other":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @nested_if:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @nested_if:nn:nn
-                foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @nested_if:nn:nn
-                foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_if:nn:nn
+                wybe.string.print<0>("other":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @nested_if:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @nested_if:nn:nn
+                foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @nested_if:nn:nn
+                foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_if:nn:nn
 
             1:
-                wybe.string.print<0>("two":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @nested_if:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @nested_if:nn:nn
-                foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @nested_if:nn:nn
-                foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_if:nn:nn
+                wybe.string.print<0>("two":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @nested_if:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @nested_if:nn:nn
+                foreign c putchar(10:wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @nested_if:nn:nn
+                foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_if:nn:nn
 
 
         1:
-            wybe.string.print<0>("one thousand and one":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @nested_if:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @nested_if:nn:nn
-            foreign c putchar(10:wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @nested_if:nn:nn
-            foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_if:nn:nn
+            wybe.string.print<0>("one thousand and one":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @nested_if:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @nested_if:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @nested_if:nn:nn
+            foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_if:nn:nn
 
 
     1:
-        wybe.string.print<0>("zero":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @nested_if:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @nested_if:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @nested_if:nn:nn
-        foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_if:nn:nn
+        wybe.string.print<0>("zero":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @nested_if:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#40##0:wybe.phantom) @nested_if:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#41##0:wybe.phantom) @nested_if:nn:nn
+        foreign lpvm store(~%tmp#41##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_if:nn:nn
 
 
   LLVM code       :
@@ -68,42 +68,42 @@ nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/nested_if.wybe"
 target triple    ????
 
-@"nested_if#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"other\00", align 8
-@"nested_if#constant#1" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"nested_if#constant#0" }, align 8
+@"nested_if#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"zero\00", align 8
+@"nested_if#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"one thousand and one\00", align 8
 @"nested_if#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"two\00", align 8
-@"nested_if#constant#3" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"nested_if#constant#2" }, align 8
-@"nested_if#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"one thousand and one\00", align 8
-@"nested_if#constant#5" = private unnamed_addr constant {i64, ptr} { i64 20, ptr @"nested_if#constant#4" }, align 8
-@"nested_if#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"zero\00", align 8
-@"nested_if#constant#7" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"nested_if#constant#6" }, align 8
+@"nested_if#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"other\00", align 8
+@"nested_if#constant#4" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"nested_if#constant#3" }, align 8
+@"nested_if#constant#5" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"nested_if#constant#2" }, align 8
+@"nested_if#constant#6" = private unnamed_addr constant {i64, ptr} { i64 20, ptr @"nested_if#constant#1" }, align 8
+@"nested_if#constant#7" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"nested_if#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"nested_if.nested_if<0>"(i64 %"i##0") {
-  %"tmp#3##0" = icmp eq i64 %"i##0", 0
-  br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
+  %"tmp#7##0" = icmp eq i64 %"i##0", 0
+  br i1 %"tmp#7##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_if#constant#7" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
-  %"tmp#2##0" = icmp eq i64 %"i##0", 1001
-  br i1 %"tmp#2##0", label %if.then.1, label %if.else.1
+  %"tmp#6##0" = icmp eq i64 %"i##0", 1001
+  br i1 %"tmp#6##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_if#constant#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_if#constant#6" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.1:
-  %"tmp#1##0" = icmp eq i64 %"i##0", 2
-  br i1 %"tmp#1##0", label %if.then.2, label %if.else.2
+  %"tmp#5##0" = icmp eq i64 %"i##0", 2
+  br i1 %"tmp#5##0", label %if.then.2, label %if.else.2
 if.then.2:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_if#constant#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_if#constant#5" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.2:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_if#constant#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"nested_if#constant#4" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

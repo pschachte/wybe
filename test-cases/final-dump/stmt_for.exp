@@ -35,44 +35,44 @@ AFTER EVERYTHING:
                     stmt_for.int_sequence.stride<0>
                     stmt_for.int_sequence.stride<1>
                     stmt_for.int_sequence.~=<0>
-  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,IntStructMember 0 8]}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember stmt_for#constant#0]}
-                    2:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember stmt_for#constant#1]}
-                    3:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember stmt_for#constant#2]}
-                    4:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
-                    5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember stmt_for#constant#4]}
-                    6:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember stmt_for#constant#5]}
-                    7:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,IntStructMember 0 8]}
-                    8:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember stmt_for#constant#7]}
-                    9:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,IntStructMember 0 8]}
-                    10:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember stmt_for#constant#9]}
-                    11:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember stmt_for#constant#10]}
-                    12:: CStringInfo {cstringChars = "single_generator:"}
-                    13:: StructInfo {structSize = 16, structData = [IntStructMember 17 8,PointerStructMember stmt_for#constant#12]}
-                    14:: CStringInfo {cstringChars = "\nmultiple_generator"}
-                    15:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember stmt_for#constant#14]}
-                    16:: CStringInfo {cstringChars = "\nshortest_generator_termination"}
-                    17:: StructInfo {structSize = 16, structData = [IntStructMember 31 8,PointerStructMember stmt_for#constant#16]}
-                    18:: CStringInfo {cstringChars = "\nusing_break"}
-                    19:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember stmt_for#constant#18]}
-                    20:: CStringInfo {cstringChars = "\nusing_next"}
-                    21:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember stmt_for#constant#20]}
-                    22:: CStringInfo {cstringChars = "\nusing_while"}
-                    23:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember stmt_for#constant#22]}
-                    24:: CStringInfo {cstringChars = "\nusing_until"}
-                    25:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember stmt_for#constant#24]}
-                    26:: CStringInfo {cstringChars = "\nusing_when"}
-                    27:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember stmt_for#constant#26]}
-                    28:: CStringInfo {cstringChars = "\nusing_unless"}
-                    29:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember stmt_for#constant#28]}
-                    30:: CStringInfo {cstringChars = "\nusing_xrange"}
-                    31:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember stmt_for#constant#30]}
-                    32:: CStringInfo {cstringChars = "\nusing_xrange_reverse"}
-                    33:: StructInfo {structSize = 16, structData = [IntStructMember 21 8,PointerStructMember stmt_for#constant#32]}
-                    34:: CStringInfo {cstringChars = "\nusing_irange"}
-                    35:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember stmt_for#constant#34]}
-                    36:: CStringInfo {cstringChars = "\nusing_irange_reverse"}
-                    37:: StructInfo {structSize = 16, structData = [IntStructMember 21 8,PointerStructMember stmt_for#constant#36]}
+  constants       : 0:: CStringInfo {cstringChars = "single_generator:"}
+                    1:: CStringInfo {cstringChars = "\nmultiple_generator"}
+                    2:: CStringInfo {cstringChars = "\nshortest_generator_termination"}
+                    3:: CStringInfo {cstringChars = "\nusing_break"}
+                    4:: CStringInfo {cstringChars = "\nusing_next"}
+                    5:: CStringInfo {cstringChars = "\nusing_while"}
+                    6:: CStringInfo {cstringChars = "\nusing_until"}
+                    7:: CStringInfo {cstringChars = "\nusing_when"}
+                    8:: CStringInfo {cstringChars = "\nusing_unless"}
+                    9:: CStringInfo {cstringChars = "\nusing_xrange"}
+                    10:: CStringInfo {cstringChars = "\nusing_xrange_reverse"}
+                    11:: CStringInfo {cstringChars = "\nusing_irange"}
+                    12:: CStringInfo {cstringChars = "\nusing_irange_reverse"}
+                    13:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,IntStructMember 0 8]}
+                    14:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember stmt_for#constant#13]}
+                    15:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember stmt_for#constant#14]}
+                    16:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember stmt_for#constant#15]}
+                    17:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
+                    18:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember stmt_for#constant#17]}
+                    19:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember stmt_for#constant#18]}
+                    20:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,IntStructMember 0 8]}
+                    21:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember stmt_for#constant#20]}
+                    22:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,IntStructMember 0 8]}
+                    23:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember stmt_for#constant#22]}
+                    24:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember stmt_for#constant#23]}
+                    25:: StructInfo {structSize = 16, structData = [IntStructMember 17 8,PointerStructMember c"single_generator:"]}
+                    26:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember c"\nmultiple_generator"]}
+                    27:: StructInfo {structSize = 16, structData = [IntStructMember 31 8,PointerStructMember c"\nshortest_generator_termination"]}
+                    28:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"\nusing_break"]}
+                    29:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"\nusing_next"]}
+                    30:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"\nusing_while"]}
+                    31:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"\nusing_until"]}
+                    32:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"\nusing_when"]}
+                    33:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember c"\nusing_unless"]}
+                    34:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember c"\nusing_xrange"]}
+                    35:: StructInfo {structSize = 16, structData = [IntStructMember 21 8,PointerStructMember c"\nusing_xrange_reverse"]}
+                    36:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember c"\nusing_irange"]}
+                    37:: StructInfo {structSize = 16, structData = [IntStructMember 21 8,PointerStructMember c"\nusing_irange_reverse"]}
   imports         : public use stmt_for.int_sequence
                     use wybe
   resources       : 
@@ -84,75 +84,75 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("single_generator:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.single_generator#cont#1<0>(stmt_for#constant#6:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @stmt_for:nn:nn
-    wybe.string.print<0>("\nmultiple_generator":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.multiple_generator#cont#1<0>(stmt_for#constant#6:wybe.list(wybe.int), stmt_for#constant#11:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #29 @stmt_for:nn:nn
-    wybe.string.print<0>("\nshortest_generator_termination":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.shortest_generator_termination#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int), stmt_for#constant#8:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_break":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.using_break#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_next":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #34 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.using_next#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #35 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_while":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #36 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.using_while#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #37 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_until":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #38 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.using_until#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #39 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_when":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.using_when#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #41 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_unless":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #42 @stmt_for:nn:nn
+    wybe.string.print<0>("single_generator:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #39 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.single_generator#cont#1<0>(stmt_for#constant#19:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @stmt_for:nn:nn
+    wybe.string.print<0>("\nmultiple_generator":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #41 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @stmt_for:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#26##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.using_unless#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #43 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_xrange":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #44 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#30##0:stmt_for.int_sequence) #45 @stmt_for:nn:nn
-    stmt_for.using_xrange#cont#1<0>(~tmp#30##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #46 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_xrange_reverse":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #47 @stmt_for:nn:nn
+    stmt_for.multiple_generator#cont#1<0>(stmt_for#constant#19:wybe.list(wybe.int), stmt_for#constant#24:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #42 @stmt_for:nn:nn
+    wybe.string.print<0>("\nshortest_generator_termination":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #43 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @stmt_for:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @stmt_for:nn:nn
     foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#34##0:stmt_for.int_sequence) #48 @stmt_for:nn:nn
-    stmt_for.using_xrange_reverse#cont#1<0>(~tmp#34##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #49 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_irange":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#36##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#37##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#38##0:stmt_for.int_sequence) #51 @stmt_for:nn:nn
-    stmt_for.using_irange#cont#1<0>(~tmp#38##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #52 @stmt_for:nn:nn
-    wybe.string.print<0>("\nusing_irange_reverse":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #53 @stmt_for:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#40##0:wybe.phantom) @stmt_for:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#41##0:wybe.phantom) @stmt_for:nn:nn
-    foreign lpvm store(~%tmp#41##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
-    stmt_for.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#42##0:stmt_for.int_sequence) #54 @stmt_for:nn:nn
-    stmt_for.using_irange_reverse#cont#1<0>(~tmp#42##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #55 @stmt_for:nn:nn
+    stmt_for.shortest_generator_termination#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int), stmt_for#constant#21:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #44 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_break":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #45 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#39##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#39##0:wybe.phantom, ?tmp#40##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#40##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.using_break#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #46 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_next":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #47 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#46##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#47##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.using_next#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #48 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_while":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #49 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.using_while#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_until":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #51 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#60##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#60##0:wybe.phantom, ?tmp#61##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#61##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.using_until#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #52 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_when":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #53 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#67##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#67##0:wybe.phantom, ?tmp#68##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#68##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.using_when#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #54 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_unless":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #55 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#74##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#74##0:wybe.phantom, ?tmp#75##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#75##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.using_unless#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #56 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_xrange":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #57 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#81##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#81##0:wybe.phantom, ?tmp#82##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#82##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#83##0:stmt_for.int_sequence) #58 @stmt_for:nn:nn
+    stmt_for.using_xrange#cont#1<0>(~tmp#83##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #59 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_xrange_reverse":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #60 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#89##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#89##0:wybe.phantom, ?tmp#90##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#90##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#91##0:stmt_for.int_sequence) #61 @stmt_for:nn:nn
+    stmt_for.using_xrange_reverse#cont#1<0>(~tmp#91##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #62 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_irange":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #63 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#97##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#97##0:wybe.phantom, ?tmp#98##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#98##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#99##0:stmt_for.int_sequence) #64 @stmt_for:nn:nn
+    stmt_for.using_irange#cont#1<0>(~tmp#99##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #65 @stmt_for:nn:nn
+    wybe.string.print<0>("\nusing_irange_reverse":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #66 @stmt_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#105##0:wybe.phantom) @stmt_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#105##0:wybe.phantom, ?tmp#106##0:wybe.phantom) @stmt_for:nn:nn
+    foreign lpvm store(~%tmp#106##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_for:nn:nn
+    stmt_for.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#107##0:stmt_for.int_sequence) #67 @stmt_for:nn:nn
+    stmt_for.using_irange_reverse#cont#1<0>(~tmp#107##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #68 @stmt_for:nn:nn
 
 
 proc irange > public (2 calls)
@@ -183,7 +183,7 @@ proc multiple_generator > public {inline} (1 calls)
 multiple_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_for.multiple_generator#cont#1<0>(stmt_for#constant#6:wybe.list(wybe.int), stmt_for#constant#11:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
+    stmt_for.multiple_generator#cont#1<0>(stmt_for#constant#19:wybe.list(wybe.int), stmt_for#constant#24:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
 
 
 proc multiple_generator#cont#1 > (2 calls)
@@ -252,7 +252,7 @@ proc shortest_generator_termination > public {inline} (1 calls)
 shortest_generator_termination()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_for.shortest_generator_termination#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int), stmt_for#constant#8:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
+    stmt_for.shortest_generator_termination#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int), stmt_for#constant#21:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
 
 
 proc shortest_generator_termination#cont#1 > (2 calls)
@@ -290,7 +290,7 @@ proc single_generator > public {inline} (1 calls)
 single_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_for.single_generator#cont#1<0>(stmt_for#constant#6:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_for:nn:nn
+    stmt_for.single_generator#cont#1<0>(stmt_for#constant#19:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_for:nn:nn
 
 
 proc single_generator#cont#1 > (2 calls)
@@ -318,7 +318,7 @@ proc using_break > public {inline} (1 calls)
 using_break()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_for.using_break#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
+    stmt_for.using_break#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
 proc using_break#cont#1 > (2 calls)
@@ -406,7 +406,7 @@ proc using_next > public {inline} (1 calls)
 using_next()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_for.using_next#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
+    stmt_for.using_next#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
 proc using_next#cont#1 > (3 calls)
@@ -441,7 +441,7 @@ proc using_unless > public {inline} (1 calls)
 using_unless()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_for.using_unless#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
+    stmt_for.using_unless#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
 proc using_unless#cont#1 > (3 calls)
@@ -476,7 +476,7 @@ proc using_until > public {inline} (1 calls)
 using_until()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_for.using_until#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
+    stmt_for.using_until#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
 proc using_until#cont#1 > (2 calls)
@@ -510,7 +510,7 @@ proc using_when > public {inline} (1 calls)
 using_when()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_for.using_when#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
+    stmt_for.using_when#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
 proc using_when#cont#1 > (3 calls)
@@ -545,7 +545,7 @@ proc using_while > public {inline} (1 calls)
 using_while()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_for.using_while#cont#1<0>(stmt_for#constant#3:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
+    stmt_for.using_while#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
 proc using_while#cont#1 > (2 calls)
@@ -646,44 +646,44 @@ xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_
 source_filename = "!ROOT!/final-dump/stmt_for.wybe"
 target triple    ????
 
-@"stmt_for#constant#0" = private unnamed_addr constant {i64, i64} { i64 4, i64 0 }, align 8
-@"stmt_for#constant#1" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"stmt_for#constant#0" }, align 8
-@"stmt_for#constant#2" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"stmt_for#constant#1" }, align 8
-@"stmt_for#constant#3" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"stmt_for#constant#2" }, align 8
-@"stmt_for#constant#4" = private unnamed_addr constant {i64, i64} { i64 3, i64 0 }, align 8
-@"stmt_for#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"stmt_for#constant#4" }, align 8
-@"stmt_for#constant#6" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"stmt_for#constant#5" }, align 8
-@"stmt_for#constant#7" = private unnamed_addr constant {i64, i64} { i64 5, i64 0 }, align 8
-@"stmt_for#constant#8" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"stmt_for#constant#7" }, align 8
-@"stmt_for#constant#9" = private unnamed_addr constant {i64, i64} { i64 6, i64 0 }, align 8
-@"stmt_for#constant#10" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"stmt_for#constant#9" }, align 8
-@"stmt_for#constant#11" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"stmt_for#constant#10" }, align 8
-@"stmt_for#constant#12" = private unnamed_addr constant [ ?? x i8 ] c"single_generator:\00", align 8
-@"stmt_for#constant#13" = private unnamed_addr constant {i64, ptr} { i64 17, ptr @"stmt_for#constant#12" }, align 8
-@"stmt_for#constant#14" = private unnamed_addr constant [ ?? x i8 ] c"\0Amultiple_generator\00", align 8
-@"stmt_for#constant#15" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"stmt_for#constant#14" }, align 8
-@"stmt_for#constant#16" = private unnamed_addr constant [ ?? x i8 ] c"\0Ashortest_generator_termination\00", align 8
-@"stmt_for#constant#17" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"stmt_for#constant#16" }, align 8
-@"stmt_for#constant#18" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_break\00", align 8
-@"stmt_for#constant#19" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"stmt_for#constant#18" }, align 8
-@"stmt_for#constant#20" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_next\00", align 8
-@"stmt_for#constant#21" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"stmt_for#constant#20" }, align 8
-@"stmt_for#constant#22" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_while\00", align 8
-@"stmt_for#constant#23" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"stmt_for#constant#22" }, align 8
-@"stmt_for#constant#24" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_until\00", align 8
-@"stmt_for#constant#25" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"stmt_for#constant#24" }, align 8
-@"stmt_for#constant#26" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_when\00", align 8
-@"stmt_for#constant#27" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"stmt_for#constant#26" }, align 8
-@"stmt_for#constant#28" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_unless\00", align 8
-@"stmt_for#constant#29" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"stmt_for#constant#28" }, align 8
-@"stmt_for#constant#30" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_xrange\00", align 8
-@"stmt_for#constant#31" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"stmt_for#constant#30" }, align 8
-@"stmt_for#constant#32" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_xrange_reverse\00", align 8
-@"stmt_for#constant#33" = private unnamed_addr constant {i64, ptr} { i64 21, ptr @"stmt_for#constant#32" }, align 8
-@"stmt_for#constant#34" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_irange\00", align 8
-@"stmt_for#constant#35" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"stmt_for#constant#34" }, align 8
-@"stmt_for#constant#36" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_irange_reverse\00", align 8
-@"stmt_for#constant#37" = private unnamed_addr constant {i64, ptr} { i64 21, ptr @"stmt_for#constant#36" }, align 8
+@"stmt_for#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"single_generator:\00", align 8
+@"stmt_for#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"\0Amultiple_generator\00", align 8
+@"stmt_for#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"\0Ashortest_generator_termination\00", align 8
+@"stmt_for#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_break\00", align 8
+@"stmt_for#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_next\00", align 8
+@"stmt_for#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_while\00", align 8
+@"stmt_for#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_until\00", align 8
+@"stmt_for#constant#7" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_when\00", align 8
+@"stmt_for#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_unless\00", align 8
+@"stmt_for#constant#9" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_xrange\00", align 8
+@"stmt_for#constant#10" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_xrange_reverse\00", align 8
+@"stmt_for#constant#11" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_irange\00", align 8
+@"stmt_for#constant#12" = private unnamed_addr constant [ ?? x i8 ] c"\0Ausing_irange_reverse\00", align 8
+@"stmt_for#constant#13" = private unnamed_addr constant {i64, i64} { i64 4, i64 0 }, align 8
+@"stmt_for#constant#14" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"stmt_for#constant#13" }, align 8
+@"stmt_for#constant#15" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"stmt_for#constant#14" }, align 8
+@"stmt_for#constant#16" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"stmt_for#constant#15" }, align 8
+@"stmt_for#constant#17" = private unnamed_addr constant {i64, i64} { i64 3, i64 0 }, align 8
+@"stmt_for#constant#18" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"stmt_for#constant#17" }, align 8
+@"stmt_for#constant#19" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"stmt_for#constant#18" }, align 8
+@"stmt_for#constant#20" = private unnamed_addr constant {i64, i64} { i64 5, i64 0 }, align 8
+@"stmt_for#constant#21" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"stmt_for#constant#20" }, align 8
+@"stmt_for#constant#22" = private unnamed_addr constant {i64, i64} { i64 6, i64 0 }, align 8
+@"stmt_for#constant#23" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"stmt_for#constant#22" }, align 8
+@"stmt_for#constant#24" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"stmt_for#constant#23" }, align 8
+@"stmt_for#constant#25" = private unnamed_addr constant {i64, ptr} { i64 17, ptr @"stmt_for#constant#0" }, align 8
+@"stmt_for#constant#26" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"stmt_for#constant#1" }, align 8
+@"stmt_for#constant#27" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"stmt_for#constant#2" }, align 8
+@"stmt_for#constant#28" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"stmt_for#constant#3" }, align 8
+@"stmt_for#constant#29" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"stmt_for#constant#4" }, align 8
+@"stmt_for#constant#30" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"stmt_for#constant#5" }, align 8
+@"stmt_for#constant#31" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"stmt_for#constant#6" }, align 8
+@"stmt_for#constant#32" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"stmt_for#constant#7" }, align 8
+@"stmt_for#constant#33" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"stmt_for#constant#8" }, align 8
+@"stmt_for#constant#34" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"stmt_for#constant#9" }, align 8
+@"stmt_for#constant#35" = private unnamed_addr constant {i64, ptr} { i64 21, ptr @"stmt_for#constant#10" }, align 8
+@"stmt_for#constant#36" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"stmt_for#constant#11" }, align 8
+@"stmt_for#constant#37" = private unnamed_addr constant {i64, ptr} { i64 21, ptr @"stmt_for#constant#12" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
@@ -692,49 +692,49 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"stmt_for.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#13" to i64 ))
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_for.single_generator#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#6" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#15" to i64 ))
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_for.multiple_generator#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#6" to i64 ), i64 ptrtoint( ptr @"stmt_for#constant#11" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#17" to i64 ))
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_for.shortest_generator_termination#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ), i64 ptrtoint( ptr @"stmt_for#constant#8" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#19" to i64 ))
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_for.using_break#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#21" to i64 ))
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_for.using_next#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#23" to i64 ))
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_for.using_while#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#25" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_for.using_until#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
+  tail call fastcc void @"stmt_for.single_generator#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#19" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#26" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"stmt_for.multiple_generator#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#19" to i64 ), i64 ptrtoint( ptr @"stmt_for#constant#24" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#27" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_for.using_when#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
+  tail call fastcc void @"stmt_for.shortest_generator_termination#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ), i64 ptrtoint( ptr @"stmt_for#constant#21" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#28" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"stmt_for.using_break#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#29" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_for.using_unless#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
+  tail call fastcc void @"stmt_for.using_next#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#30" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"stmt_for.using_while#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#31" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#30##0" = tail call fastcc i64 @"stmt_for.xrange<0>"(i64 1, i64 1, i64 10)
-  tail call fastcc void @"stmt_for.using_xrange#cont#1<0>"(i64 %"tmp#30##0")
+  tail call fastcc void @"stmt_for.using_until#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#32" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"stmt_for.using_when#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#33" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#34##0" = tail call fastcc i64 @"stmt_for.xrange<0>"(i64 10, i64 -1, i64 1)
-  tail call fastcc void @"stmt_for.using_xrange_reverse#cont#1<0>"(i64 %"tmp#34##0")
+  tail call fastcc void @"stmt_for.using_unless#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#34" to i64 ))
+  call ccc void @putchar(i8 10)
+  %"tmp#83##0" = tail call fastcc i64 @"stmt_for.xrange<0>"(i64 1, i64 1, i64 10)
+  tail call fastcc void @"stmt_for.using_xrange#cont#1<0>"(i64 %"tmp#83##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#35" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#38##0" = tail call fastcc i64 @"stmt_for.irange<0>"(i64 1, i64 1, i64 10)
-  tail call fastcc void @"stmt_for.using_irange#cont#1<0>"(i64 %"tmp#38##0")
+  %"tmp#91##0" = tail call fastcc i64 @"stmt_for.xrange<0>"(i64 10, i64 -1, i64 1)
+  tail call fastcc void @"stmt_for.using_xrange_reverse#cont#1<0>"(i64 %"tmp#91##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#36" to i64 ))
+  call ccc void @putchar(i8 10)
+  %"tmp#99##0" = tail call fastcc i64 @"stmt_for.irange<0>"(i64 1, i64 1, i64 10)
+  tail call fastcc void @"stmt_for.using_irange#cont#1<0>"(i64 %"tmp#99##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_for#constant#37" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#42##0" = tail call fastcc i64 @"stmt_for.irange<0>"(i64 10, i64 -1, i64 1)
-  tail call fastcc void @"stmt_for.using_irange_reverse#cont#1<0>"(i64 %"tmp#42##0")
+  %"tmp#107##0" = tail call fastcc i64 @"stmt_for.irange<0>"(i64 10, i64 -1, i64 1)
+  tail call fastcc void @"stmt_for.using_irange_reverse#cont#1<0>"(i64 %"tmp#107##0")
   ret void
 }
 
@@ -770,7 +770,7 @@ if.else.0:
 }
 
 define external fastcc void @"stmt_for.multiple_generator<0>"() {
-  tail call fastcc void @"stmt_for.multiple_generator#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#6" to i64 ), i64 ptrtoint( ptr @"stmt_for#constant#11" to i64 ))
+  tail call fastcc void @"stmt_for.multiple_generator#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#19" to i64 ), i64 ptrtoint( ptr @"stmt_for#constant#24" to i64 ))
   ret void
 }
 
@@ -828,7 +828,7 @@ if.else.0:
 }
 
 define external fastcc void @"stmt_for.shortest_generator_termination<0>"() {
-  tail call fastcc void @"stmt_for.shortest_generator_termination#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ), i64 ptrtoint( ptr @"stmt_for#constant#8" to i64 ))
+  tail call fastcc void @"stmt_for.shortest_generator_termination#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ), i64 ptrtoint( ptr @"stmt_for#constant#21" to i64 ))
   ret void
 }
 
@@ -862,7 +862,7 @@ if.else.0:
 }
 
 define external fastcc void @"stmt_for.single_generator<0>"() {
-  tail call fastcc void @"stmt_for.single_generator#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#6" to i64 ))
+  tail call fastcc void @"stmt_for.single_generator#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#19" to i64 ))
   ret void
 }
 
@@ -884,7 +884,7 @@ if.else.0:
 }
 
 define external fastcc void @"stmt_for.using_break<0>"() {
-  tail call fastcc void @"stmt_for.using_break#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
+  tail call fastcc void @"stmt_for.using_break#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
   ret void
 }
 
@@ -953,7 +953,7 @@ if.else.0:
 }
 
 define external fastcc void @"stmt_for.using_next<0>"() {
-  tail call fastcc void @"stmt_for.using_next#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
+  tail call fastcc void @"stmt_for.using_next#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
   ret void
 }
 
@@ -981,7 +981,7 @@ if.else.0:
 }
 
 define external fastcc void @"stmt_for.using_unless<0>"() {
-  tail call fastcc void @"stmt_for.using_unless#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
+  tail call fastcc void @"stmt_for.using_unless#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
   ret void
 }
 
@@ -1009,7 +1009,7 @@ if.else.0:
 }
 
 define external fastcc void @"stmt_for.using_until<0>"() {
-  tail call fastcc void @"stmt_for.using_until#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
+  tail call fastcc void @"stmt_for.using_until#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
   ret void
 }
 
@@ -1036,7 +1036,7 @@ if.else.0:
 }
 
 define external fastcc void @"stmt_for.using_when<0>"() {
-  tail call fastcc void @"stmt_for.using_when#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
+  tail call fastcc void @"stmt_for.using_when#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
   ret void
 }
 
@@ -1064,7 +1064,7 @@ if.else.0:
 }
 
 define external fastcc void @"stmt_for.using_while<0>"() {
-  tail call fastcc void @"stmt_for.using_while#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#3" to i64 ))
+  tail call fastcc void @"stmt_for.using_while#cont#1<0>"(i64 ptrtoint( ptr @"stmt_for#constant#16" to i64 ))
   ret void
 }
 

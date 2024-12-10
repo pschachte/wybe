@@ -8,9 +8,9 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : assert_error.<0>
-  constants       : 0:: CStringInfo {cstringChars = "assert_error:3:2"}
-                    1:: CStringInfo {cstringChars = "assert_error:5:2"}
-                    2:: CStringInfo {cstringChars = "we should never get here"}
+  constants       : 0:: CStringInfo {cstringChars = "we should never get here"}
+                    1:: CStringInfo {cstringChars = "assert_error:3:2"}
+                    2:: CStringInfo {cstringChars = "assert_error:5:2"}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -31,16 +31,16 @@ module top-level code > public {semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/assert_error.wybe"
 target triple    ????
 
-@"assert_error#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"assert_error:3:2\00", align 8
-@"assert_error#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"assert_error:5:2\00", align 8
-@"assert_error#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"we should never get here\00", align 8
+@"assert_error#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"we should never get here\00", align 8
+@"assert_error#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"assert_error:3:2\00", align 8
+@"assert_error#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"assert_error:5:2\00", align 8
 
 declare external fastcc void @"wybe.control.assert<0>"(i1, i64)
 declare external ccc void @error_exit(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"assert_error.<0>"() {
-  tail call fastcc void @"wybe.control.assert<0>"(i1 0, i64 ptrtoint( ptr @"assert_error#constant#0" to i64 ))
-  call ccc void @error_exit(i64 ptrtoint( ptr @"assert_error#constant#1" to i64 ), i64 ptrtoint( ptr @"assert_error#constant#2" to i64 ))
+  tail call fastcc void @"wybe.control.assert<0>"(i1 0, i64 ptrtoint( ptr @"assert_error#constant#1" to i64 ))
+  call ccc void @error_exit(ptr @"assert_error#constant#2", ptr @"assert_error#constant#0")
   ret void
 }

@@ -18,7 +18,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    higher_order_inline#constant#0:(wybe.int, ?wybe.int)(1:wybe.int, ?i##0:wybe.int) #0 @higher_order_inline:nn:nn
+    higher_order_inline.#closure#1<0><>:(wybe.int, ?wybe.int)(1:wybe.int, ?i##0:wybe.int) #0 @higher_order_inline:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @higher_order_inline:nn:nn
     foreign c print_int(~i##0:wybe.int, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @higher_order_inline:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @higher_order_inline:nn:nn

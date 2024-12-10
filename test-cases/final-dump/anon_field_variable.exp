@@ -8,9 +8,9 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : anon_field_variable.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [IntStructMember 0 8]}
-                    1:: CStringInfo {cstringChars = "foo"}
-                    2:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember anon_field_variable#constant#1]}
+  constants       : 0:: CStringInfo {cstringChars = "foo"}
+                    1:: StructInfo {structSize = 8, structData = [IntStructMember 0 8]}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"foo"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -20,16 +20,16 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(1:wybe.int, anon_field_variable#constant#0:wybe.int, ?tmp#7##0:wybe.int) @anon_field_variable:nn:nn
-    foreign llvm icmp_eq(~tmp#7##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool) @anon_field_variable:nn:nn
-    case ~tmp#8##0:wybe.bool of
+    foreign llvm and(1:wybe.int, anon_field_variable#constant#1:wybe.int, ?tmp#8##0:wybe.int) @anon_field_variable:nn:nn
+    foreign llvm icmp_eq(~tmp#8##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @anon_field_variable:nn:nn
+    case ~tmp#9##0:wybe.bool of
     0:
 
     1:
-        wybe.string.print<0>("foo":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @anon_field_variable:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @anon_field_variable:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @anon_field_variable:nn:nn
-        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field_variable:nn:nn
+        wybe.string.print<0>("foo":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @anon_field_variable:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @anon_field_variable:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @anon_field_variable:nn:nn
+        foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field_variable:nn:nn
 
 
 
@@ -131,9 +131,9 @@ foo(?foo#1##0:T <{}; {}; {1}>, #result##0:anon_field_variable(T) <{}; {}; {1}>, 
 source_filename = "!ROOT!/final-dump/anon_field_variable.wybe"
 target triple    ????
 
-@"anon_field_variable#constant#0" = private unnamed_addr constant {i64} { i64 0 }, align 8
-@"anon_field_variable#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"foo\00", align 8
-@"anon_field_variable#constant#2" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"anon_field_variable#constant#1" }, align 8
+@"anon_field_variable#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"foo\00", align 8
+@"anon_field_variable#constant#1" = private unnamed_addr constant {i64} { i64 0 }, align 8
+@"anon_field_variable#constant#2" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"anon_field_variable#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
@@ -141,9 +141,9 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"anon_field_variable.<0>"() {
-  %"tmp#7##0" = and i64 1, ptrtoint( ptr @"anon_field_variable#constant#0" to i64 )
-  %"tmp#8##0" = icmp eq i64 %"tmp#7##0", 0
-  br i1 %"tmp#8##0", label %if.then.0, label %if.else.0
+  %"tmp#8##0" = and i64 1, ptrtoint( ptr @"anon_field_variable#constant#1" to i64 )
+  %"tmp#9##0" = icmp eq i64 %"tmp#8##0", 0
+  br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"anon_field_variable#constant#2" to i64 ))
   call ccc void @putchar(i8 10)

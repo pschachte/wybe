@@ -22,7 +22,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    higher_order_impure#constant#3:{impure}() #0 @higher_order_impure:nn:nn
+    higher_order_impure.#anon#1<1><higher_order_impure#constant#2>:{impure}() #0 @higher_order_impure:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @higher_order_impure:nn:nn
     foreign c print_float(3.0:wybe.float, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @higher_order_impure:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @higher_order_impure:nn:nn

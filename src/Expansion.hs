@@ -343,34 +343,6 @@ inlineCall proto args body pos = do
 
 
 expandArg :: PrimArg -> Expander PrimArg
--- termToExp (StringConst pos "" DoubleQuote)
---     = return $ Placed (Fncall ["wybe","string"] "empty" False []) pos
--- termToExp (StringConst pos [chr] DoubleQuote)
---     = return $ Placed (Fncall ["wybe","string"] "singleton" False
---                         [Unplaced (CharValue chr)]) pos
-expandArg arg@(ArgString "" WybeString ty) = do
-    logExpansion "Optimising empty string"
-    newVarName <- lift freshVarName
-    let defVar = ArgVar newVarName ty FlowOut Ordinary False
-    let useVar = ArgVar newVarName ty FlowIn Ordinary False
-    logExpansion $ "    Generated fresh name " ++ show newVarName
-    callID <- genCallSiteID
-    let emptyStringProc = ProcSpec ["wybe","string"] "empty" 0 Set.empty
-    expandPrim (PrimCall callID emptyStringProc Pure [defVar] emptyGlobalFlows) Nothing
-    logExpansion $ "Empty string variable = " ++ show useVar
-    return useVar
-expandArg arg@(ArgString [ch] WybeString ty) = do
-    logExpansion $ "Optimising singleton string \"" ++ [ch] ++ "\""
-    newVarName <- lift freshVarName
-    let defVar = ArgVar newVarName ty FlowOut Ordinary False
-    let useVar = ArgVar newVarName ty FlowIn Ordinary False
-    logExpansion $ "    Generated fresh name " ++ show newVarName
-    callID <- genCallSiteID
-    let emptyStringProc = ProcSpec ["wybe","string"] "singleton" 0 Set.empty
-    expandPrim (PrimCall callID emptyStringProc Pure
-                [ArgInt (fromIntegral $ ord ch) charType, defVar] emptyGlobalFlows) Nothing
-    logExpansion $ "Singleton string variable = " ++ show useVar
-    return useVar
 expandArg arg@(ArgVar var ty flow ft _) = do
     renameAll <- isJust <$> gets inlining
     if renameAll

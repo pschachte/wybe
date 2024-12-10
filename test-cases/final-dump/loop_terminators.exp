@@ -9,8 +9,8 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : 
   constants       : 0:: CStringInfo {cstringChars = "lol"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember loop_terminators#constant#0]}
-                    2:: CStringInfo {cstringChars = "loop_terminators:14:11"}
+                    1:: CStringInfo {cstringChars = "loop_terminators:14:11"}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"lol"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -62,8 +62,8 @@ proc loop3 > {inline} (0 calls)
 loop3()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.c_string<0>("lol":wybe.string, ?tmp#0##0:wybe.c_string) #1 @loop_terminators:nn:nn
-    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#0##0:wybe.c_string) @loop_terminators:nn:nn
+    wybe.string.c_string<0>("lol":wybe.string, ?tmp#1##0:wybe.c_string) #1 @loop_terminators:nn:nn
+    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#1##0:wybe.c_string) @loop_terminators:nn:nn
 
 
 proc loop3#cont#1 > {inline} (1 calls)
@@ -71,8 +71,8 @@ proc loop3#cont#1 > {inline} (1 calls)
 loop3#cont#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.c_string<0>("lol":wybe.string, ?tmp#2##0:wybe.c_string) #1 @loop_terminators:nn:nn
-    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#2##0:wybe.c_string) @loop_terminators:nn:nn
+    wybe.string.c_string<0>("lol":wybe.string, ?tmp#7##0:wybe.c_string) #2 @loop_terminators:nn:nn
+    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#7##0:wybe.c_string) @loop_terminators:nn:nn
 
   LLVM code       :
 
@@ -83,8 +83,8 @@ source_filename = "!ROOT!/final-dump/loop_terminators.wybe"
 target triple    ????
 
 @"loop_terminators#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"lol\00", align 8
-@"loop_terminators#constant#1" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"loop_terminators#constant#0" }, align 8
-@"loop_terminators#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"loop_terminators:14:11\00", align 8
+@"loop_terminators#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"loop_terminators:14:11\00", align 8
+@"loop_terminators#constant#2" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"loop_terminators#constant#0" }, align 8
 
 declare external fastcc i64 @"wybe.string.c_string<0>"(i64)
 declare external ccc void @error_exit(i64, i64)
@@ -115,13 +115,13 @@ define external fastcc void @"loop_terminators.loop2#cont#1<0>"() {
 }
 
 define external fastcc void @"loop_terminators.loop3<0>"() {
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"loop_terminators#constant#1" to i64 ))
-  call ccc void @error_exit(i64 ptrtoint( ptr @"loop_terminators#constant#2" to i64 ), i64 %"tmp#0##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"loop_terminators#constant#2" to i64 ))
+  call ccc void @error_exit(ptr @"loop_terminators#constant#1", i64 %"tmp#1##0")
   ret void
 }
 
 define external fastcc void @"loop_terminators.loop3#cont#1<0>"() {
-  %"tmp#2##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"loop_terminators#constant#1" to i64 ))
-  call ccc void @error_exit(i64 ptrtoint( ptr @"loop_terminators#constant#2" to i64 ), i64 %"tmp#2##0")
+  %"tmp#7##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"loop_terminators#constant#2" to i64 ))
+  call ccc void @error_exit(ptr @"loop_terminators#constant#1", i64 %"tmp#7##0")
   ret void
 }

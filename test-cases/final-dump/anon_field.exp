@@ -16,17 +16,17 @@ AFTER EVERYTHING:
                     anon_field.quux.quuz<0>
                     anon_field.quux.quuz<1>
                     anon_field.quux.~=<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [IntStructMember 1 8]}
-                    1:: StructInfo {structSize = 24, structData = [IntStructMember 0 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,IntStructMember 1 8,IntStructMember 1 8]}
-                    2:: StructInfo {structSize = 24, structData = [IntStructMember 0 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,IntStructMember 2 8,IntStructMember 1 8]}
-                    3:: CStringInfo {cstringChars = "uh oh"}
-                    4:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember anon_field#constant#3]}
-                    5:: CStringInfo {cstringChars = "good"}
-                    6:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember anon_field#constant#5]}
-                    7:: CStringInfo {cstringChars = "bad"}
-                    8:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember anon_field#constant#7]}
-                    9:: CStringInfo {cstringChars = "maybe"}
-                    10:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember anon_field#constant#9]}
+  constants       : 0:: CStringInfo {cstringChars = "uh oh"}
+                    1:: CStringInfo {cstringChars = "good"}
+                    2:: CStringInfo {cstringChars = "bad"}
+                    3:: CStringInfo {cstringChars = "maybe"}
+                    4:: StructInfo {structSize = 8, structData = [IntStructMember 1 8]}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"maybe"]}
+                    6:: StructInfo {structSize = 24, structData = [IntStructMember 0 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,IntStructMember 1 8,IntStructMember 1 8]}
+                    7:: StructInfo {structSize = 24, structData = [IntStructMember 0 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,IntStructMember 2 8,IntStructMember 1 8]}
+                    8:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"bad"]}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"good"]}
+                    10:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"uh oh"]}
   imports         : public use anon_field.quux
                     use wybe
   resources       : 
@@ -38,18 +38,18 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm or(1:wybe.int, anon_field#constant#0:anon_field, ?tmp#2##0:anon_field) @anon_field:nn:nn
-    anon_field.=<0>(anon_field#constant#1:anon_field, ~tmp#2##0:anon_field, ?tmp#17##0:wybe.bool) #3 @anon_field:nn:nn
-    case ~tmp#17##0:wybe.bool of
+    foreign llvm or(1:wybe.int, anon_field#constant#4:anon_field, ?tmp#2##0:anon_field) @anon_field:nn:nn
+    anon_field.=<0>(anon_field#constant#6:anon_field, ~tmp#2##0:anon_field, ?tmp#21##0:wybe.bool) #3 @anon_field:nn:nn
+    case ~tmp#21##0:wybe.bool of
     0:
-        anon_field.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6
+        anon_field.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7
 
     1:
-        wybe.string.print<0>("uh oh":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @anon_field:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @anon_field:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @anon_field:nn:nn
-        foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field:nn:nn
-        anon_field.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
+        wybe.string.print<0>("uh oh":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @anon_field:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom) @anon_field:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#36##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @anon_field:nn:nn
+        foreign lpvm store(~%tmp#37##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field:nn:nn
+        anon_field.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6
 
 
 
@@ -58,18 +58,18 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(3:wybe.int, anon_field#constant#1:wybe.int, ?tmp#24##0:wybe.int) @anon_field:nn:nn
-    foreign llvm icmp_eq(~tmp#24##0:wybe.int, 0:wybe.int, ?tmp#25##0:wybe.bool) @anon_field:nn:nn
-    case ~tmp#25##0:wybe.bool of
+    foreign llvm and(3:wybe.int, anon_field#constant#6:wybe.int, ?tmp#28##0:wybe.int) @anon_field:nn:nn
+    foreign llvm icmp_eq(~tmp#28##0:wybe.int, 0:wybe.int, ?tmp#29##0:wybe.bool) @anon_field:nn:nn
+    case ~tmp#29##0:wybe.bool of
     0:
-        anon_field.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7
+        anon_field.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8
 
     1:
-        wybe.string.print<0>("good":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @anon_field:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @anon_field:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @anon_field:nn:nn
-        foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field:nn:nn
-        anon_field.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
+        wybe.string.print<0>("good":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @anon_field:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#37##0:wybe.phantom) @anon_field:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#37##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @anon_field:nn:nn
+        foreign lpvm store(~%tmp#38##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field:nn:nn
+        anon_field.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6
 
 
 
@@ -78,17 +78,17 @@ proc #cont#2 > {semipure} (3 calls)
 #cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    anon_field.=<0>(anon_field#constant#1:anon_field, anon_field#constant#2:anon_field, ?tmp#14##0:wybe.bool) #4 @anon_field:nn:nn
-    case ~tmp#14##0:wybe.bool of
+    anon_field.=<0>(anon_field#constant#6:anon_field, anon_field#constant#7:anon_field, ?tmp#18##0:wybe.bool) #4 @anon_field:nn:nn
+    case ~tmp#18##0:wybe.bool of
     0:
-        anon_field.#cont#3<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7
+        anon_field.#cont#3<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8
 
     1:
-        wybe.string.print<0>("bad":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @anon_field:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @anon_field:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @anon_field:nn:nn
-        foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field:nn:nn
-        anon_field.#cont#3<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6
+        wybe.string.print<0>("bad":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @anon_field:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom) @anon_field:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#36##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @anon_field:nn:nn
+        foreign lpvm store(~%tmp#37##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field:nn:nn
+        anon_field.#cont#3<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7
 
 
 
@@ -97,23 +97,23 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm or(2:wybe.int, anon_field#constant#0:anon_field, ?tmp#11##0:anon_field) @anon_field:nn:nn
-    foreign llvm and(tmp#11##0:wybe.int, 3:wybe.int, ?tmp#18##0:wybe.int) @anon_field:nn:nn
-    foreign llvm icmp_eq(~tmp#18##0:wybe.int, 2:wybe.int, ?tmp#19##0:wybe.bool) @anon_field:nn:nn
-    case ~tmp#19##0:wybe.bool of
+    foreign llvm or(2:wybe.int, anon_field#constant#4:anon_field, ?tmp#14##0:anon_field) @anon_field:nn:nn
+    foreign llvm and(tmp#14##0:wybe.int, 3:wybe.int, ?tmp#22##0:wybe.int) @anon_field:nn:nn
+    foreign llvm icmp_eq(~tmp#22##0:wybe.int, 2:wybe.int, ?tmp#23##0:wybe.bool) @anon_field:nn:nn
+    case ~tmp#23##0:wybe.bool of
     0:
 
     1:
-        foreign lpvm access(~tmp#11##0:anon_field, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?tmp#10##0:wybe.int) @anon_field:nn:nn
-        foreign llvm icmp_ne(~tmp#10##0:wybe.int, 2:wybe.int, ?tmp#13##0:wybe.bool) @anon_field:nn:nn
-        case ~tmp#13##0:wybe.bool of
+        foreign lpvm access(~tmp#14##0:anon_field, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?tmp#13##0:wybe.int) @anon_field:nn:nn
+        foreign llvm icmp_ne(~tmp#13##0:wybe.int, 2:wybe.int, ?tmp#17##0:wybe.bool) @anon_field:nn:nn
+        case ~tmp#17##0:wybe.bool of
         0:
 
         1:
-            wybe.string.print<0>("maybe":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @anon_field:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @anon_field:nn:nn
-            foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @anon_field:nn:nn
-            foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field:nn:nn
+            wybe.string.print<0>("maybe":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @anon_field:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom) @anon_field:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @anon_field:nn:nn
+            foreign lpvm store(~%tmp#32##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field:nn:nn
 
 
 
@@ -351,17 +351,17 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/anon_field.wybe"
 target triple    ????
 
-@"anon_field#constant#0" = private unnamed_addr constant {i64} { i64 1 }, align 8
-@"anon_field#constant#1" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, i64, i64} { i8 0, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i64 1, i64 1 }, align 8
-@"anon_field#constant#2" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, i64, i64} { i8 0, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i64 2, i64 1 }, align 8
-@"anon_field#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"uh oh\00", align 8
-@"anon_field#constant#4" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"anon_field#constant#3" }, align 8
-@"anon_field#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"good\00", align 8
-@"anon_field#constant#6" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"anon_field#constant#5" }, align 8
-@"anon_field#constant#7" = private unnamed_addr constant [ ?? x i8 ] c"bad\00", align 8
-@"anon_field#constant#8" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"anon_field#constant#7" }, align 8
-@"anon_field#constant#9" = private unnamed_addr constant [ ?? x i8 ] c"maybe\00", align 8
-@"anon_field#constant#10" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"anon_field#constant#9" }, align 8
+@"anon_field#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"uh oh\00", align 8
+@"anon_field#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"good\00", align 8
+@"anon_field#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"bad\00", align 8
+@"anon_field#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"maybe\00", align 8
+@"anon_field#constant#4" = private unnamed_addr constant {i64} { i64 1 }, align 8
+@"anon_field#constant#5" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"anon_field#constant#3" }, align 8
+@"anon_field#constant#6" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, i64, i64} { i8 0, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i64 1, i64 1 }, align 8
+@"anon_field#constant#7" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, i64, i64} { i8 0, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i64 2, i64 1 }, align 8
+@"anon_field#constant#8" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"anon_field#constant#2" }, align 8
+@"anon_field#constant#9" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"anon_field#constant#1" }, align 8
+@"anon_field#constant#10" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"anon_field#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
@@ -369,11 +369,11 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"anon_field.<0>"() {
-  %"tmp#2##0" = or i64 1, ptrtoint( ptr @"anon_field#constant#0" to i64 )
-  %"tmp#17##0" = tail call fastcc i1 @"anon_field.=<0>"(i64 ptrtoint( ptr @"anon_field#constant#1" to i64 ), i64 %"tmp#2##0")
-  br i1 %"tmp#17##0", label %if.then.0, label %if.else.0
+  %"tmp#2##0" = or i64 1, ptrtoint( ptr @"anon_field#constant#4" to i64 )
+  %"tmp#21##0" = tail call fastcc i1 @"anon_field.=<0>"(i64 ptrtoint( ptr @"anon_field#constant#6" to i64 ), i64 %"tmp#2##0")
+  br i1 %"tmp#21##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"anon_field#constant#4" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"anon_field#constant#10" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"anon_field.#cont#1<0>"()
   ret void
@@ -383,11 +383,11 @@ if.else.0:
 }
 
 define external fastcc void @"anon_field.#cont#1<0>"() {
-  %"tmp#24##0" = and i64 3, ptrtoint( ptr @"anon_field#constant#1" to i64 )
-  %"tmp#25##0" = icmp eq i64 %"tmp#24##0", 0
-  br i1 %"tmp#25##0", label %if.then.0, label %if.else.0
+  %"tmp#28##0" = and i64 3, ptrtoint( ptr @"anon_field#constant#6" to i64 )
+  %"tmp#29##0" = icmp eq i64 %"tmp#28##0", 0
+  br i1 %"tmp#29##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"anon_field#constant#6" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"anon_field#constant#9" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"anon_field.#cont#2<0>"()
   ret void
@@ -397,8 +397,8 @@ if.else.0:
 }
 
 define external fastcc void @"anon_field.#cont#2<0>"() {
-  %"tmp#14##0" = tail call fastcc i1 @"anon_field.=<0>"(i64 ptrtoint( ptr @"anon_field#constant#1" to i64 ), i64 ptrtoint( ptr @"anon_field#constant#2" to i64 ))
-  br i1 %"tmp#14##0", label %if.then.0, label %if.else.0
+  %"tmp#18##0" = tail call fastcc i1 @"anon_field.=<0>"(i64 ptrtoint( ptr @"anon_field#constant#6" to i64 ), i64 ptrtoint( ptr @"anon_field#constant#7" to i64 ))
+  br i1 %"tmp#18##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"anon_field#constant#8" to i64 ))
   call ccc void @putchar(i8 10)
@@ -410,18 +410,18 @@ if.else.0:
 }
 
 define external fastcc void @"anon_field.#cont#3<0>"() {
-  %"tmp#11##0" = or i64 2, ptrtoint( ptr @"anon_field#constant#0" to i64 )
-  %"tmp#18##0" = and i64 %"tmp#11##0", 3
-  %"tmp#19##0" = icmp eq i64 %"tmp#18##0", 2
-  br i1 %"tmp#19##0", label %if.then.0, label %if.else.0
+  %"tmp#14##0" = or i64 2, ptrtoint( ptr @"anon_field#constant#4" to i64 )
+  %"tmp#22##0" = and i64 %"tmp#14##0", 3
+  %"tmp#23##0" = icmp eq i64 %"tmp#22##0", 2
+  br i1 %"tmp#23##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#25##0" = add i64 %"tmp#11##0", -2
-  %"tmp#26##0" = inttoptr i64 %"tmp#25##0" to ptr
-  %"tmp#10##0" = load i64, ptr %"tmp#26##0"
-  %"tmp#13##0" = icmp ne i64 %"tmp#10##0", 2
-  br i1 %"tmp#13##0", label %if.then.1, label %if.else.1
+  %"tmp#33##0" = add i64 %"tmp#14##0", -2
+  %"tmp#34##0" = inttoptr i64 %"tmp#33##0" to ptr
+  %"tmp#13##0" = load i64, ptr %"tmp#34##0"
+  %"tmp#17##0" = icmp ne i64 %"tmp#13##0", 2
+  br i1 %"tmp#17##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"anon_field#constant#10" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"anon_field#constant#5" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.1:
