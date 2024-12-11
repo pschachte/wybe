@@ -9,7 +9,8 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : early_exit2.<0>
   constants       : 0:: CStringInfo {cstringChars = "should print this"}
-                    1:: StructInfo {structSize = 16, structData = [IntStructMember 17 8,PointerStructMember early_exit2#constant#0]}
+                    1:: CStringInfo {cstringChars = "shouldn't print this"}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 17 8,PointerStructMember c"should print this"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -19,10 +20,10 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("should print this":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @early_exit2:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @early_exit2:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @early_exit2:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @early_exit2:nn:nn
+    wybe.string.print<0>("should print this":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @early_exit2:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @early_exit2:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @early_exit2:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @early_exit2:nn:nn
     foreign c {terminal,semipure} exit(1:wybe.int) @early_exit2:nn:nn
 
 
@@ -42,7 +43,7 @@ source_filename = "!ROOT!/final-dump/early_exit2.wybe"
 target triple    ????
 
 @"early_exit2#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"should print this\00", align 8
-@"early_exit2#constant#1" = private unnamed_addr constant {i64, ptr} { i64 17, ptr @"early_exit2#constant#0" }, align 8
+@"early_exit2#constant#2" = private unnamed_addr constant {i64, ptr} { i64 17, ptr @"early_exit2#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @exit(i64)
@@ -50,7 +51,7 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"early_exit2.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"early_exit2#constant#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"early_exit2#constant#2" to i64 ))
   call ccc void @putchar(i8 10)
   call ccc void @exit(i64 1)
   ret void
@@ -61,3 +62,4 @@ define external fastcc void @"early_exit2.my_exit<0>"(i64 %"code##0") {
   ret void
 }
 final-dump/early_exit2.wybe:3:2: In module top-level code, this statement is unreachable
+final-dump/early_exit2.wybe:3:10: In module top-level code, this statement is unreachable

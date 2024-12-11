@@ -41,6 +41,7 @@ import AST
 import Config
 import Debug.Trace
 import Snippets
+import Util
 import Options (LogSelection(Flatten))
 import Data.Map as Map
 import Data.Set as Set
@@ -751,7 +752,8 @@ typeAndPlace exp ty castFrom = maybePlace (maybeType exp ty castFrom)
 
 
 maybeType :: Exp -> TypeSpec -> Maybe TypeSpec -> Exp
-maybeType (Typed exp _ _) ty castFrom = Typed exp ty castFrom
+maybeType (Typed exp _ castFrom1) ty castFrom2 =
+    Typed exp ty (castFrom1 `orElse` castFrom2)
 maybeType exp AnyType Nothing = exp
 maybeType exp ty castFrom = Typed exp ty castFrom
 

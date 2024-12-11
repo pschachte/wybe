@@ -1075,7 +1075,8 @@ expandConstStruct True arg@ArgVar{argVarName=var, argVarType=ty} = do
           structID <- lift $ recordConstStruct
                         (StructInfo sz $ reverse $ structMembers sz contents)
                         guessedExp
-          logBuild $ "Recording " ++ show sz ++ " byte const structure " ++ show contents ++ " as " ++ show structID
+          logBuild $ "Recording " ++ show sz ++ " byte const structure "
+                      ++ show contents ++ " as " ++ show structID
           return $ ArgConstRef structID ty
         _ -> return arg
 expandConstStruct _ arg = return arg

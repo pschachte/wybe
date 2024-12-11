@@ -1837,7 +1837,8 @@ data TypeVarName
 
 instance Show TypeVarName where
     show (RealTypeVar v) = v
-    show (FauxTypeVar i) = show i
+    show (FauxTypeVar i) = "Type" ++ show i
+
 
 -- |A module specification, as a list of module names; module a.b.c would
 --  be represented as ["a","b","c"].
