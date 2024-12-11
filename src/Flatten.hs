@@ -646,7 +646,10 @@ flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
     flattenCall (ForeignCall lang name flags) True ty castFrom pos exps
 flattenExp (Typed exp AnyType _) ty castFrom pos = do
     flattenExp exp ty castFrom pos
-flattenExp (Typed exp ty castFrom) _ _ pos = do
+flattenExp typed@(Typed exp ty castFrom) ctxtTy ctxtCastFrom pos = do
+    logFlatten $ "  Flattening typed exp " ++ show typed
+                ++ " with context type " ++ show ctxtTy
+                ++ " and context cast from " ++ show ctxtCastFrom
     lift $ explicitTypeSpecificationWarning pos ty
     lift $ forM_ castFrom (explicitTypeSpecificationWarning pos)
     flattenExp exp ty castFrom pos
@@ -752,8 +755,10 @@ typeAndPlace exp ty castFrom = maybePlace (maybeType exp ty castFrom)
 
 
 maybeType :: Exp -> TypeSpec -> Maybe TypeSpec -> Exp
+maybeType (Typed exp ty castFrom1) AnyType castFrom2 =
+    maybeType exp ty (castFrom2 `orElse` castFrom1)
 maybeType (Typed exp _ castFrom1) ty castFrom2 =
-    Typed exp ty (castFrom1 `orElse` castFrom2)
+    maybeType exp ty (castFrom2 `orElse` castFrom1)
 maybeType exp AnyType Nothing = exp
 maybeType exp ty castFrom = Typed exp ty castFrom
 
