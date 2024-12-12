@@ -646,13 +646,20 @@ flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
     flattenCall (ForeignCall lang name flags) True ty castFrom pos exps
 flattenExp (Typed exp AnyType _) ty castFrom pos = do
     flattenExp exp ty castFrom pos
-flattenExp typed@(Typed exp ty castFrom) ctxtTy ctxtCastFrom pos = do
+flattenExp typed@(Typed exp ty castFrom) AnyType ctxtCastFrom pos = do
     logFlatten $ "  Flattening typed exp " ++ show typed
-                ++ " with context type " ++ show ctxtTy
+                ++ " with no context type "
                 ++ " and context cast from " ++ show ctxtCastFrom
     lift $ explicitTypeSpecificationWarning pos ty
     lift $ forM_ castFrom (explicitTypeSpecificationWarning pos)
     flattenExp exp ty castFrom pos
+flattenExp typed@(Typed exp ty castFrom) ctxtTy ctxtCastFrom pos = do
+    logFlatten $ "  Flattening doubly typed exp " ++ show typed
+                ++ " with context type " ++ show ctxtTy
+                ++ " and context cast from " ++ show ctxtCastFrom
+    lift $ explicitTypeSpecificationWarning pos ty
+    lift $ forM_ castFrom (explicitTypeSpecificationWarning pos)
+    flattenExp exp ctxtTy castFrom pos
 
 
 -- | Flatten something, and produce an anonymous procedure from the resultant flattened
