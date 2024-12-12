@@ -335,17 +335,7 @@ argConstValue (ArgInt n ty) = do
 argConstValue (ArgFloat n ty) = do
     sz <- typeRepSize <$> lift (typeRepresentation ty)
     return $ Just $ FloatStructMember n (sz `div` 8)
-argConstValue (ArgClosure pspec args _) = do
-    args' <- neededFreeArgs pspec args
-    mapM argConstValue args' >>= (\case
-        Just argReps@(_:_) -> do
-            let fnPtr = FnPointerStructMember pspec
-            structID <- lift
-                $ recordConstStruct
-                    (StructInfo (wordSizeBytes*(length argReps+1)) argReps)
-                    Nothing
-            return $ Just $ PointerStructMember structID
-        _ -> return Nothing) . sequence
+argConstValue ArgClosure{} = return Nothing -- const closures already handled
 argConstValue (ArgGlobal info _) = do
     -- XXX is ArgGlobal a constant?  Does it give the address, or value, of the
     -- global?
@@ -519,21 +509,6 @@ writeConstDeclaration structID = do
             <$> lift (lookupConstInfo structID)
     let structName = structConstName structID
     declareStructConstant structName info Nothing
-
-
--- -- XXX shouldn't need this
--- -- | Find the global constant that holds the value of the specified string
--- -- constant.
--- lookupConstant :: StaticConstSpec -> LLVM StructID
--- lookupConstant spec =
---     trustFromJust ("lookupConstant " ++ show spec) <$> tryLookupConstant spec
-
-
--- -- | Find the global constant that holds the value of the specified string
--- -- constant.
--- tryLookupConstant :: StaticConstSpec -> LLVM (Maybe StructID)
--- tryLookupConstant spec =
---     gets $ Map.lookup spec . constNames
 
 
 ----------------------------------------------------------------------------
