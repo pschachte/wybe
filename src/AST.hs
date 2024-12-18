@@ -2280,7 +2280,7 @@ isConstructorVariant _                   = False
 -- into a ProcBody, which is a clausal, logic programming form.
 -- Finally it is turned into SSA form (LLVM).
 data ProcImpln
-    = ProcDefSrc [Placed Stmt]           -- ^defn in source-like form
+    = ProcDefSrc [Placed Stmt]           -- ^defn in AST (source-like) form
     | ProcDefPrim {
         procImplnProcSpec :: ProcSpec,
         procImplnProto :: PrimProto,
