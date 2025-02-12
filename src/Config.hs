@@ -12,7 +12,7 @@ module Config (sourceExtension, objectExtension, executableExtension,
                bitcodeExtension, assemblyExtension, nativeAssemblyExtension,
                archiveExtension, moduleDirectoryBasename, currentModuleAlias,
                specialChar, specialName, specialName2, initProcName,
-               wordSize, wordSizeBytes,
+               wordSize, wordSizeBytes, byteBits,
                availableTagBits, tagMask, smallestAllocatedAddress,
                minimumSwitchCases, magicVersion,
                linkerDeadStripArgs, removeLPVMSection,
@@ -102,12 +102,17 @@ initProcName = ""
 
 -- |Determining word size of the machine in bits
 wordSize :: Int
-wordSize = wordSizeBytes * 8
+wordSize = wordSizeBytes * byteBits
 
 
 -- |Word size of the machine in bytes
 wordSizeBytes :: Int
 wordSizeBytes = sizeOf (3 :: Word)
+
+
+-- |Size of a byte in bits
+byteBits :: Int
+byteBits = 8
 
 
 -- |The number of tag bits available on this architecture.  This is the base 2

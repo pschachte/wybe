@@ -134,7 +134,7 @@ module AST (
 
 import           Config (magicVersion, wordSize, objectExtension,
                          sourceExtension, currentModuleAlias,
-                         specialChar, specialName, specialName2, wordSizeBytes,)
+                         specialChar, specialName, specialName2, wordSizeBytes,byteBits)
 import           Control.Monad
 import           Control.Monad.Extra
 import           Control.Monad.Trans (lift,liftIO)
@@ -3542,11 +3542,11 @@ constValueSize (GenericStructMember _) = wordSizeBytes
 
 -- | Return the representation of a StructMember
 constValueRepresentation :: ConstValue -> TypeRepresentation
-constValueRepresentation (IntStructMember _ size) = Bits $ size * 8
-constValueRepresentation (FloatStructMember _ size) = Floating $ size * 8
+constValueRepresentation (IntStructMember _ size) = Bits $ size * byteBits
+constValueRepresentation (FloatStructMember _ size) = Floating $ size * byteBits
 constValueRepresentation (PointerStructMember _) = Pointer
 constValueRepresentation (FnPointerStructMember _) = CPointer
-constValueRepresentation (UndefStructMember size) = Bits $ size * 8
+constValueRepresentation (UndefStructMember size) = Bits $ size * byteBits
 constValueRepresentation (GenericStructMember _) = Pointer
 
 

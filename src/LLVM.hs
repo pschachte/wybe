@@ -331,10 +331,10 @@ argConstValue :: PrimArg -> LLVM (Maybe ConstValue)
 argConstValue ArgVar{} = return Nothing
 argConstValue (ArgInt n ty) = do
     sz <- typeRepSize <$> lift (typeRepresentation ty)
-    return $ Just $ IntStructMember n (sz `div` 8)
+    return $ Just $ IntStructMember n (sz `div` byteBits)
 argConstValue (ArgFloat n ty) = do
     sz <- typeRepSize <$> lift (typeRepresentation ty)
-    return $ Just $ FloatStructMember n (sz `div` 8)
+    return $ Just $ FloatStructMember n (sz `div` byteBits)
 argConstValue ArgClosure{} = return Nothing -- const closures already handled
 argConstValue (ArgGlobal info _) = do
     -- XXX is ArgGlobal a constant?  Does it give the address, or value, of the
@@ -345,7 +345,7 @@ argConstValue (ArgConstRef structID _) = do
 argConstValue ArgUnneeded{} = return Nothing
 argConstValue (ArgUndef ty) = do
     sz <- typeRepSize <$> lift (typeRepresentation ty)
-    return $ Just $ UndefStructMember (sz `div` 8)
+    return $ Just $ UndefStructMember (sz `div` byteBits)
 
 
 -- | If needed, add an extern declaration for a prim to the set.
@@ -472,38 +472,6 @@ writeAssemblyConstants = do
 -- declared and recorded.  This will happen because sets are sorted
 -- alphabetically, and CString comes before WybeString.
 writeConstDeclaration :: StructID -> LLVM ()
--- writeConstDeclaration spec@(WybeStringSpec str) n = do
---     -- let stringName = specialName2 "string" $ show n
---     -- modify $ \s -> s { constNames=Map.insert spec stringName
---     --                                    $ constNames s}
---     cStringID <- lift $ recordConstStruct $ CStringInfo str
---     writeConstDeclaration (StructSpec cStringID) n
---     wStringID <- lift $ recordConstStruct $ StructInfo
---          [ IntStructMember (fromIntegral $ length str) wordSize
---          , PointerStructMember cStringID]
---     writeConstDeclaration (StructSpec wStringID) n
---     -- return ()
--- writeConstDeclaration spec@(CStringSpec str) n = do
---     -- let textName = specialName2 "cstring" $ show n
---     cStringID <- lift $ recordConstStruct $ CStringInfo str
---     writeConstDeclaration (StructSpec cStringID) n
---     -- modify $ \s -> s { constNames=Map.insert spec textName
---     --                                    $ constNames s}
---     -- declareStringConstant textName str Nothing
--- writeConstDeclaration spec@(ClosureSpec pspec args) n = do
---     -- let closureName = specialName2 "closure" $ show n
---     -- modify $ \s -> s { constNames=Map.insert spec closureName $ constNames s}
---     let pname = show pspec
---     -- argReps <- mapM argTypeRep args
---     -- declareStructConstant closureName
---     --     ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
---     --      : zip args argReps)
---     --     Nothing
---     constArgs <- mapM argStructMember args
---     closureID <- lift $ recordConstStruct
---                     $ StructInfo (GlobalNameMember pname : constArgs )
---     writeConstDeclaration (StructSpec closureID) n
-
 writeConstDeclaration structID = do
     info <- trustFromJust ("writeConstDeclaration of " ++ show structID)
             <$> lift (lookupConstInfo structID)
@@ -816,12 +784,9 @@ writeWybeCall wybeProc args pos = do
 
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
-writeHOCall (ArgClosure pspec closed _) args pos = do
-    -- NB:  this case doesn't seem to ever occur -- probably handled earlier
-    pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
-    logLLVM $ "Compiling HO call as first order call to " ++ show pspec'
-              ++ " closed over " ++ show closed
-    writeWybeCall pspec' (closed ++ args) pos
+writeHOCall closure@(ArgClosure pspec closed _) args pos = do
+    -- NB:  this case should have been handled earlier
+    shouldnt $ "Higher order call with constand closure should have been handled earlier: " ++ show closure
 writeHOCall closure args pos = do
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs $ closure:args
     unless (List.null oRefs && List.null iRefs)

@@ -17,7 +17,7 @@ import AST
 import Debug.Trace
 import Snippets ( boolType, intType, primMove )
 import Util
-import Config (minimumSwitchCases, wordSize, wordSizeBytes)
+import Config (minimumSwitchCases, wordSize, wordSizeBytes, byteBits)
 import Options (LogSelection(BodyBuilder))
 import Data.Char ( ord )
 import Data.Map as Map
@@ -278,7 +278,7 @@ potentialConstStruct var size = do
                     Map.insert var (newBlock size) $ constStructs st}
 
 
--- | Does the specified variable hold a constant structure?
+-- | Delete a constant structure record from the BodyBuilder monad.
 deleteConstStruct :: PrimVarName -> BodyBuilder ()
 deleteConstStruct var = do
     logBuild $ "Deleting constant structure " ++ show var
@@ -692,7 +692,7 @@ typeSize :: TypeSpec -> BodyBuilder Int
 typeSize ty = do
     rep <- trustFromJust ("lookupTypeRepresentation of " ++ show ty)
             <$> lift (lookupTypeRepresentation ty)
-    return $ 1 + ((typeRepSize rep - 1) `div` 8)
+    return $ 1 + ((typeRepSize rep - 1) `div` byteBits)
 
 
 -- Do the normal work of instr.  First check if we've already computed its

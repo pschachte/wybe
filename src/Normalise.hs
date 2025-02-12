@@ -13,7 +13,7 @@ module Normalise (normalise, normaliseItem, completeNormalisation) where
 
 import AST
 import Config (wordSize, wordSizeBytes, availableTagBits,
-               tagMask, smallestAllocatedAddress, currentModuleAlias, specialName2, specialName, initProcName)
+               tagMask, smallestAllocatedAddress, currentModuleAlias, specialName2, specialName, initProcName, byteBits)
 import Control.Monad
 import Control.Monad.State (gets)
 import Control.Monad.Trans (lift,liftIO)
@@ -643,7 +643,7 @@ layoutRecord paramInfos tag tagLimit =
     let sizes = (2^) <$> [0..floor $ logBase 2 $ fromIntegral wordSizeBytes]
         fields = List.map
                 (\(CtorParamInfo param anon rep sz) ->
-                    let byteSize = (sz + 7) `div` 8
+                    let byteSize = (sz + 7) `div` byteBits
                         wordSize = (byteSize + wordSizeBytes - 1)
                                     `div` wordSizeBytes * wordSizeBytes
                         alignment =
