@@ -47,6 +47,7 @@ data Options = Options
                                    -- ^Which aspects to log
     , optOptimisations :: Set OptFlag
                                    -- ^Enabled optimisations
+    , optLlcBin        :: String   -- ^LLVM 'llc' binary path
     , optLLVMOptLevel  :: Word     -- ^LLVM optimisation level
     , optDumpLib       :: Bool     -- ^Also dump wybe.* modules when dumping
     , optVerbose       :: Bool     -- ^Be verbose in compiler output
@@ -70,6 +71,7 @@ defaultOptions = Options
   , optLogAspects    = Set.empty
   , optLogFile       = Nothing
   , optOptimisations = defaultOptFlags
+  , optLlcBin        = "llc"
   , optLLVMOptLevel  = 3
   , optDumpLib       = False
   , optVerbose       = False
@@ -245,6 +247,9 @@ options =
     , Option ['x'] ["opt"]
         (ReqArg addOptFlags "FLAGS")
         "add comma-separated optimisation flags"
+    , Option [] ["llc-path"]
+        (ReqArg (\ llc opts -> opts { optLlcBin = llc }) "PATH")
+        "specify the path of the 'llc' used"
     , Option ['O'] ["llvm-opt-level"]
         (ReqArg setLLVMOptLevel "LEVEL")
         "specify the LLVM compiler optimisation level"
