@@ -41,6 +41,8 @@ data Options = Options
     , optHelpLog       :: Bool     -- ^Print log option help and exit
     , optHelpOpt       :: Bool     -- ^Print optiisation option help and exit
     , optLibDirs       :: [String] -- ^Directories where library files live
+    , optLogFile       :: Maybe String 
+                                   -- ^Path where to dump logs
     , optLogAspects    :: Set LogSelection
                                    -- ^Which aspects to log
     , optOptimisations :: Set OptFlag
@@ -66,6 +68,7 @@ defaultOptions = Options
   , optHelpOpt       = False
   , optLibDirs       = []
   , optLogAspects    = Set.empty
+  , optLogFile       = Nothing
   , optOptimisations = defaultOptFlags
   , optLLVMOptLevel  = 3
   , optDumpLib       = False
@@ -222,8 +225,11 @@ options =
         (ReqArg (\ d opts -> opts { optLibDirs = optLibDirs opts ++ [d] }) "DIR")
         ("specify a library directory [default $WYBELIBS or " ++ libDir ++ "]")
     , Option ['l'] ["log"]
-      (ReqArg addLogAspects "ASPECT")
-       "add comma-separated aspects to log, or 'all'"
+        (ReqArg addLogAspects "ASPECT")
+        "add comma-separated aspects to log, or 'all'"
+    , Option [] ["log-file"]
+        (ReqArg (\ f opts -> opts { optLogFile = Just f }) "FILE")
+        "File to write logs to"
     , Option ['h'] ["help"]
         (NoArg (\ opts -> opts { optShowHelp = True }))
         "display this help text and exit"
