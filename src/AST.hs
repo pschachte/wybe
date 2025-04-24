@@ -513,8 +513,9 @@ data CompilerState = Compiler {
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
-  unchangedMods :: Set ModSpec   -- ^record mods that are loaded from object
+  unchangedMods :: Set ModSpec,  -- ^record mods that are loaded from object
                                  --  and unchanged.
+  logHandle :: Handle            -- ^handle to write logs to
 }
 
 -- |The compiler monad is a state transformer monad carrying the
@@ -522,9 +523,9 @@ data CompilerState = Compiler {
 type Compiler = StateT CompilerState IO
 
 -- |Run a compiler function from outside the Compiler monad.
-runCompiler :: Options -> Compiler t -> IO t
-runCompiler opts comp = evalStateT comp
-                        (Compiler opts "" [] False Map.empty [] Set.empty)
+runCompiler :: Options -> Handle -> Compiler t -> IO t
+runCompiler opts logHandle comp = evalStateT comp
+                        (Compiler opts "" [] False Map.empty [] Set.empty logHandle)
 
 
 -- |Apply some transformation function to the compiler state.
@@ -4747,8 +4748,9 @@ logMsg :: LogSelection    -- ^ The aspect of the compiler being logged,
           -> Compiler ()  -- ^ Works in the Compiler monad
 logMsg selector msg = do
     prefix <- makeBold $ show selector ++ ": "
-    whenLogging selector $
-      liftIO $ hPutStrLn stderr (prefix ++ List.intercalate ('\n':prefix) (lines msg))
+    whenLogging selector $ do
+        logFile <- gets logHandle
+        liftIO $ hPutStrLn logFile (prefix ++ List.intercalate ('\n':prefix) (lines msg))
 
 -- | Appends a ISO/IEC 6429 code to the given string to print it bold
 -- in a terminal output.

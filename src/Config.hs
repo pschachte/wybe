@@ -185,9 +185,10 @@ llvmToNativeAssemblerCommand :: FilePath -> FilePath -> Options
                              -> (String, [String])
 llvmToNativeAssemblerCommand llFile sFile options =
     let opt = "-O" ++ show (optLLVMOptLevel options)
+        llc = optLlcBin options
     in case buildOS of
-        OSX   -> ("llc", ["--filetype=asm", opt, "-o", sFile, llFile])
-        Linux -> ("llc", ["--filetype=asm", opt, "-o", sFile, llFile])
+        OSX   -> (llc, ["--filetype=asm", opt, "-o", sFile, llFile])
+        Linux -> (llc, ["--filetype=asm", opt, "-o", sFile, llFile])
         os    -> error $ "Unsupported OS: " ++ show os
 
 
@@ -195,9 +196,10 @@ llvmToNativeAssemblerCommand llFile sFile options =
 llvmToObjectCommand :: FilePath -> FilePath -> Options  -> (String, [String])
 llvmToObjectCommand llFile oFile options =
     let opt = "-O" ++ show (optLLVMOptLevel options)
+        llc = optLlcBin options
     in case buildOS of
-        OSX   -> ("llc", ["--filetype=obj", opt, "-o", oFile, llFile])
-        Linux -> ("llc", ["--filetype=obj", opt, "-o", oFile, llFile])
+        OSX   -> (llc, ["--filetype=obj", opt, "-o", oFile, llFile])
+        Linux -> (llc, ["--filetype=obj", opt, "-o", oFile, llFile])
         os    -> error $ "Unsupported OS: " ++ show os
 
 

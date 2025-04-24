@@ -96,14 +96,15 @@ logDumpWith :: (Handle -> ModSpec -> Bool -> Bool -> Compiler ())
             -> LogSelection -> LogSelection -> String -> Compiler ()
 logDumpWith llPrinter selector1 selector2 pass =
     whenLogging2 selector1 selector2 $ do
+        logFile <- gets logHandle
         modList <- gets (Map.elems . modules)
         dumpLib <- gets (optDumpLib . options)
         let toLog mod = let spec  = modSpec mod
                         in  List.null spec || dumpLib || head spec /= "wybe"
         let logging = List.filter toLog modList
-        liftIO $ hPutStrLn stderr $ replicate 70 '='
+        liftIO $ hPutStrLn logFile $ replicate 70 '='
                     ++ "\nAFTER " ++ pass ++ ":\n"
         forM_ logging $ \mod -> do
-                liftIO $ hPutStrLn stderr $ "\n" ++ replicate 50 '-' ++ "\n"
+                liftIO $ hPutStrLn logFile $ "\n" ++ replicate 50 '-' ++ "\n"
                         ++ show mod ++ "\n\n  LLVM code       :\n"
-                llPrinter stderr (modSpec mod) False False
+                llPrinter logFile (modSpec mod) False False
