@@ -4,6 +4,7 @@
 --  Copyright: (c) 2024 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+{-# LANGUAGE LambdaCase #-}
 
 
 module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM, BinOpInfo(..) ) where
@@ -36,6 +37,7 @@ import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
 import Distribution.TestSuite (TestInstance(name))
+import Distribution.Simple.Utils (info)
 
 
 -- BEGIN MAJOR DOC
@@ -234,6 +236,10 @@ writeLLVM handle modSpec withLPVM recursive = do
     reenterModule modSpec
     flip execStateT (initLLVMState handle) $ do
         forEachModule allMods preScanProcs
+        logLLVM "Generating LLVM code for modules:"
+        forEachModule allMods $ do
+            m <- lift $ getModule id
+            logLLVM $ show m ++ "\n"
         writeAssemblyPrologue
         writeAssemblyConstants
         writeAssemblyExterns
@@ -271,47 +277,75 @@ preScanProcs = do
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
     let bodies = concatMap (concatMap allProcBodies) procss
     mapM_ (mapLPVMBodyM (recordExtern mod) prescanArg) bodies
-
-
--- | What's needed to identify a manifest constant string in generated LLVM
--- code.  Wybe string constants (usually) consist of a size and a pointer to a C
--- string, while C strings are C pointers to 0-terminated packed arrays of
--- bytes.
-data StaticConstSpec = CStringSpec String
-                     | WybeStringSpec String
-                     | ClosureSpec ProcSpec [PrimArg]
-    deriving (Eq,Ord)
-
-instance Show StaticConstSpec where
-    show (CStringSpec str) = 'c' : show str
-    show (WybeStringSpec str) = show str
-    show (ClosureSpec pspec args) = show pspec ++ showArguments args
+    consts <- lift $ getModule modStructs
+    logLLVM $ "after preScanProcs, consts = "
+                ++ showMap "{" ", " "}" ((++":: ") . show) show consts
 
 
 -- | If the specified PrimArg is a string constant or closure with only constant
 -- arguments, add it to the set.  For Wybe strings, add both the Wybe string and
 -- the C string, since the Wybe string constant refers to the C string.
 prescanArg :: PrimArg -> LLVM ()
-prescanArg (ArgString str WybeString _) = do
-    recordConst $ WybeStringSpec str
-    recordConst $ CStringSpec str
-prescanArg (ArgString str CString _) =
-    recordConst $ CStringSpec str
-prescanArg (ArgClosure pspec args _) = do
-    args' <- neededFreeArgs pspec args
-    if all argIsConst args'
-    then
-        recordConst $ ClosureSpec pspec args
-    else
-        recordExternSpec externAlloc
-prescanArg _ = return ()
+prescanArg closure@(ArgClosure _ args _) = do
+    recordExternSpec externAlloc
+    argConstValue closure >>= maybe (return ()) recordIfConst
+    mapM_ prescanArg args
+prescanArg arg =
+    argConstValue arg >>= maybe (return ()) recordIfConst
 
 
--- | Record that the specified constant needs to be declared in this LLVM module
-recordConst :: StaticConstSpec -> LLVM ()
-recordConst spec =
-    modify $ \s -> s {allConsts=Set.insert spec $ allConsts s}
+recordIfConst :: ConstValue -> LLVM ()
+recordIfConst (PointerStructMember structID) = do
+    constInfo <- lift $ lookupConstInfo structID
+    logLLVM $ "Recording const " ++ show structID
+                ++ " ( -> " ++ show constInfo ++ ")"
+    recordConst structID
+recordIfConst (GenericStructMember member) =
+    recordIfConst member
+recordIfConst _ = return ()
 
+
+-- | Record that the specified constant needs to be declared in this LLVM
+-- module, as well as any constants it refers to.
+recordConst :: StructID -> LLVM ()
+recordConst spec = do
+    logLLVM $ "Recording constant " ++ show spec
+    new <- gets $ Set.notMember spec . allConsts
+    when new $ do
+        modify $ \s -> s {allConsts=Set.insert spec $ allConsts s}
+        lift (lookupConstInfo spec) >>=
+                maybe (return ()) recordConstParts
+
+
+-- | Record the pointer parts of a constant structure.
+recordConstParts :: StructInfo -> LLVM ()
+recordConstParts CStringInfo{} = return ()
+recordConstParts StructInfo{structData=members} = do
+    logLLVM $ "Recording parts of constant struct " ++ show members
+    mapM_ recordIfConst members
+
+
+-- | Produce a StructMember from a PrimArg, if it's a constant.  This may record
+-- new constants in the current module.
+argConstValue :: PrimArg -> LLVM (Maybe ConstValue)
+argConstValue ArgVar{} = return Nothing
+argConstValue (ArgInt n ty) = do
+    sz <- typeRepSize <$> lift (typeRepresentation ty)
+    return $ Just $ IntStructMember n (sz `div` byteBits)
+argConstValue (ArgFloat n ty) = do
+    sz <- typeRepSize <$> lift (typeRepresentation ty)
+    return $ Just $ FloatStructMember n (sz `div` byteBits)
+argConstValue ArgClosure{} = return Nothing -- const closures already handled
+argConstValue (ArgGlobal info _) = do
+    -- XXX is ArgGlobal a constant?  Does it give the address, or value, of the
+    -- global?
+    return Nothing
+argConstValue (ArgConstRef structID _) = do
+    return $ Just $ PointerStructMember structID
+argConstValue ArgUnneeded{} = return Nothing
+argConstValue (ArgUndef ty) = do
+    sz <- typeRepSize <$> lift (typeRepresentation ty)
+    return $ Just $ UndefStructMember (sz `div` byteBits)
 
 
 -- | If needed, add an extern declaration for a prim to the set.
@@ -428,8 +462,8 @@ writeAssemblyPrologue = do
 writeAssemblyConstants :: LLVM ()
 writeAssemblyConstants = do
     logLLVM "writeAssemblyConstants"
-    strings <- gets $ Set.toList . allConsts
-    zipWithM_ writeConstDeclaration strings [0..]
+    consts <- gets $ Set.toList . allConsts
+    mapM_ writeConstDeclaration consts
     llvmBlankLine
 
 
@@ -437,46 +471,12 @@ writeAssemblyConstants = do
 -- assumes that the CString that a WybeString refers to has already been
 -- declared and recorded.  This will happen because sets are sorted
 -- alphabetically, and CString comes before WybeString.
-writeConstDeclaration :: StaticConstSpec -> Int -> LLVM ()
-writeConstDeclaration spec@(WybeStringSpec str) n = do
-    let stringName = specialName2 "string" $ show n
-    modify $ \s -> s { constNames=Map.insert spec stringName
-                                       $ constNames s}
-    textName <- lookupConstant $ CStringSpec str
-    declareStructConstant stringName
-        [ (ArgInt (fromIntegral $ length str) (Representation $ Bits wordSize)
-          , Bits wordSize)
-        , (ArgGlobal (GlobalVariable textName) (Representation CPointer)
-          , Pointer)]
-        Nothing
-writeConstDeclaration spec@(CStringSpec str) n = do
-    let textName = specialName2 "cstring" $ show n
-    modify $ \s -> s { constNames=Map.insert spec textName
-                                       $ constNames s}
-    declareStringConstant textName str Nothing
-writeConstDeclaration spec@(ClosureSpec pspec args) n = do
-    let closureName = specialName2 "closure" $ show n
-    modify $ \s -> s { constNames=Map.insert spec closureName $ constNames s}
-    let pname = show pspec
-    argReps <- mapM argTypeRep args
-    declareStructConstant closureName
-        ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
-         : zip args argReps)
-        Nothing
-
-
--- | Find the global constant that holds the value of the specified string
--- constant.
-lookupConstant :: StaticConstSpec -> LLVM Ident
-lookupConstant spec =
-    trustFromJust ("lookupConstant " ++ show spec) <$> tryLookupConstant spec
-
-
--- | Find the global constant that holds the value of the specified string
--- constant.
-tryLookupConstant :: StaticConstSpec -> LLVM (Maybe Ident)
-tryLookupConstant spec =
-    gets $ Map.lookup spec . constNames
+writeConstDeclaration :: StructID -> LLVM ()
+writeConstDeclaration structID = do
+    info <- trustFromJust ("writeConstDeclaration of " ++ show structID)
+            <$> lift (lookupConstInfo structID)
+    let structName = structConstName structID
+    declareStructConstant structName info Nothing
 
 
 ----------------------------------------------------------------------------
@@ -784,19 +784,16 @@ writeWybeCall wybeProc args pos = do
 
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
-writeHOCall (ArgClosure pspec closed _) args pos = do
-    -- NB:  this case doesn't seem to ever occur
-    pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
-    logLLVM $ "Compiling HO call as first order call to " ++ show pspec'
-              ++ " closed over " ++ show closed
-    writeWybeCall pspec' (closed ++ args) pos
+writeHOCall closure@(ArgClosure pspec closed _) args pos = do
+    -- NB:  this case should have been handled earlier
+    shouldnt $ "Higher order call with constand closure should have been handled earlier: " ++ show closure
 writeHOCall closure args pos = do
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs $ closure:args
     unless (List.null oRefs && List.null iRefs)
         $ nyi $ "Higher order call with out-by-ref or take-ref argument "
                 ++ show (PrimHigher 0 closure Pure args)
     allPhantoms <- and <$> lift (mapM argIsPhantom outs)
-    let ty = argVarType closure
+    let ty = argType closure
     unless (allPhantoms && not (isResourcefulHigherOrder ty)
                 && modifierImpurity (higherTypeModifiers ty) <= Pure) $ do
         outTy <- llvmReturnType $ List.map argType outs
@@ -925,7 +922,8 @@ writeLPVMCall "access" _ args pos = do
                 ArgInt 0 _ -> return struct
                 _ -> do
                         (writeArg,readArg) <- freshTempArgs $ argType struct
-                        writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
+                        struct' <- typeConvertedPrim Pointer struct
+                        writeLLVMCall "add" [] [struct',offset,writeArg] Nothing
                         return readArg
             lltype <- llvmTypeRep <$> argTypeRep member
             arg <- typeConvertedArg CPointer addrArg
@@ -1069,20 +1067,34 @@ declareStringConstant name str section = do
 
 -- | Emit an LLVM declaration for a string constant, optionally specifying a
 -- file section.
-declareStructConstant :: LLVMName -> [ConstSpec] -> Maybe String -> LLVM ()
-declareStructConstant name fields section = do
-    llvmFields <- llvmConstStruct fields
+declareStructConstant :: LLVMName -> StructInfo -> Maybe String -> LLVM ()
+declareStructConstant name (StructInfo sz members) section = do
+    llvmFields <- llvmConstStruct members
     llvmPutStrLn $ llvmGlobalName name
                     ++ " = private unnamed_addr constant " ++ llvmFields
                     ++ maybe "" ((", section "++) . show) section
                     ++ ", align " ++ show wordSizeBytes
+declareStructConstant name (CStringInfo str) section = do
+    llvmPutStrLn $ llvmGlobalName name
+                    ++ " = private unnamed_addr constant "
+                    ++ showLLVMString str True
+                    ++ maybe "" ((", section "++) . show) section
+                    ++ ", align " ++ show wordSizeBytes
+
+-- | The representation of a constant value as seen by LLVM, as distinguished
+-- from the representation used by Wybe.  Pointer struct members are seen as
+-- CPointers, while other values are seen as their Wybe representation.
+llvmConstValueRep :: ConstValue -> TypeRepresentation
+llvmConstValueRep (PointerStructMember structID) = CPointer
+llvmConstValueRep other = constValueRepresentation other
 
 
 -- | Build a string giving the body of an llvm constant structure declaration
-llvmConstStruct :: [ConstSpec] -> LLVM String
-llvmConstStruct fields = do
-    llvmVals <- mapM (uncurry convertedConstantArg) fields
-    return $ llvmStructType (snd <$> fields)
+llvmConstStruct :: [ConstValue] -> LLVM String
+llvmConstStruct members = do
+    let reps = llvmConstValueRep <$> members
+    llvmVals <- zipWithM convertedConstantArg members reps
+    return $ llvmStructType reps
             ++ " { " ++ intercalate ", " llvmVals ++ " }"
 
 
@@ -1398,13 +1410,12 @@ marshallArgument arg cType = do
 
 -- | The LLVM type of the specified argument.  Wybe strings are Wybe pointers; C
 -- strings are also Wybe pointers, because we do address arithmetic on them;
--- globals are C pointers.  Other kinds of args are represented however their
--- types say they are.
+-- globals, closures, and structure constants are C pointers.  Other kinds of
+-- args are represented however their types say they are.
 argTypeRep :: PrimArg -> LLVM TypeRepresentation
-argTypeRep (ArgString _ WybeString _) = return Pointer
-argTypeRep (ArgString _ CString _)    = return Pointer
 argTypeRep ArgGlobal{}                = return CPointer
 argTypeRep ArgClosure{}               = return CPointer
+argTypeRep ArgConstRef{}              = return CPointer
 argTypeRep arg                        = typeRep $ argType arg
 
 
@@ -1436,21 +1447,11 @@ llvmValue argVar@ArgVar{argVarName=var, argVarType=ty} = do
             typeConverted thisRep argVar{argVarType=Representation defRep}
 llvmValue (ArgInt val _) = return $ show val
 llvmValue (ArgFloat val _) = return $ show val
-llvmValue (ArgString str stringVariant _) = do
-    let spec = case stringVariant of
-                WybeString -> WybeStringSpec str
-                CString    -> CStringSpec str
-    glob <- lookupConstant spec
-    convertedConstant
-        (ArgGlobal (GlobalVariable glob) $ Representation CPointer) Pointer
-llvmValue (ArgChar val _) = return $ show $ fromEnum val
 llvmValue arg@(ArgClosure pspec args ty) = do
     logLLVM $ "llvmValue of " ++ show arg
     -- See if we've already allocated a constant for this closure
-    glob <- tryLookupConstant $ ClosureSpec pspec args
-    case glob of
-        Just constName ->
-            return $ llvmGlobalName constName
+    argConstValue arg >>= \case
+        Just const -> llvmConstValue const
         Nothing -> do
             (writePtr,readPtr) <- freshTempArgs $ Representation CPointer
             let fnRef = funcRef pspec
@@ -1466,8 +1467,23 @@ llvmValue arg@(ArgClosure pspec args ty) = do
             logLLVM $ "Converting to representation " ++ show rep
             llvmValue readPtr
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
+llvmValue (ArgConstRef structID _) =
+    return $ llvmGlobalName $ structConstName structID
 llvmValue (ArgUnneeded val _) = return "undef"
 llvmValue (ArgUndef _) = return "undef"
+
+
+-- | Generate the LLVM code for the specified constant value.
+llvmConstValue :: ConstValue -> LLVM String
+llvmConstValue (IntStructMember val _) = return $ show val
+llvmConstValue (FloatStructMember val _) = return $ show val
+llvmConstValue (PointerStructMember structID) =
+    return $ llvmGlobalName $ structConstName structID
+llvmConstValue (FnPointerStructMember pspec) =
+    return $ llvmGlobalName (show pspec)
+llvmConstValue (UndefStructMember sz) = return "undef"
+llvmConstValue (GenericStructMember val) =
+    convertedConstant val Pointer
 
 
 -- | The LLVMArg translation of a ProcSpec.
@@ -1495,9 +1511,7 @@ neededFreeArgs pspec args = lift $ do
 
 -- | Return the representation for the specified type
 typeRep :: TypeSpec -> LLVM TypeRepresentation
-typeRep ty =
-    trustFromJust ("lookupTypeRepresentation of unknown type " ++ show ty)
-      <$> lift (lookupTypeRepresentation ty)
+typeRep = lift . typeRepresentation
 
 
 -- | Return the LLMV name and type representation of the specified resource.
@@ -1597,55 +1611,54 @@ typeConvertedPrim toTy fromArg = do
 -- | LLVM code to convert PrimArg fromVal to representation toTy, returning an
 -- LLVMArg holding the converted value.
 typeConvertedArg :: TypeRepresentation -> PrimArg -> LLVM LLVMArg
-typeConvertedArg toTy fromArg
-    | argIsConst fromArg = convertedConstantArg fromArg toTy
-    | otherwise = typeConvertedPrim toTy fromArg >>= llvmArgument
+typeConvertedArg toTy fromArg =
+    argConstValue fromArg >>= \case
+        Just val -> convertedConstantArg val toTy
+        Nothing -> typeConvertedPrim toTy fromArg >>= llvmArgument
 
 
 -- | LLVM code to convert PrimArg fromVal to representation toTy, returning a
 -- LLVMName (ie, without type prefix) holding the converted value.
 typeConverted :: TypeRepresentation -> PrimArg -> LLVM LLVMName
-typeConverted toTy fromArg
-    | argIsConst fromArg = convertedConstant fromArg toTy
-    | otherwise = do
-        argRep <- argTypeRep fromArg
-        if equivLLTypes argRep toTy
-            then llvmValue fromArg
-            else do
-                (writeArg,readArg) <- freshTempArgs $ Representation toTy
-                typeConvert fromArg writeArg
-                llvmValue readArg
+typeConverted toTy fromArg =
+    argConstValue fromArg >>= \case
+        Just val -> convertedConstant val toTy
+        Nothing -> do
+            argRep <- argTypeRep fromArg
+            if equivLLTypes argRep toTy
+                then llvmValue fromArg
+                else do
+                    (writeArg,readArg) <- freshTempArgs $ Representation toTy
+                    typeConvert fromArg writeArg
+                    llvmValue readArg
 
 
 -- | An LLVM constant expression of the specified type toTy, when the constant
--- is initially of the specified type fromTy.  This may take the form of an
--- LLVM type conversion expression, which is fully evaluated at compile-time, so
--- it cannot involve conversion instructions.
-convertedConstant :: PrimArg -> TypeRepresentation -> LLVM LLVMName
-convertedConstant arg toTy = do
-    -- XXX should verify that arg is constant, if ArgGlobal is considered const
-    logLLVM $ "Converting constant " ++ show arg ++ " to type " ++ show toTy
-    fromTy <- argTypeRep arg
-    logLLVM $ "  conversion " ++ show fromTy ++ " -> " ++ show toTy
-            ++ (if trivialConstConversion fromTy toTy then " IS" else " is NOT")
+-- may initially have a different but convertable type.  This may take the form
+-- of an LLVM type conversion expression, which is fully evaluated at
+-- compile-time, so it cannot involve conversion instructions.
+convertedConstant :: ConstValue -> TypeRepresentation -> LLVM LLVMName
+convertedConstant const toRep = do
+    logLLVM $ "Converting constant " ++ show const ++ " to type " ++ show toRep
+    let fromRep = llvmConstValueRep const
+    logLLVM $ "  conversion " ++ show fromRep ++ " -> " ++ show toRep
+            ++ (if trivialConstConversion fromRep toRep then " IS" else " is NOT")
             ++ " trivial"
-    if trivialConstConversion fromTy toTy
-        then llvmValue arg
+    fromVal <- llvmConstValue const
+    let fromArg = makeLLVMArg (llvmTypeRep fromRep) fromVal
+    if trivialConstConversion fromRep toRep
+        then return fromVal
         else do
-            fromArg <- llvmArgument arg
-            return $ typeConvertOp fromTy toTy ++ "( "
-                         ++ fromArg ++ " to " ++ llvmTypeRep toTy ++ " )"
+            return $ typeConvertOp fromRep toRep ++ "( "
+                         ++ fromArg ++ " to " ++ llvmTypeRep toRep ++ " )"
 
-
--- | An LLVM constant expression of the specified type toTy, when the constant
--- is initially of the specified type fromTy.  This may take the form of an
--- LLVM type conversion expression, which is fully evaluated at compile-time, so
--- it cannot involve conversion instructions.
-convertedConstantArg :: PrimArg -> TypeRepresentation -> LLVM LLVMArg
-convertedConstantArg arg toTy = do
-    -- XXX should verify that arg is constant, if ArgGlobal is considered const
-    makeLLVMArg (llvmTypeRep toTy) <$> convertedConstant arg toTy
-
+-- | An LLVM argument of the specified type toTy, when the constant
+-- may initially have a different but convertable type.  This includes the LLVM
+-- type in the result.
+convertedConstantArg :: ConstValue -> TypeRepresentation -> LLVM LLVMArg
+convertedConstantArg const toRep = do
+    val <- convertedConstant const toRep
+    return $ makeLLVMArg (llvmTypeRep toRep) val
 
 
 -- Converting constants from the first type to the second is completely trivial,
@@ -1711,6 +1724,8 @@ typeConvertOp (Floating m) (Floating n)
     | n < m = "fptrunc"
     | otherwise = shouldnt "no-op floating point conversion"
 typeConvertOp CPointer (Bits _) = "ptrtoint"
+-- because CPointer is used for generic data
+typeConvertOp CPointer (Signed _) = "ptrtoint"
 -- These don't change representation, or change any bits.  They just
 -- re-interpret a FP number as an integer or vice versa.  This ensures we don't
 -- lose precision or waste time on round trip conversion.
@@ -1775,10 +1790,10 @@ type ConstSpec = (PrimArg,TypeRepresentation)
 -- | The LLVM State monad
 data LLVMState = LLVMState {
         -- These values apply to a whole module (and submodules)
-        allConsts :: Set StaticConstSpec,
+        allConsts :: Set StructID,
                                      -- ^ Static constants appearing in module
-        constNames :: Map StaticConstSpec Ident,
-                                    -- ^ local name given to static constants
+        -- constNames :: Map StaticConstSpec Ident,
+        --                             -- ^ local name given to static constants
         allExterns :: Map String ExternSpec,
                                     -- ^ Extern declarations needed by module
         fileHandle :: Handle,       -- ^ The file handle we're writing to
@@ -1808,7 +1823,7 @@ data LLVMState = LLVMState {
 
 -- | Set up LLVM monad to translate a module into the given file handle
 initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState Set.empty Map.empty Map.empty h 0 0 Set.empty
+initLLVMState h = LLVMState Set.empty Map.empty h 0 0 Set.empty
                      Map.empty Map.empty Nothing Map.empty Map.empty False
 
 
