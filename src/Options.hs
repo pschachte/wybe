@@ -41,10 +41,13 @@ data Options = Options
     , optHelpLog       :: Bool     -- ^Print log option help and exit
     , optHelpOpt       :: Bool     -- ^Print optiisation option help and exit
     , optLibDirs       :: [String] -- ^Directories where library files live
+    , optLogFile       :: Maybe String 
+                                   -- ^Path where to dump logs
     , optLogAspects    :: Set LogSelection
                                    -- ^Which aspects to log
     , optOptimisations :: Set OptFlag
                                    -- ^Enabled optimisations
+    , optLlcBin        :: String   -- ^LLVM 'llc' binary path
     , optLLVMOptLevel  :: Word     -- ^LLVM optimisation level
     , optDumpLib       :: Bool     -- ^Also dump wybe.* modules when dumping
     , optVerbose       :: Bool     -- ^Be verbose in compiler output
@@ -66,7 +69,9 @@ defaultOptions = Options
   , optHelpOpt       = False
   , optLibDirs       = []
   , optLogAspects    = Set.empty
+  , optLogFile       = Nothing
   , optOptimisations = defaultOptFlags
+  , optLlcBin        = "llc"
   , optLLVMOptLevel  = 3
   , optDumpLib       = False
   , optVerbose       = False
@@ -222,8 +227,11 @@ options =
         (ReqArg (\ d opts -> opts { optLibDirs = optLibDirs opts ++ [d] }) "DIR")
         ("specify a library directory [default $WYBELIBS or " ++ libDir ++ "]")
     , Option ['l'] ["log"]
-      (ReqArg addLogAspects "ASPECT")
-       "add comma-separated aspects to log, or 'all'"
+        (ReqArg addLogAspects "ASPECT")
+        "add comma-separated aspects to log, or 'all'"
+    , Option [] ["log-file"]
+        (ReqArg (\ f opts -> opts { optLogFile = Just f }) "FILE")
+        "File to write logs to"
     , Option ['h'] ["help"]
         (NoArg (\ opts -> opts { optShowHelp = True }))
         "display this help text and exit"
@@ -239,6 +247,9 @@ options =
     , Option ['x'] ["opt"]
         (ReqArg addOptFlags "FLAGS")
         "add comma-separated optimisation flags"
+    , Option [] ["llc-path"]
+        (ReqArg (\ llc opts -> opts { optLlcBin = llc }) "PATH")
+        "specify the path of the 'llc' used"
     , Option ['O'] ["llvm-opt-level"]
         (ReqArg setLLVMOptLevel "LEVEL")
         "specify the LLVM compiler optimisation level"
