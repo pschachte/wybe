@@ -29,7 +29,7 @@ jobs:
 
     # cache Haskell Stack stuff
     - name: Cache stack global package db
-      uses: actions/cache@v1
+      uses: actions/cache@v4
       with:
         path: ~/.stack
         key: ${{ runner.os }}-stack-global-${{ hashFiles('stack.yaml') }}-${{ hashFiles('wybe.cabal') }}
@@ -37,14 +37,14 @@ jobs:
           ${{ runner.os }}-stack-global-${{ hashFiles('stack.yaml') }}
         # drop the cache if stack.yaml has been changed
     - name: Cache stack-installed programs in ~/.local/bin
-      uses: actions/cache@v1
+      uses: actions/cache@v4
       with:
         path: ~/.local/bin
         key: ${{ runner.os }}-stack-programs-${{ hashFiles('stack.yaml') }}-${{ hashFiles('wybe.cabal') }}
         restore-keys: |
           ${{ runner.os }}-stack-programs-${{ hashFiles('stack.yaml') }}
     - name: Cache .stack-work
-      uses: actions/cache@v1
+      uses: actions/cache@v4
       with:
         path: .stack-work
         key: ${{ runner.os }}-stack-work-${{ hashFiles('stack.yaml') }}-${{ hashFiles('wybe.cabal') }}
