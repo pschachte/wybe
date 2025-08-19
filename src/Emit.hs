@@ -6,8 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 module Emit (emitObjectFile, emitBitcodeFile, emitAssemblyFile,
-             emitNativeAssemblyFile, makeArchive, makeExec, extractLLVM,
-             logLLVMString
+             emitNativeAssemblyFile, makeArchive, makeExec
             )
 where
 
@@ -41,31 +40,11 @@ import           System.Exit                (ExitCode (..))
 import           System.IO                  (openFile, hClose, Handle,
                                              IOMode (WriteMode), hPutStrLn)
 import           System.Process             (proc, readCreateProcessWithExitCode)
-import           System.FilePath            ((-<.>))
-import           System.Directory           (getPermissions, writable, doesFileExist, removeFile)
-import           Util                       (createLocalCacheFile)
+import           System.FilePath            ((-<.>), takeDirectory)
+import           System.Directory           (getPermissions, removeFile)
+import           Util                       (createLocalCacheFile, pathIsWriteable)
 import           LLVM
 import Data.String
-
-----------------------------------------------------------------------------
--- For now, make placebo definitions of LLVM-related types
-----------------------------------------------------------------------------
-
-type LLVMModule = ()
-type Definition = ()
-type PassSetSpec = [String]
-
-
--- This does not check the permission if the file does not exists.
--- It is fine for our current usage, but we should improve it.
-_haveWritePermission :: FilePath -> IO Bool
-_haveWritePermission file = do
-    exists <- doesFileExist file
-    if exists
-    then do
-        permission <- getPermissions file
-        return $ writable permission
-    else return True
 
 
 -- | With a LPVM Module, create a target object file, including the serialised
@@ -77,7 +56,7 @@ emitObjectFile m f = do
     logEmit $ "===> Producing object file " ++ filename
     userOptions <- gets options
     filename <- do
-        writable <- liftIO $ _haveWritePermission filename
+        writable <- liftIO $ pathIsWriteable filename
         if writable
         then return filename
         else do
@@ -154,11 +133,6 @@ runOSCmd cmd cmdLine = do
 liftError :: ExceptT String IO a -> IO a
 liftError = runExceptT >=> either fail return
 
--- | Return string form LLVM IR represenation of a LLVMModule
--- codeemit :: Options -> LLVMModule -> IO BS.ByteString
--- codeemit opts llmod = withOptimisedModule opts llmod moduleLLVMAssembly
--- codeemit noVerify llmod = withModule noVerify llmod moduleLLVMAssembly
-
 
 -------------------------------------------------------------------------------
 -- Optimisations                                                             --
@@ -166,54 +140,9 @@ liftError = runExceptT >=> either fail return
 
 -- | Setup the set of passes for optimisations.
 -- Currently using the curated set provided by LLVM.
-passes :: Word -> PassSetSpec
--- passes lvl = defaultCuratedPassSetSpec { optLevel = Just lvl }
+passes :: Word -> [String]
 passes lvl = ["-O" ++ show lvl]
 
-
--- -- | Return a string LLVM IR representation of a LLVMModule after
--- -- a curated set of passes has been executed on the C++ Module form.
--- codeEmitWithPasses :: LLVMModule -> IO BS.ByteString
--- codeEmitWithPasses llmod =
---     withContext $ \context ->
---         withModuleFromAST context llmod $ \m ->
---             withPassManager passes $ \pm -> do
---                 success <- runPassManager pm m
---                 if success
---                     then moduleLLVMAssembly m
---                     else error "Running of optimisation passes not successful!"
-
--- -- | Testing function to analyse optimisation passes.
--- testOptimisations :: LLVMModule -> IO ()
--- testOptimisations llmod = do
---     llstr <- codeEmitWithPasses llmod
---     putStrLn $ replicate 80 '-'
---     putStrLn "Optimisation Passes"
---     putStrLn $ replicate 80 '-'
---     B8.putStrLn llstr
---     putStrLn $ replicate 80 '-'
-
-
--- | Using a bracket pattern, perform an action on the C++ Module
--- representation of a LLVMModule after the C++ module has been through
--- a set of curated passes.
--- withOptimisedModule :: Options -> LLVMModule -> (LLVMModule -> IO a) -> IO a
--- withOptimisedModule opts@Options{optLLVMOptLevel=lvl} llmod action =
---     withModule opts llmod $ \m -> do
---         withPassManager (passes lvl) $ \pm -> do
---             success <- runPassManager pm m
---             if success
---             then action m
---             else error "Running of optimisation passes not successful"
-
-
--- -- | Bracket pattern to run an [action] on the [LLVMModule].
--- withModule :: Options -> LLVMModule -> (LLVMModule -> IO a) -> IO a
--- withModule Options{optNoVerifyLLVM=noVerify} llmod action =
---     withContext $ \context ->
---         withModuleFromAST context llmod $ \m -> do
---             unless noVerify $ verify m
---             action m
 
 
 ----------------------------------------------------------------------------
@@ -283,40 +212,3 @@ makeArchive ofiles target = do
 
 logEmit :: String -> Compiler ()
 logEmit = logMsg Emit
-
--- | Log LLVM IR representation of the given module.
-logLLVMString :: ModSpec -> Compiler ()
-logLLVMString thisMod = do
-    -- reenterModule thisMod
-    -- maybeLLMod <- getModuleImplementationField modLLVM
-    -- case maybeLLMod of
-    --     (Just llmod) -> do
-    --         let llstr = ppllvm llmod
-    --         logEmit $ replicate 80 '-'
-    --         logEmit $ TL.unpack llstr
-    --         logEmit $ replicate 80 '-'
-    --     Nothing -> error "No LLVM Module Implementation"
-    -- reexitModule
-    return ()
-
--- | Pull the LLVMAST representation of the module and generate the LLVM
--- IR String for it, if it exists.
-extractLLVM :: AST.Module -> Compiler String
-extractLLVM thisMod = do
-    return "No LLVM generation yet"
-    -- opts <- gets options
-    -- case modImplementation thisMod >>= modLLVM of
-    --     Just llmod -> liftIO $ B8.unpack <$> codeemit opts llmod
-    --     Nothing    -> return "No LLVM IR generated."
-
--- | Log the LLVMIR strings for all the modules compiled, except the standard
--- library.
-logLLVMDump :: LogSelection -> LogSelection -> String -> Compiler ()
-logLLVMDump selector1 selector2 pass =
-    whenLogging2 selector1 selector2 $ do
-        modList <- gets (Map.elems . modules)
-        let noLibMod = List.filter ((/="wybe"). List.head . modSpec) modList
-        liftIO $ putStrLn $ showModSpecs $ List.map modSpec noLibMod
-        llvmir <- mapM extractLLVM noLibMod
-        liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n\n" ++
-            intercalate ("\n" ++ replicate 50 '-' ++ "\n") llvmir
