@@ -52,17 +52,17 @@ import Data.String
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
 emitObjectFile m f = do
     let filename = f -<.> Config.objectExtension
-    llFilename <- emitAssemblyFile m f
-    logEmit $ "===> Producing object file " ++ filename
-    userOptions <- gets options
+    writable <- liftIO $ pathIsWriteable filename
     filename <- do
-        writable <- liftIO $ pathIsWriteable filename
         if writable
         then return filename
         else do
             logEmit $ "Do not have write permission on file " ++ filename
                 ++ ", use local cache file instead"
             liftIO $ createLocalCacheFile filename
+    llFilename <- emitAssemblyFile m filename
+    logEmit $ "===> Producing object file " ++ filename
+    userOptions <- gets options
     let (cmd,cmdLine) = llvmToObjectCommand llFilename filename userOptions
     runOSCmd cmd cmdLine
     lift $ removeFile llFilename
