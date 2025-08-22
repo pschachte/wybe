@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: res: resource_conflict_b.res
   public procs    : 
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(resource_conflict_b.res,wybe.char = 'c' @resource_conflict_b:nn:nn @resource_conflict_b:nn:nn)]
   procs           : 

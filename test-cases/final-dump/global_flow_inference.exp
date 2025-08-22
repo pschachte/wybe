@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(global_flow_inference.res,wybe.int = 1 @global_flow_inference:nn:nn @global_flow_inference:nn:nn)]
   procs           : 

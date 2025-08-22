@@ -33,7 +33,7 @@ instance Show Module where
            bracketList "(" ", " ")" (show <$> modParams mod) ++
            (if typeMods == defaultTypeModifiers
                then ""
-               else "\n modifiers       : " ++ (show $ typeModifiers int)) ++
+               else "\n modifiers       : " ++ show (typeModifiers int)) ++
            "\n  representation  : " ++
            (if modIsType mod
             then maybe "(not yet known)" show (modTypeRep mod)
@@ -46,6 +46,9 @@ instance Show Module where
            intercalate "\n                    "
            (List.map show $ Set.toList $ Set.unions $
             List.map Map.keysSet $ Map.elems $ pubProcs int) ++
+           "\n  constants       : "
+           ++ showMap "" "\n                    " ""
+                    ((++":: ") . show) show (modStructs mod) ++ 
            if isNothing maybeimpl then "\n  implementation not available"
            else let impl = fromJust maybeimpl
                 in
@@ -65,8 +68,7 @@ instance Show Module where
                        (modSubmods impl)) ++
                  "\n  procs           : " ++ "\n" ++
                  showMap "" "\n\n" "" (const "") (showProcDefs 0)
-                  (modProcs impl) ++
-                  ""
+                  (modProcs impl)
 
 
 -- |How to show a map, one line per item.

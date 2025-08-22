@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : explicit_type_warning.=<0>
                     explicit_type_warning.~=<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
