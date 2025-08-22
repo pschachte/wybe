@@ -333,7 +333,6 @@ buildTarget target = do
                         --     mapM_ (uncurry emitObjectFile) targets
                         other ->
                             nyi $ "output file type " ++ show other
-                    whenLogging Emit $ logLLVMString modspec
     liftIO $ removeDirectoryRecursive tmpDir
     logBuild $ "<=== Finished building target " ++ target
 
@@ -1078,7 +1077,7 @@ buildExecutable orderedSCCs targetMod target = do
 
 
 -- |Visit all dependencies that have a corresponding object file, emit object
--- files that does not exist or are outdated.
+-- files that do not exist or are outdated.
 emitObjectFilesIfNeeded :: [ModSpec] -> Compiler [FilePath]
 emitObjectFilesIfNeeded depends = do
     unchangedSet <- gets unchangedMods
