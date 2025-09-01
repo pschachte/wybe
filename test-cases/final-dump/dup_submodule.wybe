@@ -1,0 +1,11 @@
+module again {
+   pub def answer:int = 42
+}
+
+# should be an error:
+module again {
+   pub def foo:int = answer
+}
+
+!println "answer = $answer"
+!println "foo = $foo"

@@ -1,0 +1,2 @@
+Error detected during preliminary processing of module dup_submodule
+final-dump/dup_submodule.wybe:6:1: module dup_submodule.again already exists
