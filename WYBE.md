@@ -315,7 +315,7 @@ as first argument and returning a `string`.
 ## Procedure calls
 
 `!println("Hello, World!")` is a call to the procedure `println` with the string
-`Hello, World` as its only argument.
+`"Hello, World"` as its only argument.
 In general, procedure calls have the form:
 
 > *name*`(`*arg*, ... *arg*`)`,
