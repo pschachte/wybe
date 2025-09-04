@@ -15,6 +15,7 @@ module Util (sameLength, maybeNth, insertAt,
              mapDS, filterDS, dsToTransitivePairs,
              intersectMapIdentity, orElse,
              apply2way, (&&&), (|||), zipWith3M, zipWith3M_, lift2,
+             pathIsWriteable,
              useLocalCacheFileIfPossible, createLocalCacheFile
              ) where
 
@@ -35,8 +36,10 @@ import qualified Data.Text.Internal.Builder as BS
 import qualified Data.Text.Internal.Builder as BS.UTF8
 import           GHC.Generics (Generic)
 import           Flow         ((|>))
-import           System.FilePath ( (<.>), (</>) )
+import           System.FilePath ( (<.>), (</>), takeDirectory )
 import           System.Directory ( doesFileExist, removeFile, createDirectoryIfMissing )
+import System.Directory.Extra (Permissions(writable))
+import System.Directory (getPermissions)
 
 
 -- |Do the the two lists have the same length?
@@ -279,6 +282,16 @@ lift2 :: (MonadTrans t1, MonadTrans t2, Monad m, Monad (t2 m)) => m a -> t1 (t2 
 lift2 act = lift $ lift act
 
 
+-- | Check if we can write to the specified file path.
+pathIsWriteable :: FilePath -> IO Bool
+pathIsWriteable file = do
+    exists <- doesFileExist file
+    if exists
+    then writable <$> getPermissions file
+    else writable <$> getPermissions (takeDirectory file)
+
+
+
 ----------------------------------------------------------------
 --
 -- Wybe local cache file
@@ -319,8 +332,7 @@ _getFileHash file = do
     else return ""
 
 
--- | Given a file path and return the actual file that should be used.
--- It can be the original file or a local cache file.
+-- | Given a file path and return the local cache file name.
 useLocalCacheFileIfPossible :: FilePath -> IO FilePath
 useLocalCacheFileIfPossible file = do
     (cacheFile, meta) <- _localCachePathOfFile file

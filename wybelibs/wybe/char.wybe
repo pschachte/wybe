@@ -40,12 +40,23 @@ pub def {test} chr(i:count):_ = foreign lpvm cast(i) where { i <= 255:count }
 
 ## Formatting
 pub def fmt(x:_):string = string(x)
-
-pub def fmt(x:_):string = string(x)
 pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
 pub def fmt(x:_, minlength:int, fill:_):string =
     fmt(string(x), minlength, fill)
 
+pub def {test} is_whitespace(x:_) {
+    x = ' ' | x = '\t' | x = '\n' | x = '\r' | x = '\f' | x = '\v'
+}
+
+pub def {test} is_digit(x:_) { x >= '0' & x <= '9' }
+
+pub def {test} is_upper(x:_) { x >= 'A' & x <= 'Z' }
+
+pub def {test} is_lower(x:_) { x >= 'a' & x <= 'z' }
+
+pub def {test} is_alpha(x:_) { is_upper(x) | is_lower(x) }
+
+pub def {test} is_alphanumeric(x:_) { is_alpha(x) | is_digit(x) }
 
 ## I/O
 

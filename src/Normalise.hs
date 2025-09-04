@@ -55,18 +55,18 @@ normalise items = do
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) mods
               (TypeRepresentation rep) items pos) = do
-    validateModuleName "type" pos name
+    validateNewModuleName "type" pos name
     let items' = RepresentationDecl params mods rep pos : items
     unless (List.null params)
       $ errmsg pos "types defined by representation cannot have type parameters"
     normaliseSubmodule name vis pos items'
 normaliseItem (TypeDecl vis (TypeProto name params) mods
               (TypeCtors ctorVis ctors) items pos) = do
-    validateModuleName "type" pos name
+    validateNewModuleName "type" pos name
     let items' = ConstructorDecl ctorVis params mods ctors pos : items
     normaliseSubmodule name vis pos items'
 normaliseItem (ModuleDecl vis name items pos) = do
-    validateModuleName "module" pos name
+    validateNewModuleName "module" pos name
     normaliseSubmodule name vis pos items
 normaliseItem (RepresentationDecl params mods rep pos) = do
     updateTypeModifiers mods
@@ -301,7 +301,19 @@ completeTypeSCC (CyclicSCC modTypeDefs) = do
     mapM_ (uncurry completeType) modTypeDefs
 
 
--- |Check that the specified module name is valid, reporting and error if not.
+-- |Check that the specified name is a valid name for a new module of the
+-- current module.  Report an error if it's an invalid module name component or
+-- is the name of an existing submodule.
+validateNewModuleName :: String -> OptPos -> Ident -> Compiler ()
+validateNewModuleName what pos name = do
+    validateModuleName what pos name
+    subModSpec <- (++[name]) <$> getModuleSpec
+    alreadyExists <- isJust <$> getLoadingModule subModSpec
+    when alreadyExists
+      $ errmsg pos $ "module " ++ showModSpec subModSpec ++ " already exists"
+
+
+-- |Check that the specified module name is valid, reporting an error if not.
 validateModuleName :: String -> OptPos -> Ident -> Compiler ()
 validateModuleName what pos name =
     unless (validModuleName name)
