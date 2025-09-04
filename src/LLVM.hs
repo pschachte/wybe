@@ -337,8 +337,8 @@ argConstValue (ArgFloat n ty) = do
     return $ Just $ FloatStructMember n (sz `div` byteBits)
 argConstValue ArgClosure{} = return Nothing -- const closures already handled
 argConstValue (ArgGlobal info _) = do
-    -- XXX is ArgGlobal a constant?  Does it give the address, or value, of the
-    -- global?
+    -- XXX ArgGlobal is a constant pointer to a global resource or global value,
+    -- but for now we don't support them in constant structures
     return Nothing
 argConstValue (ArgConstRef structID _) = do
     return $ Just $ PointerStructMember structID
@@ -1792,8 +1792,6 @@ data LLVMState = LLVMState {
         -- These values apply to a whole module (and submodules)
         allConsts :: Set StructID,
                                      -- ^ Static constants appearing in module
-        -- constNames :: Map StaticConstSpec Ident,
-        --                             -- ^ local name given to static constants
         allExterns :: Map String ExternSpec,
                                     -- ^ Extern declarations needed by module
         fileHandle :: Handle,       -- ^ The file handle we're writing to

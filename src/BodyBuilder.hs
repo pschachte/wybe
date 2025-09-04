@@ -1095,13 +1095,6 @@ guessExp members = do
             return $ Just $ StringValue str WybeString
           _ -> return Nothing
       _ -> return Nothing
--- guessExp [(n,PointerStructMember id),(0,IntStructMember len _)] = do
---     structInfo <- lift $ lookupConstInfo id
---     case structInfo of
---         Just (StructInfo _ (FnPointerStructMember pspec:args)) -> do
---             args' <- mapM guessExp args
---             return $ Nothing
---         _ -> return Nothing
 
 
 
