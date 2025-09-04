@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use bug217.foo
                     use wybe
   resources       : 
@@ -33,6 +34,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
   public resources: 
   public procs    : bug217.foo.=<0>
                     bug217.foo.~=<0>
+  constants       : 
   imports         : use bug217
                     use bug217.foo.bar
                     use wybe
@@ -93,6 +95,7 @@ define external fastcc i1 @"bug217.foo.~=<0>"() {
   public resources: 
   public procs    : bug217.foo.bar.=<0>
                     bug217.foo.bar.~=<0>
+  constants       : 
   imports         : use bug217.foo
                     use wybe
   resources       : 

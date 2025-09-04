@@ -1,6 +1,6 @@
 # Wybe implementation of https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/nbody.html#nbody
 
-pub type bodylist { pub constructors empty | body(x:float, y:float, z:float, vx:float, vy:float, vz:float, m:float, tail:bodylist) }
+pub type bodylist { pub constructors empty | body(x:float, y:float, z:float, vx:float, vy:float, vz:float, m:float, tail:_) }
 
 pub def get_bodies(?bodies:bodylist) {
     ?PI = 3.14159265358979323
@@ -201,5 +201,5 @@ advance(0.01, n, !bodies)
 !report_energy(bodies)
 !nl
 !malloc_count(?mc)
-!println("malloc count: (should be 5005 with multi-specz and 10006 without it)")
+!println("malloc count: (should be 5001 with multi-specz and 10001 without it)")
 !println(mc)
