@@ -470,13 +470,15 @@ loadModuleFromSrcFile mspec srcfile maybeDir = do
                       ++ " from " ++ srcfile
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parseWybe tokens srcfile
+    logBuild $ "Parse tree: " ++ show parseTree
     mods <- either
             (\er -> errmsg
-                    (Just $ errorPos er)
+                    (Just $ emptySourceInfo $ errorPos er)
                     ("Syntax error: " ++ tail (dropWhile (/='\n') $ show er))
                      >> return [])
             (compileParseTree srcfile mspec)
             parseTree
+    stopOnError $ "loading of module " ++ showModSpec mspec
     -- If we just loaded a _.wybe file, now import sources in the directory
     case maybeDir of
       Nothing -> return ()
@@ -507,6 +509,8 @@ loadModuleFromSrcFile mspec srcfile maybeDir = do
 loadModuleFromSrcOrObj :: Bool -> ModSpec -> FilePath -> FilePath
                        -> Maybe FilePath -> Bool -> Compiler [ModSpec]
 loadModuleFromSrcOrObj force modspec srcfile objfile maybeDir isLib = do
+    logBuild $ "load module " ++ showModSpec modspec
+                ++ if force then " (forced)" else ""
     srcDate <- (liftIO . getModificationTime) srcfile
     dstDate <- (liftIO . getModificationTime) objfile
     if srcDate <= dstDate && (not force || isLib)
@@ -530,7 +534,7 @@ loadModuleFromSrcOrObj force modspec srcfile objfile maybeDir isLib = do
 loadDirectoryModule :: Bool -> FilePath -> ModSpec -> Bool -> Compiler [ModSpec]
 loadDirectoryModule force dir dirmod isLib = do
     logBuild $ "Loading directory " ++ dir ++ " into module "
-        ++ showModSpec dirmod
+        ++ showModSpec dirmod ++ if force then " (forced)" else ""
     -- Make the directory a Module package
     let fileBase = dir </> moduleDirectoryBasename
     modSrc <- sourceInDir fileBase isLib

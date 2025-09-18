@@ -6,7 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 
-module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
+module Scanner (floatValue, intValue, stringValue,
                 charValue, identName, symbolName, tokenName, showPosition,
                 StringDelim(..), BracketStyle(..), bracketString, fileTokens, tokenise,
                 inputTokens, stringTokens, delimitString) where
@@ -18,33 +18,6 @@ import Data.List
 import Data.Tuple.Extra
 import Data.Tuple.HT
 import Text.ParserCombinators.Parsec.Pos
-
--- |The tokens of the wybe language, each carrying its source position.
-data Token = TokFloat Double SourcePos          -- ^A floating point number
-              | TokInt Integer SourcePos        -- ^An integer
-              | TokString StringDelim String SourcePos
-                                                -- ^A string with its delimiter
-              | TokChar Char SourcePos          -- ^A character constant
-              | TokIdent String SourcePos       -- ^An identifier
-              | TokLBracket BracketStyle SourcePos
-                                                -- ^Some kind of left bracket
-              | TokRBracket BracketStyle SourcePos
-                                                -- ^Some kind of right bracket
-              | TokComma SourcePos              -- ^A comma
-              | TokPeriod SourcePos             -- ^A period (full stop)
-              | TokSymbol String SourcePos      -- ^A symbol made up of
-                                                --  non-identifier chars
-              | TokSeparator Bool SourcePos     -- ^A statement separator
-                                                -- indicating whether explicit
-              | TokError String SourcePos       -- ^A lexical error
-
--- |The different string delimiters.
-data StringDelim = DoubleQuote
-                 | BackQuote
-                 | LongQuote String
-                 | IdentQuote String StringDelim
-               deriving (Eq, Ord)
-
 
 instance Show Token where
     show (TokFloat n _)         = "floating point number " ++ show n
@@ -61,21 +34,6 @@ instance Show Token where
     show (TokSeparator False _) = "newline"
     show (TokError str _)       = str
 
-
--- |Returns the source position of a token.
-tokenPosition :: Token -> SourcePos
-tokenPosition (TokFloat _     pos) = pos
-tokenPosition (TokInt   _     pos) = pos
-tokenPosition (TokString _ _  pos) = pos
-tokenPosition (TokChar _      pos) = pos
-tokenPosition (TokIdent _     pos) = pos
-tokenPosition (TokLBracket _  pos) = pos
-tokenPosition (TokRBracket _  pos) = pos
-tokenPosition (TokComma       pos) = pos
-tokenPosition (TokPeriod      pos) = pos
-tokenPosition (TokSymbol _    pos) = pos
-tokenPosition (TokSeparator _ pos) = pos
-tokenPosition (TokError _     pos) = pos
 
 -- |Returns the value of a float token.
 floatValue :: Token -> Double
@@ -153,10 +111,6 @@ delimStringEnd BackQuote        = "`"
 delimStringEnd (LongQuote s)    = s
 delimStringEnd (IdentQuote _ s) = delimStringEnd s
 
-
--- |The different kinds of brackets.
-data BracketStyle = Paren | Bracket | Brace
-                  deriving (Eq)
 
 -- |Return the specified bracket as a string, where the Bool specifies whether
 -- it should be a left bracket.

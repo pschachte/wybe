@@ -5,7 +5,7 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module Util (sameLength, maybeNth, insertAt,
+module Util (sameLength, maybeHead, maybeNth, insertAt,
              setMapInsert, showArguments,
              fillLines, nop, sccElts, DisjointSet,
              emptyDS, addOneToDS, unionTwoInDS,
@@ -47,6 +47,12 @@ sameLength :: [a] -> [b] -> Bool
 sameLength [] [] = True
 sameLength (_:as) (_:bs) = sameLength as bs
 sameLength _ _ = False
+
+
+-- |Return the head of the list, if present, else Nothing.
+maybeHead :: [a] -> Maybe a
+maybeHead []     = Nothing
+maybeHead (e:_ ) = Just e
 
 
 -- |Return the nth element of the list, if present, else Nothing.

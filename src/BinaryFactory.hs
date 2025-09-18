@@ -26,6 +26,10 @@ import Data.List
 -- * Self Deriving instances
 instance Binary Visibility
 instance Binary Determinism
+instance Binary StringDelim
+instance Binary BracketStyle
+instance Binary Token
+instance Binary SourceInfo
 instance Binary t => Binary (Placed t)
 instance Binary ArgFlowType
 instance Binary ResourceSpec

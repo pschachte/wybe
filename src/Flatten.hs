@@ -51,6 +51,7 @@ import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
+import GHC.Exception (SrcLoc(srcLocModule))
 
 
 ----------------------------------------------------------------

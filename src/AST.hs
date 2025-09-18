@@ -17,6 +17,7 @@
 --  This also includes the Compiler monad and the Module types.
 module AST (
   -- *Types just for parsing
+  Token(..), StringDelim(..), BracketStyle(..), tokenPosition,
   Item(..), Visibility(..), isPublic,
   Determinism(..), determinismLEQ, determinismJoin, determinismMeet,
   disjunctionDeterminism, determinismFail, determinismSucceed,
@@ -44,7 +45,9 @@ module AST (
   protoRealParams, realParams, paramIsReal, paramIsNeeded,
   protoInputParamNames, protoRealParamsWhere, isProcProtoArg,
   -- *Source Position Types
-  OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
+  SourceInfo(..), unitSourceInfo, emptySourceInfo, leftExtendSourceInfo,
+  OptPos, Placed(..), place, betterPlace, content,
+  maybePlace, rePlace, unPlace,
   placedApply, defaultPlacedApply, placedApplyM, contentApply, updatePlacedM,
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
@@ -166,6 +169,198 @@ import Data.Binary (Binary)
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
+----------------------------------------------------------------
+
+-- |The tokens of the wybe language, each carrying its source position.
+data Token = TokFloat Double SourcePos          -- ^A floating point number
+              | TokInt Integer SourcePos        -- ^An integer
+              | TokString StringDelim String SourcePos
+                                                -- ^A string with its delimiter
+              | TokChar Char SourcePos          -- ^A character constant
+              | TokIdent String SourcePos       -- ^An identifier
+              | TokLBracket BracketStyle SourcePos
+                                                -- ^Some kind of left bracket
+              | TokRBracket BracketStyle SourcePos
+                                                -- ^Some kind of right bracket
+              | TokComma SourcePos              -- ^A comma
+              | TokPeriod SourcePos             -- ^A period (full stop)
+              | TokSymbol String SourcePos      -- ^A symbol made up of
+                                                --  non-identifier chars
+              | TokSeparator Bool SourcePos     -- ^A statement separator
+                                                -- indicating whether explicit
+              | TokError String SourcePos       -- ^A lexical error
+    deriving (Eq, Ord, Generic)
+
+-- |The different string delimiters.
+data StringDelim = DoubleQuote
+                 | BackQuote
+                 | LongQuote String
+                 | IdentQuote String StringDelim
+               deriving (Eq, Ord, Generic)
+
+
+-- |The different kinds of brackets.
+data BracketStyle = Paren | Bracket | Brace
+                  deriving (Eq, Ord, Generic)
+
+
+----------------------------------------------------------------
+--                    Handling Source Positions
+----------------------------------------------------------------
+
+-- |Returns the source position of a token.
+tokenPosition :: Token -> SourcePos
+tokenPosition (TokFloat _     pos) = pos
+tokenPosition (TokInt   _     pos) = pos
+tokenPosition (TokString _ _  pos) = pos
+tokenPosition (TokChar _      pos) = pos
+tokenPosition (TokIdent _     pos) = pos
+tokenPosition (TokLBracket _  pos) = pos
+tokenPosition (TokRBracket _  pos) = pos
+tokenPosition (TokComma       pos) = pos
+tokenPosition (TokPeriod      pos) = pos
+tokenPosition (TokSymbol _    pos) = pos
+tokenPosition (TokSeparator _ pos) = pos
+tokenPosition (TokError _     pos) = pos
+
+
+-- | Information about a node in the AST needed to report an error.  This gets
+-- attached anywhere in the AST that we might need to report an error.  Note
+-- that tokens contain their start position, so we can get the start position of
+-- the whole node from the first token.
+data SourceInfo = SourceInfo {
+    sourceStart :: SourcePos    -- ^ Source position of the start of the node
+    ,sourceEnd  :: SourcePos    -- ^ Source position of the end of the node
+    ,sourceTokens :: [[Token]]  -- ^ Tokens that make up the node, reversed
+    }
+    deriving (Eq, Ord, Generic)
+
+
+instance Show SourceInfo where
+    show (SourceInfo start end _) =
+        sourceName start ++ ":" ++ show (sourceLine start) ++ ":"
+        ++ show (sourceColumn start) ++ "-"
+        ++ show (sourceLine end) ++ ":" ++ show (sourceColumn end)
+
+
+-- |Source info for a single-token term
+unitSourceInfo :: Token -> SourceInfo
+unitSourceInfo tok = SourceInfo (tokenPosition tok) (tokenPosition tok) [[tok]]
+
+
+-- |Source info for a single-token term
+emptySourceInfo :: SourcePos -> SourceInfo
+emptySourceInfo pos = SourceInfo pos pos []
+
+
+-- |Extend a SourceInfo to include a token to the left
+leftExtendSourceInfo :: Token -> SourceInfo -> SourceInfo
+leftExtendSourceInfo tok (SourceInfo start end toks) =
+    SourceInfo (tokenPosition tok) end $ toks ++ [[tok]]
+
+
+-- |Optional source information.
+type OptPos = Maybe SourceInfo
+
+
+-- |Some kind of value, with a source position optionally attached.
+data Placed t
+    = Placed t SourceInfo
+    | Unplaced t
+    deriving (Eq, Ord, Generic)
+
+
+sourceInfoPos :: OptPos -> Maybe SourcePos
+sourceInfoPos = (sourceStart <$>)
+
+
+-- |Return the source position attached to a Placed value, if present.
+realPlace :: Placed t -> Maybe SourcePos
+realPlace (Placed _ info) = Just $ sourceStart info
+realPlace (Unplaced _) = Nothing
+
+
+-- |Return the optional source info attached to a Placed value.
+place :: Placed t -> OptPos
+place (Placed _ pos) = Just pos
+place (Unplaced _) = Nothing
+
+
+-- |Return the optional source info attached to a Placed value, if
+-- present, or the provided optional pos otherwise.
+betterPlace :: OptPos -> Placed t -> OptPos
+betterPlace _ (Placed _ pos) = Just pos
+betterPlace pos (Unplaced _) = pos
+
+
+-- |Return the content of a Placed value.
+content :: Placed t -> t
+content (Placed content _) = content
+content (Unplaced content) = content
+
+
+-- |Attach a source info to a data value, if one is available.
+maybePlace :: t -> OptPos -> Placed t
+maybePlace t (Just pos) = Placed t pos
+maybePlace t Nothing    = Unplaced t
+
+
+-- |Replace the source info of the Placed value with the given info, if
+-- one is given; otherwise leave the info it already has.
+rePlace :: OptPos -> Placed t -> Placed t
+rePlace Nothing    t            = t
+rePlace (Just pos) (Placed t _) = Placed t pos
+rePlace (Just pos) (Unplaced t) = Placed t pos
+
+
+-- |Extract the info and payload of a Placed value
+unPlace :: Placed t -> (t, OptPos)
+unPlace (Placed x pos) = (x, Just pos)
+unPlace (Unplaced x)   = (x, Nothing)
+
+
+-- |Apply a function that takes a thing and an optional place to a
+--  placed thing.
+placedApply :: (a -> OptPos -> b) -> Placed a -> b
+placedApply f placed = f (content placed) (place placed)
+
+
+-- |Apply a function that takes a thing and an optional place to a placed thing.
+--  Use the place attached to the placed thing, if there is one, otherwise use
+--  the supplied default place.
+defaultPlacedApply :: (a -> OptPos -> b) -> OptPos -> Placed a -> b
+defaultPlacedApply f pos placed = f (content placed) (betterPlace pos placed)
+
+
+-- |Apply a function that takes a thing and an optional place to a
+--  placed thing.
+placedApplyM :: Monad m => (a -> OptPos -> m b) -> Placed a -> m b
+placedApplyM f placed = f (content placed) (place placed)
+
+
+-- |Apply an operator to the content of a placed thing.
+contentApply :: (a->b) -> Placed a -> Placed b
+contentApply f (Placed a pos) = Placed (f a) pos
+contentApply f (Unplaced a) = Unplaced $ f a
+
+
+
+instance Functor Placed where
+  fmap f (Placed x pos) = Placed (f x) pos
+  fmap f (Unplaced x) = Unplaced $ f x
+
+
+-- |Apply a monadic function to the payload of a Placed thing
+updatePlacedM :: (Monad m) => (a -> m b) -> Placed a -> m (Placed b)
+updatePlacedM fn (Placed content pos) = do
+    content' <- fn content
+    return $ Placed content' pos
+updatePlacedM fn (Unplaced content) = do
+    content' <- fn content
+    return $ Unplaced content'
+
+----------------------------------------------------------------
+--                      Abstract Syntax Tree
 ----------------------------------------------------------------
 
 -- |An item appearing at the top level of a source file.
@@ -364,96 +559,6 @@ data TypeModifiers = TypeModifiers {
 defaultTypeModifiers :: TypeModifiers
 defaultTypeModifiers = TypeModifiers False []
 
-----------------------------------------------------------------
---                    Handling Source Positions
-----------------------------------------------------------------
-
--- |Optional source position.
-type OptPos = Maybe SourcePos
-
--- |Some kind of value, with a source position optionally attached.
-data Placed t
-    = Placed t SourcePos
-    | Unplaced t
-    deriving (Eq, Ord, Generic)
-
-
--- |Return the optional position attached to a Placed value.
-place :: Placed t -> OptPos
-place (Placed _ pos) = Just pos
-place (Unplaced _) = Nothing
-
--- |Return the optional position attached to a Placed value, if
--- present, or the provided optional pos otherwise.
-betterPlace :: OptPos -> Placed t -> OptPos
-betterPlace _ (Placed _ pos) = Just pos
-betterPlace pos (Unplaced _) = pos
-
--- |Return the content of a Placed value.
-content :: Placed t -> t
-content (Placed content _) = content
-content (Unplaced content) = content
-
-
--- |Attach a source position to a data value, if one is available.
-maybePlace :: t -> OptPos -> Placed t
-maybePlace t (Just pos) = Placed t pos
-maybePlace t Nothing    = Unplaced t
-
-
--- |Replace the source position of the Placed value with the given position, if
--- one is given; otherwise leave the position it already has.
-rePlace :: OptPos -> Placed t -> Placed t
-rePlace Nothing    t            = t
-rePlace (Just pos) (Placed t _) = Placed t pos
-rePlace (Just pos) (Unplaced t) = Placed t pos
-
-
--- |Extract the place and payload of a Placed value
-unPlace :: Placed t -> (t, OptPos)
-unPlace (Placed x pos) = (x, Just pos)
-unPlace (Unplaced x)   = (x, Nothing)
-
-
--- |Apply a function that takes a thing and an optional place to a
---  placed thing.
-placedApply :: (a -> OptPos -> b) -> Placed a -> b
-placedApply f placed = f (content placed) (place placed)
-
-
--- |Apply a function that takes a thing and an optional place to a placed thing.
---  Use the place attached to the placed thing, if there is one, otherwise use
---  the supplied default place.
-defaultPlacedApply :: (a -> OptPos -> b) -> OptPos -> Placed a -> b
-defaultPlacedApply f pos placed = f (content placed) (betterPlace pos placed)
-
-
--- |Apply a function that takes a thing and an optional place to a
---  placed thing.
-placedApplyM :: Monad m => (a -> OptPos -> m b) -> Placed a -> m b
-placedApplyM f placed = f (content placed) (place placed)
-
-
--- |Apply an operator to the content of a placed thing.
-contentApply :: (a->b) -> Placed a -> Placed b
-contentApply f (Placed a pos) = Placed (f a) pos
-contentApply f (Unplaced a) = Unplaced $ f a
-
-
-
-instance Functor Placed where
-  fmap f (Placed x pos) = Placed (f x) pos
-  fmap f (Unplaced x) = Unplaced $ f x
-
-
--- |Apply a monadic function to the payload of a Placed thing
-updatePlacedM :: (Monad m) => (a -> m b) -> Placed a -> m (Placed b)
-updatePlacedM fn (Placed content pos) = do
-    content' <- fn content
-    return $ Placed content' pos
-updatePlacedM fn (Unplaced content) = do
-    content' <- fn content
-    return $ Unplaced content'
 
 ----------------------------------------------------------------
 --                    Compiler monad
@@ -672,7 +777,7 @@ getSpecModule context getter spec = do
     -- logAST $ "found " ++ show (length curr) ++
     --   " matching modules under compilation"
     case curr of
-        []    -> gets (maybe (error msg) getter . Map.lookup spec . modules)
+        []    -> gets (maybe (shouldnt msg) getter . Map.lookup spec . modules)
         (mod:_) -> return $ getter mod
 
 
@@ -1076,25 +1181,27 @@ isSpecialResource res = res `Set.member` specialResourcesSet
 callFileName :: Placed Stmt -> Exp
 callFileName pstmt =
     (`StringValue` CString)
-    $ maybe "Unknown file" (takeBaseName . sourceName) (place pstmt)
+    $ maybe "**UNKNOWN FILE**" (takeBaseName . sourceName) (realPlace pstmt)
 
 callFileFullName :: Placed Stmt -> Exp
 callFileFullName pstmt =
     (`StringValue` CString)
-    $ maybe "Unknown file" sourceName (place pstmt)
+    $ maybe "**UNKNOWN FILE**" sourceName (realPlace pstmt)
 
 callLineNumber :: Placed Stmt -> Exp
 callLineNumber pstmt =
-    IntValue $ fromIntegral $ maybe 0 sourceLine (place pstmt)
+    Typed (IntValue $ fromIntegral $ maybe 0 sourceLine (realPlace pstmt))
+          (TypeSpec ["wybe"] "int" []) Nothing
 
 callColumnNumber :: Placed Stmt -> Exp
 callColumnNumber pstmt =
-    IntValue $ fromIntegral $ maybe 0 sourceColumn (place pstmt)
+    Typed (IntValue $ fromIntegral $ maybe 0 sourceColumn (realPlace pstmt))
+                (TypeSpec ["wybe"] "int" []) Nothing
 
 callSourceLocation :: Bool -> Placed Stmt -> Exp
 callSourceLocation full pstmt =
     (`StringValue` CString)
-    $ maybe "unknown location" (showSourcePos full) (place pstmt)
+    $ maybe "**UNKNOWN LOCATION**" (showSourcePos full) (realPlace pstmt)
 
 
 -- |Is the specified resource exported by the current module.
@@ -3939,12 +4046,13 @@ instance Show TypeModifiers where
     show (TypeModifiers True _)  = "{unique} "
     show (TypeModifiers False _) = "{}"
 
+
 -- |How to show an optional source position
 showOptPos :: OptPos -> String
 -- uncomment to turn off annoying source positions
 -- showOptPos _ = ""
 -- comment to turn off annoying source positions
-showOptPos = maybe "" ((" @" ++) . showSourcePos False)
+showOptPos = maybe "" ((" @" ++) . showSourcePos False . sourceStart)
 
 
 -- |Show a source position, optionally including directory
@@ -4354,19 +4462,21 @@ trustFromJustM msg computation = do
 
 data Message = Message {
     messageLevel :: MessageLevel,  -- ^The inportance of the message
-    messagePlace :: OptPos,        -- ^The source location the message refers to
+    messagePlace :: OptPos,        -- ^The source info the message refers to
     messageText  :: String         -- ^The text of the message
 } deriving (Eq, Ord)
 
 -- Not for displaying error messages, just for debugging printouts.
 instance Show Message where
-    show (Message lvl pos txt) = show lvl ++ " " ++ show pos ++ ": " ++ txt
+    show (Message lvl pos txt) = show lvl ++ " " ++ show (sourceStart <$> pos)
+                                    ++ ": " ++ txt
+
 
 -- |Add the specified string as a message of the specified severity
 --  referring to the optionally specified source location to the
 --  collected compiler output messages.
 message :: MessageLevel -> String -> OptPos -> Compiler ()
-message lvl msg pos = queueMessage $ Message lvl pos msg
+message lvl msg info = queueMessage $ Message lvl info msg
 
 
 -- |Add the specified message to the collected compiler output messages.
@@ -4391,7 +4501,8 @@ infix 0 <!>
 
 prettyPos :: OptPos -> IO String
 prettyPos Nothing = return ""
-prettyPos (Just pos) = do
+prettyPos (Just info) = do
+    let pos = sourceStart info
     relFile <- makeRelativeToCurrentDirectory $ sourceName pos
     return $ relFile ++ ":" ++ show (sourceLine pos)
              ++ ":" ++ show (sourceColumn pos)
