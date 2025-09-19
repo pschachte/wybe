@@ -1607,6 +1607,33 @@ two input lists must be the same, and the result will be a list of the same
 type.
 
 
+## <a name="abstract"></a>Abstract types and bounded type quantification
+
+A generic value, one whose declared type is a type variable, has an unknown
+type, and therefore cannot be passed to most functions or procedures.
+An *abstract type* specifies a set of procedures and functions that a type may
+be expected to define. 
+By specifying that a generic variable must have a type that implements those
+procedures and functions, values of that type may passed to those procedures and
+functions.
+This is done by following the type variable with a colon and the abstract type
+name.
+A type variable can be given multiple abstract type constraints by enclosing them in parentheses and separating them with commas.
+
+For example, a function to find the smallest element of a list of any type that
+allows values to be compared could be written as:
+
+```wybe
+def {partial} minimum(xs:list(T:comparable)):T = ?result where {
+    ?result = head(xs)
+    for ?x in tail(xs) { if {x < result :: ?result = x}}
+}
+```
+
+In this example, the `x < result` test is only permitted because of the
+`T:comparable` constraint.
+
+
 ## <a name="resources"></a>Resources
 
 Resources provide an alternative argument passing mechanism,
