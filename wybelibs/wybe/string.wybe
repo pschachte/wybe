@@ -120,6 +120,7 @@ pub def {test} [](s:_, idx:int, ?c:char) {
 pub def [](s:_, r:range):_ = slice(s, r)
 
 # Generate a string as a repetition of a given char
+# XXX redefine to build a cstring for n>1.
 pub def repetition(c:char, n:int):_ = result where {
     ?result = empty
     if { n > 0 :: for ?i in 0..n { c ,, !result } }

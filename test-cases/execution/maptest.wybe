@@ -1,0 +1,14 @@
+?map = empty
+insert(!map, "one", 1)
+insert(!map, "two", 2)
+insert(!map, "three", 3)
+insert(!map, "four", 4)
+
+#Conversion:
+# insert(!map, "one", 1, `<=>`)
+# insert(!map, "two", 2, `<=>`)
+# insert(!map, "three", 3, `<=>`)
+# insert(!map, "four", 4, `<=>`)
+
+!println "map = $map"
+# conversion: !println "map = $(map,fmt,fmt)"

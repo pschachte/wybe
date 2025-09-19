@@ -1,0 +1,22 @@
+# purpose: comparable abstract type
+# since  : 0.3
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.comparison, wybe.bool
+
+abstract_type
+
+abstract (_ <=> _):comparison
+
+# these are default definitions that can be overridden by individual types
+
+pub def {test} (x:_ < y:_)  { ( x <=> y ) = lesser }
+
+pub def {test} (x:_ <= y:_) { ( x <=> y ) = lesser | ( x <=> y ) = equal }
+
+pub def {test} (x:_ = y:_)  { ( x <=> y ) = equal }
+
+pub def {test} (x:_ >= y:_) { ( x <=> y ) = greater | ( x <=> y ) = equal }
+
+pub def {test} (x:_ > y:_)  { ( x <=> y ) = greater }

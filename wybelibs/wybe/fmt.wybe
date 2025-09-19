@@ -1,0 +1,69 @@
+# purpose: abstract type for things that can be formatted
+# since  : 0.3
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.string, wybe.int, wybe.char
+
+abstract_type
+
+abstract fmt(_):string
+
+# these are default definitions that can be overridden by individual types
+
+pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
+
+pub def fmt(x:_, minlength:int, fill:char):string =
+    let { ?fmted = fmt(x) } in
+    repetition(fill, minlength-length(fmted)) ,, fmted
+
+# Stage 2:  allow this (in place of the `abstract` declaration above) to format
+# any algebraic type:
+pub def fmt(x:_, ?result:string) {
+    ?result = constructor_name(x)
+    ?n = constructor_arity(x)
+    # For now, don't handle infix operator constructors
+    if {n > 0 ::
+            !result ,, "("
+            !result ,, fmt(constructor_argument(x, 1))
+            for ?i in 2..n {
+                !result ,, ","
+                !result ,, fmt(constructor_argument(x, i))
+            }
+            !result ,, ")"
+    }
+}
+# Ideally, code like this would be agressively specialised for its type.
+# This would be like `deriving Show` in Haskell.  Programmers would still have
+# to manually define fmt for primitive types and types with non-standard syntax.
+#
+# This would only work for types all of whose argument types implement fmt.
+#
+# XXX:  If you don't have to say that a type implements `fmt`, then you won't
+# get a warning when an argument of a constructor doesn't implement `fmt`, so it
+# might be confusing when you can't fmt some value; need good error messages.
+
+# In addition to `constructor_name`, `constructor_arity`, and
+# `constructor_argument`, we should support:
+#
+#   constructor_number (ordinal number of the constructor in the declaration;
+#   merges niladic and other constructors)
+#
+#   construct_datum (takes constructor number and returns a value with that
+#   constructor and uninitialised arguments -- dangerous!)
+#
+#   constructor_store_argument (takes constructor number, a datum with that
+#   constructor, an argument number, and a value, and stores that value as the
+#   specified argument of that datum -- dangerous!)
+#
+#   constructor_count (the ordinal number of the last constructor for this type)
+#
+#   constructor_number_name (takes value and constructor number and returns the
+#   name of the specified constructor for that type)
+#
+#   constructor_number_arity (takes value and constructor number and returns the
+#   arity of the specified constructor for that type)
+#
+# The goal is to be able to write generic code to do things like generate JSON
+# or XML, or to read in data stored as JSON or XML, or to serialise or
+# de-serialise data structures.

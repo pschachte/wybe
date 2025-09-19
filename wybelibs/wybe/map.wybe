@@ -1,0 +1,95 @@
+# purpose: Standard map type
+# since  : 0.3
+
+# This is a poor implementation of a map type implemented as an unbalanced
+# binary search tree.  It's written to experiment with abstract types.
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.string, wybe.int, wybe.comparison, wybe.bool, wybe.comparable
+
+
+# annotate a type variable with an abstract type; for all instances of that
+# type, it can be assumed that that type implements that abstract type
+pub constructors (K:comparable,V) empty
+        | node(left:_(K,V), key:K, value:V, right:_(K,V))
+
+
+# Here we can use the <=> function on the K type because of the annotation
+pub def insert(map:_(K,V), key:K, value:V):_(K,V) =
+# conversion: insert(map:_(K,V), key:K, value:V, f:(K,K,?comparison)):_(K,V) =
+    case map in {
+        node(?l, ?k, ?v, ?r) ::
+            case (key <=> k) in {
+            # conversion: case f(key, k) in {
+                lesser :: node(insert(l, key, value), k, v, r)
+                # conversion: lesser :: node(insert(l, key, value, f), k, v, r)
+            |   equal  :: node(l, k, value, r)
+            |   else   :: node(l, k, v, insert(r, key, value))
+            # conversion: |   else   :: node(l, k, v, insert(r, key, value, f))
+            }
+    |   else ::
+            node(empty, key, value, empty)
+    }
+
+
+pub def {partial} `[]`(map:_(K,V), key:K):V =
+# conversion: {partial} `[]`(map:_(K,V), key:K, f:(K,K,?comparison)):V =
+    let { map = node(?l, ?k, ?v, ?r) } in
+    case (key <=> k) in {
+    # conversion: case f(key, k) in {
+        lesser :: l[key]
+        # conversion: lesser :: l[key,f]
+    |   equal  :: v
+    |   else   :: r[key]
+    # conversion: |   else   :: r[key,f]
+    }
+
+
+# For fmt, we require that both K and V implement the fmt abstract type
+pub def fmt(map:_(K:fmt,V:fmt)):string =
+    "{" ,, fmtcontent(map, "}")
+# conversion: fmt(map:_(K,V), fmtk:(K,?string), fmtv:(V,?string)):string =
+#     "{" ,, fmtcontent(map, "}", fmtk, fmtv)
+
+
+# Format the items in the map, separating items with ", ", and following the
+# last item with `final`.
+# Because we declare that the K and V types implement `fmt`, we can call `fmt`
+# on values of those types.  The `fmt` abstract type specifies that the `fmt`
+# function is defined for implementing types.
+def fmtcontent(map:_(K:fmt,V:fmt), final:string, ?result:string) {
+    ?result = ""
+    case map in {
+        node(?l, ?k, ?v, ?r) ::
+            !result ,, fmtcontent(l, ", ")
+            !result ,, fmt(k)
+            !result ,, "::"
+            !result ,, fmt(v)
+            case r in {
+                node(_,_,_,_) ::
+                    !result ,, ", "
+                    !result ,, fmtcontent(r, final)
+            |   else ::
+                    !result ,, final
+            }
+    }
+}
+# conversion: fmtcontent(map:_(K,V), final:string, fmtk:(K,?string), fmtv:(V,?string),
+#                ?result:string) {
+#     ?result = ""
+#     case map in {
+#         node(?l, ?k, ?v, ?r) ::
+#             !result ,, fmtcontent(l, ", ", fmtk, fmtv)
+#             !result ,, fmtk(k)
+#             !result ,, "::"
+#             !result ,, fmtv(v)
+#             case r in {
+#                 node(_,_,_,_) ::
+#                     !result ,, ", "
+#                     !result ,, fmtcontent(r, final, fmtk, fmtv)
+#             |   else ::
+#                     !result ,, final
+#             }
+#     }
+# }
