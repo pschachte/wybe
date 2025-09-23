@@ -1,11 +1,11 @@
-# purpose: abstract type for things that can be formatted
+# purpose: trait for things that can be formatted
 # since  : 0.3
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.string, wybe.int, wybe.char
 
-abstract_type
+trait is
 
 abstract fmt(_):string
 
@@ -19,7 +19,7 @@ pub def fmt(x:_, minlength:int, fill:char):string =
 
 # Stage 2:  allow this (in place of the `abstract` declaration above) to format
 # any algebraic type:
-pub def fmt(x:_, ?result:string) {
+pub def fmt(x:_<:algebraic_type, ?result:string) {
     ?result = constructor_name(x)
     ?n = constructor_arity(x)
     # For now, don't handle infix operator constructors
@@ -42,9 +42,12 @@ pub def fmt(x:_, ?result:string) {
 # XXX:  If you don't have to say that a type implements `fmt`, then you won't
 # get a warning when an argument of a constructor doesn't implement `fmt`, so it
 # might be confusing when you can't fmt some value; need good error messages.
-
+#
+# All algebraic types (those defined with a `constructor` or `constructors`
+# declaration) automatically implement the `algebraic_type` trait.
+#
 # In addition to `constructor_name`, `constructor_arity`, and
-# `constructor_argument`, we should support:
+# `constructor_argument`, all algebraic types should support:
 #
 #   constructor_number (ordinal number of the constructor in the declaration;
 #   merges niladic and other constructors)

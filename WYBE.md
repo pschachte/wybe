@@ -1608,88 +1608,116 @@ two input lists must be the same, and the result will be a list of the same
 type.
 
 
-### <a name="abstract"></a>Abstract types and bounded type quantification
+### <a name="traits"></a>Traits
 
-A generic value, one whose declared type is a type variable, has an unknown
-type, and therefore cannot be passed to most functions or procedures.
-An *abstract type* specifies a set of procedures and functions that a type may
-be expected to define.
-By specifying that a generic variable must have a type that implements those
-procedures and functions, values of that type may passed to those procedures and
-functions.
-This is done by following the type variable with a colon and the abstract type
-name.
-A type variable can be given multiple abstract type constraints by enclosing them in parentheses and separating them with commas.
+A generic value, one whose declared type is a type variable, has a type that is
+unknown to the compiler.
+Since few procedures take arguments whose type is unknown, such values
+cannot be passed to most functions or procedures.
 
-For example, a function to find the smallest element of a list of any type that
-allows values to be compared could be written as:
+*Traits* make such values more useful by allowing a type variable to be
+restricted to types that support certain operations.
+A trait specifies a set of procedure and function signatures, some of whose
+parameters are restricted to implement this trait.
 
-```wybe
-def {partial} minimum(xs:list(T:comparable)):T = ?result where {
-    ?result = head(xs)
-    for ?x in tail(xs) { if {x < result :: ?result = x}}
-}
-```
+Like types, traits are a special kind of module.
+A module can be made a trait with a `trait is` directive.
 
-In this example, the `x < result` test is only permitted because of the
-`T:comparable` constraint.
-Note that it is only necessary to follow `T` with `:comparable` in one place in the function definition.
+Traits specify their "methods" with abstract declarations, which consist of the
+keyword `abstract` followed by the signature of the procedure or function.
+They have no body.
+Abstract declaration are always considered public, so they do not need (and must
+not include) the `pub` keyword, and they must be explicitly typed.
 
+Traits can also include public or private procedure and function definitions.
+Public definitions effectively define methods with default definitions -- types
+may override the default definitions by supplying their own definitions, but if
+they do not, the default supplied by the trait will be used.
+Private definitions cannot be overridden; they simply provide operations that
+can be used from default procedures or functions.
 
-### <a name="abstract"></a>Declaring abstract types
-
-A module becomes an abstract type with an `abstract_type` declaration, much like
-it becomes an ordinary type with a`constructors` or `representation`
-declaration.
-Abstract types are permitted to have abstract procedure and function
-declarations, which provide a procedure or function signature without giving an
-implementation.
-These begin with the `abstract` keyword in place of `pub def` (all abstract
-procedures and functions are public), must specify types for all parameters, and
-do not include any definition.
-For example, a `comparable` abstract type can be defined with this in a file
-named `comparable.wybe`:
+For example, a `comparable` trait can be defined with the following code:
 
 ```
-abstract_type
+trait is
 
 abstract (_ <=> _):comparison
-```
 
-With this definition, any type that defines a function `<=>` that takes two
-values of that type and returns a `comparison` value will be considered to be
-comparable, so a list of values of that type could be passed to the `minimum`
-function shown above.
-
-### <a name="abstract"></a>Default definitions
-
-Abstract types can also include ordinary procedure and function definitions.
-If declared `public`, these operations can then be applied to values of any type
-that implements that abstract type; if private, then can used from within that
-module.
-For example, these definitions would be useful in the `comparable` abstract
-type:
-
-```
 pub def {test} (x:_ < y:_)  { ( x <=> y ) = lesser }
 
 pub def {test} (x:_ <= y:_) { ( x <=> y ) = lesser | ( x <=> y ) = equal }
-
-pub def {test} (x:_ = y:_)  { ( x <=> y ) = equal }
-
-pub def {test} (x:_ >= y:_) { ( x <=> y ) = greater | ( x <=> y ) = equal }
-
-pub def {test} (x:_ > y:_)  { ( x <=> y ) = greater }
+...
 ```
 
-These procedures can then be applied to values of any `comparable` type.
-Because they have been defined, and not just declared `abstract`, they need not
-be defined for a type to be considered comparable.
-However, any type can define these functions itself, in which case, those
-definitions are used.
-Thus, explicit definitions in abstract type modules can be viewed as default
-definitions that can be overridden by individual types.
+This specifies that a type is comparable if it provides an operation `<=>` that
+takes two comparable things (of the same type) and returns a comparison (a
+standard library type).
+It also provides sensible default implementations of `<` and `<=` (presumably
+extended to include other operations that can be defined with reference to a
+`comparison`).
 
+With this definition, any type for which there is a function `<=>` that takes
+two values of that type and returns a `comparison` value will be considered to
+be comparable.
+There is no need to explicitly declare that a type is `comparable`.
+The `<=>` function does not need to be defined within the type; it can be
+defined in any module, as long as it is in scope where the value of that type is
+passed to a function that expects a value that is `comparable`.
+
+A type variable can be restricted to only types that implement a specified trait
+by following the type variable with `<:` and the trait name.
+This is called a *type bound*.
+A single type variable can be bound to multiple traits, meaning the type must
+implement all the specified traits, by surrounding them with parentheses and
+separating them with commas.
+The type bound need only be applied to a type variable once in each scope;
+it applies to all occurrences of that type variable.
+It is recommended to place the type bound after the first
+occurrence of the variable in its scope.
+
+For example, given the above definition, a function to find the smallest element
+of a list of any `comparable` type could be written as:
+
+```
+def {partial} minimum(xs:list(T<:comparable)):T = ?result where {
+    xs = [?result | ?t]
+    for ?x in t { if { x < result :: ?result = x} }
+}
+```
+
+With this, the compiler knows that the call `x < result` will be defined
+(the `<:` in the type bound is unrelated to the `<` comparison operation).
+Likewise, when the compiler compiles a call to `minimum`, it will know that the
+argument must be a list of some `comparable` type.
+
+Type bounds can be written anywhere a type variable can be used.
+In particular, it can be applied to type variables in a generic `constructors`
+declaration, in which case those type bounds will apply to all instances of that
+type.
+For example, a binary search tree type could be defined as:
+
+```
+pub constructors (K<:comparable,V) empty
+        | node(left:_(K,V), key:K, value:V, right:_(K,V))
+```
+
+This ensures that all keys in the tree will be comparable, so it will not be
+necessary to apply the type bound to procedures to search and insert into the
+tree.
+That will be implicit.
+
+Traits can also be parametric, in which case, the type parameters are separated
+by commas and enclosed in parentheses, written between `trait` and `is`.
+For example, a `sequence(E)` trait could be defined as:
+
+```
+trait(E) is
+abstract {partial} next(_(E), ?E, ?_(E))
+```
+
+This specifies that a `sequence(E)` can be passed to `next` to return a value of
+the element type `E` and a value of the `sequence(E)` type, or to fail if the
+sequence is empty.
 
 
 ## <a name="resources"></a>Resources
@@ -2013,7 +2041,7 @@ A proc call may also be omitted if a proc call with the same inputs has previous
 been made; in this case, the compiler will assume the output(s) will be identical.
 The compiler may also reorder calls however it likes, as long as all the inputs 
 to a proc are available when the proc is called.  As long as your code is purely 
-logical, all of these optimisations and more are perfectly safe.
+logical, all these optimisations and more are perfectly safe.
 
 However, occasionally it is important that the compiler not perform such optimisations.
 For example, the `exit` command has no outputs, it is only executed for its effect 
