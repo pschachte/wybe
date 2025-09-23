@@ -1350,7 +1350,8 @@ where *name* is the module name and *items* are the contents of the submodule,
 separated by newlines or semicolons.
 
 
-## <a name="defining-types"></a>Defining Types
+## <a name="defining-types"></a> Types
+
 ### <a name="constructor-declarations"></a>Constructor declarations
 
 Wybe supports abstract algebraic data types. Every Wybe type is a module, and
@@ -1510,7 +1511,7 @@ def {test} member(elt:int, tree:_) {
 }
 ```
 
-## <a name="_-type"></a>The `_` type
+### <a name="_-type"></a>The `_` type
 
 As a special case, the type `_` is treated as an alias for whatever type is
 defined by the module in which it appears.  That provides a shorter
@@ -1528,7 +1529,7 @@ def concat(a:_(T), b:_(T)):_(T) =
 ```
 
 
-## <a name="type-declarations"></a>Type declarations
+### <a name="type-declarations"></a>Type declarations
 
 In some cases, a module may wish to define multiple types.  This can be done by
 declaring separate submodules within the module, and declaring constructors in
@@ -1553,7 +1554,7 @@ procedure and function declarations, which will have full access to the
 constructors of the type, whether or not they are public.
 
 
-## <a name="generics"></a>Generic types
+### <a name="generics"></a>Generic types
 
 Wybe supports *generic* types, a feature called *parametric polymorphism*. A
 generic type is one that takes other types as parameters, specified by following
@@ -1605,6 +1606,90 @@ def concat(a:list(T), b:list(T)):list(T) =
 This will concatenate lists of any type, but the types of the elements of the
 two input lists must be the same, and the result will be a list of the same
 type.
+
+
+### <a name="abstract"></a>Abstract types and bounded type quantification
+
+A generic value, one whose declared type is a type variable, has an unknown
+type, and therefore cannot be passed to most functions or procedures.
+An *abstract type* specifies a set of procedures and functions that a type may
+be expected to define.
+By specifying that a generic variable must have a type that implements those
+procedures and functions, values of that type may passed to those procedures and
+functions.
+This is done by following the type variable with a colon and the abstract type
+name.
+A type variable can be given multiple abstract type constraints by enclosing them in parentheses and separating them with commas.
+
+For example, a function to find the smallest element of a list of any type that
+allows values to be compared could be written as:
+
+```wybe
+def {partial} minimum(xs:list(T:comparable)):T = ?result where {
+    ?result = head(xs)
+    for ?x in tail(xs) { if {x < result :: ?result = x}}
+}
+```
+
+In this example, the `x < result` test is only permitted because of the
+`T:comparable` constraint.
+Note that it is only necessary to follow `T` with `:comparable` in one place in the function definition.
+
+
+### <a name="abstract"></a>Declaring abstract types
+
+A module becomes an abstract type with an `abstract_type` declaration, much like
+it becomes an ordinary type with a`constructors` or `representation`
+declaration.
+Abstract types are permitted to have abstract procedure and function
+declarations, which provide a procedure or function signature without giving an
+implementation.
+These begin with the `abstract` keyword in place of `pub def` (all abstract
+procedures and functions are public), must specify types for all parameters, and
+do not include any definition.
+For example, a `comparable` abstract type can be defined with this in a file
+named `comparable.wybe`:
+
+```
+abstract_type
+
+abstract (_ <=> _):comparison
+```
+
+With this definition, any type that defines a function `<=>` that takes two
+values of that type and returns a `comparison` value will be considered to be
+comparable, so a list of values of that type could be passed to the `minimum`
+function shown above.
+
+### <a name="abstract"></a>Default definitions
+
+Abstract types can also include ordinary procedure and function definitions.
+If declared `public`, these operations can then be applied to values of any type
+that implements that abstract type; if private, then can used from within that
+module.
+For example, these definitions would be useful in the `comparable` abstract
+type:
+
+```
+pub def {test} (x:_ < y:_)  { ( x <=> y ) = lesser }
+
+pub def {test} (x:_ <= y:_) { ( x <=> y ) = lesser | ( x <=> y ) = equal }
+
+pub def {test} (x:_ = y:_)  { ( x <=> y ) = equal }
+
+pub def {test} (x:_ >= y:_) { ( x <=> y ) = greater | ( x <=> y ) = equal }
+
+pub def {test} (x:_ > y:_)  { ( x <=> y ) = greater }
+```
+
+These procedures can then be applied to values of any `comparable` type.
+Because they have been defined, and not just declared `abstract`, they need not
+be defined for a type to be considered comparable.
+However, any type can define these functions itself, in which case, those
+definitions are used.
+Thus, explicit definitions in abstract type modules can be viewed as default
+definitions that can be overridden by individual types.
+
 
 
 ## <a name="resources"></a>Resources

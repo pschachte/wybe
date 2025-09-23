@@ -20,3 +20,7 @@ pub def {test} (x:_ = y:_)  { ( x <=> y ) = equal }
 pub def {test} (x:_ >= y:_) { ( x <=> y ) = greater | ( x <=> y ) = equal }
 
 pub def {test} (x:_ > y:_)  { ( x <=> y ) = greater }
+
+pub def max(x:_, y:_):_ = if { x > y :: x | else :: y }
+
+pub def min(x:_, y:_):_ = if { x < y :: x | else :: y }
