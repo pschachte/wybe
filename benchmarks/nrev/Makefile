@@ -1,17 +1,15 @@
 # Makefile for nrev benchmarks
 
 EXES = c_nrev c_nrev_destr c_nrev_fast \
-		hs_nrev \
+		haskell_nrev \
 		rust_nrev rust_nrev_destr \
 		wybe_nrev
-
-REPETITIONS = 9
 
 all: $(EXES)
 
 test: all
 	rm -f BENCHMARKS
-	./runbenchmarks.sh $(EXES)
+	../runbenchmarks.sh $(EXES)
 
 clean:
 	rm -f $(EXES) BENCHMARKS
@@ -29,8 +27,8 @@ c_nrev_destr: c_nrev_destr.c
 c_nrev_fast: c_nrev_fast.c
 	gcc -O3 -o c_nrev_fast c_nrev_fast.c
 
-hs_nrev: hs_nrev.hs
-	ghc -O3 -o hs_nrev hs_nrev.hs
+haskell_nrev: haskell_nrev.hs
+	ghc -O3 -o haskell_nrev haskell_nrev.hs
 
 rust_nrev: rust_nrev.rs
 	rustc -C opt-level=3 -o rust_nrev rust_nrev.rs

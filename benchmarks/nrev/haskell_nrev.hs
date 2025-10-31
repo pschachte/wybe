@@ -21,10 +21,7 @@ fromTo lo hi =
     then Nil
     else Cons lo $ fromTo (lo + 1) hi
 
-biglist :: Mylist Int
-biglist = fromTo 0 100000
-
 main :: IO ()
 main = do
-    let rev_size = len $ nrev biglist
+    let rev_size = len $ nrev $ fromTo 0 100000
     putStrLn $ "Reversed list size = " ++ show rev_size
