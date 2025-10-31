@@ -26,23 +26,21 @@ impl List {
     }
 
     // Destructive append
-    fn append(self, other: List) -> List {
-        match self {
-            List::Nil => other,
-            List::Cons(head, mut tail) => {
-                // mutate the tail pointer, rather than making a new one
-                *tail = tail.append(other);
-                List::Cons(head, tail)
-            }
+    fn append(mut self : &mut List, other: List) {
+        while let List::Cons(_, next) = self {
+            self = next;
         }
+        *self = other;
     }
 
     fn reverse(self) -> List {
         match self {
             List::Nil => List::Nil,
-            List::Cons(head, tail) =>
-                tail.reverse()
-                    .append(List::Cons(head, Box::new(List::Nil))),
+            List::Cons(head, box_tail) => {
+                let mut rtail = box_tail.reverse();
+                rtail.append(List::Cons(head, Box::new(List::Nil)));
+                rtail
+            }
         }
     }
 }
@@ -50,5 +48,33 @@ impl List {
 fn main() {
     let list = List::from_to(0, 100_000);
     let reversed = list.reverse();
-    println!("{}", reversed.len());
+    println!("Reversed list size = {}", reversed.len());
 }
+
+// // Testing code
+// impl List {
+//     // Print the list (for debugging)
+//     #[allow(dead_code)]
+//     fn print_list(&self) {
+//         match self {
+//             List::Nil => println!("[]"),
+//             List::Cons(head, tail) => {
+//                 print!("[{}", head);
+//                 let mut current = tail;
+//                 while let List::Cons(h, t) = &**current {
+//                     print!(", {}", h);
+//                     current = t;
+//                 }
+//                 println!("]");
+//             }
+//         }
+//     }
+// }
+
+// fn main() {
+//     let list = List::from_to(0, 10);
+//     list.print_list();
+//     let reversed = list.reverse();
+//     reversed.print_list();
+//     println!("length = {}", reversed.len());
+// }

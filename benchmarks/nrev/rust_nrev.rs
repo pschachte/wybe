@@ -39,8 +39,36 @@ impl List {
     }
 }
 
-fn main() {
-    let list = List::from_to(0, 100_000);
-    let reversed = list.reverse();
-    println!("{}", reversed.len());
+// fn main() {
+//     let list = List::from_to(0, 100_000);
+//     let reversed = list.reverse();
+//     println!("Reversed list size = {}", reversed.len());
+// }
+
+impl List {
+    // Print the list (for debugging)
+    #[allow(dead_code)]
+    fn print_list(&self) {
+        match self {
+            List::Nil => println!("[]"),
+            List::Cons(head, tail) => {
+                print!("[{}", head);
+                let mut current = tail;
+                while let List::Cons(h, t) = &**current {
+                    print!(", {}", h);
+                    current = t;
+                }
+                println!("]");
+            }
+        }
+    }
 }
+
+fn main() {
+    let list = List::from_to(0, 10);
+    list.print_list();
+    let reversed = list.reverse();
+    reversed.print_list();
+    println!("length = {}", reversed.len());
+}
+
