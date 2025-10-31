@@ -1,7 +1,6 @@
 # Makefile for n queens benchmarks
 
-EXES = haskell_queens \
-		wybe_queens
+EXES = c_queens haskell_queens wybe_queens
 
 all: $(EXES)
 
@@ -15,15 +14,6 @@ clean:
 
 c_queens: c_queens.c
 	gcc -O3 -lgc -o c_queens c_queens.c
-
-c_queens_imp: c_queens_imp.c
-	gcc -O3 -lgc -o c_queens_imp c_queens_imp.c
-
-c_queens_destr: c_queens_destr.c
-	gcc -O3 -lgc -o c_queens_destr c_queens_destr.c
-
-c_queens_fast: c_queens_fast.c
-	gcc -O3 -o c_queens_fast c_queens_fast.c
 
 haskell_queens: haskell_queens.hs
 	ghc -O3 -o haskell_queens haskell_queens.hs
