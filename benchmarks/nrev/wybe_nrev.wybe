@@ -1,0 +1,35 @@
+# Simple naive reverse benchmark
+
+# List type
+type mylist(T) {
+    pub constructors nil | cons(head: T, tail: _(T))
+
+    pub def append(l1:_(T), l2:_(T)): _(T) =
+        case l1 in {
+            cons(?h, ?t):: cons(h, append(t, l2))
+        |   else        :: l2
+        }
+
+    pub def nrev(l: _(T)): _(T) =
+        case l in {
+            cons(?h, ?t):: append(nrev(t), cons(h, nil))
+        |   else        :: nil
+        }
+
+    pub def len(l: _(T)): int =
+        case l in {
+            cons(_, ?t):: 1 + len(t)
+        |   else       :: 0
+        }
+
+    pub def from_to(lo:int, hi:int): _(int) = result where {
+        ?result = nil
+        for ?i in hi..lo {
+            cons(i, !result) # prepend i to result
+        }
+    }
+}
+
+?lst = from_to(0, 100_000)
+?rev_size = len(nrev(lst))
+!println "Reversed list size = $rev_size"
