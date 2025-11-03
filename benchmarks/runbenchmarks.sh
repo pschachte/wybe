@@ -3,7 +3,7 @@
 # BENCHMARKS file
 
 repeat=5
-ulimit -s 65520
+ulimit -s 65520 -t 300
 for exe in $* ; do
     echo "Testing $exe:"
     for i in `seq $repeat` ; do
