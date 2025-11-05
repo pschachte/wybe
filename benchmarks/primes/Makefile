@@ -1,6 +1,7 @@
 # Makefile for nth prime benchmarks
 
-EXES = c_primes haskell_primes rust_primes wybe_primes
+EXES = wybe_prime
+# c_prime haskell_prime rust_prime
 
 all: $(EXES)
 
@@ -12,17 +13,17 @@ clean:
 	rm -f $(EXES) BENCHMARKS
 
 
-c_primes: c_primes.c
-	gcc -O3 -lgc -o c_primes c_primes.c
+c_prime: c_prime.c
+	gcc -O3 -lgc -o c_prime c_prime.c
 
-haskell_primes: haskell_primes.hs
-	ghc -O3 -o haskell_primes haskell_primes.hs
+haskell_prime: haskell_prime.hs
+	ghc -O3 -o haskell_prime haskell_prime.hs
 
-rust_primes: rust_primes.rs
-	rustc -C opt-level=3 -o rust_primes rust_primes.rs
+rust_prime: rust_prime.rs
+	rustc -C opt-level=3 -o rust_prime rust_prime.rs
 
-wybe_primes: wybe_primes.wybe
-	wybemk wybe_primes
+wybe_prime: wybe_prime.wybe
+	wybemk wybe_prime
 
 
 .PHONY: all clean test
