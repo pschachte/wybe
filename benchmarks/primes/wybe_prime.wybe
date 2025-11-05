@@ -18,5 +18,5 @@ def {test} divisible_by_any(i:int, ps:list(int)) {
     (i % p = 0 | divisible_by_any(i, ps))
 }
 
-?n = 75_000
+?n = 50_000
 !println(sieve(n))
