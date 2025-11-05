@@ -1,0 +1,22 @@
+# Compute and print the n'th prime number using the Sieve of Eratosthenes
+
+def sieve(n:int):int = prime where {
+    ?primes = []
+    ?count = 0
+    ?prime = 1
+    do {
+        while count < n
+        !prime + 1
+        unless divisible_by_any(prime, primes)
+        [prime|!primes]
+        !count + 1
+    }
+}
+
+def {test} divisible_by_any(i:int, ps:list(int)) {
+    ps = [?p|?ps]
+    (i % p = 0 | divisible_by_any(i, ps))
+}
+
+?n = 75_000
+!println(sieve(n))
