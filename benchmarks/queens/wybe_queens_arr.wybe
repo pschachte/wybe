@@ -1,0 +1,42 @@
+# Wybe solution to the n queens problem using arrays
+# The Wybe optimiser fails to turn array update into destructive update, so this
+# is substantially slower than the list version.
+
+def {partial} queens(n:int):array(int) = place_queens(n, n-1, 0, array(0, n))
+
+def {partial} place_queens(n:int, row:int, col:int, qs:array(int)):array(int) =
+    if { row < 0 :: qs
+       | col >= n :: fail
+       | safe(n, col, row-col, row+col, row+1, qs) ::
+         let { !qs[row] = col | !error("array index out of bounds") } in
+         (  place_queens(n, row - 1, 0, qs)
+         | place_queens(n, row, col + 1, qs)
+         )
+       | else :: place_queens(n, row, col + 1, qs)
+    }
+
+def {partial} safe(n:int, col:int, diag1:int, diag2:int, row:int, qs:array(int)) {
+    for ?r in row..n {
+        (?c = qs[r] | !error("array index out of bounds"))
+        if { ( c = col | row-c = diag1 | row+c = diag2) :: fail }
+        !row + 1
+    }
+}
+
+def show_queens(qs:array(int)) use !io {
+    ?n = length(qs)
+    for ?q in qs {
+        for ?c in 0 .. n {
+            !print( if{ q = c :: 'Q' | else :: '.'} )
+        }
+        !nl
+    }
+}
+
+?n = 32
+if{ ?qs = queens(n) ::
+        !println "$n Queens Solution:"
+        !show_queens(qs)
+  | else ::
+        !println "No solution to $n queens problem."
+}

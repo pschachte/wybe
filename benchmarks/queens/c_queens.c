@@ -14,7 +14,6 @@ int safe(int n, int col, int diag1, int diag2, int row, int *qs) {
 }
 
 int place_queens(int n, int row, int col, int *qs) {
-    // printf("place_queens(n=%d, row=%d, col=%d)\n", n, row, col);
     if (row < 0) {
         return 1;
     } else if (col >= n) {

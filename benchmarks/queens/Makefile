@@ -1,6 +1,6 @@
 # Makefile for n queens benchmarks
 
-EXES = c_queens haskell_queens wybe_queens
+EXES = c_queens haskell_queens rust_queens wybe_queens
 
 all: $(EXES)
 
@@ -21,11 +21,11 @@ haskell_queens: haskell_queens.hs
 rust_queens: rust_queens.rs
 	rustc -C opt-level=3 -o rust_queens rust_queens.rs
 
-rust_queens_destr: rust_queens_destr.rs
-	rustc -C opt-level=3 -o rust_queens_destr rust_queens_destr.rs
-
 wybe_queens: wybe_queens.wybe
 	wybemk wybe_queens
+
+wybe_queens_arr: wybe_queens_arr.wybe
+	wybemk wybe_queens_arr
 
 
 .PHONY: all clean test

@@ -70,5 +70,5 @@ fn main() {
     let reversed = list.reverse();
     reversed.print_list();
     println!("length = {}", reversed.len());
-}
+ }
 
