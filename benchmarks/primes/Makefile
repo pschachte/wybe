@@ -1,7 +1,6 @@
 # Makefile for nth prime benchmarks
 
-EXES = wybe_prime
-# c_prime haskell_prime rust_prime
+EXES = c_prime c_prime_backwards haskell_prime rust_prime wybe_prime
 
 all: $(EXES)
 
@@ -13,8 +12,8 @@ clean:
 	rm -f $(EXES) BENCHMARKS
 
 
-c_prime: c_prime.c
-	gcc -O3 -lgc -o c_prime c_prime.c
+%: %.c
+	gcc -O3 -o $@ $<
 
 haskell_prime: haskell_prime.hs
 	ghc -O3 -o haskell_prime haskell_prime.hs
