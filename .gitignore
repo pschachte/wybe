@@ -60,8 +60,7 @@ stack.yaml.lock
 LOG*
 src/c_config
 src/CConfig.hs
-benchmarks/nrev/c_nrev
-benchmarks/nrev/hs_nrev
-benchmarks/nrev/BENCHMARKS
-benchmarks/nrev/wybe_nrev
-.gitignore
+BENCHMARKS
+c_nrev
+hs_nrev
+wybe_nrev
