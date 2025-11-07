@@ -2311,7 +2311,7 @@ declaration has the form:
 
 where *rep* has one of these forms:
 
-- `pointer`
+- `address`
  the type is the address of a Wybe data structure.  Foreign code should not
 treat this as an ordinary pointer.
 - `opaque`
@@ -2327,19 +2327,20 @@ a floating point number type comprising *n* bits, where *n* is one of 16, 32,
 64, or 128.  
 
 Like a `constructor` declaration, a `representation` declaration makes the
-enclosing module into type.  Also like a `constructor` declaration, a submodule
+enclosing module into a type.  Also like a `constructor` declaration, a submodule
 declaration may be combined with the specification of a representation using the
 form:
 
 > `type` *type* `is` *rep* `{` *defs* `}`
 
-where *rep* is as above, and *defs* specifies other members of the type.
+where *rep* is as above, and *defs* specifies zero or more other members of the
+type.
 
 Note that it is not permitted to specify both constructors and an explicit
 representation for a type.
 
-To make a representation type [unique](#unique-types), follow `is` with
-`{unique}`.
+To make a representation type [unique](#unique-types), place `{unique}` between
+`is` and the desired representation.
 
 #### Type casting
 In some cases, foreign code may need to cast values of one Wybe type to another,
