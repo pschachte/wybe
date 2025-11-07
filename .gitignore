@@ -60,7 +60,3 @@ stack.yaml.lock
 LOG*
 src/c_config
 src/CConfig.hs
-BENCHMARKS
-c_nrev
-hs_nrev
-wybe_nrev
