@@ -5,7 +5,6 @@ rust_nrev
 rust_nrev_destr
 rust_nrev_imp
 haskell_nrev
-BENCHMARKS
 c_nrev
 hs_nrev
 wybe_nrev
