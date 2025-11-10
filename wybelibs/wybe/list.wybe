@@ -127,7 +127,7 @@ pub def println(printer:{resource}(T), xs:_(T)) use !io {
 # Convert an array into a list
 pub def list(ar:array(T)):_(T) = ls where {
     ?ls = []
-    for ?x in ar {
+    for ?x in ar^values {
         ?ls = [x | ls]
     }
     reverse(ls, ?ls)

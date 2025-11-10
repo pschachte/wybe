@@ -1,0 +1,488 @@
+======================================================================
+AFTER EVERYTHING:
+
+
+--------------------------------------------------
+ Module new_array_test
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : new_array_test.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: new_array_test.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(3,(new_array_test.#cont#4<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 []]))]
+    wybe.array.array<0>(0:wybe.int, 1000000:wybe.int, ?tmp#0##0:wybe.array(wybe.int)) #0 @new_array_test:nn:nn
+    foreign lpvm access(tmp#0##0:wybe.array(T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @new_array_test:nn:nn
+    wybe.range...<0>(0:wybe.int, ~tmp#3##0:wybe.int, ?tmp#2##0:wybe.range) #2 @new_array_test:nn:nn
+    new_array_test.#cont#4<0>[7477e50a09](~tmp#0##0:wybe.array(wybe.int), ~tmp#2##0:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @new_array_test:nn:nn
+
+
+proc #cont#1 > {inline,semipure} (1 calls)
+0: new_array_test.#cont#1<0>
+#cont#1(ar##0:wybe.array(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(ar##0:wybe.array(T), 8:wybe.int, ?tmp#13##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+    foreign lpvm access(~ar##0:wybe.array(T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#14##0:wybe.int) @new_array_test:nn:nn
+    foreign llvm mul(~tmp#14##0:wybe.int, 8:wybe.int, ?tmp#15##0:wybe.int) @new_array_test:nn:nn
+    foreign llvm add(tmp#13##0:wybe.c_array.raw_array, ~tmp#15##0:wybe.int, ?tmp#16##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#17##0:wybe.array.array_iterator(T)) @new_array_test:nn:nn
+    foreign lpvm mutate(~tmp#17##0:wybe.array.array_iterator(T), ?tmp#18##0:wybe.array.array_iterator(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#13##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+    foreign lpvm mutate(~tmp#18##0:wybe.array.array_iterator(T), ?tmp#5##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+    new_array_test.#cont#3<0>(0:wybe.int, ~tmp#5##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @new_array_test:nn:nn
+
+
+proc #cont#2 > {inline,semipure} (1 calls)
+0: new_array_test.#cont#2<0>
+#cont#2(sum##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.int.fmt<2>(~sum##0:wybe.int, 0:wybe.int, ' ':wybe.char, ?tmp#7##0:wybe.string) #3 @new_array_test:nn:nn
+    wybe.string.,,<0>("Sum   : ":wybe.string, ~tmp#7##0:wybe.string, ?tmp#6##0:wybe.string) #1 @new_array_test:nn:nn
+    wybe.string.print<0>(~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @new_array_test:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @new_array_test:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @new_array_test:nn:nn
+    foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @new_array_test:nn:nn
+
+
+proc #cont#3 > {semipure} (2 calls)
+0: new_array_test.#cont#3<0>
+#cont#3(sum##0:wybe.int, tmp#4##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: [InterestingUnaliased 1]
+  MultiSpeczDepInfo: [(2,(new_array_test.#cont#3<0>,fromList [NonAliasedParamCond 1 [1]])),(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    foreign lpvm access(tmp#4##0:wybe.array.array_iterator(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#13##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+    foreign lpvm access(tmp#4##0:wybe.array.array_iterator(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#14##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+    foreign llvm icmp_slt(tmp#13##0:wybe.c_array.raw_array, ~tmp#14##0:wybe.c_array.raw_array, ?tmp#15##0:wybe.bool) @new_array_test:nn:nn
+    case ~tmp#15##0:wybe.bool of
+    0:
+        wybe.int.fmt<2>(~sum##0:wybe.int, 0:wybe.int, ' ':wybe.char, ?tmp#18##0:wybe.string) #4 @new_array_test:nn:nn
+        wybe.string.,,<0>("Sum   : ":wybe.string, ~tmp#18##0:wybe.string, ?tmp#19##0:wybe.string) #5 @new_array_test:nn:nn
+        wybe.string.print<0>[410bae77d3](~tmp#19##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @new_array_test:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @new_array_test:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @new_array_test:nn:nn
+        foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @new_array_test:nn:nn
+
+    1:
+        foreign lpvm access(tmp#13##0:wybe.c_array.raw_array, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?i##0:wybe.int) @new_array_test:nn:nn
+        foreign llvm add(~tmp#13##0:wybe.c_array.raw_array, 8:wybe.int, ?tmp#16##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm mutate(~tmp#4##0:wybe.array.array_iterator(T), ?tmp#4##1:wybe.array.array_iterator(wybe.int), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign llvm add(~i##0:wybe.int, ~sum##0:wybe.int, ?sum##1:wybe.int) @new_array_test:nn:nn
+        new_array_test.#cont#3<0>(~sum##1:wybe.int, ~tmp#4##1:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+
+ [6dacb8fd25] [NonAliasedParam 1] :
+    foreign lpvm access(tmp#4##0:wybe.array.array_iterator(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#13##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+    foreign lpvm access(tmp#4##0:wybe.array.array_iterator(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#14##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+    foreign llvm icmp_slt(tmp#13##0:wybe.c_array.raw_array, ~tmp#14##0:wybe.c_array.raw_array, ?tmp#15##0:wybe.bool) @new_array_test:nn:nn
+    case ~tmp#15##0:wybe.bool of
+    0:
+        wybe.int.fmt<2>(~sum##0:wybe.int, 0:wybe.int, ' ':wybe.char, ?tmp#18##0:wybe.string) #4 @new_array_test:nn:nn
+        wybe.string.,,<0>("Sum   : ":wybe.string, ~tmp#18##0:wybe.string, ?tmp#19##0:wybe.string) #5 @new_array_test:nn:nn
+        wybe.string.print<0>[410bae77d3](~tmp#19##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @new_array_test:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @new_array_test:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @new_array_test:nn:nn
+        foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @new_array_test:nn:nn
+
+    1:
+        foreign lpvm access(tmp#13##0:wybe.c_array.raw_array, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?i##0:wybe.int) @new_array_test:nn:nn
+        foreign llvm add(~tmp#13##0:wybe.c_array.raw_array, 8:wybe.int, ?tmp#16##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm mutate(~tmp#4##0:wybe.array.array_iterator(T), ?tmp#4##1:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign llvm add(~i##0:wybe.int, ~sum##0:wybe.int, ?sum##1:wybe.int) @new_array_test:nn:nn
+        new_array_test.#cont#3<0>[6dacb8fd25](~sum##1:wybe.int, ~tmp#4##1:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+
+
+
+proc #cont#4 > {semipure} (2 calls)
+0: new_array_test.#cont#4<0>
+#cont#4(ar##0:wybe.array(wybe.int), tmp#1##0:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1]
+  MultiSpeczDepInfo: [(0,(wybe.range.[|]<0>,fromList [NonAliasedParamCond 2 [1]])),(2,(new_array_test.#cont#4<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 []])),(5,(new_array_test.#cont#3<0>,fromList [NonAliasedParamCond 1 []]))]
+    wybe.range.[|]<0>(?i##0:wybe.int, ?tmp#1##1:wybe.range, ~tmp#1##0:wybe.range, ?tmp#13##0:wybe.bool) #0 @new_array_test:nn:nn
+    case ~tmp#13##0:wybe.bool of
+    0:
+        foreign llvm add(ar##0:wybe.array(T), 8:wybe.int, ?tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm access(~ar##0:wybe.array(T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#16##0:wybe.int) @new_array_test:nn:nn
+        foreign llvm mul(~tmp#16##0:wybe.int, 8:wybe.int, ?tmp#17##0:wybe.int) @new_array_test:nn:nn
+        foreign llvm add(tmp#15##0:wybe.c_array.raw_array, ~tmp#17##0:wybe.int, ?tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.array.array_iterator(T)) @new_array_test:nn:nn
+        foreign lpvm mutate(~tmp#19##0:wybe.array.array_iterator(T), ?tmp#20##0:wybe.array.array_iterator(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm mutate(~tmp#20##0:wybe.array.array_iterator(T), ?tmp#21##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#21##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @new_array_test:nn:nn
+
+    1:
+        foreign llvm icmp_sge(i##0:wybe.int, 0:wybe.int, ?tmp#25##0:wybe.bool) @new_array_test:nn:nn
+        case ~tmp#25##0:wybe.bool of
+        0:
+            wybe.string.c_string<0>("shouldn't happen!":wybe.string, ?tmp#33##0:wybe.c_string) #6 @new_array_test:nn:nn
+            foreign c {terminal,semipure} error_exit(c"new_array_test:8:19":wybe.c_string, ~tmp#33##0:wybe.c_string) @new_array_test:nn:nn
+
+        1:
+            foreign lpvm access(ar##0:wybe.array(T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.int) @new_array_test:nn:nn
+            foreign llvm icmp_slt(i##0:wybe.int, tmp#26##0:wybe.int, ?tmp#27##0:wybe.bool) @new_array_test:nn:nn
+            case ~tmp#27##0:wybe.bool of
+            0:
+                wybe.string.c_string<0>("shouldn't happen!":wybe.string, ?tmp#33##0:wybe.c_string) #6 @new_array_test:nn:nn
+                foreign c {terminal,semipure} error_exit(c"new_array_test:8:19":wybe.c_string, ~tmp#33##0:wybe.c_string) @new_array_test:nn:nn
+
+            1:
+                foreign llvm add(i##0:wybe.int, 1:wybe.int, ?tmp#28##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm mul(~tmp#28##0:wybe.int, 8:wybe.int, ?tmp#29##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm mul(~tmp#26##0:wybe.int, 8:wybe.int, ?tmp#31##0:wybe.int) @new_array_test:nn:nn
+                foreign lpvm mutate(~ar##0:wybe.array(T), ?ar##1:wybe.array(wybe.int), ~tmp#29##0:wybe.int, 0:wybe.int, ~tmp#31##0:wybe.int, 0:wybe.int, ~i##0:T) @new_array_test:nn:nn
+                new_array_test.#cont#4<0>[6dacb8fd25](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+
+
+
+ [7477e50a09] [NonAliasedParam 0,NonAliasedParam 1] :
+    wybe.range.[|]<0>[785a827a1b](?i##0:wybe.int, ?tmp#1##1:wybe.range, ~tmp#1##0:wybe.range, ?tmp#13##0:wybe.bool) #0 @new_array_test:nn:nn
+    case ~tmp#13##0:wybe.bool of
+    0:
+        foreign llvm add(ar##0:wybe.array(T), 8:wybe.int, ?tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm access(~ar##0:wybe.array(T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#16##0:wybe.int) @new_array_test:nn:nn
+        foreign llvm mul(~tmp#16##0:wybe.int, 8:wybe.int, ?tmp#17##0:wybe.int) @new_array_test:nn:nn
+        foreign llvm add(tmp#15##0:wybe.c_array.raw_array, ~tmp#17##0:wybe.int, ?tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.array.array_iterator(T)) @new_array_test:nn:nn
+        foreign lpvm mutate(~tmp#19##0:wybe.array.array_iterator(T), ?tmp#20##0:wybe.array.array_iterator(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm mutate(~tmp#20##0:wybe.array.array_iterator(T), ?tmp#21##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#21##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @new_array_test:nn:nn
+
+    1:
+        foreign llvm icmp_sge(i##0:wybe.int, 0:wybe.int, ?tmp#25##0:wybe.bool) @new_array_test:nn:nn
+        case ~tmp#25##0:wybe.bool of
+        0:
+            wybe.string.c_string<0>("shouldn't happen!":wybe.string, ?tmp#33##0:wybe.c_string) #6 @new_array_test:nn:nn
+            foreign c {terminal,semipure} error_exit(c"new_array_test:8:19":wybe.c_string, ~tmp#33##0:wybe.c_string) @new_array_test:nn:nn
+
+        1:
+            foreign lpvm access(ar##0:wybe.array(T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.int) @new_array_test:nn:nn
+            foreign llvm icmp_slt(i##0:wybe.int, tmp#26##0:wybe.int, ?tmp#27##0:wybe.bool) @new_array_test:nn:nn
+            case ~tmp#27##0:wybe.bool of
+            0:
+                wybe.string.c_string<0>("shouldn't happen!":wybe.string, ?tmp#33##0:wybe.c_string) #6 @new_array_test:nn:nn
+                foreign c {terminal,semipure} error_exit(c"new_array_test:8:19":wybe.c_string, ~tmp#33##0:wybe.c_string) @new_array_test:nn:nn
+
+            1:
+                foreign llvm add(i##0:wybe.int, 1:wybe.int, ?tmp#28##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm mul(~tmp#28##0:wybe.int, 8:wybe.int, ?tmp#29##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm mul(~tmp#26##0:wybe.int, 8:wybe.int, ?tmp#31##0:wybe.int) @new_array_test:nn:nn
+                foreign lpvm mutate(~ar##0:wybe.array(T), ?ar##1:wybe.array(wybe.int), ~tmp#29##0:wybe.int, 1:wybe.int, ~tmp#31##0:wybe.int, 0:wybe.int, ~i##0:T) @new_array_test:nn:nn
+                new_array_test.#cont#4<0>[7477e50a09](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+
+
+
+
+ [6dacb8fd25] [NonAliasedParam 1] :
+    wybe.range.[|]<0>[785a827a1b](?i##0:wybe.int, ?tmp#1##1:wybe.range, ~tmp#1##0:wybe.range, ?tmp#13##0:wybe.bool) #0 @new_array_test:nn:nn
+    case ~tmp#13##0:wybe.bool of
+    0:
+        foreign llvm add(ar##0:wybe.array(T), 8:wybe.int, ?tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm access(~ar##0:wybe.array(T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#16##0:wybe.int) @new_array_test:nn:nn
+        foreign llvm mul(~tmp#16##0:wybe.int, 8:wybe.int, ?tmp#17##0:wybe.int) @new_array_test:nn:nn
+        foreign llvm add(tmp#15##0:wybe.c_array.raw_array, ~tmp#17##0:wybe.int, ?tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.array.array_iterator(T)) @new_array_test:nn:nn
+        foreign lpvm mutate(~tmp#19##0:wybe.array.array_iterator(T), ?tmp#20##0:wybe.array.array_iterator(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm mutate(~tmp#20##0:wybe.array.array_iterator(T), ?tmp#21##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#21##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @new_array_test:nn:nn
+
+    1:
+        foreign llvm icmp_sge(i##0:wybe.int, 0:wybe.int, ?tmp#25##0:wybe.bool) @new_array_test:nn:nn
+        case ~tmp#25##0:wybe.bool of
+        0:
+            wybe.string.c_string<0>("shouldn't happen!":wybe.string, ?tmp#33##0:wybe.c_string) #6 @new_array_test:nn:nn
+            foreign c {terminal,semipure} error_exit(c"new_array_test:8:19":wybe.c_string, ~tmp#33##0:wybe.c_string) @new_array_test:nn:nn
+
+        1:
+            foreign lpvm access(ar##0:wybe.array(T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.int) @new_array_test:nn:nn
+            foreign llvm icmp_slt(i##0:wybe.int, tmp#26##0:wybe.int, ?tmp#27##0:wybe.bool) @new_array_test:nn:nn
+            case ~tmp#27##0:wybe.bool of
+            0:
+                wybe.string.c_string<0>("shouldn't happen!":wybe.string, ?tmp#33##0:wybe.c_string) #6 @new_array_test:nn:nn
+                foreign c {terminal,semipure} error_exit(c"new_array_test:8:19":wybe.c_string, ~tmp#33##0:wybe.c_string) @new_array_test:nn:nn
+
+            1:
+                foreign llvm add(i##0:wybe.int, 1:wybe.int, ?tmp#28##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm mul(~tmp#28##0:wybe.int, 8:wybe.int, ?tmp#29##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm mul(~tmp#26##0:wybe.int, 8:wybe.int, ?tmp#31##0:wybe.int) @new_array_test:nn:nn
+                foreign lpvm mutate(~ar##0:wybe.array(T), ?ar##1:wybe.array(wybe.int), ~tmp#29##0:wybe.int, 0:wybe.int, ~tmp#31##0:wybe.int, 0:wybe.int, ~i##0:T) @new_array_test:nn:nn
+                new_array_test.#cont#4<0>[6dacb8fd25](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+
+
+
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk 0.2 -- see https://github.com/pschachte/wybe
+; ModuleID = 'new_array_test'
+
+source_filename = "!ROOT!/final-dump/new_array_test.wybe"
+target triple    ????
+
+@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Sum   : \00", align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"new_array_test:8:19\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"shouldn't happen!\00", align 8
+@"string#3" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#4" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+
+declare external fastcc i64 @"wybe.array.array<0>"(i64, i64)
+declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
+declare external fastcc i64 @"wybe.range...<0>"(i64, i64)
+declare external fastcc {i64, i64, i1} @"wybe.range.[|]<0>"(i64)
+declare external fastcc {i64, i64, i1} @"wybe.range.[|]<0>[785a827a1b]"(i64)
+declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
+declare external fastcc i64 @"wybe.string.c_string<0>"(i64)
+declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
+declare external ccc void @error_exit(i64, i64)
+declare external ccc void @putchar(i8)
+declare external ccc ptr @wybe_malloc(i32)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc void @"new_array_test.<0>"() {
+  %"tmp#0##0" = tail call fastcc i64 @"wybe.array.array<0>"(i64 0, i64 1000000)
+  %"tmp#15##0" = inttoptr i64 %"tmp#0##0" to ptr
+  %"tmp#3##0" = load i64, ptr %"tmp#15##0"
+  %"tmp#2##0" = tail call fastcc i64 @"wybe.range...<0>"(i64 0, i64 %"tmp#3##0")
+  tail call fastcc void @"new_array_test.#cont#4<0>[7477e50a09]"(i64 %"tmp#0##0", i64 %"tmp#2##0")
+  ret void
+}
+
+define external fastcc void @"new_array_test.#cont#1<0>"(i64 %"ar##0") {
+  %"tmp#13##0" = add i64 %"ar##0", 8
+  %"tmp#19##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#14##0" = load i64, ptr %"tmp#19##0"
+  %"tmp#15##0" = mul i64 %"tmp#14##0", 8
+  %"tmp#16##0" = add i64 %"tmp#13##0", %"tmp#15##0"
+  %"tmp#20##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#17##0" = ptrtoint ptr %"tmp#20##0" to i64
+  %"tmp#21##0" = inttoptr i64 %"tmp#17##0" to ptr
+  store i64 %"tmp#13##0", ptr %"tmp#21##0"
+  %"tmp#22##0" = add i64 %"tmp#17##0", 8
+  %"tmp#23##0" = inttoptr i64 %"tmp#22##0" to ptr
+  store i64 %"tmp#16##0", ptr %"tmp#23##0"
+  tail call fastcc void @"new_array_test.#cont#3<0>"(i64 0, i64 %"tmp#17##0")
+  ret void
+}
+
+define external fastcc void @"new_array_test.#cont#2<0>"(i64 %"sum##0") {
+  %"tmp#7##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
+  %"tmp#6##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#7##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#6##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"new_array_test.#cont#3<0>"(i64 %"sum##0", i64 %"tmp#4##0") {
+  %"tmp#24##0" = inttoptr i64 %"tmp#4##0" to ptr
+  %"tmp#13##0" = load i64, ptr %"tmp#24##0"
+  %"tmp#25##0" = add i64 %"tmp#4##0", 8
+  %"tmp#26##0" = inttoptr i64 %"tmp#25##0" to ptr
+  %"tmp#14##0" = load i64, ptr %"tmp#26##0"
+  %"tmp#15##0" = icmp slt i64 %"tmp#13##0", %"tmp#14##0"
+  br i1 %"tmp#15##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#27##0" = inttoptr i64 %"tmp#13##0" to ptr
+  %"i##0" = load i64, ptr %"tmp#27##0"
+  %"tmp#16##0" = add i64 %"tmp#13##0", 8
+  %"tmp#28##0" = inttoptr i64 %"tmp#4##0" to ptr
+  %"tmp#29##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#29##0", ptr %"tmp#28##0", i64 16, i1 0)
+  %"tmp#30##0" = ptrtoint ptr %"tmp#29##0" to i64
+  %"tmp#31##0" = inttoptr i64 %"tmp#30##0" to ptr
+  store i64 %"tmp#16##0", ptr %"tmp#31##0"
+  %"sum##1" = add i64 %"i##0", %"sum##0"
+  tail call fastcc void @"new_array_test.#cont#3<0>"(i64 %"sum##1", i64 %"tmp#30##0")
+  ret void
+if.else.0:
+  %"tmp#18##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
+  %"tmp#19##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#18##0")
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#19##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 %"sum##0", i64 %"tmp#4##0") {
+  %"tmp#24##0" = inttoptr i64 %"tmp#4##0" to ptr
+  %"tmp#13##0" = load i64, ptr %"tmp#24##0"
+  %"tmp#25##0" = add i64 %"tmp#4##0", 8
+  %"tmp#26##0" = inttoptr i64 %"tmp#25##0" to ptr
+  %"tmp#14##0" = load i64, ptr %"tmp#26##0"
+  %"tmp#15##0" = icmp slt i64 %"tmp#13##0", %"tmp#14##0"
+  br i1 %"tmp#15##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#27##0" = inttoptr i64 %"tmp#13##0" to ptr
+  %"i##0" = load i64, ptr %"tmp#27##0"
+  %"tmp#16##0" = add i64 %"tmp#13##0", 8
+  %"tmp#28##0" = inttoptr i64 %"tmp#4##0" to ptr
+  store i64 %"tmp#16##0", ptr %"tmp#28##0"
+  %"sum##1" = add i64 %"i##0", %"sum##0"
+  tail call fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 %"sum##1", i64 %"tmp#4##0")
+  ret void
+if.else.0:
+  %"tmp#18##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
+  %"tmp#19##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#18##0")
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#19##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"new_array_test.#cont#4<0>"(i64 %"ar##0", i64 %"tmp#1##0") {
+  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe.range.[|]<0>"(i64 %"tmp#1##0")
+  %"i##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 0
+  %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#34##0", 1
+  %"tmp#13##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 2
+  br i1 %"tmp#13##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#25##0" = icmp sge i64 %"i##0", 0
+  br i1 %"tmp#25##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"tmp#35##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#26##0" = load i64, ptr %"tmp#35##0"
+  %"tmp#27##0" = icmp slt i64 %"i##0", %"tmp#26##0"
+  br i1 %"tmp#27##0", label %if.then.2, label %if.else.2
+if.then.2:
+  %"tmp#28##0" = add i64 %"i##0", 1
+  %"tmp#29##0" = mul i64 %"tmp#28##0", 8
+  %"tmp#31##0" = mul i64 %"tmp#26##0", 8
+  %"tmp#36##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#38##0" = trunc i64 %"tmp#31##0" to i32
+  %"tmp#37##0" = call ccc ptr @wybe_malloc(i32 %"tmp#38##0")
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#37##0", ptr %"tmp#36##0", i64 %"tmp#31##0", i1 0)
+  %"tmp#39##0" = ptrtoint ptr %"tmp#37##0" to i64
+  %"tmp#40##0" = add i64 %"tmp#39##0", %"tmp#29##0"
+  %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
+  store i64 %"i##0", ptr %"tmp#41##0"
+  tail call fastcc void @"new_array_test.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#39##0", i64 %"tmp#1##1")
+  ret void
+if.else.2:
+  %"tmp#33##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#33##0")
+  ret void
+if.else.1:
+  %"tmp#42##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#42##0")
+  ret void
+if.else.0:
+  %"tmp#15##0" = add i64 %"ar##0", 8
+  %"tmp#43##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#16##0" = load i64, ptr %"tmp#43##0"
+  %"tmp#17##0" = mul i64 %"tmp#16##0", 8
+  %"tmp#18##0" = add i64 %"tmp#15##0", %"tmp#17##0"
+  %"tmp#44##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#19##0" = ptrtoint ptr %"tmp#44##0" to i64
+  %"tmp#45##0" = inttoptr i64 %"tmp#19##0" to ptr
+  store i64 %"tmp#15##0", ptr %"tmp#45##0"
+  %"tmp#46##0" = add i64 %"tmp#19##0", 8
+  %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
+  store i64 %"tmp#18##0", ptr %"tmp#47##0"
+  tail call fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
+  ret void
+}
+
+define external fastcc void @"new_array_test.#cont#4<0>[7477e50a09]"(i64 %"ar##0", i64 %"tmp#1##0") {
+  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe.range.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
+  %"i##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 0
+  %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#34##0", 1
+  %"tmp#13##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 2
+  br i1 %"tmp#13##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#25##0" = icmp sge i64 %"i##0", 0
+  br i1 %"tmp#25##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"tmp#35##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#26##0" = load i64, ptr %"tmp#35##0"
+  %"tmp#27##0" = icmp slt i64 %"i##0", %"tmp#26##0"
+  br i1 %"tmp#27##0", label %if.then.2, label %if.else.2
+if.then.2:
+  %"tmp#28##0" = add i64 %"i##0", 1
+  %"tmp#29##0" = mul i64 %"tmp#28##0", 8
+  %"tmp#31##0" = mul i64 %"tmp#26##0", 8
+  %"tmp#36##0" = add i64 %"ar##0", %"tmp#29##0"
+  %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
+  store i64 %"i##0", ptr %"tmp#37##0"
+  tail call fastcc void @"new_array_test.#cont#4<0>[7477e50a09]"(i64 %"ar##0", i64 %"tmp#1##1")
+  ret void
+if.else.2:
+  %"tmp#33##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#33##0")
+  ret void
+if.else.1:
+  %"tmp#38##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#38##0")
+  ret void
+if.else.0:
+  %"tmp#15##0" = add i64 %"ar##0", 8
+  %"tmp#39##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#16##0" = load i64, ptr %"tmp#39##0"
+  %"tmp#17##0" = mul i64 %"tmp#16##0", 8
+  %"tmp#18##0" = add i64 %"tmp#15##0", %"tmp#17##0"
+  %"tmp#40##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#19##0" = ptrtoint ptr %"tmp#40##0" to i64
+  %"tmp#41##0" = inttoptr i64 %"tmp#19##0" to ptr
+  store i64 %"tmp#15##0", ptr %"tmp#41##0"
+  %"tmp#42##0" = add i64 %"tmp#19##0", 8
+  %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
+  store i64 %"tmp#18##0", ptr %"tmp#43##0"
+  tail call fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
+  ret void
+}
+
+define external fastcc void @"new_array_test.#cont#4<0>[6dacb8fd25]"(i64 %"ar##0", i64 %"tmp#1##0") {
+  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe.range.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
+  %"i##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 0
+  %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#34##0", 1
+  %"tmp#13##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 2
+  br i1 %"tmp#13##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#25##0" = icmp sge i64 %"i##0", 0
+  br i1 %"tmp#25##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"tmp#35##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#26##0" = load i64, ptr %"tmp#35##0"
+  %"tmp#27##0" = icmp slt i64 %"i##0", %"tmp#26##0"
+  br i1 %"tmp#27##0", label %if.then.2, label %if.else.2
+if.then.2:
+  %"tmp#28##0" = add i64 %"i##0", 1
+  %"tmp#29##0" = mul i64 %"tmp#28##0", 8
+  %"tmp#31##0" = mul i64 %"tmp#26##0", 8
+  %"tmp#36##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#38##0" = trunc i64 %"tmp#31##0" to i32
+  %"tmp#37##0" = call ccc ptr @wybe_malloc(i32 %"tmp#38##0")
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#37##0", ptr %"tmp#36##0", i64 %"tmp#31##0", i1 0)
+  %"tmp#39##0" = ptrtoint ptr %"tmp#37##0" to i64
+  %"tmp#40##0" = add i64 %"tmp#39##0", %"tmp#29##0"
+  %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
+  store i64 %"i##0", ptr %"tmp#41##0"
+  tail call fastcc void @"new_array_test.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#39##0", i64 %"tmp#1##1")
+  ret void
+if.else.2:
+  %"tmp#33##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#33##0")
+  ret void
+if.else.1:
+  %"tmp#42##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#42##0")
+  ret void
+if.else.0:
+  %"tmp#15##0" = add i64 %"ar##0", 8
+  %"tmp#43##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#16##0" = load i64, ptr %"tmp#43##0"
+  %"tmp#17##0" = mul i64 %"tmp#16##0", 8
+  %"tmp#18##0" = add i64 %"tmp#15##0", %"tmp#17##0"
+  %"tmp#44##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#19##0" = ptrtoint ptr %"tmp#44##0" to i64
+  %"tmp#45##0" = inttoptr i64 %"tmp#19##0" to ptr
+  store i64 %"tmp#15##0", ptr %"tmp#45##0"
+  %"tmp#46##0" = add i64 %"tmp#19##0", 8
+  %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
+  store i64 %"tmp#18##0", ptr %"tmp#47##0"
+  tail call fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
+  ret void
+}
