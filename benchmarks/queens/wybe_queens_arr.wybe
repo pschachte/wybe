@@ -25,7 +25,7 @@ def {partial} safe(n:int, col:int, diag1:int, diag2:int, row:int, qs:array(int))
 
 def show_queens(qs:array(int)) use !io {
     ?n = length(qs)
-    for ?q in qs {
+    for ?q in qs^values {
         for ?c in 0 .. n {
             !print( if{ q = c :: 'Q' | else :: '.'} )
         }
