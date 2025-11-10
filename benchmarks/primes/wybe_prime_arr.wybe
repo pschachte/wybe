@@ -20,5 +20,5 @@ def sieve(n:int):int = prime where {
     }
 }
 
-?n = 50_000
+?n = 75_000
 !println(sieve(n))

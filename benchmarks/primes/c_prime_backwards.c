@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define NTH 50000
-
 int sieve(int n) {
     int *primes = malloc(n * sizeof(int));
     int prime = 1;
@@ -32,7 +30,7 @@ int sieve(int n) {
 
 
 int main(void) {
-    int n = NTH;
+    int n = 75000;
     printf("%d\n", sieve(n));
     return 0;
 }

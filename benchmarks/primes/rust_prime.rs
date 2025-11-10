@@ -29,6 +29,6 @@ fn sieve(n:i32) -> i32 {
 
 
 fn main() -> () {
-    let n = 50000;
+    let n = 75_000;
     println!("{}", sieve(n));
 }

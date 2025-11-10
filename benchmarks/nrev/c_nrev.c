@@ -68,7 +68,7 @@ int main() {
 }
 
 
-// For testing: print the list
+// // For testing: print the list
 // void print_list(Node* xs) {
 //     Node* current = xs;
 //     printf("[");
@@ -84,7 +84,7 @@ int main() {
 // }
 
 // int main() {
-//     Node* biglist = from_to(0, 9);
+//     Node* biglist = from_to(0, 10);
 //     print_list(biglist);
 //     Node* rev_list = nrev(biglist);
 //     print_list(rev_list);
