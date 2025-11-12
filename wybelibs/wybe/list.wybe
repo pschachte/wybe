@@ -4,7 +4,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int, wybe.char, wybe.array, wybe.machine_word
-use wybe.io
+use wybe.string, wybe.io
 
 pub constructors (T) [] | [head:T | tail:_(T)]
 
@@ -121,6 +121,16 @@ pub def println(printer:{resource}(T), xs:_(T)) use !io {
     !nl
 }
 
+# Format a list, using `formatter` to print each element
+# XXX: refactor when we have typeclasses
+pub def fmt(formatter:(T,?string), xs:_(T)):string =
+    "[" ,,
+    (if { [?x | ?rest] = xs ::
+            formatter(x) ,, fmt_rest(formatter, rest)
+       | else :: ""
+    }) ,,
+    "]"
+
 
 ## Conversion procedures
 
@@ -158,3 +168,11 @@ def print1(printer:{resource}(T), xs:_(T)) use !io {
         !print1(printer, xs)
     }
 }
+
+# Helper for fmt:  format the tail of a list, after the first element.
+# This mean every element is preceded by a comma.
+def fmt_rest(formatter:(T,?string), xs:_(T)):string =
+    (if { [?x | ?rest] = xs ::
+            ", " ,, formatter(x) ,, fmt_rest(formatter, rest)
+       | else :: ""
+    })

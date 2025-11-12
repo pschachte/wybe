@@ -1,0 +1,8 @@
+# Test code to format lists as strings
+
+?lst1:list(int) = [2,3,5,7,11,13,17]
+fmt(lst1, fmt, ?str)
+!println(fmt(lst1, fmt))
+
+?lst2:list(bool) = [false,true,true,false,true,false,true]
+!println("Which counting numbers are prime:  $(lst2,fmt)")
