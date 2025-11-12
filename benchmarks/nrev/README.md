@@ -13,7 +13,8 @@ built-in list type.
 There may be multiple versions of this benchmark for each language:
 
   1. `nrev`: a recursive implementation of all algorithms
-  2. `nrev_destr`: where possible, an iterative implementation that
+  2. `nrev_imp`: an imperative implementation of all but reverse
+  3. `nrev_destr`: where possible, an iterative implementation that
       repeatedly destructively appends each element to the end of the list.
 
 Each test program name begins with the language name and follows with one of the

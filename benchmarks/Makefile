@@ -7,9 +7,14 @@ all:
 	  $(MAKE) -C $$b all; \
 	done
 
-test: all
+test:
 	@for b in $(BENCHMARKS); do \
 	  $(MAKE) -C $$b test; \
+	done
+
+stats:
+	@for b in $(BENCHMARKS); do \
+	  $(MAKE) -C $$b stats; \
 	done
 
 clean:
@@ -17,4 +22,4 @@ clean:
 	  $(MAKE) -C $$b clean; \
 	done
 
-.PHONY: all clean test
+.PHONY: all clean test stats

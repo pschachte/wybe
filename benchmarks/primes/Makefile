@@ -1,12 +1,26 @@
 # Makefile for nth prime benchmarks
 
-EXES = c_prime c_prime_backwards haskell_prime rust_prime wybe_prime
+SRCS = c_prime.c c_prime_backwards.c \
+		haskell_prime.hs \
+		rust_prime.rs \
+		wybe_prime.wybe wybe_prime_arr.wybe
+
+EXES := $(shell echo $(SRCS) | sed 's/\.[a-z]*//g')
+
+STATFILE := $(shell basename $(shell pwd))-stats.tex
 
 all: $(EXES)
 
-test: all
+test:	BENCHMARKS
+
+stats:	$(STATFILE)
+
+BENCHMARKS:	$(EXES)
 	rm -f BENCHMARKS
 	../runbenchmarks.sh $(EXES)
+
+$(STATFILE): BENCHMARKS
+	../exestats.sh $(SRCS) > $(STATFILE)
 
 clean:
 	rm -f $(EXES) BENCHMARKS
@@ -25,4 +39,4 @@ wybe_prime: wybe_prime.wybe
 	wybemk wybe_prime
 
 
-.PHONY: all clean test
+.PHONY: all clean test stats

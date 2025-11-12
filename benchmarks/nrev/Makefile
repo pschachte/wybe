@@ -1,18 +1,29 @@
 # Makefile for nrev benchmarks
 
-EXES = c_nrev c_nrev_destr c_nrev_fast \
-		haskell_nrev \
-		rust_nrev rust_nrev_destr \
-		wybe_nrev
+SRCS = c_nrev.c c_nrev_destr.c c_nrev_fast.c \
+		haskell_nrev.hs \
+		rust_nrev.rs rust_nrev_destr.rs \
+		wybe_nrev.wybe
+
+EXES := $(shell echo $(SRCS) | sed 's/\.[a-z]*//g')
+
+STATFILE := $(shell basename $(shell pwd))-stats.tex
 
 all: $(EXES)
 
-test: all
+test:	BENCHMARKS
+
+stats:	$(STATFILE)
+
+BENCHMARKS:	$(EXES)
 	rm -f BENCHMARKS
 	../runbenchmarks.sh $(EXES)
 
+$(STATFILE): BENCHMARKS
+	../exestats.sh $(SRCS) > $@
+
 clean:
-	rm -f $(EXES) BENCHMARKS
+	rm -f $(EXES) BENCHMARKS 
 
 
 c_nrev: c_nrev.c
@@ -40,4 +51,4 @@ wybe_nrev: wybe_nrev.wybe
 	wybemk wybe_nrev
 
 
-.PHONY: all clean test
+.PHONY: all clean test stats
