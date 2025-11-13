@@ -25,29 +25,17 @@ clean:
 	rm -f $(EXES) BENCHMARKS 
 
 
-c_nrev: c_nrev.c
-	gcc -O3 -lgc -o c_nrev c_nrev.c
+%: %.c
+	gcc -O3 -o $@ $<
 
-c_nrev_imp: c_nrev_imp.c
-	gcc -O3 -lgc -o c_nrev_imp c_nrev_imp.c
+%: %.hs
+	ghc -O3 -o $@ $<
 
-c_nrev_destr: c_nrev_destr.c
-	gcc -O3 -lgc -o c_nrev_destr c_nrev_destr.c
+%: %.rs
+	rustc -C opt-level=3 -o $@ $<
 
-c_nrev_fast: c_nrev_fast.c
-	gcc -O3 -o c_nrev_fast c_nrev_fast.c
-
-haskell_nrev: haskell_nrev.hs
-	ghc -O3 -o haskell_nrev haskell_nrev.hs
-
-rust_nrev: rust_nrev.rs
-	rustc -C opt-level=3 -o rust_nrev rust_nrev.rs
-
-rust_nrev_destr: rust_nrev_destr.rs
-	rustc -C opt-level=3 -o rust_nrev_destr rust_nrev_destr.rs
-
-wybe_nrev: wybe_nrev.wybe
-	wybemk wybe_nrev
+%: %.wybe
+	wybemk $@
 
 
 .PHONY: all clean test stats

@@ -1,7 +1,7 @@
 # Makefile for nth prime benchmarks
 
 SRCS = c_prime.c haskell_prime.hs rust_prime.rs wybe_prime.wybe \
-		c_prime_backwards.c wybe_prime_arr.wybe
+		haskell_prime_nonlazy
 
 EXES := $(shell echo $(SRCS) | sed 's/\.[a-z]*//g')
 
@@ -27,14 +27,14 @@ clean:
 %: %.c
 	gcc -O3 -o $@ $<
 
-haskell_prime: haskell_prime.hs
-	ghc -O3 -o haskell_prime haskell_prime.hs
+%: %.hs
+	ghc -O3 -o $@ $<
 
-rust_prime: rust_prime.rs
-	rustc -C opt-level=3 -o rust_prime rust_prime.rs
+%: %.rs
+	rustc -C opt-level=3 -o $@ $<
 
-wybe_prime: wybe_prime.wybe
-	wybemk wybe_prime
+%: %.wybe
+	wybemk $@
 
 
 .PHONY: all clean test stats
