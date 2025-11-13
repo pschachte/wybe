@@ -9,7 +9,7 @@ def sieve(n:int):int = candidate where {
         !candidate + 1
         ?indivisible = true
         for ?p in primes^values {
-            if { candidate % p = 0 :: 
+            if { candidate % p = 0 ::
                 ?indivisible = false
                 break
             }
