@@ -14,7 +14,7 @@ for file in $* ; do
     esac  
     lines=`sed -e '/^\s*$/d' -e "/^\s*${comment}/d" $file | wc -l`
     exesize=`ls -l $exefile | awk '{printf("%s\n", $5);}'`
-    exectime=`awk '$1 == "'"$exefile"'" {count++; tot+=$8} END {printf("%7.2f\n", tot/count);}' BENCHMARKS`
+    exectime=`awk '$1 == "'"$exefile"'" {count++; tot+=$2} END {printf("%7.2f\n", tot/count);}' BENCHMARKS`
     rowname='\texttt{'`echo $exefile | sed 's/_/\\\\_/g'`'}'
     printf "%s & %d & %d & %s \\\\\\\\\n\\hline\n" $rowname $lines $exesize $exectime
 done

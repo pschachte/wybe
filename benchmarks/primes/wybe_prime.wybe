@@ -1,4 +1,4 @@
-# Compute and print the n'th candidate number using the Sieve of Eratosthenes
+# Compute and print the n'th prime number using the Sieve of Eratosthenes
 
 def sieve(n:int):int = candidate where {
     ?primes = array(0, n)

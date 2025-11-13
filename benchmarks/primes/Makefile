@@ -1,7 +1,7 @@
 # Makefile for nth prime benchmarks
 
 SRCS = c_prime.c haskell_prime.hs rust_prime.rs wybe_prime.wybe \
-		haskell_prime_nonlazy
+		haskell_prime_nonlazy.hs
 
 EXES := $(shell echo $(SRCS) | sed 's/\.[a-z]*//g')
 
