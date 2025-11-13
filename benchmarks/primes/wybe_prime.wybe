@@ -1,0 +1,24 @@
+# Compute and print the n'th prime number using the Sieve of Eratosthenes
+
+def sieve(n:int):int = candidate where {
+    ?primes = array(0, n)
+    ?count = 0
+    ?candidate = 1
+    do {
+        while count < n
+        !candidate + 1
+        ?indivisible = true
+        for ?p in primes^values {
+            if { candidate % p = 0 ::
+                ?indivisible = false
+                break
+            }
+        }
+        when indivisible
+        ( !primes[count] = candidate | !shouldnt )
+        !count + 1
+    }
+}
+
+?n = 75_000
+!println(sieve(n))
