@@ -1,21 +1,21 @@
-# Compute and print the n'th prime number using the Sieve of Eratosthenes
+# Compute and print the n'th candidate number using the Sieve of Eratosthenes
 
-def sieve(n:int):int = prime where {
-    ?primes = []
+def sieve(n:int):int = candidate where {
+    ?primes = array(0, n)
     ?count = 0
-    ?prime = 1
+    ?candidate = 1
     do {
         while count < n
-        !prime + 1
+        !candidate + 1
         ?indivisible = true
-        for ?p in primes {
-            if { prime % p = 0 :: 
+        for ?p in primes^values {
+            if { candidate % p = 0 :: 
                 ?indivisible = false
                 break
             }
         }
         when indivisible
-        [prime|!primes]
+        ( !primes[count] = candidate | !shouldnt )
         !count + 1
     }
 }
