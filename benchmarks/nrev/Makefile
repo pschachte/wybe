@@ -26,6 +26,9 @@ clean:
 
 
 %: %.c
+	gcc -O3 -lgc -o $@ $<
+
+c_nrev_fast: c_nrev_fast.c
 	gcc -O3 -o $@ $<
 
 %: %.hs
