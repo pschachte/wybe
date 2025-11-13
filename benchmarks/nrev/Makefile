@@ -1,9 +1,8 @@
 # Makefile for nrev benchmarks
 
-SRCS = c_nrev.c c_nrev_destr.c c_nrev_fast.c \
-		haskell_nrev.hs \
-		rust_nrev.rs rust_nrev_destr.rs \
-		wybe_nrev.wybe
+SRCS = c_nrev.c haskell_nrev.hs rust_nrev.rs wybe_nrev.wybe \
+		c_nrev_destr.c rust_nrev_destr.rs \
+		c_nrev_fast.c		
 
 EXES := $(shell echo $(SRCS) | sed 's/\.[a-z]*//g')
 

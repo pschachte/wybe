@@ -1,9 +1,7 @@
 # Makefile for n queens benchmarks
 
-SRCS = c_queens.c \
-		haskell_queens.hs \
-		rust_queens.rs \
-		wybe_queens.wybe wybe_queens_arr.wybe
+SRCS = c_queens.c haskell_queens.hs	rust_queens.rs wybe_queens.wybe \
+		wybe_queens_arr.wybe
 
 EXES := $(shell echo $(SRCS) | sed 's/\.[a-z]*//g')
 
