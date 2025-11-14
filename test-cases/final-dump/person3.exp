@@ -16,6 +16,15 @@ AFTER EVERYTHING:
                     person3.person.person<0>
                     person3.person.person<1>
                     person3.person.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "John"}
+                    1:: CStringInfo {cstringChars = "Smith"}
+                    2:: CStringInfo {cstringChars = "Jane"}
+                    3:: CStringInfo {cstringChars = "Wang"}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"John"]}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"Smith"]}
+                    6:: StructInfo {structSize = 16, structData = [PointerStructMember "John",PointerStructMember "Smith"]}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"Jane"]}
+                    8:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"Wang"]}
   imports         : public use person3.person
                     use wybe
   resources       : 
@@ -27,8 +36,8 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("Smith":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @person3:nn:nn
-    wybe.string.print<0>("Wang":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @person3:nn:nn
+    wybe.string.print<0>("Smith":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @person3:nn:nn
+    wybe.string.print<0>("Wang":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @person3:nn:nn
 
   LLVM code       :
 
@@ -38,17 +47,17 @@ module top-level code > public {inline,semipure} (0 calls)
 source_filename = "!ROOT!/final-dump/person3.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Smith\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"Wang\00", align 8
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"person3#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"Smith\00", align 8
+@"person3#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"Wang\00", align 8
+@"person3#constant#5" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"person3#constant#1" }, align 8
+@"person3#constant#8" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"person3#constant#3" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"person3.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"person3#constant#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"person3#constant#8" to i64 ))
   ret void
 }
 
@@ -65,6 +74,7 @@ define external fastcc void @"person3.<0>"() {
                     person3.person.person<0>
                     person3.person.person<1>
                     person3.person.~=<0>
+  constants       : 
   imports         : use person3
                     use wybe
   resources       : 

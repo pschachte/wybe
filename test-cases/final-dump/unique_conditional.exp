@@ -10,6 +10,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : unique_conditional.bar<0>
                     unique_conditional.baz<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
