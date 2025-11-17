@@ -122,10 +122,11 @@ pub def (x:_ ** n:_):_ = foreign c `llvm.pow.f64`(x,n)
 # Trigonometric functions.
 pub def sin(x:_):_  = foreign c `llvm.sin.f64`(x)
 pub def cos(x:_):_  = foreign c `llvm.cos.f64`(x)
-pub def tan(x:_):_  = foreign c `llvm.tan.f64`(x)
+pub def tan(x:_):_  = foreign c `llvm.sin.f64`(x) / foreign c `llvm.cos.f64`(x)
 pub def asin(x:_):_ = foreign c `llvm.asin.f64`(x)
 pub def acos(x:_):_ = foreign c `llvm.acos.f64`(x)
 pub def atan(x:_):_ = foreign c `llvm.atan.f64`(x)
+pub def atan2(x:_,y:_):_ = foreign c `llvm.atan2.f64`(x,y)
 
 # Convert between degrees and radians for use in trig functions
 pub def from_degrees(deg:_):_   = deg*(pi/180.0)

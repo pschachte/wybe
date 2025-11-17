@@ -47,6 +47,12 @@ def area(r:float):float = pi * square(r)
 !print(to_degrees(atan(sqrt(3.0)/3.0)))
 !println(" degrees")
 
+!print("atan2(-1,-1) = ")
+!print(atan(atan2((-1.0),(-1.0))))
+!print(" = ")
+!print(to_degrees(atan2((-1.0),(-1.0))))
+!println(" degrees")
+
 
 !print("ln(e) = ")
 !println(log(e))
