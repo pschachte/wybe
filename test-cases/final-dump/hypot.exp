@@ -19,91 +19,142 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     wybe.string.print<0>("hypot(3,4) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @hypot:nn:nn
     foreign c llvm.sqrt.f64(25.0:wybe.float, ?tmp#0##0:wybe.float) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#34##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#0##0:wybe.float, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#35##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#36##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#49##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#0##0:wybe.float, ~tmp#49##0:wybe.phantom, ?tmp#50##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#50##0:wybe.phantom, ?tmp#51##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#51##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("area(5) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#40##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(78.53981633974483:wybe.float, ~tmp#40##0:wybe.phantom, ?tmp#41##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#41##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#42##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#55##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(78.53981633974483:wybe.float, ~tmp#55##0:wybe.phantom, ?tmp#56##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("e = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#44##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(2.7182818284590455:wybe.float, ~tmp#44##0:wybe.phantom, ?tmp#45##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#45##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#59##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(2.7182818284590455:wybe.float, ~tmp#59##0:wybe.phantom, ?tmp#60##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#60##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @hypot:nn:nn
     foreign c llvm.exp.f64(1.0:wybe.float, ?tmp#3##0:wybe.float) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#48##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#3##0:wybe.float, ~tmp#48##0:wybe.phantom, ?tmp#49##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#49##0:wybe.phantom, ?tmp#50##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#50##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#3##0:wybe.float, ~tmp#63##0:wybe.phantom, ?tmp#64##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#64##0:wybe.phantom, ?tmp#65##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#65##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("sin(30) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @hypot:nn:nn
     foreign c llvm.sin.f64(30.0:wybe.float, ?tmp#4##0:wybe.float) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#4##0:wybe.float, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#54##0:wybe.phantom, ?tmp#55##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#55##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#68##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#4##0:wybe.float, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#69##0:wybe.phantom, ?tmp#70##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#70##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("cos(30) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @hypot:nn:nn
     foreign c llvm.cos.f64(30.0:wybe.float, ?tmp#5##0:wybe.float) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#58##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#5##0:wybe.float, ~tmp#58##0:wybe.phantom, ?tmp#59##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#59##0:wybe.phantom, ?tmp#60##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#60##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#73##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#5##0:wybe.float, ~tmp#73##0:wybe.phantom, ?tmp#74##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#74##0:wybe.phantom, ?tmp#75##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#75##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("sin(30 degrees) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @hypot:nn:nn
     foreign c llvm.sin.f64(0.5235987755982988:wybe.float, ?tmp#6##0:wybe.float) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#67##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#6##0:wybe.float, ~tmp#67##0:wybe.phantom, ?tmp#68##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#69##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
-    wybe.string.print<0>("cos(30 degrees) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @hypot:nn:nn
-    foreign c llvm.cos.f64(0.5235987755982988:wybe.float, ?tmp#10##0:wybe.float) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#76##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#10##0:wybe.float, ~tmp#76##0:wybe.phantom, ?tmp#77##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#77##0:wybe.phantom, ?tmp#78##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#78##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
-    wybe.string.print<0>("ln(e) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @hypot:nn:nn
-    foreign c llvm.log.f64(2.7182818284590455:wybe.float, ?tmp#14##0:wybe.float) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#81##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#14##0:wybe.float, ~tmp#81##0:wybe.phantom, ?tmp#82##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#82##0:wybe.phantom, ?tmp#83##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#83##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
-    wybe.string.print<0>("common log(e) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #34 @hypot:nn:nn
-    foreign c llvm.log10.f64(2.7182818284590455:wybe.float, ?tmp#16##0:wybe.float) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#86##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#16##0:wybe.float, ~tmp#86##0:wybe.phantom, ?tmp#87##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#87##0:wybe.phantom, ?tmp#88##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#88##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
-    wybe.string.print<0>("base 2 log(e) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #38 @hypot:nn:nn
-    foreign c llvm.log2.f64(2.7182818284590455:wybe.float, ?tmp#18##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#79##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#6##0:wybe.float, ~tmp#79##0:wybe.phantom, ?tmp#80##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#80##0:wybe.phantom, ?tmp#81##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#81##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("cos(30 degrees) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @hypot:nn:nn
+    foreign c llvm.cos.f64(0.5235987755982988:wybe.float, ?tmp#8##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#85##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#8##0:wybe.float, ~tmp#85##0:wybe.phantom, ?tmp#86##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#86##0:wybe.phantom, ?tmp#87##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#87##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("tan(30 degrees) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26 @hypot:nn:nn
+    foreign c llvm.tan.f64(0.5235987755982988:wybe.float, ?tmp#10##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#91##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#18##0:wybe.float, ~tmp#91##0:wybe.phantom, ?tmp#92##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#10##0:wybe.float, ~tmp#91##0:wybe.phantom, ?tmp#92##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#92##0:wybe.phantom, ?tmp#93##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#93##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
-    wybe.string.print<0>("floor(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #42 @hypot:nn:nn
-    foreign c llvm.floor.f64(3.141592653589793:wybe.float, ?tmp#20##0:wybe.float) @hypot:nn:nn
+    wybe.string.print<0>("asin(0.5) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @hypot:nn:nn
+    foreign c llvm.asin.f64(0.5:wybe.float, ?tmp#12##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#96##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#20##0:wybe.float, ~tmp#96##0:wybe.phantom, ?tmp#97##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#97##0:wybe.phantom, ?tmp#98##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#98##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
-    wybe.string.print<0>("ceil(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #46 @hypot:nn:nn
-    foreign c llvm.ceil.f64(3.141592653589793:wybe.float, ?tmp#22##0:wybe.float) @hypot:nn:nn
+    foreign c print_float(tmp#12##0:wybe.float, ~tmp#96##0:wybe.phantom, ?tmp#97##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#97##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>(" = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @hypot:nn:nn
+    foreign llvm fmul(~tmp#12##0:wybe.float, 57.29577951308232:wybe.float, ?tmp#13##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#101##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#22##0:wybe.float, ~tmp#101##0:wybe.phantom, ?tmp#102##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#102##0:wybe.phantom, ?tmp#103##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#103##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
-    wybe.string.print<0>("round(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @hypot:nn:nn
-    foreign c llvm.round.f64(3.141592653589793:wybe.float, ?tmp#24##0:wybe.float) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#106##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(tmp#24##0:wybe.float, ~tmp#106##0:wybe.phantom, ?tmp#107##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#107##0:wybe.phantom, ?tmp#108##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#108##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
-    wybe.string.print<0>("iround(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #54 @hypot:nn:nn
-    foreign llvm fptosi(~tmp#24##0:wybe.float, ?tmp#26##0:wybe.int) @hypot:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#112##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_int(~tmp#26##0:wybe.int, ~tmp#112##0:wybe.phantom, ?tmp#113##0:wybe.phantom) @hypot:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#113##0:wybe.phantom, ?tmp#114##0:wybe.phantom) @hypot:nn:nn
-    foreign lpvm store(~%tmp#114##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#13##0:wybe.float, ~tmp#101##0:wybe.phantom, ?tmp#102##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#102##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>(" degrees":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #90 @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#104##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#104##0:wybe.phantom, ?tmp#105##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#105##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("acos(sqrt(3)/2) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #38 @hypot:nn:nn
+    foreign c llvm.sqrt.f64(3.0:wybe.float, ?tmp#132##0:wybe.float) @hypot:nn:nn
+    foreign llvm fdiv(tmp#132##0:wybe.float, 2.0:wybe.float, ?tmp#116##0:wybe.float) @hypot:nn:nn
+    foreign c llvm.acos.f64(~tmp#116##0:wybe.float, ?tmp#15##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#111##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(tmp#15##0:wybe.float, ~tmp#111##0:wybe.phantom, ?tmp#112##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#112##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>(" = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #43 @hypot:nn:nn
+    foreign llvm fmul(~tmp#15##0:wybe.float, 57.29577951308232:wybe.float, ?tmp#18##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#119##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#18##0:wybe.float, ~tmp#119##0:wybe.phantom, ?tmp#120##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#120##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>(" degrees":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #91 @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#122##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#122##0:wybe.phantom, ?tmp#123##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#123##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("atan(sqrt(3)/3) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @hypot:nn:nn
+    foreign llvm fdiv(~tmp#132##0:wybe.float, 3.0:wybe.float, ?tmp#134##0:wybe.float) @hypot:nn:nn
+    foreign c llvm.atan.f64(~tmp#134##0:wybe.float, ?tmp#22##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#129##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(tmp#22##0:wybe.float, ~tmp#129##0:wybe.phantom, ?tmp#130##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#130##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>(" = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #55 @hypot:nn:nn
+    foreign llvm fmul(~tmp#22##0:wybe.float, 57.29577951308232:wybe.float, ?tmp#25##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#137##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#25##0:wybe.float, ~tmp#137##0:wybe.phantom, ?tmp#138##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#138##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>(" degrees":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #92 @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#140##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#140##0:wybe.phantom, ?tmp#141##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#141##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("ln(e) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #62 @hypot:nn:nn
+    foreign c llvm.log.f64(2.7182818284590455:wybe.float, ?tmp#29##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#144##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#29##0:wybe.float, ~tmp#144##0:wybe.phantom, ?tmp#145##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#145##0:wybe.phantom, ?tmp#146##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#146##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("common log(e) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #66 @hypot:nn:nn
+    foreign c llvm.log10.f64(2.7182818284590455:wybe.float, ?tmp#31##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#149##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#31##0:wybe.float, ~tmp#149##0:wybe.phantom, ?tmp#150##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#150##0:wybe.phantom, ?tmp#151##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#151##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("base 2 log(e) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #70 @hypot:nn:nn
+    foreign c llvm.log2.f64(2.7182818284590455:wybe.float, ?tmp#33##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#154##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#33##0:wybe.float, ~tmp#154##0:wybe.phantom, ?tmp#155##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#155##0:wybe.phantom, ?tmp#156##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#156##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("floor(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #74 @hypot:nn:nn
+    foreign c llvm.floor.f64(3.141592653589793:wybe.float, ?tmp#35##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#159##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#35##0:wybe.float, ~tmp#159##0:wybe.phantom, ?tmp#160##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#160##0:wybe.phantom, ?tmp#161##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#161##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("ceil(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #78 @hypot:nn:nn
+    foreign c llvm.ceil.f64(3.141592653589793:wybe.float, ?tmp#37##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#164##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#37##0:wybe.float, ~tmp#164##0:wybe.phantom, ?tmp#165##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#165##0:wybe.phantom, ?tmp#166##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#166##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("round(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #82 @hypot:nn:nn
+    foreign c llvm.round.f64(3.141592653589793:wybe.float, ?tmp#39##0:wybe.float) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#169##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(tmp#39##0:wybe.float, ~tmp#169##0:wybe.phantom, ?tmp#170##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#170##0:wybe.phantom, ?tmp#171##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#171##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
+    wybe.string.print<0>("iround(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #86 @hypot:nn:nn
+    foreign llvm fptosi(~tmp#39##0:wybe.float, ?tmp#41##0:wybe.int) @hypot:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#175##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_int(~tmp#41##0:wybe.int, ~tmp#175##0:wybe.phantom, ?tmp#176##0:wybe.phantom) @hypot:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#176##0:wybe.phantom, ?tmp#177##0:wybe.phantom) @hypot:nn:nn
+    foreign lpvm store(~%tmp#177##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
 
 
 proc area > {inline} (1 calls)
@@ -134,37 +185,50 @@ source_filename = "!ROOT!/final-dump/hypot.wybe"
 target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" = \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"area(5) = \00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"base 2 log(e) = \00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"ceil(pi) = \00", align 8
-@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"common log(e) = \00", align 8
-@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"cos(30 degrees) = \00", align 8
-@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"cos(30) = \00", align 8
-@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"e = \00", align 8
-@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"floor(pi) = \00", align 8
-@"cstring#9" = private unnamed_addr constant [ ?? x i8 ] c"hypot(3,4) = \00", align 8
-@"cstring#10" = private unnamed_addr constant [ ?? x i8 ] c"iround(pi) = \00", align 8
-@"cstring#11" = private unnamed_addr constant [ ?? x i8 ] c"ln(e) = \00", align 8
-@"cstring#12" = private unnamed_addr constant [ ?? x i8 ] c"round(pi) = \00", align 8
-@"cstring#13" = private unnamed_addr constant [ ?? x i8 ] c"sin(30 degrees) = \00", align 8
-@"cstring#14" = private unnamed_addr constant [ ?? x i8 ] c"sin(30) = \00", align 8
-@"string#15" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#16" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#17" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#18" = private unnamed_addr constant {i64, i64} { i64 11, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
-@"string#19" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
-@"string#20" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
-@"string#21" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
-@"string#22" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
-@"string#23" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
-@"string#24" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#9" to i64 ) }, align 8
-@"string#25" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#10" to i64 ) }, align 8
-@"string#26" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#11" to i64 ) }, align 8
-@"string#27" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#12" to i64 ) }, align 8
-@"string#28" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#13" to i64 ) }, align 8
-@"string#29" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#14" to i64 ) }, align 8
+@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c" degrees\00", align 8
+@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"acos(sqrt(3)/2) = \00", align 8
+@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"area(5) = \00", align 8
+@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"asin(0.5) = \00", align 8
+@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"atan(sqrt(3)/3) = \00", align 8
+@"cstring#6" = private unnamed_addr constant [ ?? x i8 ] c"base 2 log(e) = \00", align 8
+@"cstring#7" = private unnamed_addr constant [ ?? x i8 ] c"ceil(pi) = \00", align 8
+@"cstring#8" = private unnamed_addr constant [ ?? x i8 ] c"common log(e) = \00", align 8
+@"cstring#9" = private unnamed_addr constant [ ?? x i8 ] c"cos(30 degrees) = \00", align 8
+@"cstring#10" = private unnamed_addr constant [ ?? x i8 ] c"cos(30) = \00", align 8
+@"cstring#11" = private unnamed_addr constant [ ?? x i8 ] c"e = \00", align 8
+@"cstring#12" = private unnamed_addr constant [ ?? x i8 ] c"floor(pi) = \00", align 8
+@"cstring#13" = private unnamed_addr constant [ ?? x i8 ] c"hypot(3,4) = \00", align 8
+@"cstring#14" = private unnamed_addr constant [ ?? x i8 ] c"iround(pi) = \00", align 8
+@"cstring#15" = private unnamed_addr constant [ ?? x i8 ] c"ln(e) = \00", align 8
+@"cstring#16" = private unnamed_addr constant [ ?? x i8 ] c"round(pi) = \00", align 8
+@"cstring#17" = private unnamed_addr constant [ ?? x i8 ] c"sin(30 degrees) = \00", align 8
+@"cstring#18" = private unnamed_addr constant [ ?? x i8 ] c"sin(30) = \00", align 8
+@"cstring#19" = private unnamed_addr constant [ ?? x i8 ] c"tan(30 degrees) = \00", align 8
+@"string#20" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"string#21" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"string#22" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"string#23" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
+@"string#24" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
+@"string#25" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
+@"string#26" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#6" to i64 ) }, align 8
+@"string#27" = private unnamed_addr constant {i64, i64} { i64 11, i64 ptrtoint( ptr @"cstring#7" to i64 ) }, align 8
+@"string#28" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#8" to i64 ) }, align 8
+@"string#29" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#9" to i64 ) }, align 8
+@"string#30" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#10" to i64 ) }, align 8
+@"string#31" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#11" to i64 ) }, align 8
+@"string#32" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#12" to i64 ) }, align 8
+@"string#33" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#13" to i64 ) }, align 8
+@"string#34" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#14" to i64 ) }, align 8
+@"string#35" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#15" to i64 ) }, align 8
+@"string#36" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#16" to i64 ) }, align 8
+@"string#37" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#17" to i64 ) }, align 8
+@"string#38" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#18" to i64 ) }, align 8
+@"string#39" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#19" to i64 ) }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external ccc double @llvm.acos.f64(double)
+declare external ccc double @llvm.asin.f64(double)
+declare external ccc double @llvm.atan.f64(double)
 declare external ccc double @llvm.ceil.f64(double)
 declare external ccc double @llvm.cos.f64(double)
 declare external ccc double @llvm.exp.f64(double)
@@ -175,68 +239,100 @@ declare external ccc double @llvm.log2.f64(double)
 declare external ccc double @llvm.round.f64(double)
 declare external ccc double @llvm.sin.f64(double)
 declare external ccc double @llvm.sqrt.f64(double)
+declare external ccc double @llvm.tan.f64(double)
 declare external ccc void @print_float(double)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"hypot.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#24" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#33" to i64 ))
   %"tmp#0##0" = call ccc double @llvm.sqrt.f64(double 25.0)
   call ccc void @print_float(double %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#16" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#23" to i64 ))
   call ccc void @print_float(double 78.53981633974483)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#31" to i64 ))
   call ccc void @print_float(double 2.7182818284590455)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#20" to i64 ))
   %"tmp#3##0" = call ccc double @llvm.exp.f64(double 1.0)
   call ccc void @print_float(double %"tmp#3##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#29" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#38" to i64 ))
   %"tmp#4##0" = call ccc double @llvm.sin.f64(double 30.0)
   call ccc void @print_float(double %"tmp#4##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#30" to i64 ))
   %"tmp#5##0" = call ccc double @llvm.cos.f64(double 30.0)
   call ccc void @print_float(double %"tmp#5##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#28" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#37" to i64 ))
   %"tmp#6##0" = call ccc double @llvm.sin.f64(double 0.5235987755982988)
   call ccc void @print_float(double %"tmp#6##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#20" to i64 ))
-  %"tmp#10##0" = call ccc double @llvm.cos.f64(double 0.5235987755982988)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#29" to i64 ))
+  %"tmp#8##0" = call ccc double @llvm.cos.f64(double 0.5235987755982988)
+  call ccc void @print_float(double %"tmp#8##0")
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#39" to i64 ))
+  %"tmp#10##0" = call ccc double @llvm.tan.f64(double 0.5235987755982988)
   call ccc void @print_float(double %"tmp#10##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
-  %"tmp#14##0" = call ccc double @llvm.log.f64(double 2.7182818284590455)
-  call ccc void @print_float(double %"tmp#14##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#24" to i64 ))
+  %"tmp#12##0" = call ccc double @llvm.asin.f64(double 0.5)
+  call ccc void @print_float(double %"tmp#12##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#20" to i64 ))
+  %"tmp#13##0" = fmul double %"tmp#12##0", 57.29577951308232
+  call ccc void @print_float(double %"tmp#13##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#19" to i64 ))
-  %"tmp#16##0" = call ccc double @llvm.log10.f64(double 2.7182818284590455)
-  call ccc void @print_float(double %"tmp#16##0")
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#17" to i64 ))
-  %"tmp#18##0" = call ccc double @llvm.log2.f64(double 2.7182818284590455)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
+  %"tmp#132##0" = call ccc double @llvm.sqrt.f64(double 3.0)
+  %"tmp#116##0" = fdiv double %"tmp#132##0", 2.0
+  %"tmp#15##0" = call ccc double @llvm.acos.f64(double %"tmp#116##0")
+  call ccc void @print_float(double %"tmp#15##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#20" to i64 ))
+  %"tmp#18##0" = fmul double %"tmp#15##0", 57.29577951308232
   call ccc void @print_float(double %"tmp#18##0")
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#23" to i64 ))
-  %"tmp#20##0" = call ccc double @llvm.floor.f64(double 3.141592653589793)
-  call ccc void @print_float(double %"tmp#20##0")
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#18" to i64 ))
-  %"tmp#22##0" = call ccc double @llvm.ceil.f64(double 3.141592653589793)
-  call ccc void @print_float(double %"tmp#22##0")
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#27" to i64 ))
-  %"tmp#24##0" = call ccc double @llvm.round.f64(double 3.141592653589793)
-  call ccc void @print_float(double %"tmp#24##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#25" to i64 ))
-  %"tmp#26##0" = fptosi double %"tmp#24##0" to i64
-  call ccc void @print_int(i64 %"tmp#26##0")
+  %"tmp#134##0" = fdiv double %"tmp#132##0", 3.0
+  %"tmp#22##0" = call ccc double @llvm.atan.f64(double %"tmp#134##0")
+  call ccc void @print_float(double %"tmp#22##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#20" to i64 ))
+  %"tmp#25##0" = fmul double %"tmp#22##0", 57.29577951308232
+  call ccc void @print_float(double %"tmp#25##0")
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#35" to i64 ))
+  %"tmp#29##0" = call ccc double @llvm.log.f64(double 2.7182818284590455)
+  call ccc void @print_float(double %"tmp#29##0")
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#28" to i64 ))
+  %"tmp#31##0" = call ccc double @llvm.log10.f64(double 2.7182818284590455)
+  call ccc void @print_float(double %"tmp#31##0")
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
+  %"tmp#33##0" = call ccc double @llvm.log2.f64(double 2.7182818284590455)
+  call ccc void @print_float(double %"tmp#33##0")
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#32" to i64 ))
+  %"tmp#35##0" = call ccc double @llvm.floor.f64(double 3.141592653589793)
+  call ccc void @print_float(double %"tmp#35##0")
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#27" to i64 ))
+  %"tmp#37##0" = call ccc double @llvm.ceil.f64(double 3.141592653589793)
+  call ccc void @print_float(double %"tmp#37##0")
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#36" to i64 ))
+  %"tmp#39##0" = call ccc double @llvm.round.f64(double 3.141592653589793)
+  call ccc void @print_float(double %"tmp#39##0")
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#34" to i64 ))
+  %"tmp#41##0" = fptosi double %"tmp#39##0" to i64
+  call ccc void @print_int(i64 %"tmp#41##0")
   call ccc void @putchar(i8 10)
   ret void
 }

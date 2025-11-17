@@ -5,6 +5,10 @@ sin(30) = -0.988032
 cos(30) = 0.154251
 sin(30 degrees) = 0.500000
 cos(30 degrees) = 0.866025
+tan(30 degrees) = 0.577350
+asin(0.5) = 0.523599 = 30.000000 degrees
+acos(sqrt(3)/2) = 0.523599 = 30.000000 degrees
+atan(sqrt(3)/3) = 0.523599 = 30.000000 degrees
 ln(e) = 1.000000
 common log(e) = 0.434294
 base 2 log(e) = 1.442695

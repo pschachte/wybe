@@ -21,10 +21,32 @@ def area(r:float):float = pi * square(r)
 !println(cos(30.0))
 
 !print("sin(30 degrees) = ")
-!println(sin(pi*30.0/180.0))
+!println(sin(from_degrees(30.0)))
 
 !print("cos(30 degrees) = ")
-!println(cos(pi*30.0/180.0))
+!println(cos(from_degrees(30.0)))
+
+!print("tan(30 degrees) = ")
+!println(tan(from_degrees(30.0)))
+
+!print("asin(0.5) = ")
+!print(asin(0.5))
+!print(" = ")
+!print(to_degrees(asin(0.5)))
+!println(" degrees")
+
+!print("acos(sqrt(3)/2) = ")
+!print(acos(sqrt(3.0)/2.0))
+!print(" = ")
+!print(to_degrees(acos(sqrt(3.0)/2.0)))
+!println(" degrees")
+
+!print("atan(sqrt(3)/3) = ")
+!print(atan(sqrt(3.0)/3.0))
+!print(" = ")
+!print(to_degrees(atan(sqrt(3.0)/3.0)))
+!println(" degrees")
+
 
 !print("ln(e) = ")
 !println(log(e))
