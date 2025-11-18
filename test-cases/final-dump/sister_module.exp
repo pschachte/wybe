@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use sister_module.m1
                     use sister_module.m2
                     use wybe
@@ -57,6 +58,7 @@ define external fastcc i64 @"sister_module.buzz<0>"(i64 %"i##0") {
   public submods  : 
   public resources: 
   public procs    : sister_module.m1.foo<0>
+  constants       : 
   imports         : use sister_module
                     use wybe
   resources       : 
@@ -91,6 +93,7 @@ define external fastcc i64 @"sister_module.m1.foo<0>"(i64 %"i##0") {
   public submods  : 
   public resources: 
   public procs    : sister_module.m2.bar<0>
+  constants       : 
   imports         : use sister_module
                     use wybe
   resources       : 

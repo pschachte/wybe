@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use ctor_visibility.all_priv
                     use ctor_visibility.all_public_long
                     use ctor_visibility.all_public_short
@@ -40,6 +41,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
   public resources: 
   public procs    : ctor_visibility.all_priv.=<0>
                     ctor_visibility.all_priv.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -116,6 +118,7 @@ define external fastcc i1 @"ctor_visibility.all_priv.~=<0>"(i1 %"#left##0", i1 %
                     ctor_visibility.all_public_long.bar<0>
                     ctor_visibility.all_public_long.foo<0>
                     ctor_visibility.all_public_long.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -192,6 +195,7 @@ define external fastcc i1 @"ctor_visibility.all_public_long.~=<0>"(i1 %"#left##0
                     ctor_visibility.all_public_short.bar<0>
                     ctor_visibility.all_public_short.foo<0>
                     ctor_visibility.all_public_short.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -266,6 +270,7 @@ define external fastcc i1 @"ctor_visibility.all_public_short.~=<0>"(i1 %"#left##
   public resources: 
   public procs    : ctor_visibility.ctor_keyword.=<0>
                     ctor_visibility.ctor_keyword.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -341,6 +346,7 @@ define external fastcc i1 @"ctor_visibility.ctor_keyword.~=<0>"(i1 %"#left##0", 
   public procs    : ctor_visibility.one_pub.=<0>
                     ctor_visibility.one_pub.foo<0>
                     ctor_visibility.one_pub.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -416,6 +422,7 @@ define external fastcc i1 @"ctor_visibility.one_pub.~=<0>"(i1 %"#left##0", i1 %"
   public procs    : ctor_visibility.one_pub2.=<0>
                     ctor_visibility.one_pub2.bar<0>
                     ctor_visibility.one_pub2.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -498,6 +505,7 @@ define external fastcc i1 @"ctor_visibility.one_pub2.~=<0>"(i1 %"#left##0", i1 %
                     ctor_visibility.with_fields.foo<0>
                     ctor_visibility.with_fields.foo<1>
                     ctor_visibility.with_fields.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -898,6 +906,7 @@ define external fastcc i1 @"ctor_visibility.with_fields.~=<0>"(i64 %"#left##0", 
                     ctor_visibility.with_fields2.foo<0>
                     ctor_visibility.with_fields2.foo<1>
                     ctor_visibility.with_fields2.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 

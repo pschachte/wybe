@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use mutual_type.a
                     use mutual_type.b
                     use wybe
@@ -41,6 +42,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
                     mutual_type.a.atail<1>
                     mutual_type.a.no_a<0>
                     mutual_type.a.~=<0>
+  constants       : 
   imports         : use mutual_type
                     use wybe
   resources       : 
@@ -354,6 +356,7 @@ define external fastcc i1 @"mutual_type.a.~=<0>"(i64 %"#left##0", i64 %"#right##
                     mutual_type.b.btail<1>
                     mutual_type.b.no_b<0>
                     mutual_type.b.~=<0>
+  constants       : 
   imports         : use mutual_type
                     use wybe
   resources       : 

@@ -14,6 +14,7 @@ AFTER EVERYTHING:
                     constructors.value<0>
                     constructors.value<1>
                     constructors.~=<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

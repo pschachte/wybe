@@ -37,10 +37,13 @@ import           Config        (specialName2)
 -- something outside the procedure scope ("AliasByParam" / "MaybeAliasByParam").
 -- "AliasByParam" and "MaybeAliasByParam" won't be removed during the analysis,
 -- but if the existence of a "MaybeAliasByParam" can change the outcome then we
--- consider the corresponding parameter as interesting.
+-- consider the corresponding parameter as interesting.  For variables aliased
+-- to globals (resource values), we use "AliasByGlobal". For variables aliased
+-- to global constant structures, we use "AliasByConst". 
 data AliasMapLocalItem
     = LiveVar           PrimVarName
     | AliasByGlobal     GlobalInfo
+    | AliasByConst
     | AliasByParam      PrimVarName
     | MaybeAliasByParam PrimVarName
     deriving (Eq, Ord, Show)
@@ -273,7 +276,7 @@ updateAliasedByPrim aliasMap prim =
             let ProcDefPrim _ calleeProto _ analysis _ = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
             logAlias $ "--- call          " ++ show spec ++" (callee): "
-            logAlias $ "" ++ show calleeProto
+                        ++ show calleeProto
             logAlias $ "PrimCall args:    " ++ show args
             let paramArgMap = mapParamToArgVar calleeProto args
             -- calleeArgsAliasMap is the alias map of actual arguments passed
@@ -342,6 +345,7 @@ _maybeAliasPrimArgs args = do
         case arg of
         ArgVar{argVarName=var, argVarType=ty} -> maybeAddressAlias arg ty $ LiveVar var
         ArgGlobal global ty -> maybeAddressAlias arg ty $ AliasByGlobal global
+        ArgConstRef global ty -> maybeAddressAlias arg ty AliasByConst
         _ -> return Nothing
     maybeAddressAlias arg ty item = do
         rep <- lookupTypeRepresentation ty

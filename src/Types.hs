@@ -843,11 +843,10 @@ expType expr = do
 
 
 expType' :: Exp -> OptPos -> Typed TypeSpec
-expType' (IntValue _) _               = return $ TypeSpec ["wybe"] "int" []
-expType' (FloatValue _) _             = return $ TypeSpec ["wybe"] "float" []
-expType' (StringValue _ WybeString) _ = return $ TypeSpec ["wybe"] "string" []
-expType' (StringValue _ CString) _    = return $ TypeSpec ["wybe"] "c_string" []
-expType' (CharValue _) _              = return $ TypeSpec ["wybe"] "char" []
+expType' IntValue{} _          = return $ TypeSpec ["wybe"] "int" []
+expType' FloatValue{} _        = return $ TypeSpec ["wybe"] "float" []
+expType' CharValue{} _         = return $ TypeSpec ["wybe"] "char" []
+expType' expr@ConstStruct{} _  = return AnyType -- will be explicitly typed
 expType' (AnonProc mods params pstmts _ _) _ = do
     mapM_ ultimateVarType $ paramName <$> params
     params' <- updateParamTypes $ Unplaced <$> params
@@ -892,16 +891,16 @@ expMode :: Placed Exp -> Moded (FlowDirection,Bool,Maybe VarName)
 expMode = expMode' . content
 
 expMode' :: Exp -> Moded (FlowDirection,Bool,Maybe VarName)
-expMode' (IntValue _) = return (ParamIn, True, Nothing)
-expMode' (FloatValue _) = return (ParamIn, True, Nothing)
-expMode' (StringValue _ _) = return (ParamIn, True, Nothing)
-expMode' (CharValue _) = return (ParamIn, True, Nothing)
-expMode' (Closure _ _) = return (ParamIn, True, Nothing)
-expMode' AnonProc{} = return (ParamIn, True, Nothing)
+expMode' IntValue{}    = return (ParamIn, True, Nothing)
+expMode' FloatValue{}  = return (ParamIn, True, Nothing)
+expMode' ConstStruct{} = return (ParamIn, True, Nothing)
+expMode' CharValue{}   = return (ParamIn, True, Nothing)
+expMode' Closure{}     = return (ParamIn, True, Nothing)
+expMode' AnonProc{}    = return (ParamIn, True, Nothing)
 expMode' (Var name flow _) = do
     assigned <- get
     return (flow, name `assignedIn` assigned, Nothing)
-expMode' FailExpr = return (ParamIn, True, Nothing)
+expMode' FailExpr      = return (ParamIn, True, Nothing)
 expMode' (Typed expr _ _) = expMode' expr
 expMode' expr =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
@@ -1269,7 +1268,7 @@ addResourceType errFn rspec pos = do
 -- expressions.
 recordCasts :: ProcName -> Stmt -> OptPos -> Typed ()
 recordCasts caller instr@(ForeignCall "llvm" "move" _ [v1,v2]) pos = do
-    logTyped $ "Recording casts in " ++ show instr
+    logTyped $ "Recording casts in move instr " ++ show instr
     recordCast (Just "llvm") caller "move" v1 1
     recordCast (Just "llvm") caller "move" v2 2
     logTyped $ "Unifying move argument types " ++ show v1 ++ " and " ++ show v2
@@ -1278,13 +1277,13 @@ recordCasts caller instr@(ForeignCall "llvm" "move" _ [v1,v2]) pos = do
     void $ unifyTypes (ReasonEqual (content v1) (content v2) pos)
            t1 t2
 recordCasts caller instr@(ForeignCall lang callee _ args) pos = do
-    logTyped $ "Recording casts in " ++ show instr
+    logTyped $ "Recording casts in foreign call " ++ show instr
     mapM_ (uncurry $ recordCast (Just lang) caller callee) $ zip args [1..]
 recordCasts caller instr@(ProcCall (First _ callee _) _ _ args) pos = do
-    logTyped $ "Recording casts in " ++ show instr
+    logTyped $ "Recording casts in wybe call " ++ show instr
     mapM_ (uncurry $ recordCast Nothing caller callee) $ zip args [1..]
 recordCasts caller instr@(ProcCall (Higher fn) _ _ args) _ = do
-    logTyped $ "Recording casts in " ++ show instr
+    logTyped $ "Recording casts in HO wybe call " ++ show instr
     mapM_ (uncurry $ recordCast Nothing caller $ show $ content fn) $ zip (fn:args) [0..]
 recordCasts caller stmt _ =
     shouldnt $ "recordCasts of non-call statement " ++ show stmt
@@ -2651,14 +2650,16 @@ finaliseCall resourceful final pos args
         logModed $ "Specials in call   :  " ++ simpleShowSet specials
         logModed $ "Available vars     :  " ++ simpleShowSet avail
         logModed $ "Available resources:  " ++ simpleShowSet (bindingResources assigned)
-        let specialInstrs =
-                [ move (s `withType` ty) (varSetTyped r ty)
-                | True -- resourceful -- no specials unless resourceful
-                , r <- Set.elems $ specials Set.\\ avail
-                , let (f,ty) = fromMaybe (const $ StringValue "Unknown" CString,
-                                        cStringType)
+        specialInstrs <-
+            mapM (\r -> do
+                    logModed $ "Checking special resource: " ++ r
+                    let (f,ty) = fromMaybe (const (cStringExpr "Unknown"),
+                                            cStringType)
                                 $ Map.lookup r specialResources
-                , let s = f $ maybePlace stmt pos]
+                    f' <- lift2 $ f $ maybePlace stmt pos
+                    logModed $ "Special resource value: " ++ show f'
+                    return $ move f' (varSetTyped r ty)
+                ) $ Set.elems $ specials Set.\\ avail
         bindVars (Set.map resourceName outResources)
         bindingStateSeq matchDetism matchImpurity (pexpListOutputs args')
         logModed $ "Generated special stmts = " ++ show specialInstrs
