@@ -20,6 +20,7 @@ module Options (Options(..),
 import           Data.List             as List
 import           Data.List.Extra       (lower)
 import           Data.Map              as Map
+import           Data.Maybe            (fromMaybe)
 import           Data.Set              as Set
 import           Data.Either           as Either
 import           Text.Read             (readMaybe)
@@ -56,6 +57,7 @@ data Options = Options
     , optNoVerifyLLVM  :: Bool     -- ^Don't run LLVM verification
     , optErrors        :: Set String 
                                    -- ^Erroneous flag error messages
+    , optNoEnv         :: Bool     -- ^Don't read WYBEARGS
     } deriving Show
 
 
@@ -79,6 +81,7 @@ defaultOptions = Options
   , optNoFont        = False
   , optNoVerifyLLVM  = False
   , optErrors        = Set.empty
+  , optNoEnv         = False
   }
 
 
@@ -266,6 +269,9 @@ options =
     , Option []    ["no-verify-llvm"]
         (NoArg (\opts -> opts { optNoVerifyLLVM = True }))
         "disable verification of generated LLVM code"
+    , Option []    ["no-env"]
+        (NoArg (\opts -> opts { optNoEnv = True }))
+        $ "disable reading compiler switches from '" ++ envArgs ++ "'"
     ]
 
 
@@ -292,9 +298,12 @@ compilerOpts argv =
 handleCmdline :: IO (Options, [String])
 handleCmdline = do
     argv <- getArgs
+    (cmdLineOpts, files) <- compilerOpts argv
     env <- Map.fromList <$> getEnvironment
-    envArgs <- parseEnvArgs $ Map.lookup envArgs env
-    (opts0,files) <- compilerOpts $ envArgs ++ argv
+    opts0 <- if optNoEnv cmdLineOpts 
+             then return cmdLineOpts 
+             else handleEnvArgs cmdLineOpts argv files $ fromMaybe "" (Map.lookup envArgs env)
+
     let libs0 = case optLibDirs opts0 of
                 [] -> maybe [libDir] splitSearchPath $ Map.lookup envLibs env
                 lst -> lst
@@ -341,29 +350,32 @@ handleCmdline = do
     then do
         putStrLn $ usageInfo header options
         exitFailure
-    else return (opts,files)
+    else return (opts, files)
 
 
-parseEnvArgs :: Maybe String -> IO [String]
-parseEnvArgs Nothing = return []
-parseEnvArgs (Just rawArgs) = do
-    case SW.parse rawArgs of
-        Right envArgs -> return envArgs 
-        Left err -> do
-            putStrLn $ "Failed to parse " ++ envArgs ++ ":\n  " ++ err
-            exitFailure
-    
+-- |Parse and add options from envArg.
+-- Ensures that no files are specified in envArg
+handleEnvArgs :: Options -> [String] -> [String] -> String -> IO Options
+handleEnvArgs cmdLineOpts argv files envArg = 
+    case SW.parse envArg of
+      Left err -> return $ addOptError cmdLineOpts $ "Error parsing " ++ envArgs ++ ":\n" ++ err
+      Right envArgv -> do
+        (opts, files') <- compilerOpts (envArgv ++ argv)
+        if files' /= files
+        then return $ addOptError opts $ "Files cannot be specified in " ++ envArgs ++ ": " ++ intercalate ", " (files' List.\\ files)
+        else return opts
 
 -- Set the LLVM optimisation level specified by the string.
 -- Add an error message if the string is not a number.
 setLLVMOptLevel :: String -> Options -> Options
-setLLVMOptLevel str opts@Options{optErrors=errors}=
+setLLVMOptLevel str opts=
     case readMaybe str of
-        Nothing -> opts{optErrors=("LLVM opt level should be a number: " ++ str) 
-                                    `Set.insert` errors}
+        Nothing -> addOptError opts $ "LLVM opt level should be a number: " ++ str 
         Just lvl -> opts{optLLVMOptLevel=lvl}
 
-
+-- | Adds an error to the set of errors
+addOptError :: Options -> String -> Options
+addOptError opts@Options{optErrors=errs} err = opts{optErrors=Set.insert err errs}
 
 -- |The inverse of intercalate:  split up a list into sublists separated
 --  by the separator list.
