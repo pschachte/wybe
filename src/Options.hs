@@ -287,23 +287,25 @@ envArgs :: String
 envArgs = "WYBEARGS"
 
 -- |Parse command line arguments
-compilerOpts :: [String] -> IO (Options, [String])
+compilerOpts :: [String] -> (Options, [String])
 compilerOpts argv =
-  case getOpt Permute options argv of
-    (o,n,[]  ) -> return (List.foldl (flip id) defaultOptions o, n)
-    (_,_,errs) -> ioError (userError (concat errs ++ usageInfo header options))
+    let (o, files, errs) =  getOpt Permute options argv
+        opts = List.foldl (flip id) defaultOptions o
+    in if List.null errs
+    then (opts, files)
+    else (opts{optErrors=Set.fromList errs `Set.union` optErrors opts}, files)
 
 -- |Parse the command line and handle all options asking to print
 --  something and exit.
 handleCmdline :: IO (Options, [String])
 handleCmdline = do
     argv <- getArgs
-    (cmdLineOpts, files) <- compilerOpts argv
+    let (cmdLineOpts, files) = compilerOpts argv
     env <- Map.fromList <$> getEnvironment
-    opts0 <- if optNoEnv cmdLineOpts 
-             then return cmdLineOpts 
-             else handleEnvArgs cmdLineOpts argv files $ fromMaybe "" (Map.lookup envArgs env)
-
+    let opts0 = 
+            if optNoEnv cmdLineOpts 
+            then cmdLineOpts 
+            else handleEnvArgs cmdLineOpts argv files $ fromMaybe "" (Map.lookup envArgs env)
     let libs0 = case optLibDirs opts0 of
                 [] -> maybe [libDir] splitSearchPath $ Map.lookup envLibs env
                 lst -> lst
@@ -345,6 +347,8 @@ handleCmdline = do
     then do
         unless (optNoFont opts) $ setSGR [SetColor Foreground Vivid Red]
         putStrLn $ "Command line option errors:\n  " ++ intercalate "\n  " (Set.toList errs)
+        unless (optNoFont opts) $ setSGR [Reset]
+        putStrLn $ usageInfo header options
         exitFailure
     else if List.null files
     then do
@@ -355,15 +359,15 @@ handleCmdline = do
 
 -- |Parse and add options from envArg.
 -- Ensures that no files are specified in envArg
-handleEnvArgs :: Options -> [String] -> [String] -> String -> IO Options
+handleEnvArgs :: Options -> [String] -> [String] -> String -> Options
 handleEnvArgs cmdLineOpts argv files envArg = 
     case SW.parse envArg of
-      Left err -> return $ addOptError cmdLineOpts $ "Error parsing " ++ envArgs ++ ":\n" ++ err
-      Right envArgv -> do
-        (opts, files') <- compilerOpts (envArgv ++ argv)
-        if files' /= files
-        then return $ addOptError opts $ "Files cannot be specified in " ++ envArgs ++ ": " ++ intercalate ", " (files' List.\\ files)
-        else return opts
+      Left err -> addOptError cmdLineOpts $ "Error parsing " ++ envArgs ++ ":\n" ++ err
+      Right envArgv -> 
+        let (opts, files') = compilerOpts (envArgv ++ argv)
+        in if files' /= files
+        then addOptError opts $ "Files cannot be specified in " ++ envArgs ++ ": " ++ intercalate ", " (files' List.\\ files)
+        else opts
 
 -- Set the LLVM optimisation level specified by the string.
 -- Add an error message if the string is not a number.
