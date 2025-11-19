@@ -31,6 +31,7 @@ import           System.FilePath
 import           Version
 import           System.Directory
 import           System.Console.ANSI
+import qualified ShellWords            as SW
 
 -- |Command line options for the wybe compiler.
 data Options = Options
@@ -272,6 +273,13 @@ options =
 header :: String
 header = "Usage: wybemk [OPTION...] targets..."
 
+-- |Environment variables used by the compiler
+envLibs :: String
+envLibs = "WYBELIBS"
+
+envArgs :: String
+envArgs = "WYBEARGS"
+
 -- |Parse command line arguments
 compilerOpts :: [String] -> IO (Options, [String])
 compilerOpts argv =
@@ -284,11 +292,11 @@ compilerOpts argv =
 handleCmdline :: IO (Options, [String])
 handleCmdline = do
     argv <- getArgs
-    assocList <- getEnvironment
-    let env = Map.fromList assocList
-    (opts0,files) <- compilerOpts argv
+    env <- Map.fromList <$> getEnvironment
+    envArgs <- parseEnvArgs $ Map.lookup envArgs env
+    (opts0,files) <- compilerOpts $ envArgs ++ argv
     let libs0 = case optLibDirs opts0 of
-                [] -> maybe [libDir] splitSearchPath $ Map.lookup "WYBELIBS" env
+                [] -> maybe [libDir] splitSearchPath $ Map.lookup envLibs env
                 lst -> lst
     libs <- mapM makeAbsolute libs0
     let opts = opts0 { optLibDirs = libs }
@@ -334,6 +342,16 @@ handleCmdline = do
         putStrLn $ usageInfo header options
         exitFailure
     else return (opts,files)
+
+
+parseEnvArgs :: Maybe String -> IO [String]
+parseEnvArgs Nothing = return []
+parseEnvArgs (Just rawArgs) = do
+    case SW.parse rawArgs of
+        Right envArgs -> return envArgs 
+        Left err -> do
+            putStrLn $ "Failed to parse " ++ envArgs ++ ":\n  " ++ err
+            exitFailure
     
 
 -- Set the LLVM optimisation level specified by the string.
