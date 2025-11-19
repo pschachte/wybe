@@ -350,7 +350,7 @@ handleCmdline = do
     then do
         putStrLn $ usageInfo header options
         exitFailure
-    else return (opts, files)
+    else return (opts, nub files)
 
 
 -- |Parse and add options from envArg.
