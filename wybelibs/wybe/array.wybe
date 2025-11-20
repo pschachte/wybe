@@ -44,7 +44,13 @@ pub def array(x:T, len:int):_(T) = ar where {
     }
 }
 
-# Construct a Wybe array from an c_array.  This will need to copy the data.
+# Construct an array filled with 0s.  Takes advangage of the fact that GC_malloc
+# clears the allocated memory.
+pub def array(len:int):_(T) = ar where {
+    allocate_array(len, ?ar, ?size)
+}
+
+# Construct a Wybe array from a c_array.  This will need to copy the data.
 pub def array(data:c_array(T)):_(T) = ar where {
     allocate_array(data^length, ?ar, ?size)
     ?i = 0
@@ -54,6 +60,11 @@ pub def array(data:c_array(T)):_(T) = ar where {
     }
 }
 
+# Test if an index is within the bounds of an array
+pub def {test, inline} inbounds(a:_(T), idx:int) {
+    (0 <= idx)
+    (idx < a^length)
+}
 
 
 ## Conversion procedures
@@ -87,7 +98,9 @@ pub def {test, inline} `[]`(!a:_(T), idx:int, x:T) {
 
 ## Array slicing
 
-# Return a sub-array from index `start` (inclusive) to `end` (exclusive).
+# Return a sub-array from index `start` (inclusive) to `end` (exclusive), but
+# restricted to the bounds of the array.
+#
 # We can't just return a pointer into the original array, because the first word
 # of an array is its length.  So we "pretend" the array actually starts one word
 # before the specified start index, and its length is `end - start`, and use the
@@ -95,10 +108,10 @@ pub def {test, inline} `[]`(!a:_(T), idx:int, x:T) {
 # uniqueness analysis will turn that into a destructive update if the original
 # array is unused after the slice operation, otherwise it will copy as much data
 # as is needed for the slice, and then write the size where it belongs.
-pub def {partial} slice(a:_(T), start:int, end:int):_(T) = subarray where {
-    (0 <= start)
-    (start <= end)
-    (end <= a^length)
+pub def slice(a:_(T), start:int, end:int):_(T) = subarray where {
+    max(!start, 0)
+    min(!end, a^length)
+    max(!start, end)
     foreign llvm add(a^raw_data, (start-1) * word_size_bytes, ?start_address)
     ?slice_size = (end - start + 1) * word_size_bytes
     ?sz = end - start
@@ -132,12 +145,6 @@ pub type array_iterator(T) {
 
 
 ## Common operations
-
-# Test if an index is within the bounds of an array
-pub def {test, inline} inbounds(a:_(T), idx:int) {
-    (0 <= idx)
-    (idx < a^length)
-}
 
 # WARNING: does not initialise the array.
 # Allocate space for an array and record the size.
