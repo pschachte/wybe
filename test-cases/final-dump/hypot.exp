@@ -69,7 +69,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar('\n':wybe.char, ~tmp#98##0:wybe.phantom, ?tmp#99##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#99##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("asin(0.5) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @hypot:nn:nn
-    foreign c llvm.asin.f64(0.5:wybe.float, ?tmp#12##0:wybe.float) @hypot:nn:nn
+    foreign c asin(0.5:wybe.float, ?tmp#12##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#102##0:wybe.phantom) @hypot:nn:nn
     foreign c print_float(tmp#12##0:wybe.float, ~tmp#102##0:wybe.phantom, ?tmp#103##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#103##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
@@ -85,7 +85,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("acos(sqrt(3)/2) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #38 @hypot:nn:nn
     foreign c llvm.sqrt.f64(3.0:wybe.float, ?tmp#138##0:wybe.float) @hypot:nn:nn
     foreign llvm fdiv(tmp#138##0:wybe.float, 2.0:wybe.float, ?tmp#122##0:wybe.float) @hypot:nn:nn
-    foreign c llvm.acos.f64(~tmp#122##0:wybe.float, ?tmp#15##0:wybe.float) @hypot:nn:nn
+    foreign c acos(~tmp#122##0:wybe.float, ?tmp#15##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#117##0:wybe.phantom) @hypot:nn:nn
     foreign c print_float(tmp#15##0:wybe.float, ~tmp#117##0:wybe.phantom, ?tmp#118##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#118##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
@@ -100,7 +100,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#129##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("atan(sqrt(3)/3) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @hypot:nn:nn
     foreign llvm fdiv(~tmp#138##0:wybe.float, 3.0:wybe.float, ?tmp#140##0:wybe.float) @hypot:nn:nn
-    foreign c llvm.atan.f64(~tmp#140##0:wybe.float, ?tmp#22##0:wybe.float) @hypot:nn:nn
+    foreign c atan(~tmp#140##0:wybe.float, ?tmp#22##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#135##0:wybe.phantom) @hypot:nn:nn
     foreign c print_float(tmp#22##0:wybe.float, ~tmp#135##0:wybe.phantom, ?tmp#136##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#136##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
@@ -114,8 +114,8 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar('\n':wybe.char, ~tmp#146##0:wybe.phantom, ?tmp#147##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#147##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("atan2(-1,-1) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #62 @hypot:nn:nn
-    foreign c llvm.atan2.f64(-1.0:wybe.float, -1.0:wybe.float, ?tmp#30##0:wybe.float) @hypot:nn:nn
-    foreign c llvm.atan.f64(tmp#30##0:wybe.float, ?tmp#29##0:wybe.float) @hypot:nn:nn
+    foreign c atan2(-1.0:wybe.float, -1.0:wybe.float, ?tmp#30##0:wybe.float) @hypot:nn:nn
+    foreign c atan(tmp#30##0:wybe.float, ?tmp#29##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#152##0:wybe.phantom) @hypot:nn:nn
     foreign c print_float(~tmp#29##0:wybe.float, ~tmp#152##0:wybe.phantom, ?tmp#153##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#153##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
@@ -243,10 +243,10 @@ target triple    ????
 @"string#41" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#20" to i64 ) }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
-declare external ccc double @llvm.acos.f64(double)
-declare external ccc double @llvm.asin.f64(double)
-declare external ccc double @llvm.atan.f64(double)
-declare external ccc double @llvm.atan2.f64(double, double)
+declare external ccc double @acos(double)
+declare external ccc double @asin(double)
+declare external ccc double @atan(double)
+declare external ccc double @atan2(double, double)
 declare external ccc double @llvm.ceil.f64(double)
 declare external ccc double @llvm.cos.f64(double)
 declare external ccc double @llvm.exp.f64(double)
@@ -297,7 +297,7 @@ define external fastcc void @"hypot.<0>"() {
   call ccc void @print_float(double %"tmp#10##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#25" to i64 ))
-  %"tmp#12##0" = call ccc double @llvm.asin.f64(double 0.5)
+  %"tmp#12##0" = call ccc double @asin(double 0.5)
   call ccc void @print_float(double %"tmp#12##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   %"tmp#13##0" = fmul double %"tmp#12##0", 57.29577951308232
@@ -307,7 +307,7 @@ define external fastcc void @"hypot.<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#23" to i64 ))
   %"tmp#138##0" = call ccc double @llvm.sqrt.f64(double 3.0)
   %"tmp#122##0" = fdiv double %"tmp#138##0", 2.0
-  %"tmp#15##0" = call ccc double @llvm.acos.f64(double %"tmp#122##0")
+  %"tmp#15##0" = call ccc double @acos(double %"tmp#122##0")
   call ccc void @print_float(double %"tmp#15##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   %"tmp#18##0" = fmul double %"tmp#15##0", 57.29577951308232
@@ -316,7 +316,7 @@ define external fastcc void @"hypot.<0>"() {
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
   %"tmp#140##0" = fdiv double %"tmp#138##0", 3.0
-  %"tmp#22##0" = call ccc double @llvm.atan.f64(double %"tmp#140##0")
+  %"tmp#22##0" = call ccc double @atan(double %"tmp#140##0")
   call ccc void @print_float(double %"tmp#22##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   %"tmp#25##0" = fmul double %"tmp#22##0", 57.29577951308232
@@ -324,8 +324,8 @@ define external fastcc void @"hypot.<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#27" to i64 ))
-  %"tmp#30##0" = call ccc double @llvm.atan2.f64(double -1.0, double -1.0)
-  %"tmp#29##0" = call ccc double @llvm.atan.f64(double %"tmp#30##0")
+  %"tmp#30##0" = call ccc double @atan2(double -1.0, double -1.0)
+  %"tmp#29##0" = call ccc double @atan(double %"tmp#30##0")
   call ccc void @print_float(double %"tmp#29##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   %"tmp#31##0" = fmul double %"tmp#30##0", 57.29577951308232
