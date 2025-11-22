@@ -36,8 +36,10 @@ AFTER BUILDING MAIN:
                     use drone.drone_info
                     use wybe
                     use wybe.array
-                    use wybe.array.raw_array
+                    use wybe.array.array_iterator
                     use wybe.bool
+                    use wybe.c_array
+                    use wybe.c_array.raw_array
                     use wybe.c_string
                     use wybe.char
                     use wybe.comparison
@@ -59,18 +61,18 @@ AFTER BUILDING MAIN:
 
 module top-level code > {terminal,inline,impure} (0 calls)
 0: *main* module.<0>
-(%argc##0:wybe.int, %argv##0:wybe.array.raw_array, %?exit_code##1:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
+(%argc##0:wybe.int, %argv##0:wybe.c_array.raw_array, %?exit_code##1:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(%argc##0:wybe.int, <<command_line.argc>>:wybe.int)
-    foreign lpvm store(%argv##0:wybe.array.raw_array, <<command_line.argv>>:wybe.array.raw_array)
+    foreign lpvm store(%argv##0:wybe.c_array.raw_array, <<command_line.argv>>:wybe.c_array.raw_array)
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign c {impure} gc_init @memory_management:nn:nn
     drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(T)) @command_line:nn:nn
-    foreign lpvm mutate(~tmp#9##0:wybe.array(T), ?tmp#10##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.array.raw_array) @command_line:nn:nn
-    foreign lpvm store(~tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.c_array(T)) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.c_array(T), ?tmp#10##0:wybe.c_array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.c_array(T), ?tmp#0##0:wybe.c_array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.c_array.raw_array) @command_line:nn:nn
+    foreign lpvm store(~tmp#0##0:wybe.c_array(wybe.c_string), <<command_line.arguments>>:wybe.c_array(wybe.c_string)) @command_line:nn:nn
     foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
     foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
     command_line.<0><{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}> #3
@@ -93,8 +95,8 @@ module top-level code > {terminal,inline,impure} (0 calls)
                     command_line.set_exit_code<0>
   imports         : use wybe
   resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
-                    arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
-                    argv: fromList [(command_line.argv,wybe.array.raw_array @command_line:nn:nn)]
+                    arguments: fromList [(command_line.arguments,wybe.c_array(wybe.c_string) = c_array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
+                    argv: fromList [(command_line.argv,wybe.c_array.raw_array @command_line:nn:nn)]
                     command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
@@ -104,14 +106,14 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string))
-    wybe.array.[|]<0>(?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
+    foreign lpvm load(<<command_line.arguments>>:wybe.c_array(wybe.c_string), ?%arguments##0:wybe.c_array(wybe.c_string))
+    wybe.c_array.[|]<0>(?command##1:wybe.c_string, ?arguments##2:wybe.c_array(wybe.c_string), ~arguments##0:wybe.c_array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @command_line:nn:nn
 
     1:
-        foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
+        foreign lpvm store(~%arguments##2:wybe.c_array(wybe.c_string), <<command_line.arguments>>:wybe.c_array(wybe.c_string)) @command_line:nn:nn
         foreign lpvm store(~%command##1:wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
 
 
@@ -576,8 +578,10 @@ AFTER EVERYTHING:
                     use drone.drone_info
                     use wybe
                     use wybe.array
-                    use wybe.array.raw_array
+                    use wybe.array.array_iterator
                     use wybe.bool
+                    use wybe.c_array
+                    use wybe.c_array.raw_array
                     use wybe.c_string
                     use wybe.char
                     use wybe.comparison
@@ -599,18 +603,18 @@ AFTER EVERYTHING:
 
 module top-level code > {terminal,inline,impure} (0 calls)
 0: *main* module.<0>
-(%argc##0:wybe.int, %argv##0:wybe.array.raw_array, %?exit_code##1:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
+(%argc##0:wybe.int, %argv##0:wybe.c_array.raw_array, %?exit_code##1:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(%argc##0:wybe.int, <<command_line.argc>>:wybe.int)
-    foreign lpvm store(%argv##0:wybe.array.raw_array, <<command_line.argv>>:wybe.array.raw_array)
+    foreign lpvm store(%argv##0:wybe.c_array.raw_array, <<command_line.argv>>:wybe.c_array.raw_array)
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign c {impure} gc_init @memory_management:nn:nn
     drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(T)) @command_line:nn:nn
-    foreign lpvm mutate(~tmp#9##0:wybe.array(T), ?tmp#10##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.array.raw_array) @command_line:nn:nn
-    foreign lpvm store(~tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.c_array(T)) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.c_array(T), ?tmp#10##0:wybe.c_array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.c_array(T), ?tmp#0##0:wybe.c_array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.c_array.raw_array) @command_line:nn:nn
+    foreign lpvm store(~tmp#0##0:wybe.c_array(wybe.c_string), <<command_line.arguments>>:wybe.c_array(wybe.c_string)) @command_line:nn:nn
     foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
     foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
     command_line.<0><{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}> #3
@@ -672,8 +676,8 @@ define external ccc i64 @main(i64 %"argc##0", i64 %"argv##0") {
                     command_line.set_exit_code<0>
   imports         : use wybe
   resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
-                    arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
-                    argv: fromList [(command_line.argv,wybe.array.raw_array @command_line:nn:nn)]
+                    arguments: fromList [(command_line.arguments,wybe.c_array(wybe.c_string) = c_array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
+                    argv: fromList [(command_line.argv,wybe.c_array.raw_array @command_line:nn:nn)]
                     command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
@@ -683,14 +687,14 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string))
-    wybe.array.[|]<0>(?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
+    foreign lpvm load(<<command_line.arguments>>:wybe.c_array(wybe.c_string), ?%arguments##0:wybe.c_array(wybe.c_string))
+    wybe.c_array.[|]<0>(?command##1:wybe.c_string, ?arguments##2:wybe.c_array(wybe.c_string), ~arguments##0:wybe.c_array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @command_line:nn:nn
 
     1:
-        foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
+        foreign lpvm store(~%arguments##2:wybe.c_array(wybe.c_string), <<command_line.arguments>>:wybe.c_array(wybe.c_string)) @command_line:nn:nn
         foreign lpvm store(~%command##1:wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
 
 
@@ -713,7 +717,7 @@ target triple   = ???
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Erroneous program argument vector\00", align 8
 @"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"command_line:18:15\00", align 8
 
-declare external fastcc {i64, i64, i1} @"wybe.array.[|]<0>"(i64)
+declare external fastcc {i64, i64, i1} @"wybe.c_array.[|]<0>"(i64)
 declare external ccc void @error_exit(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#command_line.argc" = global i64 undef
@@ -724,7 +728,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"command_line.<0>"() {
   %"arguments##0" = load i64, ptr @"resource#command_line.arguments"
-  %"tmp#11##0" = tail call fastcc {i64, i64, i1} @"wybe.array.[|]<0>"(i64 %"arguments##0")
+  %"tmp#11##0" = tail call fastcc {i64, i64, i1} @"wybe.c_array.[|]<0>"(i64 %"arguments##0")
   %"command##1" = extractvalue {i64, i64, i1}%"tmp#11##0", 0
   %"arguments##2" = extractvalue {i64, i64, i1}%"tmp#11##0", 1
   %"tmp#8##0" = extractvalue {i64, i64, i1}%"tmp#11##0", 2
