@@ -10,11 +10,11 @@ AFTER EVERYTHING:
   public procs    : foreign_test.<0>
                     foreign_test.lt<0>
                     foreign_test.neq<0>
-  constants       : 0:: CStringInfo {cstringChars = "lt(1,2)"}
-                    1:: CStringInfo {cstringChars = "lt(2,1)"}
-                    2:: CStringInfo {cstringChars = "string"}
-                    3:: CStringInfo {cstringChars = "neq(c\"string\", c\"string\")"}
-                    4:: CStringInfo {cstringChars = "strong"}
+  constants       : 0:: CStringInfo {cstringChars = "string"}
+                    1:: CStringInfo {cstringChars = "strong"}
+                    2:: CStringInfo {cstringChars = "lt(1,2)"}
+                    3:: CStringInfo {cstringChars = "lt(2,1)"}
+                    4:: CStringInfo {cstringChars = "neq(c\"string\", c\"string\")"}
                     5:: CStringInfo {cstringChars = "neq(c\"string\", c\"strong\")"}
                     6:: StructInfo {structSize = 16, structData = [IntStructMember 25 8,PointerStructMember c"neq(c\"string\", c\"strong\")"]}
                     7:: StructInfo {structSize = 16, structData = [IntStructMember 25 8,PointerStructMember c"neq(c\"string\", c\"string\")"]}
@@ -105,14 +105,14 @@ neq(x##0:wybe.c_string, y##0:wybe.c_string, ?#success##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/foreign_test.wybe"
 target triple    ????
 
-@"foreign_test#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"lt(1,2)\00", align 8
-@"foreign_test#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"string\00", align 8
-@"foreign_test#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"neq(c\22string\22, c\22string\22)\00", align 8
-@"foreign_test#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"strong\00", align 8
+@"foreign_test#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"string\00", align 8
+@"foreign_test#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"strong\00", align 8
+@"foreign_test#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"lt(1,2)\00", align 8
+@"foreign_test#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"neq(c\22string\22, c\22string\22)\00", align 8
 @"foreign_test#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"neq(c\22string\22, c\22strong\22)\00", align 8
 @"foreign_test#constant#6" = private unnamed_addr constant {i64, ptr} { i64 25, ptr @"foreign_test#constant#5" }, align 8
-@"foreign_test#constant#7" = private unnamed_addr constant {i64, ptr} { i64 25, ptr @"foreign_test#constant#3" }, align 8
-@"foreign_test#constant#8" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"foreign_test#constant#0" }, align 8
+@"foreign_test#constant#7" = private unnamed_addr constant {i64, ptr} { i64 25, ptr @"foreign_test#constant#4" }, align 8
+@"foreign_test#constant#8" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"foreign_test#constant#2" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
@@ -132,7 +132,7 @@ define external fastcc void @"foreign_test.#cont#1<0>"() {
 }
 
 define external fastcc void @"foreign_test.#cont#2<0>"() {
-  %"tmp#8##0" = call ccc i64 @strcmp(ptr @"foreign_test#constant#2", ptr @"foreign_test#constant#2")
+  %"tmp#8##0" = call ccc i64 @strcmp(ptr @"foreign_test#constant#0", ptr @"foreign_test#constant#0")
   %"tmp#5##0" = icmp ne i64 %"tmp#8##0", 0
   br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -146,7 +146,7 @@ if.else.0:
 }
 
 define external fastcc void @"foreign_test.#cont#3<0>"() {
-  %"tmp#7##0" = call ccc i64 @strcmp(ptr @"foreign_test#constant#2", ptr @"foreign_test#constant#4")
+  %"tmp#7##0" = call ccc i64 @strcmp(ptr @"foreign_test#constant#0", ptr @"foreign_test#constant#1")
   %"tmp#4##0" = icmp ne i64 %"tmp#7##0", 0
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:

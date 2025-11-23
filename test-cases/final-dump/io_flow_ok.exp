@@ -8,9 +8,9 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : io_flow_ok.<0>
-  constants       : 0:: CStringInfo {cstringChars = "OK"}
-                    1:: CStringInfo {cstringChars = "That's odd!"}
-                    2:: CStringInfo {cstringChars = "hello world!"}
+  constants       : 0:: CStringInfo {cstringChars = "hello world!"}
+                    1:: CStringInfo {cstringChars = "OK"}
+                    2:: CStringInfo {cstringChars = "That's odd!"}
                     3:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"hello world!"]}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"That's odd!"]}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"OK"]}
@@ -77,12 +77,12 @@ unknown(?#success##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/io_flow_ok.wybe"
 target triple    ????
 
-@"io_flow_ok#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"OK\00", align 8
-@"io_flow_ok#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"That's odd!\00", align 8
-@"io_flow_ok#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"hello world!\00", align 8
-@"io_flow_ok#constant#3" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"io_flow_ok#constant#2" }, align 8
-@"io_flow_ok#constant#4" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"io_flow_ok#constant#1" }, align 8
-@"io_flow_ok#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"io_flow_ok#constant#0" }, align 8
+@"io_flow_ok#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"hello world!\00", align 8
+@"io_flow_ok#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"OK\00", align 8
+@"io_flow_ok#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"That's odd!\00", align 8
+@"io_flow_ok#constant#3" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"io_flow_ok#constant#0" }, align 8
+@"io_flow_ok#constant#4" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"io_flow_ok#constant#2" }, align 8
+@"io_flow_ok#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"io_flow_ok#constant#1" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)

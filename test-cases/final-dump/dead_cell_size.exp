@@ -40,12 +40,12 @@ AFTER EVERYTHING:
                     dead_cell_size.t2.t2b<0>
                     dead_cell_size.t2.t2b<1>
                     dead_cell_size.t2.~=<0>
-  constants       : 0:: CStringInfo {cstringChars = "ta"}
-                    1:: CStringInfo {cstringChars = "tb("}
-                    2:: CStringInfo {cstringChars = "tc("}
-                    3:: CStringInfo {cstringChars = "td("}
-                    4:: CStringInfo {cstringChars = "t2a"}
-                    5:: CStringInfo {cstringChars = "t2b("}
+  constants       : 0:: CStringInfo {cstringChars = "t2a"}
+                    1:: CStringInfo {cstringChars = "t2b("}
+                    2:: CStringInfo {cstringChars = "ta"}
+                    3:: CStringInfo {cstringChars = "tb("}
+                    4:: CStringInfo {cstringChars = "tc("}
+                    5:: CStringInfo {cstringChars = "td("}
                     6:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"t2b("]}
                     7:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"t2a"]}
                     8:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"td("]}
@@ -268,18 +268,18 @@ print_t2(x##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/dead_cell_size.wybe"
 target triple    ????
 
-@"dead_cell_size#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"ta\00", align 8
-@"dead_cell_size#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"tb(\00", align 8
-@"dead_cell_size#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"tc(\00", align 8
-@"dead_cell_size#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"td(\00", align 8
-@"dead_cell_size#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"t2a\00", align 8
-@"dead_cell_size#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"t2b(\00", align 8
-@"dead_cell_size#constant#6" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"dead_cell_size#constant#5" }, align 8
-@"dead_cell_size#constant#7" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#4" }, align 8
-@"dead_cell_size#constant#8" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#3" }, align 8
-@"dead_cell_size#constant#9" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#2" }, align 8
-@"dead_cell_size#constant#10" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#1" }, align 8
-@"dead_cell_size#constant#11" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"dead_cell_size#constant#0" }, align 8
+@"dead_cell_size#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"t2a\00", align 8
+@"dead_cell_size#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"t2b(\00", align 8
+@"dead_cell_size#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"ta\00", align 8
+@"dead_cell_size#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"tb(\00", align 8
+@"dead_cell_size#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"tc(\00", align 8
+@"dead_cell_size#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"td(\00", align 8
+@"dead_cell_size#constant#6" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"dead_cell_size#constant#1" }, align 8
+@"dead_cell_size#constant#7" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#0" }, align 8
+@"dead_cell_size#constant#8" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#5" }, align 8
+@"dead_cell_size#constant#9" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#4" }, align 8
+@"dead_cell_size#constant#10" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#3" }, align 8
+@"dead_cell_size#constant#11" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"dead_cell_size#constant#2" }, align 8
 @"dead_cell_size#constant#12" = private unnamed_addr constant {i64} { i64 -1 }, align 8
 @"dead_cell_size#constant#13" = private unnamed_addr constant {i64} { i64 9 }, align 8
 

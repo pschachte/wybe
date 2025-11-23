@@ -37,9 +37,9 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(coordinate#constant#2:coordinate.Coordinate, ?crd1##1:coordinate.Coordinate, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int) @coordinate:nn:nn
     wybe.string.print<0>("expect crd1^z=8000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @coordinate:nn:nn
-    foreign lpvm access(~crd1##1:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @coordinate:nn:nn
+    foreign lpvm access(~crd1##1:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @coordinate:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @coordinate:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @coordinate:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @coordinate:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @coordinate:nn:nn
     foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @coordinate:nn:nn
     wybe.string.print<0>("expect crd2^z=1000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @coordinate:nn:nn
@@ -86,8 +86,8 @@ define external fastcc void @"coordinate.<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"coordinate#constant#3" to i64 ))
   %"tmp#39##0" = add i64 %"tmp#36##0", 16
   %"tmp#40##0" = inttoptr i64 %"tmp#39##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#40##0"
-  call ccc void @print_int(i64 %"tmp#3##0")
+  %"tmp#2##0" = load i64, ptr %"tmp#40##0"
+  call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"coordinate#constant#4" to i64 ))
   call ccc void @print_int(i64 1000)

@@ -11,14 +11,14 @@ AFTER EVERYTHING:
                     alias_multifunc.bar<0>
                     alias_multifunc.replicate1<0>
                     alias_multifunc.replicate2<0>
-  constants       : 0:: CStringInfo {cstringChars = "--- After calling replicate1: "}
-                    1:: CStringInfo {cstringChars = "expect p1(101,102):"}
-                    2:: CStringInfo {cstringChars = "expect p2(101,102):"}
-                    3:: CStringInfo {cstringChars = "expect p3(101,102):"}
-                    4:: CStringInfo {cstringChars = "--- After calling x(!p1, 555): "}
-                    5:: CStringInfo {cstringChars = "expect p1(555,102):"}
-                    6:: CStringInfo {cstringChars = "random replicate1 "}
-                    7:: CStringInfo {cstringChars = "random replicate2 "}
+  constants       : 0:: CStringInfo {cstringChars = "random replicate2 "}
+                    1:: CStringInfo {cstringChars = "random replicate1 "}
+                    2:: CStringInfo {cstringChars = "--- After calling replicate1: "}
+                    3:: CStringInfo {cstringChars = "expect p1(101,102):"}
+                    4:: CStringInfo {cstringChars = "expect p2(101,102):"}
+                    5:: CStringInfo {cstringChars = "expect p3(101,102):"}
+                    6:: CStringInfo {cstringChars = "--- After calling x(!p1, 555): "}
+                    7:: CStringInfo {cstringChars = "expect p1(555,102):"}
                     8:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 0 8]}
                     9:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember c"random replicate2 "]}
                     10:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember c"random replicate1 "]}
@@ -110,23 +110,23 @@ replicate2(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; 
 source_filename = "!ROOT!/final-dump/alias_multifunc.wybe"
 target triple    ????
 
-@"alias_multifunc#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"--- After calling replicate1: \00", align 8
-@"alias_multifunc#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(101,102):\00", align 8
-@"alias_multifunc#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"expect p2(101,102):\00", align 8
-@"alias_multifunc#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"expect p3(101,102):\00", align 8
-@"alias_multifunc#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"--- After calling x(!p1, 555): \00", align 8
-@"alias_multifunc#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(555,102):\00", align 8
-@"alias_multifunc#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"random replicate1 \00", align 8
-@"alias_multifunc#constant#7" = private unnamed_addr constant [ ?? x i8 ] c"random replicate2 \00", align 8
-@"alias_multifunc#constant#9" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"alias_multifunc#constant#7" }, align 8
-@"alias_multifunc#constant#10" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"alias_multifunc#constant#6" }, align 8
+@"alias_multifunc#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"random replicate2 \00", align 8
+@"alias_multifunc#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"random replicate1 \00", align 8
+@"alias_multifunc#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"--- After calling replicate1: \00", align 8
+@"alias_multifunc#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(101,102):\00", align 8
+@"alias_multifunc#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"expect p2(101,102):\00", align 8
+@"alias_multifunc#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"expect p3(101,102):\00", align 8
+@"alias_multifunc#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"--- After calling x(!p1, 555): \00", align 8
+@"alias_multifunc#constant#7" = private unnamed_addr constant [ ?? x i8 ] c"expect p1(555,102):\00", align 8
+@"alias_multifunc#constant#9" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"alias_multifunc#constant#0" }, align 8
+@"alias_multifunc#constant#10" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"alias_multifunc#constant#1" }, align 8
 @"alias_multifunc#constant#11" = private unnamed_addr constant {i64, i64} { i64 101, i64 102 }, align 8
-@"alias_multifunc#constant#12" = private unnamed_addr constant {i64, ptr} { i64 30, ptr @"alias_multifunc#constant#0" }, align 8
-@"alias_multifunc#constant#13" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias_multifunc#constant#1" }, align 8
-@"alias_multifunc#constant#14" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias_multifunc#constant#2" }, align 8
-@"alias_multifunc#constant#15" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias_multifunc#constant#3" }, align 8
-@"alias_multifunc#constant#16" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"alias_multifunc#constant#4" }, align 8
-@"alias_multifunc#constant#17" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias_multifunc#constant#5" }, align 8
+@"alias_multifunc#constant#12" = private unnamed_addr constant {i64, ptr} { i64 30, ptr @"alias_multifunc#constant#2" }, align 8
+@"alias_multifunc#constant#13" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias_multifunc#constant#3" }, align 8
+@"alias_multifunc#constant#14" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias_multifunc#constant#4" }, align 8
+@"alias_multifunc#constant#15" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias_multifunc#constant#5" }, align 8
+@"alias_multifunc#constant#16" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"alias_multifunc#constant#6" }, align 8
+@"alias_multifunc#constant#17" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"alias_multifunc#constant#7" }, align 8
 
 declare external fastcc void @"position.printPosition<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -216,14 +216,14 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(10,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.string.print<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @position:nn:nn
-    foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
+    foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @position:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @position:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @position:nn:nn
     foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
     wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @position:nn:nn
-    foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @position:nn:nn
+    foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @position:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @position:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @position:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
     wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @position:nn:nn
@@ -250,13 +250,13 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 define external fastcc void @"position.printPosition<0>"(i64 %"pos##0") {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"position#constant#1" to i64 ))
   %"tmp#28##0" = inttoptr i64 %"pos##0" to ptr
-  %"tmp#1##0" = load i64, ptr %"tmp#28##0"
-  call ccc void @print_int(i64 %"tmp#1##0")
+  %"tmp#0##0" = load i64, ptr %"tmp#28##0"
+  call ccc void @print_int(i64 %"tmp#0##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1203)
   %"tmp#29##0" = add i64 %"pos##0", 8
   %"tmp#30##0" = inttoptr i64 %"tmp#29##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#30##0"
-  call ccc void @print_int(i64 %"tmp#3##0")
+  %"tmp#1##0" = load i64, ptr %"tmp#30##0"
+  call ccc void @print_int(i64 %"tmp#1##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void

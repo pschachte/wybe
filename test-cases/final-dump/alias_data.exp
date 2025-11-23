@@ -120,10 +120,10 @@ define external fastcc void @"alias_data.bar<0>"() {
                     student.student.student<0>
                     student.student.student<1>
                     student.student.~=<0>
-  constants       : 0:: CStringInfo {cstringChars = "Declarative Programming"}
-                    1:: CStringInfo {cstringChars = "student id: "}
-                    2:: CStringInfo {cstringChars = "course code: "}
-                    3:: CStringInfo {cstringChars = "course name: "}
+  constants       : 0:: CStringInfo {cstringChars = "student id: "}
+                    1:: CStringInfo {cstringChars = "course code: "}
+                    2:: CStringInfo {cstringChars = "course name: "}
+                    3:: CStringInfo {cstringChars = "Declarative Programming"}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"student id: "]}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember c"course code: "]}
                     6:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember c"course name: "]}
@@ -152,21 +152,21 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(13,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [0]]))]
     wybe.string.print<0>("student id: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @student:nn:nn
-    foreign lpvm access(stu##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @student:nn:nn
+    foreign lpvm access(stu##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @student:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @student:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @student:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @student:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @student:nn:nn
     foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @student:nn:nn
-    foreign lpvm access(~stu##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:student.course) @student:nn:nn
+    foreign lpvm access(~stu##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:student.course) @student:nn:nn
     wybe.string.print<0>("course code: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @student:nn:nn
-    foreign lpvm access(tmp#2##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @student:nn:nn
+    foreign lpvm access(tmp#1##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @student:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @student:nn:nn
-    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @student:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @student:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @student:nn:nn
     foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @student:nn:nn
     wybe.string.print<0>("course name: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @student:nn:nn
-    foreign lpvm access(~tmp#2##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string) @student:nn:nn
-    wybe.string.print<0>(~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @student:nn:nn
+    foreign lpvm access(~tmp#1##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @student:nn:nn
+    wybe.string.print<0>(~tmp#3##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @student:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @student:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @student:nn:nn
     foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @student:nn:nn
@@ -179,14 +179,14 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/student.wybe"
 target triple    ????
 
-@"student#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Declarative Programming\00", align 8
-@"student#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"student id: \00", align 8
-@"student#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"course code: \00", align 8
-@"student#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"course name: \00", align 8
-@"student#constant#4" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"student#constant#1" }, align 8
-@"student#constant#5" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"student#constant#2" }, align 8
-@"student#constant#6" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"student#constant#3" }, align 8
-@"student#constant#7" = private unnamed_addr constant {i64, ptr} { i64 23, ptr @"student#constant#0" }, align 8
+@"student#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"student id: \00", align 8
+@"student#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"course code: \00", align 8
+@"student#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"course name: \00", align 8
+@"student#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"Declarative Programming\00", align 8
+@"student#constant#4" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"student#constant#0" }, align 8
+@"student#constant#5" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"student#constant#1" }, align 8
+@"student#constant#6" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"student#constant#2" }, align 8
+@"student#constant#7" = private unnamed_addr constant {i64, ptr} { i64 23, ptr @"student#constant#3" }, align 8
 @"student#constant#8" = private unnamed_addr constant {i64, ptr} { i64 90048, ptr @"student#constant#7" }, align 8
 @"student#constant#9" = private unnamed_addr constant {i64, ptr} { i64 12345, ptr @"student#constant#8" }, align 8
 
@@ -203,22 +203,22 @@ define external fastcc void @"student.<0>"() {
 define external fastcc void @"student.printStudent<0>"(i64 %"stu##0") {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"student#constant#4" to i64 ))
   %"tmp#34##0" = inttoptr i64 %"stu##0" to ptr
-  %"tmp#1##0" = load i64, ptr %"tmp#34##0"
-  call ccc void @print_int(i64 %"tmp#1##0")
+  %"tmp#0##0" = load i64, ptr %"tmp#34##0"
+  call ccc void @print_int(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   %"tmp#35##0" = add i64 %"stu##0", 8
   %"tmp#36##0" = inttoptr i64 %"tmp#35##0" to ptr
-  %"tmp#2##0" = load i64, ptr %"tmp#36##0"
+  %"tmp#1##0" = load i64, ptr %"tmp#36##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"student#constant#5" to i64 ))
-  %"tmp#37##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#37##0"
-  call ccc void @print_int(i64 %"tmp#4##0")
+  %"tmp#37##0" = inttoptr i64 %"tmp#1##0" to ptr
+  %"tmp#2##0" = load i64, ptr %"tmp#37##0"
+  call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"student#constant#6" to i64 ))
-  %"tmp#38##0" = add i64 %"tmp#2##0", 8
+  %"tmp#38##0" = add i64 %"tmp#1##0", 8
   %"tmp#39##0" = inttoptr i64 %"tmp#38##0" to ptr
-  %"tmp#6##0" = load i64, ptr %"tmp#39##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#6##0")
+  %"tmp#3##0" = load i64, ptr %"tmp#39##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#3##0")
   call ccc void @putchar(i8 10)
   ret void
 }

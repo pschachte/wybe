@@ -97,15 +97,15 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm or(2:wybe.int, anon_field#constant#4:anon_field, ?tmp#14##0:anon_field) @anon_field:nn:nn
-    foreign llvm and(tmp#14##0:wybe.int, 3:wybe.int, ?tmp#22##0:wybe.int) @anon_field:nn:nn
+    foreign llvm or(2:wybe.int, anon_field#constant#4:anon_field, ?tmp#11##0:anon_field) @anon_field:nn:nn
+    foreign llvm and(tmp#11##0:wybe.int, 3:wybe.int, ?tmp#22##0:wybe.int) @anon_field:nn:nn
     foreign llvm icmp_eq(~tmp#22##0:wybe.int, 2:wybe.int, ?tmp#23##0:wybe.bool) @anon_field:nn:nn
     case ~tmp#23##0:wybe.bool of
     0:
 
     1:
-        foreign lpvm access(~tmp#14##0:anon_field, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?tmp#13##0:wybe.int) @anon_field:nn:nn
-        foreign llvm icmp_ne(~tmp#13##0:wybe.int, 2:wybe.int, ?tmp#17##0:wybe.bool) @anon_field:nn:nn
+        foreign lpvm access(~tmp#11##0:anon_field, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?tmp#10##0:wybe.int) @anon_field:nn:nn
+        foreign llvm icmp_ne(~tmp#10##0:wybe.int, 2:wybe.int, ?tmp#17##0:wybe.bool) @anon_field:nn:nn
         case ~tmp#17##0:wybe.bool of
         0:
 
@@ -410,15 +410,15 @@ if.else.0:
 }
 
 define external fastcc void @"anon_field.#cont#3<0>"() {
-  %"tmp#14##0" = or i64 2, ptrtoint( ptr @"anon_field#constant#4" to i64 )
-  %"tmp#22##0" = and i64 %"tmp#14##0", 3
+  %"tmp#11##0" = or i64 2, ptrtoint( ptr @"anon_field#constant#4" to i64 )
+  %"tmp#22##0" = and i64 %"tmp#11##0", 3
   %"tmp#23##0" = icmp eq i64 %"tmp#22##0", 2
   br i1 %"tmp#23##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#33##0" = add i64 %"tmp#14##0", -2
+  %"tmp#33##0" = add i64 %"tmp#11##0", -2
   %"tmp#34##0" = inttoptr i64 %"tmp#33##0" to ptr
-  %"tmp#13##0" = load i64, ptr %"tmp#34##0"
-  %"tmp#17##0" = icmp ne i64 %"tmp#13##0", 2
+  %"tmp#10##0" = load i64, ptr %"tmp#34##0"
+  %"tmp#17##0" = icmp ne i64 %"tmp#10##0", 2
   br i1 %"tmp#17##0", label %if.then.1, label %if.else.1
 if.then.1:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"anon_field#constant#5" to i64 ))

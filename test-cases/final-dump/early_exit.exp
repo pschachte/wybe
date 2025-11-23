@@ -49,4 +49,3 @@ define external fastcc void @"early_exit.<0>"() {
   ret void
 }
 final-dump/early_exit.wybe:3:2: In module top-level code, this statement is unreachable
-final-dump/early_exit.wybe:3:10: In module top-level code, this statement is unreachable
