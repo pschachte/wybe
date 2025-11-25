@@ -1012,9 +1012,9 @@ marshalledCCall cfn flags args ctypes pos = do
 -- | Generate and write out the LLVM return statement.
 writeAssemblyReturn :: [PrimParam] -> LLVM ()
 writeAssemblyReturn [] = llvmPutStrLnIndented "ret void"
-writeAssemblyReturn [PrimParam{primParamName=v, primParamType=ty}] = do
+writeAssemblyReturn [param@PrimParam{primParamType=ty}] = do
     llty <- llvmTypeRep <$> typeRep ty
-    llvar <- varToRead v
+    llvar <- llvmValue $ primParamToArg param
     llvmPutStrLnIndented $ "ret " ++ makeLLVMArg llty llvar
 writeAssemblyReturn params = do
     retType <- llvmReturnType $ List.map primParamType params
@@ -1028,9 +1028,9 @@ writeAssemblyReturn params = do
 buildTuple :: LLVMType -> LLVMName -> Int -> [PrimParam] -> LLVM LLVMName
 buildTuple _ tuple _ [] = return tuple
 buildTuple outType tuple argNum
-           (PrimParam{primParamName=v, primParamType=ty}:params) = do
+           (param@PrimParam{primParamType=ty}:params) = do
     llty <- llvmTypeRep <$> typeRep ty
-    llvar <- varToRead v
+    llvar <- llvmValue $ primParamToArg param
     nextVar <- llvmLocalName <$> makeTemp
     llvmPutStrLnIndented $ nextVar ++ " = insertvalue " ++ outType ++ " "
                             ++ tuple ++ ", " ++ makeLLVMArg llty llvar
