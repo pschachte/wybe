@@ -193,7 +193,7 @@ define external fastcc void @"higher_order_append.<0>"() {
   %"tmp#90##0" = ptrtoint ptr %"tmp#89##0" to i64
   %"tmp#91##0" = add i64 %"tmp#90##0", 8
   %"tmp#92##0" = inttoptr i64 %"tmp#91##0" to ptr
-  store ptr @"higher_order_append.#anon#1<1>", ptr %"tmp#92##0"
+  store i64 %"tmp#45##0", ptr %"tmp#92##0"
   %"tmp#88##0" = ptrtoint ptr %"tmp#89##0" to i64
   call fastcc void @"wybe.list.map<1>"(i64 %"tmp#88##0", i64 %"tmp#37##0", ptr %"tmp#87##0")
   %"y##0" = load i64, ptr %"tmp#87##0"

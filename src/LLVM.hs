@@ -1121,7 +1121,7 @@ llvmStoreArray ptr (llVal:llVals) = do
     llvmStoreValue ptr llVal
     foldM_ (\p v -> do
         cptr <- pointerOffset p wordSizeBytes
-        llvmStoreValue cptr llVal
+        llvmStoreValue cptr v
         return cptr
       ) ptr llVals
 
@@ -1457,7 +1457,7 @@ llvmValue arg@(ArgClosure pspec args ty) = do
             let sizeVar =
                     ArgInt (fromIntegral (wordSizeBytes * (1 + length args)))
                             intType
-            logLLVM "Creating closure"
+            logLLVM $ "Creating closure with args " ++ show args
             heapAlloc writePtr sizeVar Nothing
             llArgs <- mapM llvmArgument args
             llvmStoreArray readPtr (fnRef:llArgs)

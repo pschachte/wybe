@@ -1,0 +1,13 @@
+use logging
+
+?p = 3
+!println(call({test}{ !logmsg("$p"); !lognl; p = 3 }, 2))
+!println(proc(p))
+
+def {noinline, test} proc(p:int) {
+    call({test}{ !logmsg("$p"); !lognl; p = 3 }, 2)
+}
+
+def {noinline, test} call(f:{test}(X), x:X) {
+    f(x)
+}

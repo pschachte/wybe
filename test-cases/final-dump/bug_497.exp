@@ -1,0 +1,3 @@
+Error detected during type checking of module(s) bug_497
+final-dump/bug_497.wybe:4:10: Type error in call to proc call, argument 1
+final-dump/bug_497.wybe:8:5: Type error in call to proc call, argument 1
