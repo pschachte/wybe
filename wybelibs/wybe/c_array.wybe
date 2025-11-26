@@ -1,0 +1,93 @@
+# purpose: Standard Array type, a fixed-length array
+# since  : 0.1
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.bool, wybe.int, wybe.machine_word, wybe.list
+
+pub constructor (T) c_array(length:int, raw_data:raw_array)
+
+
+# Raw array type
+pub type raw_array is address {}
+
+
+## Construction procedures
+
+# Construct a c_array filled with the given element of a given length.
+pub def c_array(x:T, len:int):_(T) = ar where {
+    ?size = len * word_size_bytes
+    foreign lpvm alloc(size, ?data)
+    ?offset = 0
+    do {
+        while offset < size
+        foreign lpvm mutate(data, ?data, offset, 1, size, 0, x)
+        !offset += word_size_bytes
+    }
+    ?ar = c_array(len, data)
+}
+
+
+## Conversion procedures
+
+# Convert a list into a c_array
+pub def c_array(ls:list(T)):_(T) = ar where {
+    ?len = length(ls) 
+    ?size = len * word_size_bytes
+    foreign lpvm alloc(size, ?data)
+    ?offset = 0
+    for ?x in ls {
+        foreign lpvm mutate(data, ?data, offset, 1, size, 0, x)
+        !offset += word_size_bytes
+    }
+    ?ar = c_array(len, data)
+}
+
+
+## Common operations
+
+# Get the head and tail of a c_array.
+# Fails if the c_array is empty
+pub def {test} `[|]`(?head:T, ?tail:_(T), a:_(T)) {
+    c_array(?length, ?data) = a
+    (length > 0)
+    foreign lpvm access(data, 0, word_size_bytes, 0, ?head)
+    foreign llvm add(data, word_size_bytes, ?data)
+    ?tail = c_array(length - 1, data)
+}
+
+# Test if an index is within the bounds of a c_array
+pub def {test, inline} inbounds(a:_(T), idx:int) {
+    (0 <= idx)
+    (idx < a^length)
+}
+
+# Get the element of a c_array at a given index.
+# Fails when the index is out of the bounds of the c_array
+pub def {test} `[]`(a:_(T), idx:int):T = x where {
+    inbounds(a, idx)
+    ?x = a^unsafe_get(idx)
+}
+
+# WARNING: does not check that the index is in the bound of the c_array. You 
+# probably want `[]`.
+# Get the element of a c_array at a given index
+pub def {inline} unsafe_get(a:_(T), idx:int):T = x where {
+    foreign lpvm access(a^raw_data, idx * word_size_bytes, word_size_bytes, 0, ?x)
+}
+
+# Update the c_array at the given index to the given element.
+# Fails when the index is out of the bounds of the c_array
+pub def {test} `[]`(!a:_(T), idx:int, x:T) {
+    inbounds(a, idx)
+    unsafe_update(!a, idx, x)
+}
+
+# WARNING: does not check that the index is in the bound of the c_array. You 
+# probably want `[]`.
+# Update the c_array at the given index to the given element
+pub def {inline} unsafe_update(!a:_(T), idx:int, x:T) {
+    foreign lpvm mutate(a^raw_data, ?data, idx * word_size_bytes, 0, 
+                                           a^length * word_size_bytes, 0, x)
+    !a^raw_data = data
+}

@@ -1,0 +1,13 @@
+# Test of new version of array type
+
+?size = 1_000_000
+
+# ?ar = c_array(0, size)
+?ar = array(0, size)
+for ?i in 0 .. ar^length {
+    !ar[i] = i | !shouldnt
+}
+?sum = 0
+# for ?i in ar { !sum + i }
+for ?i in ar^values { !sum + i }
+!println("Sum   : $sum")

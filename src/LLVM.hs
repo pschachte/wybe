@@ -1010,9 +1010,9 @@ marshalledCCall cfn flags args ctypes pos = do
 -- | Generate and write out the LLVM return statement.
 writeAssemblyReturn :: [PrimParam] -> LLVM ()
 writeAssemblyReturn [] = llvmPutStrLnIndented "ret void"
-writeAssemblyReturn [PrimParam{primParamName=v, primParamType=ty}] = do
+writeAssemblyReturn [param@PrimParam{primParamType=ty}] = do
     llty <- llvmTypeRep <$> typeRep ty
-    llvar <- varToRead v
+    llvar <- llvmValue $ primParamToArg param
     llvmPutStrLnIndented $ "ret " ++ makeLLVMArg llty llvar
 writeAssemblyReturn params = do
     retType <- llvmReturnType $ List.map primParamType params
@@ -1026,9 +1026,9 @@ writeAssemblyReturn params = do
 buildTuple :: LLVMType -> LLVMName -> Int -> [PrimParam] -> LLVM LLVMName
 buildTuple _ tuple _ [] = return tuple
 buildTuple outType tuple argNum
-           (PrimParam{primParamName=v, primParamType=ty}:params) = do
+           (param@PrimParam{primParamType=ty}:params) = do
     llty <- llvmTypeRep <$> typeRep ty
-    llvar <- varToRead v
+    llvar <- llvmValue $ primParamToArg param
     nextVar <- llvmLocalName <$> makeTemp
     llvmPutStrLnIndented $ nextVar ++ " = insertvalue " ++ outType ++ " "
                             ++ tuple ++ ", " ++ makeLLVMArg llty llvar
@@ -1133,7 +1133,7 @@ llvmStoreArray ptr (llVal:llVals) = do
     llvmStoreValue ptr llVal
     foldM_ (\p v -> do
         cptr <- pointerOffset p wordSizeBytes
-        llvmStoreValue cptr llVal
+        llvmStoreValue cptr v
         return cptr
       ) ptr llVals
 
@@ -1458,7 +1458,7 @@ llvmValue arg@(ArgClosure pspec args ty) = do
             let sizeVar =
                     ArgInt (fromIntegral (wordSizeBytes * (1 + length args)))
                             intType
-            logLLVM "Creating closure"
+            logLLVM $ "Creating closure with args " ++ show args
             heapAlloc writePtr sizeVar Nothing
             llArgs <- mapM llvmArgument args
             llvmStoreArray readPtr (fnRef:llArgs)
