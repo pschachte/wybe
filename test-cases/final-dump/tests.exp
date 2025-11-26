@@ -24,6 +24,7 @@ AFTER EVERYTHING:
                     tests.map.value<0>
                     tests.map.value<1>
                     tests.map.~=<0>
+  constants       : 
   imports         : public use tests.map
                     use wybe
   resources       : 
@@ -186,6 +187,7 @@ define external fastcc i1 @"tests.lt3<0>"(i64 %"x##0", i64 %"y##0") {
                     tests.map.value<0>
                     tests.map.value<1>
                     tests.map.~=<0>
+  constants       : 
   imports         : use tests
                     use wybe
   resources       : 

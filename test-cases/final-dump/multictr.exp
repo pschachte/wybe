@@ -164,6 +164,7 @@ AFTER EVERYTHING:
                     multictr.unit.=<0>
                     multictr.unit.unit<0>
                     multictr.unit.~=<0>
+  constants       : 
   imports         : public use multictr.card
                     public use multictr.complicated
                     public use multictr.length
@@ -204,6 +205,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
                     multictr.card.suit<0>
                     multictr.card.suit<1>
                     multictr.card.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 
@@ -430,6 +432,7 @@ define external fastcc i1 @"multictr.card.~=<0>"(i6 %"#left##0", i6 %"#right##0"
                     multictr.complicated.summer<0>
                     multictr.complicated.winter<0>
                     multictr.complicated.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 
@@ -4994,6 +4997,7 @@ define external fastcc i1 @"multictr.complicated.~=<0>"(i64 %"#left##0", i64 %"#
                     multictr.length.value<0>
                     multictr.length.value<1>
                     multictr.length.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 
@@ -5097,6 +5101,7 @@ define external fastcc i1 @"multictr.length.~=<0>"(i64 %"#left##0", i64 %"#right
                     multictr.maybe_int.value<0>
                     multictr.maybe_int.value<1>
                     multictr.maybe_int.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 
@@ -5312,6 +5317,7 @@ define external fastcc i1 @"multictr.maybe_int.~=<0>"(i64 %"#left##0", i64 %"#ri
                     multictr.number.int_value<0>
                     multictr.number.int_value<1>
                     multictr.number.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 
@@ -5681,6 +5687,7 @@ define external fastcc i1 @"multictr.number.~=<0>"(i64 %"#left##0", i64 %"#right
                     multictr.perhaps.perhaps<0>
                     multictr.perhaps.perhaps<1>
                     multictr.perhaps.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 
@@ -5788,6 +5795,7 @@ define external fastcc i1 @"multictr.perhaps.~=<0>"(i64 %"#left##0", i64 %"#righ
                     multictr.rank.r8<0>
                     multictr.rank.r9<0>
                     multictr.rank.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 
@@ -6005,6 +6013,7 @@ define external fastcc i1 @"multictr.rank.~=<0>"(i4 %"#left##0", i4 %"#right##0"
                     multictr.simple.two_field2<1>
                     multictr.simple.zero<0>
                     multictr.simple.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 
@@ -6650,6 +6659,7 @@ define external fastcc i1 @"multictr.simple.~=<0>"(i64 %"#left##0", i64 %"#right
                     multictr.suit.hearts<0>
                     multictr.suit.spades<0>
                     multictr.suit.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 
@@ -6749,6 +6759,7 @@ define external fastcc i1 @"multictr.suit.~=<0>"(i2 %"#left##0", i2 %"#right##0"
   public procs    : multictr.unit.=<0>
                     multictr.unit.unit<0>
                     multictr.unit.~=<0>
+  constants       : 
   imports         : use multictr
                     use wybe
   resources       : 

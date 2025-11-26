@@ -16,6 +16,7 @@ AFTER EVERYTHING:
                     generic_list.cons<1>
                     generic_list.length<0>
                     generic_list.nil<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

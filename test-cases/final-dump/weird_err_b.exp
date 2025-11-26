@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : weird_err_b.<0>
+  constants       : 
   imports         : use weird_err_d
                     use wybe
   resources       : 
@@ -43,6 +44,7 @@ define external fastcc void @"weird_err_b.<0>"() {
   public procs    : weird_err_d.=<0>
                     weird_err_d.empty<0>
                     weird_err_d.~=<0>
+  constants       : 
   imports         : public use weird_err_d.a
                     public use weird_err_d.c
                     use wybe
@@ -102,6 +104,7 @@ define external fastcc i1 @"weird_err_d.~=<0>"() {
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use weird_err_d
                     use wybe
   resources       : 
@@ -125,6 +128,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use weird_err_d
                     use wybe
   resources       : 

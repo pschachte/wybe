@@ -25,6 +25,7 @@ import           Util
 import           Resources
 import UnivSet (emptyUnivSet)
 import AST (emptyGlobalFlows)
+import Data.Char (ord)
 
 
 ----------------------------------------------------------------
@@ -310,8 +311,9 @@ compileArg exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
 compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp [PrimArg]
 compileArg' typ (IntValue int) _ = return [ArgInt int typ]
 compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
-compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
-compileArg' typ (CharValue char) _ = return [ArgChar char typ]
+compileArg' typ (ConstStruct structID) _ = do
+    return [ArgConstRef structID typ]
+compileArg' typ (CharValue char) _ = return [ArgInt (fromIntegral $ ord char) typ]
 compileArg' typ (Global info) _ = return [ArgGlobal info typ]
 compileArg' typ (Closure ms es) _ = do
     as <- concat <$> mapM (placedApply compileArg) es
@@ -331,8 +333,9 @@ compileArg' typ var@(Var name flow flowType) pos = do
             return [ArgVar nextName typ FlowOut flowType False]
         else return []
     return $ inArg ++ outArg
-compileArg' _ (Typed exp _ _) pos =
-    shouldnt $ "Compiling multi-typed expression " ++ show exp
+compileArg' ty (Typed exp t1 _) pos =
+    shouldnt $ "Compiling multi-typed expression "
+                ++ show exp ++ ":" ++ show t1 ++ ":" ++ show ty
 compileArg' typ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
