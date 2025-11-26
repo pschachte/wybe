@@ -113,8 +113,8 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @main_hello:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @main_hello:nn:nn
     foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string)) @main_hello:nn:nn
-    foreign lpvm access(~arguments##0:wybe.array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @main_hello:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @main_hello:nn:nn
+    foreign lpvm access(~arguments##0:wybe.array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @main_hello:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @main_hello:nn:nn
     foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @main_hello:nn:nn
     wybe.string.print<0>(" command line argument(s)":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @main_hello:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @main_hello:nn:nn
@@ -147,8 +147,8 @@ define external fastcc void @"main_hello.<0>"() {
   call ccc void @putchar(i8 10)
   %"arguments##0" = load i64, ptr @"resource#command_line.arguments"
   %"tmp#22##0" = inttoptr i64 %"arguments##0" to ptr
-  %"tmp#1##0" = load i64, ptr %"tmp#22##0"
-  call ccc void @print_int(i64 %"tmp#1##0")
+  %"tmp#0##0" = load i64, ptr %"tmp#22##0"
+  call ccc void @print_int(i64 %"tmp#0##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"main_hello#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   ret void

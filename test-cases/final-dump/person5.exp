@@ -16,10 +16,10 @@ AFTER EVERYTHING:
                     person5.person.person<0>
                     person5.person.person<1>
                     person5.person.~=<0>
-  constants       : 0:: CStringInfo {cstringChars = "John"}
-                    1:: CStringInfo {cstringChars = "Smith"}
-                    2:: CStringInfo {cstringChars = "Amy"}
-                    3:: CStringInfo {cstringChars = "Bob"}
+  constants       : 0:: CStringInfo {cstringChars = "Amy"}
+                    1:: CStringInfo {cstringChars = "Bob"}
+                    2:: CStringInfo {cstringChars = "John"}
+                    3:: CStringInfo {cstringChars = "Smith"}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"Amy"]}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"Bob"]}
                     6:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"John"]}
@@ -56,10 +56,10 @@ update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?
 source_filename = "!ROOT!/final-dump/person5.wybe"
 target triple    ????
 
-@"person5#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"Amy\00", align 8
-@"person5#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"Bob\00", align 8
-@"person5#constant#4" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"person5#constant#2" }, align 8
-@"person5#constant#5" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"person5#constant#3" }, align 8
+@"person5#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Amy\00", align 8
+@"person5#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"Bob\00", align 8
+@"person5#constant#4" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"person5#constant#0" }, align 8
+@"person5#constant#5" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"person5#constant#1" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc ptr @wybe_malloc(i32)

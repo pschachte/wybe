@@ -11,8 +11,8 @@ AFTER EVERYTHING:
   constants       : 0:: CStringInfo {cstringChars = "Wybe"}
                     1:: CStringInfo {cstringChars = "Hello, "}
                     2:: CStringInfo {cstringChars = " is the answer"}
-                    3:: CStringInfo {cstringChars = "maxint is "}
-                    4:: CStringInfo {cstringChars = " and minint is "}
+                    3:: CStringInfo {cstringChars = " and minint is "}
+                    4:: CStringInfo {cstringChars = "maxint is "}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"Wybe"]}
                     6:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember c"Hello, "]}
                     7:: StructInfo {structSize = 16, structData = [IntStructMember 14 8,PointerStructMember c" is the answer"]}
@@ -27,30 +27,30 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(23,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(25,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(28,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.string.,,<0>("Wybe":wybe.string, 1159:wybe.string, ?tmp#3##0:wybe.string) #4 @string_interpolation:nn:nn
-    wybe.string.,,<0>("Hello, ":wybe.string, ~tmp#3##0:wybe.string, ?tmp#1##0:wybe.string) #5 @string_interpolation:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @string_interpolation:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#34##0:wybe.phantom) @string_interpolation:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @string_interpolation:nn:nn
-    foreign lpvm store(~%tmp#35##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string_interpolation:nn:nn
-    wybe.int.fmt<2>(42:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#8##0:wybe.string) #24 @string_interpolation:nn:nn
-    wybe.string.,,<0>(~tmp#8##0:wybe.string, " is the answer":wybe.string, ?tmp#7##0:wybe.string) #10 @string_interpolation:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#7##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @string_interpolation:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#44##0:wybe.phantom) @string_interpolation:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#44##0:wybe.phantom, ?tmp#45##0:wybe.phantom) @string_interpolation:nn:nn
-    foreign lpvm store(~%tmp#45##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string_interpolation:nn:nn
-    foreign c ipow(2:wybe.int, 63:wybe.int, ?tmp#15##0:wybe.int) @string_interpolation:nn:nn
-    foreign llvm sub(tmp#15##0:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.int) @string_interpolation:nn:nn
-    wybe.int.fmt<2>(~tmp#14##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#13##0:wybe.string) #26 @string_interpolation:nn:nn
-    wybe.int.fmt<2>(~tmp#15##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#18##0:wybe.string) #27 @string_interpolation:nn:nn
-    wybe.string.,,<0>(" and minint is ":wybe.string, ~tmp#18##0:wybe.string, ?tmp#16##0:wybe.string) #19 @string_interpolation:nn:nn
-    wybe.string.,,<0>(~tmp#13##0:wybe.string, ~tmp#16##0:wybe.string, ?tmp#12##0:wybe.string) #20 @string_interpolation:nn:nn
-    wybe.string.,,<0>("maxint is ":wybe.string, ~tmp#12##0:wybe.string, ?tmp#10##0:wybe.string) #21 @string_interpolation:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#10##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @string_interpolation:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom) @string_interpolation:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#63##0:wybe.phantom, ?tmp#64##0:wybe.phantom) @string_interpolation:nn:nn
-    foreign lpvm store(~%tmp#64##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string_interpolation:nn:nn
+  MultiSpeczDepInfo: [(24,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(26,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(29,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.string.,,<0>("Wybe":wybe.string, 1159:wybe.string, ?tmp#1##0:wybe.string) #4 @string_interpolation:nn:nn
+    wybe.string.,,<0>("Hello, ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #6 @string_interpolation:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @string_interpolation:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#39##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#39##0:wybe.phantom, ?tmp#40##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign lpvm store(~%tmp#40##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string_interpolation:nn:nn
+    wybe.int.fmt<2>(42:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#5##0:wybe.string) #25 @string_interpolation:nn:nn
+    wybe.string.,,<0>(~tmp#5##0:wybe.string, " is the answer":wybe.string, ?tmp#4##0:wybe.string) #11 @string_interpolation:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26 @string_interpolation:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#49##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#49##0:wybe.phantom, ?tmp#50##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign lpvm store(~%tmp#50##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string_interpolation:nn:nn
+    foreign c ipow(2:wybe.int, 63:wybe.int, ?tmp#10##0:wybe.int) @string_interpolation:nn:nn
+    foreign llvm sub(tmp#10##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int) @string_interpolation:nn:nn
+    wybe.int.fmt<2>(~tmp#9##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#8##0:wybe.string) #27 @string_interpolation:nn:nn
+    wybe.int.fmt<2>(~tmp#10##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#12##0:wybe.string) #28 @string_interpolation:nn:nn
+    wybe.string.,,<0>(" and minint is ":wybe.string, ~tmp#12##0:wybe.string, ?tmp#11##0:wybe.string) #19 @string_interpolation:nn:nn
+    wybe.string.,,<0>(~tmp#8##0:wybe.string, ~tmp#11##0:wybe.string, ?tmp#7##0:wybe.string) #20 @string_interpolation:nn:nn
+    wybe.string.,,<0>("maxint is ":wybe.string, ~tmp#7##0:wybe.string, ?tmp#6##0:wybe.string) #22 @string_interpolation:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #29 @string_interpolation:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#68##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign lpvm store(~%tmp#69##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string_interpolation:nn:nn
 
   LLVM code       :
 
@@ -63,13 +63,13 @@ target triple    ????
 @"string_interpolation#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Wybe\00", align 8
 @"string_interpolation#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"Hello, \00", align 8
 @"string_interpolation#constant#2" = private unnamed_addr constant [ ?? x i8 ] c" is the answer\00", align 8
-@"string_interpolation#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"maxint is \00", align 8
-@"string_interpolation#constant#4" = private unnamed_addr constant [ ?? x i8 ] c" and minint is \00", align 8
+@"string_interpolation#constant#3" = private unnamed_addr constant [ ?? x i8 ] c" and minint is \00", align 8
+@"string_interpolation#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"maxint is \00", align 8
 @"string_interpolation#constant#5" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"string_interpolation#constant#0" }, align 8
 @"string_interpolation#constant#6" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"string_interpolation#constant#1" }, align 8
 @"string_interpolation#constant#7" = private unnamed_addr constant {i64, ptr} { i64 14, ptr @"string_interpolation#constant#2" }, align 8
-@"string_interpolation#constant#8" = private unnamed_addr constant {i64, ptr} { i64 15, ptr @"string_interpolation#constant#4" }, align 8
-@"string_interpolation#constant#9" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"string_interpolation#constant#3" }, align 8
+@"string_interpolation#constant#8" = private unnamed_addr constant {i64, ptr} { i64 15, ptr @"string_interpolation#constant#3" }, align 8
+@"string_interpolation#constant#9" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"string_interpolation#constant#4" }, align 8
 
 declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
@@ -79,22 +79,22 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"string_interpolation.<0>"() {
-  %"tmp#3##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string_interpolation#constant#5" to i64 ), i64 1159)
-  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string_interpolation#constant#6" to i64 ), i64 %"tmp#3##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#1##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string_interpolation#constant#5" to i64 ), i64 1159)
+  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string_interpolation#constant#6" to i64 ), i64 %"tmp#1##0")
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  %"tmp#8##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 42, i64 0, i8 32)
-  %"tmp#7##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#8##0", i64 ptrtoint( ptr @"string_interpolation#constant#7" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#7##0")
+  %"tmp#5##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 42, i64 0, i8 32)
+  %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#5##0", i64 ptrtoint( ptr @"string_interpolation#constant#7" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)
-  %"tmp#15##0" = call ccc i64 @ipow(i64 2, i64 63)
-  %"tmp#14##0" = sub i64 %"tmp#15##0", 1
-  %"tmp#13##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#14##0", i64 0, i8 32)
-  %"tmp#18##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#15##0", i64 0, i8 32)
-  %"tmp#16##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string_interpolation#constant#8" to i64 ), i64 %"tmp#18##0")
-  %"tmp#12##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#13##0", i64 %"tmp#16##0")
-  %"tmp#10##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string_interpolation#constant#9" to i64 ), i64 %"tmp#12##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#10##0")
+  %"tmp#10##0" = call ccc i64 @ipow(i64 2, i64 63)
+  %"tmp#9##0" = sub i64 %"tmp#10##0", 1
+  %"tmp#8##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#9##0", i64 0, i8 32)
+  %"tmp#12##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#10##0", i64 0, i8 32)
+  %"tmp#11##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string_interpolation#constant#8" to i64 ), i64 %"tmp#12##0")
+  %"tmp#7##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#8##0", i64 %"tmp#11##0")
+  %"tmp#6##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string_interpolation#constant#9" to i64 ), i64 %"tmp#7##0")
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#6##0")
   call ccc void @putchar(i8 10)
   ret void
 }

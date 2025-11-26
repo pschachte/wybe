@@ -79,12 +79,12 @@ define external fastcc double @"benchmark.time_execution<0>"(i64 %"proc##0", i64
   public submods  : 
   public resources: 
   public procs    : benchmark_fib.<0>
-  constants       : 0:: CStringInfo {cstringChars = "Elapsed time (s):  "}
-                    1:: CStringInfo {cstringChars = "n should be strictly positive"}
-                    2:: CStringInfo {cstringChars = "benchmark_fib:5:21"}
-                    3:: CStringInfo {cstringChars = "benchmark_fib:18:21"}
-                    4:: CStringInfo {cstringChars = "benchmark_fib:30:2"}
-                    5:: CStringInfo {cstringChars = "benchmark_fib:32:2"}
+  constants       : 0:: CStringInfo {cstringChars = "n should be strictly positive"}
+                    1:: CStringInfo {cstringChars = "benchmark_fib:5:21"}
+                    2:: CStringInfo {cstringChars = "benchmark_fib:18:21"}
+                    3:: CStringInfo {cstringChars = "benchmark_fib:30:2"}
+                    4:: CStringInfo {cstringChars = "benchmark_fib:32:2"}
+                    5:: CStringInfo {cstringChars = "Elapsed time (s):  "}
                     6:: CStringInfo {cstringChars = "benchmark_fib:35:2"}
                     7:: CStringInfo {cstringChars = "benchmark_fib:37:2"}
                     8:: CStringInfo {cstringChars = "benchmark_fib:40:2"}
@@ -237,16 +237,16 @@ naive_fib1(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/benchmark_fib.wybe"
 target triple    ????
 
-@"benchmark_fib#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Elapsed time (s):  \00", align 8
-@"benchmark_fib#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"n should be strictly positive\00", align 8
-@"benchmark_fib#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:5:21\00", align 8
-@"benchmark_fib#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:18:21\00", align 8
-@"benchmark_fib#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:30:2\00", align 8
-@"benchmark_fib#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:32:2\00", align 8
+@"benchmark_fib#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"n should be strictly positive\00", align 8
+@"benchmark_fib#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:5:21\00", align 8
+@"benchmark_fib#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:18:21\00", align 8
+@"benchmark_fib#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:30:2\00", align 8
+@"benchmark_fib#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:32:2\00", align 8
+@"benchmark_fib#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"Elapsed time (s):  \00", align 8
 @"benchmark_fib#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:35:2\00", align 8
 @"benchmark_fib#constant#7" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:37:2\00", align 8
 @"benchmark_fib#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:40:2\00", align 8
-@"benchmark_fib#constant#9" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"benchmark_fib#constant#0" }, align 8
+@"benchmark_fib#constant#9" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"benchmark_fib#constant#5" }, align 8
 @"benchmark_fib#constant#10" = private unnamed_addr constant {ptr} { ptr @"benchmark_fib.#anon#1<1>" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -258,9 +258,9 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"benchmark_fib.<0>"() {
-  call ccc void @benchmark_start(ptr @"benchmark_fib#constant#4")
+  call ccc void @benchmark_start(ptr @"benchmark_fib#constant#3")
   %"res##0" = tail call fastcc i64 @"benchmark_fib.naive_fib<0>"(i64 42)
-  %"time##0" = call ccc double @benchmark_end(ptr @"benchmark_fib#constant#5")
+  %"time##0" = call ccc double @benchmark_end(ptr @"benchmark_fib#constant#4")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"benchmark_fib#constant#9" to i64 ))
   call ccc void @print_float(double %"time##0")
   call ccc void @putchar(i8 10)
@@ -294,7 +294,7 @@ define external fastcc i64 @"benchmark_fib.fib<0>"(i64 %"n##0") {
   %"tmp#4##0" = icmp sle i64 %"n##0", 0
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
-  call ccc void @error_exit(ptr @"benchmark_fib#constant#3", ptr @"benchmark_fib#constant#1")
+  call ccc void @error_exit(ptr @"benchmark_fib#constant#2", ptr @"benchmark_fib#constant#0")
   ret i64 undef
 if.else.0:
   %"tmp#3##0" = icmp eq i64 %"n##0", 1
@@ -329,7 +329,7 @@ define external fastcc i64 @"benchmark_fib.naive_fib<0>"(i64 %"n##0") {
   %"tmp#1##0" = icmp sle i64 %"n##0", 0
   br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
 if.then.0:
-  call ccc void @error_exit(ptr @"benchmark_fib#constant#2", ptr @"benchmark_fib#constant#1")
+  call ccc void @error_exit(ptr @"benchmark_fib#constant#1", ptr @"benchmark_fib#constant#0")
   ret i64 undef
 if.else.0:
   %"tmp#6##0" = tail call fastcc i64 @"benchmark_fib.naive_fib1<0>"(i64 %"n##0")

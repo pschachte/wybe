@@ -50,7 +50,7 @@ module AST (
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..),
   InterfaceHash, PubProcInfo(..),
   StructID, structConstName, recordConstStruct,
-  lookupConstStruct, lookupConstInfo, stringExpr, cStringExpr,
+  lookupConstStruct, lookupConstInfo, cStringExpr,
   StructInfo(..), ConstValue(..), constValueSize, constValueRepresentation,
   constValueAtOffset, constValuePrimArg, constValueExp,
   ImportSpec(..), importSpec, Pragma(..), addPragma,
@@ -1516,24 +1516,6 @@ lookupConstInfo (StructID mspec n _) = do
             ("in lookupConstInfo, unknown module " ++ showModSpec mspec) $
             getLoadingModule mspec
     return $ Map.lookup n $ modStructs md
-
-
--- | Give a Placed Exp that produces the specified Wybe String, with explicit
--- type.  The resulting Exp does not use a StringValue constructor.
-stringExpr :: String -> Compiler Exp
-stringExpr [] =
-    return $ Typed (Fncall ["wybe","string"] "empty" False [])
-                stringType Nothing
-stringExpr [ch] = do
-    let arg = Unplaced $ CharValue ch
-    return $ Typed (Fncall ["wybe","string"] "singleton" False [arg])
-                stringType Nothing
-stringExpr str = do
-    cStringArg <- Unplaced <$> cStringExpr str
-    return $ Typed
-            (Fncall ["wybe","string"] "unsafe_cstring_to_string" False
-                [cStringArg, Unplaced $ IntValue $ fromIntegral $ length str])
-            stringType Nothing
 
 
 -- | Give a Placed Exp that produces the specified C String, with explicit type.

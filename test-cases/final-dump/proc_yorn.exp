@@ -9,9 +9,9 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : proc_yorn.<0>
                     proc_yorn.yorn<0>
-  constants       : 0:: CStringInfo {cstringChars = "Well, yes or no?"}
-                    1:: CStringInfo {cstringChars = " (y/n) "}
-                    2:: CStringInfo {cstringChars = "Please answer 'yes' or 'no'."}
+  constants       : 0:: CStringInfo {cstringChars = " (y/n) "}
+                    1:: CStringInfo {cstringChars = "Please answer 'yes' or 'no'."}
+                    2:: CStringInfo {cstringChars = "Well, yes or no?"}
                     3:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember c" (y/n) "]}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 28 8,PointerStructMember c"Please answer 'yes' or 'no'."]}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember c"Well, yes or no?"]}
@@ -78,7 +78,7 @@ yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wy
     foreign llvm icmp_ne(response##0:wybe.char, 121:wybe.char, ?tmp#11##0:wybe.bool) @proc_yorn:nn:nn
     foreign llvm icmp_ne(response##0:wybe.char, 89:wybe.char, ?tmp#12##0:wybe.bool) @proc_yorn:nn:nn
     foreign llvm and(~tmp#11##0:wybe.bool, ~tmp#12##0:wybe.bool, ?tmp#13##0:wybe.bool) @proc_yorn:nn:nn
-    foreign llvm xor(~tmp#13##0:wybe.bool, 1:wybe.bool, ?tmp#1##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm xor(~tmp#13##0:wybe.bool, 1:wybe.bool, ?tmp#0##0:wybe.bool) @proc_yorn:nn:nn
     proc_yorn.is_yes_or_no<0>(~response##0:wybe.char, ?tmp#3##0:wybe.bool) #5 @proc_yorn:nn:nn
     case ~tmp#3##0:wybe.bool of
     0:
@@ -89,7 +89,7 @@ yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wy
         proc_yorn.yorn#cont#1<0>(~prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @proc_yorn:nn:nn
 
     1:
-        foreign llvm move(~tmp#1##0:wybe.bool, ?result##1:wybe.bool)
+        foreign llvm move(~tmp#0##0:wybe.bool, ?result##1:wybe.bool)
 
 
 
@@ -112,12 +112,12 @@ yorn#cont#2(prompt##0:wybe.string, [result##0:wybe.bool], ?result##1:wybe.bool)<
 source_filename = "!ROOT!/final-dump/proc_yorn.wybe"
 target triple    ????
 
-@"proc_yorn#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Well, yes or no?\00", align 8
-@"proc_yorn#constant#1" = private unnamed_addr constant [ ?? x i8 ] c" (y/n) \00", align 8
-@"proc_yorn#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"Please answer 'yes' or 'no'.\00", align 8
-@"proc_yorn#constant#3" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"proc_yorn#constant#1" }, align 8
-@"proc_yorn#constant#4" = private unnamed_addr constant {i64, ptr} { i64 28, ptr @"proc_yorn#constant#2" }, align 8
-@"proc_yorn#constant#5" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"proc_yorn#constant#0" }, align 8
+@"proc_yorn#constant#0" = private unnamed_addr constant [ ?? x i8 ] c" (y/n) \00", align 8
+@"proc_yorn#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"Please answer 'yes' or 'no'.\00", align 8
+@"proc_yorn#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"Well, yes or no?\00", align 8
+@"proc_yorn#constant#3" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"proc_yorn#constant#0" }, align 8
+@"proc_yorn#constant#4" = private unnamed_addr constant {i64, ptr} { i64 28, ptr @"proc_yorn#constant#1" }, align 8
+@"proc_yorn#constant#5" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"proc_yorn#constant#2" }, align 8
 
 declare external fastcc void @"wybe.bool.print<0>"(i1)
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -164,11 +164,11 @@ define external fastcc i1 @"proc_yorn.yorn#cont#1<0>"(i64 %"prompt##0") {
   %"tmp#11##0" = icmp ne i8 %"response##0", 121
   %"tmp#12##0" = icmp ne i8 %"response##0", 89
   %"tmp#13##0" = and i1 %"tmp#11##0", %"tmp#12##0"
-  %"tmp#1##0" = xor i1 %"tmp#13##0", 1
+  %"tmp#0##0" = xor i1 %"tmp#13##0", 1
   %"tmp#3##0" = tail call fastcc i1 @"proc_yorn.is_yes_or_no<0>"(i8 %"response##0")
   br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
-  ret i1 %"tmp#1##0"
+  ret i1 %"tmp#0##0"
 if.else.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"proc_yorn#constant#4" to i64 ))
   call ccc void @putchar(i8 10)

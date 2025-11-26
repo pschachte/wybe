@@ -509,8 +509,7 @@ flattenExp expr@(FloatValue _) ty castFrom pos =
 flattenExp expr@(ConstStruct _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(StringValue str WybeString) ty castFrom pos = do
-    exp' <- lift $ stringExpr str
-    flattenExp exp' ty castFrom pos
+    return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(StringValue cstr CString) _ castFrom pos = do
     exp' <- lift $ cStringExpr cstr
     flattenExp exp' cStringType castFrom pos

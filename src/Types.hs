@@ -846,6 +846,7 @@ expType' :: Exp -> OptPos -> Typed TypeSpec
 expType' IntValue{} _          = return $ TypeSpec ["wybe"] "int" []
 expType' FloatValue{} _        = return $ TypeSpec ["wybe"] "float" []
 expType' CharValue{} _         = return $ TypeSpec ["wybe"] "char" []
+expType' StringValue{} _       = return stringType 
 expType' expr@ConstStruct{} _  = return AnyType -- will be explicitly typed
 expType' (AnonProc mods params pstmts _ _) _ = do
     mapM_ ultimateVarType $ paramName <$> params
@@ -893,6 +894,7 @@ expMode = expMode' . content
 expMode' :: Exp -> Moded (FlowDirection,Bool,Maybe VarName)
 expMode' IntValue{}    = return (ParamIn, True, Nothing)
 expMode' FloatValue{}  = return (ParamIn, True, Nothing)
+expMode' StringValue{} = return (ParamIn, True, Nothing)
 expMode' ConstStruct{} = return (ParamIn, True, Nothing)
 expMode' CharValue{}   = return (ParamIn, True, Nothing)
 expMode' Closure{}     = return (ParamIn, True, Nothing)
@@ -2203,7 +2205,7 @@ modecheckStmt final
         $ modeErrors [ReasonUnnreachable proc pos]
 
     -- Find arg types and expand type variables
-    args' <- modeCheckExps args
+    (args', argStmts) <- modeCheckExps args
     assignedVars <- getsTy (Map.keysSet . typingDict)
     infos <- lift $ callInfos assignedVars (maybePlace stmt pos) <&> typingInfos
     actualTypes <- lift $ mapM (expType >=> ultimateType) args'
@@ -2224,7 +2226,7 @@ modecheckStmt final
                 = List.filter (exactModeMatch actualModes . fst) typeMatches
         logModed $ "Exact mode matches: " ++ show exactMatches
         let stmt' = ProcCall (First cmod cname pid) d resourceful args'
-        case (exactMatches, modeMatches, cmod, cname, actualModes, args) of
+        (argStmts ++) <$> case (exactMatches, modeMatches, cmod, cname, actualModes, args) of
             ((match,typing):rest, _, _, _, _, _) -> do
                 lift $ put typing
                 unless (List.null rest) $
@@ -2266,7 +2268,7 @@ modecheckStmt final stmt@(ProcCall (Higher fn) d resourceful args)
     when (detism == Terminal)
         $ modeErrors [ReasonUnnreachable (show fn) pos]
 
-    fnArgs' <- modeCheckExps (fn:args)
+    (fnArgs', fnArgsStmts) <- modeCheckExps (fn:args)
     actualTypes@(fnTy:_) <- lift $ mapM (expType >=> ultimateType) fnArgs'
     logModed $ "    actual types     : " ++ show actualTypes
     actualModes <- mapM expMode fnArgs'
@@ -2291,7 +2293,7 @@ modecheckStmt final stmt@(ProcCall (Higher fn) d resourceful args)
                     $ detismPurityErrors pos "higher-order term" (show $ innerExp $ content fn)
                         detism prevImpurity resourceful
                         detism' imp (modifierResourceful mods)
-                return [maybePlace (ProcCall (Higher fn') detism' resourceful args') pos]
+                return $ fnArgsStmts ++ [maybePlace (ProcCall (Higher fn') detism' resourceful args') pos]
             _ -> shouldnt $ "modecheckStmt on higher typed " ++ show fnTy
 modecheckStmt final stmt@(ForeignCall lang cname flags args) pos = do
     (extraArgs,extraStmts,flags') <-
@@ -2305,7 +2307,7 @@ modecheckStmt final stmt@(ForeignCall lang cname flags args) pos = do
                 else return ([],[],flags)
     logModed $ "Mode checking foreign call " ++ show stmt
     logAssigned "    with assigned "
-    args' <- modeCheckExps $ args ++ extraArgs
+    (args', argStmts) <- modeCheckExps $ args ++ extraArgs
     actualTypes <- lift $ mapM (expType >=> ultimateType) args'
     actualModes <- mapM expMode args'
     checkFlowErrors True False ("foreign " ++ lang ++ " " ++ cname)
@@ -2330,7 +2332,7 @@ modecheckStmt final stmt@(ForeignCall lang cname flags args) pos = do
             let vars = pexpListOutputs args''
             logModed $ "New instr = " ++ show stmt'
             bindingStateSeq stmtDetism impurity vars
-            return $ maybePlace stmt' pos : extraStmts
+            return $ argStmts ++ (maybePlace stmt' pos : extraStmts)
 modecheckStmt final Nop pos = do
     logModed "Mode checking Nop"
     return [maybePlace Nop pos]
@@ -2494,19 +2496,22 @@ splitInOutArgs exp pos = (maybePlace exp pos, Nothing)
 
 
 -- | Mode check a list of Placed Exps,
--- returning the mode checked Placed Exps and tmp counter
-modeCheckExps :: [Placed Exp] -> Moded [Placed Exp]
-modeCheckExps [] = return []
+-- returning the mode checked Placed Exps and any extra statements required for the expression
+modeCheckExps :: [Placed Exp] -> Moded ([Placed Exp], [Placed Stmt])
+modeCheckExps [] = return ([], [])
 modeCheckExps (pexp:pexps) = do
     logModed $ "Mode check exp " ++ show (content pexp)
-    pexp' <- placedApply modeCheckExp pexp
+    (pexp', stmt) <- placedApply modeCheckExp pexp
     logModed $ "Mode check exp resulted in " ++ show (content pexp')
-    (pexp':) <$> modeCheckExps pexps
+    (pexps', stmts) <- modeCheckExps pexps
+    return (pexp' : pexps', List.map Unplaced stmt ++ stmts) 
 
 
 -- | Mode check an Expression
--- This performs mode checking on the inner Stmts inside an AnonProc
-modeCheckExp :: Exp -> OptPos -> Moded (Placed Exp)
+-- This performs mode checking on the inner Stmts inside an AnonProc,
+-- and replaced WybeSting constants with a fresh variable, genearting an additional statement to construct
+-- the value
+modeCheckExp :: Exp -> OptPos -> Moded (Placed Exp, [Stmt])
 modeCheckExp
         exp@(AnonProc mods@ProcModifiers{modifierDetism=detism} params ss _ res)
         pos = do
@@ -2522,14 +2527,26 @@ modeCheckExp
     varDict <- lift $ mapFromUnivSetM ultimateVarType Set.empty vars
     let closed = Map.filterWithKey (const . flip Set.member toClose) varDict
     params' <- (content <$>) <$> lift (updateParamTypes (Unplaced <$> params))
-    return (maybePlace (AnonProc mods params' ss' (Just closed) res) pos)
+    return (maybePlace (AnonProc mods params' ss' (Just closed) res) pos, [])
 modeCheckExp (Typed exp ty cast) pos = do
     ty' <- lift $ ultimateType ty
     cast' <- lift $ forM cast ultimateType
-    exp' <- modeCheckExp exp pos
-    return (maybePlace (Typed (content exp') ty' cast') pos)
+    (exp', stmts) <- modeCheckExp exp pos
+    return (maybePlace (Typed (content exp') ty' cast') pos, stmts)
+modeCheckExp (StringValue str WybeString) pos = do
+    var <- lift genSym
+    modify $ addBindings $ Set.singleton var
+    let setVar = varSetTyped var stringType
+    (name, args) <- case str of
+        [] -> return ("empty", [setVar])
+        [ch] -> return ("singleton", [Typed (CharValue ch) charType Nothing, setVar])
+        _ -> do 
+            cStringArg <- lift2 $ cStringExpr str
+            return ("unsafe_cstring_to_string", [cStringArg, iVal (length str) `withType` intType, setVar])
+    return (varGetTyped var stringType `maybePlace` pos, 
+            [ProcCall (First ["wybe","string"] name $ Just 0) Det False $ (`maybePlace` pos) <$> args])
 modeCheckExp exp pos =
-    return (maybePlace exp pos)
+    return (maybePlace exp pos, [])
 
 
 -- | Check for flow errors in the given list of flows

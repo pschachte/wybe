@@ -1,4 +1,4 @@
 Error detected during type checking of module(s) bug228-type
 final-dump/bug228-type.wybe:5:2: Type error in call to proc =, argument 1
 final-dump/bug228-type.wybe:5:2: Type error in call to proc =, argument 2
-final-dump/bug228-type.wybe:5:2: Type of tmp#0:wybe.string incompatible with ?bar
+final-dump/bug228-type.wybe:5:2: Type of "1.0" incompatible with ?bar
