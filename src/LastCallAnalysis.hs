@@ -8,7 +8,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# LANGUAGE LambdaCase #-}
 
-module LastCallAnalysis (lastCallAnalyseMod, lastCallAnalyseProc) where
+module LastCallAnalysis (lastCallProcessModSCC, lastCallAnalyseProc) where
 import AST
 import qualified Data.List as List
 import qualified UnivSet
@@ -38,7 +38,7 @@ import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
 -- available before the last call.
 -- 
 -- One particular trick employed to make this possible is
--- last-call-module-construction optimisation.  The idea here is to invert the
+-- last-call-modulo-construction optimisation.  The idea here is to invert the
 -- direction of data flow, turing an output into an input, by passing in the
 -- address to which to write the output.  When the instruction following the
 -- last call in a body simply writes an output of that call into one memory
@@ -63,6 +63,15 @@ import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
 
 
 
+-- | Perform last call analysis and optimisation on a module dependency SCC.
+-- We perform analysis first, across all modules in the SCC.  Then we fix up
+-- calls afterwards, once all procs called by the module SCC have been analysed.
+lastCallProcessModSCC :: [ModSpec] -> Compiler ()
+lastCallProcessModSCC mods = do
+    mapM_ lastCallAnalyseMod mods
+    mapM_ lastCallOptimiseMod mods
+
+
 
 -- | Perform last call analysis on a single module.
 -- Internally, we perform analysis bottom-up on proc SCCs.
@@ -76,10 +85,22 @@ lastCallAnalyseMod thisMod = do
         unlines (List.map ((++) "    " . show . sccElts) orderedProcs)
     tcmcOpt <- gets (optimisationEnabled TailCallModCons . options)
     when tcmcOpt $ mapM_ (updateEachProcM lastCallAnalyseProc) orderedProcs
-    -- we need to fixup calls regardless whether tcmc is enabled or not,
-    -- as there could be modified calls to e.g.: standard library functions
+    reexitModule
+
+
+-- | Fix up calls to procs that have been optimised for last call modulo
+-- construction.  This must be done regardless of whether TCMC optimisation is
+-- enabled, and after all modules in the SCC have been analysed, since other
+-- modules may have been compiled with TCMC enabled.
+lastCallOptimiseMod :: ModSpec -> Compiler ()
+lastCallOptimiseMod thisMod = do
+    reenterModule thisMod
+    orderedProcs <- getSccProcs thisMod
+    logLastCallAnalysis $ ">>> Optimise Mod:" ++ show thisMod
+    logLastCallAnalysis $ ">>> Ordered Procs:" ++ show orderedProcs
     mapM_ (updateEachProcM fixupCallsInProc) orderedProcs
     reexitModule
+
 
 -- | Apply a mapping function to each proc in an SCC
 updateEachProcM :: (ProcDef -> Compiler ProcDef) -> SCC ProcSpec -> Compiler ()
