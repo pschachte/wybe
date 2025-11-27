@@ -239,7 +239,7 @@ import           LLVM                      (writeLLVM)
 import qualified Data.ByteString.Char8 as BS
 
 import           Debug.Trace
-import LastCallAnalysis (lastCallAnalyseMod)
+import LastCallAnalysis                    (lastCallProcessModSCC)
 import Data.Ord (comparing, Down (..))
 
 ------------------------ Handling dependencies ------------------------
@@ -876,7 +876,7 @@ compileModSCC mspecs = do
     logMsg LastCallAnalysis  "Start LAST CALL ANALYSIS in Builder.hs"
     logMsg LastCallAnalysis  $ "mspecs: " ++ show mspecs
     logMsg LastCallAnalysis  $ replicate 70 '='
-    mapM_ lastCallAnalyseMod mspecs
+    lastCallProcessModSCC mspecs
     logDump LastCallAnalysis LastCallAnalysis  "LAST CALL ANALYSIS"
 
     -- mods <- mapM getLoadedModule mods
