@@ -322,9 +322,9 @@ transformStmts pstmts = (concat *** or) . unzip
 -- Transform a Stmt, tranforming resources into globals
 -- The returned bool indicates if the Stmt could modify a global
 transformStmt :: Stmt -> OptPos -> Resourcer ([Placed Stmt], Bool)
-transformStmt stmt@(ProcCall fn@(First m n mbId) d resourceful args) pos = do
+transformStmt stmt@(ProcCall fn@(First m nm mbId) d resourceful args) pos = do
     let procID = trustFromJust "transformStmt" mbId
-    procDef <- lift (getProcDef $ ProcSpec m n procID generalVersion)
+    procDef <- lift (getProcDef $ ProcSpec m nm procID generalVersion)
     let proto = procProto procDef
     let (res, args') = partitionEithers $ placedApply eitherResourceExp <$> args
     unless (List.null res) $ shouldnt $ "statement with resource args " ++ show stmt
@@ -338,8 +338,7 @@ transformStmt stmt@(ProcCall fn@(First m n mbId) d resourceful args) pos = do
             || not (all (isSpecialResource . resourceFlowRes) callResFlows)
     unless (resourceful || not usesOrdinaryResources)
         $ lift $ errmsg pos
-               $ "Call to resourceful proc without ! resource marker: "
-                    ++ showStmt 4 stmt
+               $ "Call to resourceful " ++ showProcName nm ++ " without ! resource marker"
     resArgs <- concat <$> mapM (resourceArgs pos)
         (List.filter (isSpecialResource . resourceFlowRes) callResFlows)
     return (loadStoreResources pos ins outs
