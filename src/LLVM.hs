@@ -270,7 +270,7 @@ preScanProcs = do
     logLLVM $ "preScanProcs: "
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
     let bodies = concatMap (concatMap allProcBodies) procss
-    mapM_ (mapLPVMBodyM (recordExtern mod) prescanArg) bodies
+    mapM_ (mapLPVMBodyM (recordExtern mod) (prescanArg mod)) bodies
 
 
 -- | What's needed to identify a manifest constant string in generated LLVM
@@ -291,20 +291,25 @@ instance Show StaticConstSpec where
 -- | If the specified PrimArg is a string constant or closure with only constant
 -- arguments, add it to the set.  For Wybe strings, add both the Wybe string and
 -- the C string, since the Wybe string constant refers to the C string.
-prescanArg :: PrimArg -> LLVM ()
-prescanArg (ArgString str WybeString _) = do
+prescanArg :: ModSpec -> PrimArg -> LLVM ()
+prescanArg _ (ArgString str WybeString _) = do
     recordConst $ WybeStringSpec str
     recordConst $ CStringSpec str
-prescanArg (ArgString str CString _) =
+prescanArg _ (ArgString str CString _) =
     recordConst $ CStringSpec str
-prescanArg (ArgClosure pspec args _) = do
-    args' <- neededFreeArgs pspec args
-    if all argIsConst args'
-    then
+prescanArg mod (ArgClosure pspec args _) = do
+    params <- lift $ getPrimParams pspec
+    let (closureParams, realParams) = List.partition ((==Free) . primParamFlowType) params
+    neededArgs <- List.map snd <$> filterM (lift . paramIsReal . fst) (zip closureParams args)
+    if all argIsConst neededArgs
+    then do
+        let externArgs = primParamToArg envPrimParam 
+                       : List.map (setArgType AnyType . primParamToArg) realParams
+        recordExternProc mod pspec externArgs
         recordConst $ ClosureSpec pspec args
     else
         recordExternSpec externAlloc
-prescanArg _ = return ()
+prescanArg _ _ = return ()
 
 
 -- | Record that the specified constant needs to be declared in this LLVM module
@@ -316,12 +321,7 @@ recordConst spec =
 
 -- | If needed, add an extern declaration for a prim to the set.
 recordExtern :: ModSpec -> Prim -> LLVM ()
-recordExtern mod (PrimCall _ pspec _ args _) = do
-    logLLVM $ "Check if " ++ show pspec ++ " is extern to " ++ showModSpec mod
-    unless (mod /= [] && mod `isPrefixOf` procSpecMod pspec) $ do
-        logLLVM " ... it is"
-        let (nm,cc) = llvmProcName pspec
-        recordExternFn cc nm args
+recordExtern mod (PrimCall _ pspec _ args _) = recordExternProc mod pspec args
 recordExtern _ PrimHigher{} = return ()
 recordExtern _ (PrimForeign "llvm" _ _ _) = return ()
 recordExtern _ (PrimForeign "lpvm" "alloc" _ _) =
@@ -339,6 +339,15 @@ recordExtern _ (PrimForeign "c" name _ args) =
     recordExternFn "ccc" (llvmForeignName name) args
 recordExtern _ (PrimForeign other name _ args) =
     shouldnt $ "Unknown foreign language " ++ other
+
+
+recordExternProc :: ModSpec -> ProcSpec -> [PrimArg] -> LLVM ()
+recordExternProc mod pspec args = do
+    logLLVM $ "Check if " ++ show pspec ++ " is extern to " ++ showModSpec mod
+    unless (mod /= [] && mod `isPrefixOf` procSpecMod pspec) $ do
+        logLLVM " ... it is"
+        let (nm,cc) = llvmProcName pspec
+        recordExternFn cc nm args
 
 
 recordExternSpec :: ExternSpec -> LLVM ()
@@ -1479,14 +1488,6 @@ funcRef pspec = "ptr " ++ llvmGlobalName (show pspec)
 argVar :: String -> PrimArg -> PrimVarName
 argVar _ ArgVar{argVarName=var} =  var
 argVar msg _ = shouldnt $ "variable argument expected " ++ msg
-
-
-neededFreeArgs :: ProcSpec -> [PrimArg] -> LLVM [PrimArg]
-neededFreeArgs pspec args = lift $ do
-    params <- List.filter ((==Free) . primParamFlowType) . primProtoParams
-              . procImplnProto . procImpln <$> getProcDef pspec
-    List.map snd <$> filterM (paramIsReal . fst) (zip params args)
-
 
 
 ----------------------------------------------------------------------------
