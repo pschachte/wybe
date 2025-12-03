@@ -4,6 +4,7 @@
 --  Copyright: (c) 2024 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+{-# LANGUAGE TupleSections #-}
 
 
 module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM, BinOpInfo(..) ) where
@@ -298,15 +299,13 @@ prescanArg _ (ArgString str WybeString _) = do
 prescanArg _ (ArgString str CString _) =
     recordConst $ CStringSpec str
 prescanArg mod (ArgClosure pspec args _) = do
-    params <- lift $ getPrimParams pspec
-    let (closureParams, realParams) = List.partition ((==Free) . primParamFlowType) params
-    neededArgs <- List.map snd <$> filterM (lift . paramIsReal . fst) (zip closureParams args)
+    (neededArgs, realParams) <- partitionClosureParams pspec args
+    let externArgs = primParamToArg envPrimParam 
+                    : List.map (setArgType AnyType . primParamToArg) realParams
+    recordExternProc mod pspec externArgs
     if all argIsConst neededArgs
-    then do
-        let externArgs = primParamToArg envPrimParam 
-                       : List.map (setArgType AnyType . primParamToArg) realParams
-        recordExternProc mod pspec externArgs
-        recordConst $ ClosureSpec pspec args
+    then
+        recordConst $ ClosureSpec pspec neededArgs
     else
         recordExternSpec externAlloc
 prescanArg _ _ = return ()
@@ -467,10 +466,10 @@ writeConstDeclaration spec@(ClosureSpec pspec args) n = do
     let closureName = specialName2 "closure" $ show n
     modify $ \s -> s { constNames=Map.insert spec closureName $ constNames s}
     let pname = show pspec
-    argReps <- mapM argTypeRep args
+    argRep <- typeRep AnyType
     declareStructConstant closureName
         ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
-         : zip args argReps)
+         : ((,argRep) <$> args))
         Nothing
 
 
@@ -1455,8 +1454,9 @@ llvmValue (ArgString str stringVariant _) = do
 llvmValue (ArgChar val _) = return $ show $ fromEnum val
 llvmValue arg@(ArgClosure pspec args ty) = do
     logLLVM $ "llvmValue of " ++ show arg
+    args' <- fst <$> partitionClosureParams pspec args
     -- See if we've already allocated a constant for this closure
-    glob <- tryLookupConstant $ ClosureSpec pspec args
+    glob <- tryLookupConstant $ ClosureSpec pspec args'
     case glob of
         Just constName ->
             return $ llvmGlobalName constName
@@ -1464,11 +1464,11 @@ llvmValue arg@(ArgClosure pspec args ty) = do
             (writePtr,readPtr) <- freshTempArgs $ Representation CPointer
             let fnRef = funcRef pspec
             let sizeVar =
-                    ArgInt (fromIntegral (wordSizeBytes * (1 + length args)))
+                    ArgInt (fromIntegral (wordSizeBytes * (1 + length args')))
                             intType
-            logLLVM $ "Creating closure with args " ++ show args
+            logLLVM $ "Creating closure with args " ++ show args'
             heapAlloc writePtr sizeVar Nothing
-            llArgs <- mapM llvmArgument args
+            llArgs <- mapM llvmArgument args'
             llvmStoreArray readPtr (fnRef:llArgs)
             logLLVM $ "Finished creating closure; result is " ++ show readPtr
             rep <- typeRep ty
@@ -1488,6 +1488,15 @@ funcRef pspec = "ptr " ++ llvmGlobalName (show pspec)
 argVar :: String -> PrimArg -> PrimVarName
 argVar _ ArgVar{argVarName=var} =  var
 argVar msg _ = shouldnt $ "variable argument expected " ++ msg
+
+
+partitionClosureParams :: ProcSpec -> [PrimArg] -> LLVM ([PrimArg], [PrimParam])
+partitionClosureParams pspec args = lift $ do
+    params <- getPrimParams pspec
+    let (closureParams, realParams) = List.partition ((==Free) . primParamFlowType) params
+    neededArgs <- List.map snd <$> filterM (paramIsReal . fst) (zip closureParams args)
+    return (neededArgs, realParams)
+    
 
 
 ----------------------------------------------------------------------------

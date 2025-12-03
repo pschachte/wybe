@@ -17,19 +17,19 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    bug_509.call<0>(bug_509.#anon#1<1><>:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool) #0 @bug_509:nn:nn
+    bug_509.call<0>(bug_509.#anon#1<1><_:wybe.int>:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool) #0 @bug_509:nn:nn
     wybe.bool.print<0>(~x##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @bug_509:nn:nn
 
 
 proc #anon#1 > {inline} (1 calls)
 0: bug_509.#anon#1<0>
-#anon#1(anon#1#1##0:wybe.bool, ?anon#1#2##0:wybe.bool)<{}; {}; {}>:
+#anon#1([^t##0:wybe.int], anon#1#1##0:wybe.bool, ?anon#1#2##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: bug_509.#anon#1<1>
-#anon#1(anon#1#1##0:wybe.bool, ?anon#1#2##0:wybe.bool)<{}; {}; {}>:
+#anon#1([^t##0:wybe.int], anon#1#1##0:wybe.bool, ?anon#1#2##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn
@@ -69,8 +69,8 @@ define external fastcc i1 @"bug_509.#anon#1<0>"(i1 %"anon#1#1##0") {
 define external fastcc i64 @"bug_509.#anon#1<1>"(i64 %"#env##0", i64 %"generic#anon#1#1##0") {
   %"anon#1#1##0" = trunc i64 %"generic#anon#1#1##0" to i1
   %"anon#1#2##0" = icmp eq i1 %"anon#1#1##0", 1
-  %"tmp#1##0" = zext i1 %"anon#1#2##0" to i64
-  ret i64 %"tmp#1##0"
+  %"tmp#2##0" = zext i1 %"anon#1#2##0" to i64
+  ret i64 %"tmp#2##0"
 }
 
 define external fastcc i1 @"bug_509.call<0>"(i64 %"f##0") {

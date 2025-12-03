@@ -54,7 +54,7 @@ second([a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>
 source_filename = "!ROOT!/final-dump/uneeded_closure_args.wybe"
 target triple    ????
 
-@"closure#0" = private unnamed_addr constant {ptr, i64} { ptr @"uneeded_closure_args.#closure#1<0>", i64 undef }, align 8
+@"closure#0" = private unnamed_addr constant {ptr} { ptr @"uneeded_closure_args.#closure#1<0>" }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

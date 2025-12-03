@@ -136,10 +136,10 @@ target triple    ????
 
 @"closure#0" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#anon#1<1>" }, align 8
 @"closure#1" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#anon#2<1>" }, align 8
-@"closure#2" = private unnamed_addr constant {ptr, double} { ptr @"higher_order_refs.#anon#3<1>", double 0.5 }, align 8
+@"closure#2" = private unnamed_addr constant {ptr, i64} { ptr @"higher_order_refs.#anon#3<1>", i64 bitcast( double 0.5 to i64 ) }, align 8
 @"closure#3" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#1<0>" }, align 8
 @"closure#4" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#2<0>" }, align 8
-@"closure#5" = private unnamed_addr constant {ptr, i64} { ptr @"higher_order_refs.#closure#3<0>", i64 undef }, align 8
+@"closure#5" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#3<0>" }, align 8
 
 declare external ccc void @print_float(double)
 declare external ccc void @print_int(i64)
