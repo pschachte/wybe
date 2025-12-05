@@ -21,7 +21,7 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     ctor_char2.foo<0>(1412:ctor_char2, ?tmp#0##0:wybe.char) #1 @ctor_char2:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @ctor_char2:nn:nn
-    foreign c putchar(~tmp#0##0:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @ctor_char2:nn:nn
+    foreign c putchar(~tmp#0##0:wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @ctor_char2:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @ctor_char2:nn:nn
     foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @ctor_char2:nn:nn
 

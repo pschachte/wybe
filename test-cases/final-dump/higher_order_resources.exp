@@ -43,7 +43,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.list.map#cont#1<0>(higher_order_resources.#anon#1<1><>:{resource}(T), ~tmp#0##0:wybe.list(T))<{}; {}; {0, 1}> #31 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##1:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#64##0:wybe.phantom) @higher_order_resources:nn:nn
-    foreign c print_int(~maximum##1:wybe.int, ~tmp#64##0:wybe.phantom, ?tmp#65##0:wybe.phantom) @higher_order_resources:nn:nn
+    foreign c print_int(~maximum##1:wybe.int, ~%tmp#64##0:wybe.phantom, ?%tmp#65##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#65##0:wybe.phantom, ?tmp#66##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~%tmp#66##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_resources:nn:nn
     wybe.string.print<0>("*****":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @higher_order_resources:nn:nn
@@ -90,7 +90,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.list.map#cont#1<0>(higher_order_resources.#anon#2<1><>:{resource}(T), ~tmp#11##0:wybe.list(T))<{}; {}; {0, 1}> #33 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##3:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#121##0:wybe.phantom) @higher_order_resources:nn:nn
-    foreign c print_int(~maximum##3:wybe.int, ~tmp#121##0:wybe.phantom, ?tmp#122##0:wybe.phantom) @higher_order_resources:nn:nn
+    foreign c print_int(~maximum##3:wybe.int, ~%tmp#121##0:wybe.phantom, ?%tmp#122##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#122##0:wybe.phantom, ?tmp#123##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~%tmp#123##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~tmp#29##0:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
@@ -123,7 +123,7 @@ proc #anon#2 > {inline} (1 calls)
     wybe.string.print<0>("> ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##2:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom) @higher_order_resources:nn:nn
-    foreign c print_int(~maximum##2:wybe.int, ~tmp#36##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @higher_order_resources:nn:nn
+    foreign c print_int(~maximum##2:wybe.int, ~%tmp#36##0:wybe.phantom, ?%tmp#37##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#37##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~%tmp#38##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~tmp#32##0:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
@@ -140,7 +140,7 @@ proc #anon#2 > {inline} (1 calls)
     wybe.string.print<0>("> ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#2##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @higher_order_resources:nn:nn
-    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @higher_order_resources:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~tmp#1##0:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn

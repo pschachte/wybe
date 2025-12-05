@@ -20,8 +20,8 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @call_site_id:nn:nn
-    foreign c read_int(?x##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @call_site_id:nn:nn
-    foreign c read_int(?y##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c read_int(?x##0:wybe.int, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c read_int(?y##0:wybe.int, ~tmp#7##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @call_site_id:nn:nn
     foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @call_site_id:nn:nn
     foreign llvm icmp_sgt(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @call_site_id:nn:nn
     case ~tmp#5##0:wybe.bool of
@@ -76,7 +76,7 @@ foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign llvm mul(~x##0:wybe.int, 5:wybe.int, ?tmp#1##0:wybe.int) @call_site_id:nn:nn
     foreign llvm add(~tmp#1##0:wybe.int, 10:wybe.int, ?tmp#0##0:wybe.int) @call_site_id:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#42##0:wybe.phantom) @call_site_id:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#42##0:wybe.phantom, ?%tmp#43##0:wybe.phantom) @call_site_id:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @call_site_id:nn:nn
     foreign lpvm store(~%tmp#44##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @call_site_id:nn:nn
 

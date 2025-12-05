@@ -26,14 +26,14 @@ proc #cont#1 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @simple_loop:nn:nn
-    foreign c read_char(?c##0:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @simple_loop:nn:nn
+    foreign c read_char(?c##0:wybe.char, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @simple_loop:nn:nn
     foreign lpvm store(%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @simple_loop:nn:nn
     foreign llvm icmp_ne(c##0:wybe.char, 'a':wybe.char, ?tmp#0##0:wybe.bool) @simple_loop:nn:nn
     case ~tmp#0##0:wybe.bool of
     0:
 
     1:
-        foreign c putchar(~c##0:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @simple_loop:nn:nn
+        foreign c putchar(~c##0:wybe.char, ~tmp#2##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @simple_loop:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @simple_loop:nn:nn
         simple_loop.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @simple_loop:nn:nn
 

@@ -207,7 +207,7 @@ print_t(x##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
                 foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
                 wybe.string.print<0>("tb(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~a##0:wybe.int, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~a##0:wybe.int, ~%tmp#56##0:wybe.phantom, ?%tmp#57##0:wybe.phantom) @dead_cell_size:nn:nn
                 foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
                 wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom) @dead_cell_size:nn:nn
@@ -220,15 +220,15 @@ print_t(x##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
                 foreign lpvm access(~x##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?c##0:wybe.int) @dead_cell_size:nn:nn
                 wybe.string.print<0>("tc(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~a##1:wybe.int, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~a##1:wybe.int, ~%tmp#30##0:wybe.phantom, ?%tmp#31##0:wybe.phantom) @dead_cell_size:nn:nn
                 foreign lpvm store(~%tmp#31##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
                 wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~b##0:wybe.int, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~b##0:wybe.int, ~%tmp#38##0:wybe.phantom, ?%tmp#39##0:wybe.phantom) @dead_cell_size:nn:nn
                 foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
                 wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#46##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~c##0:wybe.int, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~c##0:wybe.int, ~%tmp#46##0:wybe.phantom, ?%tmp#47##0:wybe.phantom) @dead_cell_size:nn:nn
                 foreign lpvm store(~%tmp#47##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
                 wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @dead_cell_size:nn:nn
@@ -239,7 +239,7 @@ print_t(x##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
                 foreign lpvm access(~x##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int) @dead_cell_size:nn:nn
                 wybe.string.print<0>("td(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~a##2:wybe.int, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~a##2:wybe.int, ~%tmp#20##0:wybe.phantom, ?%tmp#21##0:wybe.phantom) @dead_cell_size:nn:nn
                 foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
                 wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @dead_cell_size:nn:nn
@@ -276,7 +276,7 @@ print_t2(x##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
             foreign lpvm access(~x##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
             wybe.string.print<0>("t2b(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @dead_cell_size:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @dead_cell_size:nn:nn
-            foreign c print_int(~a##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign c print_int(~a##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @dead_cell_size:nn:nn
             foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
             wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @dead_cell_size:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @dead_cell_size:nn:nn

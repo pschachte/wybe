@@ -10,14 +10,14 @@ representation is 8 bit unsigned
 ## Comparisons
 
 # Equality and disequality.
-pub def {test} (x:_ =  y:_) { foreign llvm {test} icmp_eq(x, y) }
-pub def {test} (x:_ ~= y:_) { foreign llvm {test} icmp_ne(x, y) }
+pub def foreign llvm {test} `=` =icmp_eq(x:_, y:_)
+pub def foreign llvm {test} `~=`=icmp_ne(x:_, y:_)
 
 # Inequalities.
-pub def {test} (x:_ <  y:_) { foreign llvm {test} icmp_ult(x, y) }
-pub def {test} (x:_ <= y:_) { foreign llvm {test} icmp_ule(x, y) }
-pub def {test} (x:_ >  y:_) { foreign llvm {test} icmp_ugt(x, y) }
-pub def {test} (x:_ >= y:_) { foreign llvm {test} icmp_uge(x, y) }
+pub def foreign llvm {test} `<` =icmp_ult(x:_, y:_)
+pub def foreign llvm {test} `<=`=icmp_ule(x:_, y:_)
+pub def foreign llvm {test} `>` =icmp_ugt(x:_, y:_)
+pub def foreign llvm {test} `>=`=icmp_uge(x:_, y:_)
 
 # Three-way comparison.
 pub def (x:_ <=> y:_):comparison = 
@@ -27,10 +27,10 @@ pub def (x:_ <=> y:_):comparison =
 ## Conversion procedures
 
 # Int ordinal of a char
-pub def ord(c:_):int = foreign lpvm cast(c)
+pub def foreign lpvm ord=cast(c:_):int
 
 # Count (unsigned) ordinal of a char
-pub def ord(c:_):count = foreign lpvm cast(c)
+pub def foreign lpvm ord=cast(c:_):count
 
 # Char of an int character code
 pub def {test} chr(i:int):_ = foreign lpvm cast(i) where { 0 <= i ; i <= 255 }
@@ -60,8 +60,8 @@ pub def {test} is_alphanumeric(x:_) { is_alpha(x) | is_digit(x) }
 
 ## I/O
 
-pub def print(x:_) use !io { foreign c putchar(x, !io) }
+pub def foreign c print=putchar(x:_) use !io
 
 pub def println(x:_) use !io { !print(x); !nl }
 
-pub def read(?x:_) use !io { foreign c read_char(?x, !io) }
+pub def foreign c read=read_char(?x:_) use !io
