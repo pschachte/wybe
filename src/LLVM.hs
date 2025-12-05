@@ -1529,7 +1529,7 @@ llvmTypeRep (Floating 32)   = "float"
 llvmTypeRep (Floating 64)   = "double"
 llvmTypeRep (Floating 128)  = "fp128"
 llvmTypeRep (Floating n)    = shouldnt $ "invalid float size " ++ show n
-llvmTypeRep (Func _ _)      = llvmTypeRep Pointer
+llvmTypeRep (Func _ _)      = llvmTypeRep CPointer
 llvmTypeRep Pointer         = llvmTypeRep $ Bits wordSize
 llvmTypeRep CPointer        = "ptr"
 
@@ -1669,6 +1669,8 @@ trivialConstConversion (Signed _) (Signed _)      = True
 trivialConstConversion (Signed _) (Bits _)        = True
 trivialConstConversion (Signed _) Pointer         = True
 trivialConstConversion (Floating _) (Floating _)  = True
+trivialConstConversion CPointer Func{}            = True
+trivialConstConversion Func{} CPointer            = True
 trivialConstConversion Pointer (Bits b)           = b == wordSize
 trivialConstConversion Pointer (Signed b)         = b == wordSize
 trivialConstConversion _ _                        = False
@@ -1684,8 +1686,8 @@ equivLLTypes (Signed b) Pointer    = b == wordSize
 equivLLTypes (Signed b1) (Bits b2) = b1 == b2
 equivLLTypes (Bits b1) (Signed b2) = b1 == b2
 equivLLTypes Func{} Func{}         = True -- Since LLVM just considers them ptrs
-equivLLTypes Pointer Func{}        = True
-equivLLTypes Func{} Pointer        = True
+equivLLTypes CPointer Func{}       = True
+equivLLTypes Func{} CPointer       = True
 equivLLTypes t1 t2 = t1 == t2
 
 
@@ -1695,8 +1697,8 @@ typeConvertOp fromTy toTy
     | fromTy == toTy = "bitcast" -- use bitcast for no-op conversion
 typeConvertOp Pointer toTy   = typeConvertOp (Bits wordSize) toTy
 typeConvertOp fromTy Pointer = typeConvertOp fromTy (Bits wordSize)
-typeConvertOp Func{} toTy    = typeConvertOp (Bits wordSize) toTy
-typeConvertOp fromTy Func{}  = typeConvertOp fromTy (Bits wordSize)
+typeConvertOp Func{} toTy    = typeConvertOp CPointer toTy
+typeConvertOp fromTy Func{}  = typeConvertOp fromTy CPointer
 typeConvertOp (Bits m) (Bits n)
     | m < n = "zext"
     | n < m = "trunc"

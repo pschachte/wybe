@@ -112,9 +112,8 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"need.need<0>"(i64 %"stmt##0") {
-  %"tmp#1##0" = inttoptr i64 %"stmt##0" to ptr
-  %"tmp#0##0" = load ptr, ptr %"tmp#1##0"
-  tail call fastcc void %"tmp#0##0"(i64 %"stmt##0")
+define external fastcc void @"need.need<0>"(ptr %"stmt##0") {
+  %"tmp#0##0" = load ptr, ptr %"stmt##0"
+  tail call fastcc void %"tmp#0##0"(ptr %"stmt##0")
   ret void
 }
