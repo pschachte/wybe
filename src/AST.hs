@@ -182,7 +182,7 @@ data Item
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
      | FuncDecl Visibility ProcModifiers ProcProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility ProcModifiers ProcProto [Placed Stmt] OptPos
-     | ForeignProcDecl Visibility Ident ProcModifiers ProcProto OptPos
+     | ForeignProcDecl Visibility Ident ProcModifiers (Maybe Ident) ProcProto TypeSpec OptPos
      | StmtDecl Stmt OptPos
      | PragmaDecl Pragma
      deriving (Generic, Eq)
@@ -3854,12 +3854,14 @@ instance Show Item where
     ++ " {"
     ++ showBody 4 stmts
     ++ "\n  }"  
-  show (ForeignProcDecl vis lang modifiers proto pos) =
+  show (ForeignProcDecl vis lang modifiers mbAlias proto retType pos) =
     visibilityPrefix vis
     ++ "def foreign "
     ++ lang ++ " "
     ++ showProcModifiers' modifiers
+    ++ maybeShowStr " " mbAlias "="
     ++ show proto
+    ++ showTypeSuffix retType Nothing
     ++ showOptPos pos
   show (StmtDecl stmt pos) =
     showStmt 4 stmt ++ showOptPos pos
@@ -4309,6 +4311,15 @@ simpleShowSet s =
 maybeShow :: Show t => String -> Maybe t -> String -> String
 maybeShow pre Nothing post = ""
 maybeShow pre (Just something) post =
+  pre ++ show something ++ post
+
+
+-- |maybeShow pre maybe post
+--  if maybe has something, show pre, the maybe string, and post
+--  if the maybe is Nothing, don't show anything
+maybeShowStr :: String -> Maybe String -> String -> String
+maybeShowStr pre Nothing post = ""
+maybeShowStr pre (Just something) post =
   pre ++ show something ++ post
 
 

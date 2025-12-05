@@ -111,10 +111,10 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                  [result, varSet outputVariableName `maybePlace` pos])
               pos]
         pos)
-normaliseItem (ForeignProcDecl vis lang mods proto@(ProcProto name params resources) pos) = do
+normaliseItem (ForeignProcDecl vis lang mods mbAlias proto@(ProcProto name params resources) resulttype pos) = do
     when (mods{modifierImpurity=Pure, modifierDetism=Det, modifierInline=MayInline} /= defaultProcModifiers)
         $ errmsg pos
-        $ "Foreign procedure declaration of " ++ name
+        $ "Foreign procedure declaration of " ++ procName
             ++ " has illegal procedure modifiers. Only purity, determinism, and inlining can be specified."
     mapM_ ((\(Param{paramType=ty, paramName=name}, pos) -> do
             when (ty == AnyType)
@@ -123,16 +123,20 @@ normaliseItem (ForeignProcDecl vis lang mods proto@(ProcProto name params resour
         ) . unPlace) params
 
     normaliseItem
-        (ProcDecl vis mods proto
+        (ProcDecl vis mods proto{procProtoName=procName, procProtoParams=params'}
             [maybePlace (ForeignCall lang name mods' exps) pos] pos)
   where
-    mods' = List.filter (not . List.null) 
+    procName = fromMaybe name mbAlias
+    mods' = List.filter (not . List.null)
                 [ impurityName (modifierImpurity mods)
                 , determinismName (modifierDetism mods) ]
     exps = List.map (uncurry (flip rePlace . paramToVar) . unPlace) params
+        ++ [varSet outputVariableName `maybePlace` pos | resulttype /= AnyType]
         ++ List.map (\(ResourceFlowSpec rs@(ResourceSpec _ r) dir) ->
                         Var r dir (Resource rs) `maybePlace` pos)
                     resources
+    params' = params
+        ++ [Param outputVariableName resulttype ParamOut Ordinary `maybePlace` pos | resulttype /= AnyType]
 normaliseItem item@ProcDecl{} = do
     logNormalise $ "Recording proc without flattening:" ++ show item
     addProc 0 item
