@@ -114,13 +114,12 @@ define external fastcc void @"higher_order_loop.#cont#1<0>"(i64 %"tmp#5##0") {
   br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#10##0" = inttoptr i64 %"tmp#5##0" to ptr
-  %"f##0" = load i64, ptr %"tmp#10##0"
+  %"f##0" = load ptr, ptr %"tmp#10##0"
   %"tmp#11##0" = add i64 %"tmp#5##0", 8
   %"tmp#12##0" = inttoptr i64 %"tmp#11##0" to ptr
   %"tmp#5##1" = load i64, ptr %"tmp#12##0"
-  %"tmp#14##0" = inttoptr i64 %"f##0" to ptr
-  %"tmp#13##0" = load ptr, ptr %"tmp#14##0"
-  tail call fastcc void %"tmp#13##0"(i64 %"f##0", i64 10)
+  %"tmp#13##0" = load ptr, ptr %"f##0"
+  tail call fastcc void %"tmp#13##0"(ptr %"f##0", i64 10)
   tail call fastcc void @"higher_order_loop.#cont#1<0>"(i64 %"tmp#5##1")
   ret void
 if.else.0:

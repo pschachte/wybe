@@ -63,13 +63,12 @@ define external fastcc void @"benchmark.start<0>"(i64 %"call_source_location##0"
   ret void
 }
 
-define external fastcc double @"benchmark.time_execution<0>"(i64 %"proc##0", i64 %"call_source_location##0") {
+define external fastcc double @"benchmark.time_execution<0>"(ptr %"proc##0", i64 %"call_source_location##0") {
   call ccc void @benchmark_start(i64 %"call_source_location##0")
-  %"tmp#1##0" = inttoptr i64 %"proc##0" to ptr
-  %"tmp#0##0" = load ptr, ptr %"tmp#1##0"
-  tail call fastcc void %"tmp#0##0"(i64 %"proc##0")
-  %"tmp#2##0" = call ccc double @benchmark_end(i64 %"call_source_location##0")
-  ret double %"tmp#2##0"
+  %"tmp#0##0" = load ptr, ptr %"proc##0"
+  tail call fastcc void %"tmp#0##0"(ptr %"proc##0")
+  %"tmp#1##0" = call ccc double @benchmark_end(i64 %"call_source_location##0")
+  ret double %"tmp#1##0"
 }
 
 --------------------------------------------------

@@ -4,6 +4,7 @@
 --  Copyright: (c) 2024 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+{-# LANGUAGE TupleSections #-}
 
 
 module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM, BinOpInfo(..) ) where
@@ -270,7 +271,7 @@ preScanProcs = do
     logLLVM $ "preScanProcs: "
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
     let bodies = concatMap (concatMap allProcBodies) procss
-    mapM_ (mapLPVMBodyM (recordExtern mod) prescanArg) bodies
+    mapM_ (mapLPVMBodyM (recordExtern mod) (prescanArg mod)) bodies
 
 
 -- | What's needed to identify a manifest constant string in generated LLVM
@@ -291,20 +292,23 @@ instance Show StaticConstSpec where
 -- | If the specified PrimArg is a string constant or closure with only constant
 -- arguments, add it to the set.  For Wybe strings, add both the Wybe string and
 -- the C string, since the Wybe string constant refers to the C string.
-prescanArg :: PrimArg -> LLVM ()
-prescanArg (ArgString str WybeString _) = do
+prescanArg :: ModSpec -> PrimArg -> LLVM ()
+prescanArg _ (ArgString str WybeString _) = do
     recordConst $ WybeStringSpec str
     recordConst $ CStringSpec str
-prescanArg (ArgString str CString _) =
+prescanArg _ (ArgString str CString _) =
     recordConst $ CStringSpec str
-prescanArg (ArgClosure pspec args _) = do
-    args' <- neededFreeArgs pspec args
-    if all argIsConst args'
+prescanArg mod (ArgClosure pspec args _) = do
+    (neededArgs, realParams) <- partitionClosureParams pspec args
+    let externArgs = primParamToArg envPrimParam 
+                    : List.map (setArgType AnyType . primParamToArg) realParams
+    recordExternProc mod pspec externArgs
+    if all argIsConst neededArgs
     then
-        recordConst $ ClosureSpec pspec args
+        recordConst $ ClosureSpec pspec neededArgs
     else
         recordExternSpec externAlloc
-prescanArg _ = return ()
+prescanArg _ _ = return ()
 
 
 -- | Record that the specified constant needs to be declared in this LLVM module
@@ -316,12 +320,7 @@ recordConst spec =
 
 -- | If needed, add an extern declaration for a prim to the set.
 recordExtern :: ModSpec -> Prim -> LLVM ()
-recordExtern mod (PrimCall _ pspec _ args _) = do
-    logLLVM $ "Check if " ++ show pspec ++ " is extern to " ++ showModSpec mod
-    unless (mod /= [] && mod `isPrefixOf` procSpecMod pspec) $ do
-        logLLVM " ... it is"
-        let (nm,cc) = llvmProcName pspec
-        recordExternFn cc nm args
+recordExtern mod (PrimCall _ pspec _ args _) = recordExternProc mod pspec args
 recordExtern _ PrimHigher{} = return ()
 recordExtern _ (PrimForeign "llvm" _ _ _) = return ()
 recordExtern _ (PrimForeign "lpvm" "alloc" _ _) =
@@ -339,6 +338,15 @@ recordExtern _ (PrimForeign "c" name _ args) =
     recordExternFn "ccc" (llvmForeignName name) args
 recordExtern _ (PrimForeign other name _ args) =
     shouldnt $ "Unknown foreign language " ++ other
+
+
+recordExternProc :: ModSpec -> ProcSpec -> [PrimArg] -> LLVM ()
+recordExternProc mod pspec args = do
+    logLLVM $ "Check if " ++ show pspec ++ " is extern to " ++ showModSpec mod
+    unless (mod /= [] && mod `isPrefixOf` procSpecMod pspec) $ do
+        logLLVM " ... it is"
+        let (nm,cc) = llvmProcName pspec
+        recordExternFn cc nm args
 
 
 recordExternSpec :: ExternSpec -> LLVM ()
@@ -458,10 +466,10 @@ writeConstDeclaration spec@(ClosureSpec pspec args) n = do
     let closureName = specialName2 "closure" $ show n
     modify $ \s -> s { constNames=Map.insert spec closureName $ constNames s}
     let pname = show pspec
-    argReps <- mapM argTypeRep args
+    argRep <- typeRep AnyType
     declareStructConstant closureName
         ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
-         : zip args argReps)
+         : ((,argRep) <$> args))
         Nothing
 
 
@@ -1446,8 +1454,9 @@ llvmValue (ArgString str stringVariant _) = do
 llvmValue (ArgChar val _) = return $ show $ fromEnum val
 llvmValue arg@(ArgClosure pspec args ty) = do
     logLLVM $ "llvmValue of " ++ show arg
+    args' <- fst <$> partitionClosureParams pspec args
     -- See if we've already allocated a constant for this closure
-    glob <- tryLookupConstant $ ClosureSpec pspec args
+    glob <- tryLookupConstant $ ClosureSpec pspec args'
     case glob of
         Just constName ->
             return $ llvmGlobalName constName
@@ -1455,11 +1464,11 @@ llvmValue arg@(ArgClosure pspec args ty) = do
             (writePtr,readPtr) <- freshTempArgs $ Representation CPointer
             let fnRef = funcRef pspec
             let sizeVar =
-                    ArgInt (fromIntegral (wordSizeBytes * (1 + length args)))
+                    ArgInt (fromIntegral (wordSizeBytes * (1 + length args')))
                             intType
-            logLLVM $ "Creating closure with args " ++ show args
+            logLLVM $ "Creating closure with args " ++ show args'
             heapAlloc writePtr sizeVar Nothing
-            llArgs <- mapM llvmArgument args
+            llArgs <- mapM llvmArgument args'
             llvmStoreArray readPtr (fnRef:llArgs)
             logLLVM $ "Finished creating closure; result is " ++ show readPtr
             rep <- typeRep ty
@@ -1481,12 +1490,13 @@ argVar _ ArgVar{argVarName=var} =  var
 argVar msg _ = shouldnt $ "variable argument expected " ++ msg
 
 
-neededFreeArgs :: ProcSpec -> [PrimArg] -> LLVM [PrimArg]
-neededFreeArgs pspec args = lift $ do
-    params <- List.filter ((==Free) . primParamFlowType) . primProtoParams
-              . procImplnProto . procImpln <$> getProcDef pspec
-    List.map snd <$> filterM (paramIsReal . fst) (zip params args)
-
+partitionClosureParams :: ProcSpec -> [PrimArg] -> LLVM ([PrimArg], [PrimParam])
+partitionClosureParams pspec args = lift $ do
+    params <- getPrimParams pspec
+    let (closureParams, realParams) = List.partition ((==Free) . primParamFlowType) params
+    neededArgs <- List.map snd <$> filterM (paramIsReal . fst) (zip closureParams args)
+    return (neededArgs, realParams)
+    
 
 
 ----------------------------------------------------------------------------
@@ -1519,7 +1529,7 @@ llvmTypeRep (Floating 32)   = "float"
 llvmTypeRep (Floating 64)   = "double"
 llvmTypeRep (Floating 128)  = "fp128"
 llvmTypeRep (Floating n)    = shouldnt $ "invalid float size " ++ show n
-llvmTypeRep (Func _ _)      = llvmTypeRep Pointer
+llvmTypeRep (Func _ _)      = llvmTypeRep CPointer
 llvmTypeRep Pointer         = llvmTypeRep $ Bits wordSize
 llvmTypeRep CPointer        = "ptr"
 
@@ -1659,6 +1669,8 @@ trivialConstConversion (Signed _) (Signed _)      = True
 trivialConstConversion (Signed _) (Bits _)        = True
 trivialConstConversion (Signed _) Pointer         = True
 trivialConstConversion (Floating _) (Floating _)  = True
+trivialConstConversion CPointer Func{}            = True
+trivialConstConversion Func{} CPointer            = True
 trivialConstConversion Pointer (Bits b)           = b == wordSize
 trivialConstConversion Pointer (Signed b)         = b == wordSize
 trivialConstConversion _ _                        = False
@@ -1674,8 +1686,8 @@ equivLLTypes (Signed b) Pointer    = b == wordSize
 equivLLTypes (Signed b1) (Bits b2) = b1 == b2
 equivLLTypes (Bits b1) (Signed b2) = b1 == b2
 equivLLTypes Func{} Func{}         = True -- Since LLVM just considers them ptrs
-equivLLTypes Pointer Func{}        = True
-equivLLTypes Func{} Pointer        = True
+equivLLTypes CPointer Func{}       = True
+equivLLTypes Func{} CPointer       = True
 equivLLTypes t1 t2 = t1 == t2
 
 
@@ -1685,8 +1697,8 @@ typeConvertOp fromTy toTy
     | fromTy == toTy = "bitcast" -- use bitcast for no-op conversion
 typeConvertOp Pointer toTy   = typeConvertOp (Bits wordSize) toTy
 typeConvertOp fromTy Pointer = typeConvertOp fromTy (Bits wordSize)
-typeConvertOp Func{} toTy    = typeConvertOp (Bits wordSize) toTy
-typeConvertOp fromTy Func{}  = typeConvertOp fromTy (Bits wordSize)
+typeConvertOp Func{} toTy    = typeConvertOp CPointer toTy
+typeConvertOp fromTy Func{}  = typeConvertOp fromTy CPointer
 typeConvertOp (Bits m) (Bits n)
     | m < n = "zext"
     | n < m = "trunc"

@@ -123,8 +123,8 @@ target triple    ????
 @"closure#0" = private unnamed_addr constant {ptr} { ptr @"higher_order_append.#closure#1<0>" }, align 8
 @"closure#1" = private unnamed_addr constant {ptr} { ptr @"higher_order_append.print_list_of_ints#closure#1<0>" }, align 8
 
-declare external fastcc void @"wybe.list.map<1>"(i64, i64, ptr)
-declare external fastcc void @"wybe.list.print<0>"(i64, i64)
+declare external fastcc void @"wybe.list.map<1>"(ptr, i64, ptr)
+declare external fastcc void @"wybe.list.print<0>"(ptr, i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
@@ -188,18 +188,17 @@ define external fastcc void @"higher_order_append.<0>"() {
   %"tmp#86##0" = inttoptr i64 %"tmp#85##0" to ptr
   store i64 %"tmp#41##0", ptr %"tmp#86##0"
   %"tmp#87##0" = alloca i8, i64 8, align 8
-  %"tmp#89##0" = call ccc ptr @wybe_malloc(i32 16)
-  store ptr @"higher_order_append.#anon#1<1>", ptr %"tmp#89##0"
-  %"tmp#90##0" = ptrtoint ptr %"tmp#89##0" to i64
-  %"tmp#91##0" = add i64 %"tmp#90##0", 8
-  %"tmp#92##0" = inttoptr i64 %"tmp#91##0" to ptr
-  store i64 %"tmp#45##0", ptr %"tmp#92##0"
-  %"tmp#88##0" = ptrtoint ptr %"tmp#89##0" to i64
-  call fastcc void @"wybe.list.map<1>"(i64 %"tmp#88##0", i64 %"tmp#37##0", ptr %"tmp#87##0")
+  %"tmp#88##0" = call ccc ptr @wybe_malloc(i32 16)
+  store ptr @"higher_order_append.#anon#1<1>", ptr %"tmp#88##0"
+  %"tmp#89##0" = ptrtoint ptr %"tmp#88##0" to i64
+  %"tmp#90##0" = add i64 %"tmp#89##0", 8
+  %"tmp#91##0" = inttoptr i64 %"tmp#90##0" to ptr
+  store i64 %"tmp#45##0", ptr %"tmp#91##0"
+  call fastcc void @"wybe.list.map<1>"(ptr %"tmp#88##0", i64 %"tmp#37##0", ptr %"tmp#87##0")
   %"y##0" = load i64, ptr %"tmp#87##0"
-  call fastcc void @"wybe.list.print<0>"(i64 ptrtoint( ptr @"closure#0" to i64 ), i64 %"tmp#37##0")
+  call fastcc void @"wybe.list.print<0>"(ptr @"closure#0", i64 %"tmp#37##0")
   call ccc void @putchar(i8 10)
-  call fastcc void @"wybe.list.print<0>"(i64 ptrtoint( ptr @"closure#0" to i64 ), i64 %"y##0")
+  call fastcc void @"wybe.list.print<0>"(ptr @"closure#0", i64 %"y##0")
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -222,7 +221,7 @@ define external fastcc i64 @"higher_order_append.#anon#1<1>"(i64 %"#env##0", i64
 }
 
 define external fastcc void @"higher_order_append.#closure#1<0>"(i64 %"#env##0", i64 %"generic#l##0") {
-  tail call fastcc void @"wybe.list.print<0>"(i64 ptrtoint( ptr @"closure#1" to i64 ), i64 %"generic#l##0")
+  tail call fastcc void @"wybe.list.print<0>"(ptr @"closure#1", i64 %"generic#l##0")
   ret void
 }
 
@@ -250,7 +249,7 @@ if.else.0:
 }
 
 define external fastcc void @"higher_order_append.print_list_of_ints<0>"(i64 %"l##0") {
-  tail call fastcc void @"wybe.list.print<0>"(i64 ptrtoint( ptr @"closure#1" to i64 ), i64 %"l##0")
+  tail call fastcc void @"wybe.list.print<0>"(ptr @"closure#1", i64 %"l##0")
   ret void
 }
 
