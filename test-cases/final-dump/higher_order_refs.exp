@@ -136,7 +136,7 @@ target triple    ????
 
 @"closure#0" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#anon#1<1>" }, align 8
 @"closure#1" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#anon#2<1>" }, align 8
-@"closure#2" = private unnamed_addr constant {ptr, i64} { ptr @"higher_order_refs.#anon#3<1>", i64 bitcast( double 0.5 to i64 ) }, align 8
+@"closure#2" = private unnamed_addr constant {ptr, double} { ptr @"higher_order_refs.#anon#3<1>", double 0.5 }, align 8
 @"closure#3" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#1<0>" }, align 8
 @"closure#4" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#2<0>" }, align 8
 @"closure#5" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#3<0>" }, align 8
@@ -176,7 +176,7 @@ define external fastcc double @"higher_order_refs.#anon#1<0>"(double %"anon#1#1#
   ret double %"anon#1#1##0"
 }
 
-define external fastcc i64 @"higher_order_refs.#anon#1<1>"(i64 %"#env##0", i64 %"generic#anon#1#1##0") {
+define external fastcc i64 @"higher_order_refs.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
   %"anon#1#1##0" = bitcast i64 %"generic#anon#1#1##0" to double
   %"tmp#1##0" = bitcast double %"anon#1#1##0" to i64
   ret i64 %"tmp#1##0"
@@ -186,7 +186,7 @@ define external fastcc double @"higher_order_refs.#anon#2<0>"(double %"anon#2#1#
   ret double %"anon#2#1##0"
 }
 
-define external fastcc i64 @"higher_order_refs.#anon#2<1>"(i64 %"#env##0", i64 %"generic#anon#2#1##0") {
+define external fastcc i64 @"higher_order_refs.#anon#2<1>"(ptr %"#env##0", i64 %"generic#anon#2#1##0") {
   %"anon#2#1##0" = bitcast i64 %"generic#anon#2#1##0" to double
   %"tmp#1##0" = bitcast double %"anon#2#1##0" to i64
   ret i64 %"tmp#1##0"
@@ -197,27 +197,25 @@ define external fastcc double @"higher_order_refs.#anon#3<0>"(double %"y##0", do
   ret double %"tmp#12##0"
 }
 
-define external fastcc i64 @"higher_order_refs.#anon#3<1>"(i64 %"#env##0", i64 %"generic#anon#3#1##0") {
-  %"tmp#2##0" = add i64 %"#env##0", 8
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"generic#y##0" = load i64, ptr %"tmp#3##0"
+define external fastcc i64 @"higher_order_refs.#anon#3<1>"(ptr %"#env##0", i64 %"generic#anon#3#1##0") {
+  %"tmp#2##0" = getelementptr {ptr, double}, ptr %"#env##0", i64 0, i32 1
+  %"y##0" = load double, ptr %"tmp#2##0"
   %"anon#3#1##0" = bitcast i64 %"generic#anon#3#1##0" to double
-  %"y##0" = bitcast i64 %"generic#y##0" to double
   %"anon#3#2##0" = fsub double %"anon#3#1##0", %"y##0"
-  %"tmp#4##0" = bitcast double %"anon#3#2##0" to i64
-  ret i64 %"tmp#4##0"
+  %"tmp#3##0" = bitcast double %"anon#3#2##0" to i64
+  ret i64 %"tmp#3##0"
 }
 
-define external fastcc i64 @"higher_order_refs.#closure#1<0>"(i64 %"#env##0", i64 %"generic#a##0") {
+define external fastcc i64 @"higher_order_refs.#closure#1<0>"(ptr %"#env##0", i64 %"generic#a##0") {
   ret i64 %"generic#a##0"
 }
 
-define external fastcc i64 @"higher_order_refs.#closure#2<0>"(i64 %"#env##0", i64 %"generic#i##0") {
+define external fastcc i64 @"higher_order_refs.#closure#2<0>"(ptr %"#env##0", i64 %"generic#i##0") {
   %"#result##0" = add i64 %"generic#i##0", 1
   ret i64 %"#result##0"
 }
 
-define external fastcc i64 @"higher_order_refs.#closure#3<0>"(i64 %"#env##0", i64 %"generic#y##0") {
+define external fastcc i64 @"higher_order_refs.#closure#3<0>"(ptr %"#env##0", i64 %"generic#y##0") {
   %"#result##0" = add i64 %"generic#y##0", 10
   ret i64 %"#result##0"
 }

@@ -179,7 +179,7 @@ define external fastcc i64 @"higher_order_anon.#anon#1<0>"(i64 %"anon#1#1##0") {
   ret i64 %"tmp#8##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#1<1>"(i64 %"#env##0", i64 %"generic#anon#1#1##0") {
+define external fastcc i64 @"higher_order_anon.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
   %"anon#1#2##0" = add i64 %"generic#anon#1#1##0", 1
   ret i64 %"anon#1#2##0"
 }
@@ -189,7 +189,7 @@ define external fastcc i64 @"higher_order_anon.#anon#2<0>"(i64 %"anon#2#1##0") {
   ret i64 %"tmp#8##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#2<1>"(i64 %"#env##0", i64 %"generic#anon#2#1##0") {
+define external fastcc i64 @"higher_order_anon.#anon#2<1>"(ptr %"#env##0", i64 %"generic#anon#2#1##0") {
   %"anon#2#2##0" = add i64 %"generic#anon#2#1##0", 1
   ret i64 %"anon#2#2##0"
 }
@@ -198,7 +198,7 @@ define external fastcc i64 @"higher_order_anon.#anon#3<0>"(i64 %"anon#3#2##0") {
   ret i64 %"anon#3#2##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#3<1>"(i64 %"#env##0", i64 %"generic#anon#3#1##0", i64 %"generic#anon#3#2##0") {
+define external fastcc i64 @"higher_order_anon.#anon#3<1>"(ptr %"#env##0", i64 %"generic#anon#3#1##0", i64 %"generic#anon#3#2##0") {
   ret i64 %"generic#anon#3#2##0"
 }
 
@@ -206,7 +206,7 @@ define external fastcc i64 @"higher_order_anon.#anon#4<0>"(i64 %"anon#4#2##0") {
   ret i64 %"anon#4#2##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#4<1>"(i64 %"#env##0", i64 %"generic#anon#4#1##0", i64 %"generic#anon#4#2##0") {
+define external fastcc i64 @"higher_order_anon.#anon#4<1>"(ptr %"#env##0", i64 %"generic#anon#4#1##0", i64 %"generic#anon#4#2##0") {
   ret i64 %"generic#anon#4#2##0"
 }
 
@@ -214,7 +214,7 @@ define external fastcc ptr @"higher_order_anon.#anon#5<0>"(ptr %"anon#5#1##0") {
   ret ptr %"anon#5#1##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#5<1>"(i64 %"#env##0", i64 %"generic#anon#5#1##0") {
+define external fastcc i64 @"higher_order_anon.#anon#5<1>"(ptr %"#env##0", i64 %"generic#anon#5#1##0") {
   %"anon#5#1##0" = inttoptr i64 %"generic#anon#5#1##0" to ptr
   %"tmp#1##0" = ptrtoint ptr %"anon#5#1##0" to i64
   ret i64 %"tmp#1##0"
@@ -224,7 +224,7 @@ define external fastcc ptr @"higher_order_anon.#anon#6<0>"(ptr %"anon#6#1##0") {
   ret ptr %"anon#6#1##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#6<1>"(i64 %"#env##0", i64 %"generic#anon#6#1##0") {
+define external fastcc i64 @"higher_order_anon.#anon#6<1>"(ptr %"#env##0", i64 %"generic#anon#6#1##0") {
   %"anon#6#1##0" = inttoptr i64 %"generic#anon#6#1##0" to ptr
   %"tmp#1##0" = ptrtoint ptr %"anon#6#1##0" to i64
   ret i64 %"tmp#1##0"
@@ -236,15 +236,13 @@ define external fastcc ptr @"higher_order_anon.#anon#7<0>"(ptr %"id##0") {
   ret ptr %"tmp#7##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#7<1>"(i64 %"#env##0") {
-  %"tmp#1##0" = add i64 %"#env##0", 8
-  %"tmp#2##0" = inttoptr i64 %"tmp#1##0" to ptr
-  %"generic#id##0" = load i64, ptr %"tmp#2##0"
-  %"id##0" = inttoptr i64 %"generic#id##0" to ptr
-  %"tmp#3##0" = load ptr, ptr %"id##0"
-  %"anon#7#1##0" = tail call fastcc ptr %"tmp#3##0"(ptr %"id##0", ptr @"closure#0")
-  %"tmp#4##0" = ptrtoint ptr %"anon#7#1##0" to i64
-  ret i64 %"tmp#4##0"
+define external fastcc i64 @"higher_order_anon.#anon#7<1>"(ptr %"#env##0") {
+  %"tmp#1##0" = getelementptr {ptr, ptr}, ptr %"#env##0", i64 0, i32 1
+  %"id##0" = load ptr, ptr %"tmp#1##0"
+  %"tmp#2##0" = load ptr, ptr %"id##0"
+  %"anon#7#1##0" = tail call fastcc ptr %"tmp#2##0"(ptr %"id##0", ptr @"closure#0")
+  %"tmp#3##0" = ptrtoint ptr %"anon#7#1##0" to i64
+  ret i64 %"tmp#3##0"
 }
 
 define external fastcc i64 @"higher_order_anon.#anon#7#anon#1<0>"(i64 %"anon#8#1##0") {
@@ -252,7 +250,7 @@ define external fastcc i64 @"higher_order_anon.#anon#7#anon#1<0>"(i64 %"anon#8#1
   ret i64 %"tmp#8##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#7#anon#1<1>"(i64 %"#env##0", i64 %"generic#anon#8#1##0") {
+define external fastcc i64 @"higher_order_anon.#anon#7#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#8#1##0") {
   %"anon#8#2##0" = add i64 %"generic#anon#8#1##0", 1
   ret i64 %"anon#8#2##0"
 }
@@ -262,7 +260,7 @@ define external fastcc double @"higher_order_anon.#anon#8<0>"(double %"anon#9#1#
   ret double %"tmp#8##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#8<1>"(i64 %"#env##0", i64 %"generic#anon#9#1##0", i64 %"generic#anon#9#2##0", i64 %"generic#anon#9#3##0") {
+define external fastcc i64 @"higher_order_anon.#anon#8<1>"(ptr %"#env##0", i64 %"generic#anon#9#1##0", i64 %"generic#anon#9#2##0", i64 %"generic#anon#9#3##0") {
   %"anon#9#1##0" = bitcast i64 %"generic#anon#9#1##0" to double
   %"anon#9#3##0" = bitcast i64 %"generic#anon#9#3##0" to double
   %"anon#9#4##0" = fadd double %"anon#9#1##0", %"anon#9#3##0"
@@ -275,7 +273,7 @@ define external fastcc double @"higher_order_anon.#anon#9<0>"(double %"anon#10#1
   ret double %"tmp#8##0"
 }
 
-define external fastcc i64 @"higher_order_anon.#anon#9<1>"(i64 %"#env##0", i64 %"generic#anon#10#1##0", i64 %"generic#anon#10#2##0", i64 %"generic#anon#10#3##0") {
+define external fastcc i64 @"higher_order_anon.#anon#9<1>"(ptr %"#env##0", i64 %"generic#anon#10#1##0", i64 %"generic#anon#10#2##0", i64 %"generic#anon#10#3##0") {
   %"anon#10#1##0" = bitcast i64 %"generic#anon#10#1##0" to double
   %"anon#10#3##0" = bitcast i64 %"generic#anon#10#3##0" to double
   %"anon#10#4##0" = fadd double %"anon#10#1##0", %"anon#10#3##0"

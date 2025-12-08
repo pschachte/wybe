@@ -3756,7 +3756,7 @@ envParamName = PrimVarName (specialName "env") 0
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False emptyGlobalFlows)
+envPrimParam = PrimParam envParamName (Representation CPointer) FlowIn Ordinary (ParamInfo False emptyGlobalFlows)
 
 
 makeGlobalResourceName :: ResourceSpec -> String

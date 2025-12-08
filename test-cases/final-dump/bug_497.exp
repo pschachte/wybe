@@ -143,20 +143,19 @@ define external fastcc i1 @"bug_497.#anon#1<0>"(i64 %"p##0", i64 %"anon#1#1##0")
   ret i1 %"tmp#18##0"
 }
 
-define external fastcc i64 @"bug_497.#anon#1<1>"(i64 %"#env##0", i64 %"generic#anon#1#1##0") {
-  %"tmp#7##0" = add i64 %"#env##0", 8
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  %"generic#p##0" = load i64, ptr %"tmp#8##0"
-  %"tmp#2##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"generic#p##0", i64 0, i8 32)
+define external fastcc i64 @"bug_497.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
+  %"tmp#7##0" = getelementptr {ptr, i64}, ptr %"#env##0", i64 0, i32 1
+  %"p##0" = load i64, ptr %"tmp#7##0"
+  %"tmp#2##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"p##0", i64 0, i8 32)
   %"tmp#3##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"generic#anon#1#1##0", i64 0, i8 32)
   %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 1155, i64 %"tmp#3##0")
   %"tmp#5##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#2##0", i64 %"tmp#4##0")
   %"tmp#6##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 %"tmp#5##0")
   call ccc void @log_string(i64 %"tmp#6##0")
   call ccc void @log_char(i8 10)
-  %"#success##0" = icmp eq i64 %"generic#p##0", 3
-  %"tmp#9##0" = zext i1 %"#success##0" to i64
-  ret i64 %"tmp#9##0"
+  %"#success##0" = icmp eq i64 %"p##0", 3
+  %"tmp#8##0" = zext i1 %"#success##0" to i64
+  ret i64 %"tmp#8##0"
 }
 
 define external fastcc i1 @"bug_497.call<0>"(ptr %"f##0", i64 %"x##0") {
@@ -166,11 +165,11 @@ define external fastcc i1 @"bug_497.call<0>"(ptr %"f##0", i64 %"x##0") {
 }
 
 define external fastcc i1 @"bug_497.proc<0>"(i64 %"p##0") {
-  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#6##0" = getelementptr {ptr, i64}, ptr null, i64 1
+  %"tmp#7##0" = ptrtoint ptr %"tmp#6##0" to i32
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 %"tmp#7##0")
   store ptr @"bug_497.proc#anon#1<1>", ptr %"tmp#5##0"
-  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
-  %"tmp#7##0" = add i64 %"tmp#6##0", 8
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
+  %"tmp#8##0" = getelementptr {ptr, i64}, ptr %"tmp#5##0", i64 0, i32 1
   store i64 %"p##0", ptr %"tmp#8##0"
   %"tmp#9##0" = tail call fastcc i1 @"bug_497.call<0>"(ptr %"tmp#5##0", i64 2)
   ret i1 %"tmp#9##0"
@@ -188,20 +187,19 @@ define external fastcc i1 @"bug_497.proc#anon#1<0>"(i64 %"p##0", i64 %"anon#1#1#
   ret i1 %"tmp#17##0"
 }
 
-define external fastcc i64 @"bug_497.proc#anon#1<1>"(i64 %"#env##0", i64 %"generic#anon#1#1##0") {
-  %"tmp#7##0" = add i64 %"#env##0", 8
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  %"generic#p##0" = load i64, ptr %"tmp#8##0"
-  %"tmp#2##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"generic#p##0", i64 0, i8 32)
+define external fastcc i64 @"bug_497.proc#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
+  %"tmp#7##0" = getelementptr {ptr, i64}, ptr %"#env##0", i64 0, i32 1
+  %"p##0" = load i64, ptr %"tmp#7##0"
+  %"tmp#2##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"p##0", i64 0, i8 32)
   %"tmp#3##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"generic#anon#1#1##0", i64 0, i8 32)
   %"tmp#4##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 1155, i64 %"tmp#3##0")
   %"tmp#5##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#2##0", i64 %"tmp#4##0")
   %"tmp#6##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 %"tmp#5##0")
   call ccc void @log_string(i64 %"tmp#6##0")
   call ccc void @log_char(i8 10)
-  %"#success##0" = icmp eq i64 %"generic#p##0", 3
-  %"tmp#9##0" = zext i1 %"#success##0" to i64
-  ret i64 %"tmp#9##0"
+  %"#success##0" = icmp eq i64 %"p##0", 3
+  %"tmp#8##0" = zext i1 %"#success##0" to i64
+  ret i64 %"tmp#8##0"
 }
 
 --------------------------------------------------
