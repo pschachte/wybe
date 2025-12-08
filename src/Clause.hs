@@ -281,10 +281,12 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
             let pSpec = ProcSpec mod name procID' generalVersion
             impurity' <- max impurity . procImpurity <$> lift (getProcDef pSpec)
             gFlows <- lift $ getProcGlobalFlows pSpec
-            return $ PrimCall callSiteID pSpec impurity  args' gFlows
+            return $ PrimCall callSiteID pSpec impurity' args' gFlows
         Higher fn -> do
+            let impurity' = max impurity . modifierImpurity . higherTypeModifiers 
+                          . trustFromJust ("untyped higher-order term " ++ show fn) . maybeExpType $ content fn
             fn' <- compileHigherFunc fn
-            return $ PrimHigher callSiteID fn' impurity args'
+            return $ PrimHigher callSiteID fn' impurity' args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
