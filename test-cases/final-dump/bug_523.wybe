@@ -1,0 +1,12 @@
+def {pure} pure {
+    !semipure
+    !impure
+}
+
+def {semipure, noinline} semipure {
+    !impure
+}
+
+def {impure, noinline} impure {
+    pass
+}
