@@ -58,8 +58,8 @@ print(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
         foreign lpvm access(x##0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @int_list:nn:nn
         foreign lpvm access(~x##0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:int_list.int_list) @int_list:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int_list:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int_list:nn:nn
-        foreign c putchar(' ':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int_list:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @int_list:nn:nn
+        foreign c putchar(' ':wybe.char, ~tmp#5##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int_list:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list:nn:nn
         int_list.print<0>(~t##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @int_list:nn:nn
 

@@ -26,7 +26,7 @@ def magnitude_maximum = 1.7976931348623157e308
 
 # Addition.  This operation is reversible:  you can compute either argument from
 # the other argument and the value.
-pub def (x:_  + y:_):_  = foreign llvm fadd(x,y)
+pub def foreign llvm `+`=fadd(x:_, y:_):_
 pub def (?x:_ + y:_):_  = ?z where { ?x = foreign llvm fsub(z,y) }
 pub def (x:_  + ?y:_):_ = ?z where { ?y = foreign llvm fsub(z,x) }
 
@@ -35,7 +35,7 @@ pub def (!x:_ += y:_) { ?x = x + y }
 
 # Subtraction.  This operation is reversible:  you can compute either argument
 # from the other argument and the value.
-pub def (x:_  - y:_):_  = foreign llvm fsub(x,y)
+pub def foreign llvm `-`=fsub(x:_, y:_):_
 pub def (?x:_ - y:_):_  = ?z where { ?x = foreign llvm fadd(z,y) }
 pub def (x:_  - ?y:_):_ = ?z where { ?y = foreign llvm fsub(z,x) }
 
@@ -48,13 +48,13 @@ pub def -(?x:_):_ = ?y where { ?x = foreign llvm fsub(0.0,y) }
 pub def (!x:_ -= y:_) { ?x = x - y }
 
 # Multiplication.
-pub def (x:_ * y:_):_ = foreign llvm fmul(x,y)
+pub def foreign llvm `*`=fmul(x:_, y:_):_
 
 # Multiplication assignment.
 pub def (!x:_ *= y:_) { ?x = x * y }
 
 # Division.
-pub def (x:_ / y:_):_ = foreign llvm fdiv(x,y)
+pub def foreign llvm `/`=fdiv(x:_, y:_):_
 
 # Division assignment.
 pub def (!x:_ /= y:_) { ?x = x / y }
@@ -63,40 +63,40 @@ pub def (!x:_ /= y:_) { ?x = x / y }
 pub def square(x:_):_ = foreign llvm fmul(x,x)
 
 # Absolute value.
-pub def abs(x:_):_ = foreign c `llvm.fabs.f64`(x)
+pub def foreign c abs=`llvm.fabs.f64`(x:_):_
 
 
 ## Comparisons
 
 # Equality and disequality.
-pub def {test} (x:_ =  y:_) { foreign llvm {test} fcmp_oeq(x,y) }
-pub def {test} (x:_ ~= y:_) { foreign llvm {test} fcmp_one(x,y) }
+pub def foreign llvm {test} `=` =fcmp_oeq(x:_, y:_)
+pub def foreign llvm {test} `~=`=fcmp_one(x:_, y:_)
 
 # Inequalities.
-pub def {test} (x:_ <  y:_) { foreign llvm {test} fcmp_olt(x,y) }
-pub def {test} (x:_ <= y:_) { foreign llvm {test} fcmp_ole(x,y) }
-pub def {test} (x:_ >  y:_) { foreign llvm {test} fcmp_ogt(x,y) }
-pub def {test} (x:_ >= y:_) { foreign llvm {test} fcmp_oge(x,y) }
+pub def foreign llvm {test} `<` =fcmp_olt(x:_, y:_)
+pub def foreign llvm {test} `<=`=fcmp_ole(x:_, y:_)
+pub def foreign llvm {test} `>` =fcmp_ogt(x:_, y:_)
+pub def foreign llvm {test} `>=`=fcmp_oge(x:_, y:_)
 
 # Three-way comparison.
 pub def (x:_ <=> y:_):comparison = 
     if { x < y :: lesser | x = y :: equal | else :: greater }
 
 # Minimum and maximum of two floats.
-pub def min(x:_, y:_):_ = foreign c `llvm.minnum.f64`(x,y)
-pub def max(x:_, y:_):_ = foreign c `llvm.maxnum.f64`(x,y)
+pub def foreign c min=`llvm.minnum.f64`(x:_, y:_):_
+pub def foreign c max=`llvm.maxnum.f64`(x:_, y:_):_
 
 
 ## Conversion procedures
 
 # The smallest whole number greater than or equal to the input, as a float.
-pub def ceil(x:_):_ = foreign c `llvm.ceil.f64`(x)
+pub def foreign c ceil=`llvm.ceil.f64`(x:_):_
 
 # The largest whole number less than or equal to the input, as a float.
-pub def floor(x:_):_ = foreign c `llvm.floor.f64`(x)
+pub def foreign c floor=`llvm.floor.f64`(x:_):_
 
 # The whole number closest to the input, as a float.
-pub def round(x:_):_ = foreign c `llvm.round.f64`(x)
+pub def foreign c round=`llvm.round.f64`(x:_):_
 
 # The closest whole number to the input, as an int.
 pub def iround(x:_):int = foreign llvm fptosi(round(x))
@@ -108,27 +108,27 @@ pub def iceil(x:_):int = foreign llvm fptosi(ceil(x))
 pub def ifloor(x:_):int = foreign llvm fptosi(floor(x))
 
 # Convert integers to floats
-pub def float(x:int):_   = foreign llvm sitofp(x)
-pub def float(x:count):_ = foreign llvm uitofp(x)
+pub def foreign llvm float=sitofp(x:int):_
+pub def foreign llvm float=uitofp(x:count):_
 
 
 ## Transcendental functions
 
 # Square root.
-pub def sqrt(x:_):_ = foreign c `llvm.sqrt.f64`(x)
+pub def foreign c sqrt=`llvm.sqrt.f64`(x:_):_
 
 # Raise `x` to the `n` power.
-pub def power(x:_,n:_):_ = foreign c `llvm.pow.f64`(x,n)
-pub def (x:_ ** n:_):_ = foreign c `llvm.pow.f64`(x,n)
+pub def foreign c power=`llvm.pow.f64`(x:_,n:_):_
+pub def foreign c `**`=`llvm.pow.f64`(x:_, n:_):_
 
 # Trigonometric functions.
-pub def sin(x:_):_ = foreign c `llvm.sin.f64`(x)
-pub def cos(x:_):_ = foreign c `llvm.cos.f64`(x)
+pub def foreign c sin=`llvm.sin.f64`(x:_):_
+pub def foreign c cos=`llvm.cos.f64`(x:_):_
 pub def tan(x:_):_ = foreign c `llvm.sin.f64`(x) / foreign c `llvm.cos.f64`(x)
-pub def asin(x:_):_ = foreign c asin(x)
-pub def acos(x:_):_ = foreign c acos(x)
-pub def atan(x:_):_ = foreign c atan(x)
-pub def atan2(x:_,y:_):_ = foreign c atan2(x,y)
+pub def foreign c asin(x:_):_
+pub def foreign c acos(x:_):_
+pub def foreign c atan(x:_):_
+pub def foreign c atan2(x:_,y:_):_
 
 # Convert between degrees and radians for use in trig functions
 pub def from_degrees(deg:_):_   = deg*(pi/180.0)
@@ -138,16 +138,16 @@ pub def to_degrees(rad:_):_   = rad*(180.0/pi)
 pub def to_degrees(?rad:_):_  = ?deg where { ?rad = from_degrees(deg) }
 
 # Exponential:  `e` to the `x` power.
-pub def exp(x:_):_ = foreign c `llvm.exp.f64`(x)
+pub def foreign c exp=`llvm.exp.f64`(x:_):_
 
 # Natural (base `e`) logarithm
-pub def log(x:_):_ = foreign c `llvm.log.f64`(x)
+pub def foreign c log=`llvm.log.f64`(x:_):_
 
 # Common (base 10) logarithm
-pub def log10(x:_):_ = foreign c `llvm.log10.f64`(x)
+pub def foreign c log10=`llvm.log10.f64`(x:_):_
 
 # Base 2 logarithm.
-pub def log2(x:_):_ = foreign c `llvm.log2.f64`(x)
+pub def foreign c log2=`llvm.log2.f64`(x:_):_
 
 ## Formatting 6 digits precision, trimming trailing 0s
 pub def fmt(x:_):string = fmt(x, 0, ' ', 6, true)
@@ -195,8 +195,8 @@ pub def fmt(x:_, minlength:int, fill:char, precision:int, trim:bool):string =
 
 ## I/O
 
-pub def print(x:_) use !io { foreign c print_float(x, !io) }
+pub def foreign c print=print_float(x:_) use !io 
 
 pub def println(x:_) use !io { !print(x); !nl }
 
-pub def read(?x:_) use !io { foreign c read_float(?x, !io) }
+pub def foreign c read=read_float(?x:_) use !io 

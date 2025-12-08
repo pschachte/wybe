@@ -19,19 +19,19 @@ def bound_maximum(x:_):_ = bound_maximum
 ## Common Boolean operations
 
 # Logical and
-pub def (p:_ && q:_):_ = foreign llvm and(p, q)
+pub def foreign llvm `&&`=and(p:_, q:_):_
 
 # Logical and assigment
 pub def (!p:_ &= q:_) { ?p = (p && q) }
 
 # Logical or
-pub def (p:_ || q:_):_ = foreign llvm or(p, q)
+pub def foreign llvm `||`=or(p:_, q:_):_
 
 # Logical or assigment
 pub def (!p:_ |= q:_) { ?p = (p || q) }  
 
 # Logical xor
-pub def (p:_ ^^ q:_):_ = foreign llvm xor(p, q) 
+pub def foreign llvm `^^`=xor(p:_, q:_):_
 
 # Logical xor assigment
 pub def (!p:_ ^= q:_) { ?p = q ^^ p }  
@@ -43,8 +43,14 @@ pub def ~(p:_):_ = foreign llvm xor(p, true)
 ## Comparisons
 
 # Equality and disequality.
-pub def (x:_ =  y:_):_ = foreign llvm icmp_eq(x, y)
-pub def (x:_ ~= y:_):_ = foreign llvm icmp_ne(x, y)
+pub def foreign llvm `=` =icmp_eq(x:_, y:_):_
+pub def foreign llvm `~=`=icmp_ne(x:_, y:_):_
+
+# Inequalities.
+pub def foreign llvm `<` =icmp_slt(x:_, y:_):_
+pub def foreign llvm `<=`=icmp_sle(x:_, y:_):_
+pub def foreign llvm `>` =icmp_sgt(x:_, y:_):_
+pub def foreign llvm `>=`=icmp_sge(x:_, y:_):_
 
 
 ## Other

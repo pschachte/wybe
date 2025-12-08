@@ -49,7 +49,7 @@ module top-level code > public {semipure} (0 calls)
     type_list.,,<0>[410bae77d3](~tmp#23##0:type_list.intlist, ~tmp#33##0:type_list.intlist, outByReference tmp#8##0:type_list.intlist) #7 @type_list:nn:nn
     type_list.length<0>(~tmp#8##0:type_list.intlist, ?tmp#7##0:wybe.int) #8 @type_list:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#35##0:wybe.phantom) @type_list:nn:nn
-    foreign c print_int(~tmp#7##0:wybe.int, ~tmp#35##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @type_list:nn:nn
+    foreign c print_int(~tmp#7##0:wybe.int, ~%tmp#35##0:wybe.phantom, ?%tmp#36##0:wybe.phantom) @type_list:nn:nn
     foreign lpvm store(~%tmp#36##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @type_list:nn:nn
 
 

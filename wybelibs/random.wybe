@@ -5,14 +5,10 @@
 pub resource random:phantom = 0:phantom
 
 # Seed the random number generator
-pub def set_random_seed(s:int) use ?random {
-    foreign c srand(s, ?random)
-}
+pub def foreign c set_random_seed=srand(s:int) use ?random
 
 # Generate a random number
-pub def random(?n:int) use !random {
-    foreign c rand(?n, !random)
-}
+pub def foreign c random=rand(?n:int) use !random
 
 # Generate a random number between 0 and hi-1
 pub def random(?n:int, hi:int) use !random {
