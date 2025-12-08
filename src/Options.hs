@@ -354,7 +354,24 @@ handleCmdline = do
     then do
         putStrLn $ usageInfo header options
         exitFailure
-    else return (opts, nub files)
+    else do
+        badLibDirs <- filterM notReadableDirectory $ optLibDirs opts
+        if List.null badLibDirs
+        then return (opts, nub files)
+        else do
+            unless (optNoFont opts) $ setSGR [SetColor Foreground Vivid Red]
+            putStrLn $ "Not readable library directory(s):\n  "
+                        ++ intercalate "\n  " badLibDirs
+            unless (optNoFont opts) $ setSGR [Reset]
+            exitFailure
+
+
+-- |Return True iff the specified name isn't a directory or isn't readable
+notReadableDirectory :: String -> IO Bool
+notReadableDirectory dirName = do
+    exists <- doesDirectoryExist dirName
+    if not exists then return True
+    else not . readable <$> getPermissions dirName
 
 
 -- |Parse and add options from envArg.
