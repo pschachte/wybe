@@ -37,9 +37,12 @@ import qualified Data.Text.Internal.Builder as BS.UTF8
 import           GHC.Generics (Generic)
 import           Flow         ((|>))
 import           System.FilePath ( (<.>), (</>), takeDirectory )
-import           System.Directory ( doesFileExist, removeFile, createDirectoryIfMissing )
+import System.Directory
+    ( doesFileExist,
+      removeFile,
+      createDirectoryIfMissing,
+      getPermissions )
 import System.Directory.Extra (Permissions(writable))
-import System.Directory (getPermissions)
 
 
 -- |Do the the two lists have the same length?
@@ -104,6 +107,7 @@ fillLines' marginText currColumn lineLength (word1:word2:words) =
         then "\n" ++ marginText ++
              fillLines' marginText (length marginText) lineLength (word2:words)
         else " " ++ fillLines' marginText nextColumn lineLength (word2:words)
+
 
 -- |Do nothing monadically.
 nop :: Monad m => m ()
