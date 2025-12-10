@@ -1,0 +1,57 @@
+# purpose: Standard Lazy type
+# since  : 0.1
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.int
+
+# Construct a lazy value, with a nil-adic procedure used to compute the value when required
+pub def lazy(thinker:(?T)):_(T) = 
+    thunk(unset_low_bit(thinker), foreign lpvm cast(0))
+
+# Get a lazy value.
+# Only computes the thunk on first invocation.
+pub def {pure} get(lazy:_(T)):T = thought where {
+    lazy = thunk(?thinker, ?thought)
+    if { low_bit_unset(thinker) ::
+        thinker(?thought)
+        foreign lpvm {impure} mutate(lazy, ?lazy, 0, 1, 16, 0, set_low_bit(thinker))
+        foreign lpvm {impure} mutate(lazy, ?lazy, 8, 1, 16, 0, thought)
+    }
+}
+
+
+# Private constructor. To construct a lazy value, use `lazy/2`
+constructor(T) thunk(thinker:(?T), thought:T)
+    # ^ The low bit of `thinker` is used as a flag to indicate if the lazy value has
+    # already been evaluated. We descructively set this bit, as well as `thought` when
+    # the first `get/2` call is made 
+
+
+## Helpers 
+
+# Unset (zero) the low bit of some value
+def unset_low_bit(bits:T):T = 
+    foreign lpvm cast(
+        foreign llvm and(
+            foreign lpvm cast(bits), 
+            foreign llvm xor(-1, 1)
+        )
+    )
+
+# Set the low bit of some value
+def set_low_bit(bits:T):T = 
+    foreign lpvm cast(
+        foreign llvm or(
+            foreign lpvm cast(bits), 
+            1
+        )
+    )
+
+# Test if the low bit of some value is set
+def {test} low_bit_unset(bits:T) {
+    foreign llvm and(
+        foreign lpvm cast(bits), 
+        1
+    ) = 0
+}
