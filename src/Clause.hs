@@ -163,7 +163,7 @@ compileProc proc procID =
             gFlows  = makeGlobalFlows (zip [0..] params') $ procProtoResources proto
         let proto' = PrimProto (procProtoName proto) params' gFlows
         logClause $ "  comparams  : " ++ show params'
-        logClause $ "  globalFlows: " ++ show gFlows 
+        logClause $ "  globalFlows: " ++ show gFlows
         callSiteCount <- gets nextCallSiteID
         mSpec <- lift $ getModule modSpec
         let pSpec = ProcSpec mSpec procName procID Set.empty
@@ -287,6 +287,13 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
                           . trustFromJust ("untyped higher-order term " ++ show fn) . maybeExpType $ content fn
             fn' <- compileHigherFunc fn
             return $ PrimHigher callSiteID fn' impurity' args'
+compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
+    repSize <- case content arg of
+        Typed _ ty _ -> typeRepSize . trustFromJust "sizeof with unkown typerep" <$> lift (lookupTypeRepresentation ty)
+        _ -> shouldnt $ "untyped in sizeof " ++ show arg
+    [out'] <- placedApply compileArg out
+    let size = if "bits" `elem` flags then repSize else (repSize + 7) `div` 8
+    return $ PrimForeign "llvm" "move" [] [ArgInt (fromIntegral size) intType, out']
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
@@ -377,24 +384,24 @@ compileParam allFlows startVars endVars procName idx param@(Param name ty flow f
                 (shouldnt ("compileParam for input param " ++ show param
                             ++ " of proc " ++ show procName))
                 name startVars
-          gFlows 
-            | (isResourcefulHigherOrder ||| genericType) ty 
+          gFlows
+            | (isResourcefulHigherOrder ||| genericType) ty
             = emptyGlobalFlows{globalFlowsParams=USet.singleton inIdx}
             | otherwise = emptyGlobalFlows
     ]
-    ++ 
+    ++
     [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False gFlows)
     | flowsOut flow
     , let num = Map.findWithDefault
                 (shouldnt ("compileParam for output param " ++ show param
                             ++ " of proc " ++ show procName))
                 name endVars
-          gFlows 
+          gFlows
             | isResourcefulHigherOrder ty = univGlobalFlows
             | genericType ty = emptyGlobalFlows{globalFlowsParams=UniversalSet}
             | otherwise = emptyGlobalFlows
     ]
-  where 
+  where
     inIdx = idx
     outIdx = if flowsIn flow then idx + 1 else idx
 

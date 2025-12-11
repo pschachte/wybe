@@ -3632,6 +3632,7 @@ expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ _ args) = pexpListOutputs args
+expOutputs (ForeignFn "lpvm" "sizeof" _ (_:args)) = pexpListOutputs args
 expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
 expOutputs (CaseExp _ cases deflt) =
     pexpListOutputs $ maybe id (:) deflt (snd <$> cases)

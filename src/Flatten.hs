@@ -329,6 +329,15 @@ flattenStmt' stmt@(ProcCall func detism res args) pos d = do
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall func detism res args'
     flushPostponed
+flattenStmt' (ForeignCall "lpvm" "sizeof" flags args@(arg:_)) pos _ = do
+    let (arg', argPos) = unPlace arg
+    case innerExp arg' of
+        Var var flow _ | var /= "_" && flow /= ParamIn -> 
+            lift $ message Error "First argument to sizeof cannot be an out variable" argPos
+        _ -> return ()
+    args' <- flattenStmtArgs args pos
+    emit pos $ ForeignCall "lpvm" "sizeof" flags args'
+    flushPostponed
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
@@ -635,6 +644,9 @@ flattenExp (Fncall mod name bang exps) ty castFrom pos = do
         $ errmsg pos "function call cannot have preceding !"
     let stmtBuilder = ProcCall (First mod name Nothing) Det bang
     flattenCall stmtBuilder False ty castFrom pos exps
+flattenExp (ForeignFn "lpvm" "sizeof" flags (exp:exps)) ty castFrom pos = do
+    exp' <- flattenPExp exp
+    flattenCall (ForeignCall "lpvm" "sizeof" flags . (exp':)) True ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
     flattenCall (ForeignCall lang name flags) True ty castFrom pos exps
 flattenExp (Typed exp AnyType _) ty castFrom pos = do
