@@ -1,5 +1,5 @@
 # purpose: Standard Lazy type
-# since  : 0.1
+# since  : 0.2
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
