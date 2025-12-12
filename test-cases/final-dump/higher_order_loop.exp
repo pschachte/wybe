@@ -98,13 +98,13 @@ define external fastcc void @"higher_order_loop.<0>"() {
   ret void
 }
 
-define external fastcc void @"higher_order_loop.#closure#1<0>"(i64 %"#env##0", i64 %"generic#x##0") {
+define external fastcc void @"higher_order_loop.#closure#1<0>"(ptr %"#env##0", i64 %"generic#x##0") {
   call ccc void @print_int(i64 %"generic#x##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc void @"higher_order_loop.#closure#2<0>"(i64 %"#env##0", i64 %"generic#x##0") {
+define external fastcc void @"higher_order_loop.#closure#2<0>"(ptr %"#env##0", i64 %"generic#x##0") {
   call ccc void @print_int(i64 %"generic#x##0")
   ret void
 }

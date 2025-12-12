@@ -70,12 +70,10 @@ define external fastcc void @"extern_anon_params_a.run#anon#1<0>"(ptr %"func##0"
   ret void
 }
 
-define external fastcc void @"extern_anon_params_a.run#anon#1<1>"(i64 %"#env##0") {
-  %"tmp#1##0" = add i64 %"#env##0", 8
-  %"tmp#2##0" = inttoptr i64 %"tmp#1##0" to ptr
-  %"generic#func##0" = load i64, ptr %"tmp#2##0"
-  %"func##0" = inttoptr i64 %"generic#func##0" to ptr
-  %"tmp#3##0" = load ptr, ptr %"func##0"
-  tail call fastcc void %"tmp#3##0"(ptr %"func##0")
+define external fastcc void @"extern_anon_params_a.run#anon#1<1>"(ptr %"#env##0") {
+  %"tmp#1##0" = getelementptr {ptr, ptr}, ptr %"#env##0", i64 0, i32 1
+  %"func##0" = load ptr, ptr %"tmp#1##0"
+  %"tmp#2##0" = load ptr, ptr %"func##0"
+  tail call fastcc void %"tmp#2##0"(ptr %"func##0")
   ret void
 }
