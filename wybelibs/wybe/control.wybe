@@ -6,10 +6,7 @@ pragma no_standard_library  # Standard library can't depend on itself!
 use wybe.int, wybe.bool, wybe.c_string, wybe.string
 
 # Exit right away with the specified code (0 = successful termination).
-
-pub def {terminal,semipure} exit(code:int) {
-    foreign c {terminal,semipure} exit(code)
-}
+pub def foreign c {terminal,semipure} exit(code:int)
 
 
 # Print the source location and and error message, and abort the computation.

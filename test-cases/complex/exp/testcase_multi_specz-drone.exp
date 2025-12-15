@@ -167,7 +167,7 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign c {impure} malloc_count(?mc##0:wybe.int) @drone:nn:nn
+    foreign c {semipure} malloc_count(?mc##0:wybe.int) @drone:nn:nn
     wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @drone:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @drone:nn:nn
     foreign c print_int(~mc##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @drone:nn:nn
@@ -786,7 +786,7 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign c {impure} malloc_count(?mc##0:wybe.int) @drone:nn:nn
+    foreign c {semipure} malloc_count(?mc##0:wybe.int) @drone:nn:nn
     wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @drone:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @drone:nn:nn
     foreign c print_int(~mc##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @drone:nn:nn
