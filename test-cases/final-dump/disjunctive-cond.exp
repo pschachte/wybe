@@ -63,14 +63,7 @@ proc #cont#2 > {semipure} (3 calls)
   InterestingCallProperties: []
     case ~a##0:wybe.bool of
     0:
-        foreign llvm xor(b##0:wybe.bool, 1:wybe.bool, ?tmp#2##0:wybe.bool) @disjunctive-cond:13:7
-        case ~tmp#2##0:wybe.bool of
-        0:
-            disjunctive-cond.#cont#3<0>(0:wybe.bool, ~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11
-
-        1:
-            disjunctive-cond.#cont#3<0>(0:wybe.bool, ~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10
-
+        disjunctive-cond.#cont#3<0>(0:wybe.bool, ~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10
 
     1:
         case ~b##0:wybe.bool of
@@ -185,12 +178,6 @@ if.else.1:
   tail call fastcc void @"disjunctive-cond.#cont#3<0>"(i1 1, i1 0)
   ret void
 if.else.0:
-  %"tmp#2##0" = xor i1 %"b##0", 1
-  br i1 %"tmp#2##0", label %if.then.2, label %if.else.2
-if.then.2:
-  tail call fastcc void @"disjunctive-cond.#cont#3<0>"(i1 0, i1 %"b##0")
-  ret void
-if.else.2:
   tail call fastcc void @"disjunctive-cond.#cont#3<0>"(i1 0, i1 %"b##0")
   ret void
 }

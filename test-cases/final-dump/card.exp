@@ -364,46 +364,10 @@ proc char > public (1 calls)
 char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    case ~r##0:card.rank of
-    0:
-        foreign llvm move('2':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+    tabled ~r##0:card.rank of
+      tmp#68##0:wybe.char <- [ '2':wybe.char, '3':wybe.char, '4':wybe.char, '5':wybe.char, '6':wybe.char, '7':wybe.char, '8':wybe.char, '9':wybe.char, 'T':wybe.char, 'J':wybe.char, 'Q':wybe.char, 'K':wybe.char, 'A':wybe.char ]
 
-    1:
-        foreign llvm move('3':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    2:
-        foreign llvm move('4':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    3:
-        foreign llvm move('5':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    4:
-        foreign llvm move('6':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    5:
-        foreign llvm move('7':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    6:
-        foreign llvm move('8':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    7:
-        foreign llvm move('9':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    8:
-        foreign llvm move('T':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    9:
-        foreign llvm move('J':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    10:
-        foreign llvm move('Q':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    11:
-        foreign llvm move('K':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    12:
-        foreign llvm move('A':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
+        foreign llvm move(~tmp#68##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
 
 proc jack > public {inline} (6 calls)
@@ -575,6 +539,7 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/card.wybe"
 target triple    ????
 
+@"array#0" = private unnamed_addr constant [ ?? x i8 ] [i8 50, i8 51, i8 52, i8 53, i8 54, i8 55, i8 56, i8 57, i8 84, i8 74, i8 81, i8 75, i8 65]
 
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
@@ -590,46 +555,10 @@ define external fastcc i4 @"card.rank.ace<0>"() {
 }
 
 define external fastcc i8 @"card.rank.char<0>"(i4 %"r##0") {
-  switch i4 %"r##0", label %case.12.switch.0 [
-    i4 0, label %case.0.switch.0
-    i4 1, label %case.1.switch.0
-    i4 2, label %case.2.switch.0
-    i4 3, label %case.3.switch.0
-    i4 4, label %case.4.switch.0
-    i4 5, label %case.5.switch.0
-    i4 6, label %case.6.switch.0
-    i4 7, label %case.7.switch.0
-    i4 8, label %case.8.switch.0
-    i4 9, label %case.9.switch.0
-    i4 10, label %case.10.switch.0
-    i4 11, label %case.11.switch.0
-    i4 12, label %case.12.switch.0 ]
-case.0.switch.0:
-  ret i8 50
-case.1.switch.0:
-  ret i8 51
-case.2.switch.0:
-  ret i8 52
-case.3.switch.0:
-  ret i8 53
-case.4.switch.0:
-  ret i8 54
-case.5.switch.0:
-  ret i8 55
-case.6.switch.0:
-  ret i8 56
-case.7.switch.0:
-  ret i8 57
-case.8.switch.0:
-  ret i8 84
-case.9.switch.0:
-  ret i8 74
-case.10.switch.0:
-  ret i8 81
-case.11.switch.0:
-  ret i8 75
-case.12.switch.0:
-  ret i8 65
+  %"tmp#81##0" = zext i4 %"r##0" to i64
+  %"tmp#80##0" = getelementptr inbounds [ ?? x i8 ], ptr @"array#0", i64 0, i64 %"tmp#81##0"
+  %"tmp#68##0" = load i8, ptr %"tmp#80##0"
+  ret i8 %"tmp#68##0"
 }
 
 define external fastcc i4 @"card.rank.jack<0>"() {
@@ -819,19 +748,10 @@ proc char > public (1 calls)
 char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    case ~s##0:card.suit of
-    0:
-        foreign llvm move('C':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+    tabled ~s##0:card.suit of
+      tmp#23##0:wybe.char <- [ 'C':wybe.char, 'D':wybe.char, 'H':wybe.char, 'S':wybe.char ]
 
-    1:
-        foreign llvm move('D':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    2:
-        foreign llvm move('H':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    3:
-        foreign llvm move('S':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
+        foreign llvm move(~tmp#23##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
 
 proc clubs > public {inline} (7 calls)
@@ -912,6 +832,7 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/card.wybe"
 target triple    ????
 
+@"array#0" = private unnamed_addr constant [ ?? x i8 ] [i8 67, i8 68, i8 72, i8 83]
 
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
@@ -923,19 +844,10 @@ define external fastcc i1 @"card.suit.=<0>"(i2 %"#left##0", i2 %"#right##0") {
 }
 
 define external fastcc i8 @"card.suit.char<0>"(i2 %"s##0") {
-  switch i2 %"s##0", label %case.3.switch.0 [
-    i2 0, label %case.0.switch.0
-    i2 1, label %case.1.switch.0
-    i2 2, label %case.2.switch.0
-    i2 3, label %case.3.switch.0 ]
-case.0.switch.0:
-  ret i8 67
-case.1.switch.0:
-  ret i8 68
-case.2.switch.0:
-  ret i8 72
-case.3.switch.0:
-  ret i8 83
+  %"tmp#27##0" = zext i2 %"s##0" to i64
+  %"tmp#26##0" = getelementptr inbounds [ ?? x i8 ], ptr @"array#0", i64 0, i64 %"tmp#27##0"
+  %"tmp#23##0" = load i8, ptr %"tmp#26##0"
+  ret i8 %"tmp#23##0"
 }
 
 define external fastcc i2 @"card.suit.clubs<0>"() {

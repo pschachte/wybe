@@ -144,7 +144,7 @@ define external fastcc i1 @"bug_497.#anon#1<0>"(i64 %"p##0", i64 %"anon#1#1##0")
 }
 
 define external fastcc i64 @"bug_497.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
-  %"tmp#7##0" = getelementptr {ptr, i64}, ptr %"#env##0", i64 0, i32 1
+  %"tmp#7##0" = getelementptr inbounds {ptr, i64}, ptr %"#env##0", i64 0, i32 1
   %"p##0" = load i64, ptr %"tmp#7##0"
   %"tmp#2##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"p##0", i64 0, i8 32)
   %"tmp#3##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"generic#anon#1#1##0", i64 0, i8 32)
@@ -165,11 +165,11 @@ define external fastcc i1 @"bug_497.call<0>"(ptr %"f##0", i64 %"x##0") {
 }
 
 define external fastcc i1 @"bug_497.proc<0>"(i64 %"p##0") {
-  %"tmp#6##0" = getelementptr {ptr, i64}, ptr null, i64 1
+  %"tmp#6##0" = getelementptr inbounds {ptr, i64}, ptr null, i64 1
   %"tmp#7##0" = ptrtoint ptr %"tmp#6##0" to i32
   %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 %"tmp#7##0")
   store ptr @"bug_497.proc#anon#1<1>", ptr %"tmp#5##0"
-  %"tmp#8##0" = getelementptr {ptr, i64}, ptr %"tmp#5##0", i64 0, i32 1
+  %"tmp#8##0" = getelementptr inbounds {ptr, i64}, ptr %"tmp#5##0", i64 0, i32 1
   store i64 %"p##0", ptr %"tmp#8##0"
   %"tmp#9##0" = tail call fastcc i1 @"bug_497.call<0>"(ptr %"tmp#5##0", i64 2)
   ret i1 %"tmp#9##0"
@@ -188,7 +188,7 @@ define external fastcc i1 @"bug_497.proc#anon#1<0>"(i64 %"p##0", i64 %"anon#1#1#
 }
 
 define external fastcc i64 @"bug_497.proc#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
-  %"tmp#7##0" = getelementptr {ptr, i64}, ptr %"#env##0", i64 0, i32 1
+  %"tmp#7##0" = getelementptr inbounds {ptr, i64}, ptr %"#env##0", i64 0, i32 1
   %"p##0" = load i64, ptr %"tmp#7##0"
   %"tmp#2##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"p##0", i64 0, i8 32)
   %"tmp#3##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"generic#anon#1#1##0", i64 0, i8 32)
@@ -261,13 +261,10 @@ proc logmsg > public {semipure} (0 calls)
 logmsg(x##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    case ~x##0:wybe.bool of
-    0:
-        foreign c {impure} log_string(c"false":wybe.c_string) @logging:nn:nn
+    tabled ~x##0:wybe.bool of
+      tmp#4##0:wybe.c_string <- [ c"false":wybe.c_string, c"true":wybe.c_string ]
 
-    1:
-        foreign c {impure} log_string(c"true":wybe.c_string) @logging:nn:nn
-
+        foreign c {impure} log_string(~tmp#4##0:wybe.c_string) @logging:nn:nn
 
 
 proc lognl > public {inline,semipure} (0 calls)
@@ -287,6 +284,7 @@ target triple    ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"false\00", align 8
 @"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"true\00", align 8
+@"array#2" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"cstring#0" to i64 ), i64 ptrtoint( ptr @"cstring#1" to i64 )]
 
 declare external fastcc i64 @"wybe.string.c_string<0>"(i64)
 declare external ccc void @log_char(i8)
@@ -328,12 +326,10 @@ define external fastcc void @"logging.logmsg<5>"(i64 %"x##0") {
 }
 
 define external fastcc void @"logging.logmsg<6>"(i1 %"x##0") {
-  br i1 %"x##0", label %if.then.0, label %if.else.0
-if.then.0:
-  call ccc void @log_string(i64 ptrtoint( ptr @"cstring#1" to i64 ))
-  ret void
-if.else.0:
-  call ccc void @log_string(i64 ptrtoint( ptr @"cstring#0" to i64 ))
+  %"tmp#6##0" = zext i1 %"x##0" to i64
+  %"tmp#5##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#6##0"
+  %"tmp#4##0" = load i64, ptr %"tmp#5##0"
+  call ccc void @log_string(i64 %"tmp#4##0")
   ret void
 }
 

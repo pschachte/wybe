@@ -211,15 +211,13 @@ initExpanderState = Expander Nothing identityRenaming identityRenaming True
 
 expandBody :: ProcBody -> Expander ()
 expandBody (ProcBody prims fork) = do
-    logExpansion $ "Expanding unforked part of body:" ++ showPlacedPrims 4 prims
-    modify (\s -> s { noFork = fork == NoFork })
-    mapM_ (placedApply expandPrim) prims
-    logExpansion $ "Finished expanding unforked part of body"
     case fork of
       NoFork -> do
+        expandUnforked prims fork
         logExpansion "No fork for this body"
         return ()
       PrimFork var ty final bodies deflt -> do
+        expandUnforked prims fork
         st <- get
         logExpansion $ "Now expanding fork (" ++
           (if isJust (inlining st) then "without" else "WITH") ++ " inlining)"
@@ -232,6 +230,20 @@ expandBody (ProcBody prims fork) = do
                        ++ " with " ++ show (length bodies) ++ " branches"
         expandFork var' ty $ bodies ++ maybeToList deflt
         logExpansion $ "Finished expanding fork on " ++ show var'
+      MergedFork var ty final table body -> do
+        logExpansion "Expanding merged as fork..."
+        let unmerged = List.transpose 
+                     $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ primMove p (ArgVar var' ty' FlowOut Ordinary True)) vals) 
+                     table
+        when (List.null table) $ shouldnt "here!!"
+        expandBody $ ProcBody prims $ PrimFork var ty final (List.map (`prependToBody` body) unmerged) Nothing
+        
+expandUnforked :: [Placed Prim] -> PrimFork -> Expander ()
+expandUnforked prims fork = do
+    logExpansion $ "Expanding unforked part of body:" ++ showPlacedPrims 4 prims
+    modify (\s -> s { noFork = fork == NoFork })
+    mapM_ (placedApply expandPrim) prims
+    logExpansion "Finished expanding unforked part of body"
 
 
 expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()

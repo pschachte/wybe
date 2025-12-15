@@ -408,6 +408,9 @@ mapProcLeavesM f current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies
         -- XXX must map over default, too
         bodies' <- mapM (mapProcLeavesM f) bodies
         return current { bodyFork = fork { forkBodies = bodies' } }
+mapProcLeavesM f current@ProcBody { bodyFork = fork@MergedFork{forkBody = body} } = do
+        body' <- mapProcLeavesM f body
+        return current { bodyFork = fork { forkBody = body' } }
 
 -- | Applies a transformation to each prim in a proc
 mapProcPrimsM :: (Monad t) => (Placed Prim -> t (Placed Prim)) -> ProcBody -> t ProcBody
@@ -419,6 +422,10 @@ mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@PrimFork{for
         prims' <- mapM fn prims
         bodies <- mapM (mapProcPrimsM fn) bodies
         return body { bodyPrims = prims', bodyFork = fork { forkBodies = bodies } }
+mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@MergedFork{forkBody = forkBody} } = do
+        prims' <- mapM fn prims
+        body' <- mapProcPrimsM fn forkBody
+        return body { bodyPrims = prims', bodyFork = fork { forkBody = body' } }
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

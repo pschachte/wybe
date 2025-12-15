@@ -25,14 +25,16 @@ import Data.List as List
 import Data.Set as Set
 import UnivSet as USet
 import Data.Maybe as Maybe
-import Data.Tuple.HT (mapFst)
+import Data.Tuple.HT (mapFst, mapSnd, thd3, snd3, mapSnd3)
 import Data.Bits
 import Data.Function
 import Control.Monad
-import Control.Monad.Extra (whenJust, whenM)
+import Control.Monad.Extra (whenJust, whenM, fold1M)
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
 import AST (simpleShowMap)
+import Data.Foldable.Extra (foldlM, foldrM)
+import Control.Monad.Trans.Maybe (MaybeT(runMaybeT, MaybeT))
 
 
 ----------------------------------------------------------------
@@ -247,14 +249,14 @@ buildBody :: Int -> VarSubstitution -> [PrimParam] -> BodyBuilder a
 buildBody tmp oSubst params builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     (a, st) <- runStateT builder $ initState tmp oSubst params
-    let tmp = tmpCount st
+    let tmp' = tmpCount st
     logMsg BodyBuilder ">>>> Finished building a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
-    logMsg BodyBuilder $ "  tmpCount = " ++ show tmp
+    logMsg BodyBuilder $ "  tmpCount = " ++ show tmp'
     st' <- fuseBodies st
-    (_, used, stored, varFlows, body) <- currBody (ProcBody [] NoFork) st'
-    return (a, tmp, used, stored, varFlows, body)
+    (tmp'', used, stored, varFlows, body) <- currBody (ProcBody [] NoFork) st'
+    return (a, tmp'', used, stored, varFlows, body)
 
 
 -- |Start a new fork on var of type ty
@@ -312,7 +314,7 @@ completeFork = do
         -- Variables with a constant value in each branch.  These can be
         -- used later to fuse branches of subsequent forks on those variables
         -- with this fork.
-        
+
         let consts = List.foldr1 Set.union
                      $ List.map Map.keysSet branchMaps
         logBuild $ "     definite variables in all branches: " ++ show consts
@@ -875,7 +877,7 @@ updateGlobalsLoaded prim = do
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         PrimForeign "lpvm" "store" _ [var, ArgGlobal info _] ->
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
-        PrimHigher _ (ArgVar name _ _ _ _) _ _ -> 
+        PrimHigher _ (ArgVar name _ _ _ _) _ _ ->
             case Map.lookup name varFlows of
               Just gFlows -> do
                 let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
@@ -928,14 +930,14 @@ updateVariableFlows prim = do
                          then inFlows
                          else emptyGlobalFlows)) outs
         PrimForeign "lpvm" "load" _ [_, ArgVar name ty flow _ _]
-            | isResourcefulHigherOrder ty -> 
+            | isResourcefulHigherOrder ty ->
           return $ Map.singleton name univGlobalFlows
         PrimForeign{} -> do
-          return $ Map.fromList $ List.map 
+          return $ Map.fromList $ List.map
             (\ArgVar{argVarName=name, argVarType=ty} ->
               (name, if isResourcefulHigherOrder ty || genericType ty
                      then inFlows
-                     else emptyGlobalFlows)) 
+                     else emptyGlobalFlows))
                 $ List.filter argIsVar $ outs
     when (any (/= emptyGlobalFlows) $ Map.elems newFlows) $
         logBuild $ "New Variable Flows: " ++ simpleShowMap newFlows
@@ -1229,7 +1231,7 @@ addBodyContinuation prev@BodyState{buildState=Unforked, currBuild=bld,
                                    outSubst=osubst, varGlobalFlows=vFlows} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after unforked body:" ++ fst (showState 4 prev)
-    addSelectedContinuation bld subst defs osubst vFlows next 
+    addSelectedContinuation bld subst defs osubst vFlows next
 addBodyContinuation prev@BodyState{buildState=Forked{}, varGlobalFlows=vFlows} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after forked body:" ++ fst (showState 4 prev)
@@ -1315,15 +1317,16 @@ currBody body st@BodyState{tmpCount=tmp, varGlobalFlows=varFlows} = do
       ++ intercalate ", " (show <$> Map.keys (outSubst st))
     st' <- execStateT (rebuildBody st)
            $ BkwdBuilderState (Map.keysSet $ outSubst st) Nothing Map.empty
-                              0 Set.empty varFlows body
+                              tmp Set.empty varFlows body
     let BkwdBuilderState{bkwdUsedLater=usedLater,
                          bkwdFollowing=following,
                          bkwdGlobalStored=stored,
+                         bkwdTmpCount=tmp',
                          bkwdVariableFlows=varFlows'} = st'
     logMsg BodyBuilder ">>>> Finished rebuilding a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ showBlock 5 following
-    return (tmp, usedLater, stored, varFlows', following)
+    return (tmp', usedLater, stored, varFlows', following)
 
 
 -- |Another monad, this one for rebuilding a proc body bottom-up.
@@ -1401,13 +1404,13 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             logBkwd $ "  branchesUsedLater = " ++ show branchesUsedLater
             let lastUse = Set.notMember var' usedLater''
             let usedLater''' = Set.insert var' usedLater''
-            let tmp = maximum $ List.map bkwdTmpCount sts'
             let followingBranches = List.map bkwdFollowing sts
+            let followingDeflt = bkwdFollowing <$> deflt''
             let gStored = List.foldr1 Set.intersection (bkwdGlobalStored <$> sts')
+            body <- rebuildFork var' ty' lastUse followingBranches followingDeflt
+            tmp <- gets bkwdTmpCount
             put $ BkwdBuilderState usedLater''' branchesUsedLater
-                  Map.empty tmp gStored varFlows'
-                  $ ProcBody [] $ PrimFork var' ty' lastUse followingBranches
-                             (bkwdFollowing <$> deflt'')
+                  Map.empty tmp gStored varFlows' body
             mapM_ (placedApply (bkwdBuildStmt defs)) prims'
     finalUsedLater <- gets bkwdUsedLater
     logBkwd $ "Finished rebuild with usedLater = " ++ show finalUsedLater
@@ -1524,8 +1527,10 @@ completeSwitch prims var ty deflt cases
 
 rebuildBranch :: Substitution -> BodyState -> BkwdBuilder BkwdBuilderState
 rebuildBranch subst bod = do
-    bkwdSt <- get
-    lift $ execStateT (rebuildBody bod) bkwdSt
+    modify $ \st -> st{bkwdTmpCount=tmpCount bod `max` bkwdTmpCount st}
+    bkwdSt <- get >>= lift . execStateT (rebuildBody bod)
+    modify $ \st -> st{bkwdTmpCount=bkwdTmpCount bkwdSt}
+    return bkwdSt
 
 
 bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
@@ -1607,6 +1612,107 @@ markIfLastUse :: Set PrimVarName -> PrimArg -> PrimArg
 markIfLastUse usedLater arg@ArgVar{argVarName=nm,argVarFlow=flow} | isInputFlow flow =
   arg {argVarFinal=Set.notMember nm usedLater}
 markIfLastUse _ arg = arg
+
+
+-- | Try to merge branches, pattern matching the body and factoring out the common
+-- constants. If the branches cannot be merged, keep the fork as is.
+-- Yields a ProcBody with the fork, or NoFork if all branches can be merged with no substitutions
+rebuildFork :: PrimVarName -> TypeSpec -> Bool -> [ProcBody] -> Maybe ProcBody -> BkwdBuilder ProcBody
+rebuildFork var' ty' lastUse brs dflt = do
+  mbMerged <- mergeBranches brs dflt
+  return $ case mbMerged of
+    Just (consts, mergedBody) 
+      | Map.null consts -> mergedBody
+      | otherwise -> 
+         ProcBody [] $ MergedFork var' ty' lastUse (flattenFactored <$> Map.assocs consts) mergedBody
+    _ -> ProcBody [] $ PrimFork var' ty' lastUse brs dflt
+  where
+    flattenFactored (var,(ty,vals)) = (var, ty, vals ++ replicate (length brs - length vals) (last vals))
+
+-- | Maps currently factored vars to the list of values.
+-- As the merging process happens, the last variable may need to be repeated, to ensure the
+-- factored is square
+type FactoredVars = Map PrimVarName (TypeSpec, [PrimArg])
+
+-- | Try to merge all branches, with Nothing if the branches cannot be merged
+mergeBranches :: [ProcBody] -> Maybe ProcBody -> BkwdBuilder (Maybe (FactoredVars, ProcBody))
+mergeBranches brs@(_:_) Nothing = do
+  logBkwd $ "Trying to merge " ++ intercalate "\n" (show <$> brs)
+  merged <- foldrMaybeM (flip $ uncurry mergeBodies) (Map.empty, last brs) $ init brs
+  logBkwd $ "Merged into " ++ show merged
+  return merged
+mergeBranches brs _ = do
+  logBkwd "Don't know how to merge"
+  return Nothing
+
+-- | Try to merge two ProcBodies, merging the prims parwise
+mergeBodies :: FactoredVars -> ProcBody -> ProcBody -> BkwdBuilder (Maybe (FactoredVars, ProcBody))
+mergeBodies factored (ProcBody prims0 NoFork) (ProcBody prims1 NoFork)
+  | sameLength prims0 prims1 
+  = (mapSnd (`ProcBody` NoFork) <$>) <$> mergeLists mergePrim factored prims0 prims1
+mergeBodies _ _ _ = return Nothing
+
+-- | Try to merge two prims, merging prims where the constructors and fields match,
+-- and the args can be merged
+mergePrim :: FactoredVars -> Placed Prim -> Placed Prim -> BkwdBuilder (Maybe (FactoredVars, Placed Prim))
+mergePrim factored placedPrim0 placedPrim1
+  | primsMergable prim0 prim1
+  = do
+    let [(args0, gfs0), (args1, gfs1)] = List.map primArgs [prim0, prim1]
+    mergedArgs <- mergeLists mergeArg factored args0 args1
+    return $ mapSnd (\args -> replacePrimArgs prim0 args (globalFlowsUnion gfs0 gfs1) `maybePlace` pos) <$> mergedArgs
+  | otherwise
+  = return Nothing
+  where
+    (prim0, pos) = unPlace placedPrim0
+    prim1 = content placedPrim1
+
+-- | Checks if two prims could be merged, modulod the prims' arguments
+primsMergable :: Prim -> Prim -> Bool
+primsMergable (PrimCall _ pspec0 imp0 _ _) (PrimCall _ pspec1 imp1 _ _)
+  = pspec0 == pspec1 && imp0 == imp1
+primsMergable (PrimHigher _ _ imp0 _) (PrimHigher _ _ imp1 _)
+  = imp0 == imp1
+primsMergable (PrimForeign "lpvm" "mutate" flags0 (_:_:_:destr0:_)) (PrimForeign "lpvm" "mutate" flags1 (_:_:_:destr1:_))
+  = destr0 == destr1 && Set.fromList flags0 == Set.fromList flags1
+primsMergable (PrimForeign lang0 proc0 flags0 _) (PrimForeign lang1 proc1 flags1 _)
+  = lang0 == lang1 && proc0 == proc1 && Set.fromList flags0 == Set.fromList flags1
+primsMergable _ _ = False
+
+-- | Merge two args, yielding a fresh variable if the two variables are to be merged.
+-- If the first operand is already in the factored, the merging happens with a value from the
+-- factored instead
+mergeArg :: FactoredVars -> PrimArg -> PrimArg -> BkwdBuilder (Maybe (FactoredVars, PrimArg))
+mergeArg factored a b | a == b = return $ Just (factored, a) -- no subst needed
+mergeArg factored a@ArgVar{argVarName=nm} b
+  | Just (ty, values@(a':_)) <- Map.lookup nm factored = do
+    merged <- mergeArg factored a' b
+    case merged of
+      Just _ -> return $ Just (Map.update (Just . mapSnd (b:)) nm factored, a)
+      _ -> return Nothing
+mergeArg factored a b | not (argIsConst a || argIsConst b) = return Nothing
+mergeArg factored a@ArgInt{}      b@ArgInt{}      = addMergedPrim factored a b
+mergeArg factored a@ArgFloat{}    b@ArgFloat{}    = addMergedPrim factored a b
+mergeArg factored a@ArgString{}   b@ArgString{}   = addMergedPrim factored a b
+mergeArg factored a@ArgChar{}     b@ArgChar{}     = addMergedPrim factored a b
+mergeArg factored a@ArgClosure{}  b@ArgClosure{}  = addMergedPrim factored a b
+mergeArg factored a@ArgUnneeded{} b@ArgUnneeded{} = addMergedPrim factored a b
+mergeArg factored _               _               = return Nothing
+
+-- | Add two prims to the map of tablled variables, generating a fresh variable in their place
+addMergedPrim :: FactoredVars -> PrimArg -> PrimArg -> BkwdBuilder (Maybe (FactoredVars, PrimArg))
+addMergedPrim factored a b = do
+    tmp <- gets bkwdTmpCount
+    modify (\st -> st{bkwdTmpCount = tmp + 1})
+    let var = PrimVarName (mkTempName tmp) 0
+    return $ Just (Map.insert var (ty, [b, a]) factored, ArgVar var ty FlowIn Ordinary True)
+  where ty = argType a
+
+-- | Merge two [a]
+mergeLists :: (FactoredVars -> a -> a -> BkwdBuilder (Maybe (FactoredVars, a))) -> FactoredVars -> [a] -> [a] -> BkwdBuilder (Maybe (FactoredVars, [a]))
+mergeLists f factored as0 as1 =
+  foldrMaybeM (\(a0, a1) (factored', as') -> (mapSnd (:as') <$>) <$> f factored' a0 a1) (factored,[])
+      $ zip as0 as1
 
 
 ----------------------------------------------------------------

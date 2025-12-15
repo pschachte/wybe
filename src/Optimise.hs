@@ -242,7 +242,9 @@ forkGlobalFlows varFlows oldFlows (PrimFork _ _ _ bodies deflt) = do
         oldFlows' = oldFlows `USet.intersection`
                         whenFinite (`USet.subtractUnivSet` allOuts) someOuts
     return $ globalFlowsUnions (emptyGlobalFlows{globalFlowsIn=oldFlows'}:gFlows)
-  where
+forkGlobalFlows varFlows oldFlows (MergedFork{forkBody=body}) = 
+    bodyGlobalFlows varFlows oldFlows body
+
 
 -- | Update the GlobalFlows of Prims of a ProcDef and the prototype with
 -- the given GlobalFlows
@@ -277,6 +279,9 @@ updateForkGlobalFlows sccFlows (PrimFork var ty final bodies deflt) = do
         Nothing -> return Nothing
         Just d -> Just <$> updateBodyGlobalFlows sccFlows d
     return $ PrimFork var ty final bodies' deflt'
+updateForkGlobalFlows sccFlows fork@MergedFork{forkBody=body} = do
+    body' <- updateBodyGlobalFlows sccFlows body
+    return fork{forkBody=body'}
 
 
 -- | Update the GlobalFlows of a Prim

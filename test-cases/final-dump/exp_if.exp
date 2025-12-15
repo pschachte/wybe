@@ -29,13 +29,10 @@ if_test(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(~x##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @exp_if:nn:nn
-    case ~tmp#1##0:wybe.bool of
-    0:
-        foreign llvm move("smaller":wybe.string, ?#result##0:wybe.string) @exp_if:nn:nn
+    tabled ~tmp#1##0:wybe.bool of
+      tmp#5##0:wybe.string <- [ "smaller":wybe.string, "larger":wybe.string ]
 
-    1:
-        foreign llvm move("larger":wybe.string, ?#result##0:wybe.string) @exp_if:nn:nn
-
+        foreign llvm move(~tmp#5##0:wybe.string, ?#result##0:wybe.string) @exp_if:nn:nn
 
   LLVM code       :
 
@@ -51,6 +48,7 @@ target triple    ????
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 6, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 7, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
+@"array#6" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"string#5" to i64 ), i64 ptrtoint( ptr @"string#4" to i64 )]
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -64,9 +62,8 @@ define external fastcc void @"exp_if.<0>"() {
 
 define external fastcc i64 @"exp_if.if_test<0>"(i64 %"x##0") {
   %"tmp#1##0" = icmp sgt i64 %"x##0", 0
-  br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
-if.then.0:
-  ret i64 ptrtoint( ptr @"string#4" to i64 )
-if.else.0:
-  ret i64 ptrtoint( ptr @"string#5" to i64 )
+  %"tmp#7##0" = zext i1 %"tmp#1##0" to i64
+  %"tmp#6##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#6", i64 0, i64 %"tmp#7##0"
+  %"tmp#5##0" = load i64, ptr %"tmp#6##0"
+  ret i64 %"tmp#5##0"
 }

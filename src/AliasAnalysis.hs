@@ -195,6 +195,9 @@ aliasedByFork caller body analysisInfo = do
                 mapM (\body' -> aliasedByBody caller body' analysisInfo)
                     $ fBodies ++ maybeToList deflt
             return $ mergeAnalysisInfo analysisInfos
+        MergedFork _ _ _ _ body -> do
+            logAlias ">>> Merged fork:"
+            aliasedByBody caller body analysisInfo
         NoFork -> do
             logAlias ">>> No fork."
             -- drop "deadCells", we don't need it after fork

@@ -246,20 +246,6 @@ compileCond front pos expr thn els params detism = do
         _ ->
             shouldnt $ "TestBool with invalid argument " ++ show expr
 
--- |Add the specified statements at the end of the given body
-appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
-appendToBody (ProcBody prims NoFork) after
-    = ProcBody (prims++after) NoFork
-appendToBody (ProcBody prims (PrimFork v ty lst bodies deflt)) after
-    = let bodies' = List.map (`appendToBody` after) bodies
-      in ProcBody prims $ PrimFork v ty lst bodies'
-                            $ (`appendToBody` after) <$> deflt
-
--- |Add the specified statements at the front of the given body
-prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
-prependToBody before (ProcBody prims fork)
-    = ProcBody (before++prims) fork
-
 compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
 compileSimpleStmt stmt = do
     logClause $ "Compiling " ++ showStmt 4 (content stmt)
