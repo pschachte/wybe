@@ -194,7 +194,7 @@ aliasedByFork caller body analysisInfo = do
             logAlias ">>> Forking:"
             analysisInfos <-
                 mapM (\body' -> aliasedByBody caller body' analysisInfo)
-                    $ fBodies ++ maybeToList deflt
+                    $ List.map snd fBodies ++ maybeToList deflt
             return $ mergeAnalysisInfo analysisInfos
         MergedFork{} -> do
             logAlias ">>> Merged fork:"

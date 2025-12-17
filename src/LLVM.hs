@@ -321,7 +321,7 @@ preScanBodyForks mod = preScanForks mod . bodyFork
 preScanForks :: ModSpec -> PrimFork -> LLVM ()
 preScanForks _ NoFork = return ()
 preScanForks mod PrimFork{forkBodies=bodies, forkDefault=mbDflt} = do
-    mapM_ (preScanBodyForks mod) bodies
+    mapM_ (preScanBodyForks mod . snd) bodies
     forM_ mbDflt $ preScanBodyForks mod
 preScanForks mod MergedFork{forkTable=table, forkBody=body} = do
     mapM_ (recordConst . ArraySpec . thd3) table
@@ -706,8 +706,8 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
             rep <- typeRep ty
             case (rep,branches,dflt) of
                 (Bits 0,_,_) -> shouldnt "Switch on a phantom!"
-                (_,[single],Nothing) -> writeAssemblyBody outs single
-                (Bits 1, [els,thn],Nothing) -> writeAssemblyIfElse outs v thn els
+                (_,[(_,single)],Nothing) -> writeAssemblyBody outs single
+                (Bits 1, [(0,els),(1,thn)],Nothing) -> writeAssemblyIfElse outs v thn els
                 (Bits _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
                 (Signed _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
                 (rep,_,_) -> shouldnt $ "Switching on " ++ show rep ++ " type "
@@ -734,10 +734,10 @@ writeAssemblyIfElse outs v thn els = do
 
 -- | Generate and write out an LLVM multi-way switch
 writeAssemblySwitch :: [PrimParam] -> PrimVarName -> TypeRepresentation
-                    -> [ProcBody] -> Maybe ProcBody -> LLVM ()
+                    -> [(Integer, ProcBody)] -> Maybe ProcBody -> LLVM ()
 writeAssemblySwitch outs v rep cases dflt = do
     releaseDeferredCall
-    let prefixes = ["case."++show n++".switch." | n <- [0..length cases-1]]
+    let prefixes = ["case."++show n++".switch." | (n, _) <- cases]
     (dfltLabel,numLabels) <- if isJust dflt
         then do
             (dfltLabel:numLabels) <- freshLables $ "default.switch.":prefixes
@@ -748,14 +748,15 @@ writeAssemblySwitch outs v rep cases dflt = do
     let llType = llvmTypeRep rep
     llvar <- varToRead v
     logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
+    let switchValues = fst <$> cases 
     llvmPutStrLnIndented $ "switch " ++ makeLLVMArg llType llvar ++ ", "
         ++ llvmLabelName dfltLabel ++ " [\n    "
         ++ intercalate "\n    "
                 [makeLLVMArg llType (show n) ++ ", " ++ llvmLabelName lbl
-                | (lbl,n) <- zip numLabels [0..]]
+                | (lbl,n) <- zip numLabels switchValues]
         ++ " ]"
     zipWithM_
-        (\lbl cs -> llvmPutStrLn (lbl ++ ":") >> writeAssemblyBody outs cs)
+        (\lbl (_,cs) -> llvmPutStrLn (lbl ++ ":") >> writeAssemblyBody outs cs)
         numLabels cases
     case dflt of
         Nothing -> return ()

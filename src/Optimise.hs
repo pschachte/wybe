@@ -234,7 +234,7 @@ forkGlobalFlows :: Map PrimVarName GlobalFlows -> UnivSet GlobalInfo -> PrimFork
                 -> Compiler GlobalFlows
 forkGlobalFlows _ _ NoFork = return emptyGlobalFlows
 forkGlobalFlows varFlows oldFlows (PrimFork _ _ _ bodies deflt) = do
-    let bodies' = bodies ++ maybeToList deflt
+    let bodies' = (snd <$> bodies) ++ maybeToList deflt
     gFlows <- mapM (bodyGlobalFlows varFlows oldFlows) bodies'
     let outs = globalFlowsOut <$> gFlows
         someOuts = List.foldr USet.union emptyUnivSet outs 
@@ -274,11 +274,11 @@ updateBodyGlobalFlows sccFlows (ProcBody body fork) = do
 updateForkGlobalFlows :: Map ProcSpec GlobalFlows -> PrimFork -> Compiler PrimFork
 updateForkGlobalFlows _ NoFork = return NoFork
 updateForkGlobalFlows sccFlows (PrimFork var ty final bodies deflt) = do
-    bodies' <- mapM (updateBodyGlobalFlows sccFlows) bodies
+    bodies' <- mapM (updateBodyGlobalFlows sccFlows . snd) bodies
     deflt' <- case deflt of
         Nothing -> return Nothing
         Just d -> Just <$> updateBodyGlobalFlows sccFlows d
-    return $ PrimFork var ty final bodies' deflt'
+    return $ PrimFork var ty final (zip (fst <$> bodies) bodies') deflt'
 updateForkGlobalFlows sccFlows fork@MergedFork{forkBody=body} = do
     body' <- updateBodyGlobalFlows sccFlows body
     return fork{forkBody=body'}

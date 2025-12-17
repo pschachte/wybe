@@ -191,6 +191,9 @@ proc = > public (7 calls)
             foreign llvm icmp_eq(~#left#field##0:wybe.int, ~#right#field##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
+    else:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
 
 
 proc bar > {inline} (3 calls)
@@ -486,7 +489,7 @@ if.else.0:
 
 define external fastcc i1 @"anon_field.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#13##0" = and i64 %"#left##0", 3
-  switch i64 %"tmp#13##0", label %case.2.switch.0 [
+  switch i64 %"tmp#13##0", label %default.switch.0 [
     i64 0, label %case.0.switch.0
     i64 1, label %case.1.switch.0
     i64 2, label %case.2.switch.0 ]
@@ -554,6 +557,8 @@ if.then.5:
   %"tmp#60##0" = icmp eq i64 %"#left#field##0", %"#right#field##0"
   ret i1 %"tmp#60##0"
 if.else.5:
+  ret i1 0
+default.switch.0:
   ret i1 0
 }
 

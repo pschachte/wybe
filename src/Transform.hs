@@ -6,6 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 
 module Transform (transformProc,
         generateSpeczVersionInProc, expandRequiredSpeczVersionsByMod) where
@@ -28,6 +29,7 @@ import           Options       (LogSelection (Transform),
                                 OptFlag(MultiSpecz), optimisationEnabled)
 import           Util
 import           Snippets      (primMove)
+import Data.Tuple.HT (mapFst)
 
 
 ----------------------------------------------------------------
@@ -134,12 +136,12 @@ transformForks caller body (aliasMap, deadCells) callSiteMap = do
         PrimFork var ty _ fBodies deflt -> do
             buildFork var ty
             lift $ logTransform "Forking:"
-            mapM_ (\currBody -> do
-                    beginBranch
+            mapM_ (\(brNum, currBody) -> do
+                    beginBranch brNum
                     transformBody caller currBody
                                 (aliasMap, deadCells) callSiteMap
                     endBranch
-                ) (fBodies ++ maybeToList deflt)
+                ) (List.map (mapFst Just) fBodies ++ maybeToList ((Nothing,) <$> deflt))
             completeFork
         MergedFork{} -> do
             lift $ logTransform "Unmerging fork:"

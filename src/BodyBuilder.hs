@@ -127,6 +127,7 @@ type BodyBuilder = StateT BodyState Compiler
 
 -- Holds the content of a ProcBody while we're building it.
 data BodyState = BodyState {
+      branchNum      :: Maybe Integer,
       currBuild      :: [Placed Prim],   -- ^The body we're building, reversed
       currSubst      :: Substitution,    -- ^variable substitutions to propagate
       blockDefs      :: Set PrimVarName, -- ^All variables defined in this block
@@ -157,8 +158,11 @@ data BuildState
         fused        :: Bool,          -- ^forkingVar is a constant in every
                                        -- branch in the parent fork, so this
                                        -- fork will be fused with parent fork
-        bodies       :: [BodyState],   -- ^Rev'd BodyStates of branches so far
-        defaultBody  :: Maybe BodyState, -- ^Body of the default fork branch
+        bodies       :: [(Integer, BodyState)],   
+                                       -- ^Rev'd BodyStates of branches so far, 
+                                       -- with each branch's number
+        defaultBody  :: Maybe BodyState,
+                                       -- ^The fedault body, if any
         complete     :: Bool           -- ^Whether the fork has been completed
         }                              -- ^Building a new fork
     deriving (Eq,Show)
@@ -168,7 +172,7 @@ data BuildState
 -- | A fresh BodyState with specified temp counter and output var substitution
 initState :: Int -> VarSubstitution -> [PrimParam] -> BodyState
 initState tmp oSubst params =
-    BodyState [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp
+    BodyState Nothing [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp
               Unforked Nothing Map.empty (initGlobalVarFlows params) Map.empty
 
 
@@ -178,7 +182,7 @@ childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
                         tmpCount=tmp, forkConsts=consts,
                         globalsLoaded=loaded, varGlobalFlows=varFlows,
                         reifiedConstr=reif} bld =
-    BodyState [] iSubst Set.empty consts oSubst subs False tmp bld (Just st)
+    BodyState Nothing [] iSubst Set.empty consts oSubst subs False tmp bld (Just st)
               loaded varFlows reif
 
 
@@ -299,15 +303,11 @@ completeFork = do
         shouldnt "Completing an already-completed fork"
       Unforked ->
         shouldnt "Completing an un-built fork"
-      Forked var ty val fused bods deflt False -> do
+      Forked var ty val fused bods dflt False -> do
         logBuild $ ">>>> ending fork on " ++ show var
         gets tmpCount >>= logBuild . ("  tmpCount = "++) . show
-        let allBods = bods ++ maybeToList deflt
-        -- let branchMap = List.foldr1 (Map.intersectionWith Set.union)
-        --                 (Map.map Set.singleton
-        --                  . Map.filter argIsConst . currSubst <$> bods)
-        let branchMaps =
-              Map.filter argIsConst . currSubst <$> allBods
+        let allBods = List.map snd bods ++ maybeToList dflt
+        let branchMaps = Map.filter argIsConst . currSubst <$> allBods
         -- Variables set to the same constant in every branch
         let extraSubsts = List.foldr1 intersectMapIdentity branchMaps
         logBuild $ "     extraSubsts = " ++ show extraSubsts
@@ -321,8 +321,8 @@ completeFork = do
         let varFlows = Map.unionsWith globalFlowsUnion $ varGlobalFlows <$> st:allBods
         logBuild $ "     variable flows in all branches: " ++ simpleShowMap varFlows
         -- Prepare for any instructions coming after the fork
-        let parent = st { buildState = Forked var ty val fused bods deflt True
-                        , tmpCount = maximum $ tmpCount <$> bods
+        let parent = st { buildState = Forked var ty val fused bods dflt True
+                        , tmpCount = maximum $ tmpCount <$> allBods
                         , varGlobalFlows = varFlows}
         let child = childState parent Unforked
         put $ child { forkConsts = consts,
@@ -331,39 +331,25 @@ completeFork = do
 
 
 -- |Start a new branch for the next integer value of the switch variable.
-beginBranch :: BodyBuilder ()
-beginBranch = do
+beginBranch :: Maybe Integer -> BodyBuilder ()
+beginBranch branchNum = do
     st <- get
     case buildState st of
       Forked{complete=True} ->
         shouldnt "Beginning a branch in an already-completed fork"
       Unforked ->
         shouldnt "Beginning a branch in an un-built fork"
-      Forked var ty val fused bods deflt False -> do
-        let branchNum = length bods
+      Forked var ty val fused _ _ False -> do
         logBuild $ "<<<< <<<< Beginning to build "
                    ++ (if fused then "fused " else "") ++ "branch "
                    ++ show branchNum ++ " on " ++ show var
         gets tmpCount >>= logBuild . ("  tmpCount = "++) . show
-        when fused $ do
-          par <- gets $ trustFromJust "forkConst with no parent branch" . parent
-          case buildState par of
-            Forked{bodies=bods, defaultBody=deflt} -> do
-              let matchingSubsts =
-                    List.map currSubst
-                    $ List.filter (matchingSubst var branchNum) bods
-              let extraSubsts =
-                    if List.null matchingSubsts
-                    then Map.empty
-                    else List.foldr1 intersectMapIdentity matchingSubsts
-              logBuild $ "          Adding substs " ++ show extraSubsts
-              modify $ \st -> st { currSubst =
-                                   Map.union extraSubsts (currSubst st) }
-            Unforked -> shouldnt "forkConst predicted parent branch"
-        put $ childState st Unforked
-        when (isNothing val && not fused) $ do
-          addSubst var $ ArgInt (fromIntegral branchNum) intType
-          noteBranchConstraints var intType branchNum
+        put (childState st Unforked){branchNum=branchNum}
+
+        when (isNothing val && not fused) $
+          forM_ branchNum $ \n -> do
+            addSubst var $ ArgInt n ty
+            noteBranchConstraints var ty n
 
         logState
 
@@ -371,13 +357,15 @@ beginBranch = do
 -- |End the current branch.
 endBranch :: BodyBuilder ()
 endBranch = do
-    st <- get
-    (par,st,var,ty,val,fused,bodies,deflt) <- gets popParent
+    (par,st,var,ty,val,fused,bodies) <- gets popParent
     logBuild $ ">>>> >>>> Ending branch "
                ++ show (length bodies) ++ " on " ++ show var
     tmp <- gets tmpCount
     logBuild $ "  tmpCount = " ++ show tmp
-    put $ par { buildState=Forked var ty val fused (st:bodies) deflt False
+    let (bodies',dflt) = case branchNum st of
+          Nothing -> (bodies, Just st)
+          Just brNum -> ((brNum, st):bodies, Nothing)
+    put $ par { buildState=Forked var ty val fused bodies' dflt False
               , tmpCount = tmp }
     logState
 
@@ -385,20 +373,20 @@ endBranch = do
 -- |Return the closest Forking ancestor of a state, and fix its immediate
 --  child to no longer list it as parent
 popParent :: BodyState -> (BodyState,BodyState,PrimVarName,TypeSpec,
-                           Maybe Integer,Bool,[BodyState],Maybe BodyState)
+                           Maybe Integer,Bool,[(Integer, BodyState)])
 popParent st@BodyState{parent=Nothing} =
     shouldnt "endBranch with no open branch to end"
 popParent st@BodyState{parent=(Just
-             par@BodyState{buildState=(Forked var ty val fused brs deflt False)})} =
-    (par, st {parent = Nothing}, var, ty, val, fused, brs, deflt)
+             par@BodyState{buildState=(Forked var ty val fused brs _ False)})} =
+    (par, st {parent = Nothing}, var, ty, val, fused, brs)
 popParent st@BodyState{parent=Just par} =
-    let (anc, fixedPar, var, ty, val, fused, branches, deflt) = popParent par
-    in  (anc,st {parent=Just fixedPar}, var, ty, val, fused, branches, deflt)
+    let (anc, fixedPar@BodyState{branchNum=brNum}, var, ty, val, fused, branches) = popParent par
+    in  (anc, st {parent=Just fixedPar, branchNum=brNum}, var, ty, val, fused, branches)
 
 
 -- | Record whatever we can deduce from our current branch variable and branch
 -- number, based on previously computed reified constraints.
-noteBranchConstraints :: PrimVarName -> TypeSpec -> Int -> BodyBuilder ()
+noteBranchConstraints :: PrimVarName -> TypeSpec -> Integer -> BodyBuilder ()
 noteBranchConstraints var ty val = do
     constr <- gets $ Map.lookup var . reifiedConstr
     case (val,constr) of
@@ -409,9 +397,8 @@ noteBranchConstraints var ty val = do
 
 -- | Test if the specified variable is bound to the specified constant in the
 -- specified BodyState.
-matchingSubst :: PrimVarName -> Int -> BodyState -> Bool
-matchingSubst var branchNum bod =
-  maybe False ((== branchNum) . fromIntegral) $ varIntValue var bod
+matchingSubst :: PrimVarName -> Integer -> BodyState -> Bool
+matchingSubst var branchNum bod = Just branchNum == varIntValue var bod
 
 
 -- |Return Just the known value of the specified variable, or Nothing
@@ -422,9 +409,9 @@ varIntValue var bod = Map.lookup var (currSubst bod) >>= argIntegerValue
 definiteVariableValue :: PrimVarName -> BodyBuilder (Maybe PrimArg)
 definiteVariableValue var = do
     arg <- expandVar var AnyType
-    case arg of
-        ArgVar{} -> return Nothing -- variable (unknown) result
-        _ -> return $ Just arg
+    return $ if argIsConst arg
+    then Just arg
+    else Nothing
 
 
 -- |Add an instruction to the current body, after applying the current
@@ -835,7 +822,7 @@ addInstrToState :: Placed Prim -> BodyState -> BodyState
 addInstrToState ins st@BodyState{buildState=Unforked} =
     st { currBuild = ins:currBuild st}
 addInstrToState ins st@BodyState{buildState=bld@Forked{bodies=bods}} =
-    st { buildState = bld {bodies=List.map (addInstrToState ins) bods} }
+    st { buildState = bld {bodies=List.map (mapSnd $ addInstrToState ins) bods} }
 
 
 -- |Return the current ultimate value of the specified variable name and type
@@ -1215,8 +1202,9 @@ fuseBranches :: BuildState -> Compiler BuildState
 fuseBranches Unforked = return Unforked
 fuseBranches bst@Forked{forkingVar=var,bodies=bods} = do
     logMsg BodyBuilder $ "Fusing branches of fork on " ++ show var
-    bods' <- mapM fuseBodies $ bodies bst
-    return $ bst {bodies=bods'}
+    let (brNums, bods') = unzip bods
+    bods'' <- mapM fuseBodies bods'
+    return $ bst {bodies=zip brNums bods''}
 
 
 -- | Add the second BodyState at the end of the first.  The second BodyState is
@@ -1236,10 +1224,11 @@ addBodyContinuation prev@BodyState{buildState=Forked{}, varGlobalFlows=vFlows} n
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after forked body:" ++ fst (showState 4 prev)
     let build = buildState prev
-    bods <- mapM (`addBodyContinuation` next) $ bodies build
-    return $ prev { buildState = build {bodies = bods}
+    let (brNums, bods) = unzip $ bodies build
+    bods' <- mapM (`addBodyContinuation` next) bods
+    return $ prev { buildState = build {bodies = zip brNums bods'}
                   , varGlobalFlows = Map.unionsWith globalFlowsUnion
-                                   $ vFlows : List.map varGlobalFlows bods}
+                                   $ vFlows : List.map varGlobalFlows bods'}
 
 
 -- | Add the appropriate branch(es) to follow the specified list of prims, which
@@ -1282,7 +1271,7 @@ addSelectedContinuation prevPrims subst defs osubst vFlows
                          ++ fst (showState 4 st')
             return st'
         Just branchNum -> do
-            let selectedBranch = revSelectElt branchNum $ bodies bst
+            let selectedBranch = trustFromJust "selectedBranch" $ List.lookup branchNum $ bodies bst
             logMsg BodyBuilder $ "Selected branch " ++ show branchNum
             selectedBranch' <- fuseBodies selectedBranch
             addSelectedContinuation (currBuild st ++ prevPrims)
@@ -1369,21 +1358,22 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
       Unforked -> mapM_ (placedApply (bkwdBuildStmt defs)) prims
       Forked{complete=False} ->
         shouldnt "Building proc body for bodystate with incomplete fork"
-      Forked var ty fixedval fused b d True -> do
-        let bods = reverse b
+      Forked var ty fixedval fused revBods dflt True -> do
+        let bods = reverse revBods
         case fixedval of
           Just val -> do
-            rebuildBody $ selectElt val bods
+            rebuildBody $ trustFromJust "val out of range" $ List.lookup val bods
             mapM_ (placedApply (bkwdBuildStmt defs)) prims
           Nothing -> do
             -- XXX Perhaps we should generate a new proc for the parent par in
             -- cases where it's more than a few prims.
             (prims', var', ty', bods', deflt')
-                <- rebuildSwitch prims var ty bods d reif
-            sts <- mapM (rebuildBranch subst) bods'
+                <- rebuildSwitch prims var ty bods dflt reif
+            let (brNums, bods'') = unzip bods'
+            sts <- zip brNums <$> mapM (rebuildBranch subst) bods''
             deflt'' <- mapM (rebuildBranch subst) deflt'
             usedLater' <- gets bkwdUsedLater
-            let sts' = sts ++ maybeToList deflt''
+            let sts' = List.map snd sts ++ maybeToList deflt''
             let usedLaters = bkwdUsedLater <$> sts'
             -- XXX Not right!  When processing the prims prior to each fork
             -- being assembled into a switch, we must only consider the
@@ -1404,7 +1394,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             logBkwd $ "  branchesUsedLater = " ++ show branchesUsedLater
             let lastUse = Set.notMember var' usedLater''
             let usedLater''' = Set.insert var' usedLater''
-            let followingBranches = List.map bkwdFollowing sts
+            let followingBranches = List.map (mapSnd bkwdFollowing) sts
             let followingDeflt = bkwdFollowing <$> deflt''
             let gStored = List.foldr1 Set.intersection (bkwdGlobalStored <$> sts')
             body <- rebuildFork var' ty' lastUse followingBranches followingDeflt
@@ -1425,12 +1415,6 @@ selectElt num bods =
   where num' = fromIntegral num
 
 
--- |Select the element of bods, which is reversed, by num
-revSelectElt :: Integral a => a -> [b] -> b
-revSelectElt num revBods =
-    selectElt (length revBods - 1 - fromIntegral num) revBods
-
-
 -- | Try to turn nested branches into a single switch, where we have a nested
 -- elseif ... elseif ... elseif ... else structure, and the tests are equality
 -- tests about the same variable.  We also handle nested cases of disequalities
@@ -1441,35 +1425,39 @@ revSelectElt num revBods =
 -- branches are in normal order.  Returns Nothing if we can't convert the fork
 -- into a switch, or Just a tuple of the straight line code, the switch variable
 -- and its type, the branches, and the default branch.
-rebuildSwitch :: [Placed Prim] -> PrimVarName -> TypeSpec -> [BodyState]
-           -> Maybe BodyState -> Map PrimVarName Constraint
+rebuildSwitch :: [Placed Prim] -> PrimVarName -> TypeSpec 
+           -> [(Integer, BodyState)] -> Maybe BodyState -> Map PrimVarName Constraint
            -> BkwdBuilder ([Placed Prim], PrimVarName, TypeSpec,
-                           [BodyState], Maybe BodyState)
-rebuildSwitch prims var ty branches@[branch0,branch1] Nothing reif = do
+                           [(Integer, BodyState)], Maybe BodyState)
+rebuildSwitch prims var ty branches@[(_,branch0),(_,branch1)] dflt reif = do
     logBkwd $ "Rebuild fork on " ++ show var
             ++ ", reified from " ++ show (Map.lookup var reif)
     case Map.lookup var reif of
-        Nothing ->
-            return (prims, var, ty, branches, Nothing)
-        Just (Equal var' ty' (ArgInt val _)) -> do
-            sw <- rebuildSwitch' prims var' ty' branch0 $ Map.singleton val branch1
-            return $ fromMaybe (prims, var, ty, branches, Nothing) sw
-        Just (NotEqual var' ty' (ArgInt val _)) -> do
-            sw <- rebuildSwitch' prims var' ty' branch1 $ Map.singleton val branch0
-            return $ fromMaybe (prims, var, ty, branches, Nothing) sw
-        _ ->
-            return (prims, var, ty, branches, Nothing)
-rebuildSwitch prims var ty branches deflt _ =
-    return (prims, var, ty, branches, deflt)
+        Just (Equal var' ty' (ArgInt val _)) ->
+            fromMaybe fallback <$> rebuildSwitch' prims var' ty' branch0 (Map.singleton val branch1)
+        Just (NotEqual var' ty' (ArgInt val _)) ->
+            fromMaybe fallback <$> rebuildSwitch' prims var' ty' branch1 (Map.singleton val branch0)
+        _ -> return fallback
+  where 
+    fallback = (prims, var, ty, branches, dflt)
+rebuildSwitch prims var ty branches dflt _ = do
+    switchVarRep <- trustFromJust "rebuildSwitch" <$> lift (lookupTypeRepresentation ty)
+    let maxPossible = 2 ^ fromIntegral (typeRepSize switchVarRep)
+    let numBrs = genericLength branches
+    return $ if numBrs >= maxPossible
+    then (prims, var, ty, List.take (fromInteger maxPossible) branches, Nothing)
+    else if numBrs == maxPossible - 1 && isJust dflt
+    then (prims, var, ty, branches ++ [(maxPossible - 1, fromJust dflt)], Nothing)
+    else (prims, var, ty, branches, dflt)
 
 
 -- | Try to add more cases to a switch.
 rebuildSwitch' :: [Placed Prim] -> PrimVarName -> TypeSpec -> BodyState
                -> Map Integer BodyState
                -> BkwdBuilder (Maybe ([Placed Prim], PrimVarName, TypeSpec,
-                                      [BodyState], Maybe BodyState))
+                                      [(Integer,BodyState)], Maybe BodyState))
 rebuildSwitch' prims var ty
-               st@BodyState{buildState=bldst@(Forked v _ _ _ [b1,b0] _ _),
+               st@BodyState{buildState=bldst@(Forked v _ _ _ [(_,b1),(_,b0)] Nothing _),
                             parent=Nothing, currBuild=prims',
                             reifiedConstr=reif} cases
     | isJust constr = do
@@ -1498,21 +1486,15 @@ rebuildSwitch' prims var ty st cases = do
 completeSwitch :: [Placed Prim] -> PrimVarName -> TypeSpec -> BodyState
                -> Map Integer BodyState
                -> BkwdBuilder (Maybe ([Placed Prim], PrimVarName, TypeSpec,
-                                      [BodyState], Maybe BodyState))
+                                      [(Integer, BodyState)], Maybe BodyState))
 completeSwitch prims var ty deflt cases
     | Map.size cases >= minimumSwitchCases = do
         let cases' = Map.toAscList cases
-        let maxCase = fst $ last cases'
         logBkwd $ "Producing switch with cases "
                   ++ show (fst <$> cases') ++ " and a default"
         logBkwd $ "Switch variable type: " ++ show ty
         switchVarRep <- lift $ lookupTypeRepresentation ty
-        let maxPossible = 2^(maybe wordSize typeRepSize switchVarRep)-1
-        logBkwd $ "Max possible switch var value: " ++ show maxPossible
-        return $ Just (prims, var, ty, snd <$> cases',
-                        if maxPossible >= maxCase
-                        then Nothing
-                        else Just deflt)
+        return $ Just (prims, var, ty, cases', Just deflt)
     | otherwise = do
         logBkwd $ "Not producing switch (only " ++ show (Map.size cases)
                 ++ " case(s))"
@@ -1611,15 +1593,17 @@ markIfLastUse _ arg = arg
 -- | Try to merge branches, pattern matching the body and factoring out the common
 -- constants. If the branches cannot be merged, keep the fork as is.
 -- Yields a ProcBody with the fork, or NoFork if all branches can be merged with no substitutions
-rebuildFork :: PrimVarName -> TypeSpec -> Bool -> [ProcBody] -> Maybe ProcBody -> BkwdBuilder ProcBody
-rebuildFork var' ty' lastUse brs dflt = do
+rebuildFork :: PrimVarName -> TypeSpec -> Bool -> [(Integer, ProcBody)] -> Maybe ProcBody -> BkwdBuilder ProcBody
+rebuildFork var ty lastUse brs dflt = do
+  tmp <- gets bkwdTmpCount
   mbMerged <- mergeBranches brs dflt
-  return $ case mbMerged of
-    Just (FactoredVars{factored=factored}, mergedBody) 
-      | Map.null factored -> mergedBody
-      | otherwise -> 
-         ProcBody [] $ MergedFork var' ty' lastUse (flattenFactored <$> Map.assocs factored) mergedBody
-    _ -> ProcBody [] $ PrimFork var' ty' lastUse brs dflt
+  case mbMerged of
+    Just (FactoredVars{factored=factored}, mergedBody)
+      | Map.null factored -> return $ mergedBody
+      | otherwise -> return $ ProcBody [] $ MergedFork var ty lastUse (flattenFactored <$> Map.assocs factored) mergedBody
+    _ -> do
+      modify $ \s -> s{bkwdTmpCount=tmp}
+      return $ ProcBody [] $ PrimFork var ty lastUse brs dflt
   where
     flattenFactored (var,(ty,vals)) = (var, ty, vals ++ replicate (length brs - length vals) (last vals))
 
@@ -1633,22 +1617,34 @@ data FactoredVars = FactoredVars {
   deriving (Show)
 
 -- | Try to merge all branches, with Nothing if the branches cannot be merged
-mergeBranches :: [ProcBody] -> Maybe ProcBody -> BkwdBuilder (Maybe (FactoredVars, ProcBody))
-mergeBranches brs@(_:_) Nothing = do
+mergeBranches :: [(Integer, ProcBody)] -> Maybe ProcBody -> BkwdBuilder (Maybe (FactoredVars, ProcBody))
+mergeBranches brs@(_:_) Nothing
+  | idxs == List.take (length brs) [0..] = do
   logBkwd $ "Trying to merge " ++ intercalate "\n" (show <$> brs)
-  merged <- foldrMaybeM (flip $ uncurry mergeBodies) (FactoredVars Map.empty Map.empty, last brs) $ init brs
+  merged <- foldrMaybeM (flip $ uncurry $ \vars -> mergeBodies vars{renamed=Map.empty}) (FactoredVars Map.empty Map.empty, last brs') $ init brs'
   logBkwd $ "Merged into " ++ show merged
   return merged
+  where (idxs, brs') = unzip brs
 mergeBranches brs _ = do
   logBkwd "Don't know how to merge"
   return Nothing
 
 -- | Try to merge two ProcBodies, merging the prims parwise
 mergeBodies :: FactoredVars -> ProcBody -> ProcBody -> BkwdBuilder (Maybe (FactoredVars, ProcBody))
-mergeBodies vars (ProcBody prims0 NoFork) (ProcBody prims1 NoFork)
-  | sameLength prims0 prims1 
-  = (mapSnd ((`ProcBody` NoFork) . reverse) <$>) <$> (mergeLists mergePrim vars{renamed=Map.empty} `on` reverse) prims0 prims1
+mergeBodies vars (ProcBody prims0 fork0) (ProcBody prims1 fork1)
+  | sameLength prims0 prims1
+  = do
+    mbPrims <- (mergeLists mergePrim vars `on` reverse) prims0 prims1
+    case mbPrims of
+      Nothing -> return Nothing
+      Just (vars', prims) -> ((ProcBody (reverse prims) <$>) <$>) <$> mergeForks vars' fork0 fork1
 mergeBodies _ _ _ = return Nothing
+
+-- | Try to merge two forks.
+mergeForks :: FactoredVars -> PrimFork -> PrimFork -> BkwdBuilder (Maybe (FactoredVars, PrimFork))
+mergeForks vars NoFork NoFork = return $ Just (vars, NoFork)
+-- XXX handle more forks!
+mergeForks _ _ _ = return Nothing
 
 -- | Try to merge two prims, merging prims where the constructors and fields match,
 -- and the args can be merged
@@ -1687,7 +1683,7 @@ mergeArg True vars@FactoredVars{renamed=renamed} a@ArgVar{argVarName=aNm} b@ArgV
   = do
       logBkwd $ show a ++ show b ++ show renamed
       mergeArg False vars{renamed=Map.insert bNm aNm renamed} a b{argVarName=aNm}
-  | Just nmB' <- Map.lookup bNm renamed 
+  | Just nmB' <- Map.lookup bNm renamed
   = mergeArg False vars a b{argVarName=nmB'}
 mergeArg rename vars@FactoredVars{factored=factored} a@ArgVar{argVarName=aNm} b
   | Just (ty, values@(a':_)) <- Map.lookup aNm factored = do
@@ -1787,29 +1783,29 @@ showReifications reifs =
 -- | Show the current part of a build state.
 showBuildState :: Int -> BuildState -> (String,Int)
 showBuildState indent Unforked = ("", indent)
-showBuildState indent (Forked var ty val fused bodies deflt complete) =
+showBuildState indent (Forked var ty val fused bodies dflt complete) =
     let intro = showSwitch indent var ty val fused
-        content = showBranches indent 0 complete (reverse bodies) deflt
+        content = showBranches indent complete (reverse bodies) dflt
         indent' = indent + 4
     in  (intro++content,indent')
 
 
 -- | Show a list of branches of a build state.
-showBranches :: Int -> Int -> Bool -> [BodyState] -> Maybe BodyState -> String
-showBranches indent bodyNum False [] Nothing = showCase indent bodyNum ++ "..."
-showBranches indent bodyNum False [] (Just d) =
-    shouldnt "Incomplete fork with default: " ++ show d
-showBranches indent bodyNum True [] deflt =
-    maybe "" (((startLine indent ++ "else::") ++) . fst . showState (indent+4))
-          deflt
-showBranches indent bodyNum complete (body:bodies) deflt =
-    showCase indent bodyNum
+showBranches :: Int -> Bool -> [(Integer,BodyState)] -> Maybe BodyState -> String
+showBranches indent False [] deflt = 
+    showBranches indent True [] deflt 
+    ++ showCase indent "?" ++ "..."
+showBranches indent True [] dflt = 
+    maybe "" ((showCase indent "else" ++) . fst . showState (indent+4)) dflt 
+showBranches indent complete ((branchNum,body):bodies) dflt =
+    showCase indent (show branchNum)
     ++ fst (showState (indent+4) body)
-    ++ showBranches indent (bodyNum+1) complete bodies deflt
+    ++ showBranches indent complete bodies dflt
 
 
 -- | Show a single branch of a build state
-showCase indent bodyNum = startLine indent ++ show bodyNum ++ "::"
+showCase :: Int -> String -> [Char]
+showCase indent bodyNum = startLine indent ++ bodyNum ++ "::"
 
 
 -- | Show the fork part of a build state

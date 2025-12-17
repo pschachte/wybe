@@ -246,6 +246,11 @@ print_t(x##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
                 foreign c putchar('\n':wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @dead_cell_size:nn:nn
                 foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
+            else:
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+
 
 
     1:
@@ -471,7 +476,7 @@ if.else.0:
   br i1 %"tmp#6##0", label %if.then.1, label %if.else.1
 if.then.1:
   %"tmp#7##0" = and i64 %"x##0", 3
-  switch i64 %"tmp#7##0", label %case.2.switch.2 [
+  switch i64 %"tmp#7##0", label %default.switch.2 [
     i64 0, label %case.0.switch.2
     i64 1, label %case.1.switch.2
     i64 2, label %case.2.switch.2 ]
@@ -509,6 +514,9 @@ case.2.switch.2:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
   call ccc void @print_int(i64 %"a##2")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  call ccc void @putchar(i8 10)
+  ret void
+default.switch.2:
   call ccc void @putchar(i8 10)
   ret void
 if.else.1:
@@ -658,6 +666,9 @@ proc = > public (1 calls)
                     foreign llvm icmp_eq(~#left#td1##0:wybe.int, ~#right#td1##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
+
+        else:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
 
 
@@ -1054,7 +1065,7 @@ define external fastcc i1 @"dead_cell_size.t.=<0>"(i64 %"#left##0", i64 %"#right
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#15##0" = and i64 %"#left##0", 3
-  switch i64 %"tmp#15##0", label %case.2.switch.1 [
+  switch i64 %"tmp#15##0", label %default.switch.1 [
     i64 0, label %case.0.switch.1
     i64 1, label %case.1.switch.1
     i64 2, label %case.2.switch.1 ]
@@ -1137,6 +1148,8 @@ if.then.9:
 if.else.9:
   ret i1 0
 if.else.8:
+  ret i1 0
+default.switch.1:
   ret i1 0
 if.else.0:
   %"tmp#68##0" = icmp eq i64 %"#right##0", 0

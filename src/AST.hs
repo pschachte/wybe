@@ -2457,10 +2457,11 @@ data ProcBody = ProcBody {
 data PrimFork =
     NoFork |
     PrimFork {
-      forkVar::PrimVarName,     -- ^The variable that selects branch to take
-      forkVarType::TypeSpec,    -- ^The Wybe type of the forkVar
-      forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
-      forkBodies::[ProcBody],   -- ^one branch for each value of forkVar
+      forkVar::PrimVarName,       -- ^The variable that selects branch to take
+      forkVarType::TypeSpec,      -- ^The Wybe type of the forkVar
+      forkVarLast::Bool,          -- ^Is this the last occurrence of forkVar
+      forkBodies::[(Integer,ProcBody)],   
+                                  -- ^one branch for each value of forkVar
       forkDefault::Maybe ProcBody -- ^branch to take if forkVar is out of range
     } |
     MergedFork {
@@ -2480,7 +2481,7 @@ appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
 appendToBody (ProcBody prims NoFork) after
     = ProcBody (prims++after) NoFork
 appendToBody (ProcBody prims (PrimFork v ty lst bodies deflt)) after
-    = let bodies' = List.map (`appendToBody` after) bodies
+    = let bodies' = List.map (mapSnd (`appendToBody` after)) bodies
       in ProcBody prims $ PrimFork v ty lst bodies'
                             $ (`appendToBody` after) <$> deflt
 appendToBody body@ProcBody{bodyFork=merged@MergedFork{forkBody=fork}} after
@@ -2499,7 +2500,7 @@ unMergeFork (MergedFork var ty final table body) =
                      table
         in  if List.null untabled 
             then NoFork
-            else PrimFork var ty final (List.map (`prependToBody` body) untabled) Nothing
+            else PrimFork var ty final (zip [0..] (List.map (`prependToBody` body) untabled)) Nothing
 unMergeFork fork = shouldnt $ "unMergeFork on non-merged " ++ show fork
 
 data LLBlock = LLBlock {
@@ -2663,8 +2664,8 @@ foldBodyPrims primFn emptyConj abDisj (ProcBody pprims fork) =
       PrimFork _ _ _ [] _ -> shouldnt "foldBodyPrims empty clause list in a PrimFork"
       PrimFork _ _ _ (body:bodies) deflt ->
           List.foldl (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
-                (foldBodyPrims primFn common abDisj body)
-                $ bodies ++ maybeToList deflt
+                (foldBodyPrims primFn common abDisj $ snd body)
+                $ List.map snd bodies ++ maybeToList deflt
       MergedFork{forkBody=body} ->
         common `abDisj` foldBodyPrims primFn common abDisj body
 
@@ -2692,8 +2693,8 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
       PrimFork _ _ _ (body:bodies) deflt ->
         abConj common $
         List.foldl (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
-        (foldBodyPrims primFn common abDisj body)
-        $ bodies ++ maybeToList deflt
+        (foldBodyPrims primFn common abDisj $ snd body)
+        $ List.map snd bodies ++ maybeToList deflt
       MergedFork{forkBody=body} ->
         abConj common (foldBodyPrims primFn common abDisj body)
 
@@ -2708,7 +2709,7 @@ mapLPVMBodyM primFn argFn (ProcBody pprims fork) = do
     case fork of
         NoFork -> return ()
         (PrimFork _ _ _ bodies deflt) -> do
-            mapM_ (mapLPVMBodyM primFn argFn) bodies
+            mapM_ (mapLPVMBodyM primFn argFn . snd) bodies
             maybe (return ()) (mapLPVMBodyM primFn argFn) deflt
         MergedFork{forkBody=body} ->
             mapLPVMBodyM primFn argFn body
@@ -4141,8 +4142,7 @@ showFork ind (PrimFork var ty last bodies deflt) =
                   ":" ++ show ty ++ " of" ++
     List.concatMap (\(val,body) ->
                         startLine ind ++ show val ++ ":" ++
-                        showBlock (ind+4) body ++ "\n")
-    (zip [0..] bodies)
+                        showBlock (ind+4) body ++ "\n") bodies
     ++ maybe "" (\b -> startLine ind ++ "else:"
                        ++ showBlock (ind+4) b ++ "\n") deflt
 showFork ind (MergedFork var ty last vars body) =

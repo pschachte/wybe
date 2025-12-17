@@ -124,10 +124,10 @@ lastCallAnalyseProc def = do
             logLastCallAnalysis "skipping closure proc, shouldn't have direct tail-recursion anyway"
             return def
         _ -> do
-            (maybeBody', finalState) <- runStateT (runMaybeT (mapProcLeavesM transformLeaf body))
+            (maybeBody', finalState) <- runStateT (runMaybeT (mapProcLeavesM transformLeaf (0,body)))
                 LeafTransformState { procSpec = spec, originalProto = proto, transformedProto = Nothing }
             case (maybeBody', transformedProto finalState) of
-                (Just body', Just proto') -> do
+                (Just (_,body'), Just proto') -> do
                     logLastCallAnalysis $ "new proto: " ++ show proto'
                     return def {procImpln = impln{procImplnProto = proto', procImplnBody = body'}}
                 _ -> return def
@@ -360,7 +360,7 @@ tryAddToMutateChain _ _ _ ([]:_) = Left "a mutate chain shouldnt be empty"
 fixupCallsInProc :: ProcDef -> Compiler ProcDef
 fixupCallsInProc def@ProcDef { procImpln = impln@ProcDefPrim { procImplnBody = body}} = do
     logLastCallAnalysis $ ">>> Fix up calls in proc: " ++ show (procName def)
-    body' <- mapProcPrimsM (updatePlacedM fixupCallsInPrim) body
+    (_,body') <- mapProcPrimsM (updatePlacedM fixupCallsInPrim) (0,body)
     return $ def { procImpln = impln { procImplnBody = body' } }
 fixupCallsInProc _ = shouldnt "uncompiled"
 
@@ -400,32 +400,32 @@ _partitionLastCall (x:xs) =
             in (lastCall, x:afterLastCall)
 
 -- | Applies a transformation to the leaves of a proc body
-mapProcLeavesM :: (Monad t) => ([Placed Prim] -> t [Placed Prim]) -> ProcBody -> t ProcBody
-mapProcLeavesM f leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork } = do
+mapProcLeavesM :: (Monad t) => ([Placed Prim] -> t [Placed Prim]) -> (Integer, ProcBody) -> t (Integer,ProcBody)
+mapProcLeavesM f (n,leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork }) = do
         prims <- f prims
-        return leafBlock { bodyPrims = prims }
-mapProcLeavesM f current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} } = do
+        return (n,leafBlock { bodyPrims = prims })
+mapProcLeavesM f (n,current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} }) = do
         -- XXX must map over default, too
         bodies' <- mapM (mapProcLeavesM f) bodies
-        return current { bodyFork = fork { forkBodies = bodies' } }
-mapProcLeavesM f current@ProcBody { bodyFork = fork@MergedFork{forkBody = body} } = do
-        body' <- mapProcLeavesM f body
-        return current { bodyFork = fork { forkBody = body' } }
+        return (n,current { bodyFork = fork { forkBodies = bodies' } })
+mapProcLeavesM f (n,current@ProcBody { bodyFork = fork@MergedFork{forkBody = body} }) = do
+        (_,body') <- mapProcLeavesM f (0,body)
+        return (n,current { bodyFork = fork { forkBody = body' } })
 
 -- | Applies a transformation to each prim in a proc
-mapProcPrimsM :: (Monad t) => (Placed Prim -> t (Placed Prim)) -> ProcBody -> t ProcBody
-mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = NoFork } = do
+mapProcPrimsM :: (Monad t) => (Placed Prim -> t (Placed Prim)) -> (Integer, ProcBody) -> t (Integer, ProcBody)
+mapProcPrimsM fn (n,body@ProcBody { bodyPrims = prims, bodyFork = NoFork }) = do
         prims' <- mapM fn prims
-        return body { bodyPrims = prims' }
-mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@PrimFork{forkBodies = bodies } } = do
+        return (n,body { bodyPrims = prims' })
+mapProcPrimsM fn (n,body@ProcBody { bodyPrims = prims, bodyFork = fork@PrimFork{forkBodies = bodies } }) = do
         -- XXX must map over default, too
         prims' <- mapM fn prims
         bodies <- mapM (mapProcPrimsM fn) bodies
-        return body { bodyPrims = prims', bodyFork = fork { forkBodies = bodies } }
-mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@MergedFork{forkBody = forkBody} } = do
+        return (n,body { bodyPrims = prims', bodyFork = fork { forkBodies = bodies } })
+mapProcPrimsM fn (n,body@ProcBody { bodyPrims = prims, bodyFork = fork@MergedFork{forkBody = forkBody} }) = do
         prims' <- mapM fn prims
-        body' <- mapProcPrimsM fn forkBody
-        return body { bodyPrims = prims', bodyFork = fork { forkBody = body' } }
+        (_,body') <- mapProcPrimsM fn (0,forkBody)
+        return (n,body { bodyPrims = prims', bodyFork = fork { forkBody = body' } })
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

@@ -241,7 +241,7 @@ compileCond front pos expr thn els params detism = do
         Var _ ParamIn _ ->
             return $ ProcBody front
                 $ PrimFork (fromJust name') boolType False
-                [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
+                  (zip [0..] [appendToBody els' elsAssigns, appendToBody thn' thnAssigns])
                 Nothing
         _ ->
             shouldnt $ "TestBool with invalid argument " ++ show expr
