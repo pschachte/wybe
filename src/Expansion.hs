@@ -230,13 +230,9 @@ expandBody (ProcBody prims fork) = do
                        ++ " with " ++ show (length bodies) ++ " branches"
         expandFork var' ty $ bodies ++ maybeToList deflt
         logExpansion $ "Finished expanding fork on " ++ show var'
-      MergedFork var ty final table body -> do
+      MergedFork{} -> do
         logExpansion "Expanding merged as fork..."
-        let unmerged = List.transpose 
-                     $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ primMove p (ArgVar var' ty' FlowOut Ordinary True)) vals) 
-                     table
-        when (List.null table) $ shouldnt "here!!"
-        expandBody $ ProcBody prims $ PrimFork var ty final (List.map (`prependToBody` body) unmerged) Nothing
+        expandBody $ ProcBody prims $ unMergeFork fork
         
 expandUnforked :: [Placed Prim] -> PrimFork -> Expander ()
 expandUnforked prims fork = do

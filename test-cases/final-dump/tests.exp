@@ -47,15 +47,11 @@ lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe
         case ~tmp#13##0:wybe.bool of
         0:
             foreign llvm icmp_slt(key##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#11##0:wybe.bool) @tests:nn:nn
-            case ~tmp#11##0:wybe.bool of
-            0:
-                foreign lpvm access(~map##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:tests.map) @tests:nn:nn
-                tests.lookup<0>(~key##0:wybe.int, ~tmp#4##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool) #8 @tests:nn:nn
+            tabled ~tmp#11##0:wybe.bool of
+              tmp#40##0:wybe.int <- [ 24:wybe.int, 0:wybe.int ]
 
-            1:
-                foreign lpvm access(~map##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:tests.map) @tests:nn:nn
+                foreign lpvm access(~map##0:tests.map, ~tmp#40##0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:tests.map) @tests:nn:nn
                 tests.lookup<0>(~key##0:wybe.int, ~tmp#3##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool) #6 @tests:nn:nn
-
 
         1:
             foreign lpvm access(~map##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?result##0:wybe.int) @tests:nn:nn
@@ -100,6 +96,7 @@ source_filename = "!ROOT!/final-dump/tests.wybe"
 target triple    ????
 
 @"array#0" = private unnamed_addr constant [ 2 x i1 ] [i1 0, i1 1]
+@"array#1" = private unnamed_addr constant [ 2 x i64 ] [i64 24, i64 0]
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -107,44 +104,36 @@ define external fastcc {i64, i1} @"tests.lookup<0>"(i64 %"key##0", i64 %"map##0"
   %"tmp#15##0" = icmp ne i64 %"map##0", 0
   br i1 %"tmp#15##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#40##0" = add i64 %"map##0", 8
-  %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
-  %"tmp#0##0" = load i64, ptr %"tmp#41##0"
+  %"tmp#41##0" = add i64 %"map##0", 8
+  %"tmp#42##0" = inttoptr i64 %"tmp#41##0" to ptr
+  %"tmp#0##0" = load i64, ptr %"tmp#42##0"
   %"tmp#13##0" = icmp eq i64 %"key##0", %"tmp#0##0"
   br i1 %"tmp#13##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#42##0" = add i64 %"map##0", 16
-  %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
-  %"tmp#44##0" = load i64, ptr %"tmp#43##0"
-  %"tmp#45##0" = insertvalue {i64, i1} undef, i64 %"tmp#44##0", 0
-  %"tmp#46##0" = insertvalue {i64, i1} %"tmp#45##0", i1 1, 1
-  ret {i64, i1} %"tmp#46##0"
+  %"tmp#43##0" = add i64 %"map##0", 16
+  %"tmp#44##0" = inttoptr i64 %"tmp#43##0" to ptr
+  %"tmp#45##0" = load i64, ptr %"tmp#44##0"
+  %"tmp#46##0" = insertvalue {i64, i1} undef, i64 %"tmp#45##0", 0
+  %"tmp#47##0" = insertvalue {i64, i1} %"tmp#46##0", i1 1, 1
+  ret {i64, i1} %"tmp#47##0"
 if.else.1:
   %"tmp#11##0" = icmp slt i64 %"key##0", %"tmp#0##0"
-  br i1 %"tmp#11##0", label %if.then.2, label %if.else.2
-if.then.2:
-  %"tmp#47##0" = inttoptr i64 %"map##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#47##0"
-  %"tmp#48##0" = tail call fastcc {i64, i1} @"tests.lookup<0>"(i64 %"key##0", i64 %"tmp#3##0")
-  %"tmp#49##0" = extractvalue {i64, i1}%"tmp#48##0", 0
-  %"tmp#50##0" = extractvalue {i64, i1}%"tmp#48##0", 1
-  %"tmp#51##0" = insertvalue {i64, i1} undef, i64 %"tmp#49##0", 0
-  %"tmp#52##0" = insertvalue {i64, i1} %"tmp#51##0", i1 %"tmp#50##0", 1
-  ret {i64, i1} %"tmp#52##0"
-if.else.2:
-  %"tmp#53##0" = add i64 %"map##0", 24
-  %"tmp#54##0" = inttoptr i64 %"tmp#53##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#54##0"
-  %"tmp#55##0" = tail call fastcc {i64, i1} @"tests.lookup<0>"(i64 %"key##0", i64 %"tmp#4##0")
-  %"tmp#56##0" = extractvalue {i64, i1}%"tmp#55##0", 0
-  %"tmp#57##0" = extractvalue {i64, i1}%"tmp#55##0", 1
-  %"tmp#58##0" = insertvalue {i64, i1} undef, i64 %"tmp#56##0", 0
-  %"tmp#59##0" = insertvalue {i64, i1} %"tmp#58##0", i1 %"tmp#57##0", 1
-  ret {i64, i1} %"tmp#59##0"
+  %"tmp#49##0" = zext i1 %"tmp#11##0" to i64
+  %"tmp#48##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#49##0"
+  %"tmp#40##0" = load i64, ptr %"tmp#48##0"
+  %"tmp#50##0" = add i64 %"map##0", %"tmp#40##0"
+  %"tmp#51##0" = inttoptr i64 %"tmp#50##0" to ptr
+  %"tmp#3##0" = load i64, ptr %"tmp#51##0"
+  %"tmp#52##0" = tail call fastcc {i64, i1} @"tests.lookup<0>"(i64 %"key##0", i64 %"tmp#3##0")
+  %"tmp#53##0" = extractvalue {i64, i1}%"tmp#52##0", 0
+  %"tmp#54##0" = extractvalue {i64, i1}%"tmp#52##0", 1
+  %"tmp#55##0" = insertvalue {i64, i1} undef, i64 %"tmp#53##0", 0
+  %"tmp#56##0" = insertvalue {i64, i1} %"tmp#55##0", i1 %"tmp#54##0", 1
+  ret {i64, i1} %"tmp#56##0"
 if.else.0:
-  %"tmp#60##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#61##0" = insertvalue {i64, i1} %"tmp#60##0", i1 0, 1
-  ret {i64, i1} %"tmp#61##0"
+  %"tmp#57##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#58##0" = insertvalue {i64, i1} %"tmp#57##0", i1 0, 1
+  ret {i64, i1} %"tmp#58##0"
 }
 
 define external fastcc i1 @"tests.lt<0>"(i64 %"x##0", i64 %"y##0") {

@@ -65,7 +65,7 @@ module AST (
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
-  ProcBody(..), PrimFork(..), prependToBody, appendToBody, Ident, VarName,
+  ProcBody(..), PrimFork(..), prependToBody, appendToBody, unMergeFork, Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
@@ -2490,6 +2490,17 @@ appendToBody body@ProcBody{bodyFork=merged@MergedFork{forkBody=fork}} after
 prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
 prependToBody before (ProcBody prims fork)
     = ProcBody (before++prims) fork
+
+-- |Un-merge a fork, replacing the tabled with a series of moved in the PrimFork branches
+unMergeFork :: PrimFork -> PrimFork
+unMergeFork (MergedFork var ty final table body) =
+        let untabled = List.transpose 
+                     $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ PrimForeign "llvm" "move" [] [p, ArgVar var' ty' FlowOut Ordinary False]) vals) 
+                     table
+        in  if List.null untabled 
+            then NoFork
+            else PrimFork var ty final (List.map (`prependToBody` body) untabled) Nothing
+unMergeFork fork = shouldnt $ "unMergeFork on non-merged " ++ show fork
 
 data LLBlock = LLBlock {
     llInstrs::[LLInstr],

@@ -141,13 +141,9 @@ transformForks caller body (aliasMap, deadCells) callSiteMap = do
                     endBranch
                 ) (fBodies ++ maybeToList deflt)
             completeFork
-        MergedFork var ty last table body -> do
+        MergedFork{} -> do
             lift $ logTransform "Unmerging fork:"
-            let unmerged = List.transpose
-                        $ List.map (\(var, ty, vals) -> List.map (\p -> Unplaced $ primMove p (ArgVar var ty FlowOut Ordinary True)) vals)
-                        table
-            let bodies = ProcBody [] $ PrimFork var ty last (List.map (`prependToBody` body) unmerged) Nothing
-            transformForks caller bodies (aliasMap, deadCells) callSiteMap
+            transformForks caller body{bodyFork=unMergeFork fork} (aliasMap, deadCells) callSiteMap
         NoFork -> do
             -- NoFork: transform prims done
             lift $ logTransform "No fork."
