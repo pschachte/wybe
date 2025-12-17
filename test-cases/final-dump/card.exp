@@ -833,9 +833,8 @@ proc char > public (1 calls)
 char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    tabled ~s##0:card.suit of
+    factored ~s##0:card.suit of
       tmp#20##0:wybe.char <- [ 'C':wybe.char, 'D':wybe.char, 'H':wybe.char, 'S':wybe.char ]
-
         foreign llvm move(~tmp#20##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
 

@@ -261,9 +261,8 @@ proc logmsg > public {semipure} (0 calls)
 logmsg(x##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    tabled ~x##0:wybe.bool of
+    factored ~x##0:wybe.bool of
       tmp#4##0:wybe.c_string <- [ c"false":wybe.c_string, c"true":wybe.c_string ]
-
         foreign c {impure} log_string(~tmp#4##0:wybe.c_string) @logging:nn:nn
 
 

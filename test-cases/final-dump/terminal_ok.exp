@@ -25,9 +25,8 @@ proc exit_bool > {terminal,semipure} (1 calls)
 exit_bool(b##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    tabled ~b##0:wybe.bool of
+    factored ~b##0:wybe.bool of
       tmp#2##0:wybe.int <- [ 0:wybe.int, 1:wybe.int ]
-
         foreign c {terminal,impure} exit(~tmp#2##0:wybe.int) @terminal_ok:nn:nn
 
   LLVM code       :

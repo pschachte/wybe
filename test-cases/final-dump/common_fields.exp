@@ -467,13 +467,10 @@ id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
-    tabled ~tmp#1##0:2 bit unsigned of
+    factored ~tmp#1##0:2 bit unsigned of
       tmp#6##0:wybe.int <- [ 0:wybe.int, 1:wybe.int, 2:wybe.int, 3:wybe.int ]
-
       tmp#7##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
-
       tmp#8##0:wybe.int <- [ 24:wybe.int, 15:wybe.int, 22:wybe.int, 5:wybe.int ]
-
         foreign lpvm access(~#rec##0:common_fields, ~tmp#8##0:wybe.int, ~tmp#7##0:wybe.int, ~tmp#6##0:wybe.int, ?#result##0:wybe.int) @common_fields:nn:nn
 proc id > public (7 calls)
 1: common_fields.id<1>
@@ -481,23 +478,17 @@ id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}; {}
   AliasPairs: [(#rec##0,#rec##1)]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
-    tabled ~tmp#1##0:2 bit unsigned of
+    factored ~tmp#1##0:2 bit unsigned of
       tmp#6##0:wybe.int <- [ 0:wybe.int, 1:wybe.int, 2:wybe.int, 3:wybe.int ]
-
       tmp#7##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
-
       tmp#8##0:wybe.int <- [ 24:wybe.int, 15:wybe.int, 22:wybe.int, 5:wybe.int ]
-
         foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, ~tmp#8##0:wybe.int, 0:wybe.int, ~tmp#7##0:wybe.int, ~tmp#6##0:wybe.int, ~#field##0:wybe.int) @common_fields:nn:nn
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
-    tabled ~tmp#1##0:2 bit unsigned of
+    factored ~tmp#1##0:2 bit unsigned of
       tmp#15##0:wybe.int <- [ 0:wybe.int, 1:wybe.int, 2:wybe.int, 3:wybe.int ]
-
       tmp#16##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
-
       tmp#17##0:wybe.int <- [ 24:wybe.int, 15:wybe.int, 22:wybe.int, 5:wybe.int ]
-
         foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, ~tmp#17##0:wybe.int, 1:wybe.int, ~tmp#16##0:wybe.int, ~tmp#15##0:wybe.int, ~#field##0:wybe.int) @common_fields:nn:nn
 
 
@@ -568,13 +559,10 @@ title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: [(#rec##0,#result##0)]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
-    tabled ~tmp#1##0:2 bit unsigned of
+    factored ~tmp#1##0:2 bit unsigned of
       tmp#6##0:wybe.int <- [ 0:wybe.int, 1:wybe.int, 2:wybe.int, 3:wybe.int ]
-
       tmp#7##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
-
       tmp#8##0:wybe.int <- [ 0:wybe.int, -1:wybe.int, -2:wybe.int, -3:wybe.int ]
-
         foreign lpvm access(~#rec##0:common_fields, ~tmp#8##0:wybe.int, ~tmp#7##0:wybe.int, ~tmp#6##0:wybe.int, ?#result##0:wybe.string) @common_fields:nn:nn
 proc title > public (0 calls)
 1: common_fields.title<1>

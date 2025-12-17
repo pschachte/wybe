@@ -4146,11 +4146,11 @@ showFork ind (PrimFork var ty last bodies deflt) =
     ++ maybe "" (\b -> startLine ind ++ "else:"
                        ++ showBlock (ind+4) b ++ "\n") deflt
 showFork ind (MergedFork var ty last vars body) =
-    startLine ind ++ "tabled " ++ (if last then "~" else "") ++ show var ++
+    startLine ind ++ "factored " ++ (if last then "~" else "") ++ show var ++
                   ":" ++ show ty ++ " of" ++
     List.concatMap (\(var, ty, vals) -> 
                         startLine (ind + 2) ++ show var ++ ":" ++ show ty ++
-                        " <- [ " ++ intercalate ", " (List.map show vals) ++ " ]\n") 
+                        " <- [ " ++ intercalate ", " (List.map show vals) ++ " ]") 
         vars
     ++ showBlock (ind+4) body
 

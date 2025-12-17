@@ -115,9 +115,8 @@ proc only_out > {noinline} (1 calls)
 only_out(b##0:wybe.bool)<{}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    tabled ~b##0:wybe.bool of
+    factored ~b##0:wybe.bool of
       tmp#1##0:wybe.int <- [ 3:wybe.int, 2:wybe.int ]
-
         foreign lpvm store(~tmp#1##0:wybe.int, <<global_flow_inference.res>>:wybe.int) @global_flow_inference:nn:nn
 
 
