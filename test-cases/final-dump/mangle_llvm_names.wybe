@@ -1,0 +1,12 @@
+module foo {
+    pub def {noinline} bar {
+        pass
+    }
+}
+
+def {noinline} `foo.bar` {
+    pass
+}
+
+`foo.bar`
+foo.bar
