@@ -343,7 +343,7 @@ define external fastcc i1 @"card.~=<0>"(i6 %"#left##0", i6 %"#right##0") {
   resources       : 
   procs           : 
 
-proc = > public {inline} (106 calls)
+proc = > public {inline} (196 calls)
 0: card.rank.=<0>
 =(#left##0:card.rank, #right##0:card.rank, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -351,7 +351,7 @@ proc = > public {inline} (106 calls)
     foreign llvm icmp_eq(~#left##0:card.rank, ~#right##0:card.rank, ?#success##0:wybe.bool)
 
 
-proc ace > public {inline} (3 calls)
+proc ace > public {inline} (4 calls)
 0: card.rank.ace<0>
 ace(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -364,46 +364,9 @@ proc char > public (1 calls)
 char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    case ~r##0:card.rank of
-    0:
-        foreign llvm move('2':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    1:
-        foreign llvm move('3':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    2:
-        foreign llvm move('4':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    3:
-        foreign llvm move('5':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    4:
-        foreign llvm move('6':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    5:
-        foreign llvm move('7':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    6:
-        foreign llvm move('8':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    7:
-        foreign llvm move('9':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    8:
-        foreign llvm move('T':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    9:
-        foreign llvm move('J':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    10:
-        foreign llvm move('Q':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    11:
-        foreign llvm move('K':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    12:
-        foreign llvm move('A':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
+    factored ~r##0:card.rank of
+      tmp#68##0:wybe.char <- [ '2':wybe.char, '3':wybe.char, '4':wybe.char, '5':wybe.char, '6':wybe.char, '7':wybe.char, '8':wybe.char, '9':wybe.char, 'T':wybe.char, 'J':wybe.char, 'Q':wybe.char, 'K':wybe.char, 'A':wybe.char ]
+        foreign llvm move(~tmp#68##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
     else:
         wybe.string.c_string<0>("shouldn't happen!":wybe.string, ?tmp#55##0:wybe.c_string) #27 @card:nn:nn
         foreign c {terminal,semipure} error_exit(c"card:42:22":wybe.c_string, ~tmp#55##0:wybe.c_string) @card:nn:nn
@@ -411,7 +374,7 @@ char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
 
 
 
-proc jack > public {inline} (6 calls)
+proc jack > public {inline} (10 calls)
 0: card.rank.jack<0>
 jack(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -419,7 +382,7 @@ jack(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(9:card.rank, ?#result##0:card.rank)
 
 
-proc king > public {inline} (4 calls)
+proc king > public {inline} (6 calls)
 0: card.rank.king<0>
 king(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -438,7 +401,7 @@ print(r##0:card.rank)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @card:nn:nn
 
 
-proc queen > public {inline} (5 calls)
+proc queen > public {inline} (8 calls)
 0: card.rank.queen<0>
 queen(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -446,7 +409,7 @@ queen(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(10:card.rank, ?#result##0:card.rank)
 
 
-proc r10 > public {inline} (7 calls)
+proc r10 > public {inline} (12 calls)
 0: card.rank.r10<0>
 r10(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -454,7 +417,7 @@ r10(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(8:card.rank, ?#result##0:card.rank)
 
 
-proc r2 > public {inline} (16 calls)
+proc r2 > public {inline} (28 calls)
 0: card.rank.r2<0>
 r2(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -462,7 +425,7 @@ r2(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(0:card.rank, ?#result##0:card.rank)
 
 
-proc r3 > public {inline} (14 calls)
+proc r3 > public {inline} (26 calls)
 0: card.rank.r3<0>
 r3(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -470,7 +433,7 @@ r3(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(1:card.rank, ?#result##0:card.rank)
 
 
-proc r4 > public {inline} (13 calls)
+proc r4 > public {inline} (24 calls)
 0: card.rank.r4<0>
 r4(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -478,7 +441,7 @@ r4(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(2:card.rank, ?#result##0:card.rank)
 
 
-proc r5 > public {inline} (12 calls)
+proc r5 > public {inline} (22 calls)
 0: card.rank.r5<0>
 r5(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -486,7 +449,7 @@ r5(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(3:card.rank, ?#result##0:card.rank)
 
 
-proc r6 > public {inline} (11 calls)
+proc r6 > public {inline} (20 calls)
 0: card.rank.r6<0>
 r6(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -494,7 +457,7 @@ r6(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(4:card.rank, ?#result##0:card.rank)
 
 
-proc r7 > public {inline} (10 calls)
+proc r7 > public {inline} (18 calls)
 0: card.rank.r7<0>
 r7(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -502,7 +465,7 @@ r7(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(5:card.rank, ?#result##0:card.rank)
 
 
-proc r8 > public {inline} (9 calls)
+proc r8 > public {inline} (16 calls)
 0: card.rank.r8<0>
 r8(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -510,7 +473,7 @@ r8(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(6:card.rank, ?#result##0:card.rank)
 
 
-proc r9 > public {inline} (8 calls)
+proc r9 > public {inline} (14 calls)
 0: card.rank.r9<0>
 r9(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -583,6 +546,7 @@ target triple    ????
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"card:42:22\00", align 8
 @"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"shouldn't happen!\00", align 8
 @"string#2" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"array#3" = private unnamed_addr constant [ ?? x i8 ] [i8 50, i8 51, i8 52, i8 53, i8 54, i8 55, i8 56, i8 57, i8 84, i8 74, i8 81, i8 75, i8 65]
 
 declare external fastcc i64 @"wybe.string.c_string<0>"(i64)
 declare external ccc void @error_exit(i64, i64)
@@ -600,47 +564,14 @@ define external fastcc i4 @"card.rank.ace<0>"() {
 }
 
 define external fastcc i8 @"card.rank.char<0>"(i4 %"r##0") {
-  switch i4 %"r##0", label %default.switch.0 [
-    i4 0, label %case.0.switch.0
-    i4 1, label %case.1.switch.0
-    i4 2, label %case.2.switch.0
-    i4 3, label %case.3.switch.0
-    i4 4, label %case.4.switch.0
-    i4 5, label %case.5.switch.0
-    i4 6, label %case.6.switch.0
-    i4 7, label %case.7.switch.0
-    i4 8, label %case.8.switch.0
-    i4 9, label %case.9.switch.0
-    i4 10, label %case.10.switch.0
-    i4 11, label %case.11.switch.0
-    i4 12, label %case.12.switch.0 ]
-case.0.switch.0:
-  ret i8 50
-case.1.switch.0:
-  ret i8 51
-case.2.switch.0:
-  ret i8 52
-case.3.switch.0:
-  ret i8 53
-case.4.switch.0:
-  ret i8 54
-case.5.switch.0:
-  ret i8 55
-case.6.switch.0:
-  ret i8 56
-case.7.switch.0:
-  ret i8 57
-case.8.switch.0:
-  ret i8 84
-case.9.switch.0:
-  ret i8 74
-case.10.switch.0:
-  ret i8 81
-case.11.switch.0:
-  ret i8 75
-case.12.switch.0:
-  ret i8 65
-default.switch.0:
+  %"tmp#80##0" = icmp sle i4 %"r##0", 13
+  br i1 %"tmp#80##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#82##0" = zext i4 %"r##0" to i64
+  %"tmp#81##0" = getelementptr inbounds [ ?? x i8 ], ptr @"array#3", i64 0, i64 %"tmp#82##0"
+  %"tmp#68##0" = load i8, ptr %"tmp#81##0"
+  ret i8 %"tmp#68##0"
+if.else.0:
   %"tmp#55##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
   call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#0" to i64 ), i64 %"tmp#55##0")
   ret i8 undef
@@ -820,7 +751,7 @@ define external fastcc i1 @"card.rank.~=<0>"(i4 %"#left##0", i4 %"#right##0") {
   resources       : 
   procs           : 
 
-proc = > public {inline} (16 calls)
+proc = > public {inline} (25 calls)
 0: card.suit.=<0>
 =(#left##0:card.suit, #right##0:card.suit, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -834,11 +765,11 @@ char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     factored ~s##0:card.suit of
-      tmp#20##0:wybe.char <- [ 'C':wybe.char, 'D':wybe.char, 'H':wybe.char, 'S':wybe.char ]
-        foreign llvm move(~tmp#20##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
+      tmp#23##0:wybe.char <- [ 'C':wybe.char, 'D':wybe.char, 'H':wybe.char, 'S':wybe.char ]
+        foreign llvm move(~tmp#23##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
 
-proc clubs > public {inline} (7 calls)
+proc clubs > public {inline} (10 calls)
 0: card.suit.clubs<0>
 clubs(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -846,7 +777,7 @@ clubs(?#result##0:card.suit)<{}; {}; {}>:
     foreign llvm move(0:card.suit, ?#result##0:card.suit)
 
 
-proc diamonds > public {inline} (5 calls)
+proc diamonds > public {inline} (8 calls)
 0: card.suit.diamonds<0>
 diamonds(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -854,7 +785,7 @@ diamonds(?#result##0:card.suit)<{}; {}; {}>:
     foreign llvm move(1:card.suit, ?#result##0:card.suit)
 
 
-proc hearts > public {inline} (4 calls)
+proc hearts > public {inline} (6 calls)
 0: card.suit.hearts<0>
 hearts(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -873,7 +804,7 @@ print(r##0:card.suit)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @card:nn:nn
 
 
-proc spades > public {inline} (3 calls)
+proc spades > public {inline} (4 calls)
 0: card.suit.spades<0>
 spades(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -928,10 +859,10 @@ define external fastcc i1 @"card.suit.=<0>"(i2 %"#left##0", i2 %"#right##0") {
 }
 
 define external fastcc i8 @"card.suit.char<0>"(i2 %"s##0") {
-  %"tmp#24##0" = zext i2 %"s##0" to i64
-  %"tmp#23##0" = getelementptr inbounds [ ?? x i8 ], ptr @"array#0", i64 0, i64 %"tmp#24##0"
-  %"tmp#20##0" = load i8, ptr %"tmp#23##0"
-  ret i8 %"tmp#20##0"
+  %"tmp#27##0" = zext i2 %"s##0" to i64
+  %"tmp#26##0" = getelementptr inbounds [ ?? x i8 ], ptr @"array#0", i64 0, i64 %"tmp#27##0"
+  %"tmp#23##0" = load i8, ptr %"tmp#26##0"
+  ret i8 %"tmp#23##0"
 }
 
 define external fastcc i2 @"card.suit.clubs<0>"() {

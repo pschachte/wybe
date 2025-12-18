@@ -694,7 +694,7 @@ tb(tb1##0:wybe.int, ?#result##0:dead_cell_size.t)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t) @dead_cell_size:nn:nn
     foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#result##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~tb1##0:wybe.int) @dead_cell_size:nn:nn
-proc tb > public {inline} (14 calls)
+proc tb > public {inline} (20 calls)
 1: dead_cell_size.t.tb<1>
 tb(?tb1##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -780,7 +780,7 @@ tc(tc1##0:wybe.int, tc2##0:wybe.int, tc3##0:wybe.int, ?#result##0:dead_cell_size
     foreign lpvm mutate(~#rec##1:dead_cell_size.t, ?#rec##2:dead_cell_size.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc2##0:wybe.int) @dead_cell_size:nn:nn
     foreign lpvm mutate(~#rec##2:dead_cell_size.t, ?#rec##3:dead_cell_size.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc3##0:wybe.int) @dead_cell_size:nn:nn
     foreign llvm or(~#rec##3:dead_cell_size.t, 1:wybe.int, ?#result##0:dead_cell_size.t) @dead_cell_size:nn:nn
-proc tc > public {inline} (11 calls)
+proc tc > public {inline} (20 calls)
 1: dead_cell_size.t.tc<1>
 tc(?tc1##0:wybe.int, ?tc2##0:wybe.int, ?tc3##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -970,7 +970,7 @@ td(td1##0:wybe.int, ?#result##0:dead_cell_size.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t) @dead_cell_size:nn:nn
     foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~td1##0:wybe.int) @dead_cell_size:nn:nn
     foreign llvm or(~#rec##1:dead_cell_size.t, 2:wybe.int, ?#result##0:dead_cell_size.t) @dead_cell_size:nn:nn
-proc td > public {inline} (5 calls)
+proc td > public {inline} (8 calls)
 1: dead_cell_size.t.td<1>
 td(?td1##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

@@ -472,7 +472,7 @@ c01(f01##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#result##0:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01##0:wybe.int) @multictr2:nn:nn
-proc c01 > public {inline} (24 calls)
+proc c01 > public {inline} (40 calls)
 1: multictr2.t.c01<1>
 c01(?f01##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -498,7 +498,7 @@ c02(f02##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 1:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c02 > public {inline} (19 calls)
+proc c02 > public {inline} (36 calls)
 1: multictr2.t.c02<1>
 c02(?f02##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -524,7 +524,7 @@ c03(f03##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 2:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c03 > public {inline} (17 calls)
+proc c03 > public {inline} (32 calls)
 1: multictr2.t.c03<1>
 c03(?f03##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -550,7 +550,7 @@ c04(f04##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 3:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c04 > public {inline} (15 calls)
+proc c04 > public {inline} (28 calls)
 1: multictr2.t.c04<1>
 c04(?f04##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -576,7 +576,7 @@ c05(f05##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 4:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c05 > public {inline} (13 calls)
+proc c05 > public {inline} (24 calls)
 1: multictr2.t.c05<1>
 c05(?f05##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -602,7 +602,7 @@ c06(f06##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 5:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c06 > public {inline} (11 calls)
+proc c06 > public {inline} (20 calls)
 1: multictr2.t.c06<1>
 c06(?f06##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -628,7 +628,7 @@ c07(f07##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 6:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c07 > public {inline} (9 calls)
+proc c07 > public {inline} (16 calls)
 1: multictr2.t.c07<1>
 c07(?f07##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -656,7 +656,7 @@ c08(f08_a##0:wybe.int, f08_b##0:wybe.int, f08_c##0:wybe.float, ?#result##0:multi
     foreign lpvm mutate(~#rec##1:multictr2.t, ?#rec##2:multictr2.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_b##0:wybe.int) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##2:multictr2.t, ?#rec##3:multictr2.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_c##0:wybe.float) @multictr2:nn:nn
     foreign llvm or(~#rec##3:multictr2.t, 7:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c08 > public {inline} (9 calls)
+proc c08 > public {inline} (16 calls)
 1: multictr2.t.c08<1>
 c08(?f08_a##0:wybe.int, ?f08_b##0:wybe.int, ?f08_c##0:wybe.float, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

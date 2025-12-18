@@ -65,8 +65,8 @@ module AST (
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
-  ProcBody(..), PrimFork(..), prependToBody, appendToBody, unMergeFork, Ident, VarName,
-  ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
+  ProcBody(..), PrimFork(..), prependToBody, appendToBody, unMergeFork, guardedMergedFork, 
+  Ident, VarName, ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
@@ -2471,7 +2471,9 @@ data PrimFork =
       forkTable::[(PrimVarName, TypeSpec, [PrimArg])],
                                 -- ^Each variable factored out from each branch,
                                 -- with the list of values indexed by the branch
-      forkBody::ProcBody        -- ^The rest of the "branch"
+      forkBody::ProcBody,       -- ^The rest of the "branch",
+      forkDefault::Maybe ProcBody
+                                -- ^The branch if the var is out of range
     }
     deriving (Eq, Show, Generic)
 
@@ -2492,16 +2494,27 @@ prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
 prependToBody before (ProcBody prims fork)
     = ProcBody (before++prims) fork
 
--- |Un-merge a fork, replacing the tabled with a series of moved in the PrimFork branches
+-- |Un-merge a fork, replacing the tabled variables with a series of moved in the PrimFork branches
 unMergeFork :: PrimFork -> PrimFork
-unMergeFork (MergedFork var ty final table body) =
+unMergeFork (MergedFork var ty final table body dlft) =
         let untabled = List.transpose 
                      $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ PrimForeign "llvm" "move" [] [p, ArgVar var' ty' FlowOut Ordinary False]) vals) 
                      table
         in  if List.null untabled 
             then NoFork
-            else PrimFork var ty final (zip [0..] (List.map (`prependToBody` body) untabled)) Nothing
+            else PrimFork var ty final (zip [0..] (List.map (`prependToBody` body) untabled)) dlft
 unMergeFork fork = shouldnt $ "unMergeFork on non-merged " ++ show fork
+
+-- |Replace a default-y MergedFork with a guarded non-defaulted MergedFork in a ProcBody,
+-- with the given var used int the fork
+guardedMergedFork :: PrimVarName -> PrimVarName -> TypeSpec -> Integer -> ProcBody -> Maybe ProcBody -> ProcBody
+guardedMergedFork _   _   _  _     body Nothing     = body
+guardedMergedFork tmp var ty limit body (Just dflt) = 
+    ProcBody
+        [Unplaced $ PrimForeign "llvm" "icmp_sle" []
+          [ArgVar var ty FlowIn Ordinary False, ArgInt limit ty, ArgVar tmp bit FlowOut Ordinary False]]
+        $ PrimFork tmp bit True (zip [0..] [dflt,body]) Nothing
+  where bit = Representation $ Bits 1
 
 data LLBlock = LLBlock {
     llInstrs::[LLInstr],
@@ -2659,15 +2672,14 @@ foldBodyPrims primFn emptyConj abDisj (ProcBody pprims fork) =
                      []       -> a
                      (pp:pps) -> primFn (final && List.null pps) (content pp) a)
                  emptyConj $ tails pprims
+        foldAll = List.foldl (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
     in case fork of
       NoFork -> common
       PrimFork _ _ _ [] _ -> shouldnt "foldBodyPrims empty clause list in a PrimFork"
       PrimFork _ _ _ (body:bodies) deflt ->
-          List.foldl (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
-                (foldBodyPrims primFn common abDisj $ snd body)
-                $ List.map snd bodies ++ maybeToList deflt
-      MergedFork{forkBody=body} ->
-        common `abDisj` foldBodyPrims primFn common abDisj body
+          foldAll (foldBodyPrims primFn common abDisj $ snd body) $ List.map snd bodies ++ maybeToList deflt
+      MergedFork{forkBody=body, forkDefault=deflt} ->
+          foldAll (foldBodyPrims primFn common abDisj body) $ maybeToList deflt
 
 
 -- |Similar to foldBodyPrims, except that it assumes that abstract
@@ -2687,16 +2699,16 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
                      []       -> a
                      (pp:pps) -> primFn (final && List.null pps) (content pp) a)
                  emptyConj $ tails pprims
+        foldAll = (abConj common .) . List.foldl (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
     in case fork of
       NoFork -> common
       PrimFork _ _ _ [] _ -> shouldnt "foldBodyDistrib empty clause list in a PrimFork"
       PrimFork _ _ _ (body:bodies) deflt ->
-        abConj common $
-        List.foldl (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
-        (foldBodyPrims primFn common abDisj $ snd body)
-        $ List.map snd bodies ++ maybeToList deflt
-      MergedFork{forkBody=body} ->
-        abConj common (foldBodyPrims primFn common abDisj body)
+        foldAll (foldBodyDistrib primFn common abDisj abConj $ snd body) $ List.map snd bodies ++ maybeToList deflt
+      MergedFork{forkBody=body, forkDefault=deflt} ->
+        foldAll (foldBodyDistrib primFn common abDisj abConj body) $ maybeToList deflt
+            
+            
 
 
 -- |Traverse a ProcBody applying a monadic primFn to every Prim and applying a
@@ -2710,9 +2722,10 @@ mapLPVMBodyM primFn argFn (ProcBody pprims fork) = do
         NoFork -> return ()
         (PrimFork _ _ _ bodies deflt) -> do
             mapM_ (mapLPVMBodyM primFn argFn . snd) bodies
-            maybe (return ()) (mapLPVMBodyM primFn argFn) deflt
-        MergedFork{forkBody=body} ->
+            forM_ deflt (mapLPVMBodyM primFn argFn)
+        MergedFork{forkBody=body,forkDefault=deflt} -> do
             mapLPVMBodyM primFn argFn body
+            forM_ deflt (mapLPVMBodyM primFn argFn)
 
 
 -- |Handle a single Prim for mapLPVMBodyM doing the needful.
@@ -4145,7 +4158,7 @@ showFork ind (PrimFork var ty last bodies deflt) =
                         showBlock (ind+4) body ++ "\n") bodies
     ++ maybe "" (\b -> startLine ind ++ "else:"
                        ++ showBlock (ind+4) b ++ "\n") deflt
-showFork ind (MergedFork var ty last vars body) =
+showFork ind (MergedFork var ty last vars body deflt) =
     startLine ind ++ "factored " ++ (if last then "~" else "") ++ show var ++
                   ":" ++ show ty ++ " of" ++
     List.concatMap (\(var, ty, vals) -> 
@@ -4153,6 +4166,8 @@ showFork ind (MergedFork var ty last vars body) =
                         " <- [ " ++ intercalate ", " (List.map show vals) ++ " ]") 
         vars
     ++ showBlock (ind+4) body
+    ++ maybe "" (\b -> startLine ind ++ "else:"
+                       ++ showBlock (ind+4) b ++ "\n") deflt
 
 
 -- |Show a list of placed prims.

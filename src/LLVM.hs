@@ -323,10 +323,11 @@ preScanForks _ NoFork = return ()
 preScanForks mod PrimFork{forkBodies=bodies, forkDefault=mbDflt} = do
     mapM_ (preScanBodyForks mod . snd) bodies
     forM_ mbDflt $ preScanBodyForks mod
-preScanForks mod MergedFork{forkTable=table, forkBody=body} = do
+preScanForks mod MergedFork{forkTable=table, forkBody=body, forkDefault=mbDflt} = do
     mapM_ (recordConst . ArraySpec . thd3) table
     mapM_ (mapM_ (prescanArg mod) . thd3) table
     preScanBodyForks mod body
+    forM_ mbDflt $ preScanBodyForks mod
 
 
 
@@ -712,8 +713,13 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
                 (Signed _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
                 (rep,_,_) -> shouldnt $ "Switching on " ++ show rep ++ " type "
                                 ++ show ty
-        MergedFork var ty _ table body -> do 
+        MergedFork var ty _ table body Nothing -> do
+            releaseDeferredCall
             writeAssemblyMergedFork outs var ty table body
+        MergedFork var ty _ table body dflt -> do 
+            tmp <- makeTemp
+            writeAssemblyBody outs $ guardedMergedFork tmp var ty (genericLength $ thd3 $ head table) 
+                                        (ProcBody [] fork{forkDefault=Nothing}) dflt
 
 
 -- | Generate and write out an LLVM if-then-else (switch on an i1 value)

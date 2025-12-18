@@ -624,7 +624,7 @@ bar(a##0:wybe.int, b##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##1:ctor_visibility.with_fields, ?#rec##2:ctor_visibility.with_fields, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~b##0:wybe.int) @ctor_visibility:nn:nn
     foreign llvm or(~#rec##2:ctor_visibility.with_fields, 1:wybe.int, ?#result##0:ctor_visibility.with_fields) @ctor_visibility:nn:nn
-proc bar > public {inline} (7 calls)
+proc bar > public {inline} (12 calls)
 1: ctor_visibility.with_fields.bar<1>
 bar(?a##0:wybe.int, ?b##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -651,7 +651,7 @@ foo(a##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields, ?#result##0:ctor_visibility.with_fields, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
-proc foo > public {inline} (11 calls)
+proc foo > public {inline} (14 calls)
 1: ctor_visibility.with_fields.foo<1>
 foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1033,7 +1033,7 @@ bar(b##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~b##0:wybe.int) @ctor_visibility:nn:nn
     foreign llvm or(~#rec##1:ctor_visibility.with_fields2, 1:wybe.int, ?#result##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
-proc bar > {inline} (5 calls)
+proc bar > {inline} (8 calls)
 1: ctor_visibility.with_fields2.bar<1>
 bar(?b##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1058,7 +1058,7 @@ foo(a##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields2, ?#result##0:ctor_visibility.with_fields2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
-proc foo > public {inline} (10 calls)
+proc foo > public {inline} (12 calls)
 1: ctor_visibility.with_fields2.foo<1>
 foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

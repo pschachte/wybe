@@ -345,7 +345,7 @@ proc #cont#6 > {semipure} (3 calls)
     foreign lpvm store(~%tmp#140##0:wybe.int, <<failure_backtrack.s>>:wybe.int) @failure_backtrack:nn:nn
 
 
-proc nope > {noinline} (15 calls)
+proc nope > {noinline} (17 calls)
 0: failure_backtrack.nope<0>
 nope(?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

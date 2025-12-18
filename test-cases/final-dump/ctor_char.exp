@@ -165,7 +165,7 @@ ctor(c##0:wybe.char, ?#result##3:ctor_char)<{}; {}; {}>:
     foreign lpvm cast(~c##0:wybe.char, ?#temp##0:ctor_char) @ctor_char:nn:nn
     foreign llvm shl(~#temp##0:ctor_char, 1:ctor_char, ?#temp##1:ctor_char) @ctor_char:nn:nn
     foreign llvm or(~#temp##1:ctor_char, 512:ctor_char, ?#result##3:ctor_char) @ctor_char:nn:nn
-proc ctor > {inline} (13 calls)
+proc ctor > {inline} (15 calls)
 1: ctor_char.ctor<1>
 ctor(?c##0:wybe.char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -226,7 +226,7 @@ other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char) @ctor_char:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_char, ?#rec##1:ctor_char, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char) @ctor_char:nn:nn
     foreign llvm or(~#rec##1:ctor_char, 1:wybe.int, ?#result##0:ctor_char) @ctor_char:nn:nn
-proc other_ctor > {inline} (5 calls)
+proc other_ctor > {inline} (8 calls)
 1: ctor_char.other_ctor<1>
 other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

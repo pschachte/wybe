@@ -7,6 +7,7 @@
 --           : LICENSE in the root directory of this project.
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 
 module LastCallAnalysis (lastCallProcessModSCC, lastCallAnalyseProc) where
 import AST
@@ -20,10 +21,11 @@ import Data.List.Predicate (allUnique)
 import Callers (getSccProcs)
 import Data.Graph (SCC (AcyclicSCC, CyclicSCC))
 import Control.Monad.State (StateT (runStateT), MonadTrans (lift), execStateT, execState, runState, MonadState (get, put), gets, modify)
-import Control.Monad ( liftM, (>=>), when, unless, MonadPlus (mzero) )
+import Control.Monad ( liftM, (>=>), when, unless, MonadPlus (mzero), forM )
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
+import Control.Functor.HT (mapSnd)
 
 
 -- BEGIN MAJOR DOC
@@ -124,10 +126,10 @@ lastCallAnalyseProc def = do
             logLastCallAnalysis "skipping closure proc, shouldn't have direct tail-recursion anyway"
             return def
         _ -> do
-            (maybeBody', finalState) <- runStateT (runMaybeT (mapProcLeavesM transformLeaf (0,body)))
+            (maybeBody', finalState) <- runStateT (runMaybeT (mapProcLeavesM transformLeaf body))
                 LeafTransformState { procSpec = spec, originalProto = proto, transformedProto = Nothing }
             case (maybeBody', transformedProto finalState) of
-                (Just (_,body'), Just proto') -> do
+                (Just body', Just proto') -> do
                     logLastCallAnalysis $ "new proto: " ++ show proto'
                     return def {procImpln = impln{procImplnProto = proto', procImplnBody = body'}}
                 _ -> return def
@@ -360,7 +362,7 @@ tryAddToMutateChain _ _ _ ([]:_) = Left "a mutate chain shouldnt be empty"
 fixupCallsInProc :: ProcDef -> Compiler ProcDef
 fixupCallsInProc def@ProcDef { procImpln = impln@ProcDefPrim { procImplnBody = body}} = do
     logLastCallAnalysis $ ">>> Fix up calls in proc: " ++ show (procName def)
-    (_,body') <- mapProcPrimsM (updatePlacedM fixupCallsInPrim) (0,body)
+    body' <- mapProcPrimsM (updatePlacedM fixupCallsInPrim) body
     return $ def { procImpln = impln { procImplnBody = body' } }
 fixupCallsInProc _ = shouldnt "uncompiled"
 
@@ -400,32 +402,34 @@ _partitionLastCall (x:xs) =
             in (lastCall, x:afterLastCall)
 
 -- | Applies a transformation to the leaves of a proc body
-mapProcLeavesM :: (Monad t) => ([Placed Prim] -> t [Placed Prim]) -> (Integer, ProcBody) -> t (Integer,ProcBody)
-mapProcLeavesM f (n,leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork }) = do
+mapProcLeavesM :: (Monad t) => ([Placed Prim] -> t [Placed Prim]) -> ProcBody -> t ProcBody
+mapProcLeavesM f leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork } = do
         prims <- f prims
-        return (n,leafBlock { bodyPrims = prims })
-mapProcLeavesM f (n,current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} }) = do
-        -- XXX must map over default, too
-        bodies' <- mapM (mapProcLeavesM f) bodies
-        return (n,current { bodyFork = fork { forkBodies = bodies' } })
-mapProcLeavesM f (n,current@ProcBody { bodyFork = fork@MergedFork{forkBody = body} }) = do
-        (_,body') <- mapProcLeavesM f (0,body)
-        return (n,current { bodyFork = fork { forkBody = body' } })
+        return leafBlock { bodyPrims = prims }
+mapProcLeavesM f current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies, forkDefault = dflt} } = do
+        bodies' <- mapM (mapSnd $ mapProcLeavesM f) bodies
+        dflt' <- forM dflt (mapProcLeavesM f)
+        return current { bodyFork = fork { forkBodies = bodies', forkDefault = dflt' } }
+mapProcLeavesM f current@ProcBody { bodyFork = fork@MergedFork{forkBody = body, forkDefault = dflt} } = do
+        body' <- mapProcLeavesM f body
+        dflt' <- forM dflt (mapProcLeavesM f)
+        return current { bodyFork = fork { forkBody = body', forkDefault = dflt' } }
 
 -- | Applies a transformation to each prim in a proc
-mapProcPrimsM :: (Monad t) => (Placed Prim -> t (Placed Prim)) -> (Integer, ProcBody) -> t (Integer, ProcBody)
-mapProcPrimsM fn (n,body@ProcBody { bodyPrims = prims, bodyFork = NoFork }) = do
+mapProcPrimsM :: (Monad t) => (Placed Prim -> t (Placed Prim)) -> ProcBody -> t ProcBody
+mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = NoFork } = do
         prims' <- mapM fn prims
-        return (n,body { bodyPrims = prims' })
-mapProcPrimsM fn (n,body@ProcBody { bodyPrims = prims, bodyFork = fork@PrimFork{forkBodies = bodies } }) = do
-        -- XXX must map over default, too
+        return body { bodyPrims = prims' }
+mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@PrimFork{forkBodies = bodies, forkDefault = dflt } } = do
         prims' <- mapM fn prims
-        bodies <- mapM (mapProcPrimsM fn) bodies
-        return (n,body { bodyPrims = prims', bodyFork = fork { forkBodies = bodies } })
-mapProcPrimsM fn (n,body@ProcBody { bodyPrims = prims, bodyFork = fork@MergedFork{forkBody = forkBody} }) = do
+        bodies' <- mapM (mapSnd $ mapProcPrimsM fn) bodies
+        dflt' <- forM dflt (mapProcPrimsM fn)
+        return body { bodyPrims = prims', bodyFork = fork { forkBodies = bodies', forkDefault = dflt' } }
+mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@MergedFork{forkBody = forkBody, forkDefault = dflt} } = do
         prims' <- mapM fn prims
-        (_,body') <- mapProcPrimsM fn (0,forkBody)
-        return (n,body { bodyPrims = prims', bodyFork = fork { forkBody = body' } })
+        body' <- mapProcPrimsM fn forkBody
+        dflt' <- forM dflt (mapProcPrimsM fn)
+        return body { bodyPrims = prims', bodyFork = fork { forkBody = body', forkDefault = dflt' } }
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

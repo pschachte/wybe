@@ -275,14 +275,12 @@ updateForkGlobalFlows :: Map ProcSpec GlobalFlows -> PrimFork -> Compiler PrimFo
 updateForkGlobalFlows _ NoFork = return NoFork
 updateForkGlobalFlows sccFlows (PrimFork var ty final bodies deflt) = do
     bodies' <- mapM (updateBodyGlobalFlows sccFlows . snd) bodies
-    deflt' <- case deflt of
-        Nothing -> return Nothing
-        Just d -> Just <$> updateBodyGlobalFlows sccFlows d
+    deflt' <- forM deflt $ updateBodyGlobalFlows sccFlows
     return $ PrimFork var ty final (zip (fst <$> bodies) bodies') deflt'
-updateForkGlobalFlows sccFlows fork@MergedFork{forkBody=body} = do
+updateForkGlobalFlows sccFlows fork@MergedFork{forkBody=body,forkDefault=deflt} = do
     body' <- updateBodyGlobalFlows sccFlows body
-    return fork{forkBody=body'}
-
+    deflt' <- forM deflt $ updateBodyGlobalFlows sccFlows
+    return fork{forkBody=body',forkDefault=deflt'}
 
 -- | Update the GlobalFlows of a Prim
 -- If the prim is a call to a proc in the Set of ProcSpecs, we update the
