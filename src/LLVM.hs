@@ -485,10 +485,10 @@ writeConstDeclaration spec@(CStringSpec str) n = do
 writeConstDeclaration spec@(ClosureSpec pspec args) n = do
     let closureName = specialName2 "closure" $ show n
     modify $ \s -> s { constNames=Map.insert spec closureName $ constNames s}
-    let pname = show pspec
+    argRep <- typeRep AnyType
     paramTys <- partitionClosureParams pspec args >>= mapM typeRep . (argType <$>) . fst 
     declareStructConstant closureName
-        ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
+        ((ArgGlobal (GlobalVariable $ mangleProcSpec pspec) (Representation CPointer), CPointer)
          : zip args paramTys)
         Nothing
 writeConstDeclaration spec@(ArraySpec args) n = do
@@ -1536,7 +1536,7 @@ llvmValue (ArgUndef _) = return "undef"
 
 -- | The LLVMArg translation of a ProcSpec.
 funcRef :: ProcSpec -> LLVMArg
-funcRef pspec = "ptr " ++ llvmGlobalName (show pspec)
+funcRef pspec = "ptr " ++ fst (llvmProcName pspec)
 
 
 -- | The variable name of a PrimArg; report an error if not a variable.
@@ -2171,7 +2171,14 @@ stackAlloc result size = do
 llvmProcName :: ProcSpec -> (LLVMName,String)
 llvmProcName ProcSpec{procSpecMod=[],procSpecName=""} =
     (llvmGlobalName "main", "ccc")
-llvmProcName pspec = (llvmGlobalName $ show pspec, "fastcc")
+llvmProcName pspec = 
+    (llvmGlobalName $ mangleProcSpec pspec, "fastcc")
+
+
+-- | Mangle a proc spec
+mangleProcSpec :: ProcSpec -> String
+mangleProcSpec pspec@ProcSpec{procSpecMod=mod} = 
+    show pspec{procSpecMod=(++ [specialChar]) <$> mod}
 
 
 -- | Make a suitable LLVM name for a global variable or constant.  We prefix it
