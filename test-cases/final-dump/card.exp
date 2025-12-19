@@ -564,7 +564,7 @@ define external fastcc i4 @"card.rank.ace<0>"() {
 }
 
 define external fastcc i8 @"card.rank.char<0>"(i4 %"r##0") {
-  %"tmp#80##0" = icmp sle i4 %"r##0", 13
+  %"tmp#80##0" = icmp ule i4 %"r##0", 13
   br i1 %"tmp#80##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#82##0" = zext i4 %"r##0" to i64

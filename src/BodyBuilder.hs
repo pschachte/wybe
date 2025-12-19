@@ -1596,13 +1596,13 @@ markIfLastUse _ arg = arg
 -- Yields a ProcBody with the fork, or NoFork if all branches can be merged with no substitutions
 rebuildFork :: PrimVarName -> TypeSpec -> Bool -> [(Integer, ProcBody)] -> Maybe ProcBody -> BkwdBuilder ProcBody
 rebuildFork var ty lastUse brs dflt = do
-  mbMerged <- mergeBranches (FactoredVars Map.empty Map.empty) brs
+  mbMerged <- mergeBranches (FactoredVars Map.empty Map.empty) brs dflt
   case mbMerged of
-    Just (FactoredVars{factored=factored}, mergedBody) 
-      | Map.null factored -> 
-          bkwdFreshVar <&> \tmp -> guardedMergedFork tmp var ty (maximum (fst <$> brs)) mergedBody dflt
-      | otherwise -> 
-          return $ ProcBody [] $ MergedFork var ty lastUse (flattenFactored <$> Map.assocs factored) mergedBody dflt
+    Just (FactoredVars{factored=factored}, (mergedBody, dflt'))
+      | Map.null factored ->
+          bkwdFreshVar <&> \tmp -> guardedMergedFork tmp var ty (maximum (fst <$> brs)) mergedBody dflt'
+      | otherwise ->
+          return $ ProcBody [] $ MergedFork var ty lastUse (flattenFactored <$> Map.assocs factored) mergedBody dflt'
     _ -> return $ ProcBody [] $ PrimFork var ty lastUse brs dflt
   where
     flattenFactored (var,(ty,vals)) = (var, ty, vals ++ replicate (length brs - length vals) (last vals))
@@ -1619,15 +1619,26 @@ data FactoredVars = FactoredVars {
 } deriving (Show)
 
 -- | Try to merge all branches, with Nothing if the branches cannot be merged
-mergeBranches :: FactoredVars -> [(Integer, ProcBody)]-> BkwdBuilder (Maybe (FactoredVars, ProcBody))
-mergeBranches vars brs@(_:_)
-  | idxs == List.take (length brs) [0..] = do
-    logBkwd $ "Trying to merge " ++ intercalate "\n" (show <$> brs)
-    merged <- foldrMaybeM (flip $ uncurry $ \vars' -> mergeBodies vars'{renamed=renamed vars}) (vars, last brs') $ init brs'
-    logBkwd $ "Merged into " ++ show merged
-    return merged
+mergeBranches :: FactoredVars -> [(Integer, ProcBody)] -> Maybe ProcBody -> BkwdBuilder (Maybe (FactoredVars, (ProcBody, Maybe ProcBody)))
+mergeBranches vars brs@(_:_) dflt = do
+    logBkwd $ "Trying to merge " ++ intercalate "\n    " (show <$> brs) ++ "\n  with default:" ++ show dflt
+    mergedBrs <- foldrMaybeM (flip $ uncurry $ \vars' -> mergeBodies vars'{renamed=renamed vars}) (vars, last brs') $ init brs'
+    mergedAll <- join <$> forM mergedBrs (\(vars', merged') -> do
+      mbMergedDflt <- join <$> forM dflt (mergeBodies vars'{renamed=renamed vars} merged')
+      return $ case mbMergedDflt of
+        -- if there are _no_ factored vars, we can merge with dflt
+        Just (vars''@FactoredVars{factored=factored'}, merged'') | factored' == factored vars
+          -> Just (vars'', (merged'', Nothing))
+        _ -> 
+          -- when dense, can merge cases, keeping default
+          if idxs == List.take (length brs) [0..]
+          then Just (vars', (merged', dflt))
+          else Nothing
+      )
+    logBkwd $ "Merged into " ++ show mergedAll
+    return mergedAll
   where (idxs, brs') = unzip brs
-mergeBranches _ brs = do
+mergeBranches _ _ _ = do
     logBkwd "Cannot merge non-dense branches"
     return Nothing
 
@@ -1697,7 +1708,7 @@ mergeArg _ vars a@ArgString{}   b@ArgString{}   = mergeArg' vars a b
 mergeArg _ vars a@ArgChar{}     b@ArgChar{}     = mergeArg' vars a b
 mergeArg _ vars a@ArgUnneeded{} b@ArgUnneeded{} = mergeArg' vars a b
 mergeArg _ vars a@ArgUndef{}    b@ArgUndef{}    = mergeArg' vars a b
-mergeArg _ vars a b | not (argIsConst a || argIsConst b) 
+mergeArg _ vars a b | not (argIsConst a || argIsConst b)
                                                 = return Nothing
 mergeArg _ vars a@ArgClosure{}  b@ArgClosure{}  = mergeArg' vars a b
 mergeArg _ vars _               _               = return Nothing

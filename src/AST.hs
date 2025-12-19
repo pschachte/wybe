@@ -2511,7 +2511,7 @@ guardedMergedFork :: PrimVarName -> PrimVarName -> TypeSpec -> Integer -> ProcBo
 guardedMergedFork _   _   _  _     body Nothing     = body
 guardedMergedFork tmp var ty limit body (Just dflt) = 
     ProcBody
-        [Unplaced $ PrimForeign "llvm" "icmp_sle" []
+        [Unplaced $ PrimForeign "llvm" "icmp_ule" []
           [ArgVar var ty FlowIn Ordinary False, ArgInt limit ty, ArgVar tmp bit FlowOut Ordinary False]]
         $ PrimFork tmp bit True (zip [0..] [dflt,body]) Nothing
   where bit = Representation $ Bits 1
