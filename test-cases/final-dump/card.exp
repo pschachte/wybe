@@ -365,7 +365,7 @@ char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     factored ~r##0:card.rank of
-      tmp#68##0:wybe.char <- [ '2':wybe.char, '3':wybe.char, '4':wybe.char, '5':wybe.char, '6':wybe.char, '7':wybe.char, '8':wybe.char, '9':wybe.char, 'T':wybe.char, 'J':wybe.char, 'Q':wybe.char, 'K':wybe.char, 'A':wybe.char ]
+      ?tmp#68##0:wybe.char <- [ '2':wybe.char, '3':wybe.char, '4':wybe.char, '5':wybe.char, '6':wybe.char, '7':wybe.char, '8':wybe.char, '9':wybe.char, 'T':wybe.char, 'J':wybe.char, 'Q':wybe.char, 'K':wybe.char, 'A':wybe.char ]
         foreign llvm move(~tmp#68##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
     else:
         wybe.string.c_string<0>("shouldn't happen!":wybe.string, ?tmp#55##0:wybe.c_string) #27 @card:nn:nn
@@ -765,7 +765,7 @@ char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     factored ~s##0:card.suit of
-      tmp#23##0:wybe.char <- [ 'C':wybe.char, 'D':wybe.char, 'H':wybe.char, 'S':wybe.char ]
+      ?tmp#23##0:wybe.char <- [ 'C':wybe.char, 'D':wybe.char, 'H':wybe.char, 'S':wybe.char ]
         foreign llvm move(~tmp#23##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
 

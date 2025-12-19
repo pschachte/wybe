@@ -65,7 +65,7 @@ module AST (
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
-  ProcBody(..), PrimFork(..), prependToBody, appendToBody, unMergeFork, guardedMergedFork, 
+  ProcBody(..), PrimFork(..), MergedForkTable, prependToBody, appendToBody, unMergeFork, guardedMergedFork, 
   Ident, VarName, ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
@@ -2468,7 +2468,7 @@ data PrimFork =
       forkVar::PrimVarName,     -- ^The variable that selects branch to take
       forkVarType::TypeSpec,    -- ^The Wybe type of the forkVar
       forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
-      forkTable::[(PrimVarName, TypeSpec, [PrimArg])],
+      forkTable::MergedForkTable,
                                 -- ^Each variable factored out from each branch,
                                 -- with the list of values indexed by the branch
       forkBody::ProcBody,       -- ^The rest of the "branch",
@@ -2477,6 +2477,7 @@ data PrimFork =
     }
     deriving (Eq, Show, Generic)
 
+type MergedForkTable = [(PrimVarName, TypeSpec, [PrimArg])]
 
 -- |Add the specified statements at the end of the given body
 appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
@@ -4162,7 +4163,7 @@ showFork ind (MergedFork var ty last vars body deflt) =
     startLine ind ++ "factored " ++ (if last then "~" else "") ++ show var ++
                   ":" ++ show ty ++ " of" ++
     List.concatMap (\(var, ty, vals) -> 
-                        startLine (ind + 2) ++ show var ++ ":" ++ show ty ++
+                        startLine (ind + 2) ++ "?" ++ show var ++ ":" ++ show ty ++
                         " <- [ " ++ intercalate ", " (List.map show vals) ++ " ]") 
         vars
     ++ showBlock (ind+4) body

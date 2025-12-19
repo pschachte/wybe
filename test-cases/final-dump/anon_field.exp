@@ -490,43 +490,43 @@ if.else.0:
 }
 
 define external fastcc i1 @"anon_field.=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#43##0" = trunc i64 %"#left##0" to i2
-  %"tmp#13##0" = and i2 %"tmp#43##0", 3
+  %"tmp#45##0" = trunc i64 %"#left##0" to i2
+  %"tmp#13##0" = and i2 %"tmp#45##0", 3
   switch i2 %"tmp#13##0", label %case.3.switch.0 [
     i2 0, label %case.0.switch.0
     i2 1, label %case.1.switch.0
     i2 2, label %case.2.switch.0
     i2 3, label %case.3.switch.0 ]
 case.0.switch.0:
-  %"tmp#44##0" = inttoptr i64 %"#left##0" to ptr
-  %"#left#foo#2##0" = load i1, ptr %"tmp#44##0"
-  %"tmp#45##0" = add i64 %"#left##0", 8
-  %"tmp#46##0" = inttoptr i64 %"tmp#45##0" to ptr
-  %"#left#foo#1##0" = load i64, ptr %"tmp#46##0"
-  %"tmp#47##0" = add i64 %"#left##0", 16
+  %"tmp#46##0" = inttoptr i64 %"#left##0" to ptr
+  %"#left#foo#2##0" = load i1, ptr %"tmp#46##0"
+  %"tmp#47##0" = add i64 %"#left##0", 8
   %"tmp#48##0" = inttoptr i64 %"tmp#47##0" to ptr
-  %"#left#i##0" = load i64, ptr %"tmp#48##0"
-  %"tmp#49##0" = trunc i64 %"#right##0" to i2
-  %"tmp#32##0" = and i2 %"tmp#49##0", 3
+  %"#left#foo#1##0" = load i64, ptr %"tmp#48##0"
+  %"tmp#49##0" = add i64 %"#left##0", 16
+  %"tmp#50##0" = inttoptr i64 %"tmp#49##0" to ptr
+  %"#left#i##0" = load i64, ptr %"tmp#50##0"
+  %"tmp#51##0" = trunc i64 %"#right##0" to i2
+  %"tmp#32##0" = and i2 %"tmp#51##0", 3
   %"tmp#33##0" = icmp eq i2 %"tmp#32##0", 0
   br i1 %"tmp#33##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#50##0" = inttoptr i64 %"#right##0" to ptr
-  %"#right#foo#2##0" = load i1, ptr %"tmp#50##0"
-  %"tmp#51##0" = add i64 %"#right##0", 8
-  %"tmp#52##0" = inttoptr i64 %"tmp#51##0" to ptr
-  %"#right#foo#1##0" = load i64, ptr %"tmp#52##0"
-  %"tmp#53##0" = add i64 %"#right##0", 16
+  %"tmp#52##0" = inttoptr i64 %"#right##0" to ptr
+  %"#right#foo#2##0" = load i1, ptr %"tmp#52##0"
+  %"tmp#53##0" = add i64 %"#right##0", 8
   %"tmp#54##0" = inttoptr i64 %"tmp#53##0" to ptr
-  %"#right#i##0" = load i64, ptr %"tmp#54##0"
+  %"#right#foo#1##0" = load i64, ptr %"tmp#54##0"
+  %"tmp#55##0" = add i64 %"#right##0", 16
+  %"tmp#56##0" = inttoptr i64 %"tmp#55##0" to ptr
+  %"#right#i##0" = load i64, ptr %"tmp#56##0"
   %"tmp#2##0" = icmp eq i64 %"#left#foo#1##0", %"#right#foo#1##0"
   br i1 %"tmp#2##0", label %if.then.2, label %if.else.2
 if.then.2:
   %"tmp#3##0" = icmp eq i1 %"#left#foo#2##0", %"#right#foo#2##0"
   br i1 %"tmp#3##0", label %if.then.3, label %if.else.3
 if.then.3:
-  %"tmp#55##0" = icmp eq i64 %"#left#i##0", %"#right#i##0"
-  ret i1 %"tmp#55##0"
+  %"tmp#57##0" = icmp eq i64 %"#left#i##0", %"#right#i##0"
+  ret i1 %"tmp#57##0"
 if.else.3:
   ret i1 0
 if.else.2:
@@ -534,35 +534,35 @@ if.else.2:
 if.else.1:
   ret i1 0
 case.1.switch.0:
-  %"tmp#56##0" = add i64 %"#left##0", -1
-  %"tmp#57##0" = inttoptr i64 %"tmp#56##0" to ptr
-  %"#left#bar#1##0" = load i64, ptr %"tmp#57##0"
-  %"tmp#58##0" = trunc i64 %"#right##0" to i2
-  %"tmp#27##0" = and i2 %"tmp#58##0", 3
+  %"tmp#58##0" = add i64 %"#left##0", -1
+  %"tmp#59##0" = inttoptr i64 %"tmp#58##0" to ptr
+  %"#left#bar#1##0" = load i64, ptr %"tmp#59##0"
+  %"tmp#60##0" = trunc i64 %"#right##0" to i2
+  %"tmp#27##0" = and i2 %"tmp#60##0", 3
   %"tmp#28##0" = icmp eq i2 %"tmp#27##0", 1
   br i1 %"tmp#28##0", label %if.then.4, label %if.else.4
 if.then.4:
-  %"tmp#59##0" = add i64 %"#right##0", -1
-  %"tmp#60##0" = inttoptr i64 %"tmp#59##0" to ptr
-  %"#right#bar#1##0" = load i64, ptr %"tmp#60##0"
-  %"tmp#61##0" = icmp eq i64 %"#left#bar#1##0", %"#right#bar#1##0"
-  ret i1 %"tmp#61##0"
+  %"tmp#61##0" = add i64 %"#right##0", -1
+  %"tmp#62##0" = inttoptr i64 %"tmp#61##0" to ptr
+  %"#right#bar#1##0" = load i64, ptr %"tmp#62##0"
+  %"tmp#63##0" = icmp eq i64 %"#left#bar#1##0", %"#right#bar#1##0"
+  ret i1 %"tmp#63##0"
 if.else.4:
   ret i1 0
 case.2.switch.0:
-  %"tmp#62##0" = add i64 %"#left##0", -2
-  %"tmp#63##0" = inttoptr i64 %"tmp#62##0" to ptr
-  %"#left#field##0" = load i64, ptr %"tmp#63##0"
-  %"tmp#64##0" = trunc i64 %"#right##0" to i2
-  %"tmp#22##0" = and i2 %"tmp#64##0", 3
+  %"tmp#64##0" = add i64 %"#left##0", -2
+  %"tmp#65##0" = inttoptr i64 %"tmp#64##0" to ptr
+  %"#left#field##0" = load i64, ptr %"tmp#65##0"
+  %"tmp#66##0" = trunc i64 %"#right##0" to i2
+  %"tmp#22##0" = and i2 %"tmp#66##0", 3
   %"tmp#23##0" = icmp eq i2 %"tmp#22##0", 2
   br i1 %"tmp#23##0", label %if.then.5, label %if.else.5
 if.then.5:
-  %"tmp#65##0" = add i64 %"#right##0", -2
-  %"tmp#66##0" = inttoptr i64 %"tmp#65##0" to ptr
-  %"#right#field##0" = load i64, ptr %"tmp#66##0"
-  %"tmp#67##0" = icmp eq i64 %"#left#field##0", %"#right#field##0"
-  ret i1 %"tmp#67##0"
+  %"tmp#67##0" = add i64 %"#right##0", -2
+  %"tmp#68##0" = inttoptr i64 %"tmp#67##0" to ptr
+  %"#right#field##0" = load i64, ptr %"tmp#68##0"
+  %"tmp#69##0" = icmp eq i64 %"#left#field##0", %"#right#field##0"
+  ret i1 %"tmp#69##0"
 if.else.5:
   ret i1 0
 case.3.switch.0:

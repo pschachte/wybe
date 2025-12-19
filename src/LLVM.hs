@@ -774,7 +774,7 @@ writeAssemblySwitch outs v rep cases dflt = do
 
 -- | Write out the assembly for a merged fork, loading the factored variables
 -- from the constant arrays extracted earlier
-writeAssemblyMergedFork :: [PrimParam] -> PrimVarName -> TypeSpec -> [(PrimVarName, TypeSpec, [PrimArg])] -> ProcBody -> StateT LLVMState Compiler ()
+writeAssemblyMergedFork :: [PrimParam] -> PrimVarName -> TypeSpec -> MergedForkTable -> ProcBody -> StateT LLVMState Compiler ()
 writeAssemblyMergedFork outs idxVar idxTy table body = do
     releaseDeferredCall 
     forM_ table (\(var, ty, values) -> do

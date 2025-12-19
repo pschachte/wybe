@@ -14,8 +14,7 @@ module Util (sameLength, maybeNth, insertAt,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
              intersectMapIdentity, orElse,
-             apply2way, (&&&), (|||), zipWith3M, zipWith3M_, lift2,
-             foldrMaybeM,
+             apply2way, (&&&), (|||), zipWith3M, zipWith3M_, lift2, (<$$>),
              pathIsWriteable,
              useLocalCacheFileIfPossible, createLocalCacheFile
              ) where
@@ -289,9 +288,10 @@ lift2 :: (MonadTrans t1, MonadTrans t2, Monad m, Monad (t2 m)) => m a -> t1 (t2 
 lift2 act = lift $ lift act
 
 
--- | foldrM with short-circuting, using a Maybe type
-foldrMaybeM :: (Monad m) => (b -> a -> m (Maybe a)) -> a -> [b] -> m (Maybe a)
-foldrMaybeM f = (runMaybeT .) . foldrM ((MaybeT .) . f)
+-- | Nested application of <$>
+infixr 5 <$$>
+(<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)
+(<$$>) = (<$>) . (<$>) 
 
 
 -- | Check if we can write to the specified file path.

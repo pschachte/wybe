@@ -30,7 +30,7 @@ if_test(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign llvm icmp_sgt(~x##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @exp_if:nn:nn
     factored ~tmp#1##0:wybe.bool of
-      tmp#5##0:wybe.string <- [ "smaller":wybe.string, "larger":wybe.string ]
+      ?tmp#5##0:wybe.string <- [ "smaller":wybe.string, "larger":wybe.string ]
         foreign llvm move(~tmp#5##0:wybe.string, ?#result##0:wybe.string) @exp_if:nn:nn
 
   LLVM code       :

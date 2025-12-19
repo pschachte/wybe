@@ -333,8 +333,8 @@ define external fastcc i1 @"ctor_char2.=<0>"(i64 %"#left##0", i64 %"#right##0") 
   %"tmp#0##0" = icmp ne i64 %"#left##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#43##0" = trunc i64 %"#left##0" to i2
-  %"tmp#13##0" = and i2 %"tmp#43##0", 3
+  %"tmp#46##0" = trunc i64 %"#left##0" to i2
+  %"tmp#13##0" = and i2 %"tmp#46##0", 3
   switch i2 %"tmp#13##0", label %case.3.switch.1 [
     i2 0, label %case.0.switch.1
     i2 1, label %case.1.switch.1
@@ -347,58 +347,58 @@ case.0.switch.1:
   %"tmp#34##0" = icmp ne i64 %"#right##0", 0
   br i1 %"tmp#34##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#44##0" = trunc i64 %"#right##0" to i2
-  %"tmp#35##0" = and i2 %"tmp#44##0", 3
+  %"tmp#47##0" = trunc i64 %"#right##0" to i2
+  %"tmp#35##0" = and i2 %"tmp#47##0", 3
   %"tmp#36##0" = icmp eq i2 %"tmp#35##0", 0
   br i1 %"tmp#36##0", label %if.then.3, label %if.else.3
 if.then.3:
   %"tmp#37##0" = lshr i64 %"#right##0", 2
   %"tmp#38##0" = and i64 %"tmp#37##0", 255
   %"#right#c##0" = trunc i64 %"tmp#38##0" to i8
-  %"tmp#45##0" = icmp eq i8 %"#left#c##0", %"#right#c##0"
-  ret i1 %"tmp#45##0"
+  %"tmp#48##0" = icmp eq i8 %"#left#c##0", %"#right#c##0"
+  ret i1 %"tmp#48##0"
 if.else.3:
   ret i1 0
 if.else.2:
   ret i1 0
 case.1.switch.1:
-  %"tmp#46##0" = add i64 %"#left##0", -1
-  %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
-  %"#left#other_ctor#1##0" = load i64, ptr %"tmp#47##0"
+  %"tmp#49##0" = add i64 %"#left##0", -1
+  %"tmp#50##0" = inttoptr i64 %"tmp#49##0" to ptr
+  %"#left#other_ctor#1##0" = load i64, ptr %"tmp#50##0"
   %"tmp#30##0" = icmp ne i64 %"#right##0", 0
   br i1 %"tmp#30##0", label %if.then.4, label %if.else.4
 if.then.4:
-  %"tmp#48##0" = trunc i64 %"#right##0" to i2
-  %"tmp#31##0" = and i2 %"tmp#48##0", 3
+  %"tmp#51##0" = trunc i64 %"#right##0" to i2
+  %"tmp#31##0" = and i2 %"tmp#51##0", 3
   %"tmp#32##0" = icmp eq i2 %"tmp#31##0", 1
   br i1 %"tmp#32##0", label %if.then.5, label %if.else.5
 if.then.5:
-  %"tmp#49##0" = add i64 %"#right##0", -1
-  %"tmp#50##0" = inttoptr i64 %"tmp#49##0" to ptr
-  %"#right#other_ctor#1##0" = load i64, ptr %"tmp#50##0"
-  %"tmp#51##0" = tail call fastcc i1 @"ctor_char2.=<0>"(i64 %"#left#other_ctor#1##0", i64 %"#right#other_ctor#1##0")
-  ret i1 %"tmp#51##0"
+  %"tmp#52##0" = add i64 %"#right##0", -1
+  %"tmp#53##0" = inttoptr i64 %"tmp#52##0" to ptr
+  %"#right#other_ctor#1##0" = load i64, ptr %"tmp#53##0"
+  %"tmp#54##0" = tail call fastcc i1 @"ctor_char2.=<0>"(i64 %"#left#other_ctor#1##0", i64 %"#right#other_ctor#1##0")
+  ret i1 %"tmp#54##0"
 if.else.5:
   ret i1 0
 if.else.4:
   ret i1 0
 case.2.switch.1:
-  %"tmp#52##0" = add i64 %"#left##0", -2
-  %"tmp#53##0" = inttoptr i64 %"tmp#52##0" to ptr
-  %"#left#another_ctor#1##0" = load i64, ptr %"tmp#53##0"
+  %"tmp#55##0" = add i64 %"#left##0", -2
+  %"tmp#56##0" = inttoptr i64 %"tmp#55##0" to ptr
+  %"#left#another_ctor#1##0" = load i64, ptr %"tmp#56##0"
   %"tmp#26##0" = icmp ne i64 %"#right##0", 0
   br i1 %"tmp#26##0", label %if.then.6, label %if.else.6
 if.then.6:
-  %"tmp#54##0" = trunc i64 %"#right##0" to i2
-  %"tmp#27##0" = and i2 %"tmp#54##0", 3
+  %"tmp#57##0" = trunc i64 %"#right##0" to i2
+  %"tmp#27##0" = and i2 %"tmp#57##0", 3
   %"tmp#28##0" = icmp eq i2 %"tmp#27##0", 2
   br i1 %"tmp#28##0", label %if.then.7, label %if.else.7
 if.then.7:
-  %"tmp#55##0" = add i64 %"#right##0", -2
-  %"tmp#56##0" = inttoptr i64 %"tmp#55##0" to ptr
-  %"#right#another_ctor#1##0" = load i64, ptr %"tmp#56##0"
-  %"tmp#57##0" = tail call fastcc i1 @"ctor_char2.=<0>"(i64 %"#left#another_ctor#1##0", i64 %"#right#another_ctor#1##0")
-  ret i1 %"tmp#57##0"
+  %"tmp#58##0" = add i64 %"#right##0", -2
+  %"tmp#59##0" = inttoptr i64 %"tmp#58##0" to ptr
+  %"#right#another_ctor#1##0" = load i64, ptr %"tmp#59##0"
+  %"tmp#60##0" = tail call fastcc i1 @"ctor_char2.=<0>"(i64 %"#left#another_ctor#1##0", i64 %"#right#another_ctor#1##0")
+  ret i1 %"tmp#60##0"
 if.else.7:
   ret i1 0
 if.else.6:
@@ -406,8 +406,8 @@ if.else.6:
 case.3.switch.1:
   ret i1 0
 if.else.0:
-  %"tmp#58##0" = icmp eq i64 %"#right##0", 0
-  ret i1 %"tmp#58##0"
+  %"tmp#61##0" = icmp eq i64 %"#right##0", 0
+  ret i1 %"tmp#61##0"
 }
 
 define external fastcc i64 @"ctor_char2.another_ctor<0>"(i64 %"another_ctor#1##0") {

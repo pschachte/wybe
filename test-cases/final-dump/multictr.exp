@@ -2656,8 +2656,8 @@ define external fastcc i1 @"multictr.complicated.=<0>"(i64 %"#left##0", i64 %"#r
   %"tmp#0##0" = icmp uge i64 %"#left##0", 4
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#263##0" = trunc i64 %"#left##0" to i3
-  %"tmp#55##0" = and i3 %"tmp#263##0", 7
+  %"tmp#270##0" = trunc i64 %"#left##0" to i3
+  %"tmp#55##0" = and i3 %"tmp#270##0", 7
   %"tmp#84##0" = icmp eq i3 %"tmp#55##0", 7
   switch i3 %"tmp#55##0", label %case.7.switch.1 [
     i3 0, label %case.0.switch.1
@@ -2669,179 +2669,179 @@ if.then.0:
     i3 6, label %case.6.switch.1
     i3 7, label %case.7.switch.1 ]
 case.0.switch.1:
-  %"tmp#264##0" = inttoptr i64 %"#left##0" to ptr
-  %"#left#f01##0" = load i64, ptr %"tmp#264##0"
+  %"tmp#271##0" = inttoptr i64 %"#left##0" to ptr
+  %"#left#f01##0" = load i64, ptr %"tmp#271##0"
   %"tmp#258##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#258##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#265##0" = trunc i64 %"#right##0" to i3
-  %"tmp#259##0" = and i3 %"tmp#265##0", 7
+  %"tmp#272##0" = trunc i64 %"#right##0" to i3
+  %"tmp#259##0" = and i3 %"tmp#272##0", 7
   %"tmp#260##0" = icmp eq i3 %"tmp#259##0", 0
   br i1 %"tmp#260##0", label %if.then.3, label %if.else.3
 if.then.3:
-  %"tmp#266##0" = inttoptr i64 %"#right##0" to ptr
-  %"#right#f01##0" = load i64, ptr %"tmp#266##0"
-  %"tmp#267##0" = icmp eq i64 %"#left#f01##0", %"#right#f01##0"
-  ret i1 %"tmp#267##0"
+  %"tmp#273##0" = inttoptr i64 %"#right##0" to ptr
+  %"#right#f01##0" = load i64, ptr %"tmp#273##0"
+  %"tmp#274##0" = icmp eq i64 %"#left#f01##0", %"#right#f01##0"
+  ret i1 %"tmp#274##0"
 if.else.3:
   ret i1 0
 if.else.2:
   ret i1 0
 case.1.switch.1:
-  %"tmp#268##0" = add i64 %"#left##0", -1
-  %"tmp#269##0" = inttoptr i64 %"tmp#268##0" to ptr
-  %"#left#f02##0" = load i64, ptr %"tmp#269##0"
+  %"tmp#275##0" = add i64 %"#left##0", -1
+  %"tmp#276##0" = inttoptr i64 %"tmp#275##0" to ptr
+  %"#left#f02##0" = load i64, ptr %"tmp#276##0"
   %"tmp#252##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#252##0", label %if.then.4, label %if.else.4
 if.then.4:
-  %"tmp#270##0" = trunc i64 %"#right##0" to i3
-  %"tmp#253##0" = and i3 %"tmp#270##0", 7
+  %"tmp#277##0" = trunc i64 %"#right##0" to i3
+  %"tmp#253##0" = and i3 %"tmp#277##0", 7
   %"tmp#254##0" = icmp eq i3 %"tmp#253##0", 1
   br i1 %"tmp#254##0", label %if.then.5, label %if.else.5
 if.then.5:
-  %"tmp#271##0" = add i64 %"#right##0", -1
-  %"tmp#272##0" = inttoptr i64 %"tmp#271##0" to ptr
-  %"#right#f02##0" = load i64, ptr %"tmp#272##0"
-  %"tmp#273##0" = icmp eq i64 %"#left#f02##0", %"#right#f02##0"
-  ret i1 %"tmp#273##0"
+  %"tmp#278##0" = add i64 %"#right##0", -1
+  %"tmp#279##0" = inttoptr i64 %"tmp#278##0" to ptr
+  %"#right#f02##0" = load i64, ptr %"tmp#279##0"
+  %"tmp#280##0" = icmp eq i64 %"#left#f02##0", %"#right#f02##0"
+  ret i1 %"tmp#280##0"
 if.else.5:
   ret i1 0
 if.else.4:
   ret i1 0
 case.2.switch.1:
-  %"tmp#274##0" = add i64 %"#left##0", -2
-  %"tmp#275##0" = inttoptr i64 %"tmp#274##0" to ptr
-  %"#left#f03##0" = load i64, ptr %"tmp#275##0"
+  %"tmp#281##0" = add i64 %"#left##0", -2
+  %"tmp#282##0" = inttoptr i64 %"tmp#281##0" to ptr
+  %"#left#f03##0" = load i64, ptr %"tmp#282##0"
   %"tmp#246##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#246##0", label %if.then.6, label %if.else.6
 if.then.6:
-  %"tmp#276##0" = trunc i64 %"#right##0" to i3
-  %"tmp#247##0" = and i3 %"tmp#276##0", 7
+  %"tmp#283##0" = trunc i64 %"#right##0" to i3
+  %"tmp#247##0" = and i3 %"tmp#283##0", 7
   %"tmp#248##0" = icmp eq i3 %"tmp#247##0", 2
   br i1 %"tmp#248##0", label %if.then.7, label %if.else.7
 if.then.7:
-  %"tmp#277##0" = add i64 %"#right##0", -2
-  %"tmp#278##0" = inttoptr i64 %"tmp#277##0" to ptr
-  %"#right#f03##0" = load i64, ptr %"tmp#278##0"
-  %"tmp#279##0" = icmp eq i64 %"#left#f03##0", %"#right#f03##0"
-  ret i1 %"tmp#279##0"
+  %"tmp#284##0" = add i64 %"#right##0", -2
+  %"tmp#285##0" = inttoptr i64 %"tmp#284##0" to ptr
+  %"#right#f03##0" = load i64, ptr %"tmp#285##0"
+  %"tmp#286##0" = icmp eq i64 %"#left#f03##0", %"#right#f03##0"
+  ret i1 %"tmp#286##0"
 if.else.7:
   ret i1 0
 if.else.6:
   ret i1 0
 case.3.switch.1:
-  %"tmp#280##0" = add i64 %"#left##0", -3
-  %"tmp#281##0" = inttoptr i64 %"tmp#280##0" to ptr
-  %"#left#f04##0" = load i64, ptr %"tmp#281##0"
+  %"tmp#287##0" = add i64 %"#left##0", -3
+  %"tmp#288##0" = inttoptr i64 %"tmp#287##0" to ptr
+  %"#left#f04##0" = load i64, ptr %"tmp#288##0"
   %"tmp#240##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#240##0", label %if.then.8, label %if.else.8
 if.then.8:
-  %"tmp#282##0" = trunc i64 %"#right##0" to i3
-  %"tmp#241##0" = and i3 %"tmp#282##0", 7
+  %"tmp#289##0" = trunc i64 %"#right##0" to i3
+  %"tmp#241##0" = and i3 %"tmp#289##0", 7
   %"tmp#242##0" = icmp eq i3 %"tmp#241##0", 3
   br i1 %"tmp#242##0", label %if.then.9, label %if.else.9
 if.then.9:
-  %"tmp#283##0" = add i64 %"#right##0", -3
-  %"tmp#284##0" = inttoptr i64 %"tmp#283##0" to ptr
-  %"#right#f04##0" = load i64, ptr %"tmp#284##0"
-  %"tmp#285##0" = icmp eq i64 %"#left#f04##0", %"#right#f04##0"
-  ret i1 %"tmp#285##0"
+  %"tmp#290##0" = add i64 %"#right##0", -3
+  %"tmp#291##0" = inttoptr i64 %"tmp#290##0" to ptr
+  %"#right#f04##0" = load i64, ptr %"tmp#291##0"
+  %"tmp#292##0" = icmp eq i64 %"#left#f04##0", %"#right#f04##0"
+  ret i1 %"tmp#292##0"
 if.else.9:
   ret i1 0
 if.else.8:
   ret i1 0
 case.4.switch.1:
-  %"tmp#286##0" = add i64 %"#left##0", -4
-  %"tmp#287##0" = inttoptr i64 %"tmp#286##0" to ptr
-  %"#left#f05##0" = load i64, ptr %"tmp#287##0"
+  %"tmp#293##0" = add i64 %"#left##0", -4
+  %"tmp#294##0" = inttoptr i64 %"tmp#293##0" to ptr
+  %"#left#f05##0" = load i64, ptr %"tmp#294##0"
   %"tmp#234##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#234##0", label %if.then.10, label %if.else.10
 if.then.10:
-  %"tmp#288##0" = trunc i64 %"#right##0" to i3
-  %"tmp#235##0" = and i3 %"tmp#288##0", 7
+  %"tmp#295##0" = trunc i64 %"#right##0" to i3
+  %"tmp#235##0" = and i3 %"tmp#295##0", 7
   %"tmp#236##0" = icmp eq i3 %"tmp#235##0", 4
   br i1 %"tmp#236##0", label %if.then.11, label %if.else.11
 if.then.11:
-  %"tmp#289##0" = add i64 %"#right##0", -4
-  %"tmp#290##0" = inttoptr i64 %"tmp#289##0" to ptr
-  %"#right#f05##0" = load i64, ptr %"tmp#290##0"
-  %"tmp#291##0" = icmp eq i64 %"#left#f05##0", %"#right#f05##0"
-  ret i1 %"tmp#291##0"
+  %"tmp#296##0" = add i64 %"#right##0", -4
+  %"tmp#297##0" = inttoptr i64 %"tmp#296##0" to ptr
+  %"#right#f05##0" = load i64, ptr %"tmp#297##0"
+  %"tmp#298##0" = icmp eq i64 %"#left#f05##0", %"#right#f05##0"
+  ret i1 %"tmp#298##0"
 if.else.11:
   ret i1 0
 if.else.10:
   ret i1 0
 case.5.switch.1:
-  %"tmp#292##0" = add i64 %"#left##0", -5
-  %"tmp#293##0" = inttoptr i64 %"tmp#292##0" to ptr
-  %"#left#f06##0" = load i64, ptr %"tmp#293##0"
+  %"tmp#299##0" = add i64 %"#left##0", -5
+  %"tmp#300##0" = inttoptr i64 %"tmp#299##0" to ptr
+  %"#left#f06##0" = load i64, ptr %"tmp#300##0"
   %"tmp#228##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#228##0", label %if.then.12, label %if.else.12
 if.then.12:
-  %"tmp#294##0" = trunc i64 %"#right##0" to i3
-  %"tmp#229##0" = and i3 %"tmp#294##0", 7
+  %"tmp#301##0" = trunc i64 %"#right##0" to i3
+  %"tmp#229##0" = and i3 %"tmp#301##0", 7
   %"tmp#230##0" = icmp eq i3 %"tmp#229##0", 5
   br i1 %"tmp#230##0", label %if.then.13, label %if.else.13
 if.then.13:
-  %"tmp#295##0" = add i64 %"#right##0", -5
-  %"tmp#296##0" = inttoptr i64 %"tmp#295##0" to ptr
-  %"#right#f06##0" = load i64, ptr %"tmp#296##0"
-  %"tmp#297##0" = icmp eq i64 %"#left#f06##0", %"#right#f06##0"
-  ret i1 %"tmp#297##0"
+  %"tmp#302##0" = add i64 %"#right##0", -5
+  %"tmp#303##0" = inttoptr i64 %"tmp#302##0" to ptr
+  %"#right#f06##0" = load i64, ptr %"tmp#303##0"
+  %"tmp#304##0" = icmp eq i64 %"#left#f06##0", %"#right#f06##0"
+  ret i1 %"tmp#304##0"
 if.else.13:
   ret i1 0
 if.else.12:
   ret i1 0
 case.6.switch.1:
-  %"tmp#298##0" = add i64 %"#left##0", -6
-  %"tmp#299##0" = inttoptr i64 %"tmp#298##0" to ptr
-  %"#left#f07##0" = load i64, ptr %"tmp#299##0"
+  %"tmp#305##0" = add i64 %"#left##0", -6
+  %"tmp#306##0" = inttoptr i64 %"tmp#305##0" to ptr
+  %"#left#f07##0" = load i64, ptr %"tmp#306##0"
   %"tmp#222##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#222##0", label %if.then.14, label %if.else.14
 if.then.14:
-  %"tmp#300##0" = trunc i64 %"#right##0" to i3
-  %"tmp#223##0" = and i3 %"tmp#300##0", 7
+  %"tmp#307##0" = trunc i64 %"#right##0" to i3
+  %"tmp#223##0" = and i3 %"tmp#307##0", 7
   %"tmp#224##0" = icmp eq i3 %"tmp#223##0", 6
   br i1 %"tmp#224##0", label %if.then.15, label %if.else.15
 if.then.15:
-  %"tmp#301##0" = add i64 %"#right##0", -6
-  %"tmp#302##0" = inttoptr i64 %"tmp#301##0" to ptr
-  %"#right#f07##0" = load i64, ptr %"tmp#302##0"
-  %"tmp#303##0" = icmp eq i64 %"#left#f07##0", %"#right#f07##0"
-  ret i1 %"tmp#303##0"
+  %"tmp#308##0" = add i64 %"#right##0", -6
+  %"tmp#309##0" = inttoptr i64 %"tmp#308##0" to ptr
+  %"#right#f07##0" = load i64, ptr %"tmp#309##0"
+  %"tmp#310##0" = icmp eq i64 %"#left#f07##0", %"#right#f07##0"
+  ret i1 %"tmp#310##0"
 if.else.15:
   ret i1 0
 if.else.14:
   ret i1 0
 case.7.switch.1:
-  %"tmp#304##0" = add i64 %"#left##0", -7
-  %"tmp#305##0" = inttoptr i64 %"tmp#304##0" to ptr
-  %"tmp#85##0" = load i16, ptr %"tmp#305##0"
+  %"tmp#311##0" = add i64 %"#left##0", -7
+  %"tmp#312##0" = inttoptr i64 %"tmp#311##0" to ptr
+  %"tmp#85##0" = load i16, ptr %"tmp#312##0"
   %"tmp#86##0" = icmp eq i16 %"tmp#85##0", 7
   br i1 %"tmp#86##0", label %if.then.16, label %if.else.16
 if.then.16:
-  %"tmp#306##0" = add i64 %"#left##0", 1
-  %"tmp#307##0" = inttoptr i64 %"tmp#306##0" to ptr
-  %"#left#f08##0" = load i64, ptr %"tmp#307##0"
+  %"tmp#313##0" = add i64 %"#left##0", 1
+  %"tmp#314##0" = inttoptr i64 %"tmp#313##0" to ptr
+  %"#left#f08##0" = load i64, ptr %"tmp#314##0"
   %"tmp#214##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#214##0", label %if.then.17, label %if.else.17
 if.then.17:
-  %"tmp#308##0" = trunc i64 %"#right##0" to i3
-  %"tmp#215##0" = and i3 %"tmp#308##0", 7
+  %"tmp#315##0" = trunc i64 %"#right##0" to i3
+  %"tmp#215##0" = and i3 %"tmp#315##0", 7
   %"tmp#216##0" = icmp eq i3 %"tmp#215##0", 7
   br i1 %"tmp#216##0", label %if.then.18, label %if.else.18
 if.then.18:
-  %"tmp#309##0" = add i64 %"#right##0", -7
-  %"tmp#310##0" = inttoptr i64 %"tmp#309##0" to ptr
-  %"tmp#217##0" = load i16, ptr %"tmp#310##0"
+  %"tmp#316##0" = add i64 %"#right##0", -7
+  %"tmp#317##0" = inttoptr i64 %"tmp#316##0" to ptr
+  %"tmp#217##0" = load i16, ptr %"tmp#317##0"
   %"tmp#218##0" = icmp eq i16 %"tmp#217##0", 7
   br i1 %"tmp#218##0", label %if.then.19, label %if.else.19
 if.then.19:
-  %"tmp#311##0" = add i64 %"#right##0", 1
-  %"tmp#312##0" = inttoptr i64 %"tmp#311##0" to ptr
-  %"#right#f08##0" = load i64, ptr %"tmp#312##0"
-  %"tmp#313##0" = icmp eq i64 %"#left#f08##0", %"#right#f08##0"
-  ret i1 %"tmp#313##0"
+  %"tmp#318##0" = add i64 %"#right##0", 1
+  %"tmp#319##0" = inttoptr i64 %"tmp#318##0" to ptr
+  %"#right#f08##0" = load i64, ptr %"tmp#319##0"
+  %"tmp#320##0" = icmp eq i64 %"#left#f08##0", %"#right#f08##0"
+  ret i1 %"tmp#320##0"
 if.else.19:
   ret i1 0
 if.else.18:
@@ -2852,28 +2852,28 @@ if.else.16:
   %"tmp#92##0" = icmp eq i16 %"tmp#85##0", 8
   br i1 %"tmp#92##0", label %if.then.20, label %if.else.20
 if.then.20:
-  %"tmp#314##0" = add i64 %"#left##0", 1
-  %"tmp#315##0" = inttoptr i64 %"tmp#314##0" to ptr
-  %"#left#f09##0" = load i64, ptr %"tmp#315##0"
+  %"tmp#321##0" = add i64 %"#left##0", 1
+  %"tmp#322##0" = inttoptr i64 %"tmp#321##0" to ptr
+  %"#left#f09##0" = load i64, ptr %"tmp#322##0"
   %"tmp#206##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#206##0", label %if.then.21, label %if.else.21
 if.then.21:
-  %"tmp#316##0" = trunc i64 %"#right##0" to i3
-  %"tmp#207##0" = and i3 %"tmp#316##0", 7
+  %"tmp#323##0" = trunc i64 %"#right##0" to i3
+  %"tmp#207##0" = and i3 %"tmp#323##0", 7
   %"tmp#208##0" = icmp eq i3 %"tmp#207##0", 7
   br i1 %"tmp#208##0", label %if.then.22, label %if.else.22
 if.then.22:
-  %"tmp#317##0" = add i64 %"#right##0", -7
-  %"tmp#318##0" = inttoptr i64 %"tmp#317##0" to ptr
-  %"tmp#209##0" = load i16, ptr %"tmp#318##0"
+  %"tmp#324##0" = add i64 %"#right##0", -7
+  %"tmp#325##0" = inttoptr i64 %"tmp#324##0" to ptr
+  %"tmp#209##0" = load i16, ptr %"tmp#325##0"
   %"tmp#210##0" = icmp eq i16 %"tmp#209##0", 8
   br i1 %"tmp#210##0", label %if.then.23, label %if.else.23
 if.then.23:
-  %"tmp#319##0" = add i64 %"#right##0", 1
-  %"tmp#320##0" = inttoptr i64 %"tmp#319##0" to ptr
-  %"#right#f09##0" = load i64, ptr %"tmp#320##0"
-  %"tmp#321##0" = icmp eq i64 %"#left#f09##0", %"#right#f09##0"
-  ret i1 %"tmp#321##0"
+  %"tmp#326##0" = add i64 %"#right##0", 1
+  %"tmp#327##0" = inttoptr i64 %"tmp#326##0" to ptr
+  %"#right#f09##0" = load i64, ptr %"tmp#327##0"
+  %"tmp#328##0" = icmp eq i64 %"#left#f09##0", %"#right#f09##0"
+  ret i1 %"tmp#328##0"
 if.else.23:
   ret i1 0
 if.else.22:
@@ -2893,28 +2893,28 @@ if.then.24:
     i16 15, label %case.15.switch.25
     i16 16, label %case.16.switch.25 ]
 case.9.switch.25:
-  %"tmp#322##0" = add i64 %"#left##0", 1
-  %"tmp#323##0" = inttoptr i64 %"tmp#322##0" to ptr
-  %"#left#f10##0" = load i64, ptr %"tmp#323##0"
+  %"tmp#329##0" = add i64 %"#left##0", 1
+  %"tmp#330##0" = inttoptr i64 %"tmp#329##0" to ptr
+  %"#left#f10##0" = load i64, ptr %"tmp#330##0"
   %"tmp#198##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#198##0", label %if.then.26, label %if.else.26
 if.then.26:
-  %"tmp#324##0" = trunc i64 %"#right##0" to i3
-  %"tmp#199##0" = and i3 %"tmp#324##0", 7
+  %"tmp#331##0" = trunc i64 %"#right##0" to i3
+  %"tmp#199##0" = and i3 %"tmp#331##0", 7
   %"tmp#200##0" = icmp eq i3 %"tmp#199##0", 7
   br i1 %"tmp#200##0", label %if.then.27, label %if.else.27
 if.then.27:
-  %"tmp#325##0" = add i64 %"#right##0", -7
-  %"tmp#326##0" = inttoptr i64 %"tmp#325##0" to ptr
-  %"tmp#201##0" = load i16, ptr %"tmp#326##0"
+  %"tmp#332##0" = add i64 %"#right##0", -7
+  %"tmp#333##0" = inttoptr i64 %"tmp#332##0" to ptr
+  %"tmp#201##0" = load i16, ptr %"tmp#333##0"
   %"tmp#202##0" = icmp eq i16 %"tmp#201##0", 9
   br i1 %"tmp#202##0", label %if.then.28, label %if.else.28
 if.then.28:
-  %"tmp#327##0" = add i64 %"#right##0", 1
-  %"tmp#328##0" = inttoptr i64 %"tmp#327##0" to ptr
-  %"#right#f10##0" = load i64, ptr %"tmp#328##0"
-  %"tmp#329##0" = icmp eq i64 %"#left#f10##0", %"#right#f10##0"
-  ret i1 %"tmp#329##0"
+  %"tmp#334##0" = add i64 %"#right##0", 1
+  %"tmp#335##0" = inttoptr i64 %"tmp#334##0" to ptr
+  %"#right#f10##0" = load i64, ptr %"tmp#335##0"
+  %"tmp#336##0" = icmp eq i64 %"#left#f10##0", %"#right#f10##0"
+  ret i1 %"tmp#336##0"
 if.else.28:
   ret i1 0
 if.else.27:
@@ -2922,28 +2922,28 @@ if.else.27:
 if.else.26:
   ret i1 0
 case.10.switch.25:
-  %"tmp#330##0" = add i64 %"#left##0", 1
-  %"tmp#331##0" = inttoptr i64 %"tmp#330##0" to ptr
-  %"#left#f11##0" = load i64, ptr %"tmp#331##0"
+  %"tmp#337##0" = add i64 %"#left##0", 1
+  %"tmp#338##0" = inttoptr i64 %"tmp#337##0" to ptr
+  %"#left#f11##0" = load i64, ptr %"tmp#338##0"
   %"tmp#190##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#190##0", label %if.then.29, label %if.else.29
 if.then.29:
-  %"tmp#332##0" = trunc i64 %"#right##0" to i3
-  %"tmp#191##0" = and i3 %"tmp#332##0", 7
+  %"tmp#339##0" = trunc i64 %"#right##0" to i3
+  %"tmp#191##0" = and i3 %"tmp#339##0", 7
   %"tmp#192##0" = icmp eq i3 %"tmp#191##0", 7
   br i1 %"tmp#192##0", label %if.then.30, label %if.else.30
 if.then.30:
-  %"tmp#333##0" = add i64 %"#right##0", -7
-  %"tmp#334##0" = inttoptr i64 %"tmp#333##0" to ptr
-  %"tmp#193##0" = load i16, ptr %"tmp#334##0"
+  %"tmp#340##0" = add i64 %"#right##0", -7
+  %"tmp#341##0" = inttoptr i64 %"tmp#340##0" to ptr
+  %"tmp#193##0" = load i16, ptr %"tmp#341##0"
   %"tmp#194##0" = icmp eq i16 %"tmp#193##0", 10
   br i1 %"tmp#194##0", label %if.then.31, label %if.else.31
 if.then.31:
-  %"tmp#335##0" = add i64 %"#right##0", 1
-  %"tmp#336##0" = inttoptr i64 %"tmp#335##0" to ptr
-  %"#right#f11##0" = load i64, ptr %"tmp#336##0"
-  %"tmp#337##0" = icmp eq i64 %"#left#f11##0", %"#right#f11##0"
-  ret i1 %"tmp#337##0"
+  %"tmp#342##0" = add i64 %"#right##0", 1
+  %"tmp#343##0" = inttoptr i64 %"tmp#342##0" to ptr
+  %"#right#f11##0" = load i64, ptr %"tmp#343##0"
+  %"tmp#344##0" = icmp eq i64 %"#left#f11##0", %"#right#f11##0"
+  ret i1 %"tmp#344##0"
 if.else.31:
   ret i1 0
 if.else.30:
@@ -2951,28 +2951,28 @@ if.else.30:
 if.else.29:
   ret i1 0
 case.11.switch.25:
-  %"tmp#338##0" = add i64 %"#left##0", 1
-  %"tmp#339##0" = inttoptr i64 %"tmp#338##0" to ptr
-  %"#left#f12##0" = load i64, ptr %"tmp#339##0"
+  %"tmp#345##0" = add i64 %"#left##0", 1
+  %"tmp#346##0" = inttoptr i64 %"tmp#345##0" to ptr
+  %"#left#f12##0" = load i64, ptr %"tmp#346##0"
   %"tmp#182##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#182##0", label %if.then.32, label %if.else.32
 if.then.32:
-  %"tmp#340##0" = trunc i64 %"#right##0" to i3
-  %"tmp#183##0" = and i3 %"tmp#340##0", 7
+  %"tmp#347##0" = trunc i64 %"#right##0" to i3
+  %"tmp#183##0" = and i3 %"tmp#347##0", 7
   %"tmp#184##0" = icmp eq i3 %"tmp#183##0", 7
   br i1 %"tmp#184##0", label %if.then.33, label %if.else.33
 if.then.33:
-  %"tmp#341##0" = add i64 %"#right##0", -7
-  %"tmp#342##0" = inttoptr i64 %"tmp#341##0" to ptr
-  %"tmp#185##0" = load i16, ptr %"tmp#342##0"
+  %"tmp#348##0" = add i64 %"#right##0", -7
+  %"tmp#349##0" = inttoptr i64 %"tmp#348##0" to ptr
+  %"tmp#185##0" = load i16, ptr %"tmp#349##0"
   %"tmp#186##0" = icmp eq i16 %"tmp#185##0", 11
   br i1 %"tmp#186##0", label %if.then.34, label %if.else.34
 if.then.34:
-  %"tmp#343##0" = add i64 %"#right##0", 1
-  %"tmp#344##0" = inttoptr i64 %"tmp#343##0" to ptr
-  %"#right#f12##0" = load i64, ptr %"tmp#344##0"
-  %"tmp#345##0" = icmp eq i64 %"#left#f12##0", %"#right#f12##0"
-  ret i1 %"tmp#345##0"
+  %"tmp#350##0" = add i64 %"#right##0", 1
+  %"tmp#351##0" = inttoptr i64 %"tmp#350##0" to ptr
+  %"#right#f12##0" = load i64, ptr %"tmp#351##0"
+  %"tmp#352##0" = icmp eq i64 %"#left#f12##0", %"#right#f12##0"
+  ret i1 %"tmp#352##0"
 if.else.34:
   ret i1 0
 if.else.33:
@@ -2980,28 +2980,28 @@ if.else.33:
 if.else.32:
   ret i1 0
 case.12.switch.25:
-  %"tmp#346##0" = add i64 %"#left##0", 1
-  %"tmp#347##0" = inttoptr i64 %"tmp#346##0" to ptr
-  %"#left#f13##0" = load i64, ptr %"tmp#347##0"
+  %"tmp#353##0" = add i64 %"#left##0", 1
+  %"tmp#354##0" = inttoptr i64 %"tmp#353##0" to ptr
+  %"#left#f13##0" = load i64, ptr %"tmp#354##0"
   %"tmp#174##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#174##0", label %if.then.35, label %if.else.35
 if.then.35:
-  %"tmp#348##0" = trunc i64 %"#right##0" to i3
-  %"tmp#175##0" = and i3 %"tmp#348##0", 7
+  %"tmp#355##0" = trunc i64 %"#right##0" to i3
+  %"tmp#175##0" = and i3 %"tmp#355##0", 7
   %"tmp#176##0" = icmp eq i3 %"tmp#175##0", 7
   br i1 %"tmp#176##0", label %if.then.36, label %if.else.36
 if.then.36:
-  %"tmp#349##0" = add i64 %"#right##0", -7
-  %"tmp#350##0" = inttoptr i64 %"tmp#349##0" to ptr
-  %"tmp#177##0" = load i16, ptr %"tmp#350##0"
+  %"tmp#356##0" = add i64 %"#right##0", -7
+  %"tmp#357##0" = inttoptr i64 %"tmp#356##0" to ptr
+  %"tmp#177##0" = load i16, ptr %"tmp#357##0"
   %"tmp#178##0" = icmp eq i16 %"tmp#177##0", 12
   br i1 %"tmp#178##0", label %if.then.37, label %if.else.37
 if.then.37:
-  %"tmp#351##0" = add i64 %"#right##0", 1
-  %"tmp#352##0" = inttoptr i64 %"tmp#351##0" to ptr
-  %"#right#f13##0" = load i64, ptr %"tmp#352##0"
-  %"tmp#353##0" = icmp eq i64 %"#left#f13##0", %"#right#f13##0"
-  ret i1 %"tmp#353##0"
+  %"tmp#358##0" = add i64 %"#right##0", 1
+  %"tmp#359##0" = inttoptr i64 %"tmp#358##0" to ptr
+  %"#right#f13##0" = load i64, ptr %"tmp#359##0"
+  %"tmp#360##0" = icmp eq i64 %"#left#f13##0", %"#right#f13##0"
+  ret i1 %"tmp#360##0"
 if.else.37:
   ret i1 0
 if.else.36:
@@ -3009,28 +3009,28 @@ if.else.36:
 if.else.35:
   ret i1 0
 case.13.switch.25:
-  %"tmp#354##0" = add i64 %"#left##0", 1
-  %"tmp#355##0" = inttoptr i64 %"tmp#354##0" to ptr
-  %"#left#f14##0" = load i64, ptr %"tmp#355##0"
+  %"tmp#361##0" = add i64 %"#left##0", 1
+  %"tmp#362##0" = inttoptr i64 %"tmp#361##0" to ptr
+  %"#left#f14##0" = load i64, ptr %"tmp#362##0"
   %"tmp#166##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#166##0", label %if.then.38, label %if.else.38
 if.then.38:
-  %"tmp#356##0" = trunc i64 %"#right##0" to i3
-  %"tmp#167##0" = and i3 %"tmp#356##0", 7
+  %"tmp#363##0" = trunc i64 %"#right##0" to i3
+  %"tmp#167##0" = and i3 %"tmp#363##0", 7
   %"tmp#168##0" = icmp eq i3 %"tmp#167##0", 7
   br i1 %"tmp#168##0", label %if.then.39, label %if.else.39
 if.then.39:
-  %"tmp#357##0" = add i64 %"#right##0", -7
-  %"tmp#358##0" = inttoptr i64 %"tmp#357##0" to ptr
-  %"tmp#169##0" = load i16, ptr %"tmp#358##0"
+  %"tmp#364##0" = add i64 %"#right##0", -7
+  %"tmp#365##0" = inttoptr i64 %"tmp#364##0" to ptr
+  %"tmp#169##0" = load i16, ptr %"tmp#365##0"
   %"tmp#170##0" = icmp eq i16 %"tmp#169##0", 13
   br i1 %"tmp#170##0", label %if.then.40, label %if.else.40
 if.then.40:
-  %"tmp#359##0" = add i64 %"#right##0", 1
-  %"tmp#360##0" = inttoptr i64 %"tmp#359##0" to ptr
-  %"#right#f14##0" = load i64, ptr %"tmp#360##0"
-  %"tmp#361##0" = icmp eq i64 %"#left#f14##0", %"#right#f14##0"
-  ret i1 %"tmp#361##0"
+  %"tmp#366##0" = add i64 %"#right##0", 1
+  %"tmp#367##0" = inttoptr i64 %"tmp#366##0" to ptr
+  %"#right#f14##0" = load i64, ptr %"tmp#367##0"
+  %"tmp#368##0" = icmp eq i64 %"#left#f14##0", %"#right#f14##0"
+  ret i1 %"tmp#368##0"
 if.else.40:
   ret i1 0
 if.else.39:
@@ -3038,28 +3038,28 @@ if.else.39:
 if.else.38:
   ret i1 0
 case.14.switch.25:
-  %"tmp#362##0" = add i64 %"#left##0", 1
-  %"tmp#363##0" = inttoptr i64 %"tmp#362##0" to ptr
-  %"#left#f15##0" = load i64, ptr %"tmp#363##0"
+  %"tmp#369##0" = add i64 %"#left##0", 1
+  %"tmp#370##0" = inttoptr i64 %"tmp#369##0" to ptr
+  %"#left#f15##0" = load i64, ptr %"tmp#370##0"
   %"tmp#158##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#158##0", label %if.then.41, label %if.else.41
 if.then.41:
-  %"tmp#364##0" = trunc i64 %"#right##0" to i3
-  %"tmp#159##0" = and i3 %"tmp#364##0", 7
+  %"tmp#371##0" = trunc i64 %"#right##0" to i3
+  %"tmp#159##0" = and i3 %"tmp#371##0", 7
   %"tmp#160##0" = icmp eq i3 %"tmp#159##0", 7
   br i1 %"tmp#160##0", label %if.then.42, label %if.else.42
 if.then.42:
-  %"tmp#365##0" = add i64 %"#right##0", -7
-  %"tmp#366##0" = inttoptr i64 %"tmp#365##0" to ptr
-  %"tmp#161##0" = load i16, ptr %"tmp#366##0"
+  %"tmp#372##0" = add i64 %"#right##0", -7
+  %"tmp#373##0" = inttoptr i64 %"tmp#372##0" to ptr
+  %"tmp#161##0" = load i16, ptr %"tmp#373##0"
   %"tmp#162##0" = icmp eq i16 %"tmp#161##0", 14
   br i1 %"tmp#162##0", label %if.then.43, label %if.else.43
 if.then.43:
-  %"tmp#367##0" = add i64 %"#right##0", 1
-  %"tmp#368##0" = inttoptr i64 %"tmp#367##0" to ptr
-  %"#right#f15##0" = load i64, ptr %"tmp#368##0"
-  %"tmp#369##0" = icmp eq i64 %"#left#f15##0", %"#right#f15##0"
-  ret i1 %"tmp#369##0"
+  %"tmp#374##0" = add i64 %"#right##0", 1
+  %"tmp#375##0" = inttoptr i64 %"tmp#374##0" to ptr
+  %"#right#f15##0" = load i64, ptr %"tmp#375##0"
+  %"tmp#376##0" = icmp eq i64 %"#left#f15##0", %"#right#f15##0"
+  ret i1 %"tmp#376##0"
 if.else.43:
   ret i1 0
 if.else.42:
@@ -3067,28 +3067,28 @@ if.else.42:
 if.else.41:
   ret i1 0
 case.15.switch.25:
-  %"tmp#370##0" = add i64 %"#left##0", 1
-  %"tmp#371##0" = inttoptr i64 %"tmp#370##0" to ptr
-  %"#left#f16##0" = load i64, ptr %"tmp#371##0"
+  %"tmp#377##0" = add i64 %"#left##0", 1
+  %"tmp#378##0" = inttoptr i64 %"tmp#377##0" to ptr
+  %"#left#f16##0" = load i64, ptr %"tmp#378##0"
   %"tmp#150##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#150##0", label %if.then.44, label %if.else.44
 if.then.44:
-  %"tmp#372##0" = trunc i64 %"#right##0" to i3
-  %"tmp#151##0" = and i3 %"tmp#372##0", 7
+  %"tmp#379##0" = trunc i64 %"#right##0" to i3
+  %"tmp#151##0" = and i3 %"tmp#379##0", 7
   %"tmp#152##0" = icmp eq i3 %"tmp#151##0", 7
   br i1 %"tmp#152##0", label %if.then.45, label %if.else.45
 if.then.45:
-  %"tmp#373##0" = add i64 %"#right##0", -7
-  %"tmp#374##0" = inttoptr i64 %"tmp#373##0" to ptr
-  %"tmp#153##0" = load i16, ptr %"tmp#374##0"
+  %"tmp#380##0" = add i64 %"#right##0", -7
+  %"tmp#381##0" = inttoptr i64 %"tmp#380##0" to ptr
+  %"tmp#153##0" = load i16, ptr %"tmp#381##0"
   %"tmp#154##0" = icmp eq i16 %"tmp#153##0", 15
   br i1 %"tmp#154##0", label %if.then.46, label %if.else.46
 if.then.46:
-  %"tmp#375##0" = add i64 %"#right##0", 1
-  %"tmp#376##0" = inttoptr i64 %"tmp#375##0" to ptr
-  %"#right#f16##0" = load i64, ptr %"tmp#376##0"
-  %"tmp#377##0" = icmp eq i64 %"#left#f16##0", %"#right#f16##0"
-  ret i1 %"tmp#377##0"
+  %"tmp#382##0" = add i64 %"#right##0", 1
+  %"tmp#383##0" = inttoptr i64 %"tmp#382##0" to ptr
+  %"#right#f16##0" = load i64, ptr %"tmp#383##0"
+  %"tmp#384##0" = icmp eq i64 %"#left#f16##0", %"#right#f16##0"
+  ret i1 %"tmp#384##0"
 if.else.46:
   ret i1 0
 if.else.45:
@@ -3096,28 +3096,28 @@ if.else.45:
 if.else.44:
   ret i1 0
 case.16.switch.25:
-  %"tmp#378##0" = add i64 %"#left##0", 1
-  %"tmp#379##0" = inttoptr i64 %"tmp#378##0" to ptr
-  %"#left#f17##0" = load i64, ptr %"tmp#379##0"
+  %"tmp#385##0" = add i64 %"#left##0", 1
+  %"tmp#386##0" = inttoptr i64 %"tmp#385##0" to ptr
+  %"#left#f17##0" = load i64, ptr %"tmp#386##0"
   %"tmp#142##0" = icmp uge i64 %"#right##0", 4
   br i1 %"tmp#142##0", label %if.then.47, label %if.else.47
 if.then.47:
-  %"tmp#380##0" = trunc i64 %"#right##0" to i3
-  %"tmp#143##0" = and i3 %"tmp#380##0", 7
+  %"tmp#387##0" = trunc i64 %"#right##0" to i3
+  %"tmp#143##0" = and i3 %"tmp#387##0", 7
   %"tmp#144##0" = icmp eq i3 %"tmp#143##0", 7
   br i1 %"tmp#144##0", label %if.then.48, label %if.else.48
 if.then.48:
-  %"tmp#381##0" = add i64 %"#right##0", -7
-  %"tmp#382##0" = inttoptr i64 %"tmp#381##0" to ptr
-  %"tmp#145##0" = load i16, ptr %"tmp#382##0"
+  %"tmp#388##0" = add i64 %"#right##0", -7
+  %"tmp#389##0" = inttoptr i64 %"tmp#388##0" to ptr
+  %"tmp#145##0" = load i16, ptr %"tmp#389##0"
   %"tmp#146##0" = icmp eq i16 %"tmp#145##0", 16
   br i1 %"tmp#146##0", label %if.then.49, label %if.else.49
 if.then.49:
-  %"tmp#383##0" = add i64 %"#right##0", 1
-  %"tmp#384##0" = inttoptr i64 %"tmp#383##0" to ptr
-  %"#right#f17##0" = load i64, ptr %"tmp#384##0"
-  %"tmp#385##0" = icmp eq i64 %"#left#f17##0", %"#right#f17##0"
-  ret i1 %"tmp#385##0"
+  %"tmp#390##0" = add i64 %"#right##0", 1
+  %"tmp#391##0" = inttoptr i64 %"tmp#390##0" to ptr
+  %"#right#f17##0" = load i64, ptr %"tmp#391##0"
+  %"tmp#392##0" = icmp eq i64 %"#left#f17##0", %"#right#f17##0"
+  ret i1 %"tmp#392##0"
 if.else.49:
   ret i1 0
 if.else.48:
@@ -3129,8 +3129,8 @@ default.switch.25:
 if.else.24:
   ret i1 0
 if.else.0:
-  %"tmp#386##0" = icmp eq i64 %"#left##0", %"#right##0"
-  ret i1 %"tmp#386##0"
+  %"tmp#393##0" = icmp eq i64 %"#left##0", %"#right##0"
+  ret i1 %"tmp#393##0"
 }
 
 define external fastcc i64 @"multictr.complicated.autumn<0>"() {

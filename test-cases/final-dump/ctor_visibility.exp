@@ -563,9 +563,9 @@ a(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int)<{}; {}; {}>:
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
     factored ~tmp#0##0:wybe.bool of
-      tmp#5##0:wybe.int <- [ 1:wybe.int, 0:wybe.int ]
-      tmp#6##0:wybe.int <- [ 16:wybe.int, 8:wybe.int ]
-      tmp#7##0:wybe.int <- [ -1:wybe.int, 0:wybe.int ]
+      ?tmp#5##0:wybe.int <- [ 1:wybe.int, 0:wybe.int ]
+      ?tmp#6##0:wybe.int <- [ 16:wybe.int, 8:wybe.int ]
+      ?tmp#7##0:wybe.int <- [ -1:wybe.int, 0:wybe.int ]
         foreign lpvm access(~#rec##0:ctor_visibility.with_fields, ~tmp#7##0:wybe.int, ~tmp#6##0:wybe.int, ~tmp#5##0:wybe.int, ?#result##0:wybe.int) @ctor_visibility:nn:nn
 proc a > public (0 calls)
 1: ctor_visibility.with_fields.a<1>
@@ -575,9 +575,9 @@ a(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #fi
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
     factored ~tmp#0##0:wybe.bool of
-      tmp#5##0:wybe.int <- [ 1:wybe.int, 0:wybe.int ]
-      tmp#6##0:wybe.int <- [ 16:wybe.int, 8:wybe.int ]
-      tmp#7##0:wybe.int <- [ -1:wybe.int, 0:wybe.int ]
+      ?tmp#5##0:wybe.int <- [ 1:wybe.int, 0:wybe.int ]
+      ?tmp#6##0:wybe.int <- [ 16:wybe.int, 8:wybe.int ]
+      ?tmp#7##0:wybe.int <- [ -1:wybe.int, 0:wybe.int ]
         foreign lpvm {noalias} mutate(~#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, ~tmp#7##0:wybe.int, 0:wybe.int, ~tmp#6##0:wybe.int, ~tmp#5##0:wybe.int, ~#field##0:wybe.int) @ctor_visibility:nn:nn
 
 

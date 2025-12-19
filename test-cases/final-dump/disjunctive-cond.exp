@@ -32,8 +32,8 @@ proc #cont#1 > {semipure} (5 calls)
     case ~a##0:wybe.bool of
     0:
         factored ~b##0:wybe.bool of
-          tmp#14##0:wybe.string <- [ "no good":wybe.string, "also good":wybe.string ]
-          tmp#15##0:wybe.bool <- [ 0:wybe.bool, 1:wybe.bool ]
+          ?tmp#14##0:wybe.string <- [ "no good":wybe.string, "also good":wybe.string ]
+          ?tmp#15##0:wybe.bool <- [ 0:wybe.bool, 1:wybe.bool ]
             wybe.string.print<0>(~tmp#14##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @disjunctive-cond:8:18
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @disjunctive-cond:8:18
             foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @disjunctive-cond:8:18
@@ -60,8 +60,8 @@ proc #cont#2 > {semipure} (3 calls)
 
     1:
         factored ~b##0:wybe.bool of
-          tmp#14##0:wybe.string <- [ "more good":wybe.string, "no good":wybe.string ]
-          tmp#15##0:wybe.bool <- [ 0:wybe.bool, 1:wybe.bool ]
+          ?tmp#14##0:wybe.string <- [ "more good":wybe.string, "no good":wybe.string ]
+          ?tmp#15##0:wybe.bool <- [ 0:wybe.bool, 1:wybe.bool ]
             wybe.string.print<0>(~tmp#14##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @disjunctive-cond:12:19
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @disjunctive-cond:12:19
             foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @disjunctive-cond:12:19
@@ -84,7 +84,7 @@ proc #cont#3 > {semipure} (7 calls)
 
     1:
         factored ~b##0:wybe.bool of
-          tmp#12##0:wybe.string <- [ "still good":wybe.string, "no good":wybe.string ]
+          ?tmp#12##0:wybe.string <- [ "still good":wybe.string, "no good":wybe.string ]
             wybe.string.print<0>(~tmp#12##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @disjunctive-cond:16:18
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @disjunctive-cond:16:18
             foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @disjunctive-cond:16:18

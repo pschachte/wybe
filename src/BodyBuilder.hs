@@ -25,7 +25,7 @@ import Data.List as List
 import Data.Set as Set
 import UnivSet as USet
 import Data.Maybe as Maybe
-import Data.Tuple.HT (mapFst, mapSnd, thd3, snd3, mapSnd3)
+import Data.Tuple.HT (mapFst, mapSnd, thd3, snd3, mapSnd3, mapFst3)
 import Data.Bits
 import Data.Function
 import Data.Functor
@@ -36,6 +36,8 @@ import Control.Monad.Trans.State
 import AST (simpleShowMap)
 import Data.Foldable.Extra (foldlM, foldrM)
 import Control.Monad.Trans.Maybe (MaybeT(runMaybeT, MaybeT))
+import Control.Applicative
+import qualified Control.Applicative as App
 
 
 ----------------------------------------------------------------
@@ -1341,6 +1343,13 @@ data BkwdBuilderState = BkwdBuilderState {
       bkwdFollowing     :: ProcBody         -- ^Code to come later
       } deriving (Eq,Show)
 
+-- | Generate a fresh PrimVarName
+bkwdFreshVar :: BkwdBuilder PrimVarName
+bkwdFreshVar = do
+    tmp <- gets bkwdTmpCount
+    modify (\st -> st{bkwdTmpCount = tmp + 1})
+    return $ PrimVarName (mkTempName tmp) 0
+
 
 rebuildBody :: BodyState -> BkwdBuilder ()
 rebuildBody st@BodyState{parent=Just par} =
@@ -1596,9 +1605,9 @@ markIfLastUse _ arg = arg
 -- Yields a ProcBody with the fork, or NoFork if all branches can be merged with no substitutions
 rebuildFork :: PrimVarName -> TypeSpec -> Bool -> [(Integer, ProcBody)] -> Maybe ProcBody -> BkwdBuilder ProcBody
 rebuildFork var ty lastUse brs dflt = do
-  mbMerged <- mergeBranches (FactoredVars Map.empty Map.empty) brs dflt
+  mbMerged <- runMaybeT $ mergeBranches  brs dflt $ Factors Map.empty Map.empty
   case mbMerged of
-    Just (FactoredVars{factored=factored}, (mergedBody, dflt'))
+    Just (Factors{factored=factored}, (mergedBody, dflt'))
       | Map.null factored ->
           bkwdFreshVar <&> \tmp -> guardedMergedFork tmp var ty (maximum (fst <$> brs)) mergedBody dflt'
       | otherwise ->
@@ -1607,67 +1616,113 @@ rebuildFork var ty lastUse brs dflt = do
   where
     flattenFactored (var,(ty,vals)) = (var, ty, vals ++ replicate (length brs - length vals) (last vals))
 
--- | Maps currently factored vars to the list of values.
--- As the merging process happens, the last variable may need to be repeated, to ensure the
--- factored is square. 
--- For variables defined in both things being merged, the names do not matter, so long as these variabled
+-- | When merging, we replace constants in both things at the same place with variables, tracking what has been merged in a map. 
+-- When we merge again with something else, we can consult the map to see if a now variable was previously a constant.
+-- For variables defined in both things being merged, the names do not matter, so long as these variables
 -- are used consistently throughout the body. The renamed map is used to list names of variables that can be renamed in the
 -- LHS to a name from the RHS
-data FactoredVars = FactoredVars {
-    factored :: Map PrimVarName (TypeSpec, [PrimArg]),
-    renamed :: Map PrimVarName PrimVarName
+data Factors = Factors {
+    factored :: Map PrimVarName (TypeSpec, [PrimArg]), -- ^The variables and corresponding constants that have been factored
+    renamed :: Map PrimVarName PrimVarName             -- ^The variables to rename on the RHS
 } deriving (Show)
 
+type FactoredMerge a = Factors -> MaybeT BkwdBuilder (Factors, a)
+
+-- | Chain two merges, combining the results
+combineMerged :: (a -> b -> c) -> FactoredMerge a -> FactoredMerge b -> FactoredMerge c
+combineMerged joiner mergeA mergeB vars = do
+  (vars', a) <- mergeA vars
+  joiner a <$$> mergeB vars'
+
 -- | Try to merge all branches, with Nothing if the branches cannot be merged
-mergeBranches :: FactoredVars -> [(Integer, ProcBody)] -> Maybe ProcBody -> BkwdBuilder (Maybe (FactoredVars, (ProcBody, Maybe ProcBody)))
-mergeBranches vars brs@(_:_) dflt = do
-    logBkwd $ "Trying to merge " ++ intercalate "\n    " (show <$> brs) ++ "\n  with default:" ++ show dflt
-    mergedBrs <- foldrMaybeM (flip $ uncurry $ \vars' -> mergeBodies vars'{renamed=renamed vars}) (vars, last brs') $ init brs'
-    mergedAll <- join <$> forM mergedBrs (\(vars', merged') -> do
-      mbMergedDflt <- join <$> forM dflt (mergeBodies vars'{renamed=renamed vars} merged')
-      return $ case mbMergedDflt of
-        -- if there are _no_ factored vars, we can merge with dflt
-        Just (vars''@FactoredVars{factored=factored'}, merged'') | factored' == factored vars
-          -> Just (vars'', (merged'', Nothing))
-        _ -> 
-          -- when dense, can merge cases, keeping default
-          if idxs == List.take (length brs) [0..]
-          then Just (vars', (merged', dflt))
-          else Nothing
-      )
-    logBkwd $ "Merged into " ++ show mergedAll
+mergeBranches :: [(Integer, ProcBody)] -> Maybe ProcBody -> FactoredMerge (ProcBody, Maybe ProcBody)
+mergeBranches brs@(_:_) dflt vars = (do
+    lift $ logBkwd $ "Trying to merge " ++ intercalate "\n    " (show <$> brs) ++ "\n  with default: " ++ show dflt
+    (vars', body') <- foldrM mergeBodies' (vars, last bodies') $ init bodies'
+    mbMergedDflt <- join <$> optional (forM dflt $ flip mergeBodies' (vars', body'))
+    mergedAll <- case mbMergedDflt of
+      -- if there are _no_ factored vars, we can merge with dflt
+      Just (vars''@Factors{factored=factored'}, dflt') | factored' == factored vars
+        -> return (vars'', (dflt', Nothing))
+      _ ->
+        -- when dense, can merge all branches, keeping default
+        if idxs == List.take (length brs) [0..]
+        then return (vars', (body', dflt))
+        else App.empty
+    lift $ logBkwd $ "Merged into " ++ show mergedAll
     return mergedAll
-  where (idxs, brs') = unzip brs
-mergeBranches _ _ _ = do
-    logBkwd "Cannot merge non-dense branches"
-    return Nothing
+  ) <|> (lift (logBkwd "Failed to merge") >> App.empty)
+  where
+    (idxs, bodies') = unzip brs
+    mergeBodies' b (v, a) = mergeBodies a b v{renamed=renamed vars}
+mergeBranches _ _ _ = shouldnt ""
 
 -- | Try to merge two ProcBodies, merging the prims pairwise
-mergeBodies :: FactoredVars -> ProcBody -> ProcBody -> BkwdBuilder (Maybe (FactoredVars, ProcBody))
-mergeBodies vars (ProcBody prims0 fork0) (ProcBody prims1 fork1)
-  | sameLength prims0 prims1= do
-    mbPrims <- (mergeLists mergePrim vars `on` reverse) prims0 prims1
-    case mbPrims of
-      Nothing -> return Nothing
-      Just (vars', prims) -> ((ProcBody (reverse prims) <$>) <$>) <$> mergeForks vars' fork0 fork1
-mergeBodies _ _ _ = return Nothing
+mergeBodies :: ProcBody -> ProcBody -> FactoredMerge ProcBody
+mergeBodies (ProcBody prims0 fork0) (ProcBody prims1 fork1) vars
+  | sameLength prims0 prims1 =
+    combineMerged (ProcBody . reverse) ((mergeLists mergePrim `on` reverse) prims0 prims1) (mergeForks fork0 fork1) vars
+  | otherwise = App.empty
+
+-- | Like mergeBodies, but both Maybe constructor must match
+mergeMaybeBodies :: Maybe ProcBody -> Maybe ProcBody -> FactoredMerge (Maybe ProcBody)
+mergeMaybeBodies Nothing      Nothing      vars = return  (vars, Nothing)
+mergeMaybeBodies (Just body0) (Just body1) vars = Just <$$> mergeBodies body0 body1 vars
+mergeMaybeBodies _            _            _    = App.empty
 
 -- | Try to merge two forks.
-mergeForks :: FactoredVars -> PrimFork -> PrimFork -> BkwdBuilder (Maybe (FactoredVars, PrimFork))
-mergeForks vars NoFork NoFork = return $ Just (vars, NoFork)
--- XXX handle more forks!
-mergeForks _ _ _ = return Nothing
+mergeForks :: PrimFork -> PrimFork -> FactoredMerge PrimFork
+mergeForks NoFork NoFork vars = return (vars, NoFork)
+mergeForks (PrimFork var0 ty0 final0 branches0 dflt0) (PrimFork var1 ty1 final1 branches1 dflt1) vars@Factors{renamed=renamed} = do
+    [tyRep0, tyRep1] <- lift2 $ mapM lookupTypeRepresentation [ty0, ty1]
+    if tyRep0 == tyRep1 && var0 == rename renamed var1 && final0 == final1
+    then combineMerged (PrimFork var0 ty0 final0)
+            (mergeIndexedBranches branches0 branches1)
+            (mergeMaybeBodies dflt0 dflt1) vars
+    else App.empty
+  where
+    nothingDflts = all isNothing [dflt0, dflt1]
+    mergeIndexedBranches [] [] vars  = return (vars, [])
+    mergeIndexedBranches bbs0@((v0,b0):bs0) bbs1@((v1,b1):bs1) vars@Factors{renamed=renamed}
+      | v0 < v1 && nothingDflts
+      = ((v0,b0):) <$$> mergeIndexedBranches bs0 bbs1 vars
+      | v0 > v1 && nothingDflts
+      = ((v1,renameProcBody renamed b1):) <$$> mergeIndexedBranches bs0 bs1 vars
+      | v0 == v1
+      = combineMerged ((:) . (v0,)) 
+          (mergeBodies b0 b1) 
+          (mergeIndexedBranches bs0 bs1)
+          vars
+    mergeIndexedBranches _ _ _ = App.empty
+mergeForks (MergedFork var0 ty0 final0 table0 branch0 dflt0) (MergedFork var1 ty1 final1 table1 branch1 dflt1) vars@Factors{renamed=renamed} = do
+    [tyRep0, tyRep1] <- lift2 $ mapM lookupTypeRepresentation [ty0, ty1]
+    if tyRep0 == tyRep1 && var0 == rename renamed var1 && final0 == final1
+    then combineMerged (uncurry . MergedFork var0 ty0 final0)
+            (mergeTables table0 table1)
+            (combineMerged (,) 
+              (mergeBodies branch0 branch1) 
+              (mergeMaybeBodies dflt0 dflt1)) 
+            vars
+    else App.empty
+  where
+    mergeTables :: MergedForkTable -> MergedForkTable -> FactoredMerge MergedForkTable
+    mergeTables [] [] vars = return (vars, [])
+    mergeTables (entry0@(var0, ty0, args0):table0) ((var1, ty1, args1):table1) vars@Factors{renamed=renamed}
+      | args0 == args1
+      = (entry0:) <$$> mergeTables table0 table1 vars{renamed=Map.insert var1 var0 renamed}
+    mergeTables vars _ _ = App.empty
+-- XXX can we handle more forks?
+mergeForks _ _ _ = App.empty
+
 
 -- | Try to merge two prims, merging prims where the constructors and fields match,
 -- and the args can be merged
-mergePrim :: FactoredVars -> Placed Prim -> Placed Prim -> BkwdBuilder (Maybe (FactoredVars, Placed Prim))
-mergePrim vars placedPrim0 placedPrim1
+mergePrim :: Placed Prim -> Placed Prim -> FactoredMerge (Placed Prim)
+mergePrim placedPrim0 placedPrim1 vars
   | primsMergable prim0 prim1
-  = do
-    mergedArgs <- mergeLists (mergeArg True) vars args0 args1
-    return $ mapSnd (\args -> replacePrimArgs prim0 args (globalFlowsUnion gfs0 gfs1) `maybePlace` pos) <$> mergedArgs
+  = (\args -> replacePrimArgs prim0 args (globalFlowsUnion gfs0 gfs1) `maybePlace` pos) <$$> mergeLists (mergeArg True) args0 args1 vars
   | otherwise
-  = return Nothing
+  = App.empty
   where
     [(args0, gfs0), (args1, gfs1)] = primArgs <$> [prim0, prim1]
     (prim0, pos) = unPlace placedPrim0
@@ -1689,49 +1744,60 @@ primsMergable _ _ = False
 -- | Merge two args, yielding a fresh variable if the two variables are to be merged.
 -- If the first operand is already in the factored, the merging happens with a value from the
 -- factored instead. If the boolean is True and b is a variable, it may be renamed
-mergeArg :: Bool -> FactoredVars -> PrimArg -> PrimArg -> BkwdBuilder (Maybe (FactoredVars, PrimArg))
-mergeArg _ vars a b | a == b = return $ Just (vars, a) -- no subst needed
-mergeArg True vars@FactoredVars{renamed=renamed} a@ArgVar{argVarName=aNm} b@ArgVar{argVarName=bNm, argVarFlow=flow}
+mergeArg :: Bool -> PrimArg -> PrimArg -> FactoredMerge PrimArg
+mergeArg _ a b vars | a == b = return (vars, a) -- no subst needed
+mergeArg True a@ArgVar{argVarName=aNm} b@ArgVar{argVarName=bNm, argVarFlow=flow} vars@Factors{renamed=renamed}
   | isOutputFlow flow
-  = mergeArg False vars{renamed=Map.insert bNm aNm renamed} a b{argVarName=aNm}
+  = mergeArg False a b{argVarName=aNm} vars{renamed=Map.insert bNm aNm renamed}
   | Just nmB' <- Map.lookup bNm renamed
-  = mergeArg False vars a b{argVarName=nmB'}
-mergeArg rename vars@FactoredVars{factored=factored} a@ArgVar{argVarName=aNm} b
+  = mergeArg False a b{argVarName=nmB'} vars
+mergeArg rename a@ArgVar{argVarName=aNm} b vars@Factors{factored=factored}
   | Just (ty, values@(a':_)) <- Map.lookup aNm factored = do
-    merged <- mergeArg rename vars a' b
-    case merged of
-      Just _ -> return $ Just (vars{factored=Map.insert aNm (ty, b:values) factored}, a)
-      _ -> return Nothing
-mergeArg _ vars a@ArgInt{}      b@ArgInt{}      = mergeArg' vars a b
-mergeArg _ vars a@ArgFloat{}    b@ArgFloat{}    = mergeArg' vars a b
-mergeArg _ vars a@ArgString{}   b@ArgString{}   = mergeArg' vars a b
-mergeArg _ vars a@ArgChar{}     b@ArgChar{}     = mergeArg' vars a b
-mergeArg _ vars a@ArgUnneeded{} b@ArgUnneeded{} = mergeArg' vars a b
-mergeArg _ vars a@ArgUndef{}    b@ArgUndef{}    = mergeArg' vars a b
-mergeArg _ vars a b | not (argIsConst a || argIsConst b)
-                                                = return Nothing
-mergeArg _ vars a@ArgClosure{}  b@ArgClosure{}  = mergeArg' vars a b
-mergeArg _ vars _               _               = return Nothing
+    merged <- mergeArg rename a' b vars
+    return (vars{factored=Map.insert aNm (ty, b:values) factored}, a)
+mergeArg _ a@ArgInt{}      b@ArgInt{}      vars = mergeArg' a b vars
+mergeArg _ a@ArgFloat{}    b@ArgFloat{}    vars = mergeArg' a b vars
+mergeArg _ a@ArgString{}   b@ArgString{}   vars = mergeArg' a b vars
+mergeArg _ a@ArgChar{}     b@ArgChar{}     vars = mergeArg' a b vars
+mergeArg _ a@ArgUnneeded{} b@ArgUnneeded{} vars = mergeArg' a b vars
+mergeArg _ a@ArgUndef{}    b@ArgUndef{}    vars = mergeArg' a b vars
+mergeArg _ a b _ | not (argIsConst a || argIsConst b)
+                                                = App.empty
+mergeArg _ a@ArgClosure{}  b@ArgClosure{}  vars = mergeArg' a b vars
+mergeArg _ _               _               _    = App.empty
 
 -- | Add two PrimArgs to the map of factored variables, generating a fresh variable in their place
-mergeArg' :: FactoredVars -> PrimArg -> PrimArg -> BkwdBuilder (Maybe (FactoredVars, PrimArg))
-mergeArg' vars@FactoredVars{factored=factored} a b = do
-    var <- bkwdFreshVar
-    return $ Just (vars{factored=Map.insert var (ty, [b, a]) factored}, ArgVar var ty FlowIn Ordinary True)
+mergeArg' :: PrimArg -> PrimArg -> FactoredMerge PrimArg
+mergeArg' a b vars@Factors{factored=factored} = do
+    var <- lift bkwdFreshVar
+    return (vars{factored=Map.insert var (ty, [b, a]) factored}, ArgVar var ty FlowIn Ordinary True)
   where ty = argType a
 
 -- | Merge two [a]
-mergeLists :: (FactoredVars -> a -> a -> BkwdBuilder (Maybe (FactoredVars, a))) -> FactoredVars -> [a] -> [a] -> BkwdBuilder (Maybe (FactoredVars, [a]))
-mergeLists f vars as0 as1 =
-  foldrMaybeM (\(a0, a1) (vars', as') -> (mapSnd (:as') <$>) <$> f vars' a0 a1) (vars, [])
+mergeLists :: (a -> a -> FactoredMerge a) -> [a] -> [a] -> FactoredMerge [a]
+mergeLists f as0 as1 vars =
+  foldrM (\(a0, a1) (vars', as') -> MaybeT (mapSnd (:as') <$$> runMaybeT (f a0 a1 vars'))) (vars, [])
       $ zip as0 as1
 
--- | Generate a fresh PrimVarName
-bkwdFreshVar :: BkwdBuilder PrimVarName
-bkwdFreshVar = do
-    tmp <- gets bkwdTmpCount
-    modify (\st -> st{bkwdTmpCount = tmp + 1})
-    return $ PrimVarName (mkTempName tmp) 0
+renameProcBody :: Map PrimVarName PrimVarName -> ProcBody -> ProcBody
+renameProcBody vars (ProcBody prims fork) = ProcBody (contentApply (renamePrim vars) <$> prims) (renameFork vars fork)
+  where
+    renamePrim vars prim =
+      let (args, gfs) = primArgs prim
+      in replacePrimArgs prim (renamePrimArg vars <$> args) gfs
+
+    renameFork _ NoFork = NoFork
+    renameFork vars (PrimFork var ty final brs dflt)
+      = PrimFork (rename vars var) ty final (mapSnd (renameProcBody vars) <$> brs) (renameProcBody vars <$> dflt)
+    renameFork vars (MergedFork var ty final table body dflt)
+      = MergedFork (rename vars var) ty final (mapFst3 (rename vars) <$> table) (renameProcBody vars body) (renameProcBody vars <$> dflt)
+
+    renamePrimArg vars arg@ArgVar{argVarName=nm} = arg{argVarName=rename vars nm}
+    renamePrimArg vars (ArgClosure pspec args ty) = ArgClosure pspec (renamePrimArg vars <$> args) ty
+    renamePrimArg _ arg = arg
+
+rename :: Map PrimVarName PrimVarName -> PrimVarName -> PrimVarName
+rename vars var = fromMaybe var $ Map.lookup var vars
 
 
 ----------------------------------------------------------------
