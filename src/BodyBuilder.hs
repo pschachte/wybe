@@ -1681,14 +1681,20 @@ mergeForks (PrimFork var0 ty0 final0 branches0 dflt0) (PrimFork var1 ty1 final1 
             (mergeMaybeBodies dflt0 dflt1) vars
     else App.empty
   where
-    nothingDflts = all isNothing [dflt0, dflt1]
+    -- assumes branches are sorted, a safe assummption from the BkwdBuilder
     mergeIndexedBranches [] [] vars  = return (vars, [])
+    -- when either branch is "missing" a value, either use the default from the other branch,
+    -- or if there is no default then we can just keep that branch
     mergeIndexedBranches bbs0@((v0,b0):bs0) bbs1@((v1,b1):bs1) vars@Factors{renamed=renamed}
-      | v0 < v1 && nothingDflts
-      = ((v0,b0):) <$$> mergeIndexedBranches bs0 bbs1 vars
-      | v0 > v1 && nothingDflts
-      = ((v1,renameProcBody renamed b1):) <$$> mergeIndexedBranches bs0 bs1 vars
-      | v0 == v1
+      | v0 < v1
+      = case dflt1 of
+          Nothing -> ((v0,b0):) <$$> mergeIndexedBranches bs0 bbs1 vars
+          Just dflt1' -> mergeIndexedBranches bbs0 ((v0,dflt1'):bbs1) vars 
+      | v0 > v1
+      = case dflt0 of
+          Nothing -> ((v0,b0):) <$$> mergeIndexedBranches bs0 bbs1 vars
+          Just dflt0' -> mergeIndexedBranches ((v1,dflt0'):bbs0) bbs1 vars
+      | otherwise
       = combineMerged ((:) . (v0,)) 
           (mergeBodies b0 b1) 
           (mergeIndexedBranches bs0 bs1)
@@ -1705,7 +1711,9 @@ mergeForks (MergedFork var0 ty0 final0 table0 branch0 dflt0) (MergedFork var1 ty
             vars
     else App.empty
   where
-    mergeTables :: MergedForkTable -> MergedForkTable -> FactoredMerge MergedForkTable
+    -- assumes tables are created in the same order
+    -- will fail if not in the same order later on
+    -- XXX we can probably to better than this!
     mergeTables [] [] vars = return (vars, [])
     mergeTables (entry0@(var0, ty0, args0):table0) ((var1, ty1, args1):table1) vars@Factors{renamed=renamed}
       | args0 == args1

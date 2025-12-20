@@ -87,6 +87,26 @@ def {noinline} nested_different_default(b:bool, x:int) use !io {
     })
   }
 }
+def {noinline} nested_disjoint_same_default(b:bool, x:int) use !io {
+  if {
+    b ::
+    !print("$b ")
+    !println(case x in {
+        0    :: 1
+      | 4    :: 4
+      | 2    :: 2
+      | else :: 3
+    })
+  | else ::
+    !print("$b ")
+    !println(case x in {
+        0    :: 1
+      | 4    :: 4
+      | 3    :: 3
+      | else :: 2
+    })
+  }
+}
 
 !nested_same_default(true, 0)
 !nested_same_default(true, 1)
