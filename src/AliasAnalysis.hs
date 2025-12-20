@@ -41,6 +41,7 @@ import           Config        (specialName2)
 data AliasMapLocalItem
     = LiveVar           PrimVarName
     | AliasByGlobal     GlobalInfo
+    | AliasByConstant   PrimArg
     | AliasByParam      PrimVarName
     | MaybeAliasByParam PrimVarName
     deriving (Eq, Ord, Show)
@@ -193,8 +194,11 @@ aliasedByFork caller body analysisInfo = do
             logAlias ">>> Forking:"
             analysisInfos <-
                 mapM (\body' -> aliasedByBody caller body' analysisInfo)
-                    $ fBodies ++ maybeToList deflt
+                    $ List.map snd fBodies ++ maybeToList deflt
             return $ mergeAnalysisInfo analysisInfos
+        MergedFork{} -> do
+            logAlias ">>> Merged fork:"
+            aliasedByFork caller body{bodyFork=unMergeFork fork} analysisInfo
         NoFork -> do
             logAlias ">>> No fork."
             -- drop "deadCells", we don't need it after fork
@@ -338,17 +342,20 @@ _maybeAliasPrimArgs args = do
     let escapedVars = catMaybes args'
     return escapedVars
   where
-    filterArg arg =
-        case arg of
-        ArgVar{argVarName=var, argVarType=ty} -> maybeAddressAlias arg ty $ LiveVar var
-        ArgGlobal global ty -> maybeAddressAlias arg ty $ AliasByGlobal global
-        _ -> return Nothing
+    filterArg arg@ArgVar{argVarName=var, argVarType=ty} = maybeAddressAlias arg ty $ LiveVar var
+    filterArg arg@(ArgGlobal global ty)                 = maybeAddressAlias arg ty $ AliasByGlobal global
+    filterArg arg@ArgClosure{} | argIsConst arg         = return $ Just $ AliasByConstant arg
+    filterArg arg@ArgString{}                           = return $ Just $ AliasByConstant arg
+    filterArg _                                         = return Nothing
     maybeAddressAlias arg ty item = do
         rep <- lookupTypeRepresentation ty
-        -- Only Pointer types will create alias
-        if rep == Just Pointer
+        if maybe False aliasedRep rep
         then return $ Just item
         else return Nothing
+    aliasedRep CPointer = True
+    aliasedRep Pointer = True
+    aliasedRep Func{} = True
+    aliasedRep _ = False
 
 
 -- Check Arg aliases in one of proc calls inside a ProcBody

@@ -37,8 +37,8 @@ proc = > public (3 calls)
         foreign llvm icmp_eq(~#right##0:ctor_char2, 0:ctor_char2, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm and(#left##0:wybe.int, 3:wybe.int, ?tmp#13##0:wybe.int)
-        case ~tmp#13##0:wybe.int of
+        foreign llvm and(#left##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#13##0:2 bit unsigned)
+        case ~tmp#13##0:2 bit unsigned of
         0:
             foreign llvm lshr(~#left##0:ctor_char2, 2:ctor_char2, ?tmp#15##0:ctor_char2) @ctor_char2:nn:nn
             foreign llvm and(~tmp#15##0:ctor_char2, 255:ctor_char2, ?tmp#16##0:ctor_char2) @ctor_char2:nn:nn
@@ -49,8 +49,8 @@ proc = > public (3 calls)
                 foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
             1:
-                foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#35##0:wybe.int)
-                foreign llvm icmp_eq(~tmp#35##0:wybe.int, 0:wybe.int, ?tmp#36##0:wybe.bool)
+                foreign llvm and(#right##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#35##0:2 bit unsigned)
+                foreign llvm icmp_eq(~tmp#35##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#36##0:wybe.bool)
                 case ~tmp#36##0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -71,8 +71,8 @@ proc = > public (3 calls)
                 foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
             1:
-                foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#31##0:wybe.int)
-                foreign llvm icmp_eq(~tmp#31##0:wybe.int, 1:wybe.int, ?tmp#32##0:wybe.bool)
+                foreign llvm and(#right##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#31##0:2 bit unsigned)
+                foreign llvm icmp_eq(~tmp#31##0:2 bit unsigned, 1:2 bit unsigned, ?tmp#32##0:wybe.bool)
                 case ~tmp#32##0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -91,8 +91,8 @@ proc = > public (3 calls)
                 foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
             1:
-                foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#27##0:wybe.int)
-                foreign llvm icmp_eq(~tmp#27##0:wybe.int, 2:wybe.int, ?tmp#28##0:wybe.bool)
+                foreign llvm and(#right##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#27##0:2 bit unsigned)
+                foreign llvm icmp_eq(~tmp#27##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#28##0:wybe.bool)
                 case ~tmp#28##0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -102,6 +102,9 @@ proc = > public (3 calls)
                     ctor_char2.=<0>(~#left#another_ctor#1##0:ctor_char2, ~#right#another_ctor#1##0:ctor_char2, ?#success##0:wybe.bool) #8
 
 
+
+        3:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
 
 
@@ -114,7 +117,7 @@ another_ctor(another_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2) @ctor_char2:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~another_ctor#1##0:ctor_char2) @ctor_char2:nn:nn
     foreign llvm or(~#rec##1:ctor_char2, 2:wybe.int, ?#result##0:ctor_char2) @ctor_char2:nn:nn
-proc another_ctor > {inline} (5 calls)
+proc another_ctor > {inline} (8 calls)
 1: ctor_char2.another_ctor<1>
 another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -126,8 +129,8 @@ another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:
         foreign llvm move(undef:ctor_char2, ?another_ctor#1##0:ctor_char2)
 
     1:
-        foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool)
+        foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#2##0:2 bit unsigned)
+        foreign llvm icmp_eq(~tmp#2##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -152,8 +155,8 @@ c(#rec##0:ctor_char2, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>
         foreign llvm move(undef:wybe.char, ?#result##0:wybe.char)
 
     1:
-        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#2##0:2 bit unsigned)
+        foreign llvm icmp_eq(~tmp#2##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -178,8 +181,8 @@ c(#rec##0:ctor_char2, ?#rec##2:ctor_char2, #field##0:wybe.char, ?#success##0:wyb
         foreign llvm move(0:ctor_char2, ?#rec##2:ctor_char2)
 
     1:
-        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#2##0:2 bit unsigned)
+        foreign llvm icmp_eq(~tmp#2##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -211,7 +214,7 @@ ctor(c##0:wybe.char, ?#result##3:ctor_char2)<{}; {}; {}>:
     foreign lpvm cast(~c##0:wybe.char, ?#temp##0:ctor_char2) @ctor_char2:nn:nn
     foreign llvm shl(~#temp##0:ctor_char2, 2:ctor_char2, ?#temp##1:ctor_char2) @ctor_char2:nn:nn
     foreign llvm or(~#temp##1:ctor_char2, 1024:ctor_char2, ?#result##3:ctor_char2) @ctor_char2:nn:nn
-proc ctor > {inline} (15 calls)
+proc ctor > {inline} (19 calls)
 1: ctor_char2.ctor<1>
 ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -223,8 +226,8 @@ ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>
         foreign llvm move(undef:wybe.char, ?c##0:wybe.char)
 
     1:
-        foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#2##0:2 bit unsigned)
+        foreign llvm icmp_eq(~tmp#2##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -250,8 +253,8 @@ foo(this##0:ctor_char2, ?#result##0:wybe.char)<{}; {}; {}>:
         foreign llvm move('0':wybe.char, ?#result##0:wybe.char) @ctor_char2:nn:nn
 
     1:
-        foreign llvm and(this##0:wybe.int, 3:wybe.int, ?tmp#4##0:wybe.int) @ctor_char2:nn:nn
-        foreign llvm icmp_eq(~tmp#4##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @ctor_char2:nn:nn
+        foreign llvm and(this##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#4##0:2 bit unsigned) @ctor_char2:nn:nn
+        foreign llvm icmp_eq(~tmp#4##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#5##0:wybe.bool) @ctor_char2:nn:nn
         case ~tmp#5##0:wybe.bool of
         0:
             foreign llvm move('0':wybe.char, ?#result##0:wybe.char) @ctor_char2:nn:nn
@@ -272,7 +275,7 @@ other_ctor(other_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2) @ctor_char2:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char2) @ctor_char2:nn:nn
     foreign llvm or(~#rec##1:ctor_char2, 1:wybe.int, ?#result##0:ctor_char2) @ctor_char2:nn:nn
-proc other_ctor > {inline} (7 calls)
+proc other_ctor > {inline} (12 calls)
 1: ctor_char2.other_ctor<1>
 other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -284,8 +287,8 @@ other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe
         foreign llvm move(undef:ctor_char2, ?other_ctor#1##0:ctor_char2)
 
     1:
-        foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#2##0:2 bit unsigned)
+        foreign llvm icmp_eq(~tmp#2##0:2 bit unsigned, 1:2 bit unsigned, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -330,11 +333,13 @@ define external fastcc i1 @"ctor_char2.=<0>"(i64 %"#left##0", i64 %"#right##0") 
   %"tmp#0##0" = icmp ne i64 %"#left##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#13##0" = and i64 %"#left##0", 3
-  switch i64 %"tmp#13##0", label %case.2.switch.1 [
-    i64 0, label %case.0.switch.1
-    i64 1, label %case.1.switch.1
-    i64 2, label %case.2.switch.1 ]
+  %"tmp#46##0" = trunc i64 %"#left##0" to i2
+  %"tmp#13##0" = and i2 %"tmp#46##0", 3
+  switch i2 %"tmp#13##0", label %case.3.switch.1 [
+    i2 0, label %case.0.switch.1
+    i2 1, label %case.1.switch.1
+    i2 2, label %case.2.switch.1
+    i2 3, label %case.3.switch.1 ]
 case.0.switch.1:
   %"tmp#15##0" = lshr i64 %"#left##0", 2
   %"tmp#16##0" = and i64 %"tmp#15##0", 255
@@ -342,62 +347,67 @@ case.0.switch.1:
   %"tmp#34##0" = icmp ne i64 %"#right##0", 0
   br i1 %"tmp#34##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#35##0" = and i64 %"#right##0", 3
-  %"tmp#36##0" = icmp eq i64 %"tmp#35##0", 0
+  %"tmp#47##0" = trunc i64 %"#right##0" to i2
+  %"tmp#35##0" = and i2 %"tmp#47##0", 3
+  %"tmp#36##0" = icmp eq i2 %"tmp#35##0", 0
   br i1 %"tmp#36##0", label %if.then.3, label %if.else.3
 if.then.3:
   %"tmp#37##0" = lshr i64 %"#right##0", 2
   %"tmp#38##0" = and i64 %"tmp#37##0", 255
   %"#right#c##0" = trunc i64 %"tmp#38##0" to i8
-  %"tmp#41##0" = icmp eq i8 %"#left#c##0", %"#right#c##0"
-  ret i1 %"tmp#41##0"
+  %"tmp#48##0" = icmp eq i8 %"#left#c##0", %"#right#c##0"
+  ret i1 %"tmp#48##0"
 if.else.3:
   ret i1 0
 if.else.2:
   ret i1 0
 case.1.switch.1:
-  %"tmp#42##0" = add i64 %"#left##0", -1
-  %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
-  %"#left#other_ctor#1##0" = load i64, ptr %"tmp#43##0"
+  %"tmp#49##0" = add i64 %"#left##0", -1
+  %"tmp#50##0" = inttoptr i64 %"tmp#49##0" to ptr
+  %"#left#other_ctor#1##0" = load i64, ptr %"tmp#50##0"
   %"tmp#30##0" = icmp ne i64 %"#right##0", 0
   br i1 %"tmp#30##0", label %if.then.4, label %if.else.4
 if.then.4:
-  %"tmp#31##0" = and i64 %"#right##0", 3
-  %"tmp#32##0" = icmp eq i64 %"tmp#31##0", 1
+  %"tmp#51##0" = trunc i64 %"#right##0" to i2
+  %"tmp#31##0" = and i2 %"tmp#51##0", 3
+  %"tmp#32##0" = icmp eq i2 %"tmp#31##0", 1
   br i1 %"tmp#32##0", label %if.then.5, label %if.else.5
 if.then.5:
-  %"tmp#44##0" = add i64 %"#right##0", -1
-  %"tmp#45##0" = inttoptr i64 %"tmp#44##0" to ptr
-  %"#right#other_ctor#1##0" = load i64, ptr %"tmp#45##0"
-  %"tmp#46##0" = tail call fastcc i1 @"ctor_char2.=<0>"(i64 %"#left#other_ctor#1##0", i64 %"#right#other_ctor#1##0")
-  ret i1 %"tmp#46##0"
+  %"tmp#52##0" = add i64 %"#right##0", -1
+  %"tmp#53##0" = inttoptr i64 %"tmp#52##0" to ptr
+  %"#right#other_ctor#1##0" = load i64, ptr %"tmp#53##0"
+  %"tmp#54##0" = tail call fastcc i1 @"ctor_char2.=<0>"(i64 %"#left#other_ctor#1##0", i64 %"#right#other_ctor#1##0")
+  ret i1 %"tmp#54##0"
 if.else.5:
   ret i1 0
 if.else.4:
   ret i1 0
 case.2.switch.1:
-  %"tmp#47##0" = add i64 %"#left##0", -2
-  %"tmp#48##0" = inttoptr i64 %"tmp#47##0" to ptr
-  %"#left#another_ctor#1##0" = load i64, ptr %"tmp#48##0"
+  %"tmp#55##0" = add i64 %"#left##0", -2
+  %"tmp#56##0" = inttoptr i64 %"tmp#55##0" to ptr
+  %"#left#another_ctor#1##0" = load i64, ptr %"tmp#56##0"
   %"tmp#26##0" = icmp ne i64 %"#right##0", 0
   br i1 %"tmp#26##0", label %if.then.6, label %if.else.6
 if.then.6:
-  %"tmp#27##0" = and i64 %"#right##0", 3
-  %"tmp#28##0" = icmp eq i64 %"tmp#27##0", 2
+  %"tmp#57##0" = trunc i64 %"#right##0" to i2
+  %"tmp#27##0" = and i2 %"tmp#57##0", 3
+  %"tmp#28##0" = icmp eq i2 %"tmp#27##0", 2
   br i1 %"tmp#28##0", label %if.then.7, label %if.else.7
 if.then.7:
-  %"tmp#49##0" = add i64 %"#right##0", -2
-  %"tmp#50##0" = inttoptr i64 %"tmp#49##0" to ptr
-  %"#right#another_ctor#1##0" = load i64, ptr %"tmp#50##0"
-  %"tmp#51##0" = tail call fastcc i1 @"ctor_char2.=<0>"(i64 %"#left#another_ctor#1##0", i64 %"#right#another_ctor#1##0")
-  ret i1 %"tmp#51##0"
+  %"tmp#58##0" = add i64 %"#right##0", -2
+  %"tmp#59##0" = inttoptr i64 %"tmp#58##0" to ptr
+  %"#right#another_ctor#1##0" = load i64, ptr %"tmp#59##0"
+  %"tmp#60##0" = tail call fastcc i1 @"ctor_char2.=<0>"(i64 %"#left#another_ctor#1##0", i64 %"#right#another_ctor#1##0")
+  ret i1 %"tmp#60##0"
 if.else.7:
   ret i1 0
 if.else.6:
   ret i1 0
+case.3.switch.1:
+  ret i1 0
 if.else.0:
-  %"tmp#52##0" = icmp eq i64 %"#right##0", 0
-  ret i1 %"tmp#52##0"
+  %"tmp#61##0" = icmp eq i64 %"#right##0", 0
+  ret i1 %"tmp#61##0"
 }
 
 define external fastcc i64 @"ctor_char2.another_ctor<0>"(i64 %"another_ctor#1##0") {
@@ -413,73 +423,76 @@ define external fastcc {i64, i1} @"ctor_char2.another_ctor<1>"(i64 %"#result##0"
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = and i64 %"#result##0", 3
-  %"tmp#1##0" = icmp eq i64 %"tmp#2##0", 2
+  %"tmp#3##0" = trunc i64 %"#result##0" to i2
+  %"tmp#2##0" = and i2 %"tmp#3##0", 3
+  %"tmp#1##0" = icmp eq i2 %"tmp#2##0", 2
   br i1 %"tmp#1##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#3##0" = add i64 %"#result##0", -2
-  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
-  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
-  ret {i64, i1} %"tmp#7##0"
+  %"tmp#4##0" = add i64 %"#result##0", -2
+  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
+  %"tmp#6##0" = load i64, ptr %"tmp#5##0"
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 1, 1
+  ret {i64, i1} %"tmp#8##0"
 if.else.1:
-  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
-  ret {i64, i1} %"tmp#9##0"
+  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 0, 1
+  ret {i64, i1} %"tmp#10##0"
 if.else.0:
-  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 0, 1
-  ret {i64, i1} %"tmp#11##0"
+  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
+  ret {i64, i1} %"tmp#12##0"
 }
 
 define external fastcc {i8, i1} @"ctor_char2.c<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = and i64 %"#rec##0", 3
-  %"tmp#1##0" = icmp eq i64 %"tmp#2##0", 0
+  %"tmp#3##0" = trunc i64 %"#rec##0" to i2
+  %"tmp#2##0" = and i2 %"tmp#3##0", 3
+  %"tmp#1##0" = icmp eq i2 %"tmp#2##0", 0
   br i1 %"tmp#1##0", label %if.then.1, label %if.else.1
 if.then.1:
   %"#rec##1" = lshr i64 %"#rec##0", 2
   %"#field##0" = and i64 %"#rec##1", 255
-  %"tmp#3##0" = trunc i64 %"#field##0" to i8
-  %"tmp#4##0" = insertvalue {i8, i1} undef, i8 %"tmp#3##0", 0
-  %"tmp#5##0" = insertvalue {i8, i1} %"tmp#4##0", i1 1, 1
-  ret {i8, i1} %"tmp#5##0"
+  %"tmp#4##0" = trunc i64 %"#field##0" to i8
+  %"tmp#5##0" = insertvalue {i8, i1} undef, i8 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i8, i1} %"tmp#5##0", i1 1, 1
+  ret {i8, i1} %"tmp#6##0"
 if.else.1:
-  %"tmp#6##0" = insertvalue {i8, i1} undef, i8 undef, 0
-  %"tmp#7##0" = insertvalue {i8, i1} %"tmp#6##0", i1 0, 1
-  ret {i8, i1} %"tmp#7##0"
+  %"tmp#7##0" = insertvalue {i8, i1} undef, i8 undef, 0
+  %"tmp#8##0" = insertvalue {i8, i1} %"tmp#7##0", i1 0, 1
+  ret {i8, i1} %"tmp#8##0"
 if.else.0:
-  %"tmp#8##0" = insertvalue {i8, i1} undef, i8 undef, 0
-  %"tmp#9##0" = insertvalue {i8, i1} %"tmp#8##0", i1 0, 1
-  ret {i8, i1} %"tmp#9##0"
+  %"tmp#9##0" = insertvalue {i8, i1} undef, i8 undef, 0
+  %"tmp#10##0" = insertvalue {i8, i1} %"tmp#9##0", i1 0, 1
+  ret {i8, i1} %"tmp#10##0"
 }
 
 define external fastcc {i64, i1} @"ctor_char2.c<1>"(i64 %"#rec##0", i8 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = and i64 %"#rec##0", 3
-  %"tmp#1##0" = icmp eq i64 %"tmp#2##0", 0
+  %"tmp#3##0" = trunc i64 %"#rec##0" to i2
+  %"tmp#2##0" = and i2 %"tmp#3##0", 3
+  %"tmp#1##0" = icmp eq i2 %"tmp#2##0", 0
   br i1 %"tmp#1##0", label %if.then.1, label %if.else.1
 if.then.1:
   %"#rec##1" = and i64 %"#rec##0", -1021
   %"#temp##0" = zext i8 %"#field##0" to i64
   %"#temp##1" = shl i64 %"#temp##0", 2
-  %"tmp#3##0" = or i64 %"#rec##1", %"#temp##1"
-  %"tmp#4##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
-  %"tmp#5##0" = insertvalue {i64, i1} %"tmp#4##0", i1 1, 1
-  ret {i64, i1} %"tmp#5##0"
+  %"tmp#4##0" = or i64 %"#rec##1", %"#temp##1"
+  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
+  ret {i64, i1} %"tmp#6##0"
 if.else.1:
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 0, 1
-  ret {i64, i1} %"tmp#7##0"
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
+  ret {i64, i1} %"tmp#8##0"
 if.else.0:
-  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 0, 0
-  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
-  ret {i64, i1} %"tmp#9##0"
+  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 0, 0
+  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 0, 1
+  ret {i64, i1} %"tmp#10##0"
 }
 
 define external fastcc i64 @"ctor_char2.const<0>"() {
@@ -497,38 +510,40 @@ define external fastcc {i8, i1} @"ctor_char2.ctor<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = and i64 %"#result##0", 3
-  %"tmp#1##0" = icmp eq i64 %"tmp#2##0", 0
+  %"tmp#3##0" = trunc i64 %"#result##0" to i2
+  %"tmp#2##0" = and i2 %"tmp#3##0", 3
+  %"tmp#1##0" = icmp eq i2 %"tmp#2##0", 0
   br i1 %"tmp#1##0", label %if.then.1, label %if.else.1
 if.then.1:
   %"#temp##0" = lshr i64 %"#result##0", 2
   %"#temp2##0" = and i64 %"#temp##0", 255
-  %"tmp#3##0" = trunc i64 %"#temp2##0" to i8
-  %"tmp#4##0" = insertvalue {i8, i1} undef, i8 %"tmp#3##0", 0
-  %"tmp#5##0" = insertvalue {i8, i1} %"tmp#4##0", i1 1, 1
-  ret {i8, i1} %"tmp#5##0"
+  %"tmp#4##0" = trunc i64 %"#temp2##0" to i8
+  %"tmp#5##0" = insertvalue {i8, i1} undef, i8 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i8, i1} %"tmp#5##0", i1 1, 1
+  ret {i8, i1} %"tmp#6##0"
 if.else.1:
-  %"tmp#6##0" = insertvalue {i8, i1} undef, i8 undef, 0
-  %"tmp#7##0" = insertvalue {i8, i1} %"tmp#6##0", i1 0, 1
-  ret {i8, i1} %"tmp#7##0"
+  %"tmp#7##0" = insertvalue {i8, i1} undef, i8 undef, 0
+  %"tmp#8##0" = insertvalue {i8, i1} %"tmp#7##0", i1 0, 1
+  ret {i8, i1} %"tmp#8##0"
 if.else.0:
-  %"tmp#8##0" = insertvalue {i8, i1} undef, i8 undef, 0
-  %"tmp#9##0" = insertvalue {i8, i1} %"tmp#8##0", i1 0, 1
-  ret {i8, i1} %"tmp#9##0"
+  %"tmp#9##0" = insertvalue {i8, i1} undef, i8 undef, 0
+  %"tmp#10##0" = insertvalue {i8, i1} %"tmp#9##0", i1 0, 1
+  ret {i8, i1} %"tmp#10##0"
 }
 
 define external fastcc i8 @"ctor_char2.foo<0>"(i64 %"this##0") {
   %"tmp#3##0" = icmp ne i64 %"this##0", 0
   br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#4##0" = and i64 %"this##0", 3
-  %"tmp#5##0" = icmp eq i64 %"tmp#4##0", 0
+  %"tmp#8##0" = trunc i64 %"this##0" to i2
+  %"tmp#4##0" = and i2 %"tmp#8##0", 3
+  %"tmp#5##0" = icmp eq i2 %"tmp#4##0", 0
   br i1 %"tmp#5##0", label %if.then.1, label %if.else.1
 if.then.1:
   %"tmp#6##0" = lshr i64 %"this##0", 2
   %"tmp#7##0" = and i64 %"tmp#6##0", 255
-  %"tmp#8##0" = trunc i64 %"tmp#7##0" to i8
-  ret i8 %"tmp#8##0"
+  %"tmp#9##0" = trunc i64 %"tmp#7##0" to i8
+  ret i8 %"tmp#9##0"
 if.else.1:
   ret i8 48
 if.else.0:
@@ -548,24 +563,25 @@ define external fastcc {i64, i1} @"ctor_char2.other_ctor<1>"(i64 %"#result##0") 
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = and i64 %"#result##0", 3
-  %"tmp#1##0" = icmp eq i64 %"tmp#2##0", 1
+  %"tmp#3##0" = trunc i64 %"#result##0" to i2
+  %"tmp#2##0" = and i2 %"tmp#3##0", 3
+  %"tmp#1##0" = icmp eq i2 %"tmp#2##0", 1
   br i1 %"tmp#1##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#3##0" = add i64 %"#result##0", -1
-  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
-  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
-  ret {i64, i1} %"tmp#7##0"
+  %"tmp#4##0" = add i64 %"#result##0", -1
+  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
+  %"tmp#6##0" = load i64, ptr %"tmp#5##0"
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 1, 1
+  ret {i64, i1} %"tmp#8##0"
 if.else.1:
-  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
-  ret {i64, i1} %"tmp#9##0"
+  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 0, 1
+  ret {i64, i1} %"tmp#10##0"
 if.else.0:
-  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 0, 1
-  ret {i64, i1} %"tmp#11##0"
+  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
+  ret {i64, i1} %"tmp#12##0"
 }
 
 define external fastcc i1 @"ctor_char2.~=<0>"(i64 %"#left##0", i64 %"#right##0") {

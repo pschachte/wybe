@@ -1,0 +1,24 @@
+?int_bytes = foreign lpvm sizeof(_:int):int
+?int_bits = foreign lpvm {bits} sizeof(_:int):int
+!println("Int bytes: $int_bytes")
+!println("Int bits: $int_bits")
+
+foreign lpvm sizeof('c', ?char_bytes:int)
+?c = 'a'
+foreign lpvm {bits} sizeof(c, ?char_bits:count)
+!println("Char bytes: $char_bytes")
+!println("Char bits: $char_bits")
+
+type narrow {
+    constructor one | two | three | foure | five
+}
+
+foreign lpvm {bits} sizeof(_:narrow, ?narrow_bits:int)
+!println("Narrow bits: $narrow_bits")
+
+type wide {
+    constructor wide(_) | other
+}
+
+foreign lpvm {bits} sizeof(_:wide, ?wide_bits:int)
+!println("Small bits: $wide_bits")

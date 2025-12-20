@@ -7,6 +7,7 @@
 --           : LICENSE in the root directory of this project.
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 
 module LastCallAnalysis (lastCallProcessModSCC, lastCallAnalyseProc) where
 import AST
@@ -20,10 +21,11 @@ import Data.List.Predicate (allUnique)
 import Callers (getSccProcs)
 import Data.Graph (SCC (AcyclicSCC, CyclicSCC))
 import Control.Monad.State (StateT (runStateT), MonadTrans (lift), execStateT, execState, runState, MonadState (get, put), gets, modify)
-import Control.Monad ( liftM, (>=>), when, unless, MonadPlus (mzero) )
+import Control.Monad ( liftM, (>=>), when, unless, MonadPlus (mzero), forM )
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
+import Control.Functor.HT (mapSnd)
 
 
 -- BEGIN MAJOR DOC
@@ -404,21 +406,30 @@ mapProcLeavesM :: (Monad t) => ([Placed Prim] -> t [Placed Prim]) -> ProcBody ->
 mapProcLeavesM f leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork } = do
         prims <- f prims
         return leafBlock { bodyPrims = prims }
-mapProcLeavesM f current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} } = do
-        -- XXX must map over default, too
-        bodies' <- mapM (mapProcLeavesM f) bodies
-        return current { bodyFork = fork { forkBodies = bodies' } }
+mapProcLeavesM f current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies, forkDefault = dflt} } = do
+        bodies' <- mapM (mapSnd $ mapProcLeavesM f) bodies
+        dflt' <- forM dflt (mapProcLeavesM f)
+        return current { bodyFork = fork { forkBodies = bodies', forkDefault = dflt' } }
+mapProcLeavesM f current@ProcBody { bodyFork = fork@MergedFork{forkBody = body, forkDefault = dflt} } = do
+        body' <- mapProcLeavesM f body
+        dflt' <- forM dflt (mapProcLeavesM f)
+        return current { bodyFork = fork { forkBody = body', forkDefault = dflt' } }
 
 -- | Applies a transformation to each prim in a proc
 mapProcPrimsM :: (Monad t) => (Placed Prim -> t (Placed Prim)) -> ProcBody -> t ProcBody
 mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = NoFork } = do
         prims' <- mapM fn prims
         return body { bodyPrims = prims' }
-mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@PrimFork{forkBodies = bodies } } = do
-        -- XXX must map over default, too
+mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@PrimFork{forkBodies = bodies, forkDefault = dflt } } = do
         prims' <- mapM fn prims
-        bodies <- mapM (mapProcPrimsM fn) bodies
-        return body { bodyPrims = prims', bodyFork = fork { forkBodies = bodies } }
+        bodies' <- mapM (mapSnd $ mapProcPrimsM fn) bodies
+        dflt' <- forM dflt (mapProcPrimsM fn)
+        return body { bodyPrims = prims', bodyFork = fork { forkBodies = bodies', forkDefault = dflt' } }
+mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@MergedFork{forkBody = forkBody, forkDefault = dflt} } = do
+        prims' <- mapM fn prims
+        body' <- mapProcPrimsM fn forkBody
+        dflt' <- forM dflt (mapProcPrimsM fn)
+        return body { bodyPrims = prims', bodyFork = fork { forkBody = body', forkDefault = dflt' } }
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

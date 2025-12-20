@@ -272,6 +272,7 @@ preScanProcs = do
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
     let bodies = concatMap (concatMap allProcBodies) procss
     mapM_ (mapLPVMBodyM (recordExtern mod) (prescanArg mod)) bodies
+    mapM_ (preScanBodyForks mod) bodies
 
 
 -- | What's needed to identify a manifest constant string in generated LLVM
@@ -281,12 +282,14 @@ preScanProcs = do
 data StaticConstSpec = CStringSpec String
                      | WybeStringSpec String
                      | ClosureSpec ProcSpec [PrimArg]
+                     | ArraySpec [PrimArg]
     deriving (Eq,Ord)
 
 instance Show StaticConstSpec where
     show (CStringSpec str) = 'c' : show str
     show (WybeStringSpec str) = show str
     show (ClosureSpec pspec args) = show pspec ++ showArguments args
+    show (ArraySpec elts) = "[" ++ intercalate ", " (show <$> elts) ++ "]"
 
 
 -- | If the specified PrimArg is a string constant or closure with only constant
@@ -309,6 +312,23 @@ prescanArg mod (ArgClosure pspec args _) = do
     else
         recordExternSpec externAlloc
 prescanArg _ _ = return ()
+
+-- | Scan the forks of a ProcBody, recording any constants
+preScanBodyForks :: ModSpec -> ProcBody -> LLVM ()
+preScanBodyForks mod = preScanForks mod . bodyFork
+
+-- | Scan a fork (and subsequent forks), recording any constants
+preScanForks :: ModSpec -> PrimFork -> LLVM ()
+preScanForks _ NoFork = return ()
+preScanForks mod PrimFork{forkBodies=bodies, forkDefault=mbDflt} = do
+    mapM_ (preScanBodyForks mod . snd) bodies
+    forM_ mbDflt $ preScanBodyForks mod
+preScanForks mod MergedFork{forkTable=table, forkBody=body, forkDefault=mbDflt} = do
+    mapM_ (recordConst . ArraySpec . thd3) table
+    mapM_ (mapM_ (prescanArg mod) . thd3) table
+    preScanBodyForks mod body
+    forM_ mbDflt $ preScanBodyForks mod
+
 
 
 -- | Record that the specified constant needs to be declared in this LLVM module
@@ -466,12 +486,16 @@ writeConstDeclaration spec@(ClosureSpec pspec args) n = do
     let closureName = specialName2 "closure" $ show n
     modify $ \s -> s { constNames=Map.insert spec closureName $ constNames s}
     let pname = show pspec
-    argRep <- typeRep AnyType
     paramTys <- partitionClosureParams pspec args >>= mapM typeRep . (argType <$>) . fst 
     declareStructConstant closureName
         ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
          : zip args paramTys)
         Nothing
+writeConstDeclaration spec@(ArraySpec args) n = do
+    let arrayName = specialName2 "array" $ show n
+    tys <- mapM argTypeRep args
+    modify $ \s -> s { constNames=Map.insert spec arrayName $ constNames s}
+    declareArrayConstant arrayName $ zip args tys
 
 
 -- | Find the global constant that holds the value of the specified string
@@ -683,12 +707,19 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
             rep <- typeRep ty
             case (rep,branches,dflt) of
                 (Bits 0,_,_) -> shouldnt "Switch on a phantom!"
-                (_,[single],Nothing) -> writeAssemblyBody outs single
-                (Bits 1, [els,thn],Nothing) -> writeAssemblyIfElse outs v thn els
+                (_,[(_,single)],Nothing) -> writeAssemblyBody outs single
+                (Bits 1, [(0,els),(1,thn)],Nothing) -> writeAssemblyIfElse outs v thn els
                 (Bits _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
                 (Signed _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
                 (rep,_,_) -> shouldnt $ "Switching on " ++ show rep ++ " type "
                                 ++ show ty
+        MergedFork var ty _ table body Nothing -> do
+            releaseDeferredCall
+            writeAssemblyMergedFork outs var ty table body
+        MergedFork var ty _ table body dflt -> do 
+            tmp <- makeTemp
+            writeAssemblyBody outs $ guardedMergedFork tmp var ty (genericLength $ thd3 $ head table) 
+                                        (ProcBody [] fork{forkDefault=Nothing}) dflt
 
 
 -- | Generate and write out an LLVM if-then-else (switch on an i1 value)
@@ -709,10 +740,10 @@ writeAssemblyIfElse outs v thn els = do
 
 -- | Generate and write out an LLVM multi-way switch
 writeAssemblySwitch :: [PrimParam] -> PrimVarName -> TypeRepresentation
-                    -> [ProcBody] -> Maybe ProcBody -> LLVM ()
+                    -> [(Integer, ProcBody)] -> Maybe ProcBody -> LLVM ()
 writeAssemblySwitch outs v rep cases dflt = do
     releaseDeferredCall
-    let prefixes = ["case."++show n++".switch." | n <- [0..length cases-1]]
+    let prefixes = ["case."++show n++".switch." | (n, _) <- cases]
     (dfltLabel,numLabels) <- if isJust dflt
         then do
             (dfltLabel:numLabels) <- freshLables $ "default.switch.":prefixes
@@ -723,14 +754,15 @@ writeAssemblySwitch outs v rep cases dflt = do
     let llType = llvmTypeRep rep
     llvar <- varToRead v
     logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
+    let switchValues = fst <$> cases 
     llvmPutStrLnIndented $ "switch " ++ makeLLVMArg llType llvar ++ ", "
         ++ llvmLabelName dfltLabel ++ " [\n    "
         ++ intercalate "\n    "
                 [makeLLVMArg llType (show n) ++ ", " ++ llvmLabelName lbl
-                | (lbl,n) <- zip numLabels [0..]]
+                | (lbl,n) <- zip numLabels switchValues]
         ++ " ]"
     zipWithM_
-        (\lbl cs -> llvmPutStrLn (lbl ++ ":") >> writeAssemblyBody outs cs)
+        (\lbl (_,cs) -> llvmPutStrLn (lbl ++ ":") >> writeAssemblyBody outs cs)
         numLabels cases
     case dflt of
         Nothing -> return ()
@@ -740,12 +772,29 @@ writeAssemblySwitch outs v rep cases dflt = do
             writeAssemblyBody outs dfltCode
 
 
+-- | Write out the assembly for a merged fork, loading the factored variables
+-- from the constant arrays extracted earlier
+writeAssemblyMergedFork :: [PrimParam] -> PrimVarName -> TypeSpec -> MergedForkTable -> ProcBody -> StateT LLVMState Compiler ()
+writeAssemblyMergedFork outs idxVar idxTy table body = do
+    releaseDeferredCall 
+    forM_ table (\(var, ty, values) -> do
+            arr <- lookupConstant $ ArraySpec values
+            varRep <- llvmTypeRep <$> typeRep ty
+            let llarrty = "[ " ++ show (length values) ++ " x " ++ varRep ++ " ]"
+            ptr <- getElementPtr True llarrty (Just $ ArgGlobal (GlobalVariable arr) AnyType) 
+                        [ ArgInt 0 intType
+                        , ArgVar idxVar (Representation $ Bits 64) FlowIn Ordinary False]
+            llvmLoad ptr $ ArgVar var ty FlowOut Ordinary False
+        )
+    writeAssemblyBody outs body
+
+
 -- | Unmarshall the Free params from the env param
 writeClosureEnvUnmarshall :: [PrimParam] -> LLVM ()
 writeClosureEnvUnmarshall params = do
     structTy <- llvmStructType . (CPointer:) <$> mapM (typeRep . primParamType) params
     forM_ (zip [1..] params) $ \(idx, param) -> do
-        eltPtr <- getElementPtr structTy (Just $ primParamToArg envPrimParam) [ArgInt 0 intType, ArgInt idx int32Type]
+        eltPtr <- getElementPtr True structTy (Just $ primParamToArg envPrimParam) [ArgInt 0 intType, ArgInt idx int32Type]
         llvmLoad eltPtr $ primParamToArg param
 
 
@@ -1054,12 +1103,12 @@ buildTuple outType tuple argNum
 -- That is, for a given pointer to a given type, yield the pointer of the element 
 -- specified by the indices. No assumptions are made on the correctness of the indices. 
 -- If the pointer is Nothing, the LLVM instruction uses a `null` value
-getElementPtr :: LLVMType -> Maybe PrimArg -> [PrimArg] -> LLVM PrimArg
-getElementPtr ty ptr idxs = do
+getElementPtr :: Bool -> LLVMType -> Maybe PrimArg -> [PrimArg] -> LLVM PrimArg
+getElementPtr inbounds ty ptr idxs = do
     (writeEltPtr, readEltPtr) <- freshTempArgs $ Representation CPointer
     llptr <- maybe (return "null") llvmValue ptr
     llidxs <- mapM llvmArgument idxs
-    llvmAssignResult writeEltPtr $ "getelementptr " ++ ty ++ ", " 
+    llvmAssignResult writeEltPtr $ "getelementptr " ++ (if inbounds then "inbounds " else "") ++ ty ++ ", " 
                                 ++ llvmTypeRep CPointer ++ " " ++ llptr ++ ", " 
                                 ++ intercalate ", " llidxs
     return readEltPtr
@@ -1094,7 +1143,7 @@ declareStringConstant name str section = do
                     ++ ", align " ++ show wordSizeBytes
 
 
--- | Emit an LLVM declaration for a string constant, optionally specifying a
+-- | Emit an LLVM declaration for a struct constant, optionally specifying a
 -- file section.
 declareStructConstant :: LLVMName -> [ConstSpec] -> Maybe String -> LLVM ()
 declareStructConstant name fields section = do
@@ -1103,6 +1152,17 @@ declareStructConstant name fields section = do
                     ++ " = private unnamed_addr constant " ++ llvmFields
                     ++ maybe "" ((", section "++) . show) section
                     ++ ", align " ++ show wordSizeBytes
+
+
+-- | Emit an LLVM declaration for an array constant, optionally specifying a
+-- file section.
+declareArrayConstant :: LLVMName -> [ConstSpec] -> LLVM ()
+declareArrayConstant name values = do
+    let ty = llvmTypeRep $ snd $ head values
+    llvmVals <- mapM (uncurry convertedConstantArg) values
+    llvmPutStrLn $ llvmGlobalName name
+                    ++ " = private unnamed_addr constant [ " ++ show (length values) ++ " x " ++ ty ++ " ] "
+                    ++ "[" ++ intercalate ", " llvmVals ++ "]"
 
 
 -- | Build a string giving the body of an llvm constant structure declaration
@@ -1459,11 +1519,11 @@ llvmValue arg@(ArgClosure pspec args ty) = do
             -- The size of a structure can be determinied by the address after NULL for the given type,
             -- which is effectively (int)(((llclosureTy*) NULL) + 1)
             -- This is a free operation and is eliminated by llc, but takes a LLVM few instructions
-            sizeVar <- getElementPtr llClosureTy Nothing [ArgInt 1 intType]
+            sizeVar <- getElementPtr True llClosureTy Nothing [ArgInt 1 intType]
             heapAlloc writePtr sizeVar Nothing
             llvmStoreValue writePtr $ funcRef pspec
             forM_ (zip [1..] args') $ \(idx, arg) -> do
-                eltPtr <- getElementPtr llClosureTy (Just writePtr) [ArgInt 0 intType, ArgInt idx int32Type]
+                eltPtr <- getElementPtr True llClosureTy (Just writePtr) [ArgInt 0 intType, ArgInt idx int32Type]
                 llvmStore eltPtr arg
             logLLVM $ "Finished creating closure; result is " ++ show readPtr
             rep <- typeRep ty
@@ -1699,7 +1759,7 @@ typeConvertOp (Bits m) (Bits n)
     | n < m = "trunc"
     | otherwise = shouldnt "no-op unsigned conversion"
 typeConvertOp (Bits m) (Signed n)
-    | m < n = "sext"
+    | m < n = "zext"
     | n < m = "trunc"
     | otherwise = -- no instruction actually needed, but one is expected
         "bitcast"

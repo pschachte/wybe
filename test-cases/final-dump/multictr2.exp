@@ -58,8 +58,8 @@ print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(8,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(13,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(18,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(23,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(28,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(33,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(42,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign llvm and(x##0:wybe.int, 7:wybe.int, ?tmp#9##0:wybe.int) @multictr2:nn:nn
-    case ~tmp#9##0:wybe.int of
+    foreign llvm and(x##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#9##0:3 bit unsigned) @multictr2:nn:nn
+    case ~tmp#9##0:3 bit unsigned of
     0:
         foreign lpvm access(~x##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @multictr2:nn:nn
         wybe.string.print<0>("c01(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @multictr2:nn:nn
@@ -192,88 +192,89 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"multictr2.print_t<0>"(i64 %"x##0") {
-  %"tmp#9##0" = and i64 %"x##0", 7
-  switch i64 %"tmp#9##0", label %case.7.switch.0 [
-    i64 0, label %case.0.switch.0
-    i64 1, label %case.1.switch.0
-    i64 2, label %case.2.switch.0
-    i64 3, label %case.3.switch.0
-    i64 4, label %case.4.switch.0
-    i64 5, label %case.5.switch.0
-    i64 6, label %case.6.switch.0
-    i64 7, label %case.7.switch.0 ]
+  %"tmp#120##0" = trunc i64 %"x##0" to i3
+  %"tmp#9##0" = and i3 %"tmp#120##0", 7
+  switch i3 %"tmp#9##0", label %case.7.switch.0 [
+    i3 0, label %case.0.switch.0
+    i3 1, label %case.1.switch.0
+    i3 2, label %case.2.switch.0
+    i3 3, label %case.3.switch.0
+    i3 4, label %case.4.switch.0
+    i3 5, label %case.5.switch.0
+    i3 6, label %case.6.switch.0
+    i3 7, label %case.7.switch.0 ]
 case.0.switch.0:
-  %"tmp#120##0" = inttoptr i64 %"x##0" to ptr
-  %"a##0" = load i64, ptr %"tmp#120##0"
+  %"tmp#121##0" = inttoptr i64 %"x##0" to ptr
+  %"a##0" = load i64, ptr %"tmp#121##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
   call ccc void @print_int(i64 %"a##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.1.switch.0:
-  %"tmp#121##0" = add i64 %"x##0", -1
-  %"tmp#122##0" = inttoptr i64 %"tmp#121##0" to ptr
-  %"a##1" = load i64, ptr %"tmp#122##0"
+  %"tmp#122##0" = add i64 %"x##0", -1
+  %"tmp#123##0" = inttoptr i64 %"tmp#122##0" to ptr
+  %"a##1" = load i64, ptr %"tmp#123##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
   call ccc void @print_int(i64 %"a##1")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.2.switch.0:
-  %"tmp#123##0" = add i64 %"x##0", -2
-  %"tmp#124##0" = inttoptr i64 %"tmp#123##0" to ptr
-  %"a##2" = load i64, ptr %"tmp#124##0"
+  %"tmp#124##0" = add i64 %"x##0", -2
+  %"tmp#125##0" = inttoptr i64 %"tmp#124##0" to ptr
+  %"a##2" = load i64, ptr %"tmp#125##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
   call ccc void @print_int(i64 %"a##2")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.3.switch.0:
-  %"tmp#125##0" = add i64 %"x##0", -3
-  %"tmp#126##0" = inttoptr i64 %"tmp#125##0" to ptr
-  %"a##3" = load i64, ptr %"tmp#126##0"
+  %"tmp#126##0" = add i64 %"x##0", -3
+  %"tmp#127##0" = inttoptr i64 %"tmp#126##0" to ptr
+  %"a##3" = load i64, ptr %"tmp#127##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
   call ccc void @print_int(i64 %"a##3")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.4.switch.0:
-  %"tmp#127##0" = add i64 %"x##0", -4
-  %"tmp#128##0" = inttoptr i64 %"tmp#127##0" to ptr
-  %"a##4" = load i64, ptr %"tmp#128##0"
+  %"tmp#128##0" = add i64 %"x##0", -4
+  %"tmp#129##0" = inttoptr i64 %"tmp#128##0" to ptr
+  %"a##4" = load i64, ptr %"tmp#129##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#12" to i64 ))
   call ccc void @print_int(i64 %"a##4")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.5.switch.0:
-  %"tmp#129##0" = add i64 %"x##0", -5
-  %"tmp#130##0" = inttoptr i64 %"tmp#129##0" to ptr
-  %"a##5" = load i64, ptr %"tmp#130##0"
+  %"tmp#130##0" = add i64 %"x##0", -5
+  %"tmp#131##0" = inttoptr i64 %"tmp#130##0" to ptr
+  %"a##5" = load i64, ptr %"tmp#131##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#13" to i64 ))
   call ccc void @print_int(i64 %"a##5")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.6.switch.0:
-  %"tmp#131##0" = add i64 %"x##0", -6
-  %"tmp#132##0" = inttoptr i64 %"tmp#131##0" to ptr
-  %"a##6" = load i64, ptr %"tmp#132##0"
+  %"tmp#132##0" = add i64 %"x##0", -6
+  %"tmp#133##0" = inttoptr i64 %"tmp#132##0" to ptr
+  %"a##6" = load i64, ptr %"tmp#133##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#14" to i64 ))
   call ccc void @print_int(i64 %"a##6")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.7.switch.0:
-  %"tmp#133##0" = add i64 %"x##0", -7
-  %"tmp#134##0" = inttoptr i64 %"tmp#133##0" to ptr
-  %"a##7" = load i64, ptr %"tmp#134##0"
-  %"tmp#135##0" = add i64 %"x##0", 1
-  %"tmp#136##0" = inttoptr i64 %"tmp#135##0" to ptr
-  %"b##0" = load i64, ptr %"tmp#136##0"
-  %"tmp#137##0" = add i64 %"x##0", 9
-  %"tmp#138##0" = inttoptr i64 %"tmp#137##0" to ptr
-  %"c##0" = load double, ptr %"tmp#138##0"
+  %"tmp#134##0" = add i64 %"x##0", -7
+  %"tmp#135##0" = inttoptr i64 %"tmp#134##0" to ptr
+  %"a##7" = load i64, ptr %"tmp#135##0"
+  %"tmp#136##0" = add i64 %"x##0", 1
+  %"tmp#137##0" = inttoptr i64 %"tmp#136##0" to ptr
+  %"b##0" = load i64, ptr %"tmp#137##0"
+  %"tmp#138##0" = add i64 %"x##0", 9
+  %"tmp#139##0" = inttoptr i64 %"tmp#138##0" to ptr
+  %"c##0" = load double, ptr %"tmp#139##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#15" to i64 ))
   call ccc void @print_int(i64 %"a##7")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
@@ -338,12 +339,12 @@ proc = > public (1 calls)
 =(#left##0:multictr2.t, #right##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#left##0:wybe.int, 7:wybe.int, ?tmp#28##0:wybe.int)
-    case ~tmp#28##0:wybe.int of
+    foreign llvm and(#left##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#28##0:3 bit unsigned)
+    case ~tmp#28##0:3 bit unsigned of
     0:
         foreign lpvm access(~#left##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#f01##0:wybe.int) @multictr2:nn:nn
-        foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#91##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#91##0:wybe.int, 0:wybe.int, ?tmp#92##0:wybe.bool)
+        foreign llvm and(#right##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#91##0:3 bit unsigned)
+        foreign llvm icmp_eq(~tmp#91##0:3 bit unsigned, 0:3 bit unsigned, ?tmp#92##0:wybe.bool)
         case ~tmp#92##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -355,8 +356,8 @@ proc = > public (1 calls)
 
     1:
         foreign lpvm access(~#left##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#left#f02##0:wybe.int) @multictr2:nn:nn
-        foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#86##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#86##0:wybe.int, 1:wybe.int, ?tmp#87##0:wybe.bool)
+        foreign llvm and(#right##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#86##0:3 bit unsigned)
+        foreign llvm icmp_eq(~tmp#86##0:3 bit unsigned, 1:3 bit unsigned, ?tmp#87##0:wybe.bool)
         case ~tmp#87##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -368,8 +369,8 @@ proc = > public (1 calls)
 
     2:
         foreign lpvm access(~#left##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#left#f03##0:wybe.int) @multictr2:nn:nn
-        foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#81##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#81##0:wybe.int, 2:wybe.int, ?tmp#82##0:wybe.bool)
+        foreign llvm and(#right##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#81##0:3 bit unsigned)
+        foreign llvm icmp_eq(~tmp#81##0:3 bit unsigned, 2:3 bit unsigned, ?tmp#82##0:wybe.bool)
         case ~tmp#82##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -381,8 +382,8 @@ proc = > public (1 calls)
 
     3:
         foreign lpvm access(~#left##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?#left#f04##0:wybe.int) @multictr2:nn:nn
-        foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#76##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#76##0:wybe.int, 3:wybe.int, ?tmp#77##0:wybe.bool)
+        foreign llvm and(#right##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#76##0:3 bit unsigned)
+        foreign llvm icmp_eq(~tmp#76##0:3 bit unsigned, 3:3 bit unsigned, ?tmp#77##0:wybe.bool)
         case ~tmp#77##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -394,8 +395,8 @@ proc = > public (1 calls)
 
     4:
         foreign lpvm access(~#left##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?#left#f05##0:wybe.int) @multictr2:nn:nn
-        foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#71##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#71##0:wybe.int, 4:wybe.int, ?tmp#72##0:wybe.bool)
+        foreign llvm and(#right##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#71##0:3 bit unsigned)
+        foreign llvm icmp_eq(~tmp#71##0:3 bit unsigned, 4:3 bit unsigned, ?tmp#72##0:wybe.bool)
         case ~tmp#72##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -407,8 +408,8 @@ proc = > public (1 calls)
 
     5:
         foreign lpvm access(~#left##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?#left#f06##0:wybe.int) @multictr2:nn:nn
-        foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#66##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#66##0:wybe.int, 5:wybe.int, ?tmp#67##0:wybe.bool)
+        foreign llvm and(#right##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#66##0:3 bit unsigned)
+        foreign llvm icmp_eq(~tmp#66##0:3 bit unsigned, 5:3 bit unsigned, ?tmp#67##0:wybe.bool)
         case ~tmp#67##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -420,8 +421,8 @@ proc = > public (1 calls)
 
     6:
         foreign lpvm access(~#left##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?#left#f07##0:wybe.int) @multictr2:nn:nn
-        foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#61##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#61##0:wybe.int, 6:wybe.int, ?tmp#62##0:wybe.bool)
+        foreign llvm and(#right##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#61##0:3 bit unsigned)
+        foreign llvm icmp_eq(~tmp#61##0:3 bit unsigned, 6:3 bit unsigned, ?tmp#62##0:wybe.bool)
         case ~tmp#62##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -435,8 +436,8 @@ proc = > public (1 calls)
         foreign lpvm access(#left##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?#left#f08_a##0:wybe.int) @multictr2:nn:nn
         foreign lpvm access(#left##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?#left#f08_b##0:wybe.int) @multictr2:nn:nn
         foreign lpvm access(~#left##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?#left#f08_c##0:wybe.float) @multictr2:nn:nn
-        foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#52##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#52##0:wybe.int, 7:wybe.int, ?tmp#53##0:wybe.bool)
+        foreign llvm and(#right##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#52##0:3 bit unsigned)
+        foreign llvm icmp_eq(~tmp#52##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#53##0:wybe.bool)
         case ~tmp#53##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -471,13 +472,13 @@ c01(f01##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#result##0:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01##0:wybe.int) @multictr2:nn:nn
-proc c01 > public {inline} (24 calls)
+proc c01 > public {inline} (40 calls)
 1: multictr2.t.c01<1>
 c01(?f01##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 0:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -497,13 +498,13 @@ c02(f02##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 1:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c02 > public {inline} (19 calls)
+proc c02 > public {inline} (36 calls)
 1: multictr2.t.c02<1>
 c02(?f02##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 1:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -523,13 +524,13 @@ c03(f03##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 2:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c03 > public {inline} (17 calls)
+proc c03 > public {inline} (32 calls)
 1: multictr2.t.c03<1>
 c03(?f03##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 2:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 2:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -549,13 +550,13 @@ c04(f04##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 3:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c04 > public {inline} (15 calls)
+proc c04 > public {inline} (28 calls)
 1: multictr2.t.c04<1>
 c04(?f04##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 3:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 3:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -575,13 +576,13 @@ c05(f05##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 4:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c05 > public {inline} (13 calls)
+proc c05 > public {inline} (24 calls)
 1: multictr2.t.c05<1>
 c05(?f05##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 4:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -601,13 +602,13 @@ c06(f06##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 5:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c06 > public {inline} (11 calls)
+proc c06 > public {inline} (20 calls)
 1: multictr2.t.c06<1>
 c06(?f06##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 5:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 5:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -627,13 +628,13 @@ c07(f07##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07##0:wybe.int) @multictr2:nn:nn
     foreign llvm or(~#rec##1:multictr2.t, 6:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c07 > public {inline} (9 calls)
+proc c07 > public {inline} (16 calls)
 1: multictr2.t.c07<1>
 c07(?f07##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 6:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 6:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -655,13 +656,13 @@ c08(f08_a##0:wybe.int, f08_b##0:wybe.int, f08_c##0:wybe.float, ?#result##0:multi
     foreign lpvm mutate(~#rec##1:multictr2.t, ?#rec##2:multictr2.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_b##0:wybe.int) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##2:multictr2.t, ?#rec##3:multictr2.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_c##0:wybe.float) @multictr2:nn:nn
     foreign llvm or(~#rec##3:multictr2.t, 7:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
-proc c08 > public {inline} (9 calls)
+proc c08 > public {inline} (16 calls)
 1: multictr2.t.c08<1>
 c08(?f08_a##0:wybe.int, ?f08_b##0:wybe.int, ?f08_c##0:wybe.float, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 7:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -682,8 +683,8 @@ proc f01 > public {inline} (0 calls)
 f01(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 0:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -698,8 +699,8 @@ proc f01 > public {inline} (0 calls)
 f01(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 0:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -716,8 +717,8 @@ proc f02 > public {inline} (0 calls)
 f02(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 1:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -732,8 +733,8 @@ proc f02 > public {inline} (0 calls)
 f02(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 1:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -750,8 +751,8 @@ proc f03 > public {inline} (0 calls)
 f03(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 2:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 2:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -766,8 +767,8 @@ proc f03 > public {inline} (0 calls)
 f03(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 2:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 2:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -784,8 +785,8 @@ proc f04 > public {inline} (0 calls)
 f04(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 3:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 3:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -800,8 +801,8 @@ proc f04 > public {inline} (0 calls)
 f04(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 3:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 3:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -818,8 +819,8 @@ proc f05 > public {inline} (0 calls)
 f05(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 4:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -834,8 +835,8 @@ proc f05 > public {inline} (0 calls)
 f05(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 4:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -852,8 +853,8 @@ proc f06 > public {inline} (0 calls)
 f06(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 5:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 5:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -868,8 +869,8 @@ proc f06 > public {inline} (0 calls)
 f06(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 5:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 5:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -886,8 +887,8 @@ proc f07 > public {inline} (0 calls)
 f07(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 6:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 6:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -902,8 +903,8 @@ proc f07 > public {inline} (0 calls)
 f07(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 6:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 6:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -920,8 +921,8 @@ proc f08_a > public {inline} (0 calls)
 f08_a(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 7:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -936,8 +937,8 @@ proc f08_a > public {inline} (0 calls)
 f08_a(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 7:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -954,8 +955,8 @@ proc f08_b > public {inline} (0 calls)
 f08_b(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 7:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -970,8 +971,8 @@ proc f08_b > public {inline} (0 calls)
 f08_b(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 7:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -988,8 +989,8 @@ proc f08_c > public {inline} (0 calls)
 f08_c(#rec##0:multictr2.t, ?#result##0:wybe.float, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 7:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -1004,8 +1005,8 @@ proc f08_c > public {inline} (0 calls)
 f08_c(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.float, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 7:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -1038,150 +1039,159 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc i1 @"multictr2.t.=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#28##0" = and i64 %"#left##0", 7
-  switch i64 %"tmp#28##0", label %case.7.switch.0 [
-    i64 0, label %case.0.switch.0
-    i64 1, label %case.1.switch.0
-    i64 2, label %case.2.switch.0
-    i64 3, label %case.3.switch.0
-    i64 4, label %case.4.switch.0
-    i64 5, label %case.5.switch.0
-    i64 6, label %case.6.switch.0
-    i64 7, label %case.7.switch.0 ]
+  %"tmp#95##0" = trunc i64 %"#left##0" to i3
+  %"tmp#28##0" = and i3 %"tmp#95##0", 7
+  switch i3 %"tmp#28##0", label %case.7.switch.0 [
+    i3 0, label %case.0.switch.0
+    i3 1, label %case.1.switch.0
+    i3 2, label %case.2.switch.0
+    i3 3, label %case.3.switch.0
+    i3 4, label %case.4.switch.0
+    i3 5, label %case.5.switch.0
+    i3 6, label %case.6.switch.0
+    i3 7, label %case.7.switch.0 ]
 case.0.switch.0:
-  %"tmp#95##0" = inttoptr i64 %"#left##0" to ptr
-  %"#left#f01##0" = load i64, ptr %"tmp#95##0"
-  %"tmp#91##0" = and i64 %"#right##0", 7
-  %"tmp#92##0" = icmp eq i64 %"tmp#91##0", 0
+  %"tmp#96##0" = inttoptr i64 %"#left##0" to ptr
+  %"#left#f01##0" = load i64, ptr %"tmp#96##0"
+  %"tmp#97##0" = trunc i64 %"#right##0" to i3
+  %"tmp#91##0" = and i3 %"tmp#97##0", 7
+  %"tmp#92##0" = icmp eq i3 %"tmp#91##0", 0
   br i1 %"tmp#92##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#96##0" = inttoptr i64 %"#right##0" to ptr
-  %"#right#f01##0" = load i64, ptr %"tmp#96##0"
-  %"tmp#97##0" = icmp eq i64 %"#left#f01##0", %"#right#f01##0"
-  ret i1 %"tmp#97##0"
+  %"tmp#98##0" = inttoptr i64 %"#right##0" to ptr
+  %"#right#f01##0" = load i64, ptr %"tmp#98##0"
+  %"tmp#99##0" = icmp eq i64 %"#left#f01##0", %"#right#f01##0"
+  ret i1 %"tmp#99##0"
 if.else.1:
   ret i1 0
 case.1.switch.0:
-  %"tmp#98##0" = add i64 %"#left##0", -1
-  %"tmp#99##0" = inttoptr i64 %"tmp#98##0" to ptr
-  %"#left#f02##0" = load i64, ptr %"tmp#99##0"
-  %"tmp#86##0" = and i64 %"#right##0", 7
-  %"tmp#87##0" = icmp eq i64 %"tmp#86##0", 1
+  %"tmp#100##0" = add i64 %"#left##0", -1
+  %"tmp#101##0" = inttoptr i64 %"tmp#100##0" to ptr
+  %"#left#f02##0" = load i64, ptr %"tmp#101##0"
+  %"tmp#102##0" = trunc i64 %"#right##0" to i3
+  %"tmp#86##0" = and i3 %"tmp#102##0", 7
+  %"tmp#87##0" = icmp eq i3 %"tmp#86##0", 1
   br i1 %"tmp#87##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#100##0" = add i64 %"#right##0", -1
-  %"tmp#101##0" = inttoptr i64 %"tmp#100##0" to ptr
-  %"#right#f02##0" = load i64, ptr %"tmp#101##0"
-  %"tmp#102##0" = icmp eq i64 %"#left#f02##0", %"#right#f02##0"
-  ret i1 %"tmp#102##0"
+  %"tmp#103##0" = add i64 %"#right##0", -1
+  %"tmp#104##0" = inttoptr i64 %"tmp#103##0" to ptr
+  %"#right#f02##0" = load i64, ptr %"tmp#104##0"
+  %"tmp#105##0" = icmp eq i64 %"#left#f02##0", %"#right#f02##0"
+  ret i1 %"tmp#105##0"
 if.else.2:
   ret i1 0
 case.2.switch.0:
-  %"tmp#103##0" = add i64 %"#left##0", -2
-  %"tmp#104##0" = inttoptr i64 %"tmp#103##0" to ptr
-  %"#left#f03##0" = load i64, ptr %"tmp#104##0"
-  %"tmp#81##0" = and i64 %"#right##0", 7
-  %"tmp#82##0" = icmp eq i64 %"tmp#81##0", 2
+  %"tmp#106##0" = add i64 %"#left##0", -2
+  %"tmp#107##0" = inttoptr i64 %"tmp#106##0" to ptr
+  %"#left#f03##0" = load i64, ptr %"tmp#107##0"
+  %"tmp#108##0" = trunc i64 %"#right##0" to i3
+  %"tmp#81##0" = and i3 %"tmp#108##0", 7
+  %"tmp#82##0" = icmp eq i3 %"tmp#81##0", 2
   br i1 %"tmp#82##0", label %if.then.3, label %if.else.3
 if.then.3:
-  %"tmp#105##0" = add i64 %"#right##0", -2
-  %"tmp#106##0" = inttoptr i64 %"tmp#105##0" to ptr
-  %"#right#f03##0" = load i64, ptr %"tmp#106##0"
-  %"tmp#107##0" = icmp eq i64 %"#left#f03##0", %"#right#f03##0"
-  ret i1 %"tmp#107##0"
+  %"tmp#109##0" = add i64 %"#right##0", -2
+  %"tmp#110##0" = inttoptr i64 %"tmp#109##0" to ptr
+  %"#right#f03##0" = load i64, ptr %"tmp#110##0"
+  %"tmp#111##0" = icmp eq i64 %"#left#f03##0", %"#right#f03##0"
+  ret i1 %"tmp#111##0"
 if.else.3:
   ret i1 0
 case.3.switch.0:
-  %"tmp#108##0" = add i64 %"#left##0", -3
-  %"tmp#109##0" = inttoptr i64 %"tmp#108##0" to ptr
-  %"#left#f04##0" = load i64, ptr %"tmp#109##0"
-  %"tmp#76##0" = and i64 %"#right##0", 7
-  %"tmp#77##0" = icmp eq i64 %"tmp#76##0", 3
+  %"tmp#112##0" = add i64 %"#left##0", -3
+  %"tmp#113##0" = inttoptr i64 %"tmp#112##0" to ptr
+  %"#left#f04##0" = load i64, ptr %"tmp#113##0"
+  %"tmp#114##0" = trunc i64 %"#right##0" to i3
+  %"tmp#76##0" = and i3 %"tmp#114##0", 7
+  %"tmp#77##0" = icmp eq i3 %"tmp#76##0", 3
   br i1 %"tmp#77##0", label %if.then.4, label %if.else.4
 if.then.4:
-  %"tmp#110##0" = add i64 %"#right##0", -3
-  %"tmp#111##0" = inttoptr i64 %"tmp#110##0" to ptr
-  %"#right#f04##0" = load i64, ptr %"tmp#111##0"
-  %"tmp#112##0" = icmp eq i64 %"#left#f04##0", %"#right#f04##0"
-  ret i1 %"tmp#112##0"
+  %"tmp#115##0" = add i64 %"#right##0", -3
+  %"tmp#116##0" = inttoptr i64 %"tmp#115##0" to ptr
+  %"#right#f04##0" = load i64, ptr %"tmp#116##0"
+  %"tmp#117##0" = icmp eq i64 %"#left#f04##0", %"#right#f04##0"
+  ret i1 %"tmp#117##0"
 if.else.4:
   ret i1 0
 case.4.switch.0:
-  %"tmp#113##0" = add i64 %"#left##0", -4
-  %"tmp#114##0" = inttoptr i64 %"tmp#113##0" to ptr
-  %"#left#f05##0" = load i64, ptr %"tmp#114##0"
-  %"tmp#71##0" = and i64 %"#right##0", 7
-  %"tmp#72##0" = icmp eq i64 %"tmp#71##0", 4
+  %"tmp#118##0" = add i64 %"#left##0", -4
+  %"tmp#119##0" = inttoptr i64 %"tmp#118##0" to ptr
+  %"#left#f05##0" = load i64, ptr %"tmp#119##0"
+  %"tmp#120##0" = trunc i64 %"#right##0" to i3
+  %"tmp#71##0" = and i3 %"tmp#120##0", 7
+  %"tmp#72##0" = icmp eq i3 %"tmp#71##0", 4
   br i1 %"tmp#72##0", label %if.then.5, label %if.else.5
 if.then.5:
-  %"tmp#115##0" = add i64 %"#right##0", -4
-  %"tmp#116##0" = inttoptr i64 %"tmp#115##0" to ptr
-  %"#right#f05##0" = load i64, ptr %"tmp#116##0"
-  %"tmp#117##0" = icmp eq i64 %"#left#f05##0", %"#right#f05##0"
-  ret i1 %"tmp#117##0"
+  %"tmp#121##0" = add i64 %"#right##0", -4
+  %"tmp#122##0" = inttoptr i64 %"tmp#121##0" to ptr
+  %"#right#f05##0" = load i64, ptr %"tmp#122##0"
+  %"tmp#123##0" = icmp eq i64 %"#left#f05##0", %"#right#f05##0"
+  ret i1 %"tmp#123##0"
 if.else.5:
   ret i1 0
 case.5.switch.0:
-  %"tmp#118##0" = add i64 %"#left##0", -5
-  %"tmp#119##0" = inttoptr i64 %"tmp#118##0" to ptr
-  %"#left#f06##0" = load i64, ptr %"tmp#119##0"
-  %"tmp#66##0" = and i64 %"#right##0", 7
-  %"tmp#67##0" = icmp eq i64 %"tmp#66##0", 5
+  %"tmp#124##0" = add i64 %"#left##0", -5
+  %"tmp#125##0" = inttoptr i64 %"tmp#124##0" to ptr
+  %"#left#f06##0" = load i64, ptr %"tmp#125##0"
+  %"tmp#126##0" = trunc i64 %"#right##0" to i3
+  %"tmp#66##0" = and i3 %"tmp#126##0", 7
+  %"tmp#67##0" = icmp eq i3 %"tmp#66##0", 5
   br i1 %"tmp#67##0", label %if.then.6, label %if.else.6
 if.then.6:
-  %"tmp#120##0" = add i64 %"#right##0", -5
-  %"tmp#121##0" = inttoptr i64 %"tmp#120##0" to ptr
-  %"#right#f06##0" = load i64, ptr %"tmp#121##0"
-  %"tmp#122##0" = icmp eq i64 %"#left#f06##0", %"#right#f06##0"
-  ret i1 %"tmp#122##0"
+  %"tmp#127##0" = add i64 %"#right##0", -5
+  %"tmp#128##0" = inttoptr i64 %"tmp#127##0" to ptr
+  %"#right#f06##0" = load i64, ptr %"tmp#128##0"
+  %"tmp#129##0" = icmp eq i64 %"#left#f06##0", %"#right#f06##0"
+  ret i1 %"tmp#129##0"
 if.else.6:
   ret i1 0
 case.6.switch.0:
-  %"tmp#123##0" = add i64 %"#left##0", -6
-  %"tmp#124##0" = inttoptr i64 %"tmp#123##0" to ptr
-  %"#left#f07##0" = load i64, ptr %"tmp#124##0"
-  %"tmp#61##0" = and i64 %"#right##0", 7
-  %"tmp#62##0" = icmp eq i64 %"tmp#61##0", 6
+  %"tmp#130##0" = add i64 %"#left##0", -6
+  %"tmp#131##0" = inttoptr i64 %"tmp#130##0" to ptr
+  %"#left#f07##0" = load i64, ptr %"tmp#131##0"
+  %"tmp#132##0" = trunc i64 %"#right##0" to i3
+  %"tmp#61##0" = and i3 %"tmp#132##0", 7
+  %"tmp#62##0" = icmp eq i3 %"tmp#61##0", 6
   br i1 %"tmp#62##0", label %if.then.7, label %if.else.7
 if.then.7:
-  %"tmp#125##0" = add i64 %"#right##0", -6
-  %"tmp#126##0" = inttoptr i64 %"tmp#125##0" to ptr
-  %"#right#f07##0" = load i64, ptr %"tmp#126##0"
-  %"tmp#127##0" = icmp eq i64 %"#left#f07##0", %"#right#f07##0"
-  ret i1 %"tmp#127##0"
+  %"tmp#133##0" = add i64 %"#right##0", -6
+  %"tmp#134##0" = inttoptr i64 %"tmp#133##0" to ptr
+  %"#right#f07##0" = load i64, ptr %"tmp#134##0"
+  %"tmp#135##0" = icmp eq i64 %"#left#f07##0", %"#right#f07##0"
+  ret i1 %"tmp#135##0"
 if.else.7:
   ret i1 0
 case.7.switch.0:
-  %"tmp#128##0" = add i64 %"#left##0", -7
-  %"tmp#129##0" = inttoptr i64 %"tmp#128##0" to ptr
-  %"#left#f08_a##0" = load i64, ptr %"tmp#129##0"
-  %"tmp#130##0" = add i64 %"#left##0", 1
-  %"tmp#131##0" = inttoptr i64 %"tmp#130##0" to ptr
-  %"#left#f08_b##0" = load i64, ptr %"tmp#131##0"
-  %"tmp#132##0" = add i64 %"#left##0", 9
-  %"tmp#133##0" = inttoptr i64 %"tmp#132##0" to ptr
-  %"#left#f08_c##0" = load double, ptr %"tmp#133##0"
-  %"tmp#52##0" = and i64 %"#right##0", 7
-  %"tmp#53##0" = icmp eq i64 %"tmp#52##0", 7
+  %"tmp#136##0" = add i64 %"#left##0", -7
+  %"tmp#137##0" = inttoptr i64 %"tmp#136##0" to ptr
+  %"#left#f08_a##0" = load i64, ptr %"tmp#137##0"
+  %"tmp#138##0" = add i64 %"#left##0", 1
+  %"tmp#139##0" = inttoptr i64 %"tmp#138##0" to ptr
+  %"#left#f08_b##0" = load i64, ptr %"tmp#139##0"
+  %"tmp#140##0" = add i64 %"#left##0", 9
+  %"tmp#141##0" = inttoptr i64 %"tmp#140##0" to ptr
+  %"#left#f08_c##0" = load double, ptr %"tmp#141##0"
+  %"tmp#142##0" = trunc i64 %"#right##0" to i3
+  %"tmp#52##0" = and i3 %"tmp#142##0", 7
+  %"tmp#53##0" = icmp eq i3 %"tmp#52##0", 7
   br i1 %"tmp#53##0", label %if.then.8, label %if.else.8
 if.then.8:
-  %"tmp#134##0" = add i64 %"#right##0", -7
-  %"tmp#135##0" = inttoptr i64 %"tmp#134##0" to ptr
-  %"#right#f08_a##0" = load i64, ptr %"tmp#135##0"
-  %"tmp#136##0" = add i64 %"#right##0", 1
-  %"tmp#137##0" = inttoptr i64 %"tmp#136##0" to ptr
-  %"#right#f08_b##0" = load i64, ptr %"tmp#137##0"
-  %"tmp#138##0" = add i64 %"#right##0", 9
-  %"tmp#139##0" = inttoptr i64 %"tmp#138##0" to ptr
-  %"#right#f08_c##0" = load double, ptr %"tmp#139##0"
+  %"tmp#143##0" = add i64 %"#right##0", -7
+  %"tmp#144##0" = inttoptr i64 %"tmp#143##0" to ptr
+  %"#right#f08_a##0" = load i64, ptr %"tmp#144##0"
+  %"tmp#145##0" = add i64 %"#right##0", 1
+  %"tmp#146##0" = inttoptr i64 %"tmp#145##0" to ptr
+  %"#right#f08_b##0" = load i64, ptr %"tmp#146##0"
+  %"tmp#147##0" = add i64 %"#right##0", 9
+  %"tmp#148##0" = inttoptr i64 %"tmp#147##0" to ptr
+  %"#right#f08_c##0" = load double, ptr %"tmp#148##0"
   %"tmp#16##0" = icmp eq i64 %"#left#f08_a##0", %"#right#f08_a##0"
   br i1 %"tmp#16##0", label %if.then.9, label %if.else.9
 if.then.9:
   %"tmp#17##0" = icmp eq i64 %"#left#f08_b##0", %"#right#f08_b##0"
   br i1 %"tmp#17##0", label %if.then.10, label %if.else.10
 if.then.10:
-  %"tmp#140##0" = fcmp oeq double %"#left#f08_c##0", %"#right#f08_c##0"
-  ret i1 %"tmp#140##0"
+  %"tmp#149##0" = fcmp oeq double %"#left#f08_c##0", %"#right#f08_c##0"
+  ret i1 %"tmp#149##0"
 if.else.10:
   ret i1 0
 if.else.9:
@@ -1199,19 +1209,20 @@ define external fastcc i64 @"multictr2.t.c01<0>"(i64 %"f01##0") {
 }
 
 define external fastcc {i64, i1} @"multictr2.t.c01<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
+  %"tmp#2##0" = trunc i64 %"#result##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = inttoptr i64 %"#result##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#2##0"
-  %"tmp#4##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
-  %"tmp#5##0" = insertvalue {i64, i1} %"tmp#4##0", i1 1, 1
-  ret {i64, i1} %"tmp#5##0"
+  %"tmp#3##0" = inttoptr i64 %"#result##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
+  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
+  ret {i64, i1} %"tmp#6##0"
 if.else.0:
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 0, 1
-  ret {i64, i1} %"tmp#7##0"
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
+  ret {i64, i1} %"tmp#8##0"
 }
 
 define external fastcc i64 @"multictr2.t.c02<0>"(i64 %"f02##0") {
@@ -1224,20 +1235,21 @@ define external fastcc i64 @"multictr2.t.c02<0>"(i64 %"f02##0") {
 }
 
 define external fastcc {i64, i1} @"multictr2.t.c02<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
+  %"tmp#2##0" = trunc i64 %"#result##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 1
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#result##0", -1
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#result##0", -1
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc i64 @"multictr2.t.c03<0>"(i64 %"f03##0") {
@@ -1250,20 +1262,21 @@ define external fastcc i64 @"multictr2.t.c03<0>"(i64 %"f03##0") {
 }
 
 define external fastcc {i64, i1} @"multictr2.t.c03<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 2
+  %"tmp#2##0" = trunc i64 %"#result##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 2
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#result##0", -2
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#result##0", -2
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc i64 @"multictr2.t.c04<0>"(i64 %"f04##0") {
@@ -1276,20 +1289,21 @@ define external fastcc i64 @"multictr2.t.c04<0>"(i64 %"f04##0") {
 }
 
 define external fastcc {i64, i1} @"multictr2.t.c04<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 3
+  %"tmp#2##0" = trunc i64 %"#result##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 3
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#result##0", -3
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#result##0", -3
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc i64 @"multictr2.t.c05<0>"(i64 %"f05##0") {
@@ -1302,20 +1316,21 @@ define external fastcc i64 @"multictr2.t.c05<0>"(i64 %"f05##0") {
 }
 
 define external fastcc {i64, i1} @"multictr2.t.c05<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 4
+  %"tmp#2##0" = trunc i64 %"#result##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 4
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#result##0", -4
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#result##0", -4
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc i64 @"multictr2.t.c06<0>"(i64 %"f06##0") {
@@ -1328,20 +1343,21 @@ define external fastcc i64 @"multictr2.t.c06<0>"(i64 %"f06##0") {
 }
 
 define external fastcc {i64, i1} @"multictr2.t.c06<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 5
+  %"tmp#2##0" = trunc i64 %"#result##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 5
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#result##0", -5
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#result##0", -5
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc i64 @"multictr2.t.c07<0>"(i64 %"f07##0") {
@@ -1354,20 +1370,21 @@ define external fastcc i64 @"multictr2.t.c07<0>"(i64 %"f07##0") {
 }
 
 define external fastcc {i64, i1} @"multictr2.t.c07<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 6
+  %"tmp#2##0" = trunc i64 %"#result##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 6
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#result##0", -6
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#result##0", -6
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc i64 @"multictr2.t.c08<0>"(i64 %"f08_a##0", i64 %"f08_b##0", double %"f08_c##0") {
@@ -1386,426 +1403,447 @@ define external fastcc i64 @"multictr2.t.c08<0>"(i64 %"f08_a##0", i64 %"f08_b##0
 }
 
 define external fastcc {i64, i64, double, i1} @"multictr2.t.c08<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 7
+  %"tmp#2##0" = trunc i64 %"#result##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#result##0", -7
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = add i64 %"#result##0", 1
-  %"tmp#6##0" = inttoptr i64 %"tmp#5##0" to ptr
-  %"tmp#7##0" = load i64, ptr %"tmp#6##0"
-  %"tmp#8##0" = add i64 %"#result##0", 9
-  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
-  %"tmp#10##0" = load double, ptr %"tmp#9##0"
-  %"tmp#11##0" = insertvalue {i64, i64, double, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#12##0" = insertvalue {i64, i64, double, i1} %"tmp#11##0", i64 %"tmp#7##0", 1
-  %"tmp#13##0" = insertvalue {i64, i64, double, i1} %"tmp#12##0", double %"tmp#10##0", 2
-  %"tmp#14##0" = insertvalue {i64, i64, double, i1} %"tmp#13##0", i1 1, 3
-  ret {i64, i64, double, i1} %"tmp#14##0"
+  %"tmp#3##0" = add i64 %"#result##0", -7
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = add i64 %"#result##0", 1
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  %"tmp#8##0" = load i64, ptr %"tmp#7##0"
+  %"tmp#9##0" = add i64 %"#result##0", 9
+  %"tmp#10##0" = inttoptr i64 %"tmp#9##0" to ptr
+  %"tmp#11##0" = load double, ptr %"tmp#10##0"
+  %"tmp#12##0" = insertvalue {i64, i64, double, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#13##0" = insertvalue {i64, i64, double, i1} %"tmp#12##0", i64 %"tmp#8##0", 1
+  %"tmp#14##0" = insertvalue {i64, i64, double, i1} %"tmp#13##0", double %"tmp#11##0", 2
+  %"tmp#15##0" = insertvalue {i64, i64, double, i1} %"tmp#14##0", i1 1, 3
+  ret {i64, i64, double, i1} %"tmp#15##0"
 if.else.0:
-  %"tmp#15##0" = insertvalue {i64, i64, double, i1} undef, i64 undef, 0
-  %"tmp#16##0" = insertvalue {i64, i64, double, i1} %"tmp#15##0", i64 undef, 1
-  %"tmp#17##0" = insertvalue {i64, i64, double, i1} %"tmp#16##0", double undef, 2
-  %"tmp#18##0" = insertvalue {i64, i64, double, i1} %"tmp#17##0", i1 0, 3
-  ret {i64, i64, double, i1} %"tmp#18##0"
+  %"tmp#16##0" = insertvalue {i64, i64, double, i1} undef, i64 undef, 0
+  %"tmp#17##0" = insertvalue {i64, i64, double, i1} %"tmp#16##0", i64 undef, 1
+  %"tmp#18##0" = insertvalue {i64, i64, double, i1} %"tmp#17##0", double undef, 2
+  %"tmp#19##0" = insertvalue {i64, i64, double, i1} %"tmp#18##0", i1 0, 3
+  ret {i64, i64, double, i1} %"tmp#19##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f01<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#2##0"
-  %"tmp#4##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
-  %"tmp#5##0" = insertvalue {i64, i1} %"tmp#4##0", i1 1, 1
-  ret {i64, i1} %"tmp#5##0"
+  %"tmp#3##0" = inttoptr i64 %"#rec##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
+  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
+  ret {i64, i1} %"tmp#6##0"
 if.else.0:
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 0, 1
-  ret {i64, i1} %"tmp#7##0"
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
+  ret {i64, i1} %"tmp#8##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f01<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#3##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#3##0", ptr %"tmp#2##0", i64 8, i1 0)
-  %"tmp#4##0" = ptrtoint ptr %"tmp#3##0" to i64
-  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#5##0"
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
+  %"tmp#3##0" = inttoptr i64 %"#rec##0" to ptr
+  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 8)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 8, i1 0)
+  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
+  %"tmp#6##0" = inttoptr i64 %"tmp#5##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#6##0"
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 1, 1
+  ret {i64, i1} %"tmp#8##0"
+if.else.0:
+  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 0, 1
+  ret {i64, i1} %"tmp#10##0"
+}
+
+define external fastcc {i64, i1} @"multictr2.t.f02<0>"(i64 %"#rec##0") {
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 1
+  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#3##0" = add i64 %"#rec##0", -1
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
   %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
   ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
   %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f02<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
-  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", -1
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
-if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
-}
-
 define external fastcc {i64, i1} @"multictr2.t.f02<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 1
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 1
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 8, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 1
-  %"tmp#7##0" = add i64 %"tmp#6##0", -1
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 1
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 8)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 1
+  %"tmp#8##0" = add i64 %"tmp#7##0", -1
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f03<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 2
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 2
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", -2
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#rec##0", -2
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f03<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 2
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 2
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 2
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 8, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 2
-  %"tmp#7##0" = add i64 %"tmp#6##0", -2
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 2
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 8)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 2
+  %"tmp#8##0" = add i64 %"tmp#7##0", -2
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f04<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 3
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 3
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", -3
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#rec##0", -3
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f04<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 3
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 3
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 3
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 8, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 3
-  %"tmp#7##0" = add i64 %"tmp#6##0", -3
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 3
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 8)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 3
+  %"tmp#8##0" = add i64 %"tmp#7##0", -3
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f05<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 4
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 4
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", -4
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#rec##0", -4
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f05<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 4
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 4
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 4
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 8, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 4
-  %"tmp#7##0" = add i64 %"tmp#6##0", -4
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 4
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 8)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 4
+  %"tmp#8##0" = add i64 %"tmp#7##0", -4
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f06<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 5
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 5
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", -5
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#rec##0", -5
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f06<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 5
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 5
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 5
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 8, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 5
-  %"tmp#7##0" = add i64 %"tmp#6##0", -5
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 5
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 8)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 5
+  %"tmp#8##0" = add i64 %"tmp#7##0", -5
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f07<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 6
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 6
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", -6
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#rec##0", -6
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f07<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 6
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 6
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 6
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 8, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 6
-  %"tmp#7##0" = add i64 %"tmp#6##0", -6
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 6
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 8)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 6
+  %"tmp#8##0" = add i64 %"tmp#7##0", -6
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f08_a<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 7
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", -7
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#rec##0", -7
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f08_a<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 7
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 7
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 24)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 24, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 7
-  %"tmp#7##0" = add i64 %"tmp#6##0", -7
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 7
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 24)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 24, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 7
+  %"tmp#8##0" = add i64 %"tmp#7##0", -7
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f08_b<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 7
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", 1
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#rec##0", 1
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f08_b<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 7
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 7
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 24)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 24, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 7
-  %"tmp#7##0" = add i64 %"tmp#6##0", 1
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 7
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 24)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 24, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 7
+  %"tmp#8##0" = add i64 %"tmp#7##0", 1
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc {double, i1} @"multictr2.t.f08_c<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 7
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", 9
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load double, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {double, i1} undef, double %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {double, i1} %"tmp#5##0", i1 1, 1
-  ret {double, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#rec##0", 9
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load double, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {double, i1} undef, double %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {double, i1} %"tmp#6##0", i1 1, 1
+  ret {double, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {double, i1} undef, double undef, 0
-  %"tmp#8##0" = insertvalue {double, i1} %"tmp#7##0", i1 0, 1
-  ret {double, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {double, i1} undef, double undef, 0
+  %"tmp#9##0" = insertvalue {double, i1} %"tmp#8##0", i1 0, 1
+  ret {double, i1} %"tmp#9##0"
 }
 
 define external fastcc {i64, i1} @"multictr2.t.f08_c<1>"(i64 %"#rec##0", double %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 7
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 7
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i3
+  %"tmp#1##0" = and i3 %"tmp#2##0", 7
+  %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 7
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 24)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 24, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 7
-  %"tmp#7##0" = add i64 %"tmp#6##0", 9
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store double %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 7
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 24)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 24, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 7
+  %"tmp#8##0" = add i64 %"tmp#7##0", 9
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store double %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc i1 @"multictr2.t.~=<0>"(i64 %"#left##0", i64 %"#right##0") {

@@ -176,7 +176,7 @@ proc #cont#1 > {semipure} (2 calls)
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
 
 
-proc do_action > (2 calls)
+proc do_action > (3 calls)
 0: drone.do_action<0>
 do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?success##2:wybe.bool)<{}; {}; {}>:
   AliasPairs: [(d##0,d##2)]
@@ -796,7 +796,7 @@ proc #cont#1 > {semipure} (2 calls)
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
 
 
-proc do_action > (2 calls)
+proc do_action > (3 calls)
 0: drone.do_action<0>
 do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?success##2:wybe.bool)<{}; {}; {}>:
   AliasPairs: [(d##0,d##2)]

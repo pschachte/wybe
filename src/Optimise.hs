@@ -234,7 +234,7 @@ forkGlobalFlows :: Map PrimVarName GlobalFlows -> UnivSet GlobalInfo -> PrimFork
                 -> Compiler GlobalFlows
 forkGlobalFlows _ _ NoFork = return emptyGlobalFlows
 forkGlobalFlows varFlows oldFlows (PrimFork _ _ _ bodies deflt) = do
-    let bodies' = bodies ++ maybeToList deflt
+    let bodies' = (snd <$> bodies) ++ maybeToList deflt
     gFlows <- mapM (bodyGlobalFlows varFlows oldFlows) bodies'
     let outs = globalFlowsOut <$> gFlows
         someOuts = List.foldr USet.union emptyUnivSet outs 
@@ -242,7 +242,9 @@ forkGlobalFlows varFlows oldFlows (PrimFork _ _ _ bodies deflt) = do
         oldFlows' = oldFlows `USet.intersection`
                         whenFinite (`USet.subtractUnivSet` allOuts) someOuts
     return $ globalFlowsUnions (emptyGlobalFlows{globalFlowsIn=oldFlows'}:gFlows)
-  where
+forkGlobalFlows varFlows oldFlows (MergedFork{forkBody=body}) = 
+    bodyGlobalFlows varFlows oldFlows body
+
 
 -- | Update the GlobalFlows of Prims of a ProcDef and the prototype with
 -- the given GlobalFlows
@@ -272,12 +274,13 @@ updateBodyGlobalFlows sccFlows (ProcBody body fork) = do
 updateForkGlobalFlows :: Map ProcSpec GlobalFlows -> PrimFork -> Compiler PrimFork
 updateForkGlobalFlows _ NoFork = return NoFork
 updateForkGlobalFlows sccFlows (PrimFork var ty final bodies deflt) = do
-    bodies' <- mapM (updateBodyGlobalFlows sccFlows) bodies
-    deflt' <- case deflt of
-        Nothing -> return Nothing
-        Just d -> Just <$> updateBodyGlobalFlows sccFlows d
-    return $ PrimFork var ty final bodies' deflt'
-
+    bodies' <- mapM (updateBodyGlobalFlows sccFlows . snd) bodies
+    deflt' <- forM deflt $ updateBodyGlobalFlows sccFlows
+    return $ PrimFork var ty final (zip (fst <$> bodies) bodies') deflt'
+updateForkGlobalFlows sccFlows fork@MergedFork{forkBody=body,forkDefault=deflt} = do
+    body' <- updateBodyGlobalFlows sccFlows body
+    deflt' <- forM deflt $ updateBodyGlobalFlows sccFlows
+    return fork{forkBody=body',forkDefault=deflt'}
 
 -- | Update the GlobalFlows of a Prim
 -- If the prim is a call to a proc in the Set of ProcSpecs, we update the

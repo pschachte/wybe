@@ -14,7 +14,7 @@ module Util (sameLength, maybeNth, insertAt,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
              intersectMapIdentity, orElse,
-             apply2way, (&&&), (|||), zipWith3M, zipWith3M_, lift2,
+             apply2way, (&&&), (|||), zipWith3M, zipWith3M_, lift2, (<$$>), (<&&>), (<||>),
              pathIsWriteable,
              useLocalCacheFileIfPossible, createLocalCacheFile
              ) where
@@ -43,6 +43,9 @@ import System.Directory
       createDirectoryIfMissing,
       getPermissions )
 import System.Directory.Extra (Permissions(writable))
+import Control.Monad.Trans.Maybe (MaybeT(runMaybeT, MaybeT))
+import Data.Foldable (foldrM)
+import Control.Monad.Extra (ifM)
 
 
 -- |Do the the two lists have the same length?
@@ -284,6 +287,24 @@ zipWith3M_ f as bs cs = zipWith3M f as bs cs >> return ()
 -- | lift2 applies lift twice
 lift2 :: (MonadTrans t1, MonadTrans t2, Monad m, Monad (t2 m)) => m a -> t1 (t2 m) a
 lift2 act = lift $ lift act
+
+
+-- | Nested application of <$>
+infixr 5 <$$>
+(<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)
+(<$$>) = (<$>) . (<$>) 
+
+
+infixr 3 <&&>, <||>
+
+-- && lifed into a Monad
+(<&&>) :: Monad m => m Bool -> m Bool -> m Bool
+(<&&>) t f = ifM t f (return False) 
+
+
+-- || lifed into a Monad
+(<||>) :: Monad m => m Bool -> m Bool -> m Bool
+(<||>) t f = ifM t (return True) t 
 
 
 -- | Check if we can write to the specified file path.

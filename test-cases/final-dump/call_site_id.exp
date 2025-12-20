@@ -52,7 +52,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-proc bar > public {inline} (9 calls)
+proc bar > public {inline} (10 calls)
 0: call_site_id.bar<0>
 bar(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

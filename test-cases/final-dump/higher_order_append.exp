@@ -188,11 +188,11 @@ define external fastcc void @"higher_order_append.<0>"() {
   %"tmp#86##0" = inttoptr i64 %"tmp#85##0" to ptr
   store i64 %"tmp#41##0", ptr %"tmp#86##0"
   %"tmp#87##0" = alloca i8, i64 8, align 8
-  %"tmp#89##0" = getelementptr {ptr, i64}, ptr null, i64 1
+  %"tmp#89##0" = getelementptr inbounds {ptr, i64}, ptr null, i64 1
   %"tmp#90##0" = ptrtoint ptr %"tmp#89##0" to i32
   %"tmp#88##0" = call ccc ptr @wybe_malloc(i32 %"tmp#90##0")
   store ptr @"higher_order_append.#anon#1<1>", ptr %"tmp#88##0"
-  %"tmp#91##0" = getelementptr {ptr, i64}, ptr %"tmp#88##0", i64 0, i32 1
+  %"tmp#91##0" = getelementptr inbounds {ptr, i64}, ptr %"tmp#88##0", i64 0, i32 1
   store i64 %"tmp#45##0", ptr %"tmp#91##0"
   call fastcc void @"wybe.list.map<1>"(ptr %"tmp#88##0", i64 %"tmp#37##0", ptr %"tmp#87##0")
   %"y##0" = load i64, ptr %"tmp#87##0"
@@ -211,7 +211,7 @@ define external fastcc i64 @"higher_order_append.#anon#1<0>"(i64 %"cons##0", i64
 }
 
 define external fastcc i64 @"higher_order_append.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
-  %"tmp#2##0" = getelementptr {ptr, i64}, ptr %"#env##0", i64 0, i32 1
+  %"tmp#2##0" = getelementptr inbounds {ptr, i64}, ptr %"#env##0", i64 0, i32 1
   %"cons##0" = load i64, ptr %"tmp#2##0"
   %"tmp#3##0" = alloca i8, i64 8, align 8
   call fastcc void @"higher_order_append.append<0>"(i64 %"generic#anon#1#1##0", i64 %"cons##0", ptr %"tmp#3##0")
