@@ -467,10 +467,10 @@ id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
-    factored ~tmp#1##0:2 bit unsigned of
-      ?tmp#15##0:wybe.int <- [ 0:wybe.int, 1:wybe.int, 2:wybe.int, 3:wybe.int ]
+    factored tmp#1##0:2 bit unsigned of
       ?tmp#16##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
       ?tmp#17##0:wybe.int <- [ 24:wybe.int, 15:wybe.int, 22:wybe.int, 5:wybe.int ]
+        foreign lpvm cast(~tmp#1##0:2 bit unsigned, ?tmp#15##0:wybe.int)
         foreign lpvm access(~#rec##0:common_fields, ~tmp#17##0:wybe.int, ~tmp#16##0:wybe.int, ~tmp#15##0:wybe.int, ?#result##0:wybe.int) @common_fields:nn:nn
 proc id > public (7 calls)
 1: common_fields.id<1>
@@ -478,17 +478,17 @@ id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}; {}
   AliasPairs: [(#rec##0,#rec##1)]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
-    factored ~tmp#1##0:2 bit unsigned of
-      ?tmp#15##0:wybe.int <- [ 0:wybe.int, 1:wybe.int, 2:wybe.int, 3:wybe.int ]
+    factored tmp#1##0:2 bit unsigned of
       ?tmp#16##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
       ?tmp#17##0:wybe.int <- [ 24:wybe.int, 15:wybe.int, 22:wybe.int, 5:wybe.int ]
+        foreign lpvm cast(~tmp#1##0:2 bit unsigned, ?tmp#15##0:wybe.int)
         foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, ~tmp#17##0:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.int, ~tmp#15##0:wybe.int, ~#field##0:wybe.int) @common_fields:nn:nn
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
-    factored ~tmp#1##0:2 bit unsigned of
-      ?tmp#24##0:wybe.int <- [ 0:wybe.int, 1:wybe.int, 2:wybe.int, 3:wybe.int ]
+    factored tmp#1##0:2 bit unsigned of
       ?tmp#25##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
       ?tmp#26##0:wybe.int <- [ 24:wybe.int, 15:wybe.int, 22:wybe.int, 5:wybe.int ]
+        foreign lpvm cast(~tmp#1##0:2 bit unsigned, ?tmp#24##0:wybe.int)
         foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, ~tmp#26##0:wybe.int, 1:wybe.int, ~tmp#25##0:wybe.int, ~tmp#24##0:wybe.int, ~#field##0:wybe.int) @common_fields:nn:nn
 
 
@@ -559,10 +559,10 @@ title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: [(#rec##0,#result##0)]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
-    factored ~tmp#1##0:2 bit unsigned of
-      ?tmp#15##0:wybe.int <- [ 0:wybe.int, 1:wybe.int, 2:wybe.int, 3:wybe.int ]
+    factored tmp#1##0:2 bit unsigned of
       ?tmp#16##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
       ?tmp#17##0:wybe.int <- [ 0:wybe.int, -1:wybe.int, -2:wybe.int, -3:wybe.int ]
+        foreign lpvm cast(~tmp#1##0:2 bit unsigned, ?tmp#15##0:wybe.int)
         foreign lpvm access(~#rec##0:common_fields, ~tmp#17##0:wybe.int, ~tmp#16##0:wybe.int, ~tmp#15##0:wybe.int, ?#result##0:wybe.string) @common_fields:nn:nn
 proc title > public (0 calls)
 1: common_fields.title<1>
@@ -602,9 +602,8 @@ source_filename = "!ROOT!/final-dump/common_fields.wybe"
 target triple    ????
 
 @"array#0" = private unnamed_addr constant [ 4 x i64 ] [i64 0, i64 -1, i64 -2, i64 -3]
-@"array#1" = private unnamed_addr constant [ 4 x i64 ] [i64 0, i64 1, i64 2, i64 3]
-@"array#2" = private unnamed_addr constant [ 4 x i64 ] [i64 24, i64 15, i64 22, i64 5]
-@"array#3" = private unnamed_addr constant [ 4 x i64 ] [i64 32, i64 24, i64 32, i64 16]
+@"array#1" = private unnamed_addr constant [ 4 x i64 ] [i64 24, i64 15, i64 22, i64 5]
+@"array#2" = private unnamed_addr constant [ 4 x i64 ] [i64 32, i64 24, i64 32, i64 16]
 
 declare external fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
@@ -1150,60 +1149,54 @@ define external fastcc i64 @"common_fields.id<0>"(i64 %"#rec##0") {
   %"tmp#24##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#24##0", 3
   %"tmp#26##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#25##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#26##0"
-  %"tmp#15##0" = load i64, ptr %"tmp#25##0"
+  %"tmp#25##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#26##0"
+  %"tmp#16##0" = load i64, ptr %"tmp#25##0"
   %"tmp#28##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#27##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#3", i64 0, i64 %"tmp#28##0"
-  %"tmp#16##0" = load i64, ptr %"tmp#27##0"
-  %"tmp#30##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#29##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#30##0"
-  %"tmp#17##0" = load i64, ptr %"tmp#29##0"
-  %"tmp#31##0" = add i64 %"#rec##0", %"tmp#17##0"
-  %"tmp#32##0" = inttoptr i64 %"tmp#31##0" to ptr
-  %"tmp#33##0" = load i64, ptr %"tmp#32##0"
-  ret i64 %"tmp#33##0"
+  %"tmp#27##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#28##0"
+  %"tmp#17##0" = load i64, ptr %"tmp#27##0"
+  %"tmp#15##0" = zext i2 %"tmp#1##0" to i64
+  %"tmp#29##0" = add i64 %"#rec##0", %"tmp#17##0"
+  %"tmp#30##0" = inttoptr i64 %"tmp#29##0" to ptr
+  %"tmp#31##0" = load i64, ptr %"tmp#30##0"
+  ret i64 %"tmp#31##0"
 }
 
 define external fastcc i64 @"common_fields.id<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#33##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#33##0", 3
   %"tmp#35##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#34##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#35##0"
-  %"tmp#15##0" = load i64, ptr %"tmp#34##0"
+  %"tmp#34##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#35##0"
+  %"tmp#16##0" = load i64, ptr %"tmp#34##0"
   %"tmp#37##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#36##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#3", i64 0, i64 %"tmp#37##0"
-  %"tmp#16##0" = load i64, ptr %"tmp#36##0"
-  %"tmp#39##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#38##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#39##0"
-  %"tmp#17##0" = load i64, ptr %"tmp#38##0"
-  %"tmp#40##0" = sub i64 %"#rec##0", %"tmp#15##0"
-  %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
-  %"tmp#43##0" = trunc i64 %"tmp#16##0" to i32
-  %"tmp#42##0" = call ccc ptr @wybe_malloc(i32 %"tmp#43##0")
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#42##0", ptr %"tmp#41##0", i64 %"tmp#16##0", i1 0)
-  %"tmp#44##0" = ptrtoint ptr %"tmp#42##0" to i64
-  %"tmp#45##0" = add i64 %"tmp#44##0", %"tmp#15##0"
-  %"tmp#46##0" = add i64 %"tmp#45##0", %"tmp#17##0"
-  %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#47##0"
-  ret i64 %"tmp#45##0"
+  %"tmp#36##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#37##0"
+  %"tmp#17##0" = load i64, ptr %"tmp#36##0"
+  %"tmp#15##0" = zext i2 %"tmp#1##0" to i64
+  %"tmp#38##0" = sub i64 %"#rec##0", %"tmp#15##0"
+  %"tmp#39##0" = inttoptr i64 %"tmp#38##0" to ptr
+  %"tmp#41##0" = trunc i64 %"tmp#16##0" to i32
+  %"tmp#40##0" = call ccc ptr @wybe_malloc(i32 %"tmp#41##0")
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#40##0", ptr %"tmp#39##0", i64 %"tmp#16##0", i1 0)
+  %"tmp#42##0" = ptrtoint ptr %"tmp#40##0" to i64
+  %"tmp#43##0" = add i64 %"tmp#42##0", %"tmp#15##0"
+  %"tmp#44##0" = add i64 %"tmp#43##0", %"tmp#17##0"
+  %"tmp#45##0" = inttoptr i64 %"tmp#44##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#45##0"
+  ret i64 %"tmp#43##0"
 }
 
 define external fastcc i64 @"common_fields.id<1>[410bae77d3]"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#33##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#33##0", 3
   %"tmp#35##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#34##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#35##0"
-  %"tmp#24##0" = load i64, ptr %"tmp#34##0"
+  %"tmp#34##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#35##0"
+  %"tmp#25##0" = load i64, ptr %"tmp#34##0"
   %"tmp#37##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#36##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#3", i64 0, i64 %"tmp#37##0"
-  %"tmp#25##0" = load i64, ptr %"tmp#36##0"
-  %"tmp#39##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#38##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#39##0"
-  %"tmp#26##0" = load i64, ptr %"tmp#38##0"
-  %"tmp#40##0" = add i64 %"#rec##0", %"tmp#26##0"
-  %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#41##0"
+  %"tmp#36##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#37##0"
+  %"tmp#26##0" = load i64, ptr %"tmp#36##0"
+  %"tmp#24##0" = zext i2 %"tmp#1##0" to i64
+  %"tmp#38##0" = add i64 %"#rec##0", %"tmp#26##0"
+  %"tmp#39##0" = inttoptr i64 %"tmp#38##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#39##0"
   ret i64 %"#rec##0"
 }
 
@@ -1289,18 +1282,16 @@ define external fastcc i64 @"common_fields.title<0>"(i64 %"#rec##0") {
   %"tmp#24##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#24##0", 3
   %"tmp#26##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#25##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#26##0"
-  %"tmp#15##0" = load i64, ptr %"tmp#25##0"
+  %"tmp#25##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#26##0"
+  %"tmp#16##0" = load i64, ptr %"tmp#25##0"
   %"tmp#28##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#27##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#3", i64 0, i64 %"tmp#28##0"
-  %"tmp#16##0" = load i64, ptr %"tmp#27##0"
-  %"tmp#30##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#29##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#0", i64 0, i64 %"tmp#30##0"
-  %"tmp#17##0" = load i64, ptr %"tmp#29##0"
-  %"tmp#31##0" = add i64 %"#rec##0", %"tmp#17##0"
-  %"tmp#32##0" = inttoptr i64 %"tmp#31##0" to ptr
-  %"tmp#33##0" = load i64, ptr %"tmp#32##0"
-  ret i64 %"tmp#33##0"
+  %"tmp#27##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#0", i64 0, i64 %"tmp#28##0"
+  %"tmp#17##0" = load i64, ptr %"tmp#27##0"
+  %"tmp#15##0" = zext i2 %"tmp#1##0" to i64
+  %"tmp#29##0" = add i64 %"#rec##0", %"tmp#17##0"
+  %"tmp#30##0" = inttoptr i64 %"tmp#29##0" to ptr
+  %"tmp#31##0" = load i64, ptr %"tmp#30##0"
+  ret i64 %"tmp#31##0"
 }
 
 define external fastcc i64 @"common_fields.title<1>"(i64 %"#rec##0", i64 %"#field##0") {

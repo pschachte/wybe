@@ -15,7 +15,7 @@ module BodyBuilder (
 
 import AST
 import Debug.Trace
-import Snippets ( boolType, intType, primMove )
+import Snippets ( boolType, intType, primMove, primCast )
 import Util
 import Config (minimumSwitchCases, wordSize)
 import Options (LogSelection(BodyBuilder))
@@ -30,7 +30,7 @@ import Data.Bits
 import Data.Function
 import Data.Functor
 import Control.Monad
-import Control.Monad.Extra (whenJust, whenM, fold1M)
+import Control.Monad.Extra (whenJust, whenM, fold1M, ifM)
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
 import AST (simpleShowMap)
@@ -38,6 +38,8 @@ import Data.Foldable.Extra (foldlM, foldrM)
 import Control.Monad.Trans.Maybe (MaybeT(runMaybeT, MaybeT))
 import Control.Applicative
 import qualified Control.Applicative as App
+import qualified Data.Foldable as List
+import qualified Data.Foldable.Extra as List
 
 
 ----------------------------------------------------------------
@@ -468,7 +470,7 @@ instr' prim@(PrimForeign "lpvm" "cast" []
              [from, to@ArgVar{argVarName=var, argVarFlow=flow}]) pos = do
     logBuild $ "  Expanding cast(" ++ show from ++ ", " ++ show to ++ ")"
     unless (argFlowDirection from == FlowIn && flow == FlowOut) $
-        shouldnt "cast instruction with wrong flow"
+        shouldnt $ "cast instruction with wrong flow" ++ show prim
     if argType from == argType to
     then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
     else ordinaryInstr prim pos
@@ -1605,16 +1607,31 @@ markIfLastUse _ arg = arg
 -- Yields a ProcBody with the fork, or NoFork if all branches can be merged with no substitutions
 rebuildFork :: PrimVarName -> TypeSpec -> Bool -> [(Integer, ProcBody)] -> Maybe ProcBody -> BkwdBuilder ProcBody
 rebuildFork var ty lastUse brs dflt = do
-  mbMerged <- runMaybeT $ mergeBranches  brs dflt $ Factors Map.empty Map.empty
+  mbMerged <- runMaybeT $ mergeBranches brs dflt $ Factors Map.empty Map.empty
   case mbMerged of
     Just (Factors{factored=factored}, (mergedBody, dflt'))
-      | Map.null factored ->
-          bkwdFreshVar <&> \tmp -> guardedMergedFork tmp var ty (maximum (fst <$> brs)) mergedBody dflt'
-      | otherwise ->
-          return $ ProcBody [] $ MergedFork var ty lastUse (flattenFactored <$> Map.assocs factored) mergedBody dflt'
+      -> do
+          (table, finalBody, lastUse') <- constructTable factored mergedBody
+          if List.null table
+          then bkwdFreshVar <&> \tmp -> guardedMergedFork tmp var ty (maximum (fst <$> brs)) finalBody dflt'
+          else return $ ProcBody [] $ MergedFork var ty lastUse' table finalBody dflt'
     _ -> return $ ProcBody [] $ PrimFork var ty lastUse brs dflt
   where
-    flattenFactored (var,(ty,vals)) = (var, ty, vals ++ replicate (length brs - length vals) (last vals))
+    -- Ensure that all factored entries have the same length by padding with the last value if needed.
+    -- The last value is used because the branches are merged in reverse.
+    -- Also remove all factored variables that are of the form [0..].
+    constructTable table body = do
+      (table', casts, renamed) <- List.foldrM
+        (\(tmp, (tmpTy, vals)) (table, casts, renamed) ->
+          if Maybe.mapMaybe argIntegerValue vals == [0..genericLength vals-1]
+          then
+            -- avoid looking up the type rep if theyre already equal
+            ifM (return (ty == tmpTy) <||> (liftA2 (==) `on` lift . lookupTypeRepresentation) ty tmpTy)
+              (return (table, casts, (tmp,var):renamed))
+              (return (table, Unplaced (primCast (ArgVar tmp tmpTy FlowOut Ordinary False) (ArgVar var ty FlowIn Ordinary (lastUse && List.null casts))):casts, renamed))
+          else return ((tmp, tmpTy, vals ++ replicate (length brs - length vals) (last vals)):table, casts, renamed)
+        ) ([], [], []) $ Map.assocs table
+      return (table', prependToBody casts $ renameProcBody (Map.fromList renamed) body, List.null casts)
 
 -- | When merging, we replace constants in both things at the same place with variables, tracking what has been merged in a map. 
 -- When we merge again with something else, we can consult the map to see if a now variable was previously a constant.
@@ -1623,7 +1640,7 @@ rebuildFork var ty lastUse brs dflt = do
 -- LHS to a name from the RHS
 data Factors = Factors {
     factored :: Map PrimVarName (TypeSpec, [PrimArg]), -- ^The variables and corresponding constants that have been factored
-    renamed :: Map PrimVarName PrimVarName             -- ^The variables to rename on the RHS
+    renamed :: VarSubstitution             -- ^The variables to rename on the RHS
 } deriving (Show)
 
 type FactoredMerge a = Factors -> MaybeT BkwdBuilder (Factors, a)
@@ -1636,7 +1653,7 @@ combineMerged joiner mergeA mergeB vars = do
 
 -- | Try to merge all branches, with Nothing if the branches cannot be merged
 mergeBranches :: [(Integer, ProcBody)] -> Maybe ProcBody -> FactoredMerge (ProcBody, Maybe ProcBody)
-mergeBranches brs@(_:_) dflt vars = (do
+mergeBranches brs dflt vars = (do
     lift $ logBkwd $ "Trying to merge " ++ intercalate "\n    " (show <$> brs) ++ "\n  with default: " ++ show dflt
     (vars', body') <- foldrM mergeBodies' (vars, last bodies') $ init bodies'
     mbMergedDflt <- join <$> optional (forM dflt $ flip mergeBodies' (vars', body'))
@@ -1646,7 +1663,7 @@ mergeBranches brs@(_:_) dflt vars = (do
         -> return (vars'', (dflt', Nothing))
       _ ->
         -- when dense, can merge all branches, keeping default
-        if idxs == List.take (length brs) [0..]
+        if idxs == [0..genericLength brs - 1]
         then return (vars', (body', dflt))
         else App.empty
     lift $ logBkwd $ "Merged into " ++ show mergedAll
@@ -1655,7 +1672,6 @@ mergeBranches brs@(_:_) dflt vars = (do
   where
     (idxs, bodies') = unzip brs
     mergeBodies' b (v, a) = mergeBodies a b v{renamed=renamed vars}
-mergeBranches _ _ _ = shouldnt ""
 
 -- | Try to merge two ProcBodies, merging the prims pairwise
 mergeBodies :: ProcBody -> ProcBody -> FactoredMerge ProcBody
@@ -1689,14 +1705,14 @@ mergeForks (PrimFork var0 ty0 final0 branches0 dflt0) (PrimFork var1 ty1 final1 
       | v0 < v1
       = case dflt1 of
           Nothing -> ((v0,b0):) <$$> mergeIndexedBranches bs0 bbs1 vars
-          Just dflt1' -> mergeIndexedBranches bbs0 ((v0,dflt1'):bbs1) vars 
+          Just dflt1' -> mergeIndexedBranches bbs0 ((v0,dflt1'):bbs1) vars
       | v0 > v1
       = case dflt0 of
           Nothing -> ((v0,b0):) <$$> mergeIndexedBranches bs0 bbs1 vars
           Just dflt0' -> mergeIndexedBranches ((v1,dflt0'):bbs0) bbs1 vars
       | otherwise
-      = combineMerged ((:) . (v0,)) 
-          (mergeBodies b0 b1) 
+      = combineMerged ((:) . (v0,))
+          (mergeBodies b0 b1)
           (mergeIndexedBranches bs0 bs1)
           vars
     mergeIndexedBranches _ _ _ = App.empty
@@ -1705,9 +1721,9 @@ mergeForks (MergedFork var0 ty0 final0 table0 branch0 dflt0) (MergedFork var1 ty
     if tyRep0 == tyRep1 && var0 == rename renamed var1 && final0 == final1
     then combineMerged (uncurry . MergedFork var0 ty0 final0)
             (mergeTables table0 table1)
-            (combineMerged (,) 
-              (mergeBodies branch0 branch1) 
-              (mergeMaybeBodies dflt0 dflt1)) 
+            (combineMerged (,)
+              (mergeBodies branch0 branch1)
+              (mergeMaybeBodies dflt0 dflt1))
             vars
     else App.empty
   where
@@ -1787,7 +1803,8 @@ mergeLists f as0 as1 vars =
   foldrM (\(a0, a1) (vars', as') -> MaybeT (mapSnd (:as') <$$> runMaybeT (f a0 a1 vars'))) (vars, [])
       $ zip as0 as1
 
-renameProcBody :: Map PrimVarName PrimVarName -> ProcBody -> ProcBody
+-- \ Rename all variables in a proc body, under a given VarSubsitution
+renameProcBody :: VarSubstitution -> ProcBody -> ProcBody
 renameProcBody vars (ProcBody prims fork) = ProcBody (contentApply (renamePrim vars) <$> prims) (renameFork vars fork)
   where
     renamePrim vars prim =
@@ -1804,7 +1821,8 @@ renameProcBody vars (ProcBody prims fork) = ProcBody (contentApply (renamePrim v
     renamePrimArg vars (ArgClosure pspec args ty) = ArgClosure pspec (renamePrimArg vars <$> args) ty
     renamePrimArg _ arg = arg
 
-rename :: Map PrimVarName PrimVarName -> PrimVarName -> PrimVarName
+-- | Rename a variable, defaulting to itself if there is no renaming
+rename :: VarSubstitution -> PrimVarName -> PrimVarName
 rename vars var = fromMaybe var $ Map.lookup var vars
 
 

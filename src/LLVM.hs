@@ -1759,7 +1759,7 @@ typeConvertOp (Bits m) (Bits n)
     | n < m = "trunc"
     | otherwise = shouldnt "no-op unsigned conversion"
 typeConvertOp (Bits m) (Signed n)
-    | m < n = "sext"
+    | m < n = "zext"
     | n < m = "trunc"
     | otherwise = -- no instruction actually needed, but one is expected
         "bitcast"

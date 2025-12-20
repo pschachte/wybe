@@ -33,12 +33,11 @@ proc #cont#1 > {semipure} (5 calls)
     0:
         factored ~b##0:wybe.bool of
           ?tmp#14##0:wybe.string <- [ "no good":wybe.string, "also good":wybe.string ]
-          ?tmp#15##0:wybe.bool <- [ 0:wybe.bool, 1:wybe.bool ]
             wybe.string.print<0>(~tmp#14##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @disjunctive-cond:8:18
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @disjunctive-cond:8:18
             foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @disjunctive-cond:8:18
             foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @disjunctive-cond:8:18
-            disjunctive-cond.#cont#2<0>(0:wybe.bool, ~tmp#15##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
+            disjunctive-cond.#cont#2<0>(0:wybe.bool, ~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
         wybe.string.print<0>("also good":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @disjunctive-cond:8:18
@@ -61,12 +60,11 @@ proc #cont#2 > {semipure} (3 calls)
     1:
         factored ~b##0:wybe.bool of
           ?tmp#14##0:wybe.string <- [ "more good":wybe.string, "no good":wybe.string ]
-          ?tmp#15##0:wybe.bool <- [ 0:wybe.bool, 1:wybe.bool ]
             wybe.string.print<0>(~tmp#14##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @disjunctive-cond:12:19
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @disjunctive-cond:12:19
             foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @disjunctive-cond:12:19
             foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @disjunctive-cond:12:19
-            disjunctive-cond.#cont#3<0>(1:wybe.bool, ~tmp#15##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
+            disjunctive-cond.#cont#3<0>(1:wybe.bool, ~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
 
 
 
@@ -109,10 +107,9 @@ target triple    ????
 @"string#7" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"string#8" = private unnamed_addr constant {i64, i64} { i64 7, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 @"string#9" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
-@"array#10" = private unnamed_addr constant [ 2 x i1 ] [i1 0, i1 1]
-@"array#11" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"string#7" to i64 ), i64 ptrtoint( ptr @"string#8" to i64 )]
-@"array#12" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"string#8" to i64 ), i64 ptrtoint( ptr @"string#6" to i64 )]
-@"array#13" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"string#9" to i64 ), i64 ptrtoint( ptr @"string#8" to i64 )]
+@"array#10" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"string#7" to i64 ), i64 ptrtoint( ptr @"string#8" to i64 )]
+@"array#11" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"string#8" to i64 ), i64 ptrtoint( ptr @"string#6" to i64 )]
+@"array#12" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"string#9" to i64 ), i64 ptrtoint( ptr @"string#8" to i64 )]
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
@@ -134,14 +131,11 @@ if.then.0:
   ret void
 if.else.0:
   %"tmp#17##0" = zext i1 %"b##0" to i64
-  %"tmp#16##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#12", i64 0, i64 %"tmp#17##0"
+  %"tmp#16##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#11", i64 0, i64 %"tmp#17##0"
   %"tmp#14##0" = load i64, ptr %"tmp#16##0"
-  %"tmp#19##0" = zext i1 %"b##0" to i64
-  %"tmp#18##0" = getelementptr inbounds [ 2 x i1 ], ptr @"array#10", i64 0, i64 %"tmp#19##0"
-  %"tmp#15##0" = load i1, ptr %"tmp#18##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#14##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"disjunctive-cond.#cont#2<0>"(i1 0, i1 %"tmp#15##0")
+  tail call fastcc void @"disjunctive-cond.#cont#2<0>"(i1 0, i1 %"b##0")
   ret void
 }
 
@@ -149,14 +143,11 @@ define external fastcc void @"disjunctive-cond.#cont#2<0>"(i1 %"a##0", i1 %"b##0
   br i1 %"a##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#17##0" = zext i1 %"b##0" to i64
-  %"tmp#16##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#11", i64 0, i64 %"tmp#17##0"
+  %"tmp#16##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#10", i64 0, i64 %"tmp#17##0"
   %"tmp#14##0" = load i64, ptr %"tmp#16##0"
-  %"tmp#19##0" = zext i1 %"b##0" to i64
-  %"tmp#18##0" = getelementptr inbounds [ 2 x i1 ], ptr @"array#10", i64 0, i64 %"tmp#19##0"
-  %"tmp#15##0" = load i1, ptr %"tmp#18##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#14##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"disjunctive-cond.#cont#3<0>"(i1 1, i1 %"tmp#15##0")
+  tail call fastcc void @"disjunctive-cond.#cont#3<0>"(i1 1, i1 %"b##0")
   ret void
 if.else.0:
   tail call fastcc void @"disjunctive-cond.#cont#3<0>"(i1 0, i1 %"b##0")
@@ -167,7 +158,7 @@ define external fastcc void @"disjunctive-cond.#cont#3<0>"(i1 %"a##0", i1 %"b##0
   br i1 %"a##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#14##0" = zext i1 %"b##0" to i64
-  %"tmp#13##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#13", i64 0, i64 %"tmp#14##0"
+  %"tmp#13##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#12", i64 0, i64 %"tmp#14##0"
   %"tmp#12##0" = load i64, ptr %"tmp#13##0"
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#12##0")
   call ccc void @putchar(i8 10)

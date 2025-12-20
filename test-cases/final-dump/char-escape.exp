@@ -102,7 +102,7 @@ define external fastcc void @"char-escape.<0>"() {
 }
 
 define external fastcc void @"char-escape.test<0>"(i8 %"ch##0", i64 %"code##0", i64 %"name##0") {
-  %"tmp#0##0" = sext i8 %"ch##0" to i64
+  %"tmp#0##0" = zext i8 %"ch##0" to i64
   %"tmp#1##0" = icmp eq i64 %"code##0", %"tmp#0##0"
   %"tmp#14##0" = zext i1 %"tmp#1##0" to i64
   %"tmp#13##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#26", i64 0, i64 %"tmp#14##0"
