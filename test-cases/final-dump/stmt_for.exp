@@ -145,24 +145,24 @@ proc multiple_generator > public (1 calls)
 multiple_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#16##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#17##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#17##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#20##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#20##0:wybe.list(T), ?tmp#21##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#21##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#24##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?tmp#25##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#25##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#28##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#28##0:wybe.list(T), ?tmp#29##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 6:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#29##0:wybe.list(T), ?tmp#6##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#32##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#32##0:wybe.list(T), ?tmp#33##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 5:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#33##0:wybe.list(T), ?tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#36##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#36##0:wybe.list(T), ?tmp#37##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#37##0:wybe.list(T), ?tmp#4##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:wybe.list(T)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#16##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#16##0:wybe.list(wybe.int), ?tmp#17##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#17##0:wybe.list(wybe.int), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#20##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#20##0:wybe.list(wybe.int), ?tmp#21##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#21##0:wybe.list(wybe.int), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#24##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#24##0:wybe.list(wybe.int), ?tmp#25##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#25##0:wybe.list(wybe.int), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#28##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#28##0:wybe.list(wybe.int), ?tmp#29##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 6:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#29##0:wybe.list(wybe.int), ?tmp#6##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#32##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#32##0:wybe.list(wybe.int), ?tmp#33##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 5:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#33##0:wybe.list(wybe.int), ?tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#36##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#36##0:wybe.list(wybe.int), ?tmp#37##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#37##0:wybe.list(wybe.int), ?tmp#4##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:wybe.list(wybe.int)) @stmt_for:nn:nn
     stmt_for.multiple_generator#cont#1<0>(~tmp#0##0:wybe.list(wybe.int), ~tmp#4##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
 
 
@@ -176,15 +176,15 @@ multiple_generator#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.
     0:
 
     1:
-        foreign lpvm access(tmp#8##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
-        foreign lpvm access(~tmp#8##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+        foreign lpvm access(tmp#8##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
+        foreign lpvm access(~tmp#8##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign llvm icmp_ne(tmp#9##0:wybe.int, 0:wybe.int, ?tmp#17##0:wybe.bool) @stmt_for:nn:nn
         case ~tmp#17##0:wybe.bool of
         0:
 
         1:
-            foreign lpvm access(tmp#9##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?j##0:wybe.int) @stmt_for:nn:nn
-            foreign lpvm access(~tmp#9##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+            foreign lpvm access(tmp#9##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?j##0:wybe.int) @stmt_for:nn:nn
+            foreign lpvm access(~tmp#9##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##1:wybe.list(wybe.int)) @stmt_for:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~%tmp#19##0:wybe.phantom, ?%tmp#20##0:wybe.phantom) @stmt_for:nn:nn
             foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @stmt_for:nn:nn
@@ -232,24 +232,24 @@ proc shortest_generator_termination > public (1 calls)
 shortest_generator_termination()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#16##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#17##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#17##0:wybe.list(T), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#20##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#20##0:wybe.list(T), ?tmp#21##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#21##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#24##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?tmp#25##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#25##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#28##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#28##0:wybe.list(T), ?tmp#29##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#29##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#32##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#32##0:wybe.list(T), ?tmp#33##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 5:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#33##0:wybe.list(T), ?tmp#6##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#36##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#36##0:wybe.list(T), ?tmp#37##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#37##0:wybe.list(T), ?tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:wybe.list(T)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#16##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#16##0:wybe.list(wybe.int), ?tmp#17##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#17##0:wybe.list(wybe.int), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#20##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#20##0:wybe.list(wybe.int), ?tmp#21##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#21##0:wybe.list(wybe.int), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#24##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#24##0:wybe.list(wybe.int), ?tmp#25##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#25##0:wybe.list(wybe.int), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#28##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#28##0:wybe.list(wybe.int), ?tmp#29##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#29##0:wybe.list(wybe.int), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#32##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#32##0:wybe.list(wybe.int), ?tmp#33##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 5:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#33##0:wybe.list(wybe.int), ?tmp#6##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#36##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#36##0:wybe.list(wybe.int), ?tmp#37##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#37##0:wybe.list(wybe.int), ?tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:wybe.list(wybe.int)) @stmt_for:nn:nn
     stmt_for.shortest_generator_termination#cont#1<0>(~tmp#0##0:wybe.list(wybe.int), ~tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
 
 
@@ -263,15 +263,15 @@ shortest_generator_termination#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wyb
     0:
 
     1:
-        foreign lpvm access(tmp#8##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
-        foreign lpvm access(~tmp#8##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+        foreign lpvm access(tmp#8##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
+        foreign lpvm access(~tmp#8##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign llvm icmp_ne(tmp#9##0:wybe.int, 0:wybe.int, ?tmp#17##0:wybe.bool) @stmt_for:nn:nn
         case ~tmp#17##0:wybe.bool of
         0:
 
         1:
-            foreign lpvm access(tmp#9##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?j##0:wybe.int) @stmt_for:nn:nn
-            foreign lpvm access(~tmp#9##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+            foreign lpvm access(tmp#9##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?j##0:wybe.int) @stmt_for:nn:nn
+            foreign lpvm access(~tmp#9##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##1:wybe.list(wybe.int)) @stmt_for:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @stmt_for:nn:nn
             foreign c print_int(~i##0:wybe.int, ~%tmp#19##0:wybe.phantom, ?%tmp#20##0:wybe.phantom) @stmt_for:nn:nn
             foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @stmt_for:nn:nn
@@ -288,15 +288,15 @@ proc single_generator > public (1 calls)
 single_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#9##0:wybe.list(T), ?tmp#10##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#13##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#13##0:wybe.list(T), ?tmp#14##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#14##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#17##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#17##0:wybe.list(T), ?tmp#18##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#18##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(T)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.list(wybe.int), ?tmp#10##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.list(wybe.int), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#13##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#13##0:wybe.list(wybe.int), ?tmp#14##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#14##0:wybe.list(wybe.int), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#17##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#17##0:wybe.list(wybe.int), ?tmp#18##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#18##0:wybe.list(wybe.int), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(wybe.int)) @stmt_for:nn:nn
     stmt_for.single_generator#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_for:nn:nn
 
 
@@ -310,8 +310,8 @@ single_generator#cont#1(tmp#4##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.
     0:
 
     1:
-        foreign lpvm access(tmp#4##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
-        foreign lpvm access(~tmp#4##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+        foreign lpvm access(tmp#4##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
+        foreign lpvm access(~tmp#4##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @stmt_for:nn:nn
         foreign c print_int(~i##0:wybe.int, ~%tmp#10##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @stmt_for:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @stmt_for:nn:nn
@@ -325,18 +325,18 @@ proc using_break > public (1 calls)
 using_break()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?tmp#12##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#12##0:wybe.list(T), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?tmp#16##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?tmp#20##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#20##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#24##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(T)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#11##0:wybe.list(wybe.int), ?tmp#12##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#12##0:wybe.list(wybe.int), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#15##0:wybe.list(wybe.int), ?tmp#16##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#16##0:wybe.list(wybe.int), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#19##0:wybe.list(wybe.int), ?tmp#20##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#20##0:wybe.list(wybe.int), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#23##0:wybe.list(wybe.int), ?tmp#24##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#24##0:wybe.list(wybe.int), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(wybe.int)) @stmt_for:nn:nn
     stmt_for.using_break#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
@@ -350,8 +350,8 @@ using_break#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
     0:
 
     1:
-        foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
-        foreign lpvm access(~tmp#5##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+        foreign lpvm access(tmp#5##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
+        foreign lpvm access(~tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign llvm icmp_eq(i##0:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.bool) @stmt_for:nn:nn
         case ~tmp#7##0:wybe.bool of
         0:
@@ -425,18 +425,18 @@ proc using_next > public (1 calls)
 using_next()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?tmp#12##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#12##0:wybe.list(T), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?tmp#16##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?tmp#20##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#20##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#24##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(T)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#11##0:wybe.list(wybe.int), ?tmp#12##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#12##0:wybe.list(wybe.int), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#15##0:wybe.list(wybe.int), ?tmp#16##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#16##0:wybe.list(wybe.int), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#19##0:wybe.list(wybe.int), ?tmp#20##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#20##0:wybe.list(wybe.int), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#23##0:wybe.list(wybe.int), ?tmp#24##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#24##0:wybe.list(wybe.int), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(wybe.int)) @stmt_for:nn:nn
     stmt_for.using_next#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
@@ -450,8 +450,8 @@ using_next#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>
     0:
 
     1:
-        foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
-        foreign lpvm access(~tmp#5##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+        foreign lpvm access(tmp#5##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
+        foreign lpvm access(~tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign llvm icmp_eq(i##0:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.bool) @stmt_for:nn:nn
         case ~tmp#7##0:wybe.bool of
         0:
@@ -472,18 +472,18 @@ proc using_unless > public (1 calls)
 using_unless()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?tmp#12##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#12##0:wybe.list(T), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?tmp#16##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?tmp#20##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#20##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#24##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(T)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#11##0:wybe.list(wybe.int), ?tmp#12##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#12##0:wybe.list(wybe.int), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#15##0:wybe.list(wybe.int), ?tmp#16##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#16##0:wybe.list(wybe.int), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#19##0:wybe.list(wybe.int), ?tmp#20##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#20##0:wybe.list(wybe.int), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#23##0:wybe.list(wybe.int), ?tmp#24##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#24##0:wybe.list(wybe.int), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(wybe.int)) @stmt_for:nn:nn
     stmt_for.using_unless#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
@@ -497,8 +497,8 @@ using_unless#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.i
     0:
 
     1:
-        foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
-        foreign lpvm access(~tmp#5##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+        foreign lpvm access(tmp#5##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
+        foreign lpvm access(~tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign llvm icmp_slt(i##0:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.bool) @stmt_for:nn:nn
         case ~tmp#7##0:wybe.bool of
         0:
@@ -519,18 +519,18 @@ proc using_until > public (1 calls)
 using_until()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?tmp#12##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#12##0:wybe.list(T), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?tmp#16##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?tmp#20##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#20##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#24##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(T)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#11##0:wybe.list(wybe.int), ?tmp#12##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#12##0:wybe.list(wybe.int), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#15##0:wybe.list(wybe.int), ?tmp#16##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#16##0:wybe.list(wybe.int), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#19##0:wybe.list(wybe.int), ?tmp#20##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#20##0:wybe.list(wybe.int), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#23##0:wybe.list(wybe.int), ?tmp#24##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#24##0:wybe.list(wybe.int), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(wybe.int)) @stmt_for:nn:nn
     stmt_for.using_until#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
@@ -544,8 +544,8 @@ using_until#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
     0:
 
     1:
-        foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
-        foreign lpvm access(~tmp#5##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+        foreign lpvm access(tmp#5##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
+        foreign lpvm access(~tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign llvm icmp_eq(i##0:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.bool) @stmt_for:nn:nn
         case ~tmp#7##0:wybe.bool of
         0:
@@ -565,18 +565,18 @@ proc using_when > public (1 calls)
 using_when()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?tmp#12##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#12##0:wybe.list(T), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?tmp#16##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?tmp#20##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#20##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#24##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(T)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#11##0:wybe.list(wybe.int), ?tmp#12##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#12##0:wybe.list(wybe.int), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#15##0:wybe.list(wybe.int), ?tmp#16##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#16##0:wybe.list(wybe.int), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#19##0:wybe.list(wybe.int), ?tmp#20##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#20##0:wybe.list(wybe.int), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#23##0:wybe.list(wybe.int), ?tmp#24##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#24##0:wybe.list(wybe.int), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(wybe.int)) @stmt_for:nn:nn
     stmt_for.using_when#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
@@ -590,8 +590,8 @@ using_when#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>
     0:
 
     1:
-        foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
-        foreign lpvm access(~tmp#5##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+        foreign lpvm access(tmp#5##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
+        foreign lpvm access(~tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign llvm icmp_slt(i##0:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.bool) @stmt_for:nn:nn
         case ~tmp#7##0:wybe.bool of
         0:
@@ -612,18 +612,18 @@ proc using_while > public (1 calls)
 using_while()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?tmp#12##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#12##0:wybe.list(T), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?tmp#16##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?tmp#20##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#20##0:wybe.list(T), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(T)) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#24##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @stmt_for:nn:nn
-    foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(T)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#11##0:wybe.list(wybe.int), ?tmp#12##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#12##0:wybe.list(wybe.int), ?tmp#3##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#15##0:wybe.list(wybe.int), ?tmp#16##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#16##0:wybe.list(wybe.int), ?tmp#2##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#19##0:wybe.list(wybe.int), ?tmp#20##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#20##0:wybe.list(wybe.int), ?tmp#1##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(wybe.int)) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#23##0:wybe.list(wybe.int), ?tmp#24##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_for:nn:nn
+    foreign lpvm mutate(~tmp#24##0:wybe.list(wybe.int), ?tmp#0##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.list(wybe.int)) @stmt_for:nn:nn
     stmt_for.using_while#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
@@ -637,8 +637,8 @@ using_while#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
     0:
 
     1:
-        foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
-        foreign lpvm access(~tmp#5##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
+        foreign lpvm access(tmp#5##0:wybe.list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:wybe.int) @stmt_for:nn:nn
+        foreign lpvm access(~tmp#5##0:wybe.list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list(wybe.int)) @stmt_for:nn:nn
         foreign llvm icmp_slt(i##0:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.bool) @stmt_for:nn:nn
         case ~tmp#7##0:wybe.bool of
         0:

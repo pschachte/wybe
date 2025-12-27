@@ -20,25 +20,25 @@ insert(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, x##0:X <{}; {}; {1}>, xs##0:wybe.
     foreign llvm icmp_ne(xs##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @higher_order_sort:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
-        foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @higher_order_sort:nn:nn
-        foreign lpvm mutate(~tmp#10##0:wybe.list(T), ?tmp#11##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @higher_order_sort:nn:nn
-        foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @higher_order_sort:nn:nn
+        foreign lpvm alloc(16:wybe.int, ?tmp#12##0:wybe.list(X)) @higher_order_sort:nn:nn
+        foreign lpvm mutate(~tmp#12##0:wybe.list(X), ?tmp#13##0:wybe.list(X), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:X) @higher_order_sort:nn:nn
+        foreign lpvm mutate(~tmp#13##0:wybe.list(X), ?xs##1:wybe.list(14), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(X)) @higher_order_sort:nn:nn
 
     1:
-        foreign lpvm access(xs##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:X) @higher_order_sort:nn:nn
-        foreign lpvm access(xs##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?rest##0:wybe.list(X)) @higher_order_sort:nn:nn
+        foreign lpvm access(xs##0:wybe.list(X), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:8) @higher_order_sort:nn:nn
+        foreign lpvm access(xs##0:wybe.list(X), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?rest##0:wybe.list(8)) @higher_order_sort:nn:nn
         <=##0:(X, X, ?wybe.bool)(x##0:X, head##0:X, ?tmp#4##0:wybe.bool) #1 @higher_order_sort:nn:nn
         case ~tmp#4##0:wybe.bool of
         0:
-            foreign lpvm alloc(16:wybe.int, ?tmp#14##0:wybe.list(T)) @higher_order_sort:nn:nn
-            foreign lpvm mutate(~tmp#14##0:wybe.list(T), ?tmp#15##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:T) @higher_order_sort:nn:nn
+            foreign lpvm alloc(16:wybe.int, ?tmp#17##0:wybe.list(X)) @higher_order_sort:nn:nn
+            foreign lpvm mutate(~tmp#17##0:wybe.list(X), ?tmp#18##0:wybe.list(X), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:X) @higher_order_sort:nn:nn
             higher_order_sort.insert<0>(~<=##0:(X, X, ?wybe.bool), ~x##0:X, ~rest##0:wybe.list(X), outByReference rest##1:wybe.list(X)) #3 @higher_order_sort:nn:nn
-            foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference rest##1:wybe.list(T)) @higher_order_sort:nn:nn
+            foreign lpvm mutate(~tmp#18##0:wybe.list(X), ?xs##1:wybe.list(19), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference rest##1:wybe.list(X)) @higher_order_sort:nn:nn
 
         1:
-            foreign lpvm alloc(16:wybe.int, ?tmp#18##0:wybe.list(T)) @higher_order_sort:nn:nn
-            foreign lpvm mutate(~tmp#18##0:wybe.list(T), ?tmp#19##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @higher_order_sort:nn:nn
-            foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~xs##0:wybe.list(T)) @higher_order_sort:nn:nn
+            foreign lpvm alloc(16:wybe.int, ?tmp#22##0:wybe.list(X)) @higher_order_sort:nn:nn
+            foreign lpvm mutate(~tmp#22##0:wybe.list(X), ?tmp#23##0:wybe.list(X), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:X) @higher_order_sort:nn:nn
+            foreign lpvm mutate(~tmp#23##0:wybe.list(X), ?xs##1:wybe.list(24), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~xs##0:wybe.list(X)) @higher_order_sort:nn:nn
 
 
 
@@ -62,8 +62,8 @@ sort#cont#1(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, sorted##0:wybe.list(X) <{}; 
         foreign llvm move(~sorted##0:wybe.list(X), ?sorted##2:wybe.list(X))
 
     1:
-        foreign lpvm access(tmp#1##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:X) @higher_order_sort:nn:nn
-        foreign lpvm access(~tmp#1##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##1:wybe.list(X)) @higher_order_sort:nn:nn
+        foreign lpvm access(tmp#1##0:wybe.list(X), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:6) @higher_order_sort:nn:nn
+        foreign lpvm access(~tmp#1##0:wybe.list(X), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##1:wybe.list(6)) @higher_order_sort:nn:nn
         higher_order_sort.insert<0>(<=##0:(X, X, ?wybe.bool), ~x##0:X, ~sorted##0:wybe.list(X), outByReference sorted##1:wybe.list(X)) #1 @higher_order_sort:nn:nn
         higher_order_sort.sort#cont#1<0>(~<=##0:(X, X, ?wybe.bool), ~sorted##1:wybe.list(X), ~tmp#1##1:wybe.list(X), ?sorted##2:wybe.list(X)) #2 @higher_order_sort:nn:nn
 
@@ -80,69 +80,69 @@ target triple    ????
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"higher_order_sort.insert<0>"(ptr %"<=##0", i64 %"x##0", i64 %"xs##0", ptr %"tmp#20##0") {
+define external fastcc void @"higher_order_sort.insert<0>"(ptr %"<=##0", i64 %"x##0", i64 %"xs##0", ptr %"tmp#25##0") {
   %"tmp#7##0" = icmp ne i64 %"xs##0", 0
   br i1 %"tmp#7##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#21##0" = inttoptr i64 %"xs##0" to ptr
-  %"head##0" = load i64, ptr %"tmp#21##0"
-  %"tmp#22##0" = add i64 %"xs##0", 8
-  %"tmp#23##0" = inttoptr i64 %"tmp#22##0" to ptr
-  %"rest##0" = load i64, ptr %"tmp#23##0"
-  %"tmp#24##0" = load ptr, ptr %"<=##0"
-  %"tmp#4##0" = tail call fastcc i1 %"tmp#24##0"(ptr %"<=##0", i64 %"x##0", i64 %"head##0")
+  %"tmp#26##0" = inttoptr i64 %"xs##0" to ptr
+  %"head##0" = load i64, ptr %"tmp#26##0"
+  %"tmp#27##0" = add i64 %"xs##0", 8
+  %"tmp#28##0" = inttoptr i64 %"tmp#27##0" to ptr
+  %"rest##0" = load i64, ptr %"tmp#28##0"
+  %"tmp#29##0" = load ptr, ptr %"<=##0"
+  %"tmp#4##0" = tail call fastcc i1 %"tmp#29##0"(ptr %"<=##0", i64 %"x##0", i64 %"head##0")
   br i1 %"tmp#4##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#25##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#18##0" = ptrtoint ptr %"tmp#25##0" to i64
-  %"tmp#26##0" = inttoptr i64 %"tmp#18##0" to ptr
-  store i64 %"x##0", ptr %"tmp#26##0"
-  store i64 %"tmp#18##0", ptr %"tmp#20##0"
-  %"tmp#27##0" = add i64 %"tmp#18##0", 8
-  %"tmp#28##0" = inttoptr i64 %"tmp#27##0" to ptr
-  store i64 %"xs##0", ptr %"tmp#28##0"
+  %"tmp#30##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#22##0" = ptrtoint ptr %"tmp#30##0" to i64
+  %"tmp#31##0" = inttoptr i64 %"tmp#22##0" to ptr
+  store i64 %"x##0", ptr %"tmp#31##0"
+  store i64 %"tmp#22##0", ptr %"tmp#25##0"
+  %"tmp#32##0" = add i64 %"tmp#22##0", 8
+  %"tmp#33##0" = inttoptr i64 %"tmp#32##0" to ptr
+  store i64 %"xs##0", ptr %"tmp#33##0"
   ret void
 if.else.1:
-  %"tmp#29##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#14##0" = ptrtoint ptr %"tmp#29##0" to i64
-  %"tmp#30##0" = inttoptr i64 %"tmp#14##0" to ptr
-  store i64 %"head##0", ptr %"tmp#30##0"
-  store i64 %"tmp#14##0", ptr %"tmp#20##0"
-  %"tmp#31##0" = add i64 %"tmp#14##0", 8
-  %"tmp#32##0" = inttoptr i64 %"tmp#31##0" to ptr
-  musttail call fastcc void @"higher_order_sort.insert<0>"(ptr %"<=##0", i64 %"x##0", i64 %"rest##0", ptr %"tmp#32##0")
+  %"tmp#34##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#17##0" = ptrtoint ptr %"tmp#34##0" to i64
+  %"tmp#35##0" = inttoptr i64 %"tmp#17##0" to ptr
+  store i64 %"head##0", ptr %"tmp#35##0"
+  store i64 %"tmp#17##0", ptr %"tmp#25##0"
+  %"tmp#36##0" = add i64 %"tmp#17##0", 8
+  %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
+  musttail call fastcc void @"higher_order_sort.insert<0>"(ptr %"<=##0", i64 %"x##0", i64 %"rest##0", ptr %"tmp#37##0")
   ret void
 if.else.0:
-  %"tmp#33##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#10##0" = ptrtoint ptr %"tmp#33##0" to i64
-  %"tmp#34##0" = inttoptr i64 %"tmp#10##0" to ptr
-  store i64 %"x##0", ptr %"tmp#34##0"
-  store i64 %"tmp#10##0", ptr %"tmp#20##0"
-  %"tmp#35##0" = add i64 %"tmp#10##0", 8
-  %"tmp#36##0" = inttoptr i64 %"tmp#35##0" to ptr
-  store i64 0, ptr %"tmp#36##0"
+  %"tmp#38##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#12##0" = ptrtoint ptr %"tmp#38##0" to i64
+  %"tmp#39##0" = inttoptr i64 %"tmp#12##0" to ptr
+  store i64 %"x##0", ptr %"tmp#39##0"
+  store i64 %"tmp#12##0", ptr %"tmp#25##0"
+  %"tmp#40##0" = add i64 %"tmp#12##0", 8
+  %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
+  store i64 0, ptr %"tmp#41##0"
   ret void
 }
 
 define external fastcc i64 @"higher_order_sort.sort<0>"(ptr %"<=##0", i64 %"xs##0") {
-  %"tmp#4##0" = tail call fastcc i64 @"higher_order_sort.sort#cont#1<0>"(ptr %"<=##0", i64 0, i64 %"xs##0")
-  ret i64 %"tmp#4##0"
+  %"tmp#5##0" = tail call fastcc i64 @"higher_order_sort.sort#cont#1<0>"(ptr %"<=##0", i64 0, i64 %"xs##0")
+  ret i64 %"tmp#5##0"
 }
 
 define external fastcc i64 @"higher_order_sort.sort#cont#1<0>"(ptr %"<=##0", i64 %"sorted##0", i64 %"tmp#1##0") {
   %"tmp#5##0" = icmp ne i64 %"tmp#1##0", 0
   br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#6##0" = inttoptr i64 %"tmp#1##0" to ptr
-  %"x##0" = load i64, ptr %"tmp#6##0"
-  %"tmp#7##0" = add i64 %"tmp#1##0", 8
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  %"tmp#1##1" = load i64, ptr %"tmp#8##0"
-  %"tmp#9##0" = alloca i8, i64 8, align 8
-  call fastcc void @"higher_order_sort.insert<0>"(ptr %"<=##0", i64 %"x##0", i64 %"sorted##0", ptr %"tmp#9##0")
-  %"sorted##1" = load i64, ptr %"tmp#9##0"
-  %"tmp#10##0" = call fastcc i64 @"higher_order_sort.sort#cont#1<0>"(ptr %"<=##0", i64 %"sorted##1", i64 %"tmp#1##1")
-  ret i64 %"tmp#10##0"
+  %"tmp#7##0" = inttoptr i64 %"tmp#1##0" to ptr
+  %"x##0" = load i64, ptr %"tmp#7##0"
+  %"tmp#8##0" = add i64 %"tmp#1##0", 8
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  %"tmp#1##1" = load i64, ptr %"tmp#9##0"
+  %"tmp#10##0" = alloca i8, i64 8, align 8
+  call fastcc void @"higher_order_sort.insert<0>"(ptr %"<=##0", i64 %"x##0", i64 %"sorted##0", ptr %"tmp#10##0")
+  %"sorted##1" = load i64, ptr %"tmp#10##0"
+  %"tmp#11##0" = call fastcc i64 @"higher_order_sort.sort#cont#1<0>"(ptr %"<=##0", i64 %"sorted##1", i64 %"tmp#1##1")
+  ret i64 %"tmp#11##0"
 if.else.0:
   ret i64 %"sorted##0"
 }

@@ -70,9 +70,9 @@ module top-level code > {terminal,inline,impure} (0 calls)
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign c {impure} gc_init @memory_management:nn:nn
     drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.c_array(T)) @command_line:nn:nn
-    foreign lpvm mutate(~tmp#9##0:wybe.c_array(T), ?tmp#10##0:wybe.c_array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.c_array(T), ?tmp#0##0:wybe.c_array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.c_array.raw_array) @command_line:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.c_array(wybe.c_string)) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.c_array(wybe.c_string), ?tmp#10##0:wybe.c_array(wybe.c_string), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.c_array(wybe.c_string), ?tmp#0##0:wybe.c_array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.c_array.raw_array) @command_line:nn:nn
     foreign lpvm store(~tmp#0##0:wybe.c_array(wybe.c_string), <<command_line.arguments>>:wybe.c_array(wybe.c_string)) @command_line:nn:nn
     foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
     foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
@@ -613,9 +613,9 @@ module top-level code > {terminal,inline,impure} (0 calls)
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign c {impure} gc_init @memory_management:nn:nn
     drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.c_array(T)) @command_line:nn:nn
-    foreign lpvm mutate(~tmp#9##0:wybe.c_array(T), ?tmp#10##0:wybe.c_array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.c_array(T), ?tmp#0##0:wybe.c_array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.c_array.raw_array) @command_line:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.c_array(wybe.c_string)) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.c_array(wybe.c_string), ?tmp#10##0:wybe.c_array(wybe.c_string), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.c_array(wybe.c_string), ?tmp#0##0:wybe.c_array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.c_array.raw_array) @command_line:nn:nn
     foreign lpvm store(~tmp#0##0:wybe.c_array(wybe.c_string), <<command_line.arguments>>:wybe.c_array(wybe.c_string)) @command_line:nn:nn
     foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
     foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
