@@ -65,7 +65,7 @@ proc #cont#1 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    t##0:(I, ?wybe.bool)(1:I, ?tmp#7##0:wybe.bool) #0 @higher_order_tests:nn:nn
+    t##0:(wybe.int, ?wybe.bool)(1:wybe.int, ?tmp#7##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
         higher_order_tests.#cont#2<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
@@ -84,7 +84,7 @@ proc #cont#2 > {semipure} (2 calls)
 #cont#2(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    t##0:(I, ?wybe.bool)(2:I, ?tmp#6##0:wybe.bool) #0 @higher_order_tests:nn:nn
+    t##0:(wybe.int, ?wybe.bool)(2:wybe.int, ?tmp#6##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#6##0:wybe.bool of
     0:
         higher_order_tests.#cont#3<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
@@ -104,7 +104,7 @@ proc #cont#3 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    ~t##0:(I, ?wybe.bool)(2:I, ?tmp#5##0:wybe.bool) #0 @higher_order_tests:nn:nn
+    ~t##0:(wybe.int, ?wybe.bool)(2:wybe.int, ?tmp#5##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
         higher_order_tests.#cont#4<0>(_:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
@@ -147,7 +147,7 @@ proc #cont#5 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    t##0:(I, ?wybe.bool)(1:I, ?tmp#3##0:wybe.bool) #0 @higher_order_tests:nn:nn
+    t##0:(wybe.int, ?wybe.bool)(1:wybe.int, ?tmp#3##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#3##0:wybe.bool of
     0:
         higher_order_tests.#cont#6<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
@@ -166,7 +166,7 @@ proc #cont#6 > {semipure} (2 calls)
 #cont#6(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    t##0:(I, ?wybe.bool)(2:I, ?tmp#2##0:wybe.bool) #0 @higher_order_tests:nn:nn
+    t##0:(wybe.int, ?wybe.bool)(2:wybe.int, ?tmp#2##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         higher_order_tests.#cont#7<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
@@ -186,7 +186,7 @@ proc #cont#7 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    ~t##0:(I, ?wybe.bool)(2:I, ?tmp#1##0:wybe.bool) #0 @higher_order_tests:nn:nn
+    ~t##0:(wybe.int, ?wybe.bool)(2:wybe.int, ?tmp#1##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
 
