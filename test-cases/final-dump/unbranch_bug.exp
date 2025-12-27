@@ -44,7 +44,7 @@ proc #cont#3 > {semipure} (2 calls)
     0:
 
     1:
-        foreign lpvm access(~tmp#0##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(7)) @unbranch_bug:nn:nn
+        foreign lpvm access(~tmp#0##0:wybe.list(7), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(8)) @unbranch_bug:nn:nn
         unbranch_bug.#cont#3<0>(~tmp#0##1:wybe.list(7))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @unbranch_bug:nn:nn
 
 
@@ -76,9 +76,9 @@ define external fastcc void @"unbranch_bug.#cont#3<0>"(i64 %"tmp#0##0") {
   %"tmp#7##0" = icmp ne i64 %"tmp#0##0", 0
   br i1 %"tmp#7##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#8##0" = add i64 %"tmp#0##0", 8
-  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
-  %"tmp#0##1" = load i64, ptr %"tmp#9##0"
+  %"tmp#9##0" = add i64 %"tmp#0##0", 8
+  %"tmp#10##0" = inttoptr i64 %"tmp#9##0" to ptr
+  %"tmp#0##1" = load i64, ptr %"tmp#10##0"
   tail call fastcc void @"unbranch_bug.#cont#3<0>"(i64 %"tmp#0##1")
   ret void
 if.else.0:

@@ -17,15 +17,15 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
-    foreign lpvm mutate(~tmp#6##0:current_module_alias_type_args(T), ?tmp#7##0:current_module_alias_type_args(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 42:T) @current_module_alias_type_args:nn:nn
-    foreign lpvm mutate(~tmp#7##0:current_module_alias_type_args(T), ?tmp#1##0:current_module_alias_type_args(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:current_module_alias_type_args(wybe.int)) @current_module_alias_type_args:nn:nn
+    foreign lpvm mutate(~tmp#6##0:current_module_alias_type_args(wybe.int), ?tmp#7##0:current_module_alias_type_args(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 42:wybe.int) @current_module_alias_type_args:nn:nn
+    foreign lpvm mutate(~tmp#7##0:current_module_alias_type_args(wybe.int), ?tmp#1##0:current_module_alias_type_args(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:current_module_alias_type_args(wybe.int)) @current_module_alias_type_args:nn:nn
     foreign llvm icmp_ne(tmp#1##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @current_module_alias_type_args:nn:nn
     case ~tmp#9##0:wybe.bool of
     0:
 
     1:
-        foreign lpvm access(~tmp#1##0:current_module_alias_type_args(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @current_module_alias_type_args:nn:nn
+        foreign lpvm access(~tmp#1##0:current_module_alias_type_args(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @current_module_alias_type_args:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @current_module_alias_type_args:nn:nn
         foreign c print_int(~tmp#2##0:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @current_module_alias_type_args:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @current_module_alias_type_args:nn:nn
