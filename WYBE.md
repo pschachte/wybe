@@ -2442,6 +2442,13 @@ converting its type from *type1* to *type2*, without changing the
 representation. This just allows getting around LLVM strong typing; it does not
 actually require any instructions.
 
+- `foreign lpvm sizeof(`*arg:type*, `?`*size:int_type*`)` Get the size of the *type* of 
+the first argument in bytes. To get the size in bits, specify the `bits` modifier.
+The size of a type is the size of it's largest constructor (at most a machine word), or the size of its' representation.
+The first argument can be anything except for an outwards-flowing variable. 
+The type of the second argument, *int_type*, can have any integer represented type. 
+This instruction is resolved statically, with _no_ runtime cost.
+
 
 #### Handling impurity
 
