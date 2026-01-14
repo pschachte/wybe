@@ -162,7 +162,9 @@ normaliseSubmodule name vis pos items = do
     alreadyExists <- isJust <$> getLoadingModule subModSpec
     if alreadyExists
       then reenterModule subModSpec
-      else enterModule parentOrigin subModSpec (Just parentModSpec)
+      else do
+        root <- getModule modRootModSpec
+        enterModule parentOrigin subModSpec root
     -- submodule always imports parent module
     updateImplementation $ \i -> i { modNestedIn = Just parentModSpec }
     addImport parentModSpec (importSpec Nothing Private)
