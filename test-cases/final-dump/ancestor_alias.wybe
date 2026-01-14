@@ -1,0 +1,23 @@
+pub module a {
+    pub def {noinline, impure} foo() { pass }
+    !_._.b.c.foo
+    !_.foo
+}
+
+pub module b {
+    pub module a {
+        pub def {noinline, impure} foo { pass }
+    }
+    pub module c {
+        pub def {noinline, impure} foo() { pass }
+        !_.foo
+        !_._.a.foo
+        !_._._.a.foo
+    }
+    !_.a.foo
+    !_._.a.foo
+}
+
+!_.b.a.foo
+!b.a.foo
+!_.a.foo
