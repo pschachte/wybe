@@ -102,7 +102,7 @@ define external fastcc i64 @"lazy.#anon#1<0>"() {
   ret i64 42
 }
 
-define external fastcc i64 @"lazy.#anon#1<1>"(i64 %"#env##0") {
+define external fastcc i64 @"lazy.#anon#1<1>"(ptr %"#env##0") {
   %"tmp#0##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @log_string(i64 %"tmp#0##0")
   call ccc void @sleep(i64 1)
