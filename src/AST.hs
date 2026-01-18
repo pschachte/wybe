@@ -138,7 +138,7 @@ import           Crypto.Hash
 import qualified Data.Binary
 import qualified Data.ByteString.Lazy as BL
 import           Data.List as List
-import           Data.List.Extra (nubOrd,splitOn, disjoint)
+import           Data.List.Extra (nubOrd,splitOn, disjoint, dropEnd)
 import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
@@ -1466,10 +1466,9 @@ refersTo :: Ord b => ModSpec -> Ident ->
             (b -> ModSpec) -> Compiler (Set b)
 refersTo modspec name implMapFn specModFn = do
     currMod <- getModuleSpec
-    let modspec' = if not (List.null modspec)
-                        && head modspec == currentModuleAlias
-                   then currMod ++ tail modspec
-                   else modspec
+    let modspec' = case span (== currentModuleAlias) modspec of
+            ([], _) -> modspec
+            (prefix, unaliased) -> dropEnd (length prefix - 1) currMod ++ unaliased
     logAST $ "Finding visible symbol " ++ maybeModPrefix modspec' ++
       name ++ " from module " ++ showModSpec currMod
     defined <- getModuleImplementationField
