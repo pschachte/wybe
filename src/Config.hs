@@ -12,7 +12,7 @@ module Config (sourceExtension, objectExtension, executableExtension,
                bitcodeExtension, assemblyExtension, nativeAssemblyExtension,
                archiveExtension, moduleDirectoryBasename, currentModuleAlias,
                specialChar, specialName, specialName2, initProcName,
-               wordSize, wordSizeBytes,
+               wordSize, wordSizeBytes, bitsInByte,
                availableTagBits, tagMask, smallestAllocatedAddress,
                minimumSwitchCases, magicVersion,
                linkerDeadStripArgs, removeLPVMSection,
@@ -30,6 +30,7 @@ import System.Exit (ExitCode (..))
 import System.Process
 import System.FilePath
 import System.Directory.Extra (getHomeDirectory)
+import Data.Bits (FiniteBits (finiteBitSize))
 
 
 -- |The file extension for source files.
@@ -102,12 +103,17 @@ initProcName = ""
 
 -- |Determining word size of the machine in bits
 wordSize :: Int
-wordSize = wordSizeBytes * 8
+wordSize = wordSizeBytes * bitsInByte
 
 
 -- |Word size of the machine in bytes
 wordSizeBytes :: Int
 wordSizeBytes = sizeOf (3 :: Word)
+
+
+-- |Bits in a byte
+bitsInByte :: Int
+bitsInByte = finiteBitSize (42 :: Word8)
 
 
 -- |The number of tag bits available on this architecture.  This is the base 2

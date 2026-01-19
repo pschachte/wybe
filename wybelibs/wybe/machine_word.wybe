@@ -7,6 +7,6 @@ representation is address
 
 use wybe.int
 
-pub def word_size_bytes:int = 8
+pub def word_size_bytes:int = foreign lpvm sizeof(_:_)
 
-pub def word_size_bits:int = 8 * word_size_bytes
+pub def word_size_bits:int = foreign lpvm {bits} sizeof(_:_)

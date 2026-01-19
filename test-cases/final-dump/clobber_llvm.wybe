@@ -1,0 +1,11 @@
+module foo {
+    def bar {
+        pass
+    }
+}
+
+def {noinline} `foo.bar` {
+    pass
+}
+
+`foo.bar`
