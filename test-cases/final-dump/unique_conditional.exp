@@ -28,16 +28,11 @@ baz([a##0:unique_conditional])<{}; {}; {}>:
   InterestingCallProperties: []
 
 
-proc foo > (0 calls)
+proc foo > {inline} (0 calls)
 0: unique_conditional.foo<0>
 foo(b##0:wybe.bool, [a##0:unique_conditional])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    case ~b##0:wybe.bool of
-    0:
-
-    1:
-
 
   LLVM code       :
 
@@ -59,9 +54,5 @@ define external fastcc void @"unique_conditional.baz<0>"() {
 }
 
 define external fastcc void @"unique_conditional.foo<0>"(i1 %"b##0") {
-  br i1 %"b##0", label %if.then.0, label %if.else.0
-if.then.0:
-  ret void
-if.else.0:
   ret void
 }

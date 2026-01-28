@@ -11,6 +11,7 @@
 --
 --  This code is used bottom-up, ie, callees are expanded before
 --  their callers, so it does not need to recursively expand calls.
+{-# LANGUAGE TupleSections #-}
 
 module Expansion (procExpansion) where
 
@@ -29,6 +30,7 @@ import           Data.Maybe                as Maybe
 import           Options                   (LogSelection (Expansion))
 import Distribution.Simple.Setup (emptyGlobalFlags)
 import Snippets
+import Data.Tuple.HT (mapFst)
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
@@ -211,15 +213,13 @@ initExpanderState = Expander Nothing identityRenaming identityRenaming True
 
 expandBody :: ProcBody -> Expander ()
 expandBody (ProcBody prims fork) = do
-    logExpansion $ "Expanding unforked part of body:" ++ showPlacedPrims 4 prims
-    modify (\s -> s { noFork = fork == NoFork })
-    mapM_ (placedApply expandPrim) prims
-    logExpansion $ "Finished expanding unforked part of body"
     case fork of
       NoFork -> do
+        expandUnforked prims fork
         logExpansion "No fork for this body"
         return ()
       PrimFork var ty final bodies deflt -> do
+        expandUnforked prims fork
         st <- get
         logExpansion $ "Now expanding fork (" ++
           (if isJust (inlining st) then "without" else "WITH") ++ " inlining)"
@@ -230,29 +230,39 @@ expandBody (ProcBody prims fork) = do
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
                        ++ " with " ++ show (length bodies) ++ " branches"
-        expandFork var' ty $ bodies ++ maybeToList deflt
+        expandFork var' ty $ List.map (mapFst Just) bodies ++ maybeToList ((Nothing,) <$> deflt)
         logExpansion $ "Finished expanding fork on " ++ show var'
+      MergedFork{} -> do
+        logExpansion "Expanding merged as fork..."
+        expandBody $ ProcBody prims $ unMergeFork fork
+        
+expandUnforked :: [Placed Prim] -> PrimFork -> Expander ()
+expandUnforked prims fork = do
+    logExpansion $ "Expanding unforked part of body:" ++ showPlacedPrims 4 prims
+    modify (\s -> s { noFork = fork == NoFork })
+    mapM_ (placedApply expandPrim) prims
+    logExpansion "Finished expanding unforked part of body"
 
 
-expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()
+expandFork :: PrimVarName -> TypeSpec -> [(Maybe Integer, ProcBody)] -> Expander ()
 expandFork var ty bodies = do
     maybeVal <- lift $ definiteVariableValue var
     case maybeVal of
       Just (ArgInt n _) | n < fromIntegral (length bodies) -> do
         logExpansion $ "Value of " ++ show var ++ " known to be " ++ show n
                        ++ ": expanding only that branch"
-        expandBody $ bodies !! fromIntegral n
+        expandBody . snd $ bodies !! fromIntegral n
       _ -> do
         lift $ buildFork var ty
-        zipWithM_ (\b n -> do
+        mapM_ (\(n, b) -> do
                   logExpansion $ "Beginning expansion of branch " ++ show n
                                  ++ " on " ++ show var
-                  lift beginBranch
+                  lift (beginBranch n)
                   expandBody b
                   lift endBranch
                   logExpansion $ "Finished expansion of branch " ++ show n
                                  ++ " on " ++ show var)
-               bodies [0..]
+               bodies
         lift completeFork
 
 

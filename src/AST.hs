@@ -65,8 +65,8 @@ module AST (
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
-  ProcBody(..), PrimFork(..), Ident, VarName,
-  ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
+  ProcBody(..), PrimFork(..), MergedForkTable, prependToBody, appendToBody, unMergeFork, guardedMergedFork, 
+  Ident, VarName, ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
@@ -2456,14 +2456,65 @@ data ProcBody = ProcBody {
 data PrimFork =
     NoFork |
     PrimFork {
+      forkVar::PrimVarName,       -- ^The variable that selects branch to take
+      forkVarType::TypeSpec,      -- ^The Wybe type of the forkVar
+      forkVarLast::Bool,          -- ^Is this the last occurrence of forkVar
+      forkBodies::[(Integer,ProcBody)],   
+                                  -- ^one branch for each value of forkVar
+      forkDefault::Maybe ProcBody -- ^branch to take if forkVar is out of range
+    } |
+    MergedFork {
       forkVar::PrimVarName,     -- ^The variable that selects branch to take
       forkVarType::TypeSpec,    -- ^The Wybe type of the forkVar
       forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
-      forkBodies::[ProcBody],   -- ^one branch for each value of forkVar
-      forkDefault::Maybe ProcBody -- ^branch to take if forkVar is out of range
+      forkTable::MergedForkTable,
+                                -- ^Each variable factored out from each branch,
+                                -- with the list of values indexed by the branch
+      forkBody::ProcBody,       -- ^The rest of the "branch",
+      forkDefault::Maybe ProcBody
+                                -- ^The branch if the var is out of range
     }
     deriving (Eq, Show, Generic)
 
+type MergedForkTable = [(PrimVarName, TypeSpec, [PrimArg])]
+
+-- |Add the specified statements at the end of the given body
+appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
+appendToBody (ProcBody prims NoFork) after
+    = ProcBody (prims++after) NoFork
+appendToBody (ProcBody prims (PrimFork v ty lst bodies deflt)) after
+    = let bodies' = List.map (mapSnd (`appendToBody` after)) bodies
+      in ProcBody prims $ PrimFork v ty lst bodies'
+                            $ (`appendToBody` after) <$> deflt
+appendToBody body@ProcBody{bodyFork=merged@MergedFork{forkBody=fork}} after
+    = body{bodyFork=merged{forkBody=fork `appendToBody` after}}
+
+-- |Add the specified statements at the front of the given body
+prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
+prependToBody before (ProcBody prims fork)
+    = ProcBody (before++prims) fork
+
+-- |Un-merge a fork, replacing the tabled variables with a series of moved in the PrimFork branches
+unMergeFork :: PrimFork -> PrimFork
+unMergeFork (MergedFork var ty final table body dlft) =
+        let untabled = List.transpose 
+                     $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ PrimForeign "llvm" "move" [] [p, ArgVar var' ty' FlowOut Ordinary False]) vals) 
+                     table
+        in  if List.null untabled 
+            then NoFork
+            else PrimFork var ty final (zip [0..] (List.map (`prependToBody` body) untabled)) dlft
+unMergeFork fork = shouldnt $ "unMergeFork on non-merged " ++ show fork
+
+-- |Replace a default-y MergedFork with a guarded non-defaulted MergedFork in a ProcBody,
+-- with the given var used int the fork
+guardedMergedFork :: PrimVarName -> PrimVarName -> TypeSpec -> Integer -> ProcBody -> Maybe ProcBody -> ProcBody
+guardedMergedFork _   _   _  _     body Nothing     = body
+guardedMergedFork tmp var ty limit body (Just dflt) = 
+    ProcBody
+        [Unplaced $ PrimForeign "llvm" "icmp_ule" []
+          [ArgVar var ty FlowIn Ordinary False, ArgInt limit ty, ArgVar tmp bit FlowOut Ordinary False]]
+        $ PrimFork tmp bit True (zip [0..] [dflt,body]) Nothing
+  where bit = Representation $ Bits 1
 
 data LLBlock = LLBlock {
     llInstrs::[LLInstr],
@@ -2621,13 +2672,14 @@ foldBodyPrims primFn emptyConj abDisj (ProcBody pprims fork) =
                      []       -> a
                      (pp:pps) -> primFn (final && List.null pps) (content pp) a)
                  emptyConj $ tails pprims
+        foldAll = List.foldl (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
     in case fork of
       NoFork -> common
-      PrimFork _ _ _ [] _ -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ [] _ -> shouldnt "foldBodyPrims empty clause list in a PrimFork"
       PrimFork _ _ _ (body:bodies) deflt ->
-          List.foldl (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
-                (foldBodyPrims primFn common abDisj body)
-                $ bodies ++ maybeToList deflt
+          foldAll (foldBodyPrims primFn common abDisj $ snd body) $ List.map snd bodies ++ maybeToList deflt
+      MergedFork{forkBody=body, forkDefault=deflt} ->
+          foldAll (foldBodyPrims primFn common abDisj body) $ maybeToList deflt
 
 
 -- |Similar to foldBodyPrims, except that it assumes that abstract
@@ -2647,14 +2699,16 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
                      []       -> a
                      (pp:pps) -> primFn (final && List.null pps) (content pp) a)
                  emptyConj $ tails pprims
+        foldAll = (abConj common .) . List.foldl (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
     in case fork of
       NoFork -> common
-      PrimFork _ _ _ [] _ -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ [] _ -> shouldnt "foldBodyDistrib empty clause list in a PrimFork"
       PrimFork _ _ _ (body:bodies) deflt ->
-        abConj common $
-        List.foldl (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
-        (foldBodyPrims primFn common abDisj body)
-        $ bodies ++ maybeToList deflt
+        foldAll (foldBodyDistrib primFn common abDisj abConj $ snd body) $ List.map snd bodies ++ maybeToList deflt
+      MergedFork{forkBody=body, forkDefault=deflt} ->
+        foldAll (foldBodyDistrib primFn common abDisj abConj body) $ maybeToList deflt
+            
+            
 
 
 -- |Traverse a ProcBody applying a monadic primFn to every Prim and applying a
@@ -2667,8 +2721,11 @@ mapLPVMBodyM primFn argFn (ProcBody pprims fork) = do
     case fork of
         NoFork -> return ()
         (PrimFork _ _ _ bodies deflt) -> do
-            mapM_ (mapLPVMBodyM primFn argFn) bodies
-            maybe (return ()) (mapLPVMBodyM primFn argFn) deflt
+            mapM_ (mapLPVMBodyM primFn argFn . snd) bodies
+            forM_ deflt (mapLPVMBodyM primFn argFn)
+        MergedFork{forkBody=body,forkDefault=deflt} -> do
+            mapLPVMBodyM primFn argFn body
+            forM_ deflt (mapLPVMBodyM primFn argFn)
 
 
 -- |Handle a single Prim for mapLPVMBodyM doing the needful.
@@ -3631,6 +3688,7 @@ expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ _ args) = pexpListOutputs args
+expOutputs (ForeignFn "lpvm" "sizeof" _ (_:args)) = pexpListOutputs args
 expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
 expOutputs (CaseExp _ cases deflt) =
     pexpListOutputs $ maybe id (:) deflt (snd <$> cases)
@@ -4097,8 +4155,17 @@ showFork ind (PrimFork var ty last bodies deflt) =
                   ":" ++ show ty ++ " of" ++
     List.concatMap (\(val,body) ->
                         startLine ind ++ show val ++ ":" ++
-                        showBlock (ind+4) body ++ "\n")
-    (zip [0..] bodies)
+                        showBlock (ind+4) body ++ "\n") bodies
+    ++ maybe "" (\b -> startLine ind ++ "else:"
+                       ++ showBlock (ind+4) b ++ "\n") deflt
+showFork ind (MergedFork var ty last vars body deflt) =
+    startLine ind ++ "factored " ++ (if last then "~" else "") ++ show var ++
+                  ":" ++ show ty ++ " of" ++
+    List.concatMap (\(var, ty, vals) -> 
+                        startLine (ind + 2) ++ "?" ++ show var ++ ":" ++ show ty ++
+                        " <- [ " ++ intercalate ", " (List.map show vals) ++ " ]") 
+        vars
+    ++ showBlock (ind+4) body
     ++ maybe "" (\b -> startLine ind ++ "else:"
                        ++ showBlock (ind+4) b ++ "\n") deflt
 

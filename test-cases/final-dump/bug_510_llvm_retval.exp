@@ -67,7 +67,7 @@ define external fastcc void @"bug_510_llvm_retval.<0>"() {
 
 define external fastcc i1 @"bug_510_llvm_retval.proc<0>"(i64 %"p##0") {
   %"tmp#2##0" = icmp eq i64 %"p##0", 3
-  %"tmp#3##0" = sext i1 %"tmp#2##0" to i64
+  %"tmp#3##0" = zext i1 %"tmp#2##0" to i64
   %"tmp#4##0" = trunc i64 %"tmp#3##0" to i1
   ret i1 %"tmp#4##0"
 }
@@ -78,7 +78,7 @@ define external fastcc i1 @"bug_510_llvm_retval.proc#anon#1<0>"(i64 %"p##0") {
 }
 
 define external fastcc i64 @"bug_510_llvm_retval.proc#anon#1<1>"(ptr %"#env##0") {
-  %"tmp#1##0" = getelementptr {ptr, i64}, ptr %"#env##0", i64 0, i32 1
+  %"tmp#1##0" = getelementptr inbounds {ptr, i64}, ptr %"#env##0", i64 0, i32 1
   %"p##0" = load i64, ptr %"tmp#1##0"
   %"#success##0" = icmp eq i64 %"p##0", 3
   %"tmp#2##0" = zext i1 %"#success##0" to i64

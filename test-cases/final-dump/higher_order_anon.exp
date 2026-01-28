@@ -237,7 +237,7 @@ define external fastcc ptr @"higher_order_anon.#anon#7<0>"(ptr %"id##0") {
 }
 
 define external fastcc i64 @"higher_order_anon.#anon#7<1>"(ptr %"#env##0") {
-  %"tmp#1##0" = getelementptr {ptr, ptr}, ptr %"#env##0", i64 0, i32 1
+  %"tmp#1##0" = getelementptr inbounds {ptr, ptr}, ptr %"#env##0", i64 0, i32 1
   %"id##0" = load ptr, ptr %"tmp#1##0"
   %"tmp#2##0" = load ptr, ptr %"id##0"
   %"anon#7#1##0" = tail call fastcc ptr %"tmp#2##0"(ptr %"id##0", ptr @"closure#0")

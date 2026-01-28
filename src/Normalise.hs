@@ -765,7 +765,9 @@ deconstructorItems uniq vis ctorName typeSpec params numConsts numNonConsts tag
 --  is necessary, just generate a Nop, rather than a true test.
 tagCheck :: OptPos -> Int -> Int -> Int -> Int -> Int -> Maybe Int -> Ident -> Placed Stmt
 tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
-    let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
+    let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
+        tagTy = Representation (Bits tagBits)
+    in
     -- If there are any constant constructors, be sure it's not one of them
     let tests =
           (case numConsts of
@@ -779,11 +781,11 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
            (case numNonConsts of
                1 -> []  -- Nothing to do if it's the only non-const constructor
                _ -> [comparison "icmp_eq"
-                     (intCast $ ForeignFn "llvm" "and" [] [Unplaced $ intCast $ varGet varName,
-                         Unplaced $ iVal (2^tagBits-1) `withType` intType])
-                     (intCast $ iVal (if tag > tagLimit
+                     (ForeignFn "llvm" "and" [] [Unplaced $ varGet varName `castTo` tagTy,
+                         Unplaced $ iVal (2^tagBits-1) `withType` tagTy] `withType` tagTy)
+                     (iVal (if tag > tagLimit
                                       then wordSizeBytes-1
-                                      else tag))])
+                                      else tag) `withType` tagTy)])
            ++
            -- If there's a secondary tag, check that, too.
            if tag > tagLimit
