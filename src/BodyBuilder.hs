@@ -9,7 +9,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 module BodyBuilder (
-  BodyBuilder, buildBody, freshVarName, instr, buildFork, completeFork,
+  BodyBuilder, buildBody, freshVarName, freshTmp, instr, buildFork, completeFork,
   beginBranch, endBranch, definiteVariableValue, argExpandedPrim
   ) where
 
@@ -217,10 +217,16 @@ type ComputedCalls = Map Prim [PrimArg]
 -- |Allocate the next temp variable name and ensure it's not allocated again
 freshVarName :: BodyBuilder PrimVarName
 freshVarName = do
-    tmp <- gets tmpCount
+    tmp <- freshTmp
     logBuild $ "Generating fresh variable " ++ mkTempName tmp
-    modify (\st -> st {tmpCount = tmp + 1})
     return $ PrimVarName (mkTempName tmp) 0
+
+-- |Generate the next tmp number
+freshTmp :: BodyBuilder Int
+freshTmp = do
+    tmp <- gets tmpCount
+    modify (\st -> st {tmpCount = tmp + 1})
+    return tmp
 
 
 

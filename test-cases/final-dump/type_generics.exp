@@ -148,17 +148,17 @@ proc foo2 > (18 calls)
 foo2(x##0:T0 <{}; {}; {0}>, ?y##0:T0 <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:wybe.list(T)) @type_generics:nn:nn
-    foreign lpvm mutate(~tmp#6##0:wybe.list(T), ?tmp#7##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @type_generics:nn:nn
-    foreign lpvm mutate(~tmp#7##0:wybe.list(T), ?tmp#0##0:wybe.list(T0), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @type_generics:nn:nn
-    foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @type_generics:nn:nn
-    case ~tmp#9##0:wybe.bool of
+    foreign lpvm alloc(16:wybe.int, ?tmp#7##0:wybe.list(T0)) @type_generics:nn:nn
+    foreign lpvm mutate(~tmp#7##0:wybe.list(T0), ?tmp#8##0:wybe.list(T0), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T0) @type_generics:nn:nn
+    foreign lpvm mutate(~tmp#8##0:wybe.list(T0), ?tmp#0##0:wybe.list(9), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T0)) @type_generics:nn:nn
+    foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.bool) @type_generics:nn:nn
+    case ~tmp#11##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool) @type_generics:nn:nn
-        foreign llvm move(undef:T, ?y##0:T0) @type_generics:nn:nn
+        foreign llvm move(undef:T0, ?y##0:12) @type_generics:nn:nn
 
     1:
-        foreign lpvm access(~tmp#0##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:T0) @type_generics:nn:nn
+        foreign lpvm access(~tmp#0##0:wybe.list(T0), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:12) @type_generics:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool) @type_generics:nn:nn
 
 
@@ -290,23 +290,23 @@ define external fastcc void @"type_generics.foo<0>"(i64 %"x##0") {
 }
 
 define external fastcc {i64, i1} @"type_generics.foo2<0>"(i64 %"x##0") {
-  %"tmp#10##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#6##0" = ptrtoint ptr %"tmp#10##0" to i64
-  %"tmp#11##0" = inttoptr i64 %"tmp#6##0" to ptr
-  store i64 %"x##0", ptr %"tmp#11##0"
-  %"tmp#12##0" = add i64 %"tmp#6##0", 8
-  %"tmp#13##0" = inttoptr i64 %"tmp#12##0" to ptr
-  store i64 0, ptr %"tmp#13##0"
-  %"tmp#9##0" = icmp ne i64 %"tmp#6##0", 0
-  br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
+  %"tmp#13##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#7##0" = ptrtoint ptr %"tmp#13##0" to i64
+  %"tmp#14##0" = inttoptr i64 %"tmp#7##0" to ptr
+  store i64 %"x##0", ptr %"tmp#14##0"
+  %"tmp#15##0" = add i64 %"tmp#7##0", 8
+  %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
+  store i64 0, ptr %"tmp#16##0"
+  %"tmp#11##0" = icmp ne i64 %"tmp#7##0", 0
+  br i1 %"tmp#11##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#14##0" = inttoptr i64 %"tmp#6##0" to ptr
-  %"tmp#15##0" = load i64, ptr %"tmp#14##0"
-  %"tmp#16##0" = insertvalue {i64, i1} undef, i64 %"tmp#15##0", 0
-  %"tmp#17##0" = insertvalue {i64, i1} %"tmp#16##0", i1 1, 1
-  ret {i64, i1} %"tmp#17##0"
+  %"tmp#17##0" = inttoptr i64 %"tmp#7##0" to ptr
+  %"tmp#18##0" = load i64, ptr %"tmp#17##0"
+  %"tmp#19##0" = insertvalue {i64, i1} undef, i64 %"tmp#18##0", 0
+  %"tmp#20##0" = insertvalue {i64, i1} %"tmp#19##0", i1 1, 1
+  ret {i64, i1} %"tmp#20##0"
 if.else.0:
-  %"tmp#18##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#19##0" = insertvalue {i64, i1} %"tmp#18##0", i1 0, 1
-  ret {i64, i1} %"tmp#19##0"
+  %"tmp#21##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#22##0" = insertvalue {i64, i1} %"tmp#21##0", i1 0, 1
+  ret {i64, i1} %"tmp#22##0"
 }
