@@ -16,6 +16,7 @@ AFTER EVERYTHING:
                     ancestor_alias.b.a.foo<0>
                     ancestor_alias.b.c.<0>
                     ancestor_alias.b.c.foo<0>
+  constants       : 
   imports         : public use ancestor_alias.a
                     public use ancestor_alias.b
                     use wybe
@@ -57,6 +58,7 @@ define external fastcc void @"ancestor_alias.<0>"() {
   public resources: 
   public procs    : ancestor_alias.a.<0>
                     ancestor_alias.a.foo<0>
+  constants       : 
   imports         : use ancestor_alias
                     use wybe
   resources       : 
@@ -108,6 +110,7 @@ define external fastcc void @"ancestor_alias.a.foo<0>"() {
                     ancestor_alias.b.a.foo<0>
                     ancestor_alias.b.c.<0>
                     ancestor_alias.b.c.foo<0>
+  constants       : 
   imports         : use ancestor_alias
                     public use ancestor_alias.b.a
                     public use ancestor_alias.b.c
@@ -147,6 +150,7 @@ define external fastcc void @"ancestor_alias.b.<0>"() {
   public submods  : 
   public resources: 
   public procs    : ancestor_alias.b.a.foo<0>
+  constants       : 
   imports         : use ancestor_alias.b
                     use wybe
   resources       : 
@@ -180,6 +184,7 @@ define external fastcc void @"ancestor_alias.b.a.foo<0>"() {
   public resources: 
   public procs    : ancestor_alias.b.c.<0>
                     ancestor_alias.b.c.foo<0>
+  constants       : 
   imports         : use ancestor_alias.b
                     use wybe
   resources       : 

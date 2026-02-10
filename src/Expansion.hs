@@ -27,10 +27,10 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
 import           Data.Maybe                as Maybe
+import           Data.Char                 (ord)
+import           Data.Tuple.HT             (mapFst)
 import           Options                   (LogSelection (Expansion))
-import Distribution.Simple.Setup (emptyGlobalFlags)
-import Snippets
-import Data.Tuple.HT (mapFst)
+import           Snippets
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
@@ -234,7 +234,7 @@ expandBody (ProcBody prims fork) = do
         logExpansion $ "Finished expanding fork on " ++ show var'
       MergedFork{} -> do
         logExpansion "Expanding merged as fork..."
-        expandBody $ ProcBody prims $ unMergeFork fork
+        lift2 (unMergeFork fork) >>= expandBody . ProcBody prims 
         
 expandUnforked :: [Placed Prim] -> PrimFork -> Expander ()
 expandUnforked prims fork = do
@@ -352,34 +352,6 @@ inlineCall proto args body pos = do
 
 
 expandArg :: PrimArg -> Expander PrimArg
--- termToExp (StringConst pos "" DoubleQuote)
---     = return $ Placed (Fncall ["wybe","string"] "empty" False []) pos
--- termToExp (StringConst pos [chr] DoubleQuote)
---     = return $ Placed (Fncall ["wybe","string"] "singleton" False
---                         [Unplaced (CharValue chr)]) pos
-expandArg arg@(ArgString "" WybeString ty) = do
-    logExpansion "Optimising empty string"
-    newVarName <- lift freshVarName
-    let defVar = ArgVar newVarName ty FlowOut Ordinary False
-    let useVar = ArgVar newVarName ty FlowIn Ordinary False
-    logExpansion $ "    Generated fresh name " ++ show newVarName
-    callID <- genCallSiteID
-    let emptyStringProc = ProcSpec ["wybe","string"] "empty" 0 Set.empty
-    expandPrim (PrimCall callID emptyStringProc Pure [defVar] emptyGlobalFlows) Nothing
-    logExpansion $ "Empty string variable = " ++ show useVar
-    return useVar
-expandArg arg@(ArgString [ch] WybeString ty) = do
-    logExpansion $ "Optimising singleton string \"" ++ [ch] ++ "\""
-    newVarName <- lift freshVarName
-    let defVar = ArgVar newVarName ty FlowOut Ordinary False
-    let useVar = ArgVar newVarName ty FlowIn Ordinary False
-    logExpansion $ "    Generated fresh name " ++ show newVarName
-    callID <- genCallSiteID
-    let emptyStringProc = ProcSpec ["wybe","string"] "singleton" 0 Set.empty
-    expandPrim (PrimCall callID emptyStringProc Pure
-                [ArgChar ch charType, defVar] emptyGlobalFlows) Nothing
-    logExpansion $ "Singleton string variable = " ++ show useVar
-    return useVar
 expandArg arg@(ArgVar var ty flow ft _) = do
     renameAll <- isJust <$> gets inlining
     if renameAll

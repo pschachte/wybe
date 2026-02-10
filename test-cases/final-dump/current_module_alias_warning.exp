@@ -10,6 +10,7 @@ AFTER EVERYTHING:
   public procs    : current_module_alias_warning.<0>
                     current_module_alias_warning.toCelsius<0>
                     current_module_alias_warning.toCelsius<1>
+  constants       : 
   imports         : use math.temperature
                     use wybe
   resources       : 
@@ -23,7 +24,7 @@ module top-level code > public {semipure} (0 calls)
     current_module_alias_warning.toCelsius<0>(1.0:wybe.float, ?tmp#0##0:wybe.float) #0 @current_module_alias_warning:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @current_module_alias_warning:nn:nn
     foreign c print_float(~tmp#0##0:wybe.float, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @current_module_alias_warning:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @current_module_alias_warning:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @current_module_alias_warning:nn:nn
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @current_module_alias_warning:nn:nn
 
 
@@ -80,6 +81,7 @@ define external fastcc double @"current_module_alias_warning.toCelsius<1>"(doubl
   public submods  : 
   public resources: 
   public procs    : math.temperature.toCelsius<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

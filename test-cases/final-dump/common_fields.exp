@@ -30,6 +30,14 @@ AFTER EVERYTHING:
                     common_fields.title<0>
                     common_fields.title<1>
                     common_fields.~=<0>
+  constants       : 0:: ArrayInfo {arrayData = [IntStructMember 0 8,IntStructMember (-1) 8,IntStructMember (-2) 8]}
+                    1:: ArrayInfo {arrayData = [IntStructMember 32 8,IntStructMember 24 8,IntStructMember 32 8]}
+                    2:: ArrayInfo {arrayData = [IntStructMember 24 8,IntStructMember 15 8,IntStructMember 22 8]}
+                    3:: StructInfo {structSize = 32, structData = [IntStructMember 1415 8,IntStructMember 1419 8,IntStructMember 1423 8,IntStructMember 0 8]}
+                    4:: StructInfo {structSize = 24, structData = [IntStructMember 1419 8,IntStructMember 0 8,IntStructMember 1 8]}
+                    5:: ArrayInfo {arrayData = [IntStructMember 24 8,IntStructMember 15 8,IntStructMember 22 8,IntStructMember 5 8]}
+                    6:: ArrayInfo {arrayData = [IntStructMember 32 8,IntStructMember 24 8,IntStructMember 32 8,IntStructMember 16 8]}
+                    7:: ArrayInfo {arrayData = [IntStructMember 0 8,IntStructMember (-1) 8,IntStructMember (-2) 8,IntStructMember (-3) 8]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -39,51 +47,42 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(6,(common_fields.id<1>,fromList [NonAliasedParamCond 0 []])),(21,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(32:wybe.int, ?tmp#30##0:common_fields) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#30##0:common_fields, ?tmp#31##0:common_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 1415:wybe.string) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#31##0:common_fields, ?tmp#32##0:common_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 1419:wybe.string) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#32##0:common_fields, ?tmp#33##0:common_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 1423:wybe.string) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#33##0:common_fields, ?tmp#0##0:common_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int) @common_fields:nn:nn
-    foreign lpvm alloc(24:wybe.int, ?tmp#42##0:common_fields) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#42##0:common_fields, ?tmp#43##0:common_fields, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1419:wybe.string) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#43##0:common_fields, ?tmp#44##0:common_fields, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:wybe.int) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#44##0:common_fields, ?tmp#45##0:common_fields, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @common_fields:nn:nn
-    foreign llvm or(~tmp#45##0:common_fields, 1:wybe.int, ?tmp#1##0:common_fields) @common_fields:nn:nn
-    common_fields.title<0>(tmp#0##0:common_fields, ?tmp#2##0:wybe.string) #2 @common_fields:nn:nn
-    wybe.string.print<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @common_fields:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#47##0:wybe.phantom) @common_fields:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#47##0:wybe.phantom, ?tmp#48##0:wybe.phantom) @common_fields:nn:nn
-    common_fields.id<0>(tmp#1##0:common_fields, ?tmp#3##0:wybe.int) #4 @common_fields:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#48##0:wybe.phantom, ?%tmp#51##0:wybe.phantom) @common_fields:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#51##0:wybe.phantom, ?tmp#52##0:wybe.phantom) @common_fields:nn:nn
-    common_fields.id<1>[410bae77d3](~tmp#1##0:common_fields, ?c##1:common_fields, 10:wybe.int) #6 @common_fields:nn:nn
-    common_fields.id<0>(~c##1:common_fields, ?tmp#4##0:wybe.int) #7 @common_fields:nn:nn
-    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#52##0:wybe.phantom, ?%tmp#55##0:wybe.phantom) @common_fields:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#55##0:wybe.phantom, ?tmp#56##0:wybe.phantom) @common_fields:nn:nn
-    foreign lpvm store(~%tmp#56##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @common_fields:nn:nn
-    common_fields.genre<0>(tmp#0##0:common_fields, ?tmp#5##0:wybe.string, ?tmp#9##0:wybe.bool) #9 @common_fields:nn:nn
-    case ~tmp#9##0:wybe.bool of
+  MultiSpeczDepInfo: [(10,(common_fields.id<1>,fromList [NonAliasedParamCond 0 []])),(19,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(20,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(21,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    foreign llvm or(1:wybe.int, common_fields#constant#4:common_fields, ?tmp#1##0:common_fields) @common_fields:nn:nn
+    common_fields.title<0>(common_fields#constant#3:common_fields, ?tmp#2##0:wybe.string) #6 @common_fields:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @common_fields:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#48##0:wybe.phantom) @common_fields:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#48##0:wybe.phantom, ?tmp#49##0:wybe.phantom) @common_fields:nn:nn
+    common_fields.id<0>(tmp#1##0:common_fields, ?tmp#3##0:wybe.int) #8 @common_fields:nn:nn
+    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#49##0:wybe.phantom, ?%tmp#52##0:wybe.phantom) @common_fields:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#52##0:wybe.phantom, ?tmp#53##0:wybe.phantom) @common_fields:nn:nn
+    common_fields.id<1>[410bae77d3](~tmp#1##0:common_fields, ?c##1:common_fields, 10:wybe.int) #10 @common_fields:nn:nn
+    common_fields.id<0>(~c##1:common_fields, ?tmp#4##0:wybe.int) #11 @common_fields:nn:nn
+    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#53##0:wybe.phantom, ?%tmp#56##0:wybe.phantom) @common_fields:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @common_fields:nn:nn
+    foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @common_fields:nn:nn
+    common_fields.genre<0>(common_fields#constant#3:common_fields, ?tmp#5##0:wybe.string, ?tmp#14##0:wybe.bool) #13 @common_fields:nn:nn
+    case ~tmp#14##0:wybe.bool of
     0:
 
     1:
-        common_fields.genre<1>(~tmp#0##0:common_fields, ?b##1:common_fields, 1439:wybe.string, ?tmp#10##0:wybe.bool) #10 @common_fields:nn:nn
-        case ~tmp#10##0:wybe.bool of
+        common_fields.genre<1>(common_fields#constant#3:common_fields, ?b##1:common_fields, 1439:wybe.string, ?tmp#15##0:wybe.bool) #15 @common_fields:nn:nn
+        case ~tmp#15##0:wybe.bool of
         0:
 
         1:
-            wybe.string.print<0>(~tmp#5##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #20 @common_fields:nn:nn
+            wybe.string.print<0>[410bae77d3](~tmp#5##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #20 @common_fields:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom) @common_fields:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#63##0:wybe.phantom, ?tmp#64##0:wybe.phantom) @common_fields:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#63##0:wybe.phantom, ?tmp#64##0:wybe.phantom) @common_fields:nn:nn
             foreign lpvm store(~%tmp#64##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @common_fields:nn:nn
-            common_fields.genre<0>(~b##1:common_fields, ?tmp#6##0:wybe.string, ?tmp#8##0:wybe.bool) #12 @common_fields:nn:nn
-            case ~tmp#8##0:wybe.bool of
+            common_fields.genre<0>(~b##1:common_fields, ?tmp#6##0:wybe.string, ?tmp#13##0:wybe.bool) #17 @common_fields:nn:nn
+            case ~tmp#13##0:wybe.bool of
             0:
 
             1:
                 wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @common_fields:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#66##0:wybe.phantom) @common_fields:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#66##0:wybe.phantom, ?tmp#67##0:wybe.phantom) @common_fields:nn:nn
+                foreign c putchar(10:wybe.char, ~tmp#66##0:wybe.phantom, ?tmp#67##0:wybe.phantom) @common_fields:nn:nn
                 foreign lpvm store(~%tmp#67##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @common_fields:nn:nn
 
 
@@ -468,8 +467,8 @@ id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
-      ?tmp#16##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
-      ?tmp#17##0:wybe.int <- [ 24:wybe.int, 15:wybe.int, 22:wybe.int, 5:wybe.int ]
+      ?tmp#16##0:wybe.int <- common_fields#constant#6[IntStructMember 32 8,IntStructMember 24 8,IntStructMember 32 8,IntStructMember 16 8]
+      ?tmp#17##0:wybe.int <- common_fields#constant#5[IntStructMember 24 8,IntStructMember 15 8,IntStructMember 22 8,IntStructMember 5 8]
         foreign lpvm cast(~tmp#1##0:2 bit unsigned, ?tmp#15##0:wybe.int)
         foreign lpvm access(~#rec##0:common_fields, ~tmp#17##0:wybe.int, ~tmp#16##0:wybe.int, ~tmp#15##0:wybe.int, ?#result##0:wybe.int) @common_fields:nn:nn
 proc id > public (7 calls)
@@ -479,15 +478,15 @@ id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}; {}
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
-      ?tmp#16##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
-      ?tmp#17##0:wybe.int <- [ 24:wybe.int, 15:wybe.int, 22:wybe.int, 5:wybe.int ]
+      ?tmp#16##0:wybe.int <- common_fields#constant#6[IntStructMember 32 8,IntStructMember 24 8,IntStructMember 32 8,IntStructMember 16 8]
+      ?tmp#17##0:wybe.int <- common_fields#constant#5[IntStructMember 24 8,IntStructMember 15 8,IntStructMember 22 8,IntStructMember 5 8]
         foreign lpvm cast(~tmp#1##0:2 bit unsigned, ?tmp#15##0:wybe.int)
         foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, ~tmp#17##0:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.int, ~tmp#15##0:wybe.int, ~#field##0:wybe.int) @common_fields:nn:nn
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
-      ?tmp#25##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
-      ?tmp#26##0:wybe.int <- [ 24:wybe.int, 15:wybe.int, 22:wybe.int, 5:wybe.int ]
+      ?tmp#25##0:wybe.int <- common_fields#constant#6[IntStructMember 32 8,IntStructMember 24 8,IntStructMember 32 8,IntStructMember 16 8]
+      ?tmp#26##0:wybe.int <- common_fields#constant#5[IntStructMember 24 8,IntStructMember 15 8,IntStructMember 22 8,IntStructMember 5 8]
         foreign lpvm cast(~tmp#1##0:2 bit unsigned, ?tmp#24##0:wybe.int)
         foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, ~tmp#26##0:wybe.int, 1:wybe.int, ~tmp#25##0:wybe.int, ~tmp#24##0:wybe.int, ~#field##0:wybe.int) @common_fields:nn:nn
 
@@ -560,8 +559,8 @@ title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
-      ?tmp#16##0:wybe.int <- [ 32:wybe.int, 24:wybe.int, 32:wybe.int, 16:wybe.int ]
-      ?tmp#17##0:wybe.int <- [ 0:wybe.int, -1:wybe.int, -2:wybe.int, -3:wybe.int ]
+      ?tmp#16##0:wybe.int <- common_fields#constant#6[IntStructMember 32 8,IntStructMember 24 8,IntStructMember 32 8,IntStructMember 16 8]
+      ?tmp#17##0:wybe.int <- common_fields#constant#7[IntStructMember 0 8,IntStructMember (-1) 8,IntStructMember (-2) 8,IntStructMember (-3) 8]
         foreign lpvm cast(~tmp#1##0:2 bit unsigned, ?tmp#15##0:wybe.int)
         foreign lpvm access(~#rec##0:common_fields, ~tmp#17##0:wybe.int, ~tmp#16##0:wybe.int, ~tmp#15##0:wybe.int, ?#result##0:wybe.string) @common_fields:nn:nn
 proc title > public (0 calls)
@@ -601,12 +600,13 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/common_fields.wybe"
 target triple    ????
 
-@"array#0" = private unnamed_addr constant [ 4 x i64 ] [i64 0, i64 -1, i64 -2, i64 -3]
-@"array#1" = private unnamed_addr constant [ 4 x i64 ] [i64 24, i64 15, i64 22, i64 5]
-@"array#2" = private unnamed_addr constant [ 4 x i64 ] [i64 32, i64 24, i64 32, i64 16]
+@"common_fields#constant#3" = private unnamed_addr constant {i64, i64, i64, i64} { i64 1415, i64 1419, i64 1423, i64 0 }, align 8
+@"common_fields#constant#4" = private unnamed_addr constant {i64, i64, i64} { i64 1419, i64 0, i64 1 }, align 8
+@"common_fields#constant#5" = private unnamed_addr constant [ 4 x i64 ] [i64 24, i64 15, i64 22, i64 5]
+@"common_fields#constant#6" = private unnamed_addr constant [ 4 x i64 ] [i64 32, i64 24, i64 32, i64 16]
+@"common_fields#constant#7" = private unnamed_addr constant [ 4 x i64 ] [i64 0, i64 -1, i64 -2, i64 -3]
 
 declare external fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
-declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -614,32 +614,9 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"common_fields.<0>"() {
-  %"tmp#68##0" = call ccc ptr @wybe_malloc(i32 32)
-  %"tmp#30##0" = ptrtoint ptr %"tmp#68##0" to i64
-  %"tmp#69##0" = inttoptr i64 %"tmp#30##0" to ptr
-  store i64 1415, ptr %"tmp#69##0"
-  %"tmp#70##0" = add i64 %"tmp#30##0", 8
-  %"tmp#71##0" = inttoptr i64 %"tmp#70##0" to ptr
-  store i64 1419, ptr %"tmp#71##0"
-  %"tmp#72##0" = add i64 %"tmp#30##0", 16
-  %"tmp#73##0" = inttoptr i64 %"tmp#72##0" to ptr
-  store i64 1423, ptr %"tmp#73##0"
-  %"tmp#74##0" = add i64 %"tmp#30##0", 24
-  %"tmp#75##0" = inttoptr i64 %"tmp#74##0" to ptr
-  store i64 0, ptr %"tmp#75##0"
-  %"tmp#76##0" = call ccc ptr @wybe_malloc(i32 24)
-  %"tmp#42##0" = ptrtoint ptr %"tmp#76##0" to i64
-  %"tmp#77##0" = inttoptr i64 %"tmp#42##0" to ptr
-  store i64 1419, ptr %"tmp#77##0"
-  %"tmp#78##0" = add i64 %"tmp#42##0", 8
-  %"tmp#79##0" = inttoptr i64 %"tmp#78##0" to ptr
-  store i64 0, ptr %"tmp#79##0"
-  %"tmp#80##0" = add i64 %"tmp#42##0", 16
-  %"tmp#81##0" = inttoptr i64 %"tmp#80##0" to ptr
-  store i64 1, ptr %"tmp#81##0"
-  %"tmp#1##0" = or i64 %"tmp#42##0", 1
-  %"tmp#2##0" = tail call fastcc i64 @"common_fields.title<0>"(i64 %"tmp#30##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#2##0")
+  %"tmp#1##0" = or i64 1, ptrtoint( ptr @"common_fields#constant#4" to i64 )
+  %"tmp#2##0" = tail call fastcc i64 @"common_fields.title<0>"(i64 ptrtoint( ptr @"common_fields#constant#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   %"tmp#3##0" = tail call fastcc i64 @"common_fields.id<0>"(i64 %"tmp#1##0")
   call ccc void @print_int(i64 %"tmp#3##0")
@@ -648,22 +625,22 @@ define external fastcc void @"common_fields.<0>"() {
   %"tmp#4##0" = tail call fastcc i64 @"common_fields.id<0>"(i64 %"c##1")
   call ccc void @print_int(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)
-  %"tmp#82##0" = tail call fastcc {i64, i1} @"common_fields.genre<0>"(i64 %"tmp#30##0")
-  %"tmp#5##0" = extractvalue {i64, i1}%"tmp#82##0", 0
-  %"tmp#9##0" = extractvalue {i64, i1}%"tmp#82##0", 1
-  br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
+  %"tmp#68##0" = tail call fastcc {i64, i1} @"common_fields.genre<0>"(i64 ptrtoint( ptr @"common_fields#constant#3" to i64 ))
+  %"tmp#5##0" = extractvalue {i64, i1}%"tmp#68##0", 0
+  %"tmp#14##0" = extractvalue {i64, i1}%"tmp#68##0", 1
+  br i1 %"tmp#14##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#83##0" = tail call fastcc {i64, i1} @"common_fields.genre<1>"(i64 %"tmp#30##0", i64 1439)
-  %"b##1" = extractvalue {i64, i1}%"tmp#83##0", 0
-  %"tmp#10##0" = extractvalue {i64, i1}%"tmp#83##0", 1
-  br i1 %"tmp#10##0", label %if.then.1, label %if.else.1
+  %"tmp#69##0" = tail call fastcc {i64, i1} @"common_fields.genre<1>"(i64 ptrtoint( ptr @"common_fields#constant#3" to i64 ), i64 1439)
+  %"b##1" = extractvalue {i64, i1}%"tmp#69##0", 0
+  %"tmp#15##0" = extractvalue {i64, i1}%"tmp#69##0", 1
+  br i1 %"tmp#15##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#5##0")
+  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#5##0")
   call ccc void @putchar(i8 10)
-  %"tmp#84##0" = tail call fastcc {i64, i1} @"common_fields.genre<0>"(i64 %"b##1")
-  %"tmp#6##0" = extractvalue {i64, i1}%"tmp#84##0", 0
-  %"tmp#8##0" = extractvalue {i64, i1}%"tmp#84##0", 1
-  br i1 %"tmp#8##0", label %if.then.2, label %if.else.2
+  %"tmp#70##0" = tail call fastcc {i64, i1} @"common_fields.genre<0>"(i64 %"b##1")
+  %"tmp#6##0" = extractvalue {i64, i1}%"tmp#70##0", 0
+  %"tmp#13##0" = extractvalue {i64, i1}%"tmp#70##0", 1
+  br i1 %"tmp#13##0", label %if.then.2, label %if.else.2
 if.then.2:
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#6##0")
   call ccc void @putchar(i8 10)
@@ -1149,10 +1126,10 @@ define external fastcc i64 @"common_fields.id<0>"(i64 %"#rec##0") {
   %"tmp#24##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#24##0", 3
   %"tmp#26##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#25##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#26##0"
+  %"tmp#25##0" = getelementptr inbounds [ 4 x i64 ], ptr @"common_fields#constant#6", i64 0, i64 %"tmp#26##0"
   %"tmp#16##0" = load i64, ptr %"tmp#25##0"
   %"tmp#28##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#27##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#28##0"
+  %"tmp#27##0" = getelementptr inbounds [ 4 x i64 ], ptr @"common_fields#constant#5", i64 0, i64 %"tmp#28##0"
   %"tmp#17##0" = load i64, ptr %"tmp#27##0"
   %"tmp#15##0" = zext i2 %"tmp#1##0" to i64
   %"tmp#29##0" = add i64 %"#rec##0", %"tmp#17##0"
@@ -1165,10 +1142,10 @@ define external fastcc i64 @"common_fields.id<1>"(i64 %"#rec##0", i64 %"#field##
   %"tmp#33##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#33##0", 3
   %"tmp#35##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#34##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#35##0"
+  %"tmp#34##0" = getelementptr inbounds [ 4 x i64 ], ptr @"common_fields#constant#6", i64 0, i64 %"tmp#35##0"
   %"tmp#16##0" = load i64, ptr %"tmp#34##0"
   %"tmp#37##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#36##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#37##0"
+  %"tmp#36##0" = getelementptr inbounds [ 4 x i64 ], ptr @"common_fields#constant#5", i64 0, i64 %"tmp#37##0"
   %"tmp#17##0" = load i64, ptr %"tmp#36##0"
   %"tmp#15##0" = zext i2 %"tmp#1##0" to i64
   %"tmp#38##0" = sub i64 %"#rec##0", %"tmp#15##0"
@@ -1188,10 +1165,10 @@ define external fastcc i64 @"common_fields.id<1>[410bae77d3]"(i64 %"#rec##0", i6
   %"tmp#33##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#33##0", 3
   %"tmp#35##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#34##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#35##0"
+  %"tmp#34##0" = getelementptr inbounds [ 4 x i64 ], ptr @"common_fields#constant#6", i64 0, i64 %"tmp#35##0"
   %"tmp#25##0" = load i64, ptr %"tmp#34##0"
   %"tmp#37##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#36##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#37##0"
+  %"tmp#36##0" = getelementptr inbounds [ 4 x i64 ], ptr @"common_fields#constant#5", i64 0, i64 %"tmp#37##0"
   %"tmp#26##0" = load i64, ptr %"tmp#36##0"
   %"tmp#24##0" = zext i2 %"tmp#1##0" to i64
   %"tmp#38##0" = add i64 %"#rec##0", %"tmp#26##0"
@@ -1282,10 +1259,10 @@ define external fastcc i64 @"common_fields.title<0>"(i64 %"#rec##0") {
   %"tmp#24##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#24##0", 3
   %"tmp#26##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#25##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#26##0"
+  %"tmp#25##0" = getelementptr inbounds [ 4 x i64 ], ptr @"common_fields#constant#6", i64 0, i64 %"tmp#26##0"
   %"tmp#16##0" = load i64, ptr %"tmp#25##0"
   %"tmp#28##0" = zext i2 %"tmp#1##0" to i64
-  %"tmp#27##0" = getelementptr inbounds [ 4 x i64 ], ptr @"array#0", i64 0, i64 %"tmp#28##0"
+  %"tmp#27##0" = getelementptr inbounds [ 4 x i64 ], ptr @"common_fields#constant#7", i64 0, i64 %"tmp#28##0"
   %"tmp#17##0" = load i64, ptr %"tmp#27##0"
   %"tmp#15##0" = zext i2 %"tmp#1##0" to i64
   %"tmp#29##0" = add i64 %"#rec##0", %"tmp#17##0"

@@ -8,6 +8,9 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : upto.<0>
+  constants       : 0:: CStringInfo {cstringChars = "upto:10:22"}
+                    1:: CStringInfo {cstringChars = "lst[3] = "}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember c"lst[3] = "]}
   imports         : use upto.submod
                     use wybe
   resources       : 
@@ -19,20 +22,19 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+  MultiSpeczDepInfo: [(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     upto.submod.upto<0>(0:wybe.int, 10:wybe.int, outByReference tmp#0##0:wybe.list(wybe.int)) #0 @upto:nn:nn
-    wybe.list.[]<0>(~tmp#0##0:wybe.list(wybe.int), 3:wybe.int, ?tmp#1##0:wybe.int, ?tmp#4##0:wybe.bool) #1 @upto:nn:nn
-    case ~tmp#4##0:wybe.bool of
+    wybe.list.[]<0>(~tmp#0##0:wybe.list(wybe.int), 3:wybe.int, ?tmp#1##0:wybe.int, ?tmp#5##0:wybe.bool) #1 @upto:nn:nn
+    case ~tmp#5##0:wybe.bool of
     0:
-        wybe.string.c_string<0>("shouldn't happen!":wybe.string, ?tmp#6##0:wybe.c_string) #4 @upto:nn:nn
-        foreign c {terminal,semipure} error_exit(c"upto:10:22":wybe.c_string, ~tmp#6##0:wybe.c_string) @upto:nn:nn
+        foreign c {terminal,semipure} error_exit(c"upto:10:22":wybe.c_string, c"shouldn't happen!":wybe.c_string) @upto:nn:nn
 
     1:
-        wybe.int.fmt<2>(~tmp#1##0:wybe.int, 0:wybe.int, ' ':wybe.char, ?tmp#8##0:wybe.string) #5 @upto:nn:nn
-        wybe.string.,,<0>("lst[3] = ":wybe.string, ~tmp#8##0:wybe.string, ?tmp#9##0:wybe.string) #6 @upto:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#9##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @upto:nn:nn
+        wybe.int.fmt<2>(~tmp#1##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#8##0:wybe.string) #4 @upto:nn:nn
+        wybe.string.,,<0>("lst[3] = ":wybe.string, ~tmp#8##0:wybe.string, ?tmp#9##0:wybe.string) #5 @upto:nn:nn
+        wybe.string.print<0>[410bae77d3](~tmp#9##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @upto:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @upto:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @upto:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @upto:nn:nn
         foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @upto:nn:nn
 
 
@@ -42,12 +44,12 @@ proc #cont#1 > {inline,semipure} (1 calls)
 #cont#1(result##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.int.fmt<2>(~result##0:wybe.int, 0:wybe.int, ' ':wybe.char, ?tmp#3##0:wybe.string) #3 @upto:nn:nn
-    wybe.string.,,<0>("lst[3] = ":wybe.string, ~tmp#3##0:wybe.string, ?tmp#2##0:wybe.string) #1 @upto:nn:nn
-    wybe.string.print<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @upto:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @upto:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @upto:nn:nn
-    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @upto:nn:nn
+    wybe.int.fmt<2>(~result##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#3##0:wybe.string) #4 @upto:nn:nn
+    wybe.string.,,<0>("lst[3] = ":wybe.string, ~tmp#3##0:wybe.string, ?tmp#2##0:wybe.string) #2 @upto:nn:nn
+    wybe.string.print<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @upto:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @upto:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @upto:nn:nn
+    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @upto:nn:nn
 
   LLVM code       :
 
@@ -57,16 +59,14 @@ proc #cont#1 > {inline,semipure} (1 calls)
 source_filename = "!ROOT!/final-dump/upto.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"lst[3] = \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"shouldn't happen!\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"upto:10:22\00", align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"upto#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"upto:10:22\00", align 8
+@"upto#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"lst[3] = \00", align 8
+@"upto#constant#2" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"upto#constant#1" }, align 8
+@"wybe.control#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"shouldn't happen!\00", align 8
 
 declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
 declare external fastcc {i64, i1} @"wybe.list.[]<0>"(i64, i64)
 declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
-declare external fastcc i64 @"wybe.string.c_string<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
 declare external ccc void @error_exit(i64, i64)
@@ -79,23 +79,22 @@ define external fastcc void @"upto.<0>"() {
   %"tmp#0##0" = load i64, ptr %"tmp#12##0"
   %"tmp#13##0" = call fastcc {i64, i1} @"wybe.list.[]<0>"(i64 %"tmp#0##0", i64 3)
   %"tmp#1##0" = extractvalue {i64, i1}%"tmp#13##0", 0
-  %"tmp#4##0" = extractvalue {i64, i1}%"tmp#13##0", 1
-  br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
+  %"tmp#5##0" = extractvalue {i64, i1}%"tmp#13##0", 1
+  br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#8##0" = call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#1##0", i64 0, i8 32)
-  %"tmp#9##0" = call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#8##0")
+  %"tmp#9##0" = call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"upto#constant#2" to i64 ), i64 %"tmp#8##0")
   call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#9##0")
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
-  %"tmp#6##0" = call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
-  call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#2" to i64 ), i64 %"tmp#6##0")
+  call ccc void @error_exit(ptr @"upto#constant#0", ptr @"wybe.control#constant#1")
   ret void
 }
 
 define external fastcc void @"upto.#cont#1<0>"(i64 %"result##0") {
   %"tmp#3##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"result##0", i64 0, i8 32)
-  %"tmp#2##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#3##0")
+  %"tmp#2##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"upto#constant#2" to i64 ), i64 %"tmp#3##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   ret void
@@ -107,6 +106,7 @@ define external fastcc void @"upto.#cont#1<0>"(i64 %"result##0") {
   public submods  : 
   public resources: 
   public procs    : upto.submod.upto<0>
+  constants       : 
   imports         : use upto
                     use wybe
   resources       : 

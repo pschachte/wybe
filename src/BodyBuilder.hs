@@ -17,7 +17,7 @@ import AST
 import Debug.Trace
 import Snippets ( boolType, intType, primMove, primCast )
 import Util
-import Config (minimumSwitchCases, wordSize)
+import Config (minimumSwitchCases, wordSize, wordSizeBytes, byteBits)
 import Options (LogSelection(BodyBuilder))
 import Data.Char ( ord )
 import Data.Map as Map
@@ -33,19 +33,20 @@ import Control.Monad
 import Control.Monad.Extra (whenJust, whenM, fold1M, ifM)
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
-import AST (simpleShowMap)
-import Data.Foldable.Extra (foldlM, foldrM)
-import Control.Monad.Trans.Maybe (MaybeT(runMaybeT, MaybeT))
+import Control.Monad.Trans.Maybe (MaybeT(..))
 import Control.Applicative
 import qualified Control.Applicative as App
-import qualified Data.Foldable as List
-import qualified Data.Foldable.Extra as List
+import Data.Foldable.Extra (foldlM, foldrM)
+import Data.Text.Array (new)
+import Data.Functor ( (<&>) )
+import Crypto.KDF.Scrypt (Parameters(n))
 
 
-----------------------------------------------------------------
---                       The BodyBuilder Monad
+--  BEGIN MAJOR DOC
+-- # The BodyBuilder Monad
 --
--- This monad is used to build up a ProcBody one instruction at a time.
+-- This monad is used to build up a ProcBody one instruction at a time,
+-- optimising it as it goes.
 --
 -- buildBody runs the monad, producing a ProcBody.
 -- instr adds a single instruction to then end of the procBody being built.
@@ -55,14 +56,14 @@ import qualified Data.Foldable.Extra as List
 --    endBranch     ends the current branch
 --    completeFork  completes the current fork
 --
--- A ProcBody is considered to have a unique continuation if it either
--- does not end in a branch, or if all but at most one of the branches
--- it ends with ends with a definite failure (a PrimTest (ArgInt 0 _)).
---
 -- No instructions can be added between buildFork and beginBranch, or
 -- between endBranch and beginBranch, or if the current state does not have
 -- a unique continuation. A new fork can be built within a branch, but must
 -- be completed before the branch is ended.
+--
+-- A ProcBody is considered to have a unique continuation if it either
+-- does not end in a branch, or if all but at most one of the branches
+-- it ends with ends with a definite failure (a PrimTest (ArgInt 0 _)).
 --
 -- The ProcBody type does not support having anything follow a fork. Once a
 -- ProcBody forks, the branches do not join again. Instead, each branch of
@@ -93,7 +94,7 @@ import qualified Data.Foldable.Extra as List
 -- particular, we keep track of variable=variable assignments, and replace
 -- references to the destination (left) variable with the source (right)
 -- variable.  This usually leaves the assignment dead, to be removed in
--- a later pass.  We also keep track of previous instructions, and later
+-- the backward pass.  We also keep track of previous instructions, and later
 -- calls to the same instructions with the same inputs are replaced by
 -- assignments to the outputs with the old outputs.  We also handle some
 -- arithmetic equivalences, entailments, and tautologies (eg, on a branch
@@ -126,7 +127,8 @@ import qualified Data.Foldable.Extra as List
 --
 --     completeFork is called when the state is Forked.  It doesn't
 --     change the state.
-----------------------------------------------------------------
+--  END MAJOR DOC
+
 
 type BodyBuilder = StateT BodyState Compiler
 
@@ -136,6 +138,8 @@ data BodyState = BodyState {
       currBuild      :: [Placed Prim],   -- ^The body we're building, reversed
       currSubst      :: Substitution,    -- ^variable substitutions to propagate
       blockDefs      :: Set PrimVarName, -- ^All variables defined in this block
+      constStructs   :: Map PrimVarName BlockInfo,
+                                         -- ^Constant memory blocks
       forkConsts     :: Set PrimVarName, -- ^Consts in some branches of prev fork
       outSubst       :: VarSubstitution, -- ^Substitutions for var assignments
       subExprs       :: ComputedCalls,   -- ^Previously computed calls to reuse
@@ -173,22 +177,21 @@ data BuildState
     deriving (Eq,Show)
 
 
-
 -- | A fresh BodyState with specified temp counter and output var substitution
 initState :: Int -> VarSubstitution -> [PrimParam] -> BodyState
 initState tmp oSubst params =
-    BodyState Nothing [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp
-              Unforked Nothing Map.empty (initGlobalVarFlows params) Map.empty
+    BodyState Nothing [] Map.empty Set.empty Map.empty Set.empty oSubst Map.empty False
+           tmp Unforked Nothing Map.empty (initGlobalVarFlows params) Map.empty
 
 
 -- | Set up a BodyState as a new child of the specified BodyState
 childState :: BodyState -> BuildState -> BodyState
 childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
-                        tmpCount=tmp, forkConsts=consts,
+                        tmpCount=tmp, forkConsts=consts, constStructs=structs,
                         globalsLoaded=loaded, varGlobalFlows=varFlows,
                         reifiedConstr=reif} bld =
-    BodyState Nothing [] iSubst Set.empty consts oSubst subs False tmp bld (Just st)
-              loaded varFlows reif
+    BodyState Nothing [] iSubst Set.empty structs consts oSubst subs False tmp bld
+              (Just st) loaded varFlows reif
 
 
 initGlobalVarFlows :: [PrimParam] -> Map PrimVarName GlobalFlows
@@ -247,6 +250,101 @@ instance Show Constraint where
 
 
 ----------------------------------------------------------------
+--                      Tracking Constant Structures
+--
+-- We keep track of constant memory structures being constructed, so we can
+-- generate them as static constants.  Each alloc is considered to generate a
+-- candidate constant structure.  Each mutate operation on a constant structure
+-- storing a constant value (whether or not it is destructive) creates a new
+-- candidate constant structure.  Any other mutate of a constant structure (ie,
+-- storing a non-constant) eliminates it as a candidate constant structure
+-- without creating a new one.  Any other uses of a known constant structure are
+-- replaced with an ArgConstRef holding the recorded data. At LLVM generation
+-- time, this will produce a reference to a global constant structure.
+----------------------------------------------------------------
+
+
+-- |Information we're accumulating about a constant memory block.
+data BlockInfo = BlockInfo {
+      blockSize :: Int,                 -- ^Size of the block in bytes
+      blockData :: [(Int,ConstValue)] -- ^Data in the block, with offsets;
+                                        -- data is in reverse order, so new data
+                                        -- can be inserted at the head when
+                                        -- memory is written in forward order
+      } deriving (Eq,Show)
+
+
+-- |BlockInfo for a fresh block with the specified size
+newBlock :: Int -> BlockInfo
+newBlock size = BlockInfo size []
+
+
+-- |Record a fresh candidate constant structure
+potentialConstStruct :: PrimVarName -> Int -> BodyBuilder ()
+potentialConstStruct var size = do
+    logBuild $ "Recording constant structure " ++ show var
+    modify $ \st -> st {constStructs =
+                    Map.insert var (newBlock size) $ constStructs st}
+
+
+-- | Delete a constant structure record from the BodyBuilder monad.
+deleteConstStruct :: PrimVarName -> BodyBuilder ()
+deleteConstStruct var = do
+    logBuild $ "Deleting constant structure " ++ show var
+    modify $ \s -> s{constStructs=Map.delete var $ constStructs s}
+
+
+-- | Add a field to a constant structure.  If var is a candidate constant
+-- structure, adds newVar as a candidate constant structure extending the old
+-- var.  Keep the fields in reverse order.
+updateConstStruct :: PrimVarName -> PrimVarName -> Int -> ConstValue
+                  -> BodyBuilder ()
+updateConstStruct newVar var offset value = do
+    mapping <- gets constStructs
+    -- let mapping' = Map.delete var mapping
+    case Map.lookup var mapping of
+      Nothing -> logBuild $ "Extending non-constant structure " ++ show var
+      Just (BlockInfo sz fields) -> do
+        logBuild $ "Updating constant structure " ++ show var
+                   ++ " into new variable " ++ show newVar
+        let (before,after) = List.partition ((>=offset) . fst) fields
+        let before' = case before of
+                        (o,_):rest | o == offset -> rest
+                        _ -> before
+        let newFields =  before' ++ (offset,value):after
+        let newMapping = Map.insert newVar (BlockInfo sz newFields) mapping
+        logBuild $ "Offsets & values = " ++ show newFields
+        logBuild $ "All constants = " ++ show newMapping
+        modify $ \s -> s {constStructs = newMapping }
+
+
+-- |Translate a reverse ordered list of offsets and struct members, with
+-- possible holes, into a reverse ordered list of contiguous struct members.
+-- Because LLVM aligns ints, we can't just fill a hole with a single undef the
+-- right size; we need to fill it with the right number of 1-byte undefs,
+-- followed by as many word-sized undefs as needed.
+structMembers :: Int -> [(Int, ConstValue)] -> [ConstValue]
+structMembers 0 [] = []
+structMembers sz [] = fillHole sz
+structMembers sz ((offset,mem):mems) =
+    let memberSize = constValueSize mem
+        holeSize = max 0 $ sz - (offset + memberSize)
+        rest = mem:structMembers (sz-holeSize-memberSize) mems
+    in  if holeSize > 0
+        then fillHole holeSize ++ rest
+        else rest
+
+
+-- |Return a list of undefined constant values to exactly fill zs bytes, without
+-- triggering LLVM to pad the structure.  The list is in reverse order, so the
+-- 1-byte undefs come last.
+fillHole :: Int -> [ConstValue]
+fillHole sz =
+    replicate (sz `div` wordSizeBytes) (UndefStructMember wordSizeBytes)
+    ++ replicate (sz `mod` wordSizeBytes) (UndefStructMember 1)
+
+
+----------------------------------------------------------------
 --                      BodyBuilder Primitive Operations
 ----------------------------------------------------------------
 
@@ -262,7 +360,10 @@ buildBody tmp oSubst params builder = do
     logMsg BodyBuilder ">>>> Finished building a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
-    logMsg BodyBuilder $ "  tmpCount = " ++ show tmp'
+    logMsg BodyBuilder $ "  tmpCount = " ++ show tmp
+    structs <- getModule modStructs
+    logMsg BodyBuilder $ "Recorded structs: "
+        ++ showMap "{" ", " "}" ((++"::") .show) show structs
     st' <- fuseBodies st
     (tmp'', used, stored, varFlows, body) <- currBody (ProcBody [] NoFork) st'
     return (a, tmp'', used, stored, varFlows, body)
@@ -319,7 +420,6 @@ completeFork = do
         -- Variables with a constant value in each branch.  These can be
         -- used later to fuse branches of subsequent forks on those variables
         -- with this fork.
-
         let consts = List.foldr1 Set.union
                      $ List.map Map.keysSet branchMaps
         logBuild $ "     definite variables in all branches: " ++ show consts
@@ -438,7 +538,23 @@ instr prim pos = do
       _ ->
         shouldnt "instr in Forked context"
 
--- Actually do the work of instr
+
+--  BEGIN MAJOR DOC
+-- ## Inferring constant structures
+--
+-- We keep track of memory structures as they are constructed, so we can detect
+-- when a structure contains only constants.  A fresh allocation is considered
+-- to be fully constant, and any mutation of a constant structure to store a
+-- constant value is considered to create a new constant structure (regardless
+-- of whether the mutation is destructive).  Any other mutation of a constant
+-- does not produce a new constant.  We track which variables hold constant
+-- structures, and the contents of those structures.  References to such
+-- variables are replaced with references to the constant data.  Constant
+-- structures are registered with the module; this is handled in AST.hs.
+-- END MAJOR DOC
+
+
+-- Actually do the work of instr, handling special cases.
 instr' :: Prim -> OptPos -> BodyBuilder ()
 instr' prim@(PrimForeign "llvm" "move" []
            [val, argvar@ArgVar{argVarName=var, argVarFlow=flow}]) pos
@@ -448,8 +564,6 @@ instr' prim@(PrimForeign "llvm" "move" []
       shouldnt $ "move instruction with wrong flow" ++ show prim
     outVar <- gets (Map.findWithDefault var var . outSubst)
     addSubst outVar val
-    -- XXX since we're recording the subst, so this instr will be removed later,
-    -- can we just not generate it?
     rawInstr prim pos
     recordVarSet argvar
 -- The following equation is a bit of a hack to work around not threading a heap
@@ -462,18 +576,27 @@ instr' prim@(PrimForeign "llvm" "move" []
 -- with impurity because if we forgot the impurity modifier on any alloc,
 -- disaster would ensue, and an impure alloc wouldn't be removed if the
 -- structure weren't needed, which we want.
-instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
+instr' prim@(PrimForeign "lpvm" "alloc" [] [sz,argvar]) pos = do
     logBuild "  Leaving alloc alone"
     rawInstr prim pos
+    case sz of
+        ArgInt n _ -> potentialConstStruct (argVarName argvar) (fromIntegral n)
+        _ -> return ()
     recordVarSet argvar
 instr' prim@(PrimForeign "lpvm" "cast" []
              [from, to@ArgVar{argVarName=var, argVarFlow=flow}]) pos = do
     logBuild $ "  Expanding cast(" ++ show from ++ ", " ++ show to ++ ")"
     unless (argFlowDirection from == FlowIn && flow == FlowOut) $
-        shouldnt $ "cast instruction with wrong flow" ++ show prim
-    if argType from == argType to
+        shouldnt "cast instruction with wrong flow"
+    let toTy = argType to
+    if argType from == toTy
     then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
-    else ordinaryInstr prim pos
+    else case from of
+        ArgInt i _ ->
+            instr' (PrimForeign "llvm" "move" [] [ArgInt i toTy, to]) pos
+        ArgFloat f _ ->
+            instr' (PrimForeign "llvm" "move" [] [ArgFloat f toTy, to]) pos
+        _ -> ordinaryInstr prim pos
 instr' prim@(PrimForeign "lpvm" "load" _ [ArgGlobal info _, var]) pos = do
     logBuild $ "  Checking if we know the value of " ++ show info
     loaded <- gets globalsLoaded
@@ -496,6 +619,33 @@ instr' prim@(PrimForeign "lpvm" "store" _ [var, ArgGlobal info _]) pos = do
         _ -> do
             logBuild " ... it isn't, we need to store"
             ordinaryInstr prim pos
+instr' prim@(PrimForeign "lpvm" "access" _
+            [cnst, ArgInt offset _,_,_,valArg]) pos = do
+    lift (constantValue cnst) >>= \case
+        Just (PointerStructMember structID) -> do
+          logBuild $ "  Expanding access(" ++ show cnst ++ ", " ++ show offset
+                     ++ ", struct " ++ show structID ++ ")"
+          lift (lookupConstInfo structID) >>= \case
+            Just structInfo -> do
+              case constValueAtOffset structInfo (fromIntegral offset) of
+                Just val -> do
+                  let constArg = constValuePrimArg val (argType valArg)
+                  instr' (PrimForeign "llvm" "move" [] [constArg, valArg]) pos
+                Nothing -> ordinaryInstr prim pos
+            Nothing -> shouldnt $ "access of unknown constant structure"
+                                 ++ show structID
+        _ -> ordinaryInstr prim pos
+instr' prim@(PrimForeign "lpvm" "mutate" _
+            [ArgVar{argVarName=old}, ArgVar{argVarName=new},ArgInt offset _,
+             _,_,ArgInt 0 _,val]) pos = do
+    -- TODO for now we only handle untagged pointers to structures
+    ordinaryInstr prim pos
+    lift (constantValue val) >>= \case
+        Just val' -> do
+          let ty = argType val
+          size <- lift $ typeSize ty
+          updateConstStruct new old (fromIntegral offset) val'
+        _ -> deleteConstStruct old
 instr' prim pos = ordinaryInstr prim pos
 
 -- Do the normal work of instr.  First check if we've already computed its
@@ -535,11 +685,10 @@ mkInput (ArgVar name ty _ _ lst) =
     ArgVar name ty FlowIn Ordinary False
 mkInput arg@ArgInt{} = arg
 mkInput arg@ArgFloat{} = arg
-mkInput arg@ArgString{} = arg
-mkInput arg@ArgChar{} = arg
 mkInput arg@ArgClosure{} = arg
 mkInput (ArgUnneeded _ ty) = ArgUnneeded FlowIn ty
 mkInput arg@ArgGlobal{} = arg
+mkInput arg@ArgConstRef{} = arg
 mkInput arg@ArgUndef{} = arg
 
 
@@ -549,7 +698,7 @@ argExpandedPrim call@(PrimCall id pspec impurity args gFlows) = do
     return $ PrimCall id pspec impurity args' gFlows
 argExpandedPrim call@(PrimHigher id fn impurity args) = do
     logBuild $ "Expanding Higher call " ++ show call
-    fn' <- expandArg fn
+    fn' <- expandArg True fn
     case fn' of
         ArgClosure pspec clsd _ -> do
             pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
@@ -560,11 +709,16 @@ argExpandedPrim call@(PrimHigher id fn impurity args) = do
             argExpandedPrim $ PrimCall id pspec' impurity (clsd ++ args') gFlows
         _ -> do
             logBuild $ "Leaving as higher call to " ++ show fn'
-            args' <- mapM expandArg args
+            args' <- mapM (expandArg True) args
             return $ PrimHigher id fn' impurity args'
+argExpandedPrim (PrimForeign "lpvm" "mutate" flags (arg1:args)) = do
+    arg1' <- expandArg False arg1 -- don't expand consts in the first argument
+    args' <- mapM (expandArg True) args
+    return $ PrimForeign "lpvm" "mutate" flags (arg1':args')
 argExpandedPrim (PrimForeign lang nm flags args) = do
-    args' <- mapM expandArg args
+    args' <- mapM (expandArg True) args
     return $ simplifyForeign lang nm flags args'
+
 
 -- |Replace any unneeded arguments corresponding to unneeded parameters with
 --  ArgUnneeded.  For unneeded *output* parameters, there must be an
@@ -572,7 +726,7 @@ argExpandedPrim (PrimForeign lang nm flags args) = do
 --  to the corresponding input argument, so the value is defined.
 transformUnneededArgs :: ProcSpec -> [PrimArg] -> BodyBuilder [PrimArg]
 transformUnneededArgs pspec args = do
-    args' <- mapM expandArg args
+    args' <- mapM (expandArg True) args
     params <- lift $ primProtoParams <$> getProcPrimProto pspec
     zipWithM (transformUnneededArg $ zip params args) params args'
 
@@ -766,7 +920,6 @@ rawInstr prim pos = do
     modify $ addInstrToState (maybePlace prim pos)
 
 
-
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
 splitArgsByMode = List.partition (isInputFlow . argFlowDirection)
 
@@ -790,9 +943,8 @@ canonicaliseArg (ArgClosure ms as _) =
     ArgClosure ms (canonicaliseArg <$> as) AnyType
 canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
-canonicaliseArg (ArgString v r _)   = ArgString v r AnyType
-canonicaliseArg (ArgChar v _)       = ArgChar v AnyType
 canonicaliseArg (ArgGlobal info _)  = ArgGlobal info AnyType
+canonicaliseArg (ArgConstRef ms _)  = ArgConstRef ms AnyType
 canonicaliseArg (ArgUnneeded dir _) = ArgUnneeded dir AnyType
 canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
 
@@ -807,10 +959,9 @@ validateArg :: Prim -> PrimArg -> BodyBuilder ()
 validateArg instr ArgVar{argVarType=ty} = validateType ty instr
 validateArg instr (ArgInt    _ ty)      = validateType ty instr
 validateArg instr (ArgFloat  _ ty)      = validateType ty instr
-validateArg instr (ArgString _ _ ty)    = validateType ty instr
-validateArg instr (ArgChar   _ ty)      = validateType ty instr
 validateArg instr (ArgClosure _ _ ty)   = validateType ty instr
 validateArg instr (ArgGlobal _ ty)      = validateType ty instr
+validateArg instr (ArgConstRef _ ty)    = validateType ty instr
 validateArg instr (ArgUnneeded _ ty)    = validateType ty instr
 validateArg instr (ArgUndef ty)         = validateType ty instr
 
@@ -832,30 +983,109 @@ addInstrToState ins st@BodyState{buildState=bld@Forked{bodies=bods}} =
 
 -- |Return the current ultimate value of the specified variable name and type
 expandVar :: PrimVarName -> TypeSpec -> BodyBuilder PrimArg
-expandVar var ty = expandArg $ ArgVar var ty FlowIn Ordinary False
+expandVar var ty = expandArg True $ ArgVar var ty FlowIn Ordinary False
 
 
--- |Return the current ultimate value of the input argument.
-expandArg :: PrimArg -> BodyBuilder PrimArg
-expandArg arg@ArgVar{argVarName=var, argVarFlow=flow} | isInputFlow flow = do
+-- |Return the current ultimate value of the input argument.  If the Bool
+-- argument is True, also recognise references to static constant memory blocks
+-- and transform them into ArgConstRefs.
+expandArg :: Bool -> PrimArg -> BodyBuilder PrimArg
+expandArg cnst arg@ArgVar{argVarName=var, argVarFlow=flow} | isInputFlow flow
+  = do
     var' <- gets (Map.lookup var . currSubst)
     let ty = argVarType arg
     let var'' = setArgType ty <$> var'
-    logBuild $ "Expanded " ++ show var ++ " to " ++ show var''
-    maybe (return arg) expandArg var''
-expandArg arg@ArgVar{argVarName=var, argVarFlow=flow} | isOutputFlow flow = do
+    maybe
+      (logBuild ("Expanded " ++ show var ++ " to " ++ show var'') >>
+       expandConstStruct cnst arg)
+      (expandArg cnst)
+      var''
+expandArg _ arg@ArgVar{argVarName=var, argVarFlow=flow} | isOutputFlow flow = do
     var' <- gets (Map.findWithDefault var var . outSubst)
     when (var /= var')
       $ logBuild $ "Replaced output variable " ++ show var
                    ++ " with " ++ show var'
     return arg{argVarName=var'}
-expandArg arg@(ArgClosure ps as ty) = do
-    as' <- mapM expandArg as
-    return $ ArgClosure ps as' ty
-expandArg arg = return arg
+expandArg cnst arg@(ArgClosure ps as ty) = do
+    as' <- mapM (expandArg cnst) as
+    if cnst
+      then lift (closureStructId ps as') >>= \case
+        Just structID -> return $ ArgConstRef structID ty
+        _ -> return $ ArgClosure ps as' ty
+      else return $ ArgClosure ps as' ty
+expandArg _ arg = return arg
 
 
--- Update the set of global variables that are curently loaded after adding
+-- |If the Boolean argument is True, recognise a variable reference to a
+-- non-empty constant structure, returning a ArgConstRef.  Otherwise just return
+-- the variable ref.
+expandConstStruct :: Bool -> PrimArg -> BodyBuilder PrimArg
+expandConstStruct True arg@ArgVar{argVarName=var, argVarType=ty} = do
+    val <- Map.lookup var <$> gets constStructs
+    case val of
+        Just (BlockInfo sz contents@(_:_)) -> do
+          guessedExp <- guessExp contents
+          structID <- lift $ recordConstStruct
+                        (StructInfo sz $ reverse $ structMembers sz contents)
+                        guessedExp
+          logBuild $ "Recording " ++ show sz ++ " byte const structure "
+                      ++ show contents ++ " as " ++ show structID
+          return $ ArgConstRef structID ty
+        _ -> return arg
+expandConstStruct _ arg = return arg
+
+
+-- | Try to guess the original expression that led to the specified constant
+-- structure members.  Note that members are in reverse order.  This code relies
+-- on the current implementations of some library types and functions.
+guessExp :: [(Int, ConstValue)] -> BodyBuilder (Maybe Exp)
+guessExp members = do
+    logBuild $ "Guessing expression for structure members " ++ show members
+    case members of
+      [(n,PointerStructMember id),(0,IntStructMember len _)] ->
+        lift (lookupConstInfo id) >>= \case
+          Just (CStringInfo str) | len == fromIntegral (length str) -> do
+            return $ Just $ StringValue str WybeString
+          _ -> return Nothing
+      _ -> return Nothing
+
+
+
+-- BEGIN MAJOR DOC
+-- ## Tracking Global Flows
+-- Global flows track where global variables (holding resource values) are used
+-- and modified in the program.  This allows us to determine when a global
+-- variable must be loaded from memory, when it must be stored back to memory,
+-- and when we can omit these operations and instead use local variable values.
+
+-- Global flows are a triple, <ins, outs, params>. ins is the (possibly
+-- infinite) inwards flowing resources (read: globals) and outs is obviously the
+-- outwards flowing globals. params is a set of indexes, for the arguments that
+-- may be called when a proc is called. These sets are used in the body builder
+-- to track which globals are known (and hence don't need to be read again) and
+-- may not need to be written to (if they are not read inside the proc).
+
+-- These sets are initially set quite liberally, being the set of inwards
+-- flowing resources, outwards flowing, and the indexes of all resourceful HO
+-- parameters. I believe in the body builder, there's some analysis that
+-- restricts these sets where possible. If a HO param is never called (for
+-- whatever reason), then you can remove that param from the set of indexes; if
+-- a global is never written to, then you can remove it from outs for a proc.
+
+-- When it comes to calling a proc, we first take the global flows of each
+-- argument -- if a HO parameter is a known proc then you take the global flows
+-- of that proc; if it's a parameter of the proc then it's <{}, {}, {idx}>; else
+-- it's a triple of universal sets. With the union of the global flows of the
+-- arguments, and the (non-params) global flows of the called proc. Inside the
+-- body builder, sets of "known" globals that were recently written to in the
+-- execution path are stored. After the call, these resources that are
+-- referenced in the outs are removed from the "known" globals, and must be read
+-- again -- this is because the proc may clobber the global. 
+
+-- END MAJOR DOC
+
+
+-- |Update the set of global variables that are curently loaded after adding
 -- the given prim to the body. Any global variables that flow out are removed
 -- from the set of loaded globals.
 -- For an LPVM load instruction, the variable the global variable is loaded into
@@ -930,7 +1160,7 @@ updateVariableFlows prim = do
               (name, if isResourcefulHigherOrder ty || genericType ty
                      then inFlows
                      else emptyGlobalFlows))
-                $ List.filter argIsVar $ outs
+                $ List.filter argIsVar outs
     when (any (/= emptyGlobalFlows) $ Map.elems newFlows) $
         logBuild $ "New Variable Flows: " ++ simpleShowMap newFlows
     modify $ \s -> s {varGlobalFlows=Map.unionWith globalFlowsUnion varFlows newFlows}
@@ -944,7 +1174,6 @@ updateVariableFlows prim = do
 --  performing the operation at compile-time.
 simplifyForeign ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
 simplifyForeign "llvm" op flags args = simplifyOp op flags args
-simplifyForeign "lpvm" op flags args = simplifyLPVM op flags args
 simplifyForeign lang op flags args = PrimForeign lang op flags args
 
 
@@ -1036,10 +1265,18 @@ simplifyOp "lshr" _ [arg, ArgInt 0 _, output] =
 -- Integer comparisons, including special handling of unsigned comparison to 0
 simplifyOp "icmp_eq" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1==n2) output
+simplifyOp "icmp_eq" _ [ArgInt 0 _, ArgConstRef _ _, output] =
+  primMove (boolConstant False) output
+simplifyOp "icmp_eq" _ [ArgConstRef _ _, ArgInt 0 _, output] =
+  primMove (boolConstant False) output
 simplifyOp "icmp_eq" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "icmp_eq" flags [arg2, arg1, output]
 simplifyOp "icmp_ne" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1/=n2) output
+simplifyOp "icmp_ne" _ [ArgInt 0 _, ArgConstRef _ _, output] =
+  primMove (boolConstant True) output
+simplifyOp "icmp_ne" _ [ArgConstRef _ _, ArgInt 0 _, output] =
+  primMove (boolConstant True) output
 simplifyOp "icmp_ne" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "icmp_ne" flags [arg2, arg1, output]
 simplifyOp "icmp_slt" _ [ArgInt n1 _, ArgInt n2 _, output] =
@@ -1154,18 +1391,6 @@ simplifyOp "fcmp_uno" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
 simplifyOp "fcmp_true" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant True) output
 simplifyOp name flags args = PrimForeign "llvm" name flags args
-
-
--- | Simplify and canonicalise llpm instructions where possible.  For now, this only 
---   handles cast instructions for constants.
-simplifyLPVM :: ProcName -> [Ident] -> [PrimArg] -> Prim
-simplifyLPVM "cast" _ [ArgInt n _, output] =
-  primMove (ArgInt n (argType output)) output
-simplifyLPVM "cast" _ [ArgChar ch _, output] =
-  primMove (ArgInt (fromIntegral $ ord ch) (argType output)) output
-simplifyLPVM "cast" _ [ArgFloat n _, output] =
-  primMove (ArgFloat n (argType output)) output
-simplifyLPVM name flags args = PrimForeign "lpvm" name flags args
 
 
 boolConstant :: Bool -> PrimArg
@@ -1291,8 +1516,8 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
     known `orElse` (Map.lookup var subst >>= argIntegerValue)
 
 
-----------------------------------------------------------------
---                  Reassembling the ProcBody
+-- BEGIN MAJOR DOC
+-- ## Reassembling the ProcBody
 --
 -- Once we've built up a BodyState, this code assembles it into a new ProcBody.
 -- While we're at it, we also mark the last use of each variable, eliminate
@@ -1301,7 +1526,16 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
 -- move and not used after the move.  Most other move instructions were removed
 -- while building BodyState, but that approach cannot eliminate moves to output
 -- parameters.
-----------------------------------------------------------------
+
+-- All of this is mediated by the BkwdBuilder monad.  This monad is used to run
+-- backwards through the body we are currently building, keeping track of the
+-- variables that are used later in the computation but not defined later.
+-- We also try to detect nexted branches on the same variable, and fuse them
+-- into a single switch.
+
+-- In the end, this produces a new ProcBody equivalent to the initial one, but
+-- somewhat optimised.
+-- END MAJOR DOC
 
 currBody :: ProcBody -> BodyState
          -> Compiler (Int,Set PrimVarName,Set GlobalInfo,
@@ -1377,7 +1611,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             rebuildBody $ trustFromJust "val out of range" $ List.lookup val bods
             mapM_ (placedApply (bkwdBuildStmt defs)) prims
           Nothing -> do
-            -- XXX Perhaps we should generate a new proc for the parent par in
+            -- TODO Perhaps we should generate a new proc for the parent par in
             -- cases where it's more than a few prims.
             (prims', var', ty', bods', deflt')
                 <- rebuildSwitch prims var ty bods dflt reif
@@ -1546,12 +1780,12 @@ bkwdBuildStmt defs prim pos = do
                                                 $ bkwdRenaming s }
         _ -> do
             let (ins, outs) = splitArgsByMode $ List.filter argIsVar
-                                              $ flattenArgs args'
+                                              $ concatMap flattenArg args'
             let gOuts = globalFlowsOut gFlows
             purity <- lift $ primImpurity prim
             -- Filter out pure instructions that produce no needed outputs nor 
             -- out flowing globals that arent stored to later
-            when (purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs)
+            when (purity > Pure || any ((`Set.member` usedLater) . argVarName) outs
                                 || not (USet.isEmpty $ whenFinite (Set.\\ gStored) gOuts)
                                 || not (USet.isEmpty $ globalFlowsParams gFlows))
               $ do
@@ -1588,11 +1822,9 @@ renameArg (ArgClosure ps args ts) = do
     return $ ArgClosure ps args' ts
 renameArg arg = return arg
 
-flattenArgs :: [PrimArg] -> [PrimArg]
-flattenArgs = concatMap flattenArg
 
 flattenArg :: PrimArg -> [PrimArg]
-flattenArg arg@(ArgClosure _ as ts) = arg:flattenArgs as
+flattenArg arg@(ArgClosure _ as ts) = arg:concatMap flattenArg as
 flattenArg arg = [arg]
 
 
@@ -1621,7 +1853,7 @@ rebuildFork var ty lastUse brs dflt = do
     -- The last value is used because the branches are merged in reverse.
     -- Also remove all factored variables that are of the form [0..].
     constructTable table body = do
-      (table', casts, renamed) <- List.foldrM
+      (table', casts, renamed) <- foldrM
         (\(tmp, (tmpTy, vals)) (table, casts, renamed) ->
           if Maybe.mapMaybe argIntegerValue vals == [0..genericLength vals-1]
           then
@@ -1629,7 +1861,11 @@ rebuildFork var ty lastUse brs dflt = do
             ifM (return (ty == tmpTy) <||> (liftA2 (==) `on` lift . lookupTypeRepresentation) ty tmpTy)
               (return (table, casts, (tmp,var):renamed))
               (return (table, Unplaced (primCast (ArgVar tmp tmpTy FlowOut Ordinary False) (ArgVar var ty FlowIn Ordinary (lastUse && List.null casts))):casts, renamed))
-          else return ((tmp, tmpTy, vals ++ replicate (length brs - length vals) (last vals)):table, casts, renamed)
+          else do
+            let padded = vals ++ replicate (length brs - length vals) (last vals)
+            vals' <- catMaybes <$> lift (mapM constantValue vals)
+            id <- lift $ recordConstStruct (ArrayInfo vals') Nothing
+            return ((tmp, tmpTy, id, vals'):table, casts, renamed)
         ) ([], [], []) $ Map.assocs table
       return (table', prependToBody casts $ renameProcBody (Map.fromList renamed) body, List.null casts)
 
@@ -1731,8 +1967,8 @@ mergeForks (MergedFork var0 ty0 final0 table0 branch0 dflt0) (MergedFork var1 ty
     -- will fail if not in the same order later on
     -- XXX we can probably to better than this!
     mergeTables [] [] vars = return (vars, [])
-    mergeTables (entry0@(var0, ty0, args0):table0) ((var1, ty1, args1):table1) vars@Factors{renamed=renamed}
-      | args0 == args1
+    mergeTables (entry0@(var0, ty0, struct0, _):table0) ((var1, ty1, struct1, _):table1) vars@Factors{renamed=renamed}
+      | struct0 == struct1
       = (entry0:) <$$> mergeTables table0 table1 vars{renamed=Map.insert var1 var0 renamed}
     mergeTables vars _ _ = App.empty
 -- XXX can we handle more forks?
@@ -1781,9 +2017,8 @@ mergeArg rename a@ArgVar{argVarName=aNm} b vars@Factors{factored=factored}
     return (vars{factored=Map.insert aNm (ty, b:values) factored}, a)
 mergeArg _ a@ArgInt{}      b@ArgInt{}      vars = mergeArg' a b vars
 mergeArg _ a@ArgFloat{}    b@ArgFloat{}    vars = mergeArg' a b vars
-mergeArg _ a@ArgString{}   b@ArgString{}   vars = mergeArg' a b vars
-mergeArg _ a@ArgChar{}     b@ArgChar{}     vars = mergeArg' a b vars
 mergeArg _ a@ArgUnneeded{} b@ArgUnneeded{} vars = mergeArg' a b vars
+mergeArg _ a@ArgConstRef{} b@ArgConstRef{} vars = mergeArg' a b vars
 mergeArg _ a@ArgUndef{}    b@ArgUndef{}    vars = mergeArg' a b vars
 mergeArg _ a b _ | not (argIsConst a || argIsConst b)
                                                 = App.empty
@@ -1815,7 +2050,7 @@ renameProcBody vars (ProcBody prims fork) = ProcBody (contentApply (renamePrim v
     renameFork vars (PrimFork var ty final brs dflt)
       = PrimFork (rename vars var) ty final (mapSnd (renameProcBody vars) <$> brs) (renameProcBody vars <$> dflt)
     renameFork vars (MergedFork var ty final table body dflt)
-      = MergedFork (rename vars var) ty final (mapFst3 (rename vars) <$> table) (renameProcBody vars body) (renameProcBody vars <$> dflt)
+      = MergedFork (rename vars var) ty final (mapFst4 (rename vars) <$> table) (renameProcBody vars body) (renameProcBody vars <$> dflt)
 
     renamePrimArg vars arg@ArgVar{argVarName=nm} = arg{argVarName=rename vars nm}
     renamePrimArg vars (ArgClosure pspec args ty) = ArgClosure pspec (renamePrimArg vars <$> args) ty

@@ -17,6 +17,8 @@ AFTER EVERYTHING:
                     loop_bug.int_list.tail<0>
                     loop_bug.int_list.tail<1>
                     loop_bug.int_list.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = ", "}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c", "]}
   imports         : public use loop_bug.int_list
                     use wybe
   resources       : 
@@ -28,19 +30,19 @@ proc print > public (0 calls)
 print(lst##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @loop_bug:nn:nn
-    foreign c putchar('[':wybe.char, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @loop_bug:nn:nn
-    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool) @loop_bug:nn:nn
-    case ~tmp#8##0:wybe.bool of
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @loop_bug:nn:nn
+    foreign c putchar(91:wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @loop_bug:nn:nn
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @loop_bug:nn:nn
+    case ~tmp#9##0:wybe.bool of
     0:
-        foreign c putchar(']':wybe.char, ~tmp#6##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @loop_bug:nn:nn
-        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
+        foreign c putchar(93:wybe.char, ~tmp#7##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @loop_bug:nn:nn
+        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
 
     1:
         foreign lpvm access(lst##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @loop_bug:nn:nn
         foreign lpvm access(~lst##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:loop_bug.int_list) @loop_bug:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~tmp#6##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @loop_bug:nn:nn
-        foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~tmp#7##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) @loop_bug:nn:nn
+        foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
         loop_bug.print#cont#1<0>(_:wybe.int, ~t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @loop_bug:nn:nn
 
 
@@ -50,20 +52,20 @@ proc print#cont#1 > (2 calls)
 print#cont#1([h##0:wybe.int], t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @loop_bug:nn:nn
-    case ~tmp#4##0:wybe.bool of
+    foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @loop_bug:nn:nn
+    case ~tmp#5##0:wybe.bool of
     0:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @loop_bug:nn:nn
-        foreign c putchar(']':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @loop_bug:nn:nn
-        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @loop_bug:nn:nn
+        foreign c putchar(93:wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @loop_bug:nn:nn
+        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
 
     1:
         foreign lpvm access(t##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##1:wybe.int) @loop_bug:nn:nn
         foreign lpvm access(~t##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##1:loop_bug.int_list) @loop_bug:nn:nn
         wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @loop_bug:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @loop_bug:nn:nn
-        foreign c print_int(~h##1:wybe.int, ~%tmp#10##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @loop_bug:nn:nn
-        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @loop_bug:nn:nn
+        foreign c print_int(~h##1:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @loop_bug:nn:nn
+        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
         loop_bug.print#cont#1<0>(_:wybe.int, ~t##1:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @loop_bug:nn:nn
 
 
@@ -73,11 +75,11 @@ proc print#cont#2 > {inline} (1 calls)
 print#cont#2(h##0:wybe.int, t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @loop_bug:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @loop_bug:nn:nn
-    foreign c print_int(~h##0:wybe.int, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @loop_bug:nn:nn
-    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
-    loop_bug.print#cont#1<0>(_:wybe.int, ~t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @loop_bug:nn:nn
+    wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @loop_bug:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @loop_bug:nn:nn
+    foreign c print_int(~h##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @loop_bug:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @loop_bug:nn:nn
+    loop_bug.print#cont#1<0>(_:wybe.int, ~t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @loop_bug:nn:nn
 
   LLVM code       :
 
@@ -87,8 +89,8 @@ print#cont#2(h##0:wybe.int, t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io
 source_filename = "!ROOT!/final-dump/loop_bug.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
-@"string#1" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
+@"loop_bug#constant#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
+@"loop_bug#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"loop_bug#constant#0" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
@@ -97,14 +99,14 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"loop_bug.print<0>"(i64 %"lst##0") {
   call ccc void @putchar(i8 91)
-  %"tmp#8##0" = icmp ne i64 %"lst##0", 0
-  br i1 %"tmp#8##0", label %if.then.0, label %if.else.0
+  %"tmp#9##0" = icmp ne i64 %"lst##0", 0
+  br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#15##0" = inttoptr i64 %"lst##0" to ptr
-  %"h##0" = load i64, ptr %"tmp#15##0"
-  %"tmp#16##0" = add i64 %"lst##0", 8
-  %"tmp#17##0" = inttoptr i64 %"tmp#16##0" to ptr
-  %"t##0" = load i64, ptr %"tmp#17##0"
+  %"tmp#16##0" = inttoptr i64 %"lst##0" to ptr
+  %"h##0" = load i64, ptr %"tmp#16##0"
+  %"tmp#17##0" = add i64 %"lst##0", 8
+  %"tmp#18##0" = inttoptr i64 %"tmp#17##0" to ptr
+  %"t##0" = load i64, ptr %"tmp#18##0"
   call ccc void @print_int(i64 %"h##0")
   tail call fastcc void @"loop_bug.print#cont#1<0>"(i64 %"t##0")
   ret void
@@ -114,15 +116,15 @@ if.else.0:
 }
 
 define external fastcc void @"loop_bug.print#cont#1<0>"(i64 %"t##0") {
-  %"tmp#4##0" = icmp ne i64 %"t##0", 0
-  br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
+  %"tmp#5##0" = icmp ne i64 %"t##0", 0
+  br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#12##0" = inttoptr i64 %"t##0" to ptr
-  %"h##1" = load i64, ptr %"tmp#12##0"
-  %"tmp#13##0" = add i64 %"t##0", 8
-  %"tmp#14##0" = inttoptr i64 %"tmp#13##0" to ptr
-  %"t##1" = load i64, ptr %"tmp#14##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  %"tmp#13##0" = inttoptr i64 %"t##0" to ptr
+  %"h##1" = load i64, ptr %"tmp#13##0"
+  %"tmp#14##0" = add i64 %"t##0", 8
+  %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
+  %"t##1" = load i64, ptr %"tmp#15##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"loop_bug#constant#1" to i64 ))
   call ccc void @print_int(i64 %"h##1")
   tail call fastcc void @"loop_bug.print#cont#1<0>"(i64 %"t##1")
   ret void
@@ -132,7 +134,7 @@ if.else.0:
 }
 
 define external fastcc void @"loop_bug.print#cont#2<0>"(i64 %"h##0", i64 %"t##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"loop_bug#constant#1" to i64 ))
   call ccc void @print_int(i64 %"h##0")
   tail call fastcc void @"loop_bug.print#cont#1<0>"(i64 %"t##0")
   ret void
@@ -152,6 +154,7 @@ define external fastcc void @"loop_bug.print#cont#2<0>"(i64 %"h##0", i64 %"t##0"
                     loop_bug.int_list.tail<0>
                     loop_bug.int_list.tail<1>
                     loop_bug.int_list.~=<0>
+  constants       : 
   imports         : use loop_bug
                     use wybe
   resources       : 

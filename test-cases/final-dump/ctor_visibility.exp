@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 
   imports         : use ctor_visibility.all_priv
                     use ctor_visibility.all_public_long
                     use ctor_visibility.all_public_short
@@ -40,6 +41,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
   public resources: 
   public procs    : ctor_visibility.all_priv.=<0>
                     ctor_visibility.all_priv.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -116,6 +118,7 @@ define external fastcc i1 @"ctor_visibility.all_priv.~=<0>"(i1 %"#left##0", i1 %
                     ctor_visibility.all_public_long.bar<0>
                     ctor_visibility.all_public_long.foo<0>
                     ctor_visibility.all_public_long.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -192,6 +195,7 @@ define external fastcc i1 @"ctor_visibility.all_public_long.~=<0>"(i1 %"#left##0
                     ctor_visibility.all_public_short.bar<0>
                     ctor_visibility.all_public_short.foo<0>
                     ctor_visibility.all_public_short.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -266,6 +270,7 @@ define external fastcc i1 @"ctor_visibility.all_public_short.~=<0>"(i1 %"#left##
   public resources: 
   public procs    : ctor_visibility.ctor_keyword.=<0>
                     ctor_visibility.ctor_keyword.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -341,6 +346,7 @@ define external fastcc i1 @"ctor_visibility.ctor_keyword.~=<0>"(i1 %"#left##0", 
   public procs    : ctor_visibility.one_pub.=<0>
                     ctor_visibility.one_pub.foo<0>
                     ctor_visibility.one_pub.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -416,6 +422,7 @@ define external fastcc i1 @"ctor_visibility.one_pub.~=<0>"(i1 %"#left##0", i1 %"
   public procs    : ctor_visibility.one_pub2.=<0>
                     ctor_visibility.one_pub2.bar<0>
                     ctor_visibility.one_pub2.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -498,6 +505,9 @@ define external fastcc i1 @"ctor_visibility.one_pub2.~=<0>"(i1 %"#left##0", i1 %
                     ctor_visibility.with_fields.foo<0>
                     ctor_visibility.with_fields.foo<1>
                     ctor_visibility.with_fields.~=<0>
+  constants       : 0:: ArrayInfo {arrayData = [IntStructMember (-1) 8,IntStructMember 0 8]}
+                    1:: ArrayInfo {arrayData = [IntStructMember 16 8,IntStructMember 8 8]}
+                    2:: ArrayInfo {arrayData = [IntStructMember 1 8,IntStructMember 0 8]}
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -563,9 +573,9 @@ a(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int)<{}; {}; {}>:
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
     factored ~tmp#0##0:wybe.bool of
-      ?tmp#5##0:wybe.int <- [ 1:wybe.int, 0:wybe.int ]
-      ?tmp#6##0:wybe.int <- [ 16:wybe.int, 8:wybe.int ]
-      ?tmp#7##0:wybe.int <- [ -1:wybe.int, 0:wybe.int ]
+      ?tmp#5##0:wybe.int <- ctor_visibility.with_fields#constant#2[IntStructMember 1 8,IntStructMember 0 8]
+      ?tmp#6##0:wybe.int <- ctor_visibility.with_fields#constant#1[IntStructMember 16 8,IntStructMember 8 8]
+      ?tmp#7##0:wybe.int <- ctor_visibility.with_fields#constant#0[IntStructMember (-1) 8,IntStructMember 0 8]
         foreign lpvm access(~#rec##0:ctor_visibility.with_fields, ~tmp#7##0:wybe.int, ~tmp#6##0:wybe.int, ~tmp#5##0:wybe.int, ?#result##0:wybe.int) @ctor_visibility:nn:nn
 proc a > public (0 calls)
 1: ctor_visibility.with_fields.a<1>
@@ -575,9 +585,9 @@ a(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #fi
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
     factored ~tmp#0##0:wybe.bool of
-      ?tmp#5##0:wybe.int <- [ 1:wybe.int, 0:wybe.int ]
-      ?tmp#6##0:wybe.int <- [ 16:wybe.int, 8:wybe.int ]
-      ?tmp#7##0:wybe.int <- [ -1:wybe.int, 0:wybe.int ]
+      ?tmp#5##0:wybe.int <- ctor_visibility.with_fields#constant#2[IntStructMember 1 8,IntStructMember 0 8]
+      ?tmp#6##0:wybe.int <- ctor_visibility.with_fields#constant#1[IntStructMember 16 8,IntStructMember 8 8]
+      ?tmp#7##0:wybe.int <- ctor_visibility.with_fields#constant#0[IntStructMember (-1) 8,IntStructMember 0 8]
         foreign lpvm {noalias} mutate(~#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, ~tmp#7##0:wybe.int, 0:wybe.int, ~tmp#6##0:wybe.int, ~tmp#5##0:wybe.int, ~#field##0:wybe.int) @ctor_visibility:nn:nn
 
 
@@ -685,9 +695,9 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
 target triple    ????
 
-@"array#0" = private unnamed_addr constant [ 2 x i64 ] [i64 -1, i64 0]
-@"array#1" = private unnamed_addr constant [ 2 x i64 ] [i64 1, i64 0]
-@"array#2" = private unnamed_addr constant [ 2 x i64 ] [i64 16, i64 8]
+@"ctor_visibility.with_fields#constant#0" = private unnamed_addr constant [ 2 x i64 ] [i64 -1, i64 0]
+@"ctor_visibility.with_fields#constant#1" = private unnamed_addr constant [ 2 x i64 ] [i64 16, i64 8]
+@"ctor_visibility.with_fields#constant#2" = private unnamed_addr constant [ 2 x i64 ] [i64 1, i64 0]
 
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -750,13 +760,13 @@ define external fastcc i64 @"ctor_visibility.with_fields.a<0>"(i64 %"#rec##0") {
   %"tmp#1##0" = and i1 %"tmp#8##0", 1
   %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 0
   %"tmp#10##0" = zext i1 %"tmp#0##0" to i64
-  %"tmp#9##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#10##0"
+  %"tmp#9##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#2", i64 0, i64 %"tmp#10##0"
   %"tmp#5##0" = load i64, ptr %"tmp#9##0"
   %"tmp#12##0" = zext i1 %"tmp#0##0" to i64
-  %"tmp#11##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#12##0"
+  %"tmp#11##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#1", i64 0, i64 %"tmp#12##0"
   %"tmp#6##0" = load i64, ptr %"tmp#11##0"
   %"tmp#14##0" = zext i1 %"tmp#0##0" to i64
-  %"tmp#13##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#0", i64 0, i64 %"tmp#14##0"
+  %"tmp#13##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#0", i64 0, i64 %"tmp#14##0"
   %"tmp#7##0" = load i64, ptr %"tmp#13##0"
   %"tmp#15##0" = add i64 %"#rec##0", %"tmp#7##0"
   %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
@@ -769,13 +779,13 @@ define external fastcc i64 @"ctor_visibility.with_fields.a<1>"(i64 %"#rec##0", i
   %"tmp#1##0" = and i1 %"tmp#8##0", 1
   %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 0
   %"tmp#10##0" = zext i1 %"tmp#0##0" to i64
-  %"tmp#9##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#10##0"
+  %"tmp#9##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#2", i64 0, i64 %"tmp#10##0"
   %"tmp#5##0" = load i64, ptr %"tmp#9##0"
   %"tmp#12##0" = zext i1 %"tmp#0##0" to i64
-  %"tmp#11##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#12##0"
+  %"tmp#11##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#1", i64 0, i64 %"tmp#12##0"
   %"tmp#6##0" = load i64, ptr %"tmp#11##0"
   %"tmp#14##0" = zext i1 %"tmp#0##0" to i64
-  %"tmp#13##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#0", i64 0, i64 %"tmp#14##0"
+  %"tmp#13##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#0", i64 0, i64 %"tmp#14##0"
   %"tmp#7##0" = load i64, ptr %"tmp#13##0"
   %"tmp#15##0" = sub i64 %"#rec##0", %"tmp#5##0"
   %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
@@ -909,6 +919,7 @@ define external fastcc i1 @"ctor_visibility.with_fields.~=<0>"(i64 %"#left##0", 
                     ctor_visibility.with_fields2.foo<0>
                     ctor_visibility.with_fields2.foo<1>
                     ctor_visibility.with_fields2.~=<0>
+  constants       : 
   imports         : use ctor_visibility
                     use wybe
   resources       : 

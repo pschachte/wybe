@@ -26,6 +26,7 @@ import           Flow          ((|>))
 import           Options       (LogSelection (Analysis))
 import           Util
 import           Config        (specialName2)
+import Data.Maybe.HT (toMaybe)
 
 
 -- This "AliasMapLocal" is used during analysis and it will be converted to
@@ -41,7 +42,7 @@ import           Config        (specialName2)
 data AliasMapLocalItem
     = LiveVar           PrimVarName
     | AliasByGlobal     GlobalInfo
-    | AliasByConstant   PrimArg
+    | AliasByConst      StructID
     | AliasByParam      PrimVarName
     | MaybeAliasByParam PrimVarName
     deriving (Eq, Ord, Show)
@@ -198,7 +199,8 @@ aliasedByFork caller body analysisInfo = do
             return $ mergeAnalysisInfo analysisInfos
         MergedFork{} -> do
             logAlias ">>> Merged fork:"
-            aliasedByFork caller body{bodyFork=unMergeFork fork} analysisInfo
+            fork' <- unMergeFork fork
+            aliasedByFork caller body{bodyFork=fork'} analysisInfo
         NoFork -> do
             logAlias ">>> No fork."
             -- drop "deadCells", we don't need it after fork
@@ -342,16 +344,14 @@ _maybeAliasPrimArgs args = do
     let escapedVars = catMaybes args'
     return escapedVars
   where
-    filterArg arg@ArgVar{argVarName=var, argVarType=ty} = maybeAddressAlias arg ty $ LiveVar var
-    filterArg arg@(ArgGlobal global ty)                 = maybeAddressAlias arg ty $ AliasByGlobal global
-    filterArg arg@ArgClosure{} | argIsConst arg         = return $ Just $ AliasByConstant arg
-    filterArg arg@ArgString{}                           = return $ Just $ AliasByConstant arg
-    filterArg _                                         = return Nothing
-    maybeAddressAlias arg ty item = do
+    filterArg arg = case arg of
+        ArgVar{argVarName=var, argVarType=ty} -> maybeAddressAlias ty $ LiveVar var
+        ArgGlobal global ty -> maybeAddressAlias ty $ AliasByGlobal global
+        ArgConstRef ref ty -> maybeAddressAlias ty $ AliasByConst ref
+        _ -> return Nothing
+    maybeAddressAlias ty item = do
         rep <- lookupTypeRepresentation ty
-        if maybe False aliasedRep rep
-        then return $ Just item
-        else return Nothing
+        return $ toMaybe (maybe False aliasedRep rep) item
     aliasedRep CPointer = True
     aliasedRep Pointer = True
     aliasedRep Func{} = True

@@ -40,6 +40,20 @@ AFTER EVERYTHING:
                     dead_cell_size.t2.t2b<0>
                     dead_cell_size.t2.t2b<1>
                     dead_cell_size.t2.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "t2a"}
+                    1:: CStringInfo {cstringChars = "t2b("}
+                    2:: CStringInfo {cstringChars = "ta"}
+                    3:: CStringInfo {cstringChars = "tb("}
+                    4:: CStringInfo {cstringChars = "tc("}
+                    5:: CStringInfo {cstringChars = "td("}
+                    6:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"t2b("]}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"t2a"]}
+                    8:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"td("]}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"tc("]}
+                    10:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"tb("]}
+                    11:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"ta"]}
+                    12:: StructInfo {structSize = 8, structData = [IntStructMember (-1) 8]}
+                    13:: StructInfo {structSize = 8, structData = [IntStructMember 9 8]}
   imports         : public use dead_cell_size.t
                     public use dead_cell_size.t2
                     use wybe
@@ -52,18 +66,11 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(4,(dead_cell_size.bar<0>,fromList [NonAliasedParamCond 0 []])),(7,(dead_cell_size.diff_type<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(8:wybe.int, ?tmp#7##0:dead_cell_size.t) @dead_cell_size:nn:nn
-    foreign lpvm mutate(~tmp#7##0:dead_cell_size.t, ?tmp#8##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
-    dead_cell_size.foo<0>(~tmp#8##0:dead_cell_size.t, ?tmp#0##0:dead_cell_size.t) #1 @dead_cell_size:nn:nn
+    dead_cell_size.foo<0>(dead_cell_size#constant#13:dead_cell_size.t, ?tmp#0##0:dead_cell_size.t) #1 @dead_cell_size:nn:nn
     dead_cell_size.print_t<0>(~tmp#0##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @dead_cell_size:nn:nn
-    foreign lpvm alloc(8:wybe.int, ?tmp#10##0:dead_cell_size.t) @dead_cell_size:nn:nn
-    foreign lpvm mutate(~tmp#10##0:dead_cell_size.t, ?tmp#11##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
-    dead_cell_size.bar<0>[410bae77d3](~tmp#11##0:dead_cell_size.t, ?tmp#2##0:dead_cell_size.t) #4 @dead_cell_size:nn:nn
+    dead_cell_size.bar<0>(dead_cell_size#constant#13:dead_cell_size.t, ?tmp#2##0:dead_cell_size.t) #4 @dead_cell_size:nn:nn
     dead_cell_size.print_t<0>(~tmp#2##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @dead_cell_size:nn:nn
-    foreign lpvm alloc(8:wybe.int, ?tmp#13##0:dead_cell_size.t) @dead_cell_size:nn:nn
-    foreign lpvm mutate(~tmp#13##0:dead_cell_size.t, ?tmp#14##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
-    dead_cell_size.diff_type<0>[410bae77d3](~tmp#14##0:dead_cell_size.t, ?tmp#4##0:dead_cell_size.t2) #7 @dead_cell_size:nn:nn
+    dead_cell_size.diff_type<0>(dead_cell_size#constant#13:dead_cell_size.t, ?tmp#4##0:dead_cell_size.t2) #7 @dead_cell_size:nn:nn
     dead_cell_size.print_t2<0>(~tmp#4##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @dead_cell_size:nn:nn
 
 
@@ -91,23 +98,6 @@ bar(x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)<{}; {}; {}>:
             foreign llvm or(~tmp#8##0:dead_cell_size.t, 2:wybe.int, ?x##1:dead_cell_size.t) @dead_cell_size:nn:nn
 
 
- [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @dead_cell_size:nn:nn
-    case ~tmp#3##0:wybe.bool of
-    0:
-        foreign llvm move(0:dead_cell_size.t, ?x##1:dead_cell_size.t)
-
-    1:
-        foreign llvm and(x##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#4##0:2 bit unsigned) @dead_cell_size:nn:nn
-        foreign llvm icmp_eq(~tmp#4##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#5##0:wybe.bool) @dead_cell_size:nn:nn
-        case ~tmp#5##0:wybe.bool of
-        0:
-            foreign llvm move(~x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)
-
-        1:
-            foreign llvm or(~x##0:dead_cell_size.t, 2:wybe.int, ?x##1:dead_cell_size.t) @dead_cell_size:nn:nn
-
-
 
 
 proc diff_type > public (1 calls)
@@ -118,40 +108,19 @@ diff_type(x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2)<{}; {}; {}>:
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @dead_cell_size:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
-        foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
-        foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
+        foreign llvm move(dead_cell_size#constant#12:dead_cell_size.t2, ?y##0:dead_cell_size.t2) @dead_cell_size:nn:nn
 
     1:
         foreign llvm and(x##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#5##0:2 bit unsigned) @dead_cell_size:nn:nn
         foreign llvm icmp_eq(~tmp#5##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#6##0:wybe.bool) @dead_cell_size:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
-            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
-            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm move(dead_cell_size#constant#12:dead_cell_size.t2, ?y##0:dead_cell_size.t2) @dead_cell_size:nn:nn
 
         1:
             foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
             foreign lpvm alloc(8:wybe.int, ?tmp#11##0:dead_cell_size.t2) @dead_cell_size:nn:nn
             foreign lpvm mutate(~tmp#11##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @dead_cell_size:nn:nn
-
-
- [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @dead_cell_size:nn:nn
-    case ~tmp#4##0:wybe.bool of
-    0:
-        foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
-        foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
-
-    1:
-        foreign llvm and(x##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#5##0:2 bit unsigned) @dead_cell_size:nn:nn
-        foreign llvm icmp_eq(~tmp#5##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#6##0:wybe.bool) @dead_cell_size:nn:nn
-        case ~tmp#6##0:wybe.bool of
-        0:
-            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
-            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
-
-        1:
-            foreign llvm move(~x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2) @dead_cell_size:nn:nn
 
 
 
@@ -189,75 +158,75 @@ proc print_t > public (2 calls)
 print_t(x##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(12,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(14,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(16,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(21,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    dead_cell_size.t.=<0>(0:dead_cell_size.t, x##0:dead_cell_size.t, ?tmp#4##0:wybe.bool) #1 @dead_cell_size:nn:nn
-    case ~tmp#4##0:wybe.bool of
+  MultiSpeczDepInfo: [(10,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(17,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(20,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(23,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(30,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    dead_cell_size.t.=<0>(0:dead_cell_size.t, x##0:dead_cell_size.t, ?tmp#13##0:wybe.bool) #1 @dead_cell_size:nn:nn
+    case ~tmp#13##0:wybe.bool of
     0:
-        foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @dead_cell_size:nn:nn
-        case ~tmp#6##0:wybe.bool of
+        foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool) @dead_cell_size:nn:nn
+        case ~tmp#15##0:wybe.bool of
         0:
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @dead_cell_size:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @dead_cell_size:nn:nn
-            foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
         1:
-            foreign llvm and(x##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#7##0:2 bit unsigned) @dead_cell_size:nn:nn
-            case ~tmp#7##0:2 bit unsigned of
+            foreign llvm and(x##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#16##0:2 bit unsigned) @dead_cell_size:nn:nn
+            case ~tmp#16##0:2 bit unsigned of
             0:
                 foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
-                wybe.string.print<0>("tb(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @dead_cell_size:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~a##0:wybe.int, ~%tmp#56##0:wybe.phantom, ?%tmp#57##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
-                wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @dead_cell_size:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#63##0:wybe.phantom, ?tmp#64##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign lpvm store(~%tmp#64##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>("tb(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#73##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~a##0:wybe.int, ~%tmp#73##0:wybe.phantom, ?%tmp#74##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#74##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#79##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c putchar(10:wybe.char, ~tmp#79##0:wybe.phantom, ?tmp#80##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#80##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
             1:
                 foreign lpvm access(x##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?a##1:wybe.int) @dead_cell_size:nn:nn
                 foreign lpvm access(x##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?b##0:wybe.int) @dead_cell_size:nn:nn
                 foreign lpvm access(~x##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?c##0:wybe.int) @dead_cell_size:nn:nn
-                wybe.string.print<0>("tc(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @dead_cell_size:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~a##1:wybe.int, ~%tmp#30##0:wybe.phantom, ?%tmp#31##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign lpvm store(~%tmp#31##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
-                wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @dead_cell_size:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~b##0:wybe.int, ~%tmp#38##0:wybe.phantom, ?%tmp#39##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
-                wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @dead_cell_size:nn:nn
+                wybe.string.print<0>("tc(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#46##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~c##0:wybe.int, ~%tmp#46##0:wybe.phantom, ?%tmp#47##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~a##1:wybe.int, ~%tmp#46##0:wybe.phantom, ?%tmp#47##0:wybe.phantom) @dead_cell_size:nn:nn
                 foreign lpvm store(~%tmp#47##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
-                wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @dead_cell_size:nn:nn
+                wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @dead_cell_size:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~b##0:wybe.int, ~%tmp#53##0:wybe.phantom, ?%tmp#54##0:wybe.phantom) @dead_cell_size:nn:nn
                 foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #20 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#60##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~c##0:wybe.int, ~%tmp#60##0:wybe.phantom, ?%tmp#61##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#61##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#66##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c putchar(10:wybe.char, ~tmp#66##0:wybe.phantom, ?tmp#67##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#67##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
             2:
                 foreign lpvm access(~x##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int) @dead_cell_size:nn:nn
-                wybe.string.print<0>("td(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @dead_cell_size:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c print_int(~a##2:wybe.int, ~%tmp#20##0:wybe.phantom, ?%tmp#21##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
-                wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @dead_cell_size:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>("td(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c print_int(~a##2:wybe.int, ~%tmp#33##0:wybe.phantom, ?%tmp#34##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#39##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c putchar(10:wybe.char, ~tmp#39##0:wybe.phantom, ?tmp#40##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#40##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
             else:
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @dead_cell_size:nn:nn
-                foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign c putchar(10:wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @dead_cell_size:nn:nn
+                foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
 
 
     1:
-        wybe.string.print<0>("ta":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @dead_cell_size:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#65##0:wybe.phantom) @dead_cell_size:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#65##0:wybe.phantom, ?tmp#66##0:wybe.phantom) @dead_cell_size:nn:nn
-        foreign lpvm store(~%tmp#66##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+        wybe.string.print<0>("ta":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @dead_cell_size:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#85##0:wybe.phantom) @dead_cell_size:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#85##0:wybe.phantom, ?tmp#86##0:wybe.phantom) @dead_cell_size:nn:nn
+        foreign lpvm store(~%tmp#86##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
 
 
@@ -266,34 +235,34 @@ proc print_t2 > public (1 calls)
 print_t2(x##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    dead_cell_size.t2.=<0>(0:dead_cell_size.t2, x##0:dead_cell_size.t2, ?tmp#2##0:wybe.bool) #1 @dead_cell_size:nn:nn
-    case ~tmp#2##0:wybe.bool of
+  MultiSpeczDepInfo: [(10,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    dead_cell_size.t2.=<0>(0:dead_cell_size.t2, x##0:dead_cell_size.t2, ?tmp#5##0:wybe.bool) #1 @dead_cell_size:nn:nn
+    case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @dead_cell_size:nn:nn
-        case ~tmp#4##0:wybe.bool of
+        foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @dead_cell_size:nn:nn
+        case ~tmp#7##0:wybe.bool of
         0:
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @dead_cell_size:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @dead_cell_size:nn:nn
-            foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
         1:
             foreign lpvm access(~x##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
-            wybe.string.print<0>("t2b(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @dead_cell_size:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @dead_cell_size:nn:nn
-            foreign c print_int(~a##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @dead_cell_size:nn:nn
-            foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
-            wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @dead_cell_size:nn:nn
+            wybe.string.print<0>("t2b(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @dead_cell_size:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @dead_cell_size:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign c print_int(~a##0:wybe.int, ~%tmp#15##0:wybe.phantom, ?%tmp#16##0:wybe.phantom) @dead_cell_size:nn:nn
             foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+            wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @dead_cell_size:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @dead_cell_size:nn:nn
+            foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
 
     1:
-        wybe.string.print<0>("t2a":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @dead_cell_size:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @dead_cell_size:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @dead_cell_size:nn:nn
-        foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
+        wybe.string.print<0>("t2a":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @dead_cell_size:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @dead_cell_size:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @dead_cell_size:nn:nn
+        foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dead_cell_size:nn:nn
 
 
   LLVM code       :
@@ -304,18 +273,20 @@ print_t2(x##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 source_filename = "!ROOT!/final-dump/dead_cell_size.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"t2a\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"t2b(\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"ta\00", align 8
-@"cstring#3" = private unnamed_addr constant [ ?? x i8 ] c"tb(\00", align 8
-@"cstring#4" = private unnamed_addr constant [ ?? x i8 ] c"tc(\00", align 8
-@"cstring#5" = private unnamed_addr constant [ ?? x i8 ] c"td(\00", align 8
-@"string#6" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#7" = private unnamed_addr constant {i64, i64} { i64 4, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#8" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"string#9" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
-@"string#10" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
-@"string#11" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
+@"dead_cell_size#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"t2a\00", align 8
+@"dead_cell_size#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"t2b(\00", align 8
+@"dead_cell_size#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"ta\00", align 8
+@"dead_cell_size#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"tb(\00", align 8
+@"dead_cell_size#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"tc(\00", align 8
+@"dead_cell_size#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"td(\00", align 8
+@"dead_cell_size#constant#6" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"dead_cell_size#constant#1" }, align 8
+@"dead_cell_size#constant#7" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#0" }, align 8
+@"dead_cell_size#constant#8" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#5" }, align 8
+@"dead_cell_size#constant#9" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#4" }, align 8
+@"dead_cell_size#constant#10" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"dead_cell_size#constant#3" }, align 8
+@"dead_cell_size#constant#11" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"dead_cell_size#constant#2" }, align 8
+@"dead_cell_size#constant#12" = private unnamed_addr constant {i64} { i64 -1 }, align 8
+@"dead_cell_size#constant#13" = private unnamed_addr constant {i64} { i64 9 }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
@@ -325,23 +296,11 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"dead_cell_size.<0>"() {
-  %"tmp#15##0" = call ccc ptr @wybe_malloc(i32 8)
-  %"tmp#7##0" = ptrtoint ptr %"tmp#15##0" to i64
-  %"tmp#16##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 9, ptr %"tmp#16##0"
-  %"tmp#0##0" = tail call fastcc i64 @"dead_cell_size.foo<0>"(i64 %"tmp#7##0")
+  %"tmp#0##0" = tail call fastcc i64 @"dead_cell_size.foo<0>"(i64 ptrtoint( ptr @"dead_cell_size#constant#13" to i64 ))
   tail call fastcc void @"dead_cell_size.print_t<0>"(i64 %"tmp#0##0")
-  %"tmp#17##0" = call ccc ptr @wybe_malloc(i32 8)
-  %"tmp#10##0" = ptrtoint ptr %"tmp#17##0" to i64
-  %"tmp#18##0" = inttoptr i64 %"tmp#10##0" to ptr
-  store i64 9, ptr %"tmp#18##0"
-  %"tmp#2##0" = tail call fastcc i64 @"dead_cell_size.bar<0>[410bae77d3]"(i64 %"tmp#10##0")
+  %"tmp#2##0" = tail call fastcc i64 @"dead_cell_size.bar<0>"(i64 ptrtoint( ptr @"dead_cell_size#constant#13" to i64 ))
   tail call fastcc void @"dead_cell_size.print_t<0>"(i64 %"tmp#2##0")
-  %"tmp#19##0" = call ccc ptr @wybe_malloc(i32 8)
-  %"tmp#13##0" = ptrtoint ptr %"tmp#19##0" to i64
-  %"tmp#20##0" = inttoptr i64 %"tmp#13##0" to ptr
-  store i64 9, ptr %"tmp#20##0"
-  %"tmp#4##0" = tail call fastcc i64 @"dead_cell_size.diff_type<0>[410bae77d3]"(i64 %"tmp#13##0")
+  %"tmp#4##0" = tail call fastcc i64 @"dead_cell_size.diff_type<0>"(i64 ptrtoint( ptr @"dead_cell_size#constant#13" to i64 ))
   tail call fastcc void @"dead_cell_size.print_t2<0>"(i64 %"tmp#4##0")
   ret void
 }
@@ -369,23 +328,6 @@ if.else.0:
   ret i64 0
 }
 
-define external fastcc i64 @"dead_cell_size.bar<0>[410bae77d3]"(i64 %"x##0") {
-  %"tmp#3##0" = icmp ne i64 %"x##0", 0
-  br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"tmp#9##0" = trunc i64 %"x##0" to i2
-  %"tmp#4##0" = and i2 %"tmp#9##0", 3
-  %"tmp#5##0" = icmp eq i2 %"tmp#4##0", 0
-  br i1 %"tmp#5##0", label %if.then.1, label %if.else.1
-if.then.1:
-  %"tmp#10##0" = or i64 %"x##0", 2
-  ret i64 %"tmp#10##0"
-if.else.1:
-  ret i64 %"x##0"
-if.else.0:
-  ret i64 0
-}
-
 define external fastcc i64 @"dead_cell_size.diff_type<0>"(i64 %"x##0") {
   %"tmp#4##0" = icmp ne i64 %"x##0", 0
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
@@ -403,41 +345,11 @@ if.then.1:
   store i64 %"a##0", ptr %"tmp#16##0"
   ret i64 %"tmp#11##0"
 if.else.1:
-  %"tmp#17##0" = call ccc ptr @wybe_malloc(i32 8)
-  %"tmp#8##0" = ptrtoint ptr %"tmp#17##0" to i64
-  %"tmp#18##0" = inttoptr i64 %"tmp#8##0" to ptr
-  store i64 -1, ptr %"tmp#18##0"
-  ret i64 %"tmp#8##0"
-if.else.0:
-  %"tmp#19##0" = call ccc ptr @wybe_malloc(i32 8)
-  %"tmp#20##0" = ptrtoint ptr %"tmp#19##0" to i64
-  %"tmp#21##0" = inttoptr i64 %"tmp#20##0" to ptr
-  store i64 -1, ptr %"tmp#21##0"
-  ret i64 %"tmp#20##0"
-}
-
-define external fastcc i64 @"dead_cell_size.diff_type<0>[410bae77d3]"(i64 %"x##0") {
-  %"tmp#4##0" = icmp ne i64 %"x##0", 0
-  br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"tmp#13##0" = trunc i64 %"x##0" to i2
-  %"tmp#5##0" = and i2 %"tmp#13##0", 3
-  %"tmp#6##0" = icmp eq i2 %"tmp#5##0", 0
-  br i1 %"tmp#6##0", label %if.then.1, label %if.else.1
-if.then.1:
-  ret i64 %"x##0"
-if.else.1:
-  %"tmp#14##0" = call ccc ptr @wybe_malloc(i32 8)
-  %"tmp#8##0" = ptrtoint ptr %"tmp#14##0" to i64
-  %"tmp#15##0" = inttoptr i64 %"tmp#8##0" to ptr
-  store i64 -1, ptr %"tmp#15##0"
-  ret i64 %"tmp#8##0"
-if.else.0:
-  %"tmp#16##0" = call ccc ptr @wybe_malloc(i32 8)
-  %"tmp#17##0" = ptrtoint ptr %"tmp#16##0" to i64
-  %"tmp#18##0" = inttoptr i64 %"tmp#17##0" to ptr
-  store i64 -1, ptr %"tmp#18##0"
+  %"tmp#17##0" = ptrtoint ptr @"dead_cell_size#constant#12" to i64
   ret i64 %"tmp#17##0"
+if.else.0:
+  %"tmp#18##0" = ptrtoint ptr @"dead_cell_size#constant#12" to i64
+  ret i64 %"tmp#18##0"
 }
 
 define external fastcc i64 @"dead_cell_size.foo<0>"(i64 %"x##0") {
@@ -470,41 +382,41 @@ if.else.0:
 }
 
 define external fastcc void @"dead_cell_size.print_t<0>"(i64 %"x##0") {
-  %"tmp#4##0" = tail call fastcc i1 @"dead_cell_size.t.=<0>"(i64 0, i64 %"x##0")
-  br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
+  %"tmp#13##0" = tail call fastcc i1 @"dead_cell_size.t.=<0>"(i64 0, i64 %"x##0")
+  br i1 %"tmp#13##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"dead_cell_size#constant#11" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
-  %"tmp#6##0" = icmp ne i64 %"x##0", 0
-  br i1 %"tmp#6##0", label %if.then.1, label %if.else.1
+  %"tmp#15##0" = icmp ne i64 %"x##0", 0
+  br i1 %"tmp#15##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#67##0" = trunc i64 %"x##0" to i2
-  %"tmp#7##0" = and i2 %"tmp#67##0", 3
-  switch i2 %"tmp#7##0", label %default.switch.2 [
+  %"tmp#87##0" = trunc i64 %"x##0" to i2
+  %"tmp#16##0" = and i2 %"tmp#87##0", 3
+  switch i2 %"tmp#16##0", label %default.switch.2 [
     i2 0, label %case.0.switch.2
     i2 1, label %case.1.switch.2
     i2 2, label %case.2.switch.2 ]
 case.0.switch.2:
-  %"tmp#68##0" = inttoptr i64 %"x##0" to ptr
-  %"a##0" = load i64, ptr %"tmp#68##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  %"tmp#88##0" = inttoptr i64 %"x##0" to ptr
+  %"a##0" = load i64, ptr %"tmp#88##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"dead_cell_size#constant#10" to i64 ))
   call ccc void @print_int(i64 %"a##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.1.switch.2:
-  %"tmp#69##0" = add i64 %"x##0", -1
-  %"tmp#70##0" = inttoptr i64 %"tmp#69##0" to ptr
-  %"a##1" = load i64, ptr %"tmp#70##0"
-  %"tmp#71##0" = add i64 %"x##0", 7
-  %"tmp#72##0" = inttoptr i64 %"tmp#71##0" to ptr
-  %"b##0" = load i64, ptr %"tmp#72##0"
-  %"tmp#73##0" = add i64 %"x##0", 15
-  %"tmp#74##0" = inttoptr i64 %"tmp#73##0" to ptr
-  %"c##0" = load i64, ptr %"tmp#74##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  %"tmp#89##0" = add i64 %"x##0", -1
+  %"tmp#90##0" = inttoptr i64 %"tmp#89##0" to ptr
+  %"a##1" = load i64, ptr %"tmp#90##0"
+  %"tmp#91##0" = add i64 %"x##0", 7
+  %"tmp#92##0" = inttoptr i64 %"tmp#91##0" to ptr
+  %"b##0" = load i64, ptr %"tmp#92##0"
+  %"tmp#93##0" = add i64 %"x##0", 15
+  %"tmp#94##0" = inttoptr i64 %"tmp#93##0" to ptr
+  %"c##0" = load i64, ptr %"tmp#94##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"dead_cell_size#constant#9" to i64 ))
   call ccc void @print_int(i64 %"a##1")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1203)
   call ccc void @print_int(i64 %"b##0")
@@ -514,10 +426,10 @@ case.1.switch.2:
   call ccc void @putchar(i8 10)
   ret void
 case.2.switch.2:
-  %"tmp#75##0" = add i64 %"x##0", -2
-  %"tmp#76##0" = inttoptr i64 %"tmp#75##0" to ptr
-  %"a##2" = load i64, ptr %"tmp#76##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  %"tmp#95##0" = add i64 %"x##0", -2
+  %"tmp#96##0" = inttoptr i64 %"tmp#95##0" to ptr
+  %"a##2" = load i64, ptr %"tmp#96##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"dead_cell_size#constant#8" to i64 ))
   call ccc void @print_int(i64 %"a##2")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -531,19 +443,19 @@ if.else.1:
 }
 
 define external fastcc void @"dead_cell_size.print_t2<0>"(i64 %"x##0") {
-  %"tmp#2##0" = tail call fastcc i1 @"dead_cell_size.t2.=<0>"(i64 0, i64 %"x##0")
-  br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
+  %"tmp#5##0" = tail call fastcc i1 @"dead_cell_size.t2.=<0>"(i64 0, i64 %"x##0")
+  br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"dead_cell_size#constant#7" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
-  %"tmp#4##0" = icmp ne i64 %"x##0", 0
-  br i1 %"tmp#4##0", label %if.then.1, label %if.else.1
+  %"tmp#7##0" = icmp ne i64 %"x##0", 0
+  br i1 %"tmp#7##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#19##0" = inttoptr i64 %"x##0" to ptr
-  %"a##0" = load i64, ptr %"tmp#19##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  %"tmp#29##0" = inttoptr i64 %"x##0" to ptr
+  %"a##0" = load i64, ptr %"tmp#29##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"dead_cell_size#constant#6" to i64 ))
   call ccc void @print_int(i64 %"a##0")
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
@@ -577,6 +489,7 @@ if.else.1:
                     dead_cell_size.t.td1<0>
                     dead_cell_size.t.td1<1>
                     dead_cell_size.t.~=<0>
+  constants       : 
   imports         : use dead_cell_size
                     use wybe
   resources       : 
@@ -1583,6 +1496,7 @@ define external fastcc i1 @"dead_cell_size.t.~=<0>"(i64 %"#left##0", i64 %"#righ
                     dead_cell_size.t2.t2b<0>
                     dead_cell_size.t2.t2b<1>
                     dead_cell_size.t2.~=<0>
+  constants       : 
   imports         : use dead_cell_size
                     use wybe
   resources       : 

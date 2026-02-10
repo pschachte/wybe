@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: res: exporter.res
   public procs    : exporter.fn<0>
                     exporter.three<0>
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(exporter.res,wybe.int = 3 @exporter:nn:nn @exporter:nn:nn)]
   procs           : 

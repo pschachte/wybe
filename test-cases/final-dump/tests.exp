@@ -24,6 +24,7 @@ AFTER EVERYTHING:
                     tests.map.value<0>
                     tests.map.value<1>
                     tests.map.~=<0>
+  constants       : 0:: ArrayInfo {arrayData = [IntStructMember 24 8,IntStructMember 0 8]}
   imports         : public use tests.map
                     use wybe
   resources       : 
@@ -48,7 +49,7 @@ lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe
         0:
             foreign llvm icmp_slt(key##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#11##0:wybe.bool) @tests:nn:nn
             factored ~tmp#11##0:wybe.bool of
-              ?tmp#41##0:wybe.int <- [ 24:wybe.int, 0:wybe.int ]
+              ?tmp#41##0:wybe.int <- tests#constant#0[IntStructMember 24 8,IntStructMember 0 8]
                 foreign lpvm access(~map##0:tests.map, ~tmp#41##0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:tests.map) @tests:nn:nn
                 tests.lookup<0>(~key##0:wybe.int, ~tmp#3##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool) #6 @tests:nn:nn
 
@@ -91,7 +92,7 @@ lt3(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/tests.wybe"
 target triple    ????
 
-@"array#0" = private unnamed_addr constant [ 2 x i64 ] [i64 24, i64 0]
+@"tests#constant#0" = private unnamed_addr constant [ 2 x i64 ] [i64 24, i64 0]
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -114,7 +115,7 @@ if.then.1:
 if.else.1:
   %"tmp#11##0" = icmp slt i64 %"key##0", %"tmp#0##0"
   %"tmp#50##0" = zext i1 %"tmp#11##0" to i64
-  %"tmp#49##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#0", i64 0, i64 %"tmp#50##0"
+  %"tmp#49##0" = getelementptr inbounds [ 2 x i64 ], ptr @"tests#constant#0", i64 0, i64 %"tmp#50##0"
   %"tmp#41##0" = load i64, ptr %"tmp#49##0"
   %"tmp#51##0" = add i64 %"map##0", %"tmp#41##0"
   %"tmp#52##0" = inttoptr i64 %"tmp#51##0" to ptr
@@ -164,6 +165,7 @@ define external fastcc i1 @"tests.lt3<0>"(i64 %"x##0", i64 %"y##0") {
                     tests.map.value<0>
                     tests.map.value<1>
                     tests.map.~=<0>
+  constants       : 
   imports         : use tests
                     use wybe
   resources       : 

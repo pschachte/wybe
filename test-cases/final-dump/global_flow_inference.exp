@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
+  constants       : 0:: ArrayInfo {arrayData = [IntStructMember 3 8,IntStructMember 2 8]}
   imports         : use wybe
   resources       : res: fromList [(global_flow_inference.res,wybe.int = 1 @global_flow_inference:nn:nn @global_flow_inference:nn:nn)]
   procs           : 
@@ -116,7 +117,7 @@ only_out(b##0:wybe.bool)<{}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     factored ~b##0:wybe.bool of
-      ?tmp#1##0:wybe.int <- [ 3:wybe.int, 2:wybe.int ]
+      ?tmp#1##0:wybe.int <- global_flow_inference#constant#0[IntStructMember 3 8,IntStructMember 2 8]
         foreign lpvm store(~tmp#1##0:wybe.int, <<global_flow_inference.res>>:wybe.int) @global_flow_inference:nn:nn
 
 
@@ -173,7 +174,7 @@ still_only_in(b##0:wybe.bool, ?x##0:wybe.int)<{<<global_flow_inference.res>>}; {
 source_filename = "!ROOT!/final-dump/global_flow_inference.wybe"
 target triple    ????
 
-@"array#0" = private unnamed_addr constant [ 2 x i64 ] [i64 3, i64 2]
+@"global_flow_inference#constant#0" = private unnamed_addr constant [ 2 x i64 ] [i64 3, i64 2]
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#global_flow_inference.res" = global i64 undef
@@ -254,7 +255,7 @@ define external fastcc i64 @"global_flow_inference.only_in<0>"() {
 
 define external fastcc void @"global_flow_inference.only_out<0>"(i1 %"b##0") {
   %"tmp#3##0" = zext i1 %"b##0" to i64
-  %"tmp#2##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#0", i64 0, i64 %"tmp#3##0"
+  %"tmp#2##0" = getelementptr inbounds [ 2 x i64 ], ptr @"global_flow_inference#constant#0", i64 0, i64 %"tmp#3##0"
   %"tmp#1##0" = load i64, ptr %"tmp#2##0"
   store i64 %"tmp#1##0", ptr @"resource#global_flow_inference.res"
   ret void

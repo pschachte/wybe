@@ -1,0 +1,4 @@
+# Generate a constant structure
+
+!println(length([1,2,3]))
+!println(length([5,2,3]))

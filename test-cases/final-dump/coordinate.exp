@@ -19,6 +19,11 @@ AFTER EVERYTHING:
                     coordinate.Coordinate.z<0>
                     coordinate.Coordinate.z<1>
                     coordinate.Coordinate.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "expect crd1^z=8000: "}
+                    1:: CStringInfo {cstringChars = "expect crd2^z=1000: "}
+                    2:: StructInfo {structSize = 24, structData = [IntStructMember 1000 8,IntStructMember 1000 8,IntStructMember 1000 8]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 20 8,PointerStructMember c"expect crd1^z=8000: "]}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 20 8,PointerStructMember c"expect crd2^z=1000: "]}
   imports         : public use coordinate.Coordinate
                     use wybe
   resources       : 
@@ -30,22 +35,18 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?tmp#7##0:coordinate.Coordinate) @coordinate:nn:nn
-    foreign lpvm mutate(~tmp#7##0:coordinate.Coordinate, ?tmp#8##0:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int) @coordinate:nn:nn
-    foreign lpvm mutate(~tmp#8##0:coordinate.Coordinate, ?tmp#9##0:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int) @coordinate:nn:nn
-    foreign lpvm mutate(~tmp#9##0:coordinate.Coordinate, ?tmp#19##0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int) @coordinate:nn:nn
-    foreign lpvm {noalias} mutate(~tmp#19##0:coordinate.Coordinate, ?crd1##1:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int) @coordinate:nn:nn
-    wybe.string.print<0>("expect crd1^z=8000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @coordinate:nn:nn
+    foreign lpvm {noalias} mutate(coordinate#constant#2:coordinate.Coordinate, ?crd1##1:coordinate.Coordinate, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int) @coordinate:nn:nn
+    wybe.string.print<0>("expect crd1^z=8000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @coordinate:nn:nn
     foreign lpvm access(~crd1##1:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @coordinate:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @coordinate:nn:nn
-    foreign c print_int(~tmp#2##0:wybe.int, ~%tmp#16##0:wybe.phantom, ?%tmp#17##0:wybe.phantom) @coordinate:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @coordinate:nn:nn
-    foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @coordinate:nn:nn
-    wybe.string.print<0>("expect crd2^z=1000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @coordinate:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @coordinate:nn:nn
-    foreign c print_int(1000:wybe.int, ~%tmp#21##0:wybe.phantom, ?%tmp#22##0:wybe.phantom) @coordinate:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @coordinate:nn:nn
-    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @coordinate:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @coordinate:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~%tmp#22##0:wybe.phantom, ?%tmp#23##0:wybe.phantom) @coordinate:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @coordinate:nn:nn
+    foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @coordinate:nn:nn
+    wybe.string.print<0>("expect crd2^z=1000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @coordinate:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom) @coordinate:nn:nn
+    foreign c print_int(1000:wybe.int, ~%tmp#31##0:wybe.phantom, ?%tmp#32##0:wybe.phantom) @coordinate:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @coordinate:nn:nn
+    foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @coordinate:nn:nn
 
 
 proc fcopy > public {inline} (1 calls)
@@ -63,10 +64,11 @@ fcopy(crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate)<{}; {}; 
 source_filename = "!ROOT!/final-dump/coordinate.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"expect crd1^z=8000: \00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"expect crd2^z=1000: \00", align 8
-@"string#2" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
+@"coordinate#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"expect crd1^z=8000: \00", align 8
+@"coordinate#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"expect crd2^z=1000: \00", align 8
+@"coordinate#constant#2" = private unnamed_addr constant {i64, i64, i64} { i64 1000, i64 1000, i64 1000 }, align 8
+@"coordinate#constant#3" = private unnamed_addr constant {i64, ptr} { i64 20, ptr @"coordinate#constant#0" }, align 8
+@"coordinate#constant#4" = private unnamed_addr constant {i64, ptr} { i64 20, ptr @"coordinate#constant#1" }, align 8
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
@@ -75,26 +77,19 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"coordinate.<0>"() {
-  %"tmp#24##0" = call ccc ptr @wybe_malloc(i32 24)
-  %"tmp#7##0" = ptrtoint ptr %"tmp#24##0" to i64
-  %"tmp#25##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 1000, ptr %"tmp#25##0"
-  %"tmp#26##0" = add i64 %"tmp#7##0", 8
-  %"tmp#27##0" = inttoptr i64 %"tmp#26##0" to ptr
-  store i64 1000, ptr %"tmp#27##0"
-  %"tmp#28##0" = add i64 %"tmp#7##0", 16
-  %"tmp#29##0" = inttoptr i64 %"tmp#28##0" to ptr
-  store i64 1000, ptr %"tmp#29##0"
-  %"tmp#30##0" = add i64 %"tmp#7##0", 16
-  %"tmp#31##0" = inttoptr i64 %"tmp#30##0" to ptr
-  store i64 8000, ptr %"tmp#31##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
-  %"tmp#32##0" = add i64 %"tmp#7##0", 16
-  %"tmp#33##0" = inttoptr i64 %"tmp#32##0" to ptr
-  %"tmp#2##0" = load i64, ptr %"tmp#33##0"
+  %"tmp#35##0" = call ccc ptr @wybe_malloc(i32 24)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#35##0", ptr @"coordinate#constant#2", i64 24, i1 0)
+  %"tmp#36##0" = ptrtoint ptr %"tmp#35##0" to i64
+  %"tmp#37##0" = add i64 %"tmp#36##0", 16
+  %"tmp#38##0" = inttoptr i64 %"tmp#37##0" to ptr
+  store i64 8000, ptr %"tmp#38##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"coordinate#constant#3" to i64 ))
+  %"tmp#39##0" = add i64 %"tmp#36##0", 16
+  %"tmp#40##0" = inttoptr i64 %"tmp#39##0" to ptr
+  %"tmp#2##0" = load i64, ptr %"tmp#40##0"
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"coordinate#constant#4" to i64 ))
   call ccc void @print_int(i64 1000)
   call ccc void @putchar(i8 10)
   ret void
@@ -119,6 +114,7 @@ define external fastcc i64 @"coordinate.fcopy<0>"(i64 %"crd1##0") {
                     coordinate.Coordinate.z<0>
                     coordinate.Coordinate.z<1>
                     coordinate.Coordinate.~=<0>
+  constants       : 
   imports         : use coordinate
                     use wybe
   resources       : 

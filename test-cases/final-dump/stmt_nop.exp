@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : stmt_nop.<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

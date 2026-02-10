@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: count: res_decl.count
   public procs    : 
+  constants       : 
   imports         : use wybe
   resources       : count: fromList [(res_decl.count,wybe.int @res_decl:nn:nn)]
   procs           : 

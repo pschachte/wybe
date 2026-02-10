@@ -8,6 +8,13 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : io_flow_ok.<0>
+  constants       : 0:: CStringInfo {cstringChars = "hello world!"}
+                    1:: CStringInfo {cstringChars = "OK"}
+                    2:: CStringInfo {cstringChars = "That's odd!"}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"hello world!"]}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"That's odd!"]}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"OK"]}
+                    6:: ArrayInfo {arrayData = [PointerStructMember "That's odd!",PointerStructMember "OK"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -17,21 +24,21 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @io_flow_ok:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io_flow_ok:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io_flow_ok:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
-    io_flow_ok.unknown<0>(?tmp#0##0:wybe.bool) #1 @io_flow_ok:nn:nn
-    factored ~tmp#0##0:wybe.bool of
-      ?tmp#14##0:wybe.string <- [ "That's odd!":wybe.string, "OK":wybe.string ]
-        wybe.string.print<0>(~tmp#14##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @io_flow_ok:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io_flow_ok:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io_flow_ok:nn:nn
-        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
-        wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @io_flow_ok:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io_flow_ok:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io_flow_ok:nn:nn
-        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
+    wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @io_flow_ok:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io_flow_ok:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io_flow_ok:nn:nn
+    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
+    io_flow_ok.unknown<0>(?tmp#2##0:wybe.bool) #1 @io_flow_ok:nn:nn
+    factored ~tmp#2##0:wybe.bool of
+      ?tmp#24##0:wybe.string <- io_flow_ok#constant#6[PointerStructMember "That's odd!",PointerStructMember "OK"]
+        wybe.string.print<0>(~tmp#24##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @io_flow_ok:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
+        wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @io_flow_ok:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
 
 
 proc aok > {inline} (5 calls)
@@ -39,10 +46,10 @@ proc aok > {inline} (5 calls)
 aok()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @io_flow_ok:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io_flow_ok:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io_flow_ok:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
+    wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @io_flow_ok:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io_flow_ok:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io_flow_ok:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
 
 
 proc unknown > {noinline} (3 calls)
@@ -60,34 +67,34 @@ unknown(?#success##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/io_flow_ok.wybe"
 target triple    ????
 
-@"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"OK\00", align 8
-@"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"That's odd!\00", align 8
-@"cstring#2" = private unnamed_addr constant [ ?? x i8 ] c"hello world!\00", align 8
-@"string#3" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
-@"string#4" = private unnamed_addr constant {i64, i64} { i64 11, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
-@"string#5" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"array#6" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"string#4" to i64 ), i64 ptrtoint( ptr @"string#3" to i64 )]
+@"io_flow_ok#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"hello world!\00", align 8
+@"io_flow_ok#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"OK\00", align 8
+@"io_flow_ok#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"That's odd!\00", align 8
+@"io_flow_ok#constant#3" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"io_flow_ok#constant#0" }, align 8
+@"io_flow_ok#constant#4" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"io_flow_ok#constant#2" }, align 8
+@"io_flow_ok#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"io_flow_ok#constant#1" }, align 8
+@"io_flow_ok#constant#6" = private unnamed_addr constant [ 2 x ptr ] [ptr @"io_flow_ok#constant#4", ptr @"io_flow_ok#constant#5"]
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"io_flow_ok.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#0##0" = tail call fastcc i1 @"io_flow_ok.unknown<0>"()
-  %"tmp#16##0" = zext i1 %"tmp#0##0" to i64
-  %"tmp#15##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#6", i64 0, i64 %"tmp#16##0"
-  %"tmp#14##0" = load i64, ptr %"tmp#15##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#14##0")
+  %"tmp#2##0" = tail call fastcc i1 @"io_flow_ok.unknown<0>"()
+  %"tmp#26##0" = zext i1 %"tmp#2##0" to i64
+  %"tmp#25##0" = getelementptr inbounds [ 2 x i64 ], ptr @"io_flow_ok#constant#6", i64 0, i64 %"tmp#26##0"
+  %"tmp#24##0" = load i64, ptr %"tmp#25##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#24##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
 
 define external fastcc void @"io_flow_ok.aok<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
