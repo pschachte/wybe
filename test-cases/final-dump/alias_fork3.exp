@@ -148,7 +148,7 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
         mytree.printTree1<0>(~l##0:mytree.tree, ~prefix##0:wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @mytree:nn:nn
         wybe.string.print<0>(~prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @mytree:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @mytree:nn:nn
-        foreign c print_int(~k##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @mytree:nn:nn
+        foreign c print_int(~k##0:wybe.int, ~%tmp#14##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) @mytree:nn:nn
         foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mytree:nn:nn
         mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?prefix##3:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @mytree:nn:nn
 
@@ -165,7 +165,7 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
         mytree.printTree1<0>[6dacb8fd25](~l##0:mytree.tree, ~prefix##0:wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @mytree:nn:nn
         wybe.string.print<0>[410bae77d3](~prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @mytree:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @mytree:nn:nn
-        foreign c print_int(~k##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @mytree:nn:nn
+        foreign c print_int(~k##0:wybe.int, ~%tmp#14##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) @mytree:nn:nn
         foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mytree:nn:nn
         mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?prefix##3:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @mytree:nn:nn
 

@@ -20,20 +20,20 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @exp_simple:nn:nn
-    foreign c print_int(3:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @exp_simple:nn:nn
+    foreign c print_int(3:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @exp_simple:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @exp_simple:nn:nn
-    foreign c print_float(3.5999999999999996:wybe.float, ~tmp#10##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @exp_simple:nn:nn
+    foreign c print_float(3.5999999999999996:wybe.float, ~tmp#10##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) @exp_simple:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @exp_simple:nn:nn
-    foreign c putchar(104:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @exp_simple:nn:nn
+    foreign c putchar(104:wybe.char, ~tmp#16##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @exp_simple:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @exp_simple:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @exp_simple:nn:nn
     wybe.string.print<0>("hello":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @exp_simple:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @exp_simple:nn:nn
-    foreign c print_int(3:wybe.int, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @exp_simple:nn:nn
+    foreign c print_int(3:wybe.int, ~%tmp#28##0:wybe.phantom, ?%tmp#29##0:wybe.phantom) @exp_simple:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @exp_simple:nn:nn
-    foreign c print_int(1001:wybe.int, ~tmp#30##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @exp_simple:nn:nn
+    foreign c print_int(1001:wybe.int, ~tmp#30##0:wybe.phantom, ?%tmp#34##0:wybe.phantom) @exp_simple:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @exp_simple:nn:nn
-    foreign c print_int(3:wybe.int, ~tmp#35##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @exp_simple:nn:nn
+    foreign c print_int(3:wybe.int, ~tmp#35##0:wybe.phantom, ?%tmp#38##0:wybe.phantom) @exp_simple:nn:nn
     foreign lpvm store(~%tmp#38##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @exp_simple:nn:nn
 
 

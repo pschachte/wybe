@@ -89,7 +89,7 @@ define external fastcc void @"need.#anon#1<0>"() {
   ret void
 }
 
-define external fastcc void @"need.#anon#1<1>"(i64 %"#env##0") {
+define external fastcc void @"need.#anon#1<1>"(ptr %"#env##0") {
   %"tmp#1##0" = alloca i8, i64 8, align 8
   call fastcc void @"need.iota<0>"(i64 1000, ptr %"tmp#1##0")
   %"tmp#0##0" = load i64, ptr %"tmp#1##0"
@@ -115,9 +115,8 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"need.need<0>"(i64 %"stmt##0") {
-  %"tmp#1##0" = inttoptr i64 %"stmt##0" to ptr
-  %"tmp#0##0" = load ptr, ptr %"tmp#1##0"
-  tail call fastcc void %"tmp#0##0"(i64 %"stmt##0")
+define external fastcc void @"need.need<0>"(ptr %"stmt##0") {
+  %"tmp#0##0" = load ptr, ptr %"stmt##0"
+  tail call fastcc void %"tmp#0##0"(ptr %"stmt##0")
   ret void
 }

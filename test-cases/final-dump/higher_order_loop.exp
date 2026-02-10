@@ -30,7 +30,7 @@ proc #closure#1 > {inline} (1 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~x##0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~x##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @int:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @int:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
@@ -41,7 +41,7 @@ proc #closure#2 > {inline} (1 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~x##0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~x##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @int:nn:nn
     foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
@@ -83,13 +83,13 @@ define external fastcc void @"higher_order_loop.<0>"() {
   ret void
 }
 
-define external fastcc void @"higher_order_loop.#closure#1<0>"(i64 %"#env##0", i64 %"generic#x##0") {
+define external fastcc void @"higher_order_loop.#closure#1<0>"(ptr %"#env##0", i64 %"generic#x##0") {
   call ccc void @print_int(i64 %"generic#x##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc void @"higher_order_loop.#closure#2<0>"(i64 %"#env##0", i64 %"generic#x##0") {
+define external fastcc void @"higher_order_loop.#closure#2<0>"(ptr %"#env##0", i64 %"generic#x##0") {
   call ccc void @print_int(i64 %"generic#x##0")
   ret void
 }
@@ -99,13 +99,12 @@ define external fastcc void @"higher_order_loop.#cont#1<0>"(i64 %"tmp#5##0") {
   br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#10##0" = inttoptr i64 %"tmp#5##0" to ptr
-  %"f##0" = load i64, ptr %"tmp#10##0"
+  %"f##0" = load ptr, ptr %"tmp#10##0"
   %"tmp#11##0" = add i64 %"tmp#5##0", 8
   %"tmp#12##0" = inttoptr i64 %"tmp#11##0" to ptr
   %"tmp#5##1" = load i64, ptr %"tmp#12##0"
-  %"tmp#14##0" = inttoptr i64 %"f##0" to ptr
-  %"tmp#13##0" = load ptr, ptr %"tmp#14##0"
-  tail call fastcc void %"tmp#13##0"(i64 %"f##0", i64 10)
+  %"tmp#13##0" = load ptr, ptr %"f##0"
+  tail call fastcc void %"tmp#13##0"(ptr %"f##0", i64 10)
   tail call fastcc void @"higher_order_loop.#cont#1<0>"(i64 %"tmp#5##1")
   ret void
 if.else.0:

@@ -14,6 +14,7 @@ AFTER EVERYTHING:
                     3:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"hello world!"]}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"That's odd!"]}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"OK"]}
+                    6:: ArrayInfo {arrayData = [PointerStructMember "That's odd!",PointerStructMember "OK"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -28,19 +29,9 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io_flow_ok:nn:nn
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
     io_flow_ok.unknown<0>(?tmp#2##0:wybe.bool) #1 @io_flow_ok:nn:nn
-    case ~tmp#2##0:wybe.bool of
-    0:
-        wybe.string.print<0>("That's odd!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @io_flow_ok:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io_flow_ok:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io_flow_ok:nn:nn
-        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
-        wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @io_flow_ok:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io_flow_ok:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io_flow_ok:nn:nn
-        foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
-
-    1:
-        wybe.string.print<0>("OK":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @io_flow_ok:nn:nn
+    factored ~tmp#2##0:wybe.bool of
+      ?tmp#24##0:wybe.string <- io_flow_ok#constant#6
+        wybe.string.print<0>(~tmp#24##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @io_flow_ok:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io_flow_ok:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io_flow_ok:nn:nn
         foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
@@ -48,7 +39,6 @@ module top-level code > public {semipure} (0 calls)
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io_flow_ok:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io_flow_ok:nn:nn
         foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
-
 
 
 proc aok > {inline} (5 calls)
@@ -83,6 +73,7 @@ target triple    ????
 @"io_flow_ok#constant#3" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"io_flow_ok#constant#0" }, align 8
 @"io_flow_ok#constant#4" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"io_flow_ok#constant#2" }, align 8
 @"io_flow_ok#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"io_flow_ok#constant#1" }, align 8
+@"io_flow_ok#constant#6" = private unnamed_addr constant [ 2 x ptr ] [ptr @"io_flow_ok#constant#4", ptr @"io_flow_ok#constant#5"]
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
@@ -92,15 +83,10 @@ define external fastcc void @"io_flow_ok.<0>"() {
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   %"tmp#2##0" = tail call fastcc i1 @"io_flow_ok.unknown<0>"()
-  br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
-if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#5" to i64 ))
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
-  call ccc void @putchar(i8 10)
-  ret void
-if.else.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#4" to i64 ))
+  %"tmp#26##0" = zext i1 %"tmp#2##0" to i64
+  %"tmp#25##0" = getelementptr inbounds [ 2 x i64 ], ptr @"io_flow_ok#constant#6", i64 0, i64 %"tmp#26##0"
+  %"tmp#24##0" = load i64, ptr %"tmp#25##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#24##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
   call ccc void @putchar(i8 10)

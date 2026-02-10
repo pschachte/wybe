@@ -250,10 +250,10 @@ define external fastcc void @"higher_order_tests.<0>"() {
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#6" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#7" to i64 ))
+  tail call fastcc void @"higher_order_tests.#cont#1<0>"(ptr @"higher_order_tests#constant#7")
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#7" to i64 ))
+  tail call fastcc void @"higher_order_tests.#cont#1<0>"(ptr @"higher_order_tests#constant#7")
   ret void
 }
 
@@ -261,7 +261,7 @@ define external fastcc i1 @"higher_order_tests.#anon#1<0>"() {
   ret i1 1
 }
 
-define external fastcc i64 @"higher_order_tests.#anon#1<1>"(i64 %"#env##0", i64 %"generic#anon#1#1##0") {
+define external fastcc i64 @"higher_order_tests.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
   %"tmp#1##0" = zext i1 1 to i64
   ret i64 %"tmp#1##0"
 }
@@ -271,46 +271,43 @@ define external fastcc i1 @"higher_order_tests.#anon#2<0>"(i64 %"anon#2#1##0") {
   ret i1 %"tmp#13##0"
 }
 
-define external fastcc i64 @"higher_order_tests.#anon#2<1>"(i64 %"#env##0", i64 %"generic#anon#2#1##0") {
+define external fastcc i64 @"higher_order_tests.#anon#2<1>"(ptr %"#env##0", i64 %"generic#anon#2#1##0") {
   %"#success##0" = icmp eq i64 %"generic#anon#2#1##0", 1
   %"tmp#1##0" = zext i1 %"#success##0" to i64
   ret i64 %"tmp#1##0"
 }
 
-define external fastcc void @"higher_order_tests.#cont#1<0>"(i64 %"t##0") {
-  %"tmp#27##0" = inttoptr i64 %"t##0" to ptr
-  %"tmp#26##0" = load ptr, ptr %"tmp#27##0"
-  %"tmp#16##0" = tail call fastcc i1 %"tmp#26##0"(i64 %"t##0", i64 1)
+define external fastcc void @"higher_order_tests.#cont#1<0>"(ptr %"t##0") {
+  %"tmp#26##0" = load ptr, ptr %"t##0"
+  %"tmp#16##0" = tail call fastcc i1 %"tmp#26##0"(ptr %"t##0", i64 1)
   br i1 %"tmp#16##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1223)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#2<0>"(i64 %"t##0")
+  tail call fastcc void @"higher_order_tests.#cont#2<0>"(ptr %"t##0")
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#2<0>"(i64 %"t##0")
+  tail call fastcc void @"higher_order_tests.#cont#2<0>"(ptr %"t##0")
   ret void
 }
 
-define external fastcc void @"higher_order_tests.#cont#2<0>"(i64 %"t##0") {
-  %"tmp#26##0" = inttoptr i64 %"t##0" to ptr
-  %"tmp#25##0" = load ptr, ptr %"tmp#26##0"
-  %"tmp#15##0" = tail call fastcc i1 %"tmp#25##0"(i64 %"t##0", i64 2)
+define external fastcc void @"higher_order_tests.#cont#2<0>"(ptr %"t##0") {
+  %"tmp#25##0" = load ptr, ptr %"t##0"
+  %"tmp#15##0" = tail call fastcc i1 %"tmp#25##0"(ptr %"t##0", i64 2)
   br i1 %"tmp#15##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#3<0>"(i64 %"t##0")
+  tail call fastcc void @"higher_order_tests.#cont#3<0>"(ptr %"t##0")
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#3<0>"(i64 %"t##0")
+  tail call fastcc void @"higher_order_tests.#cont#3<0>"(ptr %"t##0")
   ret void
 }
 
-define external fastcc void @"higher_order_tests.#cont#3<0>"(i64 %"t##0") {
-  %"tmp#25##0" = inttoptr i64 %"t##0" to ptr
-  %"tmp#24##0" = load ptr, ptr %"tmp#25##0"
-  %"tmp#14##0" = tail call fastcc i1 %"tmp#24##0"(i64 %"t##0", i64 2)
+define external fastcc void @"higher_order_tests.#cont#3<0>"(ptr %"t##0") {
+  %"tmp#24##0" = load ptr, ptr %"t##0"
+  %"tmp#14##0" = tail call fastcc i1 %"tmp#24##0"(ptr %"t##0", i64 2)
   br i1 %"tmp#14##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1227)
@@ -331,47 +328,44 @@ define external fastcc void @"higher_order_tests.#cont#4<0>"() {
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#6" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#5<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#5" to i64 ))
+  tail call fastcc void @"higher_order_tests.#cont#5<0>"(ptr @"higher_order_tests#constant#5")
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#5<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#5" to i64 ))
+  tail call fastcc void @"higher_order_tests.#cont#5<0>"(ptr @"higher_order_tests#constant#5")
   ret void
 }
 
-define external fastcc void @"higher_order_tests.#cont#5<0>"(i64 %"t##0") {
-  %"tmp#23##0" = inttoptr i64 %"t##0" to ptr
-  %"tmp#22##0" = load ptr, ptr %"tmp#23##0"
-  %"tmp#12##0" = tail call fastcc i1 %"tmp#22##0"(i64 %"t##0", i64 1)
+define external fastcc void @"higher_order_tests.#cont#5<0>"(ptr %"t##0") {
+  %"tmp#22##0" = load ptr, ptr %"t##0"
+  %"tmp#12##0" = tail call fastcc i1 %"tmp#22##0"(ptr %"t##0", i64 1)
   br i1 %"tmp#12##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1223)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#6<0>"(i64 %"t##0")
+  tail call fastcc void @"higher_order_tests.#cont#6<0>"(ptr %"t##0")
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#6<0>"(i64 %"t##0")
+  tail call fastcc void @"higher_order_tests.#cont#6<0>"(ptr %"t##0")
   ret void
 }
 
-define external fastcc void @"higher_order_tests.#cont#6<0>"(i64 %"t##0") {
-  %"tmp#22##0" = inttoptr i64 %"t##0" to ptr
-  %"tmp#21##0" = load ptr, ptr %"tmp#22##0"
-  %"tmp#11##0" = tail call fastcc i1 %"tmp#21##0"(i64 %"t##0", i64 2)
+define external fastcc void @"higher_order_tests.#cont#6<0>"(ptr %"t##0") {
+  %"tmp#21##0" = load ptr, ptr %"t##0"
+  %"tmp#11##0" = tail call fastcc i1 %"tmp#21##0"(ptr %"t##0", i64 2)
   br i1 %"tmp#11##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_tests#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"higher_order_tests.#cont#7<0>"(i64 %"t##0")
+  tail call fastcc void @"higher_order_tests.#cont#7<0>"(ptr %"t##0")
   ret void
 if.else.0:
-  tail call fastcc void @"higher_order_tests.#cont#7<0>"(i64 %"t##0")
+  tail call fastcc void @"higher_order_tests.#cont#7<0>"(ptr %"t##0")
   ret void
 }
 
-define external fastcc void @"higher_order_tests.#cont#7<0>"(i64 %"t##0") {
-  %"tmp#21##0" = inttoptr i64 %"t##0" to ptr
-  %"tmp#20##0" = load ptr, ptr %"tmp#21##0"
-  %"tmp#10##0" = tail call fastcc i1 %"tmp#20##0"(i64 %"t##0", i64 2)
+define external fastcc void @"higher_order_tests.#cont#7<0>"(ptr %"t##0") {
+  %"tmp#20##0" = load ptr, ptr %"t##0"
+  %"tmp#10##0" = tail call fastcc i1 %"tmp#20##0"(ptr %"t##0", i64 2)
   br i1 %"tmp#10##0", label %if.then.0, label %if.else.0
 if.then.0:
   tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1227)
@@ -381,16 +375,14 @@ if.else.0:
   ret void
 }
 
-define external fastcc i1 @"higher_order_tests.do_test<0>"(i64 %"f##0", i64 %"i##0") {
-  %"tmp#2##0" = inttoptr i64 %"f##0" to ptr
-  %"tmp#1##0" = load ptr, ptr %"tmp#2##0"
-  %"tmp#3##0" = tail call fastcc i1 %"tmp#1##0"(i64 %"f##0", i64 %"i##0")
-  ret i1 %"tmp#3##0"
+define external fastcc i1 @"higher_order_tests.do_test<0>"(ptr %"f##0", i64 %"i##0") {
+  %"tmp#1##0" = load ptr, ptr %"f##0"
+  %"tmp#2##0" = tail call fastcc i1 %"tmp#1##0"(ptr %"f##0", i64 %"i##0")
+  ret i1 %"tmp#2##0"
 }
 
-define external fastcc i1 @"higher_order_tests.do_test2<0>"(i64 %"f##0", i64 %"i##0") {
-  %"tmp#2##0" = inttoptr i64 %"f##0" to ptr
-  %"tmp#1##0" = load ptr, ptr %"tmp#2##0"
-  %"tmp#3##0" = tail call fastcc i1 %"tmp#1##0"(i64 %"f##0", i64 %"i##0")
-  ret i1 %"tmp#3##0"
+define external fastcc i1 @"higher_order_tests.do_test2<0>"(ptr %"f##0", i64 %"i##0") {
+  %"tmp#1##0" = load ptr, ptr %"f##0"
+  %"tmp#2##0" = tail call fastcc i1 %"tmp#1##0"(ptr %"f##0", i64 %"i##0")
+  ret i1 %"tmp#2##0"
 }

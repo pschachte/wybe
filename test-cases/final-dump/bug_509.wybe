@@ -1,0 +1,12 @@
+?t = 1
+?f = { 
+    t = ?y; 
+    (@ = true) = ?@
+ }
+
+def {noinline} call(f:(bool, ?bool), ?x:bool) {
+    f(false, ?x)
+}
+
+call(f, ?x)
+!print(x)

@@ -19,7 +19,7 @@ module top-level code > public {inline,semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @current_module_alias_type_args:nn:nn
-    foreign c print_int(42:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @current_module_alias_type_args:nn:nn
+    foreign c print_int(42:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @current_module_alias_type_args:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @current_module_alias_type_args:nn:nn
     foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @current_module_alias_type_args:nn:nn
 

@@ -21,7 +21,7 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     foreign lpvm load(<<resource_rollback.res>>:wybe.int, ?%res##0:wybe.int) @resource_rollback:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @resource_rollback:nn:nn
-    foreign c print_int(res##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign c print_int(res##0:wybe.int, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @resource_rollback:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @resource_rollback:nn:nn
     foreign lpvm store(%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @resource_rollback:nn:nn
     resource_rollback.foo<0>(?s##0:wybe.c_string, ?tmp#4##0:wybe.bool, c"resource_rollback:15:7":wybe.c_string)<{<<resource_rollback.res>>}; {<<resource_rollback.res>>}; {}> #1 @resource_rollback:nn:nn
@@ -31,7 +31,7 @@ module top-level code > public {semipure} (0 calls)
         resource_rollback.#cont#1<0><{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
 
     1:
-        foreign c print_string(~s##0:wybe.c_string, ~tmp#8##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @resource_rollback:nn:nn
+        foreign c print_string(~s##0:wybe.c_string, ~tmp#8##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @resource_rollback:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @resource_rollback:nn:nn
         foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @resource_rollback:nn:nn
         resource_rollback.#cont#1<0><{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
@@ -45,10 +45,10 @@ proc #cont#1 > {semipure} (2 calls)
   InterestingCallProperties: []
     foreign lpvm load(<<resource_rollback.res>>:wybe.int, ?%res##0:wybe.int) @resource_rollback:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @resource_rollback:nn:nn
-    foreign c print_int(~res##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign c print_int(~res##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @resource_rollback:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @resource_rollback:nn:nn
     foreign lpvm load(<<resource_rollback.ser>>:wybe.int, ?%ser##0:wybe.int) @resource_rollback:nn:nn
-    foreign c print_int(~ser##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign c print_int(~ser##0:wybe.int, ~tmp#7##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @resource_rollback:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @resource_rollback:nn:nn
     foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @resource_rollback:nn:nn
 

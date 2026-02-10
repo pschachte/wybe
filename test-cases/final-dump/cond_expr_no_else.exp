@@ -137,47 +137,30 @@ proc vowel_num > (6 calls)
 vowel_num(c##0:wybe.char, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_eq(c##0:wybe.char, 97:wybe.char, ?tmp#5##0:wybe.bool) @cond_expr_no_else:nn:nn
-    case ~tmp#5##0:wybe.bool of
-    0:
-        foreign llvm icmp_eq(c##0:wybe.char, 101:wybe.char, ?tmp#4##0:wybe.bool) @cond_expr_no_else:nn:nn
-        case ~tmp#4##0:wybe.bool of
-        0:
-            foreign llvm icmp_eq(c##0:wybe.char, 105:wybe.char, ?tmp#3##0:wybe.bool) @cond_expr_no_else:nn:nn
-            case ~tmp#3##0:wybe.bool of
-            0:
-                foreign llvm icmp_eq(c##0:wybe.char, 111:wybe.char, ?tmp#2##0:wybe.bool) @cond_expr_no_else:nn:nn
-                case ~tmp#2##0:wybe.bool of
-                0:
-                    foreign llvm icmp_eq(~c##0:wybe.char, 117:wybe.char, ?tmp#1##0:wybe.bool) @cond_expr_no_else:nn:nn
-                    case ~tmp#1##0:wybe.bool of
-                    0:
-                        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-                        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
-
-                    1:
-                        foreign llvm move(5:wybe.int, ?#result##0:wybe.int) @cond_expr_no_else:nn:nn
-                        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
-
-
-                1:
-                    foreign llvm move(4:wybe.int, ?#result##0:wybe.int) @cond_expr_no_else:nn:nn
-                    foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
-
-
-            1:
-                foreign llvm move(3:wybe.int, ?#result##0:wybe.int) @cond_expr_no_else:nn:nn
-                foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
-
-
-        1:
-            foreign llvm move(2:wybe.int, ?#result##0:wybe.int) @cond_expr_no_else:nn:nn
-            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
-
-
-    1:
+    case ~c##0:wybe.char of
+    97:
         foreign llvm move(1:wybe.int, ?#result##0:wybe.int) @cond_expr_no_else:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+    101:
+        foreign llvm move(2:wybe.int, ?#result##0:wybe.int) @cond_expr_no_else:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+    105:
+        foreign llvm move(3:wybe.int, ?#result##0:wybe.int) @cond_expr_no_else:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+    111:
+        foreign llvm move(4:wybe.int, ?#result##0:wybe.int) @cond_expr_no_else:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+    117:
+        foreign llvm move(5:wybe.int, ?#result##0:wybe.int) @cond_expr_no_else:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+    else:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
 
   LLVM code       :
@@ -290,42 +273,34 @@ if.else.0:
 }
 
 define external fastcc {i64, i1} @"cond_expr_no_else.vowel_num<0>"(i8 %"c##0") {
-  %"tmp#5##0" = icmp eq i8 %"c##0", 97
-  br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"tmp#16##0" = insertvalue {i64, i1} undef, i64 1, 0
-  %"tmp#17##0" = insertvalue {i64, i1} %"tmp#16##0", i1 1, 1
-  ret {i64, i1} %"tmp#17##0"
-if.else.0:
-  %"tmp#4##0" = icmp eq i8 %"c##0", 101
-  br i1 %"tmp#4##0", label %if.then.1, label %if.else.1
-if.then.1:
-  %"tmp#18##0" = insertvalue {i64, i1} undef, i64 2, 0
-  %"tmp#19##0" = insertvalue {i64, i1} %"tmp#18##0", i1 1, 1
-  ret {i64, i1} %"tmp#19##0"
-if.else.1:
-  %"tmp#3##0" = icmp eq i8 %"c##0", 105
-  br i1 %"tmp#3##0", label %if.then.2, label %if.else.2
-if.then.2:
-  %"tmp#20##0" = insertvalue {i64, i1} undef, i64 3, 0
-  %"tmp#21##0" = insertvalue {i64, i1} %"tmp#20##0", i1 1, 1
-  ret {i64, i1} %"tmp#21##0"
-if.else.2:
-  %"tmp#2##0" = icmp eq i8 %"c##0", 111
-  br i1 %"tmp#2##0", label %if.then.3, label %if.else.3
-if.then.3:
-  %"tmp#22##0" = insertvalue {i64, i1} undef, i64 4, 0
-  %"tmp#23##0" = insertvalue {i64, i1} %"tmp#22##0", i1 1, 1
-  ret {i64, i1} %"tmp#23##0"
-if.else.3:
-  %"tmp#1##0" = icmp eq i8 %"c##0", 117
-  br i1 %"tmp#1##0", label %if.then.4, label %if.else.4
-if.then.4:
-  %"tmp#24##0" = insertvalue {i64, i1} undef, i64 5, 0
+  switch i8 %"c##0", label %default.switch.0 [
+    i8 97, label %case.97.switch.0
+    i8 101, label %case.101.switch.0
+    i8 105, label %case.105.switch.0
+    i8 111, label %case.111.switch.0
+    i8 117, label %case.117.switch.0 ]
+case.97.switch.0:
+  %"tmp#24##0" = insertvalue {i64, i1} undef, i64 1, 0
   %"tmp#25##0" = insertvalue {i64, i1} %"tmp#24##0", i1 1, 1
   ret {i64, i1} %"tmp#25##0"
-if.else.4:
-  %"tmp#26##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#27##0" = insertvalue {i64, i1} %"tmp#26##0", i1 0, 1
+case.101.switch.0:
+  %"tmp#26##0" = insertvalue {i64, i1} undef, i64 2, 0
+  %"tmp#27##0" = insertvalue {i64, i1} %"tmp#26##0", i1 1, 1
   ret {i64, i1} %"tmp#27##0"
+case.105.switch.0:
+  %"tmp#28##0" = insertvalue {i64, i1} undef, i64 3, 0
+  %"tmp#29##0" = insertvalue {i64, i1} %"tmp#28##0", i1 1, 1
+  ret {i64, i1} %"tmp#29##0"
+case.111.switch.0:
+  %"tmp#30##0" = insertvalue {i64, i1} undef, i64 4, 0
+  %"tmp#31##0" = insertvalue {i64, i1} %"tmp#30##0", i1 1, 1
+  ret {i64, i1} %"tmp#31##0"
+case.117.switch.0:
+  %"tmp#32##0" = insertvalue {i64, i1} undef, i64 5, 0
+  %"tmp#33##0" = insertvalue {i64, i1} %"tmp#32##0", i1 1, 1
+  ret {i64, i1} %"tmp#33##0"
+default.switch.0:
+  %"tmp#34##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#35##0" = insertvalue {i64, i1} %"tmp#34##0", i1 0, 1
+  ret {i64, i1} %"tmp#35##0"
 }

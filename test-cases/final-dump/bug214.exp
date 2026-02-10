@@ -43,22 +43,22 @@ proc #cont#1 > {inline,semipure} (0 calls)
     wybe.string.print<0>("Part 1: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @bug214:nn:nn
     bug214.position.print<0>(pos##0:bug214.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @bug214:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @bug214:nn:nn
-    foreign c putchar(32:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @bug214:nn:nn
+    foreign c putchar(32:wybe.char, ~%tmp#21##0:wybe.phantom, ?%tmp#22##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm access(pos##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int) @bug214:nn:nn
     foreign lpvm access(~pos##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.int) @bug214:nn:nn
     foreign llvm mul(~tmp#6##0:wybe.int, ~tmp#7##0:wybe.int, ?tmp#5##0:wybe.int) @bug214:nn:nn
-    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#22##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @bug214:nn:nn
+    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#22##0:wybe.phantom, ?%tmp#29##0:wybe.phantom) @bug214:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
     wybe.string.print<0>("Part 2: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @bug214:nn:nn
     foreign lpvm access(~sub##0:bug214, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##0:bug214.position) @bug214:nn:nn
     bug214.position.print<0>(tmp#8##0:bug214.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @bug214:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#37##0:wybe.phantom) @bug214:nn:nn
-    foreign c putchar(32:wybe.char, ~tmp#37##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @bug214:nn:nn
+    foreign c putchar(32:wybe.char, ~%tmp#37##0:wybe.phantom, ?%tmp#38##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm access(tmp#8##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int) @bug214:nn:nn
     foreign lpvm access(~tmp#8##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#12##0:wybe.int) @bug214:nn:nn
     foreign llvm mul(~tmp#10##0:wybe.int, ~tmp#12##0:wybe.int, ?tmp#9##0:wybe.int) @bug214:nn:nn
-    foreign c print_int(~tmp#9##0:wybe.int, ~tmp#38##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @bug214:nn:nn
+    foreign c print_int(~tmp#9##0:wybe.int, ~tmp#38##0:wybe.phantom, ?%tmp#47##0:wybe.phantom) @bug214:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#47##0:wybe.phantom, ?tmp#48##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm store(~%tmp#48##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
 
@@ -68,9 +68,9 @@ proc #cont#2 > {semipure} (3 calls)
 #cont#2(pos##0:bug214.position, sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1]
-  MultiSpeczDepInfo: [(4,(bug214.move<0>,fromList [NonAliasedParamCond 0 [0]])),(5,(bug214.move<1>,fromList [NonAliasedParamCond 0 [1]])),(6,(bug214.#cont#2<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 [1]])),(7,(bug214.#cont#2<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 [1]]))]
+  MultiSpeczDepInfo: [(4,(bug214.move<0>,fromList [NonAliasedParamCond 0 [0]])),(5,(bug214.move<1>,fromList [NonAliasedParamCond 0 [1]])),(6,(bug214.#cont#2<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 [1]])),(7,(bug214.#cont#2<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 [1]]))]
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @bug214:nn:nn
-    foreign c read_line(?tmp#18##0:wybe.c_string, ~tmp#17##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @bug214:nn:nn
+    foreign c read_line(?tmp#18##0:wybe.c_string, ~%tmp#17##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm store(%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
     wybe.string.string<0>(~tmp#18##0:wybe.c_string, ?dir_str##0:wybe.string) #8 @bug214:nn:nn
     bug214.direction.parse_direction<0>(~dir_str##0:wybe.string, ?tmp#3##0:bug214.direction, ?tmp#16##0:wybe.bool) #1 @bug214:nn:nn
@@ -79,35 +79,16 @@ proc #cont#2 > {semipure} (3 calls)
         bug214.#cont#2<0>(~pos##0:bug214.position, ~sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @bug214:nn:nn
 
     1:
-        foreign c read_int(?units##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @bug214:nn:nn
-        foreign c read_line(?tmp#23##0:wybe.c_string, ~tmp#21##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @bug214:nn:nn
+        foreign c read_int(?units##0:wybe.int, ~tmp#19##0:wybe.phantom, ?%tmp#21##0:wybe.phantom) @bug214:nn:nn
+        foreign c read_line(?tmp#23##0:wybe.c_string, ~tmp#21##0:wybe.phantom, ?%tmp#24##0:wybe.phantom) @bug214:nn:nn
         foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
         bug214.move<0>(~pos##0:bug214.position, ?pos##1:bug214.position, tmp#3##0:bug214.direction, units##0:wybe.int) #4 @bug214:nn:nn
         bug214.move<1>(~sub##0:bug214, ?sub##1:bug214, ~tmp#3##0:bug214.direction, ~units##0:wybe.int) #5 @bug214:nn:nn
-        bug214.#cont#2<0>[410bae77d3](~pos##1:bug214.position, ~sub##1:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @bug214:nn:nn
-
- [410bae77d3] [NonAliasedParam 0] :
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @bug214:nn:nn
-    foreign c read_line(?tmp#18##0:wybe.c_string, ~tmp#17##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @bug214:nn:nn
-    foreign lpvm store(%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
-    wybe.string.string<0>(~tmp#18##0:wybe.c_string, ?dir_str##0:wybe.string) #8 @bug214:nn:nn
-    bug214.direction.parse_direction<0>(~dir_str##0:wybe.string, ?tmp#3##0:bug214.direction, ?tmp#16##0:wybe.bool) #1 @bug214:nn:nn
-    case ~tmp#16##0:wybe.bool of
-    0:
-        bug214.#cont#2<0>[410bae77d3](~pos##0:bug214.position, ~sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @bug214:nn:nn
-
-    1:
-        foreign c read_int(?units##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @bug214:nn:nn
-        foreign c read_line(?tmp#23##0:wybe.c_string, ~tmp#21##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @bug214:nn:nn
-        foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
-        bug214.move<0>[410bae77d3](~pos##0:bug214.position, ?pos##1:bug214.position, tmp#3##0:bug214.direction, units##0:wybe.int) #4 @bug214:nn:nn
-        bug214.move<1>(~sub##0:bug214, ?sub##1:bug214, ~tmp#3##0:bug214.direction, ~units##0:wybe.int) #5 @bug214:nn:nn
-        bug214.#cont#2<0>[410bae77d3](~pos##1:bug214.position, ~sub##1:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @bug214:nn:nn
-
+        bug214.#cont#2<0>(~pos##1:bug214.position, ~sub##1:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @bug214:nn:nn
 
  [7477e50a09] [NonAliasedParam 0,NonAliasedParam 1] :
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @bug214:nn:nn
-    foreign c read_line(?tmp#18##0:wybe.c_string, ~tmp#17##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @bug214:nn:nn
+    foreign c read_line(?tmp#18##0:wybe.c_string, ~%tmp#17##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm store(%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
     wybe.string.string<0>(~tmp#18##0:wybe.c_string, ?dir_str##0:wybe.string) #8 @bug214:nn:nn
     bug214.direction.parse_direction<0>(~dir_str##0:wybe.string, ?tmp#3##0:bug214.direction, ?tmp#16##0:wybe.bool) #1 @bug214:nn:nn
@@ -116,8 +97,8 @@ proc #cont#2 > {semipure} (3 calls)
         bug214.#cont#2<0>[7477e50a09](~pos##0:bug214.position, ~sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @bug214:nn:nn
 
     1:
-        foreign c read_int(?units##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @bug214:nn:nn
-        foreign c read_line(?tmp#23##0:wybe.c_string, ~tmp#21##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @bug214:nn:nn
+        foreign c read_int(?units##0:wybe.int, ~tmp#19##0:wybe.phantom, ?%tmp#21##0:wybe.phantom) @bug214:nn:nn
+        foreign c read_line(?tmp#23##0:wybe.c_string, ~tmp#21##0:wybe.phantom, ?%tmp#24##0:wybe.phantom) @bug214:nn:nn
         foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
         bug214.move<0>[410bae77d3](~pos##0:bug214.position, ?pos##1:bug214.position, tmp#3##0:bug214.direction, units##0:wybe.int) #4 @bug214:nn:nn
         bug214.move<1>[410bae77d3](~sub##0:bug214, ?sub##1:bug214, ~tmp#3##0:bug214.direction, ~units##0:wybe.int) #5 @bug214:nn:nn
@@ -170,7 +151,7 @@ aim(#rec##0:bug214, ?#rec##1:bug214, #field##0:wybe.int)<{}; {}; {}>:
 proc move > (1 calls)
 0: bug214.move<0>
 move(pos##0:bug214.position, ?pos##1:bug214.position, dir##0:bug214.direction, units##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasPairs: [(pos##0,pos##1)]
   InterestingCallProperties: [InterestingUnaliased 0]
     case ~dir##0:bug214.direction of
     0:
@@ -188,6 +169,9 @@ move(pos##0:bug214.position, ?pos##1:bug214.position, dir##0:bug214.direction, u
         foreign llvm sub(~tmp#8##0:wybe.int, ~units##0:wybe.int, ?tmp#7##0:wybe.int) @bug214:nn:nn
         foreign lpvm {noalias} mutate(~pos##0:bug214.position, ?pos##1:bug214.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#7##0:wybe.int) @bug214:nn:nn
 
+    3:
+        foreign llvm move(~pos##0:bug214.position, ?pos##1:bug214.position)
+
  [410bae77d3] [NonAliasedParam 0] :
     case ~dir##0:bug214.direction of
     0:
@@ -204,6 +188,9 @@ move(pos##0:bug214.position, ?pos##1:bug214.position, dir##0:bug214.direction, u
         foreign lpvm access(pos##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int) @bug214:nn:nn
         foreign llvm sub(~tmp#8##0:wybe.int, ~units##0:wybe.int, ?tmp#7##0:wybe.int) @bug214:nn:nn
         foreign lpvm {noalias} mutate(~pos##0:bug214.position, ?pos##1:bug214.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#7##0:wybe.int) @bug214:nn:nn
+
+    3:
+        foreign llvm move(~pos##0:bug214.position, ?pos##1:bug214.position)
 
 proc move > (1 calls)
 1: bug214.move<1>
@@ -235,6 +222,9 @@ move(sub##0:bug214, ?sub##2:bug214, dir##0:bug214.direction, units##0:wybe.int)<
         foreign llvm sub(~tmp#16##0:wybe.int, ~units##0:wybe.int, ?tmp#15##0:wybe.int) @bug214:nn:nn
         foreign lpvm mutate(~sub##0:bug214, ?sub##2:bug214, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#15##0:wybe.int) @bug214:nn:nn
 
+    3:
+        foreign llvm move(~sub##0:bug214, ?sub##2:bug214)
+
  [410bae77d3] [NonAliasedParam 0] :
     case ~dir##0:bug214.direction of
     0:
@@ -260,6 +250,9 @@ move(sub##0:bug214, ?sub##2:bug214, dir##0:bug214.direction, units##0:wybe.int)<
         foreign lpvm access(sub##0:bug214, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#16##0:wybe.int) @bug214:nn:nn
         foreign llvm sub(~tmp#16##0:wybe.int, ~units##0:wybe.int, ?tmp#15##0:wybe.int) @bug214:nn:nn
         foreign lpvm mutate(~sub##0:bug214, ?sub##2:bug214, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#15##0:wybe.int) @bug214:nn:nn
+
+    3:
+        foreign llvm move(~sub##0:bug214, ?sub##2:bug214)
 
 
 
@@ -401,29 +394,10 @@ if.then.0:
   %"tmp#23##0" = call ccc i64 @read_line()
   %"pos##1" = tail call fastcc i64 @"bug214.move<0>"(i64 %"pos##0", i2 %"tmp#3##0", i64 %"units##0")
   %"sub##1" = tail call fastcc i64 @"bug214.move<1>"(i64 %"sub##0", i2 %"tmp#3##0", i64 %"units##0")
-  tail call fastcc void @"bug214.#cont#2<0>[410bae77d3]"(i64 %"pos##1", i64 %"sub##1")
+  tail call fastcc void @"bug214.#cont#2<0>"(i64 %"pos##1", i64 %"sub##1")
   ret void
 if.else.0:
   tail call fastcc void @"bug214.#cont#2<0>"(i64 %"pos##0", i64 %"sub##0")
-  ret void
-}
-
-define external fastcc void @"bug214.#cont#2<0>[410bae77d3]"(i64 %"pos##0", i64 %"sub##0") {
-  %"tmp#18##0" = call ccc i64 @read_line()
-  %"dir_str##0" = tail call fastcc i64 @"wybe.string.string<0>"(i64 %"tmp#18##0")
-  %"tmp#25##0" = tail call fastcc {i2, i1} @"bug214.direction.parse_direction<0>"(i64 %"dir_str##0")
-  %"tmp#3##0" = extractvalue {i2, i1}%"tmp#25##0", 0
-  %"tmp#16##0" = extractvalue {i2, i1}%"tmp#25##0", 1
-  br i1 %"tmp#16##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"units##0" = call ccc i64 @read_int()
-  %"tmp#23##0" = call ccc i64 @read_line()
-  %"pos##1" = tail call fastcc i64 @"bug214.move<0>[410bae77d3]"(i64 %"pos##0", i2 %"tmp#3##0", i64 %"units##0")
-  %"sub##1" = tail call fastcc i64 @"bug214.move<1>"(i64 %"sub##0", i2 %"tmp#3##0", i64 %"units##0")
-  tail call fastcc void @"bug214.#cont#2<0>[410bae77d3]"(i64 %"pos##1", i64 %"sub##1")
-  ret void
-if.else.0:
-  tail call fastcc void @"bug214.#cont#2<0>[410bae77d3]"(i64 %"pos##0", i64 %"sub##0")
   ret void
 }
 
@@ -496,10 +470,11 @@ define external fastcc i64 @"bug214.aim<1>"(i64 %"#rec##0", i64 %"#field##0") {
 }
 
 define external fastcc i64 @"bug214.move<0>"(i64 %"pos##0", i2 %"dir##0", i64 %"units##0") {
-  switch i2 %"dir##0", label %case.2.switch.0 [
+  switch i2 %"dir##0", label %case.3.switch.0 [
     i2 0, label %case.0.switch.0
     i2 1, label %case.1.switch.0
-    i2 2, label %case.2.switch.0 ]
+    i2 2, label %case.2.switch.0
+    i2 3, label %case.3.switch.0 ]
 case.0.switch.0:
   %"tmp#36##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#36##0"
@@ -537,13 +512,16 @@ case.2.switch.0:
   %"tmp#54##0" = inttoptr i64 %"tmp#53##0" to ptr
   store i64 %"tmp#7##0", ptr %"tmp#54##0"
   ret i64 %"tmp#52##0"
+case.3.switch.0:
+  ret i64 %"pos##0"
 }
 
 define external fastcc i64 @"bug214.move<0>[410bae77d3]"(i64 %"pos##0", i2 %"dir##0", i64 %"units##0") {
-  switch i2 %"dir##0", label %case.2.switch.0 [
+  switch i2 %"dir##0", label %case.3.switch.0 [
     i2 0, label %case.0.switch.0
     i2 1, label %case.1.switch.0
-    i2 2, label %case.2.switch.0 ]
+    i2 2, label %case.2.switch.0
+    i2 3, label %case.3.switch.0 ]
 case.0.switch.0:
   %"tmp#36##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#36##0"
@@ -569,13 +547,16 @@ case.2.switch.0:
   %"tmp#45##0" = inttoptr i64 %"tmp#44##0" to ptr
   store i64 %"tmp#7##0", ptr %"tmp#45##0"
   ret i64 %"pos##0"
+case.3.switch.0:
+  ret i64 %"pos##0"
 }
 
 define external fastcc i64 @"bug214.move<1>"(i64 %"sub##0", i2 %"dir##0", i64 %"units##0") {
-  switch i2 %"dir##0", label %case.2.switch.0 [
+  switch i2 %"dir##0", label %case.3.switch.0 [
     i2 0, label %case.0.switch.0
     i2 1, label %case.1.switch.0
-    i2 2, label %case.2.switch.0 ]
+    i2 2, label %case.2.switch.0
+    i2 3, label %case.3.switch.0 ]
 case.0.switch.0:
   %"tmp#60##0" = inttoptr i64 %"sub##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#60##0"
@@ -640,13 +621,16 @@ case.2.switch.0:
   %"tmp#94##0" = inttoptr i64 %"tmp#93##0" to ptr
   store i64 %"tmp#15##0", ptr %"tmp#94##0"
   ret i64 %"tmp#92##0"
+case.3.switch.0:
+  ret i64 %"sub##0"
 }
 
 define external fastcc i64 @"bug214.move<1>[410bae77d3]"(i64 %"sub##0", i2 %"dir##0", i64 %"units##0") {
-  switch i2 %"dir##0", label %case.2.switch.0 [
+  switch i2 %"dir##0", label %case.3.switch.0 [
     i2 0, label %case.0.switch.0
     i2 1, label %case.1.switch.0
-    i2 2, label %case.2.switch.0 ]
+    i2 2, label %case.2.switch.0
+    i2 3, label %case.3.switch.0 ]
 case.0.switch.0:
   %"tmp#60##0" = inttoptr i64 %"sub##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#60##0"
@@ -698,6 +682,8 @@ case.2.switch.0:
   %"tmp#84##0" = add i64 %"sub##0", 8
   %"tmp#85##0" = inttoptr i64 %"tmp#84##0" to ptr
   store i64 %"tmp#15##0", ptr %"tmp#85##0"
+  ret i64 %"sub##0"
+case.3.switch.0:
   ret i64 %"sub##0"
 }
 
@@ -1016,12 +1002,12 @@ print(pos##0:bug214.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     wybe.string.print<0>[410bae77d3](1187:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @bug214:nn:nn
     foreign lpvm access(pos##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @bug214:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @bug214:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @bug214:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
     wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @bug214:nn:nn
     foreign lpvm access(~pos##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @bug214:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @bug214:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @bug214:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#19##0:wybe.phantom, ?%tmp#20##0:wybe.phantom) @bug214:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug214:nn:nn
     wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @bug214:nn:nn
 

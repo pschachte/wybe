@@ -15,13 +15,14 @@ module Options (Options(..),
                 OptFlag(..),
                 optimisationEnabled,
                 handleCmdline, 
-                defaultOptions) where
+                defaultOptions,
+                putInColour, putLnInColour) where
 
 import           Data.List             as List
 import           Data.List.Extra       (lower)
 import           Data.Map              as Map
 import           Data.Maybe            (fromMaybe)
-import           Data.Set              as Set
+import           Data.Set              as Set ( Set, empty, fromList, union, insert, delete, member, toList )
 import           Data.Either           as Either
 import           Text.Read             (readMaybe)
 import           Control.Monad
@@ -30,9 +31,11 @@ import           System.Environment
 import           System.Exit
 import           System.FilePath
 import           Version
-import           System.Directory
+import           System.Directory      ( makeAbsolute,  doesDirectoryExist,  getPermissions,  Permissions(readable) )
 import           System.Console.ANSI
 import qualified ShellWords            as SW
+import Distribution.InstalledPackageInfo (showInstalledPackageInfo)
+
 
 -- |Command line options for the wybe compiler.
 data Options = Options
@@ -345,16 +348,51 @@ handleCmdline = do
     else let errs = optErrors opts
          in if not $ List.null errs 
     then do
-        unless (optNoFont opts) $ setSGR [SetColor Foreground Vivid Red]
-        putStrLn $ "Command line option errors:\n  " ++ intercalate "\n  " (Set.toList errs)
-        unless (optNoFont opts) $ setSGR [Reset]
+        putLnInColour opts Red $ "Command line option errors:\n  "
+                            ++ intercalate "\n  " (Set.toList errs)
         putStrLn $ usageInfo header options
         exitFailure
     else if List.null files
     then do
         putStrLn $ usageInfo header options
         exitFailure
-    else return (opts, nub files)
+    else do
+        badLibDirs <- filterM notReadableDirectory $ optLibDirs opts
+        if List.null badLibDirs
+        then return (opts, nub files)
+        else do
+            putLnInColour opts Red $ "Not readable library directory(s):\n  "
+                                ++ intercalate "\n  " badLibDirs
+            exitFailure
+
+
+-- |Return True iff the specified name isn't a directory or isn't readable
+notReadableDirectory :: String -> IO Bool
+notReadableDirectory dirName = do
+    exists <- doesDirectoryExist dirName
+    if not exists then return True
+    else not . readable <$> getPermissions dirName
+
+
+-- |Print the specified string to stdout.  Unless the options say not to, show
+-- it in the specified colour, changing back to normal output afterwards.
+-- Doesn't print a newline afterward.
+putInColour :: Options -> Color -> String -> IO ()
+putInColour opts colour text = do
+    if optNoFont opts
+    then putStr text
+    else do
+        setSGR [SetColor Foreground Vivid colour]
+        putStr text
+        setSGR [Reset]
+
+
+-- |Print the specified string to stdout, followed by a newline.  Unless the
+-- options say not to, show it in the specified colour, changing back to normal
+-- output afterwards.
+putLnInColour :: Options -> Color -> String -> IO ()
+putLnInColour opts colour text = putInColour opts colour $ text ++ "\n"
+    
 
 
 -- |Parse and add options from envArg.

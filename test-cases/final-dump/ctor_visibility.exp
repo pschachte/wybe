@@ -505,7 +505,9 @@ define external fastcc i1 @"ctor_visibility.one_pub2.~=<0>"(i1 %"#left##0", i1 %
                     ctor_visibility.with_fields.foo<0>
                     ctor_visibility.with_fields.foo<1>
                     ctor_visibility.with_fields.~=<0>
-  constants       : 
+  constants       : 0:: ArrayInfo {arrayData = [IntStructMember (-1) 8,IntStructMember 0 8]}
+                    1:: ArrayInfo {arrayData = [IntStructMember 16 8,IntStructMember 8 8]}
+                    2:: ArrayInfo {arrayData = [IntStructMember 1 8,IntStructMember 0 8]}
   imports         : use ctor_visibility
                     use wybe
   resources       : 
@@ -516,11 +518,11 @@ proc = > public (1 calls)
 =(#left##0:ctor_visibility.with_fields, #right##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#left##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int)
-    foreign llvm icmp_eq(tmp#9##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool)
+    foreign llvm and(#left##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#9##0:1 bit unsigned)
+    foreign llvm icmp_eq(tmp#9##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#10##0:wybe.bool)
     case ~tmp#10##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(~tmp#9##0:wybe.int, 1:wybe.int, ?tmp#13##0:wybe.bool)
+        foreign llvm icmp_eq(~tmp#9##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#13##0:wybe.bool)
         case ~tmp#13##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -528,8 +530,8 @@ proc = > public (1 calls)
         1:
             foreign lpvm access(#left##0:ctor_visibility.with_fields, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?#left#a##1:wybe.int) @ctor_visibility:nn:nn
             foreign lpvm access(~#left##0:ctor_visibility.with_fields, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?#left#b##0:wybe.int) @ctor_visibility:nn:nn
-            foreign llvm and(#right##0:wybe.int, 1:wybe.int, ?tmp#15##0:wybe.int)
-            foreign llvm icmp_eq(~tmp#15##0:wybe.int, 1:wybe.int, ?tmp#16##0:wybe.bool)
+            foreign llvm and(#right##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#15##0:1 bit unsigned)
+            foreign llvm icmp_eq(~tmp#15##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#16##0:wybe.bool)
             case ~tmp#16##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -550,8 +552,8 @@ proc = > public (1 calls)
 
     1:
         foreign lpvm access(~#left##0:ctor_visibility.with_fields, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#a##0:wybe.int) @ctor_visibility:nn:nn
-        foreign llvm and(#right##0:wybe.int, 1:wybe.int, ?tmp#22##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#22##0:wybe.int, 0:wybe.int, ?tmp#23##0:wybe.bool)
+        foreign llvm and(#right##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#22##0:1 bit unsigned)
+        foreign llvm icmp_eq(~tmp#22##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#23##0:wybe.bool)
         case ~tmp#23##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -568,29 +570,25 @@ proc a > public (0 calls)
 a(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
-    case ~tmp#0##0:wybe.bool of
-    0:
-        foreign lpvm access(~#rec##0:ctor_visibility.with_fields, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @ctor_visibility:nn:nn
-
-    1:
-        foreign lpvm access(~#rec##0:ctor_visibility.with_fields, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @ctor_visibility:nn:nn
-
+    foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
+    factored ~tmp#0##0:wybe.bool of
+      ?tmp#5##0:wybe.int <- ctor_visibility.with_fields#constant#2
+      ?tmp#6##0:wybe.int <- ctor_visibility.with_fields#constant#1
+      ?tmp#7##0:wybe.int <- ctor_visibility.with_fields#constant#0
+        foreign lpvm access(~#rec##0:ctor_visibility.with_fields, ~tmp#7##0:wybe.int, ~tmp#6##0:wybe.int, ~tmp#5##0:wybe.int, ?#result##0:wybe.int) @ctor_visibility:nn:nn
 proc a > public (0 calls)
 1: ctor_visibility.with_fields.a<1>
 a(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
-    foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
-    case ~tmp#0##0:wybe.bool of
-    0:
-        foreign lpvm {noalias} mutate(~#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, -1:wybe.int, 0:wybe.int, 16:wybe.int, 1:wybe.int, ~#field##0:wybe.int) @ctor_visibility:nn:nn
-
-    1:
-        foreign lpvm {noalias} mutate(~#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @ctor_visibility:nn:nn
-
+    foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
+    factored ~tmp#0##0:wybe.bool of
+      ?tmp#5##0:wybe.int <- ctor_visibility.with_fields#constant#2
+      ?tmp#6##0:wybe.int <- ctor_visibility.with_fields#constant#1
+      ?tmp#7##0:wybe.int <- ctor_visibility.with_fields#constant#0
+        foreign lpvm {noalias} mutate(~#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, ~tmp#7##0:wybe.int, 0:wybe.int, ~tmp#6##0:wybe.int, ~tmp#5##0:wybe.int, ~#field##0:wybe.int) @ctor_visibility:nn:nn
 
 
 proc b > public {inline} (0 calls)
@@ -598,8 +596,8 @@ proc b > public {inline} (0 calls)
 b(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -614,8 +612,8 @@ proc b > public {inline} (0 calls)
 b(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -636,13 +634,13 @@ bar(a##0:wybe.int, b##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##1:ctor_visibility.with_fields, ?#rec##2:ctor_visibility.with_fields, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~b##0:wybe.int) @ctor_visibility:nn:nn
     foreign llvm or(~#rec##2:ctor_visibility.with_fields, 1:wybe.int, ?#result##0:ctor_visibility.with_fields) @ctor_visibility:nn:nn
-proc bar > public {inline} (7 calls)
+proc bar > public {inline} (12 calls)
 1: ctor_visibility.with_fields.bar<1>
 bar(?a##0:wybe.int, ?b##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -663,13 +661,13 @@ foo(a##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields, ?#result##0:ctor_visibility.with_fields, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
-proc foo > public {inline} (11 calls)
+proc foo > public {inline} (14 calls)
 1: ctor_visibility.with_fields.foo<1>
 foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -697,52 +695,58 @@ proc ~= > public {inline} (0 calls)
 source_filename = "!ROOT!/final-dump/ctor_visibility.wybe"
 target triple    ????
 
+@"ctor_visibility.with_fields#constant#0" = private unnamed_addr constant [ 2 x i64 ] [i64 -1, i64 0]
+@"ctor_visibility.with_fields#constant#1" = private unnamed_addr constant [ 2 x i64 ] [i64 16, i64 8]
+@"ctor_visibility.with_fields#constant#2" = private unnamed_addr constant [ 2 x i64 ] [i64 1, i64 0]
 
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc i1 @"ctor_visibility.with_fields.=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#9##0" = and i64 %"#left##0", 1
-  %"tmp#10##0" = icmp eq i64 %"tmp#9##0", 0
+  %"tmp#26##0" = trunc i64 %"#left##0" to i1
+  %"tmp#9##0" = and i1 %"tmp#26##0", 1
+  %"tmp#10##0" = icmp eq i1 %"tmp#9##0", 0
   br i1 %"tmp#10##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#26##0" = inttoptr i64 %"#left##0" to ptr
-  %"#left#a##0" = load i64, ptr %"tmp#26##0"
-  %"tmp#22##0" = and i64 %"#right##0", 1
-  %"tmp#23##0" = icmp eq i64 %"tmp#22##0", 0
+  %"tmp#27##0" = inttoptr i64 %"#left##0" to ptr
+  %"#left#a##0" = load i64, ptr %"tmp#27##0"
+  %"tmp#28##0" = trunc i64 %"#right##0" to i1
+  %"tmp#22##0" = and i1 %"tmp#28##0", 1
+  %"tmp#23##0" = icmp eq i1 %"tmp#22##0", 0
   br i1 %"tmp#23##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#27##0" = inttoptr i64 %"#right##0" to ptr
-  %"#right#a##0" = load i64, ptr %"tmp#27##0"
-  %"tmp#28##0" = icmp eq i64 %"#left#a##0", %"#right#a##0"
-  ret i1 %"tmp#28##0"
+  %"tmp#29##0" = inttoptr i64 %"#right##0" to ptr
+  %"#right#a##0" = load i64, ptr %"tmp#29##0"
+  %"tmp#30##0" = icmp eq i64 %"#left#a##0", %"#right#a##0"
+  ret i1 %"tmp#30##0"
 if.else.1:
   ret i1 0
 if.else.0:
-  %"tmp#13##0" = icmp eq i64 %"tmp#9##0", 1
+  %"tmp#13##0" = icmp eq i1 %"tmp#9##0", 1
   br i1 %"tmp#13##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#29##0" = add i64 %"#left##0", -1
-  %"tmp#30##0" = inttoptr i64 %"tmp#29##0" to ptr
-  %"#left#a##1" = load i64, ptr %"tmp#30##0"
-  %"tmp#31##0" = add i64 %"#left##0", 7
+  %"tmp#31##0" = add i64 %"#left##0", -1
   %"tmp#32##0" = inttoptr i64 %"tmp#31##0" to ptr
-  %"#left#b##0" = load i64, ptr %"tmp#32##0"
-  %"tmp#15##0" = and i64 %"#right##0", 1
-  %"tmp#16##0" = icmp eq i64 %"tmp#15##0", 1
+  %"#left#a##1" = load i64, ptr %"tmp#32##0"
+  %"tmp#33##0" = add i64 %"#left##0", 7
+  %"tmp#34##0" = inttoptr i64 %"tmp#33##0" to ptr
+  %"#left#b##0" = load i64, ptr %"tmp#34##0"
+  %"tmp#35##0" = trunc i64 %"#right##0" to i1
+  %"tmp#15##0" = and i1 %"tmp#35##0", 1
+  %"tmp#16##0" = icmp eq i1 %"tmp#15##0", 1
   br i1 %"tmp#16##0", label %if.then.3, label %if.else.3
 if.then.3:
-  %"tmp#33##0" = add i64 %"#right##0", -1
-  %"tmp#34##0" = inttoptr i64 %"tmp#33##0" to ptr
-  %"tmp#35##0" = load i64, ptr %"tmp#34##0"
-  %"tmp#36##0" = add i64 %"#right##0", 7
+  %"tmp#36##0" = add i64 %"#right##0", -1
   %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
-  %"#right#b##0" = load i64, ptr %"tmp#37##0"
-  %"tmp#4##0" = icmp eq i64 %"#left#a##1", %"tmp#35##0"
+  %"tmp#38##0" = load i64, ptr %"tmp#37##0"
+  %"tmp#39##0" = add i64 %"#right##0", 7
+  %"tmp#40##0" = inttoptr i64 %"tmp#39##0" to ptr
+  %"#right#b##0" = load i64, ptr %"tmp#40##0"
+  %"tmp#4##0" = icmp eq i64 %"#left#a##1", %"tmp#38##0"
   br i1 %"tmp#4##0", label %if.then.4, label %if.else.4
 if.then.4:
-  %"tmp#38##0" = icmp eq i64 %"#left#b##0", %"#right#b##0"
-  ret i1 %"tmp#38##0"
+  %"tmp#41##0" = icmp eq i64 %"#left#b##0", %"#right#b##0"
+  ret i1 %"tmp#41##0"
 if.else.4:
   ret i1 0
 if.else.3:
@@ -752,83 +756,90 @@ if.else.2:
 }
 
 define external fastcc i64 @"ctor_visibility.with_fields.a<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
-  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"tmp#2##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#2##0"
-  ret i64 %"tmp#3##0"
-if.else.0:
-  %"tmp#4##0" = add i64 %"#rec##0", -1
-  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
-  %"tmp#6##0" = load i64, ptr %"tmp#5##0"
-  ret i64 %"tmp#6##0"
+  %"tmp#8##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#8##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 0
+  %"tmp#10##0" = zext i1 %"tmp#0##0" to i64
+  %"tmp#9##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#2", i64 0, i64 %"tmp#10##0"
+  %"tmp#5##0" = load i64, ptr %"tmp#9##0"
+  %"tmp#12##0" = zext i1 %"tmp#0##0" to i64
+  %"tmp#11##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#1", i64 0, i64 %"tmp#12##0"
+  %"tmp#6##0" = load i64, ptr %"tmp#11##0"
+  %"tmp#14##0" = zext i1 %"tmp#0##0" to i64
+  %"tmp#13##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#0", i64 0, i64 %"tmp#14##0"
+  %"tmp#7##0" = load i64, ptr %"tmp#13##0"
+  %"tmp#15##0" = add i64 %"#rec##0", %"tmp#7##0"
+  %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
+  %"tmp#17##0" = load i64, ptr %"tmp#16##0"
+  ret i64 %"tmp#17##0"
 }
 
 define external fastcc i64 @"ctor_visibility.with_fields.a<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
-  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"tmp#2##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#3##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#3##0", ptr %"tmp#2##0", i64 8, i1 0)
-  %"tmp#4##0" = ptrtoint ptr %"tmp#3##0" to i64
-  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#5##0"
-  ret i64 %"tmp#4##0"
-if.else.0:
-  %"tmp#6##0" = sub i64 %"#rec##0", 1
-  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
-  %"tmp#8##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#8##0", ptr %"tmp#7##0", i64 16, i1 0)
-  %"tmp#9##0" = ptrtoint ptr %"tmp#8##0" to i64
-  %"tmp#10##0" = add i64 %"tmp#9##0", 1
-  %"tmp#11##0" = add i64 %"tmp#10##0", -1
-  %"tmp#12##0" = inttoptr i64 %"tmp#11##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#12##0"
-  ret i64 %"tmp#10##0"
+  %"tmp#8##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#8##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 0
+  %"tmp#10##0" = zext i1 %"tmp#0##0" to i64
+  %"tmp#9##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#2", i64 0, i64 %"tmp#10##0"
+  %"tmp#5##0" = load i64, ptr %"tmp#9##0"
+  %"tmp#12##0" = zext i1 %"tmp#0##0" to i64
+  %"tmp#11##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#1", i64 0, i64 %"tmp#12##0"
+  %"tmp#6##0" = load i64, ptr %"tmp#11##0"
+  %"tmp#14##0" = zext i1 %"tmp#0##0" to i64
+  %"tmp#13##0" = getelementptr inbounds [ 2 x i64 ], ptr @"ctor_visibility.with_fields#constant#0", i64 0, i64 %"tmp#14##0"
+  %"tmp#7##0" = load i64, ptr %"tmp#13##0"
+  %"tmp#15##0" = sub i64 %"#rec##0", %"tmp#5##0"
+  %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
+  %"tmp#18##0" = trunc i64 %"tmp#6##0" to i32
+  %"tmp#17##0" = call ccc ptr @wybe_malloc(i32 %"tmp#18##0")
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#17##0", ptr %"tmp#16##0", i64 %"tmp#6##0", i1 0)
+  %"tmp#19##0" = ptrtoint ptr %"tmp#17##0" to i64
+  %"tmp#20##0" = add i64 %"tmp#19##0", %"tmp#5##0"
+  %"tmp#21##0" = add i64 %"tmp#20##0", %"tmp#7##0"
+  %"tmp#22##0" = inttoptr i64 %"tmp#21##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#22##0"
+  ret i64 %"tmp#20##0"
 }
 
 define external fastcc {i64, i1} @"ctor_visibility.with_fields.b<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", 7
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#rec##0", 7
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc {i64, i1} @"ctor_visibility.with_fields.b<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 1
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 16, i1 0)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 1
-  %"tmp#7##0" = add i64 %"tmp#6##0", 7
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = sub i64 %"#rec##0", 1
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 16, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 1
+  %"tmp#8##0" = add i64 %"tmp#7##0", 7
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc i64 @"ctor_visibility.with_fields.bar<0>"(i64 %"a##0", i64 %"b##0") {
@@ -844,25 +855,26 @@ define external fastcc i64 @"ctor_visibility.with_fields.bar<0>"(i64 %"a##0", i6
 }
 
 define external fastcc {i64, i64, i1} @"ctor_visibility.with_fields.bar<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
+  %"tmp#2##0" = trunc i64 %"#result##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#result##0", -1
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = add i64 %"#result##0", 7
-  %"tmp#6##0" = inttoptr i64 %"tmp#5##0" to ptr
-  %"tmp#7##0" = load i64, ptr %"tmp#6##0"
-  %"tmp#8##0" = insertvalue {i64, i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#9##0" = insertvalue {i64, i64, i1} %"tmp#8##0", i64 %"tmp#7##0", 1
-  %"tmp#10##0" = insertvalue {i64, i64, i1} %"tmp#9##0", i1 1, 2
-  ret {i64, i64, i1} %"tmp#10##0"
+  %"tmp#3##0" = add i64 %"#result##0", -1
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = add i64 %"#result##0", 7
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  %"tmp#8##0" = load i64, ptr %"tmp#7##0"
+  %"tmp#9##0" = insertvalue {i64, i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#10##0" = insertvalue {i64, i64, i1} %"tmp#9##0", i64 %"tmp#8##0", 1
+  %"tmp#11##0" = insertvalue {i64, i64, i1} %"tmp#10##0", i1 1, 2
+  ret {i64, i64, i1} %"tmp#11##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i64, i1} undef, i64 undef, 0
-  %"tmp#12##0" = insertvalue {i64, i64, i1} %"tmp#11##0", i64 undef, 1
-  %"tmp#13##0" = insertvalue {i64, i64, i1} %"tmp#12##0", i1 0, 2
-  ret {i64, i64, i1} %"tmp#13##0"
+  %"tmp#12##0" = insertvalue {i64, i64, i1} undef, i64 undef, 0
+  %"tmp#13##0" = insertvalue {i64, i64, i1} %"tmp#12##0", i64 undef, 1
+  %"tmp#14##0" = insertvalue {i64, i64, i1} %"tmp#13##0", i1 0, 2
+  ret {i64, i64, i1} %"tmp#14##0"
 }
 
 define external fastcc i64 @"ctor_visibility.with_fields.foo<0>"(i64 %"a##0") {
@@ -874,19 +886,20 @@ define external fastcc i64 @"ctor_visibility.with_fields.foo<0>"(i64 %"a##0") {
 }
 
 define external fastcc {i64, i1} @"ctor_visibility.with_fields.foo<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
+  %"tmp#2##0" = trunc i64 %"#result##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = inttoptr i64 %"#result##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#2##0"
-  %"tmp#4##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
-  %"tmp#5##0" = insertvalue {i64, i1} %"tmp#4##0", i1 1, 1
-  ret {i64, i1} %"tmp#5##0"
+  %"tmp#3##0" = inttoptr i64 %"#result##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
+  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
+  ret {i64, i1} %"tmp#6##0"
 if.else.0:
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 0, 1
-  ret {i64, i1} %"tmp#7##0"
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
+  ret {i64, i1} %"tmp#8##0"
 }
 
 define external fastcc i1 @"ctor_visibility.with_fields.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
@@ -917,19 +930,19 @@ proc = > public (1 calls)
 =(#left##0:ctor_visibility.with_fields2, #right##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#left##0:wybe.int, 1:wybe.int, ?tmp#8##0:wybe.int)
-    foreign llvm icmp_eq(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
+    foreign llvm and(#left##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#8##0:1 bit unsigned)
+    foreign llvm icmp_eq(tmp#8##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(~tmp#8##0:wybe.int, 1:wybe.int, ?tmp#12##0:wybe.bool)
+        foreign llvm icmp_eq(~tmp#8##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#12##0:wybe.bool)
         case ~tmp#12##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
             foreign lpvm access(~#left##0:ctor_visibility.with_fields2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#left#b##0:wybe.int) @ctor_visibility:nn:nn
-            foreign llvm and(#right##0:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.int)
-            foreign llvm icmp_eq(~tmp#14##0:wybe.int, 1:wybe.int, ?tmp#15##0:wybe.bool)
+            foreign llvm and(#right##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#14##0:1 bit unsigned)
+            foreign llvm icmp_eq(~tmp#14##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#15##0:wybe.bool)
             case ~tmp#15##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -942,8 +955,8 @@ proc = > public (1 calls)
 
     1:
         foreign lpvm access(~#left##0:ctor_visibility.with_fields2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#a##0:wybe.int) @ctor_visibility:nn:nn
-        foreign llvm and(#right##0:wybe.int, 1:wybe.int, ?tmp#19##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#19##0:wybe.int, 0:wybe.int, ?tmp#20##0:wybe.bool)
+        foreign llvm and(#right##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#19##0:1 bit unsigned)
+        foreign llvm icmp_eq(~tmp#19##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#20##0:wybe.bool)
         case ~tmp#20##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -960,8 +973,8 @@ proc a > public {inline} (0 calls)
 a(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -976,8 +989,8 @@ proc a > public {inline} (0 calls)
 a(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -994,8 +1007,8 @@ proc b > {inline} (0 calls)
 b(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -1010,8 +1023,8 @@ proc b > {inline} (0 calls)
 b(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -1031,13 +1044,13 @@ bar(b##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~b##0:wybe.int) @ctor_visibility:nn:nn
     foreign llvm or(~#rec##1:ctor_visibility.with_fields2, 1:wybe.int, ?#result##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
-proc bar > {inline} (5 calls)
+proc bar > {inline} (8 calls)
 1: ctor_visibility.with_fields2.bar<1>
 bar(?b##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -1056,13 +1069,13 @@ foo(a##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields2, ?#result##0:ctor_visibility.with_fields2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
-proc foo > public {inline} (10 calls)
+proc foo > public {inline} (12 calls)
 1: ctor_visibility.with_fields2.foo<1>
 foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
+    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -1095,38 +1108,41 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc i1 @"ctor_visibility.with_fields2.=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#8##0" = and i64 %"#left##0", 1
-  %"tmp#9##0" = icmp eq i64 %"tmp#8##0", 0
+  %"tmp#23##0" = trunc i64 %"#left##0" to i1
+  %"tmp#8##0" = and i1 %"tmp#23##0", 1
+  %"tmp#9##0" = icmp eq i1 %"tmp#8##0", 0
   br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#23##0" = inttoptr i64 %"#left##0" to ptr
-  %"#left#a##0" = load i64, ptr %"tmp#23##0"
-  %"tmp#19##0" = and i64 %"#right##0", 1
-  %"tmp#20##0" = icmp eq i64 %"tmp#19##0", 0
+  %"tmp#24##0" = inttoptr i64 %"#left##0" to ptr
+  %"#left#a##0" = load i64, ptr %"tmp#24##0"
+  %"tmp#25##0" = trunc i64 %"#right##0" to i1
+  %"tmp#19##0" = and i1 %"tmp#25##0", 1
+  %"tmp#20##0" = icmp eq i1 %"tmp#19##0", 0
   br i1 %"tmp#20##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#24##0" = inttoptr i64 %"#right##0" to ptr
-  %"#right#a##0" = load i64, ptr %"tmp#24##0"
-  %"tmp#25##0" = icmp eq i64 %"#left#a##0", %"#right#a##0"
-  ret i1 %"tmp#25##0"
+  %"tmp#26##0" = inttoptr i64 %"#right##0" to ptr
+  %"#right#a##0" = load i64, ptr %"tmp#26##0"
+  %"tmp#27##0" = icmp eq i64 %"#left#a##0", %"#right#a##0"
+  ret i1 %"tmp#27##0"
 if.else.1:
   ret i1 0
 if.else.0:
-  %"tmp#12##0" = icmp eq i64 %"tmp#8##0", 1
+  %"tmp#12##0" = icmp eq i1 %"tmp#8##0", 1
   br i1 %"tmp#12##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#26##0" = add i64 %"#left##0", -1
-  %"tmp#27##0" = inttoptr i64 %"tmp#26##0" to ptr
-  %"#left#b##0" = load i64, ptr %"tmp#27##0"
-  %"tmp#14##0" = and i64 %"#right##0", 1
-  %"tmp#15##0" = icmp eq i64 %"tmp#14##0", 1
+  %"tmp#28##0" = add i64 %"#left##0", -1
+  %"tmp#29##0" = inttoptr i64 %"tmp#28##0" to ptr
+  %"#left#b##0" = load i64, ptr %"tmp#29##0"
+  %"tmp#30##0" = trunc i64 %"#right##0" to i1
+  %"tmp#14##0" = and i1 %"tmp#30##0", 1
+  %"tmp#15##0" = icmp eq i1 %"tmp#14##0", 1
   br i1 %"tmp#15##0", label %if.then.3, label %if.else.3
 if.then.3:
-  %"tmp#28##0" = add i64 %"#right##0", -1
-  %"tmp#29##0" = inttoptr i64 %"tmp#28##0" to ptr
-  %"#right#b##0" = load i64, ptr %"tmp#29##0"
-  %"tmp#30##0" = icmp eq i64 %"#left#b##0", %"#right#b##0"
-  ret i1 %"tmp#30##0"
+  %"tmp#31##0" = add i64 %"#right##0", -1
+  %"tmp#32##0" = inttoptr i64 %"tmp#31##0" to ptr
+  %"#right#b##0" = load i64, ptr %"tmp#32##0"
+  %"tmp#33##0" = icmp eq i64 %"#left#b##0", %"#right#b##0"
+  ret i1 %"tmp#33##0"
 if.else.3:
   ret i1 0
 if.else.2:
@@ -1134,48 +1150,12 @@ if.else.2:
 }
 
 define external fastcc {i64, i1} @"ctor_visibility.with_fields2.a<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#2##0"
-  %"tmp#4##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
-  %"tmp#5##0" = insertvalue {i64, i1} %"tmp#4##0", i1 1, 1
-  ret {i64, i1} %"tmp#5##0"
-if.else.0:
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 0, 1
-  ret {i64, i1} %"tmp#7##0"
-}
-
-define external fastcc {i64, i1} @"ctor_visibility.with_fields2.a<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
-  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"tmp#2##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#3##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#3##0", ptr %"tmp#2##0", i64 8, i1 0)
-  %"tmp#4##0" = ptrtoint ptr %"tmp#3##0" to i64
-  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#5##0"
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
-  ret {i64, i1} %"tmp#7##0"
-if.else.0:
-  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
-  ret {i64, i1} %"tmp#9##0"
-}
-
-define external fastcc {i64, i1} @"ctor_visibility.with_fields2.b<0>"(i64 %"#rec##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
-  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
-if.then.0:
-  %"tmp#2##0" = add i64 %"#rec##0", -1
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  %"tmp#3##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#4##0" = load i64, ptr %"tmp#3##0"
   %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
   %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
@@ -1186,27 +1166,67 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc {i64, i1} @"ctor_visibility.with_fields2.b<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#1##0" = and i64 %"#rec##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
+define external fastcc {i64, i1} @"ctor_visibility.with_fields2.a<1>"(i64 %"#rec##0", i64 %"#field##0") {
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = sub i64 %"#rec##0", 1
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  %"tmp#3##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#4##0" = call ccc ptr @wybe_malloc(i32 8)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#3##0", i64 8, i1 0)
   %"tmp#5##0" = ptrtoint ptr %"tmp#4##0" to i64
-  %"tmp#6##0" = add i64 %"tmp#5##0", 1
-  %"tmp#7##0" = add i64 %"tmp#6##0", -1
-  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#8##0"
-  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#6##0", 0
-  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
-  ret {i64, i1} %"tmp#10##0"
+  %"tmp#6##0" = inttoptr i64 %"tmp#5##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#6##0"
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 1, 1
+  ret {i64, i1} %"tmp#8##0"
 if.else.0:
-  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
-  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
-  ret {i64, i1} %"tmp#12##0"
+  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 0, 1
+  ret {i64, i1} %"tmp#10##0"
+}
+
+define external fastcc {i64, i1} @"ctor_visibility.with_fields2.b<0>"(i64 %"#rec##0") {
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
+  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#3##0" = add i64 %"#rec##0", -1
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
+if.else.0:
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
+}
+
+define external fastcc {i64, i1} @"ctor_visibility.with_fields2.b<1>"(i64 %"#rec##0", i64 %"#field##0") {
+  %"tmp#2##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
+  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#3##0" = sub i64 %"#rec##0", 1
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 8)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#5##0", ptr %"tmp#4##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#5##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 1
+  %"tmp#8##0" = add i64 %"tmp#7##0", -1
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#11##0" = insertvalue {i64, i1} %"tmp#10##0", i1 1, 1
+  ret {i64, i1} %"tmp#11##0"
+if.else.0:
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 0, 1
+  ret {i64, i1} %"tmp#13##0"
 }
 
 define external fastcc i64 @"ctor_visibility.with_fields2.bar<0>"(i64 %"b##0") {
@@ -1219,20 +1239,21 @@ define external fastcc i64 @"ctor_visibility.with_fields2.bar<0>"(i64 %"b##0") {
 }
 
 define external fastcc {i64, i1} @"ctor_visibility.with_fields2.bar<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 1
+  %"tmp#2##0" = trunc i64 %"#result##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = add i64 %"#result##0", -1
-  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#3##0" = add i64 %"#result##0", -1
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
+  ret {i64, i1} %"tmp#7##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
+  ret {i64, i1} %"tmp#9##0"
 }
 
 define external fastcc i64 @"ctor_visibility.with_fields2.foo<0>"(i64 %"a##0") {
@@ -1244,19 +1265,20 @@ define external fastcc i64 @"ctor_visibility.with_fields2.foo<0>"(i64 %"a##0") {
 }
 
 define external fastcc {i64, i1} @"ctor_visibility.with_fields2.foo<1>"(i64 %"#result##0") {
-  %"tmp#1##0" = and i64 %"#result##0", 1
-  %"tmp#0##0" = icmp eq i64 %"tmp#1##0", 0
+  %"tmp#2##0" = trunc i64 %"#result##0" to i1
+  %"tmp#1##0" = and i1 %"tmp#2##0", 1
+  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#2##0" = inttoptr i64 %"#result##0" to ptr
-  %"tmp#3##0" = load i64, ptr %"tmp#2##0"
-  %"tmp#4##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
-  %"tmp#5##0" = insertvalue {i64, i1} %"tmp#4##0", i1 1, 1
-  ret {i64, i1} %"tmp#5##0"
+  %"tmp#3##0" = inttoptr i64 %"#result##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
+  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
+  ret {i64, i1} %"tmp#6##0"
 if.else.0:
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 undef, 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 0, 1
-  ret {i64, i1} %"tmp#7##0"
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 undef, 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
+  ret {i64, i1} %"tmp#8##0"
 }
 
 define external fastcc i1 @"ctor_visibility.with_fields2.~=<0>"(i64 %"#left##0", i64 %"#right##0") {

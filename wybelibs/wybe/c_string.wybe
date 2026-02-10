@@ -14,7 +14,7 @@ pub def {test} (x:_ <= y:_) { foreign c strcmp(x,y):int <= 0 }
 pub def {test} (x:_ >  y:_) { foreign c strcmp(x,y):int > 0  }
 pub def {test} (x:_ >= y:_) { foreign c strcmp(x,y):int >= 0 }
 
-pub def length(str:_):int = foreign c strlen(str)
+pub def foreign c length=strlen(str:_):int
 
 pub def {test} `[|]`(?head:char, ?tail:_, str:_) {
     foreign lpvm access(str, 0, 0, 0, ?head)
@@ -32,10 +32,10 @@ pub def {test} [](str:_, idx:int):char = c where {
 pub def unsafe_c_string_index(str:_, idx:int):char 
     = foreign lpvm access(str, idx, 1, 0)
 
-pub def print(x:_) use !io { foreign c print_string(x, !io) }
+pub def foreign c print=print_string(x:_) use !io
 
 pub def println(x:_) use !io { !print(x); !nl }
 
-pub def read(?x:_) use !io { foreign c read_line(?x, !io) }
+pub def foreign c read=read_line(?x:_) use !io
 
     

@@ -85,18 +85,18 @@ find_test(modulus##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     0:
         wybe.string.print<0>("Couldn't find even number divisible by ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @test_loop:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @test_loop:nn:nn
-        foreign c print_int(~modulus##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @test_loop:nn:nn
+        foreign c print_int(~modulus##0:wybe.int, ~%tmp#19##0:wybe.phantom, ?%tmp#20##0:wybe.phantom) @test_loop:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @test_loop:nn:nn
         foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @test_loop:nn:nn
 
     1:
         wybe.string.print<0>("First even number divisible by ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @test_loop:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @test_loop:nn:nn
-        foreign c print_int(~modulus##0:wybe.int, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @test_loop:nn:nn
+        foreign c print_int(~modulus##0:wybe.int, ~%tmp#27##0:wybe.phantom, ?%tmp#28##0:wybe.phantom) @test_loop:nn:nn
         foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @test_loop:nn:nn
         wybe.string.print<0>(" is ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @test_loop:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#34##0:wybe.phantom) @test_loop:nn:nn
-        foreign c print_int(~i##0:wybe.int, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @test_loop:nn:nn
+        foreign c print_int(~i##0:wybe.int, ~%tmp#34##0:wybe.phantom, ?%tmp#35##0:wybe.phantom) @test_loop:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#35##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @test_loop:nn:nn
         foreign lpvm store(~%tmp#36##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @test_loop:nn:nn
 

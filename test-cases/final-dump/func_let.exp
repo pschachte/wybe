@@ -20,7 +20,7 @@ module top-level code > public {inline,semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @func_let:nn:nn
-    foreign c print_int(40:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @func_let:nn:nn
+    foreign c print_int(40:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @func_let:nn:nn
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @func_let:nn:nn
 
 

@@ -29,11 +29,11 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("println(x:string) generates an extra newline?":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @exp_print:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @exp_print:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @exp_print:nn:nn
-    foreign c putchar(99:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @exp_print:nn:nn
+    foreign c putchar(99:wybe.char, ~tmp#20##0:wybe.phantom, ?%tmp#23##0:wybe.phantom) @exp_print:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @exp_print:nn:nn
-    foreign c print_int(1:wybe.int, ~tmp#24##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @exp_print:nn:nn
+    foreign c print_int(1:wybe.int, ~tmp#24##0:wybe.phantom, ?%tmp#27##0:wybe.phantom) @exp_print:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @exp_print:nn:nn
-    foreign c print_int(1:wybe.int, ~tmp#28##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @exp_print:nn:nn
+    foreign c print_int(1:wybe.int, ~tmp#28##0:wybe.phantom, ?%tmp#31##0:wybe.phantom) @exp_print:nn:nn
     foreign lpvm store(~%tmp#31##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @exp_print:nn:nn
 
   LLVM code       :

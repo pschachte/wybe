@@ -7,12 +7,12 @@ use wybe.bool, wybe.string, wybe.c_string, wybe.int, wybe.control
 
 pub constructors lesser | equal | greater
 
-pub def (x:_ =  y:_):bool = foreign llvm icmp_eq(x, y)
-pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x, y)
-pub def (x:_ <  y:_):bool = foreign llvm icmp_ult(x, y)
-pub def (x:_ <= y:_):bool = foreign llvm icmp_ule(x, y)
-pub def (x:_ >  y:_):bool = foreign llvm icmp_ugt(x, y)
-pub def (x:_ >= y:_):bool = foreign llvm icmp_uge(x, y)
+pub def foreign llvm `=` =icmp_eq(x:_,  y:_):bool
+pub def foreign llvm `~=`=icmp_ne(x:_,  y:_):bool
+pub def foreign llvm `<` =icmp_ult(x:_, y:_):bool
+pub def foreign llvm `<=`=icmp_ule(x:_, y:_):bool
+pub def foreign llvm `>` =icmp_ugt(x:_, y:_):bool
+pub def foreign llvm `>=`=icmp_uge(x:_, y:_):bool
 
 pub def fmt(x:_):string = case x in {
     lesser  :: "lesser"

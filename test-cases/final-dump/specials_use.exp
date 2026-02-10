@@ -24,7 +24,7 @@ show_column(%call_source_column_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials:nn:nn
-    foreign c print_int(~call_source_column_number##0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @specials:nn:nn
+    foreign c print_int(~call_source_column_number##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @specials:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @specials:nn:nn
 
@@ -35,7 +35,7 @@ show_file(%call_source_file_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials:nn:nn
-    foreign c print_string(~call_source_file_name##0:wybe.c_string, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @specials:nn:nn
+    foreign c print_string(~call_source_file_name##0:wybe.c_string, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @specials:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @specials:nn:nn
 
@@ -46,7 +46,7 @@ show_full_file(%call_source_file_full_name##0:wybe.c_string)<{<<wybe.io.io>>}; {
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials:nn:nn
-    foreign c print_string(~call_source_file_full_name##0:wybe.c_string, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @specials:nn:nn
+    foreign c print_string(~call_source_file_full_name##0:wybe.c_string, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @specials:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @specials:nn:nn
 
@@ -57,7 +57,7 @@ show_full_location(%call_source_full_location##0:wybe.c_string)<{<<wybe.io.io>>}
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials:nn:nn
-    foreign c print_string(~call_source_full_location##0:wybe.c_string, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @specials:nn:nn
+    foreign c print_string(~call_source_full_location##0:wybe.c_string, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @specials:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @specials:nn:nn
 
@@ -68,7 +68,7 @@ show_line(%call_source_line_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials:nn:nn
-    foreign c print_int(~call_source_line_number##0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @specials:nn:nn
+    foreign c print_int(~call_source_line_number##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @specials:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @specials:nn:nn
 
@@ -79,7 +79,7 @@ show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials:nn:nn
-    foreign c print_string(~call_source_location##0:wybe.c_string, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @specials:nn:nn
+    foreign c print_string(~call_source_location##0:wybe.c_string, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @specials:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @specials:nn:nn
 
@@ -154,17 +154,17 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials_use:nn:nn
-    foreign c print_string(c"specials_use":wybe.c_string, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @specials_use:nn:nn
+    foreign c print_string(c"specials_use":wybe.c_string, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials_use:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @specials_use:nn:nn
-    foreign c print_string(c"!ROOT!/final-dump/specials_use.wybe":wybe.c_string, ~tmp#3##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @specials_use:nn:nn
+    foreign c print_string(c"!ROOT!/final-dump/specials_use.wybe":wybe.c_string, ~tmp#3##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @specials_use:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @specials_use:nn:nn
-    foreign c print_int(5:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @specials_use:nn:nn
+    foreign c print_int(5:wybe.int, ~tmp#7##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @specials_use:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @specials_use:nn:nn
-    foreign c print_int(2:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @specials_use:nn:nn
+    foreign c print_int(2:wybe.int, ~tmp#11##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @specials_use:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @specials_use:nn:nn
-    foreign c print_string(c"specials_use:7:2":wybe.c_string, ~tmp#15##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @specials_use:nn:nn
+    foreign c print_string(c"specials_use:7:2":wybe.c_string, ~tmp#15##0:wybe.phantom, ?%tmp#18##0:wybe.phantom) @specials_use:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @specials_use:nn:nn
-    foreign c print_string(c"!ROOT!/final-dump/specials_use.wybe:8:2":wybe.c_string, ~tmp#19##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @specials_use:nn:nn
+    foreign c print_string(c"!ROOT!/final-dump/specials_use.wybe:8:2":wybe.c_string, ~tmp#19##0:wybe.phantom, ?%tmp#22##0:wybe.phantom) @specials_use:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @specials_use:nn:nn
     foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @specials_use:nn:nn
 

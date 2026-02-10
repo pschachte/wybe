@@ -32,7 +32,7 @@ yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wy
     wybe.string.print<0>(prompt##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_yorn2:nn:nn
     wybe.string.print<0>(" (y/n) ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_yorn2:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @proc_yorn2:nn:nn
-    foreign c read_char(?response##0:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @proc_yorn2:nn:nn
+    foreign c read_char(?response##0:wybe.char, ~%tmp#9##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @proc_yorn2:nn:nn
     foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_yorn2:nn:nn
     foreign llvm icmp_eq(response##0:wybe.char, 89:wybe.char, ?tmp#0##0:wybe.bool) @proc_yorn2:nn:nn
     foreign llvm icmp_eq(~response##0:wybe.char, 78:wybe.char, ?tmp#1##0:wybe.bool) @proc_yorn2:nn:nn

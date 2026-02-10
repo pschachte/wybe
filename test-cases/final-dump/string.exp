@@ -40,7 +40,7 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(85,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(86,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(88,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(89,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(91,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(93,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(95,(string.print_loop#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @string:nn:nn
-    foreign c print_string(c"TESTING CONSTRUCTION":wybe.c_string, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @string:nn:nn
+    foreign c print_string(c"TESTING CONSTRUCTION":wybe.c_string, ~%tmp#56##0:wybe.phantom, ?%tmp#57##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#57##0:wybe.phantom, ?tmp#58##0:wybe.phantom) @string:nn:nn
     foreign lpvm store(~%tmp#58##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
     wybe.string.print<0>[410bae77d3](0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #85 @string:nn:nn
@@ -76,7 +76,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #93 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#112##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#112##0:wybe.phantom, ?tmp#113##0:wybe.phantom) @string:nn:nn
-    foreign c print_string(c"\nTESTING CONVERSION TO c_string":wybe.c_string, ~tmp#113##0:wybe.phantom, ?tmp#116##0:wybe.phantom) @string:nn:nn
+    foreign c print_string(c"\nTESTING CONVERSION TO c_string":wybe.c_string, ~tmp#113##0:wybe.phantom, ?%tmp#116##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#116##0:wybe.phantom, ?tmp#117##0:wybe.phantom) @string:nn:nn
     foreign lpvm store(~%tmp#117##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
     wybe.range...<0>(1:wybe.int, 2:wybe.int, ?tmp#12##0:wybe.range) #25 @string:nn:nn
@@ -86,10 +86,10 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.c_string<0>(tmp#8##0:wybe.string, ?r##0:wybe.c_string) #31 @string:nn:nn
     wybe.string.print<0>(~tmp#8##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#131##0:wybe.phantom) @string:nn:nn
-    foreign c putchar(32:wybe.char, ~tmp#131##0:wybe.phantom, ?tmp#132##0:wybe.phantom) @string:nn:nn
-    foreign c print_string(~r##0:wybe.c_string, ~tmp#132##0:wybe.phantom, ?tmp#135##0:wybe.phantom) @string:nn:nn
+    foreign c putchar(32:wybe.char, ~%tmp#131##0:wybe.phantom, ?%tmp#132##0:wybe.phantom) @string:nn:nn
+    foreign c print_string(~r##0:wybe.c_string, ~tmp#132##0:wybe.phantom, ?%tmp#135##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#135##0:wybe.phantom, ?tmp#136##0:wybe.phantom) @string:nn:nn
-    foreign c print_string(c"\nTESTING LOOPS":wybe.c_string, ~tmp#136##0:wybe.phantom, ?tmp#139##0:wybe.phantom) @string:nn:nn
+    foreign c print_string(c"\nTESTING LOOPS":wybe.c_string, ~tmp#136##0:wybe.phantom, ?%tmp#139##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#139##0:wybe.phantom, ?tmp#140##0:wybe.phantom) @string:nn:nn
     foreign lpvm store(~%tmp#140##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
     string.print_loop#cont#1<0>("abc":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #94 @string:nn:nn
@@ -97,7 +97,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.[]<1>("abcdefghijkl":wybe.string, ~tmp#14##0:wybe.range, ?tmp#13##0:wybe.string) #40 @string:nn:nn
     string.print_loop#cont#1<0>[410bae77d3](~tmp#13##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #95 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#152##0:wybe.phantom) @string:nn:nn
-    foreign c print_string(c"\nTESTING INDEXING":wybe.c_string, ~tmp#152##0:wybe.phantom, ?tmp#153##0:wybe.phantom) @string:nn:nn
+    foreign c print_string(c"\nTESTING INDEXING":wybe.c_string, ~%tmp#152##0:wybe.phantom, ?%tmp#153##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#153##0:wybe.phantom, ?tmp#154##0:wybe.phantom) @string:nn:nn
     foreign lpvm store(~%tmp#154##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
     string.test_index<0>("abc":wybe.string, 0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #44 @string:nn:nn
@@ -148,7 +148,7 @@ print_loop#cont#1(tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @string:nn:nn
-        foreign c putchar(~c##0:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @string:nn:nn
+        foreign c putchar(~c##0:wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @string:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
         string.print_loop#cont#1<0>[410bae77d3](~tmp#0##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @string:nn:nn
 
@@ -162,7 +162,7 @@ print_loop#cont#1(tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @string:nn:nn
-        foreign c putchar(~c##0:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @string:nn:nn
+        foreign c putchar(~c##0:wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @string:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
         string.print_loop#cont#1<0>[410bae77d3](~tmp#0##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @string:nn:nn
 
@@ -177,13 +177,13 @@ test_index(s##0:wybe.string, i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; 
     case ~tmp#1##0:wybe.bool of
     0:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @string:nn:nn
-        foreign c print_string(c"OUT OF RANGE":wybe.c_string, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @string:nn:nn
+        foreign c print_string(c"OUT OF RANGE":wybe.c_string, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @string:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @string:nn:nn
         foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @string:nn:nn
-        foreign c putchar(~tmp#0##0:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @string:nn:nn
+        foreign c putchar(~tmp#0##0:wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @string:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @string:nn:nn
         foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
 

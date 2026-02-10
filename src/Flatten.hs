@@ -330,6 +330,11 @@ flattenStmt' stmt@(ProcCall func detism res args) pos d = do
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall func detism res args'
     flushPostponed
+flattenStmt' (ForeignCall "lpvm" "sizeof" flags (arg:args)) pos _ = do
+    arg' <- placedApplyM flattenSizeofArg arg
+    args' <- flattenStmtArgs args pos
+    emit pos $ ForeignCall "lpvm" "sizeof" flags $ arg':args'
+    flushPostponed
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
@@ -641,6 +646,9 @@ flattenExp (Fncall mod name bang exps) ty castFrom pos = do
         $ errmsg pos "function call cannot have preceding !"
     let stmtBuilder = ProcCall (First mod name Nothing) Det bang
     flattenCall stmtBuilder False ty castFrom pos exps
+flattenExp (ForeignFn "lpvm" "sizeof" flags (exp:exps)) ty castFrom pos = do
+    exp' <- placedApplyM flattenSizeofArg exp
+    flattenCall (ForeignCall "lpvm" "sizeof" flags . (exp':)) True ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
     flattenCall (ForeignCall lang name flags) True ty castFrom pos exps
 flattenExp (Typed exp AnyType _) ty castFrom pos = do
@@ -677,6 +685,16 @@ flattenAnon mods clsd res ty castFrom pos inner = do
     modify $ \s -> s{anonProcState=popAnonProcState anonState anonState'}
     let anonParams = processAnonProcParams anonState'
     return $ typeAndPlace (AnonProc mods anonParams body clsd res) ty castFrom pos
+
+-- | Flatten the first argument to a `foreign lpvm sizeof` call.
+-- Raises an error if the argument is an out-flowing named variable
+flattenSizeofArg :: Exp -> OptPos -> Flattener (Placed Exp)
+flattenSizeofArg exp pos = do
+    case innerExp exp of
+        Var var flow _ | var /= "_" && flow /= ParamIn -> 
+            lift $ message Error "Argument 0 of sizeof cannot be an out variable" pos
+        _ -> return ()
+    flattenPExp $ exp `maybePlace` pos
 
 
 -- | Emit a warning if a type constraint is the current module.

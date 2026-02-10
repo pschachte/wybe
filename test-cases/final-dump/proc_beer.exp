@@ -42,7 +42,7 @@ beer99#cont#1(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @proc_beer:nn:nn
-        foreign c print_int(count##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @proc_beer:nn:nn
+        foreign c print_int(count##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @proc_beer:nn:nn
         foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_beer:nn:nn
         wybe.string.print<0>(" bottles of beer on the wall":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_beer:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @proc_beer:nn:nn
@@ -59,7 +59,7 @@ beer99#cont#2(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @proc_beer:nn:nn
-    foreign c print_int(count##0:wybe.int, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @proc_beer:nn:nn
+    foreign c print_int(count##0:wybe.int, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @proc_beer:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_beer:nn:nn
     wybe.string.print<0>(" bottles of beer on the wall":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @proc_beer:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @proc_beer:nn:nn

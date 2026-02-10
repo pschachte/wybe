@@ -6,6 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 
 module Transform (transformProc,
         generateSpeczVersionInProc, expandRequiredSpeczVersionsByMod) where
@@ -24,9 +25,11 @@ import           Data.Map      as Map
 import           Data.Maybe    as Maybe
 import           Data.Set      as Set
 import           Flow          ((|>))
-import           Options       (LogSelection (Transform), 
+import           Options       (LogSelection (Transform),
                                 OptFlag(MultiSpecz), optimisationEnabled)
 import           Util
+import           Snippets      (primMove)
+import           Data.Tuple.HT (mapFst)
 
 
 ----------------------------------------------------------------
@@ -40,8 +43,8 @@ transformProc def _
     | not (procInline def) = do
         let impln = procImpln def
         let body = procImplnBody impln
-        body' <- transformProcBody def generalVersion
-        return def {procImpln = impln{procImplnBody = body'}}
+        (body', tmp) <- transformProcBody def generalVersion
+        return def {procImpln = impln{procImplnBody = body'}, procTmpCount=tmp}
 
 transformProc def _ = return def
 
@@ -69,7 +72,7 @@ initAliasMap proto speczVersion = do
 
 -- transform a proc based on a given specialized version, and return the body
 -- of that specialization.
-transformProcBody :: ProcDef -> SpeczVersion -> Compiler ProcBody
+transformProcBody :: ProcDef -> SpeczVersion -> Compiler (ProcBody, Int)
 transformProcBody procDef speczVersion = do
     when (procInline procDef) $ shouldnt "transforming an inline proc"
 
@@ -95,8 +98,7 @@ transformProcBody procDef speczVersion = do
     let tmp = procTmpCount procDef
     (_, tmp', _, _, _, body') <- buildBody tmp outVarSubs params $
                 transformBody proto body (aliasMap, Map.empty) callSiteMap
-    unless (tmp==tmp') $ shouldnt "tmp count changed in transform"
-    return body'
+    return (body', tmp')
 
 
 transformBody :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
@@ -134,13 +136,17 @@ transformForks caller body (aliasMap, deadCells) callSiteMap = do
         PrimFork var ty _ fBodies deflt -> do
             buildFork var ty
             lift $ logTransform "Forking:"
-            mapM_ (\currBody -> do
-                    beginBranch
+            mapM_ (\(brNum, currBody) -> do
+                    beginBranch brNum
                     transformBody caller currBody
                                 (aliasMap, deadCells) callSiteMap
                     endBranch
-                ) (fBodies ++ maybeToList deflt)
+                ) (List.map (mapFst Just) fBodies ++ maybeToList ((Nothing,) <$> deflt))
             completeFork
+        MergedFork{} -> do
+            lift $ logTransform "Unmerging fork:"
+            fork' <- lift $ unMergeFork fork
+            transformForks caller body{bodyFork=fork'} (aliasMap, deadCells) callSiteMap
         NoFork -> do
             -- NoFork: transform prims done
             lift $ logTransform "No fork."
@@ -388,7 +394,7 @@ updateRequiredMultiSpeczInMod mod versions = do
 -- For the given "ProcDef", generates all specz versions that are required but
 -- haven't got generated.
 generateSpeczVersionInProc :: ProcDef -> Int -> Compiler ProcDef
-generateSpeczVersionInProc def _
+generateSpeczVersionInProc def@ProcDef{procTmpCount=tmp} _
     | not (procInline def) = do
         let procImp = procImpln def
         let speczBodies = procImplnSpeczBodies procImp
@@ -402,7 +408,7 @@ generateSpeczVersionInProc def _
 
             speczBodiesList <- mapM (\(ver, sbody) ->
                 case sbody of
-                    Just b -> return (ver, Just b)
+                    Just b -> return (ver, Just (b, tmp))
                     Nothing -> do
                         -- generate the specz version
                         sbody' <- transformProcBody def ver
@@ -410,7 +416,8 @@ generateSpeczVersionInProc def _
                         ) (Map.toAscList speczBodies)
             let speczBodies' = Map.fromDistinctAscList speczBodiesList
             return $
-                def {procImpln = procImp{procImplnSpeczBodies=speczBodies'}}
+                def {procImpln=procImp{procImplnSpeczBodies=(fst <$>) <$> speczBodies'}, 
+                     procTmpCount=maximum $ tmp : List.map snd (Maybe.mapMaybe snd speczBodiesList)}
         else
             return def
 
@@ -421,7 +428,7 @@ generateSpeczVersionInProc def _ = return def
 groupByFst :: Eq a => [(a, b)] -> [(a, [b])]
 groupByFst l =
     List.groupBy (\x y -> fst x == fst y) l
-    |> List.map (\xs -> (fst(head xs), List.map snd xs))
+    |> List.map (\xs -> (fst (head xs), List.map snd xs))
 
 
 -- |Log a message, if we are logging optimisation activity.

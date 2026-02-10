@@ -111,10 +111,10 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                  [result, varSet outputVariableName `maybePlace` pos])
               pos]
         pos)
-normaliseItem (ForeignProcDecl vis lang mods proto@(ProcProto name params resources) pos) = do
+normaliseItem (ForeignProcDecl vis lang mods mbAlias proto@(ProcProto name params resources) resulttype pos) = do
     when (mods{modifierImpurity=Pure, modifierDetism=Det, modifierInline=MayInline} /= defaultProcModifiers)
         $ errmsg pos
-        $ "Foreign procedure declaration of " ++ name
+        $ "Foreign procedure declaration of " ++ procName
             ++ " has illegal procedure modifiers. Only purity, determinism, and inlining can be specified."
     mapM_ ((\(Param{paramType=ty, paramName=name}, pos) -> do
             when (ty == AnyType)
@@ -123,16 +123,20 @@ normaliseItem (ForeignProcDecl vis lang mods proto@(ProcProto name params resour
         ) . unPlace) params
 
     normaliseItem
-        (ProcDecl vis mods proto
+        (ProcDecl vis mods proto{procProtoName=procName, procProtoParams=params'}
             [maybePlace (ForeignCall lang name mods' exps) pos] pos)
   where
-    mods' = List.filter (not . List.null) 
+    procName = fromMaybe name mbAlias
+    mods' = List.filter (not . List.null)
                 [ impurityName (modifierImpurity mods)
                 , determinismName (modifierDetism mods) ]
     exps = List.map (uncurry (flip rePlace . paramToVar) . unPlace) params
+        ++ [varSet outputVariableName `maybePlace` pos | resulttype /= AnyType]
         ++ List.map (\(ResourceFlowSpec rs@(ResourceSpec _ r) dir) ->
                         Var r dir (Resource rs) `maybePlace` pos)
                     resources
+    params' = params
+        ++ [Param outputVariableName resulttype ParamOut Ordinary `maybePlace` pos | resulttype /= AnyType]
 normaliseItem item@ProcDecl{} = do
     logNormalise $ "Recording proc without flattening:" ++ show item
     addProc 0 item
@@ -158,7 +162,9 @@ normaliseSubmodule name vis pos items = do
     alreadyExists <- isJust <$> getLoadingModule subModSpec
     if alreadyExists
       then reenterModule subModSpec
-      else enterModule parentOrigin subModSpec (Just parentModSpec)
+      else do
+        root <- getModule modRootModSpec
+        enterModule parentOrigin subModSpec root
     -- submodule always imports parent module
     updateImplementation $ \i -> i { modNestedIn = Just parentModSpec }
     addImport parentModSpec (importSpec Nothing Private)
@@ -759,7 +765,9 @@ deconstructorItems uniq vis ctorName typeSpec params numConsts numNonConsts tag
 --  is necessary, just generate a Nop, rather than a true test.
 tagCheck :: OptPos -> Int -> Int -> Int -> Int -> Int -> Maybe Int -> Ident -> Placed Stmt
 tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
-    let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
+    let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
+        tagTy = Representation (Bits tagBits)
+    in
     -- If there are any constant constructors, be sure it's not one of them
     let tests =
           (case numConsts of
@@ -773,11 +781,11 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
            (case numNonConsts of
                1 -> []  -- Nothing to do if it's the only non-const constructor
                _ -> [comparison "icmp_eq"
-                     (intCast $ ForeignFn "llvm" "and" [] [Unplaced $ intCast $ varGet varName,
-                         Unplaced $ iVal (2^tagBits-1) `withType` intType])
-                     (intCast $ iVal (if tag > tagLimit
+                     (ForeignFn "llvm" "and" [] [Unplaced $ varGet varName `castTo` tagTy,
+                         Unplaced $ iVal (2^tagBits-1) `withType` tagTy] `withType` tagTy)
+                     (iVal (if tag > tagLimit
                                       then wordSizeBytes-1
-                                      else tag))])
+                                      else tag) `withType` tagTy)])
            ++
            -- If there's a secondary tag, check that, too.
            if tag > tagLimit

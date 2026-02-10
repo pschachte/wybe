@@ -28,13 +28,13 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm add(~tmp#3##0:wybe.int, 1:wybe.int, ?tmp#4##0:wybe.int) @use_resource:nn:nn
     wybe.string.print<0>("Inner count (4): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @use_resource:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @use_resource:nn:nn
-    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @use_resource:nn:nn
+    foreign c print_int(~tmp#4##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @use_resource:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @use_resource:nn:nn
     foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @use_resource:nn:nn
     foreign lpvm store(tmp#1##0:wybe.int, <<use_resource.count>>:wybe.int) @use_resource:nn:nn
     wybe.string.print<0>("Outer count (1): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @use_resource:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @use_resource:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @use_resource:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @use_resource:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @use_resource:nn:nn
     foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @use_resource:nn:nn
 
@@ -61,13 +61,13 @@ use_test()<{<<use_resource.count>>, <<wybe.io.io>>}; {<<use_resource.count>>, <<
     foreign llvm add(~tmp#9##0:wybe.int, 1:wybe.int, ?tmp#11##0:wybe.int) @use_resource:nn:nn
     wybe.string.print<0>("Inner count (4): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @use_resource:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @use_resource:nn:nn
-    foreign c print_int(~tmp#11##0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @use_resource:nn:nn
+    foreign c print_int(~tmp#11##0:wybe.int, ~%tmp#17##0:wybe.phantom, ?%tmp#18##0:wybe.phantom) @use_resource:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @use_resource:nn:nn
     foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @use_resource:nn:nn
     foreign lpvm store(tmp#5##0:wybe.int, <<use_resource.count>>:wybe.int) @use_resource:nn:nn
     wybe.string.print<0>("Outer count (1): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @use_resource:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @use_resource:nn:nn
-    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @use_resource:nn:nn
+    foreign c print_int(~tmp#5##0:wybe.int, ~%tmp#25##0:wybe.phantom, ?%tmp#26##0:wybe.phantom) @use_resource:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @use_resource:nn:nn
     foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @use_resource:nn:nn
 

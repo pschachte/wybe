@@ -42,7 +42,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.list.map#cont#1<0>(higher_order_resources.#anon#1<1><>:{resource}(T), higher_order_resources#constant#10:wybe.list(T))<{}; {}; {0, 1}> #32 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##1:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#66##0:wybe.phantom) @higher_order_resources:nn:nn
-    foreign c print_int(~maximum##1:wybe.int, ~tmp#66##0:wybe.phantom, ?tmp#67##0:wybe.phantom) @higher_order_resources:nn:nn
+    foreign c print_int(~maximum##1:wybe.int, ~%tmp#66##0:wybe.phantom, ?%tmp#67##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#67##0:wybe.phantom, ?tmp#68##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~%tmp#68##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_resources:nn:nn
     wybe.string.print<0>("*****":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @higher_order_resources:nn:nn
@@ -53,7 +53,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.list.map#cont#1<0>(higher_order_resources.#anon#2<1><>:{resource}(T), higher_order_resources#constant#18:wybe.list(T))<{}; {}; {0, 1}> #34 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##3:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#127##0:wybe.phantom) @higher_order_resources:nn:nn
-    foreign c print_int(~maximum##3:wybe.int, ~tmp#127##0:wybe.phantom, ?tmp#128##0:wybe.phantom) @higher_order_resources:nn:nn
+    foreign c print_int(~maximum##3:wybe.int, ~%tmp#127##0:wybe.phantom, ?%tmp#128##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#128##0:wybe.phantom, ?tmp#129##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~%tmp#129##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~tmp#31##0:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
@@ -86,7 +86,7 @@ proc #anon#2 > {inline} (1 calls)
     wybe.string.print<0>("> ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##2:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#42##0:wybe.phantom) @higher_order_resources:nn:nn
-    foreign c print_int(~maximum##2:wybe.int, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @higher_order_resources:nn:nn
+    foreign c print_int(~maximum##2:wybe.int, ~%tmp#42##0:wybe.phantom, ?%tmp#43##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~%tmp#44##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~tmp#34##0:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
@@ -103,7 +103,7 @@ proc #anon#2 > {inline} (1 calls)
     wybe.string.print<0>("> ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#2##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @higher_order_resources:nn:nn
-    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @higher_order_resources:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(~tmp#1##0:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
@@ -159,7 +159,7 @@ target triple    ????
 
 declare external fastcc i64 @"wybe.int.max<0>"(i64, i64)
 declare external fastcc i64 @"wybe.list.length1<0>"(i64, i64)
-declare external fastcc void @"wybe.list.map#cont#1<0>"(i64, i64)
+declare external fastcc void @"wybe.list.map#cont#1<0>"(ptr, i64)
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -169,14 +169,14 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 define external fastcc void @"higher_order_resources.<0>"() {
   %"tmp#31##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#11" to i64 ), i64 ptrtoint( ptr @"higher_order_resources#constant#10" to i64 ))
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(ptr @"higher_order_resources#constant#11", i64 ptrtoint( ptr @"higher_order_resources#constant#10" to i64 ))
   %"maximum##1" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"maximum##1")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#12" to i64 ))
   call ccc void @putchar(i8 10)
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#19" to i64 ), i64 ptrtoint( ptr @"higher_order_resources#constant#18" to i64 ))
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(ptr @"higher_order_resources#constant#19", i64 ptrtoint( ptr @"higher_order_resources#constant#18" to i64 ))
   %"maximum##3" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"maximum##3")
   call ccc void @putchar(i8 10)
@@ -190,7 +190,7 @@ define external fastcc void @"higher_order_resources.#anon#1<0>"(i64 %"anon#1#1#
   ret void
 }
 
-define external fastcc void @"higher_order_resources.#anon#1<1>"(i64 %"#env##0", i64 %"generic#anon#1#1##0") {
+define external fastcc void @"higher_order_resources.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
   %"tmp#1##0" = tail call fastcc i64 @"wybe.list.length1<0>"(i64 %"generic#anon#1#1##0", i64 0)
   tail call fastcc void @"higher_order_resources.take_max<0>"(i64 %"tmp#1##0")
   ret void
@@ -199,7 +199,7 @@ define external fastcc void @"higher_order_resources.#anon#1<1>"(i64 %"#env##0",
 define external fastcc void @"higher_order_resources.#anon#2<0>"(i64 %"anon#2#1##0") {
   %"tmp#34##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#2" to i64 ), i64 %"anon#2#1##0")
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(ptr @"higher_order_resources#constant#2", i64 %"anon#2#1##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#3" to i64 ))
   %"maximum##2" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"maximum##2")
@@ -210,10 +210,10 @@ define external fastcc void @"higher_order_resources.#anon#2<0>"(i64 %"anon#2#1#
   ret void
 }
 
-define external fastcc void @"higher_order_resources.#anon#2<1>"(i64 %"#env##0", i64 %"generic#anon#2#1##0") {
+define external fastcc void @"higher_order_resources.#anon#2<1>"(ptr %"#env##0", i64 %"generic#anon#2#1##0") {
   %"tmp#1##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   store i64 -1000, ptr @"resource#higher_order_resources.maximum"
-  tail call fastcc void @"wybe.list.map#cont#1<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#2" to i64 ), i64 %"generic#anon#2#1##0")
+  tail call fastcc void @"wybe.list.map#cont#1<0>"(ptr @"higher_order_resources#constant#2", i64 %"generic#anon#2#1##0")
   tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"higher_order_resources#constant#3" to i64 ))
   %"tmp#2##0" = load i64, ptr @"resource#higher_order_resources.maximum"
   call ccc void @print_int(i64 %"tmp#2##0")
@@ -224,7 +224,7 @@ define external fastcc void @"higher_order_resources.#anon#2<1>"(i64 %"#env##0",
   ret void
 }
 
-define external fastcc void @"higher_order_resources.#anon#2#closure#1<0>"(i64 %"#env##0", i64 %"generic#i##0") {
+define external fastcc void @"higher_order_resources.#anon#2#closure#1<0>"(ptr %"#env##0", i64 %"generic#i##0") {
   tail call fastcc void @"higher_order_resources.take_max<0>"(i64 %"generic#i##0")
   ret void
 }

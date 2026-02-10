@@ -18,21 +18,16 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    terminal_ok.exit_bool<0>(0:wybe.bool) #1 @terminal_ok:nn:nn
+    foreign c {terminal,impure} exit(0:wybe.int) @terminal_ok:nn:nn
 
 
-proc exit_bool > {terminal,semipure} (1 calls)
+proc exit_bool > {terminal,inline,semipure} (1 calls)
 0: terminal_ok.exit_bool<0>
 exit_bool(b##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    case ~b##0:wybe.bool of
-    0:
-        foreign c {terminal,impure} exit(0:wybe.int) @terminal_ok:nn:nn
-
-    1:
-        foreign c {terminal,impure} exit(1:wybe.int) @terminal_ok:nn:nn
-
+    foreign lpvm cast(~b##0:wybe.bool, ?tmp#1##0:wybe.int)
+    foreign c {terminal,impure} exit(~tmp#1##0:wybe.int) @terminal_ok:nn:nn
 
   LLVM code       :
 
@@ -47,16 +42,12 @@ declare external ccc void @exit(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"terminal_ok.<0>"() {
-  tail call fastcc void @"terminal_ok.exit_bool<0>"(i1 0)
+  call ccc void @exit(i64 0)
   ret void
 }
 
 define external fastcc void @"terminal_ok.exit_bool<0>"(i1 %"b##0") {
-  br i1 %"b##0", label %if.then.0, label %if.else.0
-if.then.0:
-  call ccc void @exit(i64 1)
-  ret void
-if.else.0:
-  call ccc void @exit(i64 0)
+  %"tmp#1##0" = zext i1 %"b##0" to i64
+  call ccc void @exit(i64 %"tmp#1##0")
   ret void
 }

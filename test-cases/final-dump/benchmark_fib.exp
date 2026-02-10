@@ -64,13 +64,12 @@ define external fastcc void @"benchmark.start<0>"(i64 %"call_source_location##0"
   ret void
 }
 
-define external fastcc double @"benchmark.time_execution<0>"(i64 %"proc##0", i64 %"call_source_location##0") {
+define external fastcc double @"benchmark.time_execution<0>"(ptr %"proc##0", i64 %"call_source_location##0") {
   call ccc void @benchmark_start(i64 %"call_source_location##0")
-  %"tmp#1##0" = inttoptr i64 %"proc##0" to ptr
-  %"tmp#0##0" = load ptr, ptr %"tmp#1##0"
-  tail call fastcc void %"tmp#0##0"(i64 %"proc##0")
-  %"tmp#2##0" = call ccc double @benchmark_end(i64 %"call_source_location##0")
-  ret double %"tmp#2##0"
+  %"tmp#0##0" = load ptr, ptr %"proc##0"
+  tail call fastcc void %"tmp#0##0"(ptr %"proc##0")
+  %"tmp#1##0" = call ccc double @benchmark_end(i64 %"call_source_location##0")
+  ret double %"tmp#1##0"
 }
 
 --------------------------------------------------
@@ -105,7 +104,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c {impure} benchmark_end(c"benchmark_fib:32:2":wybe.c_string, ?time##0:wybe.float) @benchmark_fib:nn:nn
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @benchmark_fib:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @benchmark_fib:nn:nn
-    foreign c print_float(~time##0:wybe.float, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c print_float(~time##0:wybe.float, ~%tmp#13##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
     foreign c {impure} benchmark_start(c"benchmark_fib:35:2":wybe.c_string) @benchmark_fib:nn:nn
@@ -113,7 +112,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c {impure} benchmark_end(c"benchmark_fib:37:2":wybe.c_string, ?time##1:wybe.float) @benchmark_fib:nn:nn
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @benchmark_fib:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @benchmark_fib:nn:nn
-    foreign c print_float(~time##1:wybe.float, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c print_float(~time##1:wybe.float, ~%tmp#23##0:wybe.phantom, ?%tmp#24##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
     foreign c {impure} benchmark_start(c"benchmark_fib:40:2":wybe.c_string) @benchmark_fib:nn:nn
@@ -121,7 +120,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c {impure} benchmark_end(c"benchmark_fib:40:2":wybe.c_string, ?time##2:wybe.float) @benchmark_fib:nn:nn
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @benchmark_fib:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @benchmark_fib:nn:nn
-    foreign c print_float(~time##2:wybe.float, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c print_float(~time##2:wybe.float, ~%tmp#33##0:wybe.phantom, ?%tmp#34##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign lpvm store(~%tmp#35##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
 
@@ -285,7 +284,7 @@ define external fastcc void @"benchmark_fib.#anon#1<0>"() {
   ret void
 }
 
-define external fastcc void @"benchmark_fib.#anon#1<1>"(i64 %"#env##0") {
+define external fastcc void @"benchmark_fib.#anon#1<1>"(ptr %"#env##0") {
   %"tmp#0##0" = tail call fastcc i64 @"benchmark_fib.naive_fib<0>"(i64 42)
   ret void
 }

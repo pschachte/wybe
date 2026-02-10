@@ -22,7 +22,7 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     current_module_alias.toCelsius<0>(1.0:wybe.float, ?tmp#0##0:wybe.float) #0 @current_module_alias:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @current_module_alias:nn:nn
-    foreign c print_float(~tmp#0##0:wybe.float, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @current_module_alias:nn:nn
+    foreign c print_float(~tmp#0##0:wybe.float, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @current_module_alias:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @current_module_alias:nn:nn
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @current_module_alias:nn:nn
 

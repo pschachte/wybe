@@ -114,7 +114,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @main_hello:nn:nn
     foreign lpvm load(<<command_line.arguments>>:wybe.c_array(wybe.c_string), ?%arguments##0:wybe.c_array(wybe.c_string)) @main_hello:nn:nn
     foreign lpvm access(~arguments##0:wybe.c_array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @main_hello:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @main_hello:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#10##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @main_hello:nn:nn
     foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @main_hello:nn:nn
     wybe.string.print<0>(" command line argument(s)":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @main_hello:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @main_hello:nn:nn

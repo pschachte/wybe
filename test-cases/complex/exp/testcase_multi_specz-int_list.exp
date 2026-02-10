@@ -118,6 +118,7 @@ AFTER BUILDING MAIN:
                     use wybe.float
                     use wybe.int
                     use wybe.io
+                    use wybe.lazy
                     use wybe.list
                     use wybe.machine_word
                     use wybe.memory_management
@@ -462,8 +463,8 @@ print(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
         foreign lpvm access(x##0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @int_list:nn:nn
         foreign lpvm access(~x##0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:int_list.int_list) @int_list:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int_list:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int_list:nn:nn
-        foreign c putchar(32:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int_list:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @int_list:nn:nn
+        foreign c putchar(32:wybe.char, ~tmp#5##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int_list:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list:nn:nn
         int_list.print<0>(~t##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @int_list:nn:nn
 
@@ -873,17 +874,17 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#105##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of building lists: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #37 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#111##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#111##0:wybe.phantom, ?tmp#112##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c print_int(~tmp#3##0:wybe.int, ~%tmp#111##0:wybe.phantom, ?%tmp#112##0:wybe.phantom) @int_list_test:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#112##0:wybe.phantom, ?tmp#113##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#113##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of test(aliased): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#119##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#119##0:wybe.phantom, ?tmp#120##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c print_int(~tmp#4##0:wybe.int, ~%tmp#119##0:wybe.phantom, ?%tmp#120##0:wybe.phantom) @int_list_test:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#120##0:wybe.phantom, ?tmp#121##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#121##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of test(non-aliased): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #43 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#127##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#127##0:wybe.phantom, ?tmp#128##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c print_int(~tmp#5##0:wybe.int, ~%tmp#127##0:wybe.phantom, ?%tmp#128##0:wybe.phantom) @int_list_test:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#128##0:wybe.phantom, ?tmp#129##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#129##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
 
@@ -975,6 +976,7 @@ AFTER EVERYTHING:
                     use wybe.float
                     use wybe.int
                     use wybe.io
+                    use wybe.lazy
                     use wybe.list
                     use wybe.machine_word
                     use wybe.memory_management
@@ -1472,8 +1474,8 @@ print(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
         foreign lpvm access(x##0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @int_list:nn:nn
         foreign lpvm access(~x##0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:int_list.int_list) @int_list:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int_list:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int_list:nn:nn
-        foreign c putchar(32:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int_list:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @int_list:nn:nn
+        foreign c putchar(32:wybe.char, ~tmp#5##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int_list:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list:nn:nn
         int_list.print<0>(~t##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @int_list:nn:nn
 
@@ -2667,17 +2669,17 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#105##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of building lists: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #37 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#111##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#111##0:wybe.phantom, ?tmp#112##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c print_int(~tmp#3##0:wybe.int, ~%tmp#111##0:wybe.phantom, ?%tmp#112##0:wybe.phantom) @int_list_test:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#112##0:wybe.phantom, ?tmp#113##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#113##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of test(aliased): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#119##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#119##0:wybe.phantom, ?tmp#120##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c print_int(~tmp#4##0:wybe.int, ~%tmp#119##0:wybe.phantom, ?%tmp#120##0:wybe.phantom) @int_list_test:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#120##0:wybe.phantom, ?tmp#121##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#121##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
     wybe.string.print<0>(" ** malloc count of test(non-aliased): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #43 @int_list_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#127##0:wybe.phantom) @int_list_test:nn:nn
-    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#127##0:wybe.phantom, ?tmp#128##0:wybe.phantom) @int_list_test:nn:nn
+    foreign c print_int(~tmp#5##0:wybe.int, ~%tmp#127##0:wybe.phantom, ?%tmp#128##0:wybe.phantom) @int_list_test:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#128##0:wybe.phantom, ?tmp#129##0:wybe.phantom) @int_list_test:nn:nn
     foreign lpvm store(~%tmp#129##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_list_test:nn:nn
 

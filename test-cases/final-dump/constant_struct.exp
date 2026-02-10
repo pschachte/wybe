@@ -23,10 +23,10 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     wybe.list.length1<0>(constant_struct#constant#2:wybe.list(T), 0:wybe.int, ?tmp#0##0:wybe.int) #12 @constant_struct:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @constant_struct:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @constant_struct:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#24##0:wybe.phantom, ?%tmp#25##0:wybe.phantom) @constant_struct:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @constant_struct:nn:nn
     wybe.list.length1<0>(constant_struct#constant#3:wybe.list(T), 0:wybe.int, ?tmp#5##0:wybe.int) #13 @constant_struct:nn:nn
-    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#26##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @constant_struct:nn:nn
+    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#26##0:wybe.phantom, ?%tmp#42##0:wybe.phantom) @constant_struct:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @constant_struct:nn:nn
     foreign lpvm store(~%tmp#43##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @constant_struct:nn:nn
 

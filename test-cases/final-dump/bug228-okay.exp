@@ -19,9 +19,9 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @bug228-okay:15:2
-    foreign c print_int(1:wybe.int, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @bug228-okay:15:2
+    foreign c print_int(1:wybe.int, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @bug228-okay:15:2
     foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @bug228-okay:15:2
-    foreign c print_int(2:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @bug228-okay:16:2
+    foreign c print_int(2:wybe.int, ~tmp#4##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @bug228-okay:16:2
     foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @bug228-okay:16:2
     foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug228-okay:16:2
 

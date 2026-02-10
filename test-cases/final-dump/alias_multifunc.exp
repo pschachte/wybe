@@ -78,13 +78,13 @@ replicate1(p1##0:position.position, ?p2##0:position.position, ?p3##0:position.po
   InterestingCallProperties: []
     wybe.string.print<0>("random replicate1 ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @alias_multifunc:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @alias_multifunc:nn:nn
-    foreign c print_int(0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @alias_multifunc:nn:nn
+    foreign c print_int(0:wybe.int, ~%tmp#13##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @alias_multifunc:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @alias_multifunc:nn:nn
     foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_multifunc:nn:nn
     foreign llvm move(p1##0:position.position, ?p2##0:position.position) @alias_multifunc:nn:nn
     wybe.string.print<0>("random replicate2 ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @alias_multifunc:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @alias_multifunc:nn:nn
-    foreign c print_int(0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @alias_multifunc:nn:nn
+    foreign c print_int(0:wybe.int, ~%tmp#17##0:wybe.phantom, ?%tmp#18##0:wybe.phantom) @alias_multifunc:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @alias_multifunc:nn:nn
     foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_multifunc:nn:nn
     foreign llvm move(~p1##0:position.position, ?p3##0:position.position) @alias_multifunc:nn:nn
@@ -97,7 +97,7 @@ replicate2(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; 
   InterestingCallProperties: []
     wybe.string.print<0>("random replicate2 ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @alias_multifunc:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @alias_multifunc:nn:nn
-    foreign c print_int(0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @alias_multifunc:nn:nn
+    foreign c print_int(0:wybe.int, ~%tmp#13##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @alias_multifunc:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @alias_multifunc:nn:nn
     foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_multifunc:nn:nn
     foreign llvm move(~p1##0:position.position, ?p2##0:position.position) @alias_multifunc:nn:nn
@@ -218,12 +218,12 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     wybe.string.print<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @position:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @position:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @position:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @position:nn:nn
     foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
     wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @position:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @position:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @position:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#19##0:wybe.phantom, ?%tmp#20##0:wybe.phantom) @position:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
     wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @position:nn:nn

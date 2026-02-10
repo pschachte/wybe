@@ -154,14 +154,14 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     wybe.string.print<0>("student id: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @student:nn:nn
     foreign lpvm access(stu##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @student:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @student:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @student:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#13##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @student:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @student:nn:nn
     foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @student:nn:nn
     foreign lpvm access(~stu##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:student.course) @student:nn:nn
     wybe.string.print<0>("course code: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @student:nn:nn
     foreign lpvm access(tmp#1##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @student:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @student:nn:nn
-    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @student:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~%tmp#23##0:wybe.phantom, ?%tmp#24##0:wybe.phantom) @student:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @student:nn:nn
     foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @student:nn:nn
     wybe.string.print<0>("course name: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @student:nn:nn

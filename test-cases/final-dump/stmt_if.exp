@@ -25,9 +25,11 @@ AFTER EVERYTHING:
                     3:: CStringInfo {cstringChars = "lookup succeeds when it should fail"}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 35 8,PointerStructMember c"lookup succeeds when it should fail"]}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 27 8,PointerStructMember c"lookup fails when it should"]}
-                    6:: StructInfo {structSize = 24, structData = [IntStructMember 0 8,IntStructMember 1 8,IntStructMember 0 8]}
-                    7:: StructInfo {structSize = 16, structData = [IntStructMember 35 8,PointerStructMember c"lookup fails when it should succeed"]}
-                    8:: StructInfo {structSize = 16, structData = [IntStructMember 30 8,PointerStructMember c"lookup succeeds when it should"]}
+                    6:: ArrayInfo {arrayData = [PointerStructMember "lookup succeeds when it should fail",PointerStructMember "lookup fails when it should"]}
+                    7:: StructInfo {structSize = 24, structData = [IntStructMember 0 8,IntStructMember 1 8,IntStructMember 0 8]}
+                    8:: StructInfo {structSize = 16, structData = [IntStructMember 35 8,PointerStructMember c"lookup fails when it should succeed"]}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 30 8,PointerStructMember c"lookup succeeds when it should"]}
+                    10:: ArrayInfo {arrayData = [PointerStructMember "lookup fails when it should succeed",PointerStructMember "lookup succeeds when it should"]}
   imports         : public use stmt_if.tree
                     use wybe
   resources       : 
@@ -39,22 +41,14 @@ proc foobar > (0 calls)
 foobar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_if.lookup<0>(1:wybe.int, stmt_if#constant#6:stmt_if.tree, ?tmp#8##0:wybe.bool) #3 @stmt_if:nn:nn
-    case ~tmp#8##0:wybe.bool of
-    0:
-        wybe.string.print<0>("lookup fails when it should succeed":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @stmt_if:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @stmt_if:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @stmt_if:nn:nn
-        foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_if:nn:nn
-        stmt_if.foobar#cont#1<0>(stmt_if#constant#6:stmt_if.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9
-
-    1:
-        wybe.string.print<0>("lookup succeeds when it should":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @stmt_if:nn:nn
+    stmt_if.lookup<0>(1:wybe.int, stmt_if#constant#7:stmt_if.tree, ?tmp#8##0:wybe.bool) #3 @stmt_if:nn:nn
+    factored ~tmp#8##0:wybe.bool of
+      ?tmp#31##0:wybe.string <- stmt_if#constant#10
+        wybe.string.print<0>(~tmp#31##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @stmt_if:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @stmt_if:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @stmt_if:nn:nn
         foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_if:nn:nn
-        stmt_if.foobar#cont#1<0>(stmt_if#constant#6:stmt_if.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6
-
+        stmt_if.foobar#cont#1<0>(stmt_if#constant#7:stmt_if.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6
 
 
 proc foobar#cont#1 > (2 calls)
@@ -63,19 +57,12 @@ foobar#cont#1(tr##0:stmt_if.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_if.lookup<0>(3:wybe.int, ~tr##0:stmt_if.tree, ?tmp#7##0:wybe.bool) #0 @stmt_if:nn:nn
-    case ~tmp#7##0:wybe.bool of
-    0:
-        wybe.string.print<0>("lookup succeeds when it should fail":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_if:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @stmt_if:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @stmt_if:nn:nn
-        foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_if:nn:nn
-
-    1:
-        wybe.string.print<0>("lookup fails when it should":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @stmt_if:nn:nn
+    factored ~tmp#7##0:wybe.bool of
+      ?tmp#23##0:wybe.string <- stmt_if#constant#6
+        wybe.string.print<0>(~tmp#23##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @stmt_if:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @stmt_if:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @stmt_if:nn:nn
         foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_if:nn:nn
-
 
 
 proc lookup > public (8 calls)
@@ -123,38 +110,33 @@ target triple    ????
 @"stmt_if#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"lookup succeeds when it should fail\00", align 8
 @"stmt_if#constant#4" = private unnamed_addr constant {i64, ptr} { i64 35, ptr @"stmt_if#constant#3" }, align 8
 @"stmt_if#constant#5" = private unnamed_addr constant {i64, ptr} { i64 27, ptr @"stmt_if#constant#2" }, align 8
-@"stmt_if#constant#6" = private unnamed_addr constant {i64, i64, i64} { i64 0, i64 1, i64 0 }, align 8
-@"stmt_if#constant#7" = private unnamed_addr constant {i64, ptr} { i64 35, ptr @"stmt_if#constant#1" }, align 8
-@"stmt_if#constant#8" = private unnamed_addr constant {i64, ptr} { i64 30, ptr @"stmt_if#constant#0" }, align 8
+@"stmt_if#constant#6" = private unnamed_addr constant [ 2 x ptr ] [ptr @"stmt_if#constant#4", ptr @"stmt_if#constant#5"]
+@"stmt_if#constant#7" = private unnamed_addr constant {i64, i64, i64} { i64 0, i64 1, i64 0 }, align 8
+@"stmt_if#constant#8" = private unnamed_addr constant {i64, ptr} { i64 35, ptr @"stmt_if#constant#1" }, align 8
+@"stmt_if#constant#9" = private unnamed_addr constant {i64, ptr} { i64 30, ptr @"stmt_if#constant#0" }, align 8
+@"stmt_if#constant#10" = private unnamed_addr constant [ 2 x ptr ] [ptr @"stmt_if#constant#8", ptr @"stmt_if#constant#9"]
 
 declare external fastcc void @"wybe.string.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"stmt_if.foobar<0>"() {
-  %"tmp#8##0" = tail call fastcc i1 @"stmt_if.lookup<0>"(i64 1, i64 ptrtoint( ptr @"stmt_if#constant#6" to i64 ))
-  br i1 %"tmp#8##0", label %if.then.0, label %if.else.0
-if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_if#constant#8" to i64 ))
+  %"tmp#8##0" = tail call fastcc i1 @"stmt_if.lookup<0>"(i64 1, i64 ptrtoint( ptr @"stmt_if#constant#7" to i64 ))
+  %"tmp#33##0" = zext i1 %"tmp#8##0" to i64
+  %"tmp#32##0" = getelementptr inbounds [ 2 x i64 ], ptr @"stmt_if#constant#10", i64 0, i64 %"tmp#33##0"
+  %"tmp#31##0" = load i64, ptr %"tmp#32##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#31##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_if.foobar#cont#1<0>"(i64 ptrtoint( ptr @"stmt_if#constant#6" to i64 ))
-  ret void
-if.else.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_if#constant#7" to i64 ))
-  call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_if.foobar#cont#1<0>"(i64 ptrtoint( ptr @"stmt_if#constant#6" to i64 ))
+  tail call fastcc void @"stmt_if.foobar#cont#1<0>"(i64 ptrtoint( ptr @"stmt_if#constant#7" to i64 ))
   ret void
 }
 
 define external fastcc void @"stmt_if.foobar#cont#1<0>"(i64 %"tr##0") {
   %"tmp#7##0" = tail call fastcc i1 @"stmt_if.lookup<0>"(i64 3, i64 %"tr##0")
-  br i1 %"tmp#7##0", label %if.then.0, label %if.else.0
-if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_if#constant#5" to i64 ))
-  call ccc void @putchar(i8 10)
-  ret void
-if.else.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"stmt_if#constant#4" to i64 ))
+  %"tmp#25##0" = zext i1 %"tmp#7##0" to i64
+  %"tmp#24##0" = getelementptr inbounds [ 2 x i64 ], ptr @"stmt_if#constant#6", i64 0, i64 %"tmp#25##0"
+  %"tmp#23##0" = load i64, ptr %"tmp#24##0"
+  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#23##0")
   call ccc void @putchar(i8 10)
   ret void
 }

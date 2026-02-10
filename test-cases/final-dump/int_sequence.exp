@@ -42,7 +42,7 @@ proc #cont#1 > {semipure} (2 calls)
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @int_sequence:nn:nn
-        foreign c print_int(~i##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @int_sequence:nn:nn
+        foreign c print_int(~i##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int_sequence:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int_sequence:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_sequence:nn:nn
         int_sequence.#cont#1<0>[410bae77d3](~tmp#0##1:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @int_sequence:nn:nn
@@ -54,7 +54,7 @@ proc #cont#1 > {semipure} (2 calls)
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @int_sequence:nn:nn
-        foreign c print_int(~i##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @int_sequence:nn:nn
+        foreign c print_int(~i##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int_sequence:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int_sequence:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int_sequence:nn:nn
         int_sequence.#cont#1<0>[410bae77d3](~tmp#0##1:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @int_sequence:nn:nn

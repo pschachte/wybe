@@ -198,12 +198,12 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     wybe.string.print<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @position:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @position:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @position:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @position:nn:nn
     foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
     wybe.string.print<0>[410bae77d3](1203:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @position:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @position:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @position:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#19##0:wybe.phantom, ?%tmp#20##0:wybe.phantom) @position:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
     wybe.string.print<0>[410bae77d3](1191:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @position:nn:nn

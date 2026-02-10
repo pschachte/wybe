@@ -24,7 +24,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @early_exit:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @early_exit:nn:nn
     foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @early_exit:nn:nn
-    foreign c {terminal,semipure} exit(1:wybe.int) @early_exit:nn:nn
+    foreign c {semipure,terminal} exit(1:wybe.int) @early_exit:nn:nn
 
   LLVM code       :
 

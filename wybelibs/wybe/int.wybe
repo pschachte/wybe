@@ -21,7 +21,7 @@ def bound_maximum(x:_):_ = bound_maximum
 
 # Addition.  This operation is reversible:  you can compute either argument from
 # the other argument and the value.
-pub def (x:_  + y:_):_  = foreign llvm add(x,y)
+pub def foreign llvm `+`=add(x:_, y:_):_
 pub def (?x:_ + y:_):_  = ?z where { ?x = foreign llvm sub(z,y) }
 pub def (x:_  + ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
 
@@ -30,7 +30,7 @@ pub def (!x:_ += y:_) { ?x = x + y }
 
 # Subtraction.  This operation is reversible:  you can compute either argument
 # from the other argument and the value.
-pub def (x:_  - y:_):_  = foreign llvm sub(x,y)
+pub def foreign llvm `-`=sub(x:_, y:_):_
 pub def (?x:_ - y:_):_  = ?z where { ?x = foreign llvm add(z,y) }
 pub def (x:_  - ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
 
@@ -43,25 +43,25 @@ pub def -(?x:_):_ = ?y where { ?x = foreign llvm sub(0,y) }
 pub def (!x:_ -= y:_) { ?x = x - y }
 
 # Multiplication.
-pub def (x:_ * y:_):_ = foreign llvm mul(x,y)
+pub def foreign llvm `*`=mul(x:_, y:_):_
 
 # Multiplication assignment.
 pub def (!x:_ *= y:_) { ?x = x * y }
 
 # Integer division.
-pub def (x:_ / y:_):_ = foreign llvm sdiv(x,y)
+pub def foreign llvm `/`=sdiv(x:_, y:_):_
 
 # Integer division assignment.
 pub def (!x:_ /= y:_) { ?x = x / y }
 
 # Modulus.
-pub def (x:_ % y:_):_ = foreign llvm srem(x,y)
+pub def foreign llvm `%`=srem(x:_, y:_):_
 
 # Modulus assignment.
 pub def (!x:_ %= y:_) { ?x = x % y }
 
 # Bit-shift left.
-pub def (x:_ << s:_):_ = foreign llvm shl(x, s)
+pub def foreign llvm `<<`=shl(x:_, s:_):_
 
 # Bit-shift left assignment.
 pub def (!x:_ <<= s:_) { ?x = x << s }
@@ -70,7 +70,7 @@ pub def (!x:_ <<= s:_) { ?x = x << s }
 # e.g.  3 >> 1 =  1 (00...011 >> 1 = 00...001)
 #      -3 >> 1 = -2 (11...101 >> 1 = 11...110)
 # on a 64-bit machine
-pub def (x:_ >> s:_):_ = foreign llvm ashr(x, s)
+pub def foreign llvm `>>`=ashr(x:_, s:_):_
 
 # Arithmetic bit-shift right (pad with sign-bit) assignment.
 pub def (!x:_ >>= s:_) { ?x = x >> s }
@@ -79,7 +79,7 @@ pub def (!x:_ >>= s:_) { ?x = x >> s }
 # e.g.  3 >> 1 = 1                   (00...011 >> 1 = 00...001)
 #      -3 >> 1 = 9223372036854775806 (11...101 >> 1 = 01...110)
 # on a 64-bit machine
-pub def logical_bitshift(x:_, s:_):_ = foreign llvm lshr(x, s)
+pub def foreign llvm logical_bitshift=lshr(x:_, s:_):_
 
 # Logical bit-shift right (pad with zeroes) assignment.
 pub def logical_bitshift(!x:_, s:_) { ?x = logical_bitshift(x, s) }
@@ -88,14 +88,14 @@ pub def logical_bitshift(!x:_, s:_) { ?x = logical_bitshift(x, s) }
 ## Comparisons
 
 # Equality and disequality.
-pub def {test} (x:_ =  y:_) { foreign llvm {test} icmp_eq(x,y) }
-pub def {test} (x:_ ~= y:_) { foreign llvm {test} icmp_ne(x,y) }
+pub def foreign llvm {test} `=` =icmp_eq(x:_, y:_)
+pub def foreign llvm {test} `~=`=icmp_ne(x:_, y:_)
 
 # Inequalities.
-pub def {test} (x:_ <  y:_) { foreign llvm {test} icmp_slt(x,y) }
-pub def {test} (x:_ <= y:_) { foreign llvm {test} icmp_sle(x,y) }
-pub def {test} (x:_ >  y:_) { foreign llvm {test} icmp_sgt(x,y) }
-pub def {test} (x:_ >= y:_) { foreign llvm {test} icmp_sge(x,y) }
+pub def foreign llvm {test} `<` =icmp_slt(x:_, y:_)
+pub def foreign llvm {test} `<=`=icmp_sle(x:_, y:_)
+pub def foreign llvm {test} `>` =icmp_sgt(x:_, y:_)
+pub def foreign llvm {test} `>=`=icmp_sge(x:_, y:_)
 
 # Three-way comparison.
 pub def (x:_ <=> y:_):comparison = 
@@ -106,24 +106,24 @@ pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
 
 # Conversion
-def count(x:_):count = foreign lpvm cast(x)
+def foreign lpvm count=cast(x:_):count
 
 
 ## Other operations
 
 # Integer square root.
-pub def sqrt(x:_):_ = foreign c isqrt(x)
+pub def foreign c sqrt=isqrt(x:_):_
 
 # Integer exponentiation.
-pub def power(x:_, y:_):_ = foreign c ipow(x,y)
-pub def (x:_ ** y:_):_ = power(x,y)
+pub def foreign c power=ipow(x:_, y:_):_
+pub def (x:_ ** y:_):_ = power(x, y)
 
 # Increment and Decrement.
 pub def incr(!x:_) { ?x = x + 1 }
 pub def decr(!x:_) { ?x = x - 1 }
 
 # The sign of an integer: +1, -1, or 0
-pub def signum(x:_):_ = foreign c signum(x)
+pub def foreign c signum(x:_):_
 
 # Absolute value
 pub def abs(x:_):_ = if {x < 0 :: -x | else :: x}
@@ -150,8 +150,8 @@ pub def fmt(x:_, minlength:_, fill:char):string = result where {
 
 ## I/O
 
-pub def print(x:_) use !io { foreign c print_int(x, !io) }
+pub def foreign c print=print_int(x:_) use !io 
 
 pub def println(x:_) use !io { !print(x); !nl }
 
-pub def read(?x:_) use !io { foreign c read_int(?x, !io) }
+pub def foreign c read=read_int(?x:_) use !io 

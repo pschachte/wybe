@@ -2925,6 +2925,11 @@ checkLPVMArgs "cast" _ [old,new] stmt pos = return ()
 checkLPVMArgs "cast" _ [] stmt pos = return ()
 checkLPVMArgs "cast" _ args stmt pos =
     typeError (ReasonForeignArity "cast" (length args) 2 pos)
+checkLPVMArgs "sizeof" _ [thing,sz] stmt pos = 
+    reportErrorUnless (ReasonForeignArgRep "sizeof" 1 sz "integer" pos)
+                      (integerTypeRep sz)
+checkLPVMArgs "sizeof" _ args stmt pos =
+    typeError (ReasonForeignArity "sizeof" (length args) 2 pos)
 checkLPVMArgs name _ args stmt pos =
     typeError (ReasonBadForeign "lpvm" name pos)
 

@@ -36,7 +36,7 @@ module AST (
   flattenedExpFlow, expIsVar, expIsConstant, expVar, expVar', maybeExpType, innerExp,
   setExpFlowType,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
-  defaultTypeRepresentation, typeRepSize, integerTypeRep,
+  defaultTypeRepresentation, typeRepSize, integerTypeRep, typeSize, 
   defaultTypeModifiers, lookupTypeRepresentation, typeRepresentation,
   lookupModuleRepresentation, argIsReal,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
@@ -51,7 +51,7 @@ module AST (
   InterfaceHash, PubProcInfo(..),
   StructID, structConstName, recordConstStruct,
   lookupConstStruct, lookupConstInfo, cStringExpr,
-  StructInfo(..), ConstValue(..), constValueSize, constValueRepresentation,
+  StructInfo(..), ConstValue(..), constValueSize, constantValue, closureStructId, constValueRepresentation,
   constValueAtOffset, constValuePrimArg, constValueExp,
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules, sameOriginModules,
@@ -70,8 +70,8 @@ module AST (
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
-  ProcBody(..), PrimFork(..), Ident, VarName,
-  ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
+  ProcBody(..), PrimFork(..), MergedForkTable, prependToBody, appendToBody, unMergeFork, guardedMergedFork, 
+  Ident, VarName, ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
@@ -143,7 +143,7 @@ import           Crypto.Hash
 import qualified Data.Binary
 import qualified Data.ByteString.Lazy as BL
 import           Data.List as List
-import           Data.List.Extra (nubOrd,splitOn, disjoint, (!?), cons)
+import           Data.List.Extra (nubOrd,splitOn, disjoint, (!?), cons, dropEnd)
 import Data.Map as Map
     ( (!),
       adjust,
@@ -192,6 +192,7 @@ import           System.Console.ANSI
 import           GHC.Generics (Generic)
 
 import Data.Binary (Binary)
+import Data.Functor ((<&>))
 
 
 ----------------------------------------------------------------
@@ -212,7 +213,7 @@ data Item
      | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
      | FuncDecl Visibility ProcModifiers ProcProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility ProcModifiers ProcProto [Placed Stmt] OptPos
-     | ForeignProcDecl Visibility Ident ProcModifiers ProcProto OptPos
+     | ForeignProcDecl Visibility Ident ProcModifiers (Maybe Ident) ProcProto TypeSpec OptPos
      | StmtDecl Stmt OptPos
      | PragmaDecl Pragma
      deriving (Generic, Eq)
@@ -353,6 +354,14 @@ integerTypeRep :: TypeRepresentation -> Bool
 integerTypeRep (Bits bits)     = True
 integerTypeRep (Signed bits)   = True
 integerTypeRep _               = False
+
+
+-- | Return the size of a member of the specified type in bytes.
+typeSize :: TypeSpec -> Compiler Int
+typeSize ty = do
+    rep <- trustFromJust ("lookupTypeRepresentation of " ++ show ty)
+            <$> lookupTypeRepresentation ty
+    return $ 1 + ((typeRepSize rep - 1) `div` byteBits)
 
 
 -- | Crude division of types useful for categorising primitive operations
@@ -1570,10 +1579,9 @@ refersTo :: Ord b => ModSpec -> Ident ->
             (b -> ModSpec) -> Compiler (Set b)
 refersTo modspec name implMapFn specModFn = do
     currMod <- getModuleSpec
-    let modspec' = if not (List.null modspec)
-                        && head modspec == currentModuleAlias
-                   then currMod ++ tail modspec
-                   else modspec
+    let modspec' = case span (== currentModuleAlias) modspec of
+            ([], _) -> modspec
+            (prefix, unaliased) -> dropEnd (length prefix - 1) currMod ++ unaliased
     logAST $ "Finding visible symbol " ++ maybeModPrefix modspec' ++
       name ++ " from module " ++ showModSpec currMod
     defined <- getModuleImplementationField
@@ -2573,14 +2581,66 @@ data ProcBody = ProcBody {
 data PrimFork =
     NoFork |
     PrimFork {
+      forkVar::PrimVarName,       -- ^The variable that selects branch to take
+      forkVarType::TypeSpec,      -- ^The Wybe type of the forkVar
+      forkVarLast::Bool,          -- ^Is this the last occurrence of forkVar
+      forkBodies::[(Integer,ProcBody)],   
+                                  -- ^one branch for each value of forkVar
+      forkDefault::Maybe ProcBody -- ^branch to take if forkVar is out of range
+    } |
+    MergedFork {
       forkVar::PrimVarName,     -- ^The variable that selects branch to take
       forkVarType::TypeSpec,    -- ^The Wybe type of the forkVar
       forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
-      forkBodies::[ProcBody],   -- ^one branch for each value of forkVar
-      forkDefault::Maybe ProcBody -- ^branch to take if forkVar is out of range
+      forkTable::MergedForkTable,
+                                -- ^Each variable factored out from each branch,
+                                -- with the list of values indexed by the branch
+      forkBody::ProcBody,       -- ^The rest of the "branch",
+      forkDefault::Maybe ProcBody
+                                -- ^The branch if the var is out of range
     }
     deriving (Eq, Show, Generic)
 
+type MergedForkTable = [(PrimVarName, TypeSpec, StructID)]
+
+-- |Add the specified statements at the end of the given body
+appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
+appendToBody (ProcBody prims NoFork) after
+    = ProcBody (prims++after) NoFork
+appendToBody (ProcBody prims (PrimFork v ty lst bodies deflt)) after
+    = let bodies' = List.map (mapSnd (`appendToBody` after)) bodies
+      in ProcBody prims $ PrimFork v ty lst bodies'
+                            $ (`appendToBody` after) <$> deflt
+appendToBody body@ProcBody{bodyFork=merged@MergedFork{forkBody=fork}} after
+    = body{bodyFork=merged{forkBody=fork `appendToBody` after}}
+
+-- |Add the specified statements at the front of the given body
+prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
+prependToBody before (ProcBody prims fork)
+    = ProcBody (before++prims) fork
+
+-- |Un-merge a fork, replacing the tabled variables with a series of moved in the PrimFork branches
+unMergeFork :: PrimFork -> Compiler PrimFork
+unMergeFork (MergedFork var ty final table body dlft) = do
+    table' <- mapM (\(var, ty, id) -> (var, ty,) . List.map (`constValuePrimArg` ty) . arrayData . trustFromJust "unMergeFork" <$> lookupConstInfo id) table
+    let untabled = List.transpose 
+                    $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ PrimForeign "llvm" "move" [] [p, ArgVar var' ty' FlowOut Ordinary False]) vals) 
+                    table'
+    return $ if List.null untabled 
+    then NoFork
+    else PrimFork var ty final (zip [0..] (List.map (`prependToBody` body) untabled)) dlft
+unMergeFork fork = shouldnt $ "unMergeFork on non-merged " ++ show fork
+
+-- |Replace a default-y MergedFork with a guarded non-defaulted MergedFork in a ProcBody,
+-- with the given var used int the fork
+guardedMergedFork :: PrimVarName -> PrimVarName -> TypeSpec -> Integer -> ProcBody -> Maybe ProcBody -> ProcBody
+guardedMergedFork _   _   _  _     body Nothing     = body
+guardedMergedFork tmp var ty limit body (Just dflt) = 
+    ProcBody
+        [Unplaced $ PrimForeign "llvm" "icmp_ule" []
+          [ArgVar var ty FlowIn Ordinary False, ArgInt limit ty, ArgVar tmp bit FlowOut Ordinary False]]
+        $ PrimFork tmp bit True (zip [0..] [dflt,body]) Nothing
+  where bit = Representation $ Bits 1
 
 data LLBlock = LLBlock {
     llInstrs::[LLInstr],
@@ -2739,13 +2799,14 @@ foldBodyPrims primFn emptyConj abDisj (ProcBody pprims fork) =
                      []       -> a
                      (pp:pps) -> primFn (final && List.null pps) (content pp) a)
                  emptyConj $ tails pprims
+        foldAll = List.foldl (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
     in case fork of
       NoFork -> common
-      PrimFork _ _ _ [] _ -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ [] _ -> shouldnt "foldBodyPrims empty clause list in a PrimFork"
       PrimFork _ _ _ (body:bodies) deflt ->
-          List.foldl (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
-                (foldBodyPrims primFn common abDisj body)
-                $ bodies ++ maybeToList deflt
+          foldAll (foldBodyPrims primFn common abDisj $ snd body) $ List.map snd bodies ++ maybeToList deflt
+      MergedFork{forkBody=body, forkDefault=deflt} ->
+          foldAll (foldBodyPrims primFn common abDisj body) $ maybeToList deflt
 
 
 -- |Similar to foldBodyPrims, except that it assumes that abstract
@@ -2765,14 +2826,16 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
                      []       -> a
                      (pp:pps) -> primFn (final && List.null pps) (content pp) a)
                  emptyConj $ tails pprims
+        foldAll = (abConj common .) . List.foldl (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
     in case fork of
       NoFork -> common
-      PrimFork _ _ _ [] _ -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ [] _ -> shouldnt "foldBodyDistrib empty clause list in a PrimFork"
       PrimFork _ _ _ (body:bodies) deflt ->
-        abConj common $
-        List.foldl (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
-        (foldBodyPrims primFn common abDisj body)
-        $ bodies ++ maybeToList deflt
+        foldAll (foldBodyDistrib primFn common abDisj abConj $ snd body) $ List.map snd bodies ++ maybeToList deflt
+      MergedFork{forkBody=body, forkDefault=deflt} ->
+        foldAll (foldBodyDistrib primFn common abDisj abConj body) $ maybeToList deflt
+            
+            
 
 
 -- |Traverse a ProcBody applying a monadic primFn to every Prim and applying a
@@ -2785,8 +2848,11 @@ mapLPVMBodyM primFn argFn (ProcBody pprims fork) = do
     case fork of
         NoFork -> return ()
         (PrimFork _ _ _ bodies deflt) -> do
-            mapM_ (mapLPVMBodyM primFn argFn) bodies
-            maybe (return ()) (mapLPVMBodyM primFn argFn) deflt
+            mapM_ (mapLPVMBodyM primFn argFn . snd) bodies
+            forM_ deflt (mapLPVMBodyM primFn argFn)
+        MergedFork{forkBody=body,forkDefault=deflt} -> do
+            mapLPVMBodyM primFn argFn body
+            forM_ deflt (mapLPVMBodyM primFn argFn)
 
 
 -- |Handle a single Prim for mapLPVMBodyM doing the needful.
@@ -3486,6 +3552,9 @@ data StructInfo
     | CStringInfo {
         cstringChars :: [Char]      -- ^ The characters of the string
         }
+    | ArrayInfo {
+        arrayData :: [ConstValue]
+        }
      deriving (Eq,Ord,Show,Generic)
 
 
@@ -3505,12 +3574,34 @@ data ConstValue =
   deriving (Eq,Ord,Show,Generic)
 
 
--- | Filter a list of PrimArgs, keeping the free needed ones.
-neededFreeArgs :: ProcSpec -> [PrimArg] -> Compiler [PrimArg]
-neededFreeArgs pspec args = do
-    params <- List.filter ((==Free) . primParamFlowType)
-                    <$> getPrimParams pspec
-    List.map snd <$> filterM (paramIsReal . fst) (zip params args)
+-- | Return the ConstStructMember of PrimArg, if it is a constant.
+constantValue :: PrimArg -> Compiler (Maybe ConstValue)
+constantValue (ArgInt i ty) =
+    typeSize ty <&> (Just . IntStructMember i)
+constantValue (ArgFloat f ty) =
+    typeSize ty <&> (Just . FloatStructMember f)
+constantValue (ArgClosure pspec args _) =
+    (PointerStructMember <$>) <$> closureStructId pspec args
+constantValue (ArgConstRef structID ty) =
+    return $ Just $ PointerStructMember structID
+constantValue ArgGlobal{} = return Nothing
+constantValue _ = return Nothing
+
+
+-- | Generate a StructId for a closure, if all its arguments are constants.
+closureStructId :: ProcSpec -> [PrimArg] -> Compiler (Maybe StructID)
+closureStructId pspec args = do
+    mapM constantValue args >>= (\case
+        Just args' -> do
+          let sz = wordSizeBytes * (length args' + 1)
+          Just <$> (
+            recordConstStruct
+                (StructInfo sz
+                    $ FnPointerStructMember pspec
+                        : List.map GenericStructMember args')
+                (Just $ Closure pspec
+                        (List.map (Unplaced . constValueExp) args')))
+        _ -> return Nothing) . sequence
 
 
 -- | Return the size of StructMember in bytes
@@ -3543,6 +3634,11 @@ constValueAtOffset (StructInfo _ fields) offset = go fields offset
           go [] _ = Nothing
 constValueAtOffset (CStringInfo chars) offset =
     (`IntStructMember` 1) . toInteger . ord <$> (chars !? offset)
+constValueAtOffset (ArrayInfo []) _ = Nothing 
+constValueAtOffset (ArrayInfo elts@(elt:_)) offset =
+    let eltSize = constValueSize elt
+        (idx, eltOffset) = divMod offset eltSize
+    in if eltOffset == 0 then elts !? idx else Nothing
 
 -- | Turn a ConstValue into the equivalent constant PrimArg
 constValuePrimArg :: ConstValue -> TypeSpec -> PrimArg
@@ -3621,7 +3717,7 @@ argGlobalFlow varFlows (ArgClosure pspec args _) = do
 argGlobalFlow varFlows (ArgConstRef structID _) = do
     lookupConstInfo structID >>= (\case
             StructInfo _ fields -> constsGlobalFlows fields
-            CStringInfo _ -> return emptyGlobalFlows)
+            _ -> return emptyGlobalFlows)
         . trustFromJust "lookupConstStruct"
 argGlobalFlow _ _ = return emptyGlobalFlows
 
@@ -3656,7 +3752,7 @@ constGlobalFlows :: ConstValue -> Compiler GlobalFlows
 constGlobalFlows (PointerStructMember structID) = do
     lookupConstInfo structID >>= (\case
             StructInfo _ fields -> constsGlobalFlows fields
-            CStringInfo _ -> return emptyGlobalFlows)
+            _ -> return emptyGlobalFlows)
         . trustFromJust "lookupConstStruct"
 constGlobalFlows _ = return emptyGlobalFlows
 
@@ -3873,6 +3969,7 @@ expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ _ args) = pexpListOutputs args
+expOutputs (ForeignFn "lpvm" "sizeof" _ (_:args)) = pexpListOutputs args
 expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
 expOutputs (CaseExp _ cases deflt) =
     pexpListOutputs $ maybe id (:) deflt (snd <$> cases)
@@ -3997,7 +4094,7 @@ envParamName = PrimVarName (specialName "env") 0
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False emptyGlobalFlows)
+envPrimParam = PrimParam envParamName (Representation CPointer) FlowIn Ordinary (ParamInfo False emptyGlobalFlows)
 
 
 makeGlobalResourceName :: ResourceSpec -> String
@@ -4106,13 +4203,15 @@ instance Show Item where
     ++ showOptPos pos
     ++ " {"
     ++ showBody 4 stmts
-    ++ "\n  }"
-  show (ForeignProcDecl vis lang modifiers proto pos) =
+    ++ "\n  }"  
+  show (ForeignProcDecl vis lang modifiers mbAlias proto retType pos) =
     visibilityPrefix vis
     ++ "def foreign "
     ++ lang ++ " "
     ++ showProcModifiers' modifiers
+    ++ maybeShowStr " " mbAlias "="
     ++ show proto
+    ++ showTypeSuffix retType Nothing
     ++ showOptPos pos
   show (StmtDecl stmt pos) =
     showStmt 4 stmt ++ showOptPos pos
@@ -4349,8 +4448,17 @@ showFork ind (PrimFork var ty last bodies deflt) =
                   ":" ++ show ty ++ " of" ++
     List.concatMap (\(val,body) ->
                         startLine ind ++ show val ++ ":" ++
-                        showBlock (ind+4) body ++ "\n")
-    (zip [0..] bodies)
+                        showBlock (ind+4) body ++ "\n") bodies
+    ++ maybe "" (\b -> startLine ind ++ "else:"
+                       ++ showBlock (ind+4) b ++ "\n") deflt
+showFork ind (MergedFork var ty last table body deflt) =
+    startLine ind ++ "factored " ++ (if last then "~" else "") ++ show var ++
+                  ":" ++ show ty ++ " of" ++
+    List.concatMap (\(var, ty, struct) -> 
+                        startLine (ind + 2) ++ "?" ++ show var ++ ":" ++ show ty ++
+                        " <- " ++ show struct) 
+        table
+    ++ showBlock (ind+4) body
     ++ maybe "" (\b -> startLine ind ++ "else:"
                        ++ showBlock (ind+4) b ++ "\n") deflt
 
@@ -4565,6 +4673,15 @@ maybeShow pre (Just something) post =
   pre ++ show something ++ post
 
 
+-- |maybeShow pre maybe post
+--  if maybe has something, show pre, the maybe string, and post
+--  if the maybe is Nothing, don't show anything
+maybeShowStr :: String -> Maybe String -> String -> String
+maybeShowStr pre Nothing post = ""
+maybeShowStr pre (Just something) post =
+  pre ++ show something ++ post
+
+
 ------------------------------ Error Reporting -----------------------
 
 -- |Report an internal error and abort.
@@ -4663,30 +4780,22 @@ showMessages :: Compiler ()
 showMessages = do
     opts <- gets options
     let verbose = optVerbose opts
-    let noFonts = optNoFont opts
     messages <- reverse <$> gets msgs -- messages are collected in reverse order
     let filtered =
             if verbose
             then messages
             else List.filter ((>=Warning) . messageLevel) messages
-    liftIO $ mapM_ (showMessage noFonts) $ nubOrd $ sortOn messagePlace filtered
+    liftIO $ mapM_ (showMessage opts) $ nubOrd $ sortOn messagePlace filtered
 
 
 -- |Prettify and show one compiler message.
-showMessage :: Bool -> Message -> IO ()
-showMessage noFont (Message lvl pos msg) = do
+showMessage :: Options -> Message -> IO ()
+showMessage opts (Message lvl pos msg) = do
     posMsg <- makeMessage pos msg
-    let showMsg colour msg =
-            if noFont
-                then putStrLn msg
-                else do
-                    setSGR [SetColor Foreground Vivid colour]
-                    putStrLn msg
-                    setSGR [Reset]
     case lvl of
       Informational -> putStrLn posMsg
-      Warning       -> showMsg Yellow posMsg
-      Error         -> showMsg Red posMsg
+      Warning       -> putLnInColour opts Yellow posMsg
+      Error         -> putLnInColour opts Red posMsg
 
 
 -- |Check if any errors have been detected, and if so, print the error messages

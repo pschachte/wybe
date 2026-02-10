@@ -30,6 +30,7 @@ import System.Exit (ExitCode (..))
 import System.Process
 import System.FilePath
 import System.Directory.Extra (getHomeDirectory)
+import Data.Bits (FiniteBits (finiteBitSize))
 
 
 -- |The file extension for source files.

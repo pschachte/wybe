@@ -26,6 +26,7 @@ import           Flow          ((|>))
 import           Options       (LogSelection (Analysis))
 import           Util
 import           Config        (specialName2)
+import Data.Maybe.HT (toMaybe)
 
 
 -- This "AliasMapLocal" is used during analysis and it will be converted to
@@ -37,13 +38,11 @@ import           Config        (specialName2)
 -- something outside the procedure scope ("AliasByParam" / "MaybeAliasByParam").
 -- "AliasByParam" and "MaybeAliasByParam" won't be removed during the analysis,
 -- but if the existence of a "MaybeAliasByParam" can change the outcome then we
--- consider the corresponding parameter as interesting.  For variables aliased
--- to globals (resource values), we use "AliasByGlobal". For variables aliased
--- to global constant structures, we use "AliasByConst". 
+-- consider the corresponding parameter as interesting.
 data AliasMapLocalItem
     = LiveVar           PrimVarName
     | AliasByGlobal     GlobalInfo
-    | AliasByConst
+    | AliasByConst      StructID
     | AliasByParam      PrimVarName
     | MaybeAliasByParam PrimVarName
     deriving (Eq, Ord, Show)
@@ -196,8 +195,12 @@ aliasedByFork caller body analysisInfo = do
             logAlias ">>> Forking:"
             analysisInfos <-
                 mapM (\body' -> aliasedByBody caller body' analysisInfo)
-                    $ fBodies ++ maybeToList deflt
+                    $ List.map snd fBodies ++ maybeToList deflt
             return $ mergeAnalysisInfo analysisInfos
+        MergedFork{} -> do
+            logAlias ">>> Merged fork:"
+            fork' <- unMergeFork fork
+            aliasedByFork caller body{bodyFork=fork'} analysisInfo
         NoFork -> do
             logAlias ">>> No fork."
             -- drop "deadCells", we don't need it after fork
@@ -276,7 +279,7 @@ updateAliasedByPrim aliasMap prim =
             let ProcDefPrim _ calleeProto _ analysis _ = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
             logAlias $ "--- call          " ++ show spec ++" (callee): "
-                        ++ show calleeProto
+            logAlias $ "" ++ show calleeProto
             logAlias $ "PrimCall args:    " ++ show args
             let paramArgMap = mapParamToArgVar calleeProto args
             -- calleeArgsAliasMap is the alias map of actual arguments passed
@@ -341,18 +344,18 @@ _maybeAliasPrimArgs args = do
     let escapedVars = catMaybes args'
     return escapedVars
   where
-    filterArg arg =
-        case arg of
-        ArgVar{argVarName=var, argVarType=ty} -> maybeAddressAlias arg ty $ LiveVar var
-        ArgGlobal global ty -> maybeAddressAlias arg ty $ AliasByGlobal global
-        ArgConstRef global ty -> maybeAddressAlias arg ty AliasByConst
+    filterArg arg = case arg of
+        ArgVar{argVarName=var, argVarType=ty} -> maybeAddressAlias ty $ LiveVar var
+        ArgGlobal global ty -> maybeAddressAlias ty $ AliasByGlobal global
+        ArgConstRef ref ty -> maybeAddressAlias ty $ AliasByConst ref
         _ -> return Nothing
-    maybeAddressAlias arg ty item = do
+    maybeAddressAlias ty item = do
         rep <- lookupTypeRepresentation ty
-        -- Only Pointer types will create alias
-        if rep == Just Pointer
-        then return $ Just item
-        else return Nothing
+        return $ toMaybe (maybe False aliasedRep rep) item
+    aliasedRep CPointer = True
+    aliasedRep Pointer = True
+    aliasedRep Func{} = True
+    aliasedRep _ = False
 
 
 -- Check Arg aliases in one of proc calls inside a ProcBody

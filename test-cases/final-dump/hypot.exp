@@ -62,63 +62,63 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("hypot(3,4) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @hypot:nn:nn
     foreign c llvm.sqrt.f64(25.0:wybe.float, ?tmp#0##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#85##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#0##0:wybe.float, ~tmp#85##0:wybe.phantom, ?tmp#86##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#0##0:wybe.float, ~%tmp#85##0:wybe.phantom, ?%tmp#86##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#86##0:wybe.phantom, ?tmp#87##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#87##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("area(5) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#95##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(78.53981633974483:wybe.float, ~tmp#95##0:wybe.phantom, ?tmp#96##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(78.53981633974483:wybe.float, ~%tmp#95##0:wybe.phantom, ?%tmp#96##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#96##0:wybe.phantom, ?tmp#97##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#97##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("e = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#103##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(2.7182818284590455:wybe.float, ~tmp#103##0:wybe.phantom, ?tmp#104##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(2.7182818284590455:wybe.float, ~%tmp#103##0:wybe.phantom, ?%tmp#104##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#104##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @hypot:nn:nn
     foreign c llvm.exp.f64(1.0:wybe.float, ?tmp#3##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#111##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#3##0:wybe.float, ~tmp#111##0:wybe.phantom, ?tmp#112##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#3##0:wybe.float, ~%tmp#111##0:wybe.phantom, ?%tmp#112##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#112##0:wybe.phantom, ?tmp#113##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#113##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("sin(30) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @hypot:nn:nn
     foreign c llvm.sin.f64(30.0:wybe.float, ?tmp#4##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#120##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#4##0:wybe.float, ~tmp#120##0:wybe.phantom, ?tmp#121##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#4##0:wybe.float, ~%tmp#120##0:wybe.phantom, ?%tmp#121##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#121##0:wybe.phantom, ?tmp#122##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#122##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("cos(30) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @hypot:nn:nn
     foreign c llvm.cos.f64(30.0:wybe.float, ?tmp#5##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#129##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#5##0:wybe.float, ~tmp#129##0:wybe.phantom, ?tmp#130##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#5##0:wybe.float, ~%tmp#129##0:wybe.phantom, ?%tmp#130##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#130##0:wybe.phantom, ?tmp#131##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#131##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("sin(30 degrees) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @hypot:nn:nn
     foreign c llvm.sin.f64(0.5235987755982988:wybe.float, ?tmp#6##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#139##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(tmp#6##0:wybe.float, ~tmp#139##0:wybe.phantom, ?tmp#140##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(tmp#6##0:wybe.float, ~%tmp#139##0:wybe.phantom, ?%tmp#140##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#140##0:wybe.phantom, ?tmp#141##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#141##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("cos(30 degrees) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @hypot:nn:nn
     foreign c llvm.cos.f64(0.5235987755982988:wybe.float, ?tmp#8##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#149##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(tmp#8##0:wybe.float, ~tmp#149##0:wybe.phantom, ?tmp#150##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(tmp#8##0:wybe.float, ~%tmp#149##0:wybe.phantom, ?%tmp#150##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#150##0:wybe.phantom, ?tmp#151##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#151##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("tan(30 degrees) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #35 @hypot:nn:nn
     foreign llvm fdiv(~tmp#6##0:wybe.float, ~tmp#8##0:wybe.float, ?tmp#10##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#161##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#10##0:wybe.float, ~tmp#161##0:wybe.phantom, ?tmp#162##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#10##0:wybe.float, ~%tmp#161##0:wybe.phantom, ?%tmp#162##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#162##0:wybe.phantom, ?tmp#163##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#163##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("asin(0.5) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @hypot:nn:nn
     foreign c asin(0.5:wybe.float, ?tmp#12##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#170##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(tmp#12##0:wybe.float, ~tmp#170##0:wybe.phantom, ?tmp#171##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(tmp#12##0:wybe.float, ~%tmp#170##0:wybe.phantom, ?%tmp#171##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#171##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #44 @hypot:nn:nn
     foreign llvm fmul(~tmp#12##0:wybe.float, 57.29577951308232:wybe.float, ?tmp#13##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#179##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#13##0:wybe.float, ~tmp#179##0:wybe.phantom, ?tmp#180##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#13##0:wybe.float, ~%tmp#179##0:wybe.phantom, ?%tmp#180##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#180##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" degrees":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #127 @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#186##0:wybe.phantom) @hypot:nn:nn
@@ -129,12 +129,12 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm fdiv(tmp#234##0:wybe.float, 2.0:wybe.float, ?tmp#206##0:wybe.float) @hypot:nn:nn
     foreign c acos(~tmp#206##0:wybe.float, ?tmp#15##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#197##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(tmp#15##0:wybe.float, ~tmp#197##0:wybe.phantom, ?tmp#198##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(tmp#15##0:wybe.float, ~%tmp#197##0:wybe.phantom, ?%tmp#198##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#198##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #57 @hypot:nn:nn
     foreign llvm fmul(~tmp#15##0:wybe.float, 57.29577951308232:wybe.float, ?tmp#18##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#209##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#18##0:wybe.float, ~tmp#209##0:wybe.phantom, ?tmp#210##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#18##0:wybe.float, ~%tmp#209##0:wybe.phantom, ?%tmp#210##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#210##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" degrees":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #128 @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#216##0:wybe.phantom) @hypot:nn:nn
@@ -144,12 +144,12 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm fdiv(~tmp#234##0:wybe.float, 3.0:wybe.float, ?tmp#236##0:wybe.float) @hypot:nn:nn
     foreign c atan(~tmp#236##0:wybe.float, ?tmp#22##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#227##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(tmp#22##0:wybe.float, ~tmp#227##0:wybe.phantom, ?tmp#228##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(tmp#22##0:wybe.float, ~%tmp#227##0:wybe.phantom, ?%tmp#228##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#228##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #72 @hypot:nn:nn
     foreign llvm fmul(~tmp#22##0:wybe.float, 57.29577951308232:wybe.float, ?tmp#25##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#239##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#25##0:wybe.float, ~tmp#239##0:wybe.phantom, ?tmp#240##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#25##0:wybe.float, ~%tmp#239##0:wybe.phantom, ?%tmp#240##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#240##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" degrees":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #129 @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#246##0:wybe.phantom) @hypot:nn:nn
@@ -159,12 +159,12 @@ module top-level code > public {semipure} (0 calls)
     foreign c atan2(-1.0:wybe.float, -1.0:wybe.float, ?tmp#30##0:wybe.float) @hypot:nn:nn
     foreign c atan(tmp#30##0:wybe.float, ?tmp#29##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#256##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#29##0:wybe.float, ~tmp#256##0:wybe.phantom, ?tmp#257##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#29##0:wybe.float, ~%tmp#256##0:wybe.phantom, ?%tmp#257##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#257##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #86 @hypot:nn:nn
     foreign llvm fmul(~tmp#30##0:wybe.float, 57.29577951308232:wybe.float, ?tmp#31##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#266##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#31##0:wybe.float, ~tmp#266##0:wybe.phantom, ?tmp#267##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#31##0:wybe.float, ~%tmp#266##0:wybe.phantom, ?%tmp#267##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#267##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>(" degrees":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #130 @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#273##0:wybe.phantom) @hypot:nn:nn
@@ -173,43 +173,43 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("ln(e) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #93 @hypot:nn:nn
     foreign c llvm.log.f64(2.7182818284590455:wybe.float, ?tmp#33##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#281##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#33##0:wybe.float, ~tmp#281##0:wybe.phantom, ?tmp#282##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#33##0:wybe.float, ~%tmp#281##0:wybe.phantom, ?%tmp#282##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#282##0:wybe.phantom, ?tmp#283##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#283##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("common log(e) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #98 @hypot:nn:nn
     foreign c llvm.log10.f64(2.7182818284590455:wybe.float, ?tmp#35##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#290##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#35##0:wybe.float, ~tmp#290##0:wybe.phantom, ?tmp#291##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#35##0:wybe.float, ~%tmp#290##0:wybe.phantom, ?%tmp#291##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#291##0:wybe.phantom, ?tmp#292##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#292##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("base 2 log(e) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #103 @hypot:nn:nn
     foreign c llvm.log2.f64(2.7182818284590455:wybe.float, ?tmp#37##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#299##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#37##0:wybe.float, ~tmp#299##0:wybe.phantom, ?tmp#300##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#37##0:wybe.float, ~%tmp#299##0:wybe.phantom, ?%tmp#300##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#300##0:wybe.phantom, ?tmp#301##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#301##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("floor(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #108 @hypot:nn:nn
     foreign c llvm.floor.f64(3.141592653589793:wybe.float, ?tmp#39##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#308##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#39##0:wybe.float, ~tmp#308##0:wybe.phantom, ?tmp#309##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#39##0:wybe.float, ~%tmp#308##0:wybe.phantom, ?%tmp#309##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#309##0:wybe.phantom, ?tmp#310##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#310##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("ceil(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #113 @hypot:nn:nn
     foreign c llvm.ceil.f64(3.141592653589793:wybe.float, ?tmp#41##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#317##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(~tmp#41##0:wybe.float, ~tmp#317##0:wybe.phantom, ?tmp#318##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(~tmp#41##0:wybe.float, ~%tmp#317##0:wybe.phantom, ?%tmp#318##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#318##0:wybe.phantom, ?tmp#319##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#319##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("round(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #118 @hypot:nn:nn
     foreign c llvm.round.f64(3.141592653589793:wybe.float, ?tmp#43##0:wybe.float) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#326##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_float(tmp#43##0:wybe.float, ~tmp#326##0:wybe.phantom, ?tmp#327##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_float(tmp#43##0:wybe.float, ~%tmp#326##0:wybe.phantom, ?%tmp#327##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#327##0:wybe.phantom, ?tmp#328##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#328##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
     wybe.string.print<0>("iround(pi) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #123 @hypot:nn:nn
     foreign llvm fptosi(~tmp#43##0:wybe.float, ?tmp#45##0:wybe.int) @hypot:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#336##0:wybe.phantom) @hypot:nn:nn
-    foreign c print_int(~tmp#45##0:wybe.int, ~tmp#336##0:wybe.phantom, ?tmp#337##0:wybe.phantom) @hypot:nn:nn
+    foreign c print_int(~tmp#45##0:wybe.int, ~%tmp#336##0:wybe.phantom, ?%tmp#337##0:wybe.phantom) @hypot:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#337##0:wybe.phantom, ?tmp#338##0:wybe.phantom) @hypot:nn:nn
     foreign lpvm store(~%tmp#338##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @hypot:nn:nn
 
