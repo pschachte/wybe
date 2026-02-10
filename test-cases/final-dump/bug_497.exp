@@ -8,7 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : bug_497.<0>
-  constants       : 0:: StructInfo {structSize = 16, structData = [FnPointerStructMember bug_497.#anon#1<1>,GenericStructMember (IntStructMember 3 8)]}
+  constants       : 0:: StructInfo {structSize = 16, structData = [FnPointerStructMember bug_497.#anon#1<1>,IntStructMember 3 8]}
   imports         : use logging
                     use wybe
   resources       : 

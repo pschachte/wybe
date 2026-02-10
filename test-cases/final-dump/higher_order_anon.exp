@@ -15,7 +15,7 @@ AFTER EVERYTHING:
                     4:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#4<1>]}
                     5:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#5<1>]}
                     6:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#6<1>]}
-                    7:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_anon.#anon#7<1>,GenericStructMember (PointerStructMember higher_order_anon.#anon#6<1><>)]}
+                    7:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_anon.#anon#7<1>,PointerStructMember higher_order_anon.#anon#6<1><>]}
                     8:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#8<1>]}
                     9:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#9<1>]}
   imports         : use wybe

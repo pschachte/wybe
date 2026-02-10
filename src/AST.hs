@@ -3599,8 +3599,7 @@ closureStructId pspec args = do
           Just <$>
             recordConstStruct
                 (StructInfo sz
-                    $ FnPointerStructMember pspec
-                        : List.map GenericStructMember args')
+                    $ FnPointerStructMember pspec : args')
                 (Just $ Closure pspec
                         (List.map (Unplaced . constValueExp) args'))
         _ -> return Nothing) . sequence

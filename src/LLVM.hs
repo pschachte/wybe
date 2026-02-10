@@ -289,8 +289,7 @@ preScanProcs = do
 prescanArg :: ModSpec -> PrimArg -> LLVM ()
 prescanArg mod closure@(ArgClosure pspec args _) = do
     (neededArgs, realParams) <- partitionClosureParams pspec args
-    let externArgs = primParamToArg envPrimParam 
-                    : List.map (setArgType AnyType . primParamToArg) realParams
+    let externArgs = primParamToArg envPrimParam : List.map primParamToArg realParams
     recordExternProc mod pspec externArgs
     recordExternSpec externAlloc
     argConstValue closure >>= maybe (return ()) recordIfConst
@@ -1502,11 +1501,11 @@ llvmValue (ArgInt val _) = return $ show val
 llvmValue (ArgFloat val _) = return $ show val
 llvmValue arg@(ArgClosure pspec args ty) = do
     logLLVM $ "llvmValue of " ++ show arg
-    args' <- fst <$> partitionClosureParams pspec args
     -- See if we've already allocated a constant for this closure
     argConstValue arg >>= \case
         Just const -> llvmConstValue const
         Nothing -> do
+            args' <- fst <$> partitionClosureParams pspec args
             logLLVM $ "Creating closure with args " ++ show args'
             (writePtr,readPtr) <- freshTempArgs $ Representation CPointer
             llClosureTy <- llvmStructType . (CPointer:) <$> mapM typeRep (argType <$> args')

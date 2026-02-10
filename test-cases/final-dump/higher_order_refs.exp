@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   public procs    : higher_order_refs.<0>
   constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#anon#1<1>]}
                     1:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#anon#2<1>]}
-                    2:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_refs.#anon#3<1>,GenericStructMember (FloatStructMember 0.5 8)]}
+                    2:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_refs.#anon#3<1>,FloatStructMember 0.5 8]}
                     3:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#closure#1<0>]}
                     4:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#closure#2<0>]}
                     5:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#closure#3<0>]}
@@ -180,7 +180,7 @@ target triple    ????
 
 @"higher_order_refs#constant#0" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#anon#1<1>" }, align 8
 @"higher_order_refs#constant#1" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#anon#2<1>" }, align 8
-@"higher_order_refs#constant#2" = private unnamed_addr constant {ptr, i64} { ptr @"higher_order_refs.#anon#3<1>", i64 bitcast( double 0.5 to i64 ) }, align 8
+@"higher_order_refs#constant#2" = private unnamed_addr constant {ptr, double} { ptr @"higher_order_refs.#anon#3<1>", double 0.5 }, align 8
 @"higher_order_refs#constant#3" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#1<0>" }, align 8
 @"higher_order_refs#constant#4" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#2<0>" }, align 8
 @"higher_order_refs#constant#5" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#3<0>" }, align 8
