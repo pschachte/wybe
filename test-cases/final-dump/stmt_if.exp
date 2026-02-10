@@ -43,7 +43,7 @@ foobar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     stmt_if.lookup<0>(1:wybe.int, stmt_if#constant#7:stmt_if.tree, ?tmp#8##0:wybe.bool) #3 @stmt_if:nn:nn
     factored ~tmp#8##0:wybe.bool of
-      ?tmp#31##0:wybe.string <- stmt_if#constant#10
+      ?tmp#31##0:wybe.string <- stmt_if#constant#10[PointerStructMember "lookup fails when it should succeed",PointerStructMember "lookup succeeds when it should"]
         wybe.string.print<0>(~tmp#31##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @stmt_if:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @stmt_if:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @stmt_if:nn:nn
@@ -58,7 +58,7 @@ foobar#cont#1(tr##0:stmt_if.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     stmt_if.lookup<0>(3:wybe.int, ~tr##0:stmt_if.tree, ?tmp#7##0:wybe.bool) #0 @stmt_if:nn:nn
     factored ~tmp#7##0:wybe.bool of
-      ?tmp#23##0:wybe.string <- stmt_if#constant#6
+      ?tmp#23##0:wybe.string <- stmt_if#constant#6[PointerStructMember "lookup succeeds when it should fail",PointerStructMember "lookup fails when it should"]
         wybe.string.print<0>(~tmp#23##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @stmt_if:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @stmt_if:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @stmt_if:nn:nn

@@ -30,7 +30,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
     io_flow_ok.unknown<0>(?tmp#2##0:wybe.bool) #1 @io_flow_ok:nn:nn
     factored ~tmp#2##0:wybe.bool of
-      ?tmp#24##0:wybe.string <- io_flow_ok#constant#6
+      ?tmp#24##0:wybe.string <- io_flow_ok#constant#6[PointerStructMember "That's odd!",PointerStructMember "OK"]
         wybe.string.print<0>(~tmp#24##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @io_flow_ok:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io_flow_ok:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io_flow_ok:nn:nn

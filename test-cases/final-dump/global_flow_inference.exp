@@ -117,7 +117,7 @@ only_out(b##0:wybe.bool)<{}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     factored ~b##0:wybe.bool of
-      ?tmp#1##0:wybe.int <- global_flow_inference#constant#0
+      ?tmp#1##0:wybe.int <- global_flow_inference#constant#0[IntStructMember 3 8,IntStructMember 2 8]
         foreign lpvm store(~tmp#1##0:wybe.int, <<global_flow_inference.res>>:wybe.int) @global_flow_inference:nn:nn
 
 

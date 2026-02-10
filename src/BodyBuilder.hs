@@ -1865,7 +1865,7 @@ rebuildFork var ty lastUse brs dflt = do
             let padded = vals ++ replicate (length brs - length vals) (last vals)
             vals' <- catMaybes <$> lift (mapM constantValue vals)
             id <- lift $ recordConstStruct (ArrayInfo vals') Nothing
-            return ((tmp, tmpTy, id):table, casts, renamed)
+            return ((tmp, tmpTy, id, vals'):table, casts, renamed)
         ) ([], [], []) $ Map.assocs table
       return (table', prependToBody casts $ renameProcBody (Map.fromList renamed) body, List.null casts)
 
@@ -1967,8 +1967,8 @@ mergeForks (MergedFork var0 ty0 final0 table0 branch0 dflt0) (MergedFork var1 ty
     -- will fail if not in the same order later on
     -- XXX we can probably to better than this!
     mergeTables [] [] vars = return (vars, [])
-    mergeTables (entry0@(var0, ty0, args0):table0) ((var1, ty1, args1):table1) vars@Factors{renamed=renamed}
-      | args0 == args1
+    mergeTables (entry0@(var0, ty0, struct0, _):table0) ((var1, ty1, struct1, _):table1) vars@Factors{renamed=renamed}
+      | struct0 == struct1
       = (entry0:) <$$> mergeTables table0 table1 vars{renamed=Map.insert var1 var0 renamed}
     mergeTables vars _ _ = App.empty
 -- XXX can we handle more forks?
@@ -2050,7 +2050,7 @@ renameProcBody vars (ProcBody prims fork) = ProcBody (contentApply (renamePrim v
     renameFork vars (PrimFork var ty final brs dflt)
       = PrimFork (rename vars var) ty final (mapSnd (renameProcBody vars) <$> brs) (renameProcBody vars <$> dflt)
     renameFork vars (MergedFork var ty final table body dflt)
-      = MergedFork (rename vars var) ty final (mapFst3 (rename vars) <$> table) (renameProcBody vars body) (renameProcBody vars <$> dflt)
+      = MergedFork (rename vars var) ty final (mapFst4 (rename vars) <$> table) (renameProcBody vars body) (renameProcBody vars <$> dflt)
 
     renamePrimArg vars arg@ArgVar{argVarName=nm} = arg{argVarName=rename vars nm}
     renamePrimArg vars (ArgClosure pspec args ty) = ArgClosure pspec (renamePrimArg vars <$> args) ty

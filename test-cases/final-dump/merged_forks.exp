@@ -59,7 +59,7 @@ leq_2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     foreign llvm icmp_ule(~x##0:wybe.int, 2:wybe.int, ?tmp#27##0:1 bit unsigned)
     factored ~tmp#27##0:1 bit unsigned of
-      ?tmp#28##0:wybe.int <- merged_forks#constant#0
+      ?tmp#28##0:wybe.int <- merged_forks#constant#0[IntStructMember 9 8,IntStructMember 1 8]
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @merged_forks:nn:nn
         foreign c print_int(~tmp#28##0:wybe.int, ~%tmp#15##0:wybe.phantom, ?%tmp#16##0:wybe.phantom) @merged_forks:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @merged_forks:nn:nn
@@ -74,7 +74,7 @@ nested(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     wybe.bool.print<0>(~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @merged_forks:nn:nn
     foreign llvm icmp_ule(~x##0:wybe.int, 2:wybe.int, ?tmp#55##0:1 bit unsigned)
     factored ~tmp#55##0:1 bit unsigned of
-      ?tmp#58##0:wybe.int <- merged_forks#constant#0
+      ?tmp#58##0:wybe.int <- merged_forks#constant#0[IntStructMember 9 8,IntStructMember 1 8]
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#41##0:wybe.phantom) @merged_forks:nn:nn
         foreign c print_int(~tmp#58##0:wybe.int, ~%tmp#41##0:wybe.phantom, ?%tmp#42##0:wybe.phantom) @merged_forks:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @merged_forks:nn:nn
@@ -97,7 +97,7 @@ nested_different_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wyb
         0:
             foreign llvm icmp_eq(~x##0:wybe.int, 3:wybe.int, ?tmp#10##0:wybe.bool) @merged_forks:nn:nn
             factored ~tmp#10##0:wybe.bool of
-              ?tmp#56##0:wybe.int <- merged_forks#constant#3
+              ?tmp#56##0:wybe.int <- merged_forks#constant#3[IntStructMember 8 8,IntStructMember 1 8]
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @merged_forks:nn:nn
                 foreign c print_int(~tmp#56##0:wybe.int, ~%tmp#25##0:wybe.phantom, ?%tmp#26##0:wybe.phantom) @merged_forks:nn:nn
                 foreign c putchar(10:wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @merged_forks:nn:nn
@@ -119,7 +119,7 @@ nested_different_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wyb
         0:
             foreign llvm icmp_eq(~x##0:wybe.int, 2:wybe.int, ?tmp#8##0:wybe.bool) @merged_forks:nn:nn
             factored ~tmp#8##0:wybe.bool of
-              ?tmp#57##0:wybe.int <- merged_forks#constant#0
+              ?tmp#57##0:wybe.int <- merged_forks#constant#0[IntStructMember 9 8,IntStructMember 1 8]
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#45##0:wybe.phantom) @merged_forks:nn:nn
                 foreign c print_int(~tmp#57##0:wybe.int, ~%tmp#45##0:wybe.phantom, ?%tmp#46##0:wybe.phantom) @merged_forks:nn:nn
                 foreign c putchar(10:wybe.char, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @merged_forks:nn:nn
@@ -141,7 +141,7 @@ nested_disjoint_same_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     factored ~b##0:wybe.bool of
-      ?tmp#83##0:wybe.int <- merged_forks#constant#2
+      ?tmp#83##0:wybe.int <- merged_forks#constant#2[IntStructMember 2 8,IntStructMember 3 8]
         wybe.bool.fmt<0>(~b##0:wybe.bool, ?tmp#1##0:wybe.string) #0 @merged_forks:nn:nn
         wybe.string.,,<0>(~tmp#1##0:wybe.string, 1155:wybe.string, ?tmp#0##0:wybe.string) #2 @merged_forks:nn:nn
         wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @merged_forks:nn:nn
@@ -185,7 +185,7 @@ nested_same_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     factored ~b##0:wybe.bool of
-      ?tmp#59##0:wybe.int <- merged_forks#constant#1
+      ?tmp#59##0:wybe.int <- merged_forks#constant#1[IntStructMember 3 8,IntStructMember 2 8]
         wybe.bool.fmt<0>(~b##0:wybe.bool, ?tmp#1##0:wybe.string) #0 @merged_forks:nn:nn
         wybe.string.,,<0>(~tmp#1##0:wybe.string, 1155:wybe.string, ?tmp#0##0:wybe.string) #2 @merged_forks:nn:nn
         wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @merged_forks:nn:nn
@@ -194,7 +194,7 @@ nested_same_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.
         0:
             foreign llvm icmp_eq(~x##0:wybe.int, ~tmp#59##0:wybe.int, ?tmp#8##0:wybe.bool) @merged_forks:nn:nn
             factored ~tmp#8##0:wybe.bool of
-              ?tmp#57##0:wybe.int <- merged_forks#constant#0
+              ?tmp#57##0:wybe.int <- merged_forks#constant#0[IntStructMember 9 8,IntStructMember 1 8]
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#45##0:wybe.phantom) @merged_forks:nn:nn
                 foreign c print_int(~tmp#57##0:wybe.int, ~%tmp#45##0:wybe.phantom, ?%tmp#46##0:wybe.phantom) @merged_forks:nn:nn
                 foreign c putchar(10:wybe.char, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @merged_forks:nn:nn
@@ -218,7 +218,7 @@ not_dense(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     0:
         foreign llvm icmp_eq(~x##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool) @merged_forks:nn:nn
         factored ~tmp#1##0:wybe.bool of
-          ?tmp#20##0:wybe.int <- merged_forks#constant#0
+          ?tmp#20##0:wybe.int <- merged_forks#constant#0[IntStructMember 9 8,IntStructMember 1 8]
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @merged_forks:nn:nn
             foreign c print_int(~tmp#20##0:wybe.int, ~%tmp#12##0:wybe.phantom, ?%tmp#13##0:wybe.phantom) @merged_forks:nn:nn
             foreign c putchar(10:wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @merged_forks:nn:nn

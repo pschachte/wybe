@@ -18,7 +18,7 @@ import           Options
 import           Version
 import           CConfig
 import           Snippets
-import           Util                            ((|||), showArguments, sameLength)
+import           Util                            ((|||), showArguments, sameLength, thd4)
 import           System.IO
 import           Data.Char                       (isAlphaNum)
 import           Data.Set                        as Set
@@ -311,7 +311,7 @@ preScanForks mod PrimFork{forkBodies=bodies, forkDefault=mbDflt} = do
     mapM_ (preScanBodyForks mod . snd) bodies
     forM_ mbDflt $ preScanBodyForks mod
 preScanForks mod MergedFork{forkTable=table, forkBody=body, forkDefault=mbDflt} = do
-    mapM_ (recordConst . thd3) table
+    mapM_ (recordConst . thd4) table
     preScanBodyForks mod body
     forM_ mbDflt $ preScanBodyForks mod
 
@@ -713,7 +713,7 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
             releaseDeferredCall
             writeAssemblyMergedFork outs var ty table body
         MergedFork var ty _ [] body dflt -> shouldnt "writeAssemblyBody empty table" 
-        MergedFork var ty _ table@((_,_,structId):_) body dflt -> do 
+        MergedFork var ty _ table@((_,_,structId, _):_) body dflt -> do 
             tmp <- makeTemp
             len <- genericLength . arrayData . trustFromJust "writeAssemblyMergedFork" <$> lift (lookupConstInfo structId)
             writeAssemblyBody outs $ guardedMergedFork tmp var ty len 
@@ -775,7 +775,7 @@ writeAssemblySwitch outs v rep cases dflt = do
 writeAssemblyMergedFork :: [PrimParam] -> PrimVarName -> TypeSpec -> MergedForkTable -> ProcBody -> StateT LLVMState Compiler ()
 writeAssemblyMergedFork outs idxVar idxTy table body = do
     releaseDeferredCall 
-    forM_ table (\(var, ty, structId) -> do
+    forM_ table (\(var, ty, structId, _) -> do
             len <- length . arrayData . trustFromJust "writeAssemblyMergedFork" <$> lift (lookupConstInfo structId)
             varRep <- llvmTypeRep <$> typeRep ty
             let llarrty = "[ " ++ show len ++ " x " ++ varRep ++ " ]"

@@ -381,7 +381,7 @@ char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     factored ~r##0:card.rank of
-      ?tmp#67##0:wybe.char <- card.rank#constant#14
+      ?tmp#67##0:wybe.char <- card.rank#constant#14[IntStructMember 50 1,IntStructMember 51 1,IntStructMember 52 1,IntStructMember 53 1,IntStructMember 54 1,IntStructMember 55 1,IntStructMember 56 1,IntStructMember 57 1,IntStructMember 84 1,IntStructMember 74 1,IntStructMember 81 1,IntStructMember 75 1,IntStructMember 65 1]
         foreign llvm move(~tmp#67##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
     else:
         foreign c {terminal,semipure} error_exit(c"card:42:22":wybe.c_string, c"shouldn't happen!":wybe.c_string) @card:nn:nn
@@ -667,7 +667,7 @@ char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     factored ~s##0:card.suit of
-      ?tmp#22##0:wybe.char <- card.suit#constant#5
+      ?tmp#22##0:wybe.char <- card.suit#constant#5[IntStructMember 67 1,IntStructMember 68 1,IntStructMember 72 1,IntStructMember 83 1]
         foreign llvm move(~tmp#22##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
 

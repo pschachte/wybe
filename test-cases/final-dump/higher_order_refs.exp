@@ -395,7 +395,7 @@ logmsg(x##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     factored ~x##0:wybe.bool of
-      ?tmp#4##0:wybe.c_string <- logging#constant#2
+      ?tmp#4##0:wybe.c_string <- logging#constant#2[PointerStructMember c"false",PointerStructMember c"true"]
         foreign c {impure} log_string(~tmp#4##0:wybe.c_string) @logging:nn:nn
 
 

@@ -49,7 +49,7 @@ lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe
         0:
             foreign llvm icmp_slt(key##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#11##0:wybe.bool) @tests:nn:nn
             factored ~tmp#11##0:wybe.bool of
-              ?tmp#41##0:wybe.int <- tests#constant#0
+              ?tmp#41##0:wybe.int <- tests#constant#0[IntStructMember 24 8,IntStructMember 0 8]
                 foreign lpvm access(~map##0:tests.map, ~tmp#41##0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:tests.map) @tests:nn:nn
                 tests.lookup<0>(~key##0:wybe.int, ~tmp#3##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool) #6 @tests:nn:nn
 

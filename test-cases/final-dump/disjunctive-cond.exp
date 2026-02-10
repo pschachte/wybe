@@ -45,7 +45,7 @@ proc #cont#1 > {semipure} (3 calls)
     case ~a##0:wybe.bool of
     0:
         factored ~b##0:wybe.bool of
-          ?tmp#28##0:wybe.string <- disjunctive-cond#constant#11
+          ?tmp#28##0:wybe.string <- disjunctive-cond#constant#11[PointerStructMember "no good",PointerStructMember "also good"]
             wybe.string.print<0>(~tmp#28##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @disjunctive-cond:8:18
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @disjunctive-cond:8:18
             foreign c putchar(10:wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @disjunctive-cond:8:18
@@ -72,7 +72,7 @@ proc #cont#2 > {semipure} (2 calls)
 
     1:
         factored ~b##0:wybe.bool of
-          ?tmp#30##0:wybe.string <- disjunctive-cond#constant#9
+          ?tmp#30##0:wybe.string <- disjunctive-cond#constant#9[PointerStructMember "more good",PointerStructMember "no good"]
             wybe.string.print<0>(~tmp#30##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @disjunctive-cond:12:19
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @disjunctive-cond:12:19
             foreign c putchar(10:wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @disjunctive-cond:12:19
@@ -95,7 +95,7 @@ proc #cont#3 > {semipure} (7 calls)
 
     1:
         factored ~b##0:wybe.bool of
-          ?tmp#32##0:wybe.string <- disjunctive-cond#constant#7
+          ?tmp#32##0:wybe.string <- disjunctive-cond#constant#7[PointerStructMember "still good",PointerStructMember "no good"]
             wybe.string.print<0>(~tmp#32##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @disjunctive-cond:16:18
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @disjunctive-cond:16:18
             foreign c putchar(10:wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @disjunctive-cond:16:18

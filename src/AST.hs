@@ -2601,7 +2601,7 @@ data PrimFork =
     }
     deriving (Eq, Show, Generic)
 
-type MergedForkTable = [(PrimVarName, TypeSpec, StructID)]
+type MergedForkTable = [(PrimVarName, TypeSpec, StructID, [ConstValue])]
 
 -- |Add the specified statements at the end of the given body
 appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
@@ -2622,7 +2622,7 @@ prependToBody before (ProcBody prims fork)
 -- |Un-merge a fork, replacing the tabled variables with a series of moved in the PrimFork branches
 unMergeFork :: PrimFork -> Compiler PrimFork
 unMergeFork (MergedFork var ty final table body dlft) = do
-    table' <- mapM (\(var, ty, id) -> (var, ty,) . List.map (`constValuePrimArg` ty) . arrayData . trustFromJust "unMergeFork" <$> lookupConstInfo id) table
+    table' <- mapM (\(var, ty, id, _) -> (var, ty,) . List.map (`constValuePrimArg` ty) . arrayData . trustFromJust "unMergeFork" <$> lookupConstInfo id) table
     let untabled = List.transpose 
                     $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ PrimForeign "llvm" "move" [] [p, ArgVar var' ty' FlowOut Ordinary False]) vals) 
                     table'
@@ -4456,9 +4456,9 @@ showFork ind (PrimFork var ty last bodies deflt) =
 showFork ind (MergedFork var ty last table body deflt) =
     startLine ind ++ "factored " ++ (if last then "~" else "") ++ show var ++
                   ":" ++ show ty ++ " of" ++
-    List.concatMap (\(var, ty, struct) -> 
+    List.concatMap (\(var, ty, struct, vals) -> 
                         startLine (ind + 2) ++ "?" ++ show var ++ ":" ++ show ty ++
-                        " <- " ++ show struct) 
+                        " <- " ++ show struct ++ "" ++ show vals ++ "") 
         table
     ++ showBlock (ind+4) body
     ++ maybe "" (\b -> startLine ind ++ "else:"

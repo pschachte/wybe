@@ -66,7 +66,7 @@ test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {
     foreign lpvm cast(~ch##0:wybe.char, ?tmp#0##0:wybe.int) @char-escape:4:10
     foreign llvm icmp_eq(~code##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#3##0:wybe.bool) @char-escape:4:10
     factored ~tmp#3##0:wybe.bool of
-      ?tmp#22##0:wybe.string <- char-escape#constant#15
+      ?tmp#22##0:wybe.string <- char-escape#constant#15[PointerStructMember " char escapes don't work",PointerStructMember " char escapes work"]
         wybe.string.print<0>(~name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @char-escape:5:14
         wybe.string.print<0>(~tmp#22##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @char-escape:5:29
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @char-escape:5:29

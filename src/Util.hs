@@ -7,8 +7,8 @@
 
 module Util (sameLength, maybeNth, insertAt,
              setMapInsert, showArguments,
-             fillLines, nop, sccElts, DisjointSet,
-             emptyDS, addOneToDS, unionTwoInDS,
+             fillLines, nop, sccElts, mapFst4, thd4, 
+             DisjointSet, emptyDS, addOneToDS, unionTwoInDS,
              combineTwoDS, removeSingletonFromDS,
              addConnectedGroupToDS, removeOneFromDS,
              removeFromDS, connectedItemsInDS,
@@ -116,6 +116,16 @@ nop = return ()
 sccElts :: SCC a -> [a]
 sccElts (AcyclicSCC single) = [single]
 sccElts (CyclicSCC multi)   = multi
+
+
+-- Map the first elemt of a 4-tuple
+mapFst4 :: (a0 -> a1) -> (a0, b, c, d) -> (a1, b, c, d)
+mapFst4 f (a, b, c, d) = (f a, b, c, d)
+
+
+
+thd4 :: (a, b, c, d) -> c
+thd4 (_, _, c, _) = c
 
 
 ----------------------------------------------------------------
