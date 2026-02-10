@@ -8,7 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : uneeded_closure_args.<0>
-  constants       : 0:: StructInfo {structSize = 16, structData = [FnPointerStructMember uneeded_closure_args.#closure#1<0>,GenericStructMember (IntStructMember 1 8)]}
+  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember uneeded_closure_args.#closure#1<0>]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -18,7 +18,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    uneeded_closure_args.call<0>(uneeded_closure_args.#closure#1<0><1>:(wybe.int, ?wybe.int), 2:wybe.int, ?tmp#0##0:wybe.int) #0 @uneeded_closure_args:nn:nn
+    uneeded_closure_args.call<0>(uneeded_closure_args.#closure#1<0><>:(wybe.int, ?wybe.int), 2:wybe.int, ?tmp#0##0:wybe.int) #0 @uneeded_closure_args:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @uneeded_closure_args:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @uneeded_closure_args:nn:nn
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @uneeded_closure_args:nn:nn
@@ -55,7 +55,7 @@ second([a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>
 source_filename = "!ROOT!/final-dump/uneeded_closure_args.wybe"
 target triple    ????
 
-@"uneeded_closure_args#constant#0" = private unnamed_addr constant {ptr, i64} { ptr @"uneeded_closure_args.#closure#1<0>", i64 1 }, align 8
+@"uneeded_closure_args#constant#0" = private unnamed_addr constant {ptr} { ptr @"uneeded_closure_args.#closure#1<0>" }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

@@ -3591,16 +3591,18 @@ constantValue _ = return Nothing
 -- | Generate a StructId for a closure, if all its arguments are constants.
 closureStructId :: ProcSpec -> [PrimArg] -> Compiler (Maybe StructID)
 closureStructId pspec args = do
-    mapM constantValue args >>= (\case
+    params <- getPrimParams pspec
+    let neededArgs = [arg | (arg, param) <- zip args params, paramIsNeeded param]
+    mapM constantValue neededArgs >>= (\case
         Just args' -> do
           let sz = wordSizeBytes * (length args' + 1)
-          Just <$> (
+          Just <$>
             recordConstStruct
                 (StructInfo sz
                     $ FnPointerStructMember pspec
                         : List.map GenericStructMember args')
                 (Just $ Closure pspec
-                        (List.map (Unplaced . constValueExp) args')))
+                        (List.map (Unplaced . constValueExp) args'))
         _ -> return Nothing) . sequence
 
 

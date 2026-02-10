@@ -13,7 +13,7 @@ AFTER EVERYTHING:
                     2:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_refs.#anon#3<1>,GenericStructMember (FloatStructMember 0.5 8)]}
                     3:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#closure#1<0>]}
                     4:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#closure#2<0>]}
-                    5:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_refs.#closure#3<0>,GenericStructMember (IntStructMember 10 8)]}
+                    5:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#closure#3<0>]}
   imports         : use logging
                     use wybe
   resources       : 
@@ -40,7 +40,7 @@ module top-level code > public {semipure} (0 calls)
     higher_order_refs.app<0>(higher_order_refs.#closure#2<0><>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#6##0:wybe.int) #8 @higher_order_refs:nn:nn
     foreign c print_int(~tmp#6##0:wybe.int, ~tmp#26##0:wybe.phantom, ?%tmp#29##0:wybe.phantom) @higher_order_refs:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @higher_order_refs:nn:nn
-    higher_order_refs.app<0>(higher_order_refs.#closure#3<0><10>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#8##0:wybe.int) #10 @higher_order_refs:nn:nn
+    higher_order_refs.app<0>(higher_order_refs.#closure#3<0><>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#8##0:wybe.int) #10 @higher_order_refs:nn:nn
     foreign c print_int(~tmp#8##0:wybe.int, ~tmp#30##0:wybe.phantom, ?%tmp#33##0:wybe.phantom) @higher_order_refs:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @higher_order_refs:nn:nn
     foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_refs:nn:nn
@@ -183,7 +183,7 @@ target triple    ????
 @"higher_order_refs#constant#2" = private unnamed_addr constant {ptr, i64} { ptr @"higher_order_refs.#anon#3<1>", i64 bitcast( double 0.5 to i64 ) }, align 8
 @"higher_order_refs#constant#3" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#1<0>" }, align 8
 @"higher_order_refs#constant#4" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#2<0>" }, align 8
-@"higher_order_refs#constant#5" = private unnamed_addr constant {ptr, i64} { ptr @"higher_order_refs.#closure#3<0>", i64 10 }, align 8
+@"higher_order_refs#constant#5" = private unnamed_addr constant {ptr} { ptr @"higher_order_refs.#closure#3<0>" }, align 8
 
 declare external fastcc void @"logging.logmsg<6>"(i1)
 declare external ccc void @log_char(i8)

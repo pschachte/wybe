@@ -8,7 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : bug_509.<0>
-  constants       : 0:: StructInfo {structSize = 16, structData = [FnPointerStructMember bug_509.#anon#1<1>,GenericStructMember (IntStructMember 1 8)]}
+  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember bug_509.#anon#1<1>]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -18,7 +18,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    bug_509.call<0>(bug_509.#anon#1<1><1>:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool) #0 @bug_509:nn:nn
+    bug_509.call<0>(bug_509.#anon#1<1><>:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool) #0 @bug_509:nn:nn
     wybe.bool.print<0>(~x##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @bug_509:nn:nn
 
 
@@ -51,7 +51,7 @@ call(f##0:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool)<{}; {}; {}>:
 source_filename = "!ROOT!/final-dump/bug_509.wybe"
 target triple    ????
 
-@"bug_509#constant#0" = private unnamed_addr constant {ptr, i64} { ptr @"bug_509.#anon#1<1>", i64 1 }, align 8
+@"bug_509#constant#0" = private unnamed_addr constant {ptr} { ptr @"bug_509.#anon#1<1>" }, align 8
 
 declare external fastcc void @"wybe.bool.print<0>"(i1)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
