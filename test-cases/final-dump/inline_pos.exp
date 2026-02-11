@@ -104,7 +104,7 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<command_line.arguments>>:wybe.c_array(wybe.c_string), ?%arguments##0:wybe.c_array(wybe.c_string)) @inline_pos:nn:nn
-    foreign lpvm access(~arguments##0:wybe.c_array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @inline_pos:nn:nn
+    foreign lpvm access(~arguments##0:wybe.c_array(wybe.c_string), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @inline_pos:nn:nn
     foreign llvm add(~tmp#0##0:wybe.int, 1:wybe.int, ?v##1:wybe.int) @inline_pos:nn:nn
     wybe.int.fmt<2>(~v##1:wybe.int, 0:wybe.int, ' ':wybe.char, ?tmp#2##0:wybe.string) #5 @inline_pos:nn:nn
     wybe.string.,,<0>("v = ":wybe.string, ~tmp#2##0:wybe.string, ?tmp#1##0:wybe.string) #3 @inline_pos:nn:nn

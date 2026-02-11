@@ -121,10 +121,10 @@ upto(lo##0:wybe.int, hi##0:wybe.int, outByReference #result##0:wybe.list(wybe.in
     case ~tmp#5##0:wybe.bool of
     0:
         foreign llvm add(lo##0:wybe.int, 1:wybe.int, ?tmp#4##0:wybe.int) @upto:nn:nn
-        foreign lpvm alloc(16:wybe.int, ?tmp#12##0:wybe.list(T)) @upto:nn:nn
-        foreign lpvm mutate(~tmp#12##0:wybe.list(T), ?tmp#13##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lo##0:T) @upto:nn:nn
+        foreign lpvm alloc(16:wybe.int, ?tmp#12##0:wybe.list(wybe.int)) @upto:nn:nn
+        foreign lpvm mutate(~tmp#12##0:wybe.list(wybe.int), ?tmp#13##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lo##0:wybe.int) @upto:nn:nn
         upto.submod.upto<0>(~tmp#4##0:wybe.int, ~hi##0:wybe.int, outByReference tmp#3##0:wybe.list(wybe.int)) #3 @upto:nn:nn
-        foreign lpvm mutate(~tmp#13##0:wybe.list(T), ?#result##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference tmp#3##0:wybe.list(T)) @upto:nn:nn
+        foreign lpvm mutate(~tmp#13##0:wybe.list(wybe.int), ?#result##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference tmp#3##0:wybe.list(wybe.int)) @upto:nn:nn
 
     1:
         foreign llvm move(0:wybe.list(wybe.int), ?#result##0:wybe.list(wybe.int)) @upto:nn:nn
