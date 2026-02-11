@@ -28,7 +28,7 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'top_level_use'
 
 source_filename = "!ROOT!/final-dump/top_level_use.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
@@ -36,7 +36,7 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#top_level_use.res" = global i64 undef
 
-define external fastcc void @"top_level_use.<0>"() {
+define external fastcc void @"top_level_use#.<0>"() {
   call ccc void @print_int(i64 0)
   call ccc void @putchar(i8 10)
   ret void

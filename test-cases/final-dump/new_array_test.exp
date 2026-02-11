@@ -223,7 +223,7 @@ proc #cont#4 > {semipure} (2 calls)
 ; ModuleID = 'new_array_test'
 
 source_filename = "!ROOT!/final-dump/new_array_test.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Sum   : \00", align 8
 @"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"new_array_test:8:19\00", align 8
@@ -231,30 +231,30 @@ target triple    ????
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 8, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 
-declare external fastcc i64 @"wybe.array.array<0>"(i64, i64)
-declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
-declare external fastcc i64 @"wybe.range...<0>"(i64, i64)
-declare external fastcc {i64, i64, i1} @"wybe.range.[|]<0>"(i64)
-declare external fastcc {i64, i64, i1} @"wybe.range.[|]<0>[785a827a1b]"(i64)
-declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
-declare external fastcc i64 @"wybe.string.c_string<0>"(i64)
-declare external fastcc void @"wybe.string.print<0>"(i64)
-declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
+declare external fastcc i64 @"wybe#.array#.array<0>"(i64, i64)
+declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
+declare external fastcc i64 @"wybe#.range#...<0>"(i64, i64)
+declare external fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>"(i64)
+declare external fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>[785a827a1b]"(i64)
+declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
+declare external fastcc i64 @"wybe#.string#.c_string<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @error_exit(i64, i64)
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"new_array_test.<0>"() {
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.array.array<0>"(i64 0, i64 1000000)
+define external fastcc void @"new_array_test#.<0>"() {
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.array#.array<0>"(i64 0, i64 1000000)
   %"tmp#15##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#3##0" = load i64, ptr %"tmp#15##0"
-  %"tmp#2##0" = tail call fastcc i64 @"wybe.range...<0>"(i64 0, i64 %"tmp#3##0")
-  tail call fastcc void @"new_array_test.#cont#4<0>[7477e50a09]"(i64 %"tmp#0##0", i64 %"tmp#2##0")
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.range#...<0>"(i64 0, i64 %"tmp#3##0")
+  tail call fastcc void @"new_array_test#.#cont#4<0>[7477e50a09]"(i64 %"tmp#0##0", i64 %"tmp#2##0")
   ret void
 }
 
-define external fastcc void @"new_array_test.#cont#1<0>"(i64 %"ar##0") {
+define external fastcc void @"new_array_test#.#cont#1<0>"(i64 %"ar##0") {
   %"tmp#13##0" = add i64 %"ar##0", 8
   %"tmp#19##0" = inttoptr i64 %"ar##0" to ptr
   %"tmp#14##0" = load i64, ptr %"tmp#19##0"
@@ -267,19 +267,19 @@ define external fastcc void @"new_array_test.#cont#1<0>"(i64 %"ar##0") {
   %"tmp#22##0" = add i64 %"tmp#17##0", 8
   %"tmp#23##0" = inttoptr i64 %"tmp#22##0" to ptr
   store i64 %"tmp#16##0", ptr %"tmp#23##0"
-  tail call fastcc void @"new_array_test.#cont#3<0>"(i64 0, i64 %"tmp#17##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>"(i64 0, i64 %"tmp#17##0")
   ret void
 }
 
-define external fastcc void @"new_array_test.#cont#2<0>"(i64 %"sum##0") {
-  %"tmp#7##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
-  %"tmp#6##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#7##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#6##0")
+define external fastcc void @"new_array_test#.#cont#2<0>"(i64 %"sum##0") {
+  %"tmp#7##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
+  %"tmp#6##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#7##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#6##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc void @"new_array_test.#cont#3<0>"(i64 %"sum##0", i64 %"tmp#4##0") {
+define external fastcc void @"new_array_test#.#cont#3<0>"(i64 %"sum##0", i64 %"tmp#4##0") {
   %"tmp#24##0" = inttoptr i64 %"tmp#4##0" to ptr
   %"tmp#13##0" = load i64, ptr %"tmp#24##0"
   %"tmp#25##0" = add i64 %"tmp#4##0", 8
@@ -298,17 +298,17 @@ if.then.0:
   %"tmp#31##0" = inttoptr i64 %"tmp#30##0" to ptr
   store i64 %"tmp#16##0", ptr %"tmp#31##0"
   %"sum##1" = add i64 %"i##0", %"sum##0"
-  tail call fastcc void @"new_array_test.#cont#3<0>"(i64 %"sum##1", i64 %"tmp#30##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>"(i64 %"sum##1", i64 %"tmp#30##0")
   ret void
 if.else.0:
-  %"tmp#18##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
-  %"tmp#19##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#18##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#19##0")
+  %"tmp#18##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
+  %"tmp#19##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#18##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#19##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 %"sum##0", i64 %"tmp#4##0") {
+define external fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 %"sum##0", i64 %"tmp#4##0") {
   %"tmp#24##0" = inttoptr i64 %"tmp#4##0" to ptr
   %"tmp#13##0" = load i64, ptr %"tmp#24##0"
   %"tmp#25##0" = add i64 %"tmp#4##0", 8
@@ -323,18 +323,18 @@ if.then.0:
   %"tmp#28##0" = inttoptr i64 %"tmp#4##0" to ptr
   store i64 %"tmp#16##0", ptr %"tmp#28##0"
   %"sum##1" = add i64 %"i##0", %"sum##0"
-  tail call fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 %"sum##1", i64 %"tmp#4##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 %"sum##1", i64 %"tmp#4##0")
   ret void
 if.else.0:
-  %"tmp#18##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
-  %"tmp#19##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#18##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#19##0")
+  %"tmp#18##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
+  %"tmp#19##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#3" to i64 ), i64 %"tmp#18##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#19##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc void @"new_array_test.#cont#4<0>"(i64 %"ar##0", i64 %"tmp#1##0") {
-  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe.range.[|]<0>"(i64 %"tmp#1##0")
+define external fastcc void @"new_array_test#.#cont#4<0>"(i64 %"ar##0", i64 %"tmp#1##0") {
+  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>"(i64 %"tmp#1##0")
   %"i##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 0
   %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#34##0", 1
   %"tmp#13##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 2
@@ -359,14 +359,14 @@ if.then.2:
   %"tmp#40##0" = add i64 %"tmp#39##0", %"tmp#29##0"
   %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
   store i64 %"i##0", ptr %"tmp#41##0"
-  tail call fastcc void @"new_array_test.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#39##0", i64 %"tmp#1##1")
+  tail call fastcc void @"new_array_test#.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#39##0", i64 %"tmp#1##1")
   ret void
 if.else.2:
-  %"tmp#33##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  %"tmp#33##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#33##0")
   ret void
 if.else.1:
-  %"tmp#42##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  %"tmp#42##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#42##0")
   ret void
 if.else.0:
@@ -382,12 +382,12 @@ if.else.0:
   %"tmp#46##0" = add i64 %"tmp#19##0", 8
   %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
   store i64 %"tmp#18##0", ptr %"tmp#47##0"
-  tail call fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
   ret void
 }
 
-define external fastcc void @"new_array_test.#cont#4<0>[7477e50a09]"(i64 %"ar##0", i64 %"tmp#1##0") {
-  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe.range.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
+define external fastcc void @"new_array_test#.#cont#4<0>[7477e50a09]"(i64 %"ar##0", i64 %"tmp#1##0") {
+  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
   %"i##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 0
   %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#34##0", 1
   %"tmp#13##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 2
@@ -407,14 +407,14 @@ if.then.2:
   %"tmp#36##0" = add i64 %"ar##0", %"tmp#29##0"
   %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
   store i64 %"i##0", ptr %"tmp#37##0"
-  tail call fastcc void @"new_array_test.#cont#4<0>[7477e50a09]"(i64 %"ar##0", i64 %"tmp#1##1")
+  tail call fastcc void @"new_array_test#.#cont#4<0>[7477e50a09]"(i64 %"ar##0", i64 %"tmp#1##1")
   ret void
 if.else.2:
-  %"tmp#33##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  %"tmp#33##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#33##0")
   ret void
 if.else.1:
-  %"tmp#38##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  %"tmp#38##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#38##0")
   ret void
 if.else.0:
@@ -430,12 +430,12 @@ if.else.0:
   %"tmp#42##0" = add i64 %"tmp#19##0", 8
   %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
   store i64 %"tmp#18##0", ptr %"tmp#43##0"
-  tail call fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
   ret void
 }
 
-define external fastcc void @"new_array_test.#cont#4<0>[6dacb8fd25]"(i64 %"ar##0", i64 %"tmp#1##0") {
-  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe.range.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
+define external fastcc void @"new_array_test#.#cont#4<0>[6dacb8fd25]"(i64 %"ar##0", i64 %"tmp#1##0") {
+  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
   %"i##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 0
   %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#34##0", 1
   %"tmp#13##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 2
@@ -460,14 +460,14 @@ if.then.2:
   %"tmp#40##0" = add i64 %"tmp#39##0", %"tmp#29##0"
   %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
   store i64 %"i##0", ptr %"tmp#41##0"
-  tail call fastcc void @"new_array_test.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#39##0", i64 %"tmp#1##1")
+  tail call fastcc void @"new_array_test#.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#39##0", i64 %"tmp#1##1")
   ret void
 if.else.2:
-  %"tmp#33##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  %"tmp#33##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#33##0")
   ret void
 if.else.1:
-  %"tmp#42##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  %"tmp#42##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @error_exit(i64 ptrtoint( ptr @"cstring#1" to i64 ), i64 %"tmp#42##0")
   ret void
 if.else.0:
@@ -483,6 +483,6 @@ if.else.0:
   %"tmp#46##0" = add i64 %"tmp#19##0", 8
   %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
   store i64 %"tmp#18##0", ptr %"tmp#47##0"
-  tail call fastcc void @"new_array_test.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
   ret void
 }

@@ -25,12 +25,12 @@ proc + > public {inline} (0 calls)
 ; ModuleID = 'representation'
 
 source_filename = "!ROOT!/final-dump/representation.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i16 @"representation.+<0>"(i16 %"x##0", i16 %"y##0") {
+define external fastcc i16 @"representation#.+<0>"(i16 %"x##0", i16 %"y##0") {
   %"tmp#1##0" = add i16 %"x##0", %"y##0"
   ret i16 %"tmp#1##0"
 }

@@ -633,8 +633,8 @@ target triple   = ???
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"\00", align 8
 
-declare external fastcc void @"command_line.<0>"()
-declare external fastcc void @"drone.<0>"()
+declare external fastcc void @"command_line#.<0>"()
+declare external fastcc void @"drone#.<0>"()
 @"resource#command_line.argc" = external global i64
 @"resource#command_line.arguments" = external global i64
 @"resource#command_line.argv" = external global i64
@@ -649,7 +649,7 @@ define external ccc i64 @main(i64 %"argc##0", i64 %"argv##0") {
   store i64 %"argc##0", ptr @"resource#command_line.argc"
   store i64 %"argv##0", ptr @"resource#command_line.argv"
   call ccc void @gc_init()
-  tail call fastcc void @"drone.<0>"()
+  tail call fastcc void @"drone#.<0>"()
   %"tmp#11##0" = call ccc ptr @wybe_malloc(i32 16)
   %"tmp#9##0" = ptrtoint ptr %"tmp#11##0" to i64
   %"tmp#12##0" = inttoptr i64 %"tmp#9##0" to ptr
@@ -660,7 +660,7 @@ define external ccc i64 @main(i64 %"argc##0", i64 %"argv##0") {
   store i64 %"tmp#9##0", ptr @"resource#command_line.arguments"
   store i64 ptrtoint( ptr @"cstring#0" to i64 ), ptr @"resource#command_line.command"
   store i64 0, ptr @"resource#command_line.exit_code"
-  tail call fastcc void @"command_line.<0>"()
+  tail call fastcc void @"command_line#.<0>"()
   call ccc void @exit(i64 0)
   ret i64 0
 }
@@ -719,7 +719,7 @@ target triple   = ???
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Erroneous program argument vector\00", align 8
 @"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"command_line:18:15\00", align 8
 
-declare external fastcc {i64, i64, i1} @"wybe.c_array.[|]<0>"(i64)
+declare external fastcc {i64, i64, i1} @"wybe#.c_array#.[|]<0>"(i64)
 declare external ccc void @error_exit(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#command_line.argc" = global i64 undef
@@ -728,9 +728,9 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#command_line.command" = global i64 undef
 @"resource#command_line.exit_code" = global i64 undef
 
-define external fastcc void @"command_line.<0>"() {
+define external fastcc void @"command_line#.<0>"() {
   %"arguments##0" = load i64, ptr @"resource#command_line.arguments"
-  %"tmp#11##0" = tail call fastcc {i64, i64, i1} @"wybe.c_array.[|]<0>"(i64 %"arguments##0")
+  %"tmp#11##0" = tail call fastcc {i64, i64, i1} @"wybe#.c_array#.[|]<0>"(i64 %"arguments##0")
   %"command##1" = extractvalue {i64, i64, i1}%"tmp#11##0", 0
   %"arguments##2" = extractvalue {i64, i64, i1}%"tmp#11##0", 1
   %"tmp#8##0" = extractvalue {i64, i64, i1}%"tmp#11##0", 2
@@ -744,7 +744,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"command_line.set_exit_code<0>"(i64 %"code##0") {
+define external fastcc void @"command_line#.set_exit_code<0>"(i64 %"code##0") {
   store i64 %"code##0", ptr @"resource#command_line.exit_code"
   ret void
 }
@@ -1161,8 +1161,8 @@ target triple   = ???
 @"string#6" = private unnamed_addr constant {i64, i64} { i64 2, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"string#7" = private unnamed_addr constant {i64, i64} { i64 15, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
-declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc i64 @malloc_count()
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -1170,29 +1170,29 @@ declare external ccc i8 @read_char()
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"drone.<0>"() {
-  %"tmp#0##0" = tail call fastcc i64 @"drone.drone_init<0>"()
+define external fastcc void @"drone#.<0>"() {
+  %"tmp#0##0" = tail call fastcc i64 @"drone#.drone_init<0>"()
   %"ch##0" = call ccc i8 @read_char()
   %"tmp#2##0" = icmp ne i8 %"ch##0", -1
   br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"drone.loop<0>[410bae77d3]"(i64 %"tmp#0##0", i8 %"ch##0")
-  tail call fastcc void @"drone.#cont#1<0>"()
+  tail call fastcc void @"drone#.loop<0>[410bae77d3]"(i64 %"tmp#0##0", i8 %"ch##0")
+  tail call fastcc void @"drone#.#cont#1<0>"()
   ret void
 if.else.0:
-  tail call fastcc void @"drone.#cont#1<0>"()
+  tail call fastcc void @"drone#.#cont#1<0>"()
   ret void
 }
 
-define external fastcc void @"drone.#cont#1<0>"() {
+define external fastcc void @"drone#.#cont#1<0>"() {
   %"mc##0" = call ccc i64 @malloc_count()
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @print_int(i64 %"mc##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc {i64, i1} @"drone.do_action<0>"(i64 %"d##0", i8 %"action##0") {
+define external fastcc {i64, i1} @"drone#.do_action<0>"(i64 %"d##0", i8 %"action##0") {
   %"tmp#21##0" = icmp eq i8 %"action##0", 110
   br i1 %"tmp#21##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1207,7 +1207,7 @@ if.then.0:
   %"tmp#69##0" = add i64 %"tmp#68##0", 8
   %"tmp#70##0" = inttoptr i64 %"tmp#69##0" to ptr
   store i64 %"tmp#1##0", ptr %"tmp#70##0"
-  %"tmp#71##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#68##0", i1 1)
+  %"tmp#71##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#68##0", i1 1)
   %"tmp#72##0" = insertvalue {i64, i1} undef, i64 %"tmp#71##0", 0
   %"tmp#73##0" = insertvalue {i64, i1} %"tmp#72##0", i1 1, 1
   ret {i64, i1} %"tmp#73##0"
@@ -1226,7 +1226,7 @@ if.then.1:
   %"tmp#79##0" = add i64 %"tmp#78##0", 8
   %"tmp#80##0" = inttoptr i64 %"tmp#79##0" to ptr
   store i64 %"tmp#3##0", ptr %"tmp#80##0"
-  %"tmp#81##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#78##0", i1 1)
+  %"tmp#81##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#78##0", i1 1)
   %"tmp#82##0" = insertvalue {i64, i1} undef, i64 %"tmp#81##0", 0
   %"tmp#83##0" = insertvalue {i64, i1} %"tmp#82##0", i1 1, 1
   ret {i64, i1} %"tmp#83##0"
@@ -1243,7 +1243,7 @@ if.then.2:
   %"tmp#87##0" = ptrtoint ptr %"tmp#86##0" to i64
   %"tmp#88##0" = inttoptr i64 %"tmp#87##0" to ptr
   store i64 %"tmp#5##0", ptr %"tmp#88##0"
-  %"tmp#89##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#87##0", i1 1)
+  %"tmp#89##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#87##0", i1 1)
   %"tmp#90##0" = insertvalue {i64, i1} undef, i64 %"tmp#89##0", 0
   %"tmp#91##0" = insertvalue {i64, i1} %"tmp#90##0", i1 1, 1
   ret {i64, i1} %"tmp#91##0"
@@ -1260,7 +1260,7 @@ if.then.3:
   %"tmp#95##0" = ptrtoint ptr %"tmp#94##0" to i64
   %"tmp#96##0" = inttoptr i64 %"tmp#95##0" to ptr
   store i64 %"tmp#7##0", ptr %"tmp#96##0"
-  %"tmp#97##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#95##0", i1 1)
+  %"tmp#97##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#95##0", i1 1)
   %"tmp#98##0" = insertvalue {i64, i1} undef, i64 %"tmp#97##0", 0
   %"tmp#99##0" = insertvalue {i64, i1} %"tmp#98##0", i1 1, 1
   ret {i64, i1} %"tmp#99##0"
@@ -1279,7 +1279,7 @@ if.then.4:
   %"tmp#105##0" = add i64 %"tmp#104##0", 16
   %"tmp#106##0" = inttoptr i64 %"tmp#105##0" to ptr
   store i64 %"tmp#9##0", ptr %"tmp#106##0"
-  %"tmp#107##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#104##0", i1 1)
+  %"tmp#107##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#104##0", i1 1)
   %"tmp#108##0" = insertvalue {i64, i1} undef, i64 %"tmp#107##0", 0
   %"tmp#109##0" = insertvalue {i64, i1} %"tmp#108##0", i1 1, 1
   ret {i64, i1} %"tmp#109##0"
@@ -1298,18 +1298,18 @@ if.then.5:
   %"tmp#115##0" = add i64 %"tmp#114##0", 16
   %"tmp#116##0" = inttoptr i64 %"tmp#115##0" to ptr
   store i64 %"tmp#11##0", ptr %"tmp#116##0"
-  %"tmp#117##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#114##0", i1 1)
+  %"tmp#117##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#114##0", i1 1)
   %"tmp#118##0" = insertvalue {i64, i1} undef, i64 %"tmp#117##0", 0
   %"tmp#119##0" = insertvalue {i64, i1} %"tmp#118##0", i1 1, 1
   ret {i64, i1} %"tmp#119##0"
 if.else.5:
-  %"tmp#120##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>"(i64 %"d##0", i1 0)
+  %"tmp#120##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>"(i64 %"d##0", i1 0)
   %"tmp#121##0" = insertvalue {i64, i1} undef, i64 %"tmp#120##0", 0
   %"tmp#122##0" = insertvalue {i64, i1} %"tmp#121##0", i1 0, 1
   ret {i64, i1} %"tmp#122##0"
 }
 
-define external fastcc {i64, i1} @"drone.do_action<0>[410bae77d3]"(i64 %"d##0", i8 %"action##0") {
+define external fastcc {i64, i1} @"drone#.do_action<0>[410bae77d3]"(i64 %"d##0", i8 %"action##0") {
   %"tmp#21##0" = icmp eq i8 %"action##0", 110
   br i1 %"tmp#21##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1320,7 +1320,7 @@ if.then.0:
   %"tmp#66##0" = add i64 %"d##0", 8
   %"tmp#67##0" = inttoptr i64 %"tmp#66##0" to ptr
   store i64 %"tmp#1##0", ptr %"tmp#67##0"
-  %"tmp#68##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
+  %"tmp#68##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
   %"tmp#69##0" = insertvalue {i64, i1} undef, i64 %"tmp#68##0", 0
   %"tmp#70##0" = insertvalue {i64, i1} %"tmp#69##0", i1 1, 1
   ret {i64, i1} %"tmp#70##0"
@@ -1335,7 +1335,7 @@ if.then.1:
   %"tmp#73##0" = add i64 %"d##0", 8
   %"tmp#74##0" = inttoptr i64 %"tmp#73##0" to ptr
   store i64 %"tmp#3##0", ptr %"tmp#74##0"
-  %"tmp#75##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
+  %"tmp#75##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
   %"tmp#76##0" = insertvalue {i64, i1} undef, i64 %"tmp#75##0", 0
   %"tmp#77##0" = insertvalue {i64, i1} %"tmp#76##0", i1 1, 1
   ret {i64, i1} %"tmp#77##0"
@@ -1348,7 +1348,7 @@ if.then.2:
   %"tmp#5##0" = sub i64 %"tmp#6##0", 1
   %"tmp#79##0" = inttoptr i64 %"d##0" to ptr
   store i64 %"tmp#5##0", ptr %"tmp#79##0"
-  %"tmp#80##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
+  %"tmp#80##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
   %"tmp#81##0" = insertvalue {i64, i1} undef, i64 %"tmp#80##0", 0
   %"tmp#82##0" = insertvalue {i64, i1} %"tmp#81##0", i1 1, 1
   ret {i64, i1} %"tmp#82##0"
@@ -1361,7 +1361,7 @@ if.then.3:
   %"tmp#7##0" = add i64 %"tmp#8##0", 1
   %"tmp#84##0" = inttoptr i64 %"d##0" to ptr
   store i64 %"tmp#7##0", ptr %"tmp#84##0"
-  %"tmp#85##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
+  %"tmp#85##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
   %"tmp#86##0" = insertvalue {i64, i1} undef, i64 %"tmp#85##0", 0
   %"tmp#87##0" = insertvalue {i64, i1} %"tmp#86##0", i1 1, 1
   ret {i64, i1} %"tmp#87##0"
@@ -1376,7 +1376,7 @@ if.then.4:
   %"tmp#90##0" = add i64 %"d##0", 16
   %"tmp#91##0" = inttoptr i64 %"tmp#90##0" to ptr
   store i64 %"tmp#9##0", ptr %"tmp#91##0"
-  %"tmp#92##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
+  %"tmp#92##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
   %"tmp#93##0" = insertvalue {i64, i1} undef, i64 %"tmp#92##0", 0
   %"tmp#94##0" = insertvalue {i64, i1} %"tmp#93##0", i1 1, 1
   ret {i64, i1} %"tmp#94##0"
@@ -1391,18 +1391,18 @@ if.then.5:
   %"tmp#97##0" = add i64 %"d##0", 16
   %"tmp#98##0" = inttoptr i64 %"tmp#97##0" to ptr
   store i64 %"tmp#11##0", ptr %"tmp#98##0"
-  %"tmp#99##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
+  %"tmp#99##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 1)
   %"tmp#100##0" = insertvalue {i64, i1} undef, i64 %"tmp#99##0", 0
   %"tmp#101##0" = insertvalue {i64, i1} %"tmp#100##0", i1 1, 1
   ret {i64, i1} %"tmp#101##0"
 if.else.5:
-  %"tmp#102##0" = tail call fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 0)
+  %"tmp#102##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 0)
   %"tmp#103##0" = insertvalue {i64, i1} undef, i64 %"tmp#102##0", 0
   %"tmp#104##0" = insertvalue {i64, i1} %"tmp#103##0", i1 0, 1
   ret {i64, i1} %"tmp#104##0"
 }
 
-define external fastcc i64 @"drone.do_action#cont#1<0>"(i64 %"d##0", i1 %"success##0") {
+define external fastcc i64 @"drone#.do_action#cont#1<0>"(i64 %"d##0", i1 %"success##0") {
   br i1 %"success##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#21##0" = add i64 %"d##0", 24
@@ -1421,7 +1421,7 @@ if.else.0:
   ret i64 %"d##0"
 }
 
-define external fastcc i64 @"drone.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 %"success##0") {
+define external fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"d##0", i1 %"success##0") {
   br i1 %"success##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#21##0" = add i64 %"d##0", 24
@@ -1436,7 +1436,7 @@ if.else.0:
   ret i64 %"d##0"
 }
 
-define external fastcc i64 @"drone.drone_init<0>"() {
+define external fastcc i64 @"drone#.drone_init<0>"() {
   %"tmp#10##0" = call ccc ptr @wybe_malloc(i32 32)
   %"tmp#5##0" = ptrtoint ptr %"tmp#10##0" to i64
   %"tmp#11##0" = inttoptr i64 %"tmp#5##0" to ptr
@@ -1453,7 +1453,7 @@ define external fastcc i64 @"drone.drone_init<0>"() {
   ret i64 %"tmp#5##0"
 }
 
-define external fastcc void @"drone.loop<0>"(i64 %"d##0", i8 %"ch##0") {
+define external fastcc void @"drone#.loop<0>"(i64 %"d##0", i8 %"ch##0") {
   %"tmp#0##0" = icmp ne i8 %"ch##0", 32
   %"tmp#1##0" = icmp ne i8 %"ch##0", 10
   %"tmp#7##0" = and i1 %"tmp#0##0", %"tmp#1##0"
@@ -1462,48 +1462,48 @@ if.then.0:
   %"tmp#6##0" = icmp eq i8 %"ch##0", 112
   br i1 %"tmp#6##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1187)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1187)
   %"tmp#35##0" = inttoptr i64 %"d##0" to ptr
   %"tmp#22##0" = load i64, ptr %"tmp#35##0"
   call ccc void @print_int(i64 %"tmp#22##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   %"tmp#36##0" = add i64 %"d##0", 8
   %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
   %"tmp#25##0" = load i64, ptr %"tmp#37##0"
   call ccc void @print_int(i64 %"tmp#25##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   %"tmp#38##0" = add i64 %"d##0", 16
   %"tmp#39##0" = inttoptr i64 %"tmp#38##0" to ptr
   %"tmp#28##0" = load i64, ptr %"tmp#39##0"
   call ccc void @print_int(i64 %"tmp#28##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   %"tmp#40##0" = add i64 %"d##0", 24
   %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
   %"tmp#31##0" = load i64, ptr %"tmp#41##0"
   call ccc void @print_int(i64 %"tmp#31##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"drone.loop#cont#1<0>"(i64 %"d##0")
+  tail call fastcc void @"drone#.loop#cont#1<0>"(i64 %"d##0")
   ret void
 if.else.1:
-  %"tmp#42##0" = tail call fastcc {i64, i1} @"drone.do_action<0>"(i64 %"d##0", i8 %"ch##0")
+  %"tmp#42##0" = tail call fastcc {i64, i1} @"drone#.do_action<0>"(i64 %"d##0", i8 %"ch##0")
   %"d##1" = extractvalue {i64, i1}%"tmp#42##0", 0
   %"success##0" = extractvalue {i64, i1}%"tmp#42##0", 1
   %"tmp#5##0" = icmp eq i1 %"success##0", 0
   br i1 %"tmp#5##0", label %if.then.2, label %if.else.2
 if.then.2:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"drone.loop#cont#1<0>"(i64 %"d##1")
+  tail call fastcc void @"drone#.loop#cont#1<0>"(i64 %"d##1")
   ret void
 if.else.2:
-  tail call fastcc void @"drone.loop#cont#1<0>"(i64 %"d##1")
+  tail call fastcc void @"drone#.loop#cont#1<0>"(i64 %"d##1")
   ret void
 if.else.0:
-  tail call fastcc void @"drone.loop#cont#1<0>"(i64 %"d##0")
+  tail call fastcc void @"drone#.loop#cont#1<0>"(i64 %"d##0")
   ret void
 }
 
-define external fastcc void @"drone.loop<0>[410bae77d3]"(i64 %"d##0", i8 %"ch##0") {
+define external fastcc void @"drone#.loop<0>[410bae77d3]"(i64 %"d##0", i8 %"ch##0") {
   %"tmp#0##0" = icmp ne i8 %"ch##0", 32
   %"tmp#1##0" = icmp ne i8 %"ch##0", 10
   %"tmp#7##0" = and i1 %"tmp#0##0", %"tmp#1##0"
@@ -1512,85 +1512,85 @@ if.then.0:
   %"tmp#6##0" = icmp eq i8 %"ch##0", 112
   br i1 %"tmp#6##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1187)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1187)
   %"tmp#35##0" = inttoptr i64 %"d##0" to ptr
   %"tmp#22##0" = load i64, ptr %"tmp#35##0"
   call ccc void @print_int(i64 %"tmp#22##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   %"tmp#36##0" = add i64 %"d##0", 8
   %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
   %"tmp#25##0" = load i64, ptr %"tmp#37##0"
   call ccc void @print_int(i64 %"tmp#25##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   %"tmp#38##0" = add i64 %"d##0", 16
   %"tmp#39##0" = inttoptr i64 %"tmp#38##0" to ptr
   %"tmp#28##0" = load i64, ptr %"tmp#39##0"
   call ccc void @print_int(i64 %"tmp#28##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   %"tmp#40##0" = add i64 %"d##0", 24
   %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
   %"tmp#31##0" = load i64, ptr %"tmp#41##0"
   call ccc void @print_int(i64 %"tmp#31##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"drone.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##0")
+  tail call fastcc void @"drone#.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##0")
   ret void
 if.else.1:
-  %"tmp#42##0" = tail call fastcc {i64, i1} @"drone.do_action<0>[410bae77d3]"(i64 %"d##0", i8 %"ch##0")
+  %"tmp#42##0" = tail call fastcc {i64, i1} @"drone#.do_action<0>[410bae77d3]"(i64 %"d##0", i8 %"ch##0")
   %"d##1" = extractvalue {i64, i1}%"tmp#42##0", 0
   %"success##0" = extractvalue {i64, i1}%"tmp#42##0", 1
   %"tmp#5##0" = icmp eq i1 %"success##0", 0
   br i1 %"tmp#5##0", label %if.then.2, label %if.else.2
 if.then.2:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"drone.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##1")
+  tail call fastcc void @"drone#.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##1")
   ret void
 if.else.2:
-  tail call fastcc void @"drone.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##1")
+  tail call fastcc void @"drone#.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##1")
   ret void
 if.else.0:
-  tail call fastcc void @"drone.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##0")
+  tail call fastcc void @"drone#.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##0")
   ret void
 }
 
-define external fastcc void @"drone.loop#cont#1<0>"(i64 %"d##0") {
+define external fastcc void @"drone#.loop#cont#1<0>"(i64 %"d##0") {
   %"ch##1" = call ccc i8 @read_char()
   %"tmp#4##0" = icmp ne i8 %"ch##1", -1
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"drone.loop<0>"(i64 %"d##0", i8 %"ch##1")
+  tail call fastcc void @"drone#.loop<0>"(i64 %"d##0", i8 %"ch##1")
   ret void
 if.else.0:
   ret void
 }
 
-define external fastcc void @"drone.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##0") {
+define external fastcc void @"drone#.loop#cont#1<0>[6dacb8fd25]"(i64 %"d##0") {
   %"ch##1" = call ccc i8 @read_char()
   %"tmp#4##0" = icmp ne i8 %"ch##1", -1
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"drone.loop<0>[410bae77d3]"(i64 %"d##0", i8 %"ch##1")
+  tail call fastcc void @"drone#.loop<0>[410bae77d3]"(i64 %"d##0", i8 %"ch##1")
   ret void
 if.else.0:
   ret void
 }
 
-define external fastcc void @"drone.print_info<0>"(i64 %"d##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 1187)
+define external fastcc void @"drone#.print_info<0>"(i64 %"d##0") {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 1187)
   %"tmp#27##0" = inttoptr i64 %"d##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#27##0"
   call ccc void @print_int(i64 %"tmp#0##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   %"tmp#28##0" = add i64 %"d##0", 8
   %"tmp#29##0" = inttoptr i64 %"tmp#28##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#29##0"
   call ccc void @print_int(i64 %"tmp#1##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   %"tmp#30##0" = add i64 %"d##0", 16
   %"tmp#31##0" = inttoptr i64 %"tmp#30##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#31##0"
   call ccc void @print_int(i64 %"tmp#2##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   %"tmp#32##0" = add i64 %"d##0", 24
   %"tmp#33##0" = inttoptr i64 %"tmp#32##0" to ptr
   %"tmp#3##0" = load i64, ptr %"tmp#33##0"
@@ -1787,7 +1787,7 @@ target triple   = ???
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"drone.drone_info.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"drone#.drone_info#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#15##0" = inttoptr i64 %"#left##0" to ptr
   %"#left#x##0" = load i64, ptr %"tmp#15##0"
   %"tmp#16##0" = add i64 %"#left##0", 8
@@ -1829,14 +1829,14 @@ if.else.0:
   ret i1 0
 }
 
-define external fastcc i64 @"drone.drone_info.count<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"drone#.drone_info#.count<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 24
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#1##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"drone.drone_info.count<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"drone#.drone_info#.count<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -1847,7 +1847,7 @@ define external fastcc i64 @"drone.drone_info.count<1>"(i64 %"#rec##0", i64 %"#f
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"drone.drone_info.drone_info<0>"(i64 %"x##0", i64 %"y##0", i64 %"z##0", i64 %"count##0") {
+define external fastcc i64 @"drone#.drone_info#.drone_info<0>"(i64 %"x##0", i64 %"y##0", i64 %"z##0", i64 %"count##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1864,7 +1864,7 @@ define external fastcc i64 @"drone.drone_info.drone_info<0>"(i64 %"x##0", i64 %"
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64, i64, i64} @"drone.drone_info.drone_info<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, i64, i64} @"drone#.drone_info#.drone_info<1>"(i64 %"#result##0") {
   %"tmp#0##0" = inttoptr i64 %"#result##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#0##0"
   %"tmp#2##0" = add i64 %"#result##0", 8
@@ -1883,13 +1883,13 @@ define external fastcc {i64, i64, i64, i64} @"drone.drone_info.drone_info<1>"(i6
   ret {i64, i64, i64, i64} %"tmp#14##0"
 }
 
-define external fastcc i64 @"drone.drone_info.x<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"drone#.drone_info#.x<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#0##0"
   ret i64 %"tmp#1##0"
 }
 
-define external fastcc i64 @"drone.drone_info.x<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"drone#.drone_info#.x<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -1899,14 +1899,14 @@ define external fastcc i64 @"drone.drone_info.x<1>"(i64 %"#rec##0", i64 %"#field
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"drone.drone_info.y<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"drone#.drone_info#.y<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 8
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#1##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"drone.drone_info.y<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"drone#.drone_info#.y<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -1917,14 +1917,14 @@ define external fastcc i64 @"drone.drone_info.y<1>"(i64 %"#rec##0", i64 %"#field
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"drone.drone_info.z<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"drone#.drone_info#.z<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 16
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#1##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"drone.drone_info.z<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"drone#.drone_info#.z<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -1935,7 +1935,7 @@ define external fastcc i64 @"drone.drone_info.z<1>"(i64 %"#rec##0", i64 %"#field
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i1 @"drone.drone_info.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"drone#.drone_info#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#14##0" = inttoptr i64 %"#left##0" to ptr
   %"tmp#3##0" = load i64, ptr %"tmp#14##0"
   %"tmp#15##0" = add i64 %"#left##0", 8

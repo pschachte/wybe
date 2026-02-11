@@ -70,13 +70,13 @@ putchar(c##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'foreign_def'
 
 source_filename = "!ROOT!/final-dump/foreign_def.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"foreign_def.<0>"() {
+define external fastcc void @"foreign_def#.<0>"() {
   call ccc void @putchar(i8 87)
   call ccc void @putchar(i8 121)
   call ccc void @putchar(i8 98)
@@ -84,22 +84,22 @@ define external fastcc void @"foreign_def.<0>"() {
   ret void
 }
 
-define external fastcc double @"foreign_def.fmul<0>"(double %"x##0", double %"y##0") {
+define external fastcc double @"foreign_def#.fmul<0>"(double %"x##0", double %"y##0") {
   %"tmp#0##0" = fmul double %"x##0", %"y##0"
   ret double %"tmp#0##0"
 }
 
-define external fastcc double @"foreign_def.fmult<0>"(double %"x##0", double %"y##0") {
+define external fastcc double @"foreign_def#.fmult<0>"(double %"x##0", double %"y##0") {
   %"tmp#0##0" = fmul double %"x##0", %"y##0"
   ret double %"tmp#0##0"
 }
 
-define external fastcc void @"foreign_def.putc<0>"(i8 %"c##0") {
+define external fastcc void @"foreign_def#.putc<0>"(i8 %"c##0") {
   call ccc void @putchar(i8 %"c##0")
   ret void
 }
 
-define external fastcc void @"foreign_def.putchar<0>"(i8 %"c##0") {
+define external fastcc void @"foreign_def#.putchar<0>"(i8 %"c##0") {
   call ccc void @putchar(i8 %"c##0")
   ret void
 }

@@ -171,14 +171,14 @@ still_only_in(b##0:wybe.bool, ?x##0:wybe.int)<{<<global_flow_inference.res>>}; {
 ; ModuleID = 'global_flow_inference'
 
 source_filename = "!ROOT!/final-dump/global_flow_inference.wybe"
-target triple    ????
+target triple   = ????
 
 @"array#0" = private unnamed_addr constant [ 2 x i64 ] [i64 3, i64 2]
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#global_flow_inference.res" = global i64 undef
 
-define external fastcc void @"global_flow_inference.higher_order_branch<0>"(i1 %"b##0", ptr %"f##0") {
+define external fastcc void @"global_flow_inference#.higher_order_branch<0>"(i1 %"b##0", ptr %"f##0") {
   br i1 %"b##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#0##0" = load ptr, ptr %"f##0"
@@ -188,7 +188,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"global_flow_inference.higher_order_branch_no_use<0>"(i1 %"b##0", ptr %"f##0") {
+define external fastcc void @"global_flow_inference#.higher_order_branch_no_use<0>"(i1 %"b##0", ptr %"f##0") {
   br i1 %"b##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#0##0" = load ptr, ptr %"f##0"
@@ -198,7 +198,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"global_flow_inference.higher_order_branch_use<0>"(i1 %"b##0", ptr %"f##0") {
+define external fastcc void @"global_flow_inference#.higher_order_branch_use<0>"(i1 %"b##0", ptr %"f##0") {
   br i1 %"b##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#0##0" = load ptr, ptr %"f##0"
@@ -209,14 +209,14 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"global_flow_inference.higher_order_in<0>"(ptr %"f##0") {
+define external fastcc void @"global_flow_inference#.higher_order_in<0>"(ptr %"f##0") {
   %"res##0" = load i64, ptr @"resource#global_flow_inference.res"
   %"tmp#0##0" = load ptr, ptr %"f##0"
   tail call fastcc void %"tmp#0##0"(ptr %"f##0", i64 %"res##0")
   ret void
 }
 
-define external fastcc void @"global_flow_inference.higher_order_inout<0>"(ptr %"f##0") {
+define external fastcc void @"global_flow_inference#.higher_order_inout<0>"(ptr %"f##0") {
   %"res##0" = load i64, ptr @"resource#global_flow_inference.res"
   %"tmp#0##0" = load ptr, ptr %"f##0"
   tail call fastcc void %"tmp#0##0"(ptr %"f##0", i64 %"res##0")
@@ -224,35 +224,35 @@ define external fastcc void @"global_flow_inference.higher_order_inout<0>"(ptr %
   ret void
 }
 
-define external fastcc void @"global_flow_inference.higher_order_only_out<0>"(ptr %"f##0") {
+define external fastcc void @"global_flow_inference#.higher_order_only_out<0>"(ptr %"f##0") {
   store i64 1, ptr @"resource#global_flow_inference.res"
   %"tmp#0##0" = load ptr, ptr %"f##0"
   tail call fastcc void %"tmp#0##0"(ptr %"f##0", i64 1)
   ret void
 }
 
-define external fastcc void @"global_flow_inference.higher_order_out<0>"(ptr %"f##0") {
+define external fastcc void @"global_flow_inference#.higher_order_out<0>"(ptr %"f##0") {
   %"tmp#0##0" = load ptr, ptr %"f##0"
   %"res##0" = tail call fastcc i64 %"tmp#0##0"(ptr %"f##0")
   store i64 %"res##0", ptr @"resource#global_flow_inference.res"
   ret void
 }
 
-define external fastcc void @"global_flow_inference.inout<0>"(i1 %"b##0") {
+define external fastcc void @"global_flow_inference#.inout<0>"(i1 %"b##0") {
   br i1 %"b##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"global_flow_inference.only_out<0>"(i1 1)
+  tail call fastcc void @"global_flow_inference#.only_out<0>"(i1 1)
   ret void
 if.else.0:
   ret void
 }
 
-define external fastcc i64 @"global_flow_inference.only_in<0>"() {
+define external fastcc i64 @"global_flow_inference#.only_in<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#global_flow_inference.res"
   ret i64 %"tmp#0##0"
 }
 
-define external fastcc void @"global_flow_inference.only_out<0>"(i1 %"b##0") {
+define external fastcc void @"global_flow_inference#.only_out<0>"(i1 %"b##0") {
   %"tmp#3##0" = zext i1 %"b##0" to i64
   %"tmp#2##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#0", i64 0, i64 %"tmp#3##0"
   %"tmp#1##0" = load i64, ptr %"tmp#2##0"
@@ -260,27 +260,27 @@ define external fastcc void @"global_flow_inference.only_out<0>"(i1 %"b##0") {
   ret void
 }
 
-define external fastcc void @"global_flow_inference.rec_out_only1<0>"() {
-  tail call fastcc void @"global_flow_inference.rec_out_only2<0>"()
+define external fastcc void @"global_flow_inference#.rec_out_only1<0>"() {
+  tail call fastcc void @"global_flow_inference#.rec_out_only2<0>"()
   ret void
 }
 
-define external fastcc void @"global_flow_inference.rec_out_only2<0>"() {
-  tail call fastcc void @"global_flow_inference.rec_out_only1<0>"()
+define external fastcc void @"global_flow_inference#.rec_out_only2<0>"() {
+  tail call fastcc void @"global_flow_inference#.rec_out_only1<0>"()
   ret void
 }
 
-define external fastcc void @"global_flow_inference.rec_out_only_notail1<0>"() {
+define external fastcc void @"global_flow_inference#.rec_out_only_notail1<0>"() {
   store i64 1, ptr @"resource#global_flow_inference.res"
   ret void
 }
 
-define external fastcc void @"global_flow_inference.rec_out_only_notail2<0>"() {
+define external fastcc void @"global_flow_inference#.rec_out_only_notail2<0>"() {
   store i64 1, ptr @"resource#global_flow_inference.res"
   ret void
 }
 
-define external fastcc i64 @"global_flow_inference.still_only_in<0>"(i1 %"b##0") {
+define external fastcc i64 @"global_flow_inference#.still_only_in<0>"(i1 %"b##0") {
   br i1 %"b##0", label %if.then.0, label %if.else.0
 if.then.0:
   ret i64 0

@@ -28,14 +28,14 @@ foo(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'import_in_sub_mod_lib'
 
 source_filename = "!ROOT!/final-dump/import_in_sub_mod_lib.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"import_in_sub_mod_lib.foo<0>"(i64 %"v##0") {
+define external fastcc void @"import_in_sub_mod_lib#.foo<0>"(i64 %"v##0") {
   call ccc void @print_int(i64 %"v##0")
   call ccc void @putchar(i8 10)
   ret void
@@ -69,14 +69,14 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'import_in_sub_mod_main'
 
 source_filename = "!ROOT!/final-dump/import_in_sub_mod_main.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"import_in_sub_mod_main.<0>"() {
+define external fastcc void @"import_in_sub_mod_main#.<0>"() {
   call ccc void @print_int(i64 10)
   call ccc void @putchar(i8 10)
   ret void
@@ -110,14 +110,14 @@ bar(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'import_in_sub_mod_main.sub'
 
 source_filename = "!ROOT!/final-dump/import_in_sub_mod_main.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"import_in_sub_mod_main.sub.bar<0>"(i64 %"v##0") {
+define external fastcc void @"import_in_sub_mod_main#.sub#.bar<0>"(i64 %"v##0") {
   call ccc void @print_int(i64 %"v##0")
   call ccc void @putchar(i8 10)
   ret void

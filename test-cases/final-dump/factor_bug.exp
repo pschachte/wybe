@@ -51,27 +51,27 @@ test(?#result##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'factor_bug'
 
 source_filename = "!ROOT!/final-dump/factor_bug.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"factor_bug.<0>"() {
+define external fastcc void @"factor_bug#.<0>"() {
   call ccc void @print_int(i64 20)
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc i64 @"factor_bug.foo<0>"() {
+define external fastcc i64 @"factor_bug#.foo<0>"() {
   ret i64 20
 }
 
-define external fastcc void @"factor_bug.foo#cont#1<0>"(i64 %"ret##0") {
+define external fastcc void @"factor_bug#.foo#cont#1<0>"(i64 %"ret##0") {
   ret void
 }
 
-define external fastcc i1 @"factor_bug.test<0>"() {
+define external fastcc i1 @"factor_bug#.test<0>"() {
   ret i1 0
 }

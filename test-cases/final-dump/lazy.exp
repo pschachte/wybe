@@ -60,7 +60,7 @@ proc #anon#1 > {inline} (1 calls)
 ; ModuleID = 'lazy'
 
 source_filename = "!ROOT!/final-dump/lazy.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"The answer is now...\00", align 8
 @"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"The answer is...\00", align 8
@@ -68,42 +68,42 @@ target triple    ????
 @"string#3" = private unnamed_addr constant {i64, i64} { i64 20, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 @"string#4" = private unnamed_addr constant {i64, i64} { i64 16, i64 ptrtoint( ptr @"cstring#1" to i64 ) }, align 8
 @"string#5" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
-@"closure#6" = private unnamed_addr constant {ptr} { ptr @"lazy.#anon#1<1>" }, align 8
+@"closure#6" = private unnamed_addr constant {ptr} { ptr @"lazy#.#anon#1<1>" }, align 8
 
-declare external fastcc i64 @"wybe.lazy.get<0>"(i64)
-declare external fastcc i64 @"wybe.lazy.lazy<0>"(ptr)
-declare external fastcc i64 @"wybe.string.c_string<0>"(i64)
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc i64 @"wybe#.lazy#.get<0>"(i64)
+declare external fastcc i64 @"wybe#.lazy#.lazy<0>"(ptr)
+declare external fastcc i64 @"wybe#.string#.c_string<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @log_string(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @sleep(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"lazy.<0>"() {
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.lazy.lazy<0>"(ptr @"closure#6")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+define external fastcc void @"lazy#.<0>"() {
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.lazy#.lazy<0>"(ptr @"closure#6")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#1##0" = tail call fastcc i64 @"wybe.lazy.get<0>"(i64 %"tmp#0##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.lazy#.get<0>"(i64 %"tmp#0##0")
   call ccc void @print_int(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#2##0" = tail call fastcc i64 @"wybe.lazy.get<0>"(i64 %"tmp#0##0")
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.lazy#.get<0>"(i64 %"tmp#0##0")
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc i64 @"lazy.#anon#1<0>"() {
-  %"tmp#4##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+define external fastcc i64 @"lazy#.#anon#1<0>"() {
+  %"tmp#4##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @log_string(i64 %"tmp#4##0")
   call ccc void @sleep(i64 1)
   ret i64 42
 }
 
-define external fastcc i64 @"lazy.#anon#1<1>"(ptr %"#env##0") {
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+define external fastcc i64 @"lazy#.#anon#1<1>"(ptr %"#env##0") {
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @log_string(i64 %"tmp#0##0")
   call ccc void @sleep(i64 1)
   ret i64 42
@@ -186,13 +186,13 @@ lognl()<{}; {}; {}>:
 ; ModuleID = 'logging'
 
 source_filename = "!ROOT!/../wybelibs/logging.o"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"false\00", align 8
 @"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"true\00", align 8
 @"array#2" = private unnamed_addr constant [ 2 x i64 ] [i64 ptrtoint( ptr @"cstring#0" to i64 ), i64 ptrtoint( ptr @"cstring#1" to i64 )]
 
-declare external fastcc i64 @"wybe.string.c_string<0>"(i64)
+declare external fastcc i64 @"wybe#.string#.c_string<0>"(i64)
 declare external ccc void @log_char(i8)
 declare external ccc void @log_count(i64)
 declare external ccc void @log_float(double)
@@ -200,38 +200,38 @@ declare external ccc void @log_int(i64)
 declare external ccc void @log_string(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"logging.logmsg<0>"(i64 %"x##0") {
+define external fastcc void @"logging#.logmsg<0>"(i64 %"x##0") {
   call ccc void @log_int(i64 %"x##0")
   ret void
 }
 
-define external fastcc void @"logging.logmsg<1>"(i64 %"x##0") {
+define external fastcc void @"logging#.logmsg<1>"(i64 %"x##0") {
   call ccc void @log_count(i64 %"x##0")
   ret void
 }
 
-define external fastcc void @"logging.logmsg<2>"(double %"x##0") {
+define external fastcc void @"logging#.logmsg<2>"(double %"x##0") {
   call ccc void @log_float(double %"x##0")
   ret void
 }
 
-define external fastcc void @"logging.logmsg<3>"(i8 %"x##0") {
+define external fastcc void @"logging#.logmsg<3>"(i8 %"x##0") {
   call ccc void @log_char(i8 %"x##0")
   ret void
 }
 
-define external fastcc void @"logging.logmsg<4>"(i64 %"x##0") {
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 %"x##0")
+define external fastcc void @"logging#.logmsg<4>"(i64 %"x##0") {
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 %"x##0")
   call ccc void @log_string(i64 %"tmp#0##0")
   ret void
 }
 
-define external fastcc void @"logging.logmsg<5>"(i64 %"x##0") {
+define external fastcc void @"logging#.logmsg<5>"(i64 %"x##0") {
   call ccc void @log_string(i64 %"x##0")
   ret void
 }
 
-define external fastcc void @"logging.logmsg<6>"(i1 %"x##0") {
+define external fastcc void @"logging#.logmsg<6>"(i1 %"x##0") {
   %"tmp#6##0" = zext i1 %"x##0" to i64
   %"tmp#5##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#2", i64 0, i64 %"tmp#6##0"
   %"tmp#4##0" = load i64, ptr %"tmp#5##0"
@@ -239,7 +239,7 @@ define external fastcc void @"logging.logmsg<6>"(i1 %"x##0") {
   ret void
 }
 
-define external fastcc void @"logging.lognl<0>"() {
+define external fastcc void @"logging#.lognl<0>"() {
   call ccc void @log_char(i8 10)
   ret void
 }

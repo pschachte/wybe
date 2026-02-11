@@ -24,11 +24,11 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'save_restore_disj'
 
 source_filename = "!ROOT!/final-dump/save_restore_disj.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"save_restore_disj.<0>"() {
+define external fastcc void @"save_restore_disj#.<0>"() {
   ret void
 }

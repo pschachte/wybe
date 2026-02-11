@@ -24,11 +24,11 @@ nada([x##0:wybe.int], [y##0:wybe.int])<{}; {}; {}>:
 ; ModuleID = 'proc_allin'
 
 source_filename = "!ROOT!/final-dump/proc_allin.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"proc_allin.nada<0>"() {
+define external fastcc void @"proc_allin#.nada<0>"() {
   ret void
 }

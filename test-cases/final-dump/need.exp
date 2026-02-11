@@ -68,32 +68,32 @@ need(stmt##0:{impure}())<{}; {}; {}>:
 ; ModuleID = 'need'
 
 source_filename = "!ROOT!/final-dump/need.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"need.<0>"() {
-  tail call fastcc void @"need.#anon#1<0>"()
+define external fastcc void @"need#.<0>"() {
+  tail call fastcc void @"need#.#anon#1<0>"()
   ret void
 }
 
-define external fastcc void @"need.#anon#1<0>"() {
+define external fastcc void @"need#.#anon#1<0>"() {
   %"tmp#1##0" = alloca i8, i64 8, align 8
-  call fastcc void @"need.iota<0>"(i64 1000, ptr %"tmp#1##0")
+  call fastcc void @"need#.iota<0>"(i64 1000, ptr %"tmp#1##0")
   %"l##0" = load i64, ptr %"tmp#1##0"
   ret void
 }
 
-define external fastcc void @"need.#anon#1<1>"(ptr %"#env##0") {
+define external fastcc void @"need#.#anon#1<1>"(ptr %"#env##0") {
   %"tmp#1##0" = alloca i8, i64 8, align 8
-  call fastcc void @"need.iota<0>"(i64 1000, ptr %"tmp#1##0")
+  call fastcc void @"need#.iota<0>"(i64 1000, ptr %"tmp#1##0")
   %"tmp#0##0" = load i64, ptr %"tmp#1##0"
   ret void
 }
 
-define external fastcc void @"need.iota<0>"(i64 %"n##0", ptr %"tmp#14##0") {
+define external fastcc void @"need#.iota<0>"(i64 %"n##0", ptr %"tmp#14##0") {
   %"tmp#5##0" = icmp sle i64 %"n##0", 0
   br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -108,11 +108,11 @@ if.else.0:
   store i64 %"tmp#12##0", ptr %"tmp#14##0"
   %"tmp#17##0" = add i64 %"tmp#12##0", 8
   %"tmp#18##0" = inttoptr i64 %"tmp#17##0" to ptr
-  musttail call fastcc void @"need.iota<0>"(i64 %"tmp#4##0", ptr %"tmp#18##0")
+  musttail call fastcc void @"need#.iota<0>"(i64 %"tmp#4##0", ptr %"tmp#18##0")
   ret void
 }
 
-define external fastcc void @"need.need<0>"(ptr %"stmt##0") {
+define external fastcc void @"need#.need<0>"(ptr %"stmt##0") {
   %"tmp#0##0" = load ptr, ptr %"stmt##0"
   tail call fastcc void %"tmp#0##0"(ptr %"stmt##0")
   ret void

@@ -25,11 +25,11 @@ OK backquote use!(?#result##0:wybe.int)<{}; {}; {}>:
 ; ModuleID = 'backquote_OK'
 
 source_filename = "!ROOT!/final-dump/backquote_OK.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i64 @"backquote_OK.OK backquote use!<0>"() {
+define external fastcc i64 @"backquote_OK#.OK backquote use!<0>"() {
   ret i64 1
 }

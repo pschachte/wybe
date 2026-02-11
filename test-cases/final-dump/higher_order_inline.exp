@@ -36,19 +36,19 @@ proc #closure#1 > {inline} (1 calls)
 ; ModuleID = 'higher_order_inline'
 
 source_filename = "!ROOT!/final-dump/higher_order_inline.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"higher_order_inline.<0>"() {
+define external fastcc void @"higher_order_inline#.<0>"() {
   call ccc void @print_int(i64 1)
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc i64 @"higher_order_inline.#closure#1<0>"(ptr %"#env##0", i64 %"generic#a##0") {
+define external fastcc i64 @"higher_order_inline#.#closure#1<0>"(ptr %"#env##0", i64 %"generic#a##0") {
   ret i64 %"generic#a##0"
 }

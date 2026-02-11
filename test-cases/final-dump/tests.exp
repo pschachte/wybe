@@ -89,13 +89,13 @@ lt3(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'tests'
 
 source_filename = "!ROOT!/final-dump/tests.wybe"
-target triple    ????
+target triple   = ????
 
 @"array#0" = private unnamed_addr constant [ 2 x i64 ] [i64 24, i64 0]
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc {i64, i1} @"tests.lookup<0>"(i64 %"key##0", i64 %"map##0") {
+define external fastcc {i64, i1} @"tests#.lookup<0>"(i64 %"key##0", i64 %"map##0") {
   %"tmp#15##0" = icmp ne i64 %"map##0", 0
   br i1 %"tmp#15##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -119,7 +119,7 @@ if.else.1:
   %"tmp#51##0" = add i64 %"map##0", %"tmp#41##0"
   %"tmp#52##0" = inttoptr i64 %"tmp#51##0" to ptr
   %"tmp#3##0" = load i64, ptr %"tmp#52##0"
-  %"tmp#53##0" = tail call fastcc {i64, i1} @"tests.lookup<0>"(i64 %"key##0", i64 %"tmp#3##0")
+  %"tmp#53##0" = tail call fastcc {i64, i1} @"tests#.lookup<0>"(i64 %"key##0", i64 %"tmp#3##0")
   %"tmp#54##0" = extractvalue {i64, i1}%"tmp#53##0", 0
   %"tmp#55##0" = extractvalue {i64, i1}%"tmp#53##0", 1
   %"tmp#56##0" = insertvalue {i64, i1} undef, i64 %"tmp#54##0", 0
@@ -131,17 +131,17 @@ if.else.0:
   ret {i64, i1} %"tmp#59##0"
 }
 
-define external fastcc i1 @"tests.lt<0>"(i64 %"x##0", i64 %"y##0") {
+define external fastcc i1 @"tests#.lt<0>"(i64 %"x##0", i64 %"y##0") {
   %"tmp#3##0" = icmp slt i64 %"x##0", %"y##0"
   ret i1 %"tmp#3##0"
 }
 
-define external fastcc i1 @"tests.lt2<0>"(i64 %"x##0", i64 %"y##0") {
+define external fastcc i1 @"tests#.lt2<0>"(i64 %"x##0", i64 %"y##0") {
   %"tmp#4##0" = icmp slt i64 %"x##0", %"y##0"
   ret i1 %"tmp#4##0"
 }
 
-define external fastcc i1 @"tests.lt3<0>"(i64 %"x##0", i64 %"y##0") {
+define external fastcc i1 @"tests#.lt3<0>"(i64 %"x##0", i64 %"y##0") {
   %"tmp#3##0" = icmp sgt i64 %"x##0", %"y##0"
   ret i1 %"tmp#3##0"
 }
@@ -403,13 +403,13 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'tests.map'
 
 source_filename = "!ROOT!/final-dump/tests.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"tests.map.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"tests#.map#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#0##0" = icmp ne i64 %"#left##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -438,7 +438,7 @@ if.then.1:
   %"tmp#28##0" = add i64 %"#right##0", 24
   %"tmp#29##0" = inttoptr i64 %"tmp#28##0" to ptr
   %"#right#right##0" = load i64, ptr %"tmp#29##0"
-  %"tmp#4##0" = tail call fastcc i1 @"tests.map.=<0>"(i64 %"#left#left##0", i64 %"#right#left##0")
+  %"tmp#4##0" = tail call fastcc i1 @"tests#.map#.=<0>"(i64 %"#left#left##0", i64 %"#right#left##0")
   br i1 %"tmp#4##0", label %if.then.2, label %if.else.2
 if.then.2:
   %"tmp#5##0" = icmp eq i64 %"#left#key##0", %"#right#key##0"
@@ -447,7 +447,7 @@ if.then.3:
   %"tmp#6##0" = icmp eq i64 %"#left#value##0", %"#right#value##0"
   br i1 %"tmp#6##0", label %if.then.4, label %if.else.4
 if.then.4:
-  %"tmp#30##0" = tail call fastcc i1 @"tests.map.=<0>"(i64 %"#left#right##0", i64 %"#right#right##0")
+  %"tmp#30##0" = tail call fastcc i1 @"tests#.map#.=<0>"(i64 %"#left#right##0", i64 %"#right#right##0")
   ret i1 %"tmp#30##0"
 if.else.4:
   ret i1 0
@@ -462,11 +462,11 @@ if.else.0:
   ret i1 %"tmp#31##0"
 }
 
-define external fastcc i64 @"tests.map.empty<0>"() {
+define external fastcc i64 @"tests#.map#.empty<0>"() {
   ret i64 0
 }
 
-define external fastcc {i64, i1} @"tests.map.key<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"tests#.map#.key<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -482,7 +482,7 @@ if.else.0:
   ret {i64, i1} %"tmp#7##0"
 }
 
-define external fastcc {i64, i1} @"tests.map.key<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"tests#.map#.key<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -502,7 +502,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"tests.map.left<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"tests#.map#.left<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -517,7 +517,7 @@ if.else.0:
   ret {i64, i1} %"tmp#6##0"
 }
 
-define external fastcc {i64, i1} @"tests.map.left<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"tests#.map#.left<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -536,7 +536,7 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc i64 @"tests.map.node<0>"(i64 %"left##0", i64 %"key##0", i64 %"value##0", i64 %"right##0") {
+define external fastcc i64 @"tests#.map#.node<0>"(i64 %"left##0", i64 %"key##0", i64 %"value##0", i64 %"right##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -553,7 +553,7 @@ define external fastcc i64 @"tests.map.node<0>"(i64 %"left##0", i64 %"key##0", i
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64, i64, i64, i1} @"tests.map.node<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, i64, i64, i1} @"tests#.map#.node<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -583,7 +583,7 @@ if.else.0:
   ret {i64, i64, i64, i64, i1} %"tmp#21##0"
 }
 
-define external fastcc {i64, i1} @"tests.map.right<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"tests#.map#.right<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -599,7 +599,7 @@ if.else.0:
   ret {i64, i1} %"tmp#7##0"
 }
 
-define external fastcc {i64, i1} @"tests.map.right<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"tests#.map#.right<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -619,7 +619,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"tests.map.value<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"tests#.map#.value<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -635,7 +635,7 @@ if.else.0:
   ret {i64, i1} %"tmp#7##0"
 }
 
-define external fastcc {i64, i1} @"tests.map.value<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"tests#.map#.value<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -655,8 +655,8 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc i1 @"tests.map.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#0##0" = tail call fastcc i1 @"tests.map.=<0>"(i64 %"#left##0", i64 %"#right##0")
+define external fastcc i1 @"tests#.map#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = tail call fastcc i1 @"tests#.map#.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"
 }

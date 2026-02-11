@@ -266,21 +266,21 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'ctor_char'
 
 source_filename = "!ROOT!/final-dump/ctor_char.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"ctor_char.<0>"() {
-  %"tmp#0##0" = tail call fastcc i8 @"ctor_char.foo<0>"(i64 706)
+define external fastcc void @"ctor_char#.<0>"() {
+  %"tmp#0##0" = tail call fastcc i8 @"ctor_char#.foo<0>"(i64 706)
   call ccc void @putchar(i8 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc i1 @"ctor_char.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"ctor_char#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#0##0" = icmp ne i64 %"#left##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -327,7 +327,7 @@ if.then.6:
   %"tmp#36##0" = add i64 %"#right##0", -1
   %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
   %"#right#other_ctor#1##0" = load i64, ptr %"tmp#37##0"
-  %"tmp#38##0" = tail call fastcc i1 @"ctor_char.=<0>"(i64 %"#left#other_ctor#1##0", i64 %"#right#other_ctor#1##0")
+  %"tmp#38##0" = tail call fastcc i1 @"ctor_char#.=<0>"(i64 %"#left#other_ctor#1##0", i64 %"#right#other_ctor#1##0")
   ret i1 %"tmp#38##0"
 if.else.6:
   ret i1 0
@@ -340,7 +340,7 @@ if.else.0:
   ret i1 %"tmp#39##0"
 }
 
-define external fastcc {i8, i1} @"ctor_char.c<0>"(i64 %"#rec##0") {
+define external fastcc {i8, i1} @"ctor_char#.c<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -365,7 +365,7 @@ if.else.0:
   ret {i8, i1} %"tmp#10##0"
 }
 
-define external fastcc {i64, i1} @"ctor_char.c<1>"(i64 %"#rec##0", i8 %"#field##0") {
+define external fastcc {i64, i1} @"ctor_char#.c<1>"(i64 %"#rec##0", i8 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -391,18 +391,18 @@ if.else.0:
   ret {i64, i1} %"tmp#10##0"
 }
 
-define external fastcc i64 @"ctor_char.const<0>"() {
+define external fastcc i64 @"ctor_char#.const<0>"() {
   ret i64 0
 }
 
-define external fastcc i64 @"ctor_char.ctor<0>"(i8 %"c##0") {
+define external fastcc i64 @"ctor_char#.ctor<0>"(i8 %"c##0") {
   %"#temp##0" = zext i8 %"c##0" to i64
   %"#temp##1" = shl i64 %"#temp##0", 1
   %"tmp#0##0" = or i64 %"#temp##1", 512
   ret i64 %"tmp#0##0"
 }
 
-define external fastcc {i8, i1} @"ctor_char.ctor<1>"(i64 %"#result##0") {
+define external fastcc {i8, i1} @"ctor_char#.ctor<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -427,7 +427,7 @@ if.else.0:
   ret {i8, i1} %"tmp#10##0"
 }
 
-define external fastcc i8 @"ctor_char.foo<0>"(i64 %"this##0") {
+define external fastcc i8 @"ctor_char#.foo<0>"(i64 %"this##0") {
   %"tmp#3##0" = icmp ne i64 %"this##0", 0
   br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -446,7 +446,7 @@ if.else.0:
   ret i8 48
 }
 
-define external fastcc i64 @"ctor_char.other_ctor<0>"(i64 %"other_ctor#1##0") {
+define external fastcc i64 @"ctor_char#.other_ctor<0>"(i64 %"other_ctor#1##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -455,7 +455,7 @@ define external fastcc i64 @"ctor_char.other_ctor<0>"(i64 %"other_ctor#1##0") {
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc {i64, i1} @"ctor_char.other_ctor<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"ctor_char#.other_ctor<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -480,8 +480,8 @@ if.else.0:
   ret {i64, i1} %"tmp#12##0"
 }
 
-define external fastcc i1 @"ctor_char.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#0##0" = tail call fastcc i1 @"ctor_char.=<0>"(i64 %"#left##0", i64 %"#right##0")
+define external fastcc i1 @"ctor_char#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = tail call fastcc i1 @"ctor_char#.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"
 }

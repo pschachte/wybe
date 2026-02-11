@@ -66,7 +66,7 @@ foo(?s##0:wybe.c_string, ?#success##0:wybe.bool, %call_source_location##0:wybe.c
 ; ModuleID = 'resource_rollback'
 
 source_filename = "!ROOT!/final-dump/resource_rollback.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"resource_rollback:15:7\00", align 8
 
@@ -77,26 +77,26 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#resource_rollback.res" = global i64 undef
 @"resource#resource_rollback.ser" = global i64 undef
 
-define external fastcc void @"resource_rollback.<0>"() {
+define external fastcc void @"resource_rollback#.<0>"() {
   %"res##0" = load i64, ptr @"resource#resource_rollback.res"
   call ccc void @print_int(i64 %"res##0")
   call ccc void @putchar(i8 10)
-  %"tmp#13##0" = tail call fastcc {i64, i1} @"resource_rollback.foo<0>"(i64 ptrtoint( ptr @"cstring#0" to i64 ))
+  %"tmp#13##0" = tail call fastcc {i64, i1} @"resource_rollback#.foo<0>"(i64 ptrtoint( ptr @"cstring#0" to i64 ))
   %"s##0" = extractvalue {i64, i1}%"tmp#13##0", 0
   %"tmp#4##0" = extractvalue {i64, i1}%"tmp#13##0", 1
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
   call ccc void @print_string(i64 %"s##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"resource_rollback.#cont#1<0>"()
+  tail call fastcc void @"resource_rollback#.#cont#1<0>"()
   ret void
 if.else.0:
   store i64 %"res##0", ptr @"resource#resource_rollback.res"
-  tail call fastcc void @"resource_rollback.#cont#1<0>"()
+  tail call fastcc void @"resource_rollback#.#cont#1<0>"()
   ret void
 }
 
-define external fastcc void @"resource_rollback.#cont#1<0>"() {
+define external fastcc void @"resource_rollback#.#cont#1<0>"() {
   %"res##0" = load i64, ptr @"resource#resource_rollback.res"
   call ccc void @print_int(i64 %"res##0")
   call ccc void @putchar(i8 10)
@@ -106,7 +106,7 @@ define external fastcc void @"resource_rollback.#cont#1<0>"() {
   ret void
 }
 
-define external fastcc {i64, i1} @"resource_rollback.foo<0>"(i64 %"call_source_location##0") {
+define external fastcc {i64, i1} @"resource_rollback#.foo<0>"(i64 %"call_source_location##0") {
   %"tmp#7##0" = insertvalue {i64, i1} undef, i64 %"call_source_location##0", 0
   %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
   ret {i64, i1} %"tmp#8##0"

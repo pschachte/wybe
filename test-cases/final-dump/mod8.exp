@@ -19,7 +19,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'mod8'
 
 source_filename = "!ROOT!/final-dump/mod8.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

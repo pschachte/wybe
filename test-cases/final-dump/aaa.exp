@@ -30,17 +30,17 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'aaa'
 
 source_filename = "!ROOT!/final-dump/aaa.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"AAA: Init\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"aaa.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+define external fastcc void @"aaa#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -72,17 +72,17 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'bbb'
 
 source_filename = "!ROOT!/final-dump/bbb.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"BBB: Init\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"bbb.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+define external fastcc void @"bbb#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -114,17 +114,17 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'ccc'
 
 source_filename = "!ROOT!/final-dump/ccc.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"CCC: Init\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"ccc.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+define external fastcc void @"ccc#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -155,17 +155,17 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'ddd'
 
 source_filename = "!ROOT!/final-dump/ddd.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"DDD: Init\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 9, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"ddd.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+define external fastcc void @"ddd#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
