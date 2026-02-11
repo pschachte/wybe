@@ -25,12 +25,12 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'weird_err_b'
 
 source_filename = "!ROOT!/final-dump/weird_err_b.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"weird_err_b.<0>"() {
+define external fastcc void @"weird_err_b#.<0>"() {
   ret void
 }
 
@@ -79,20 +79,20 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'weird_err_d'
 
 source_filename = "!ROOT!/final-dump/weird_err_d.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"weird_err_d.=<0>"() {
+define external fastcc i1 @"weird_err_d#.=<0>"() {
   ret i1 1
 }
 
-define external fastcc void @"weird_err_d.empty<0>"() {
+define external fastcc void @"weird_err_d#.empty<0>"() {
   ret void
 }
 
-define external fastcc i1 @"weird_err_d.~=<0>"() {
+define external fastcc i1 @"weird_err_d#.~=<0>"() {
   ret i1 0
 }
 
@@ -114,7 +114,7 @@ define external fastcc i1 @"weird_err_d.~=<0>"() {
 ; ModuleID = 'weird_err_d.a'
 
 source_filename = "!ROOT!/final-dump/weird_err_d.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -137,7 +137,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 ; ModuleID = 'weird_err_d.c'
 
 source_filename = "!ROOT!/final-dump/weird_err_d.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

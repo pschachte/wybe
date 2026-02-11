@@ -302,7 +302,7 @@ print_t2(x##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'dead_cell_size'
 
 source_filename = "!ROOT!/final-dump/dead_cell_size.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"t2a\00", align 8
 @"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c"t2b(\00", align 8
@@ -317,36 +317,36 @@ target triple    ????
 @"string#10" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
 @"string#11" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
-declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"dead_cell_size.<0>"() {
+define external fastcc void @"dead_cell_size#.<0>"() {
   %"tmp#15##0" = call ccc ptr @wybe_malloc(i32 8)
   %"tmp#7##0" = ptrtoint ptr %"tmp#15##0" to i64
   %"tmp#16##0" = inttoptr i64 %"tmp#7##0" to ptr
   store i64 9, ptr %"tmp#16##0"
-  %"tmp#0##0" = tail call fastcc i64 @"dead_cell_size.foo<0>"(i64 %"tmp#7##0")
-  tail call fastcc void @"dead_cell_size.print_t<0>"(i64 %"tmp#0##0")
+  %"tmp#0##0" = tail call fastcc i64 @"dead_cell_size#.foo<0>"(i64 %"tmp#7##0")
+  tail call fastcc void @"dead_cell_size#.print_t<0>"(i64 %"tmp#0##0")
   %"tmp#17##0" = call ccc ptr @wybe_malloc(i32 8)
   %"tmp#10##0" = ptrtoint ptr %"tmp#17##0" to i64
   %"tmp#18##0" = inttoptr i64 %"tmp#10##0" to ptr
   store i64 9, ptr %"tmp#18##0"
-  %"tmp#2##0" = tail call fastcc i64 @"dead_cell_size.bar<0>[410bae77d3]"(i64 %"tmp#10##0")
-  tail call fastcc void @"dead_cell_size.print_t<0>"(i64 %"tmp#2##0")
+  %"tmp#2##0" = tail call fastcc i64 @"dead_cell_size#.bar<0>[410bae77d3]"(i64 %"tmp#10##0")
+  tail call fastcc void @"dead_cell_size#.print_t<0>"(i64 %"tmp#2##0")
   %"tmp#19##0" = call ccc ptr @wybe_malloc(i32 8)
   %"tmp#13##0" = ptrtoint ptr %"tmp#19##0" to i64
   %"tmp#20##0" = inttoptr i64 %"tmp#13##0" to ptr
   store i64 9, ptr %"tmp#20##0"
-  %"tmp#4##0" = tail call fastcc i64 @"dead_cell_size.diff_type<0>[410bae77d3]"(i64 %"tmp#13##0")
-  tail call fastcc void @"dead_cell_size.print_t2<0>"(i64 %"tmp#4##0")
+  %"tmp#4##0" = tail call fastcc i64 @"dead_cell_size#.diff_type<0>[410bae77d3]"(i64 %"tmp#13##0")
+  tail call fastcc void @"dead_cell_size#.print_t2<0>"(i64 %"tmp#4##0")
   ret void
 }
 
-define external fastcc i64 @"dead_cell_size.bar<0>"(i64 %"x##0") {
+define external fastcc i64 @"dead_cell_size#.bar<0>"(i64 %"x##0") {
   %"tmp#3##0" = icmp ne i64 %"x##0", 0
   br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -369,7 +369,7 @@ if.else.0:
   ret i64 0
 }
 
-define external fastcc i64 @"dead_cell_size.bar<0>[410bae77d3]"(i64 %"x##0") {
+define external fastcc i64 @"dead_cell_size#.bar<0>[410bae77d3]"(i64 %"x##0") {
   %"tmp#3##0" = icmp ne i64 %"x##0", 0
   br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -386,7 +386,7 @@ if.else.0:
   ret i64 0
 }
 
-define external fastcc i64 @"dead_cell_size.diff_type<0>"(i64 %"x##0") {
+define external fastcc i64 @"dead_cell_size#.diff_type<0>"(i64 %"x##0") {
   %"tmp#4##0" = icmp ne i64 %"x##0", 0
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -416,7 +416,7 @@ if.else.0:
   ret i64 %"tmp#20##0"
 }
 
-define external fastcc i64 @"dead_cell_size.diff_type<0>[410bae77d3]"(i64 %"x##0") {
+define external fastcc i64 @"dead_cell_size#.diff_type<0>[410bae77d3]"(i64 %"x##0") {
   %"tmp#4##0" = icmp ne i64 %"x##0", 0
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -440,7 +440,7 @@ if.else.0:
   ret i64 %"tmp#17##0"
 }
 
-define external fastcc i64 @"dead_cell_size.foo<0>"(i64 %"x##0") {
+define external fastcc i64 @"dead_cell_size#.foo<0>"(i64 %"x##0") {
   %"tmp#3##0" = icmp ne i64 %"x##0", 0
   br i1 %"tmp#3##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -469,11 +469,11 @@ if.else.0:
   ret i64 0
 }
 
-define external fastcc void @"dead_cell_size.print_t<0>"(i64 %"x##0") {
-  %"tmp#4##0" = tail call fastcc i1 @"dead_cell_size.t.=<0>"(i64 0, i64 %"x##0")
+define external fastcc void @"dead_cell_size#.print_t<0>"(i64 %"x##0") {
+  %"tmp#4##0" = tail call fastcc i1 @"dead_cell_size#.t#.=<0>"(i64 0, i64 %"x##0")
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
@@ -489,9 +489,9 @@ if.then.1:
 case.0.switch.2:
   %"tmp#68##0" = inttoptr i64 %"x##0" to ptr
   %"a##0" = load i64, ptr %"tmp#68##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
   call ccc void @print_int(i64 %"a##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.1.switch.2:
@@ -504,22 +504,22 @@ case.1.switch.2:
   %"tmp#73##0" = add i64 %"x##0", 15
   %"tmp#74##0" = inttoptr i64 %"tmp#73##0" to ptr
   %"c##0" = load i64, ptr %"tmp#74##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
   call ccc void @print_int(i64 %"a##1")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1203)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1203)
   call ccc void @print_int(i64 %"b##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1203)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1203)
   call ccc void @print_int(i64 %"c##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.2.switch.2:
   %"tmp#75##0" = add i64 %"x##0", -2
   %"tmp#76##0" = inttoptr i64 %"tmp#75##0" to ptr
   %"a##2" = load i64, ptr %"tmp#76##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
   call ccc void @print_int(i64 %"a##2")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 default.switch.2:
@@ -530,11 +530,11 @@ if.else.1:
   ret void
 }
 
-define external fastcc void @"dead_cell_size.print_t2<0>"(i64 %"x##0") {
-  %"tmp#2##0" = tail call fastcc i1 @"dead_cell_size.t2.=<0>"(i64 0, i64 %"x##0")
+define external fastcc void @"dead_cell_size#.print_t2<0>"(i64 %"x##0") {
+  %"tmp#2##0" = tail call fastcc i1 @"dead_cell_size#.t2#.=<0>"(i64 0, i64 %"x##0")
   br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
@@ -543,9 +543,9 @@ if.else.0:
 if.then.1:
   %"tmp#19##0" = inttoptr i64 %"x##0" to ptr
   %"a##0" = load i64, ptr %"tmp#19##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
   call ccc void @print_int(i64 %"a##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 if.else.1:
@@ -1060,13 +1060,13 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'dead_cell_size.t'
 
 source_filename = "!ROOT!/final-dump/dead_cell_size.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"dead_cell_size.t.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"dead_cell_size#.t#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#0##0" = icmp ne i64 %"#left##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1167,11 +1167,11 @@ if.else.0:
   ret i1 %"tmp#72##0"
 }
 
-define external fastcc i64 @"dead_cell_size.t.ta<0>"() {
+define external fastcc i64 @"dead_cell_size#.t#.ta<0>"() {
   ret i64 0
 }
 
-define external fastcc i64 @"dead_cell_size.t.tb<0>"(i64 %"tb1##0") {
+define external fastcc i64 @"dead_cell_size#.t#.tb<0>"(i64 %"tb1##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1179,7 +1179,7 @@ define external fastcc i64 @"dead_cell_size.t.tb<0>"(i64 %"tb1##0") {
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.tb<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.tb<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1203,7 +1203,7 @@ if.else.0:
   ret {i64, i1} %"tmp#11##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.tb1<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.tb1<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1227,7 +1227,7 @@ if.else.0:
   ret {i64, i1} %"tmp#11##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.tb1<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.tb1<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1255,7 +1255,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc i64 @"dead_cell_size.t.tc<0>"(i64 %"tc1##0", i64 %"tc2##0", i64 %"tc3##0") {
+define external fastcc i64 @"dead_cell_size#.t#.tc<0>"(i64 %"tc1##0", i64 %"tc2##0", i64 %"tc3##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 24)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1270,7 +1270,7 @@ define external fastcc i64 @"dead_cell_size.t.tc<0>"(i64 %"tc1##0", i64 %"tc2##0
   ret i64 %"tmp#6##0"
 }
 
-define external fastcc {i64, i64, i64, i1} @"dead_cell_size.t.tc<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, i64, i1} @"dead_cell_size#.t#.tc<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1307,7 +1307,7 @@ if.else.0:
   ret {i64, i64, i64, i1} %"tmp#24##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.tc1<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.tc1<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1332,7 +1332,7 @@ if.else.0:
   ret {i64, i1} %"tmp#12##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.tc1<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.tc1<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1363,7 +1363,7 @@ if.else.0:
   ret {i64, i1} %"tmp#16##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.tc2<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.tc2<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1388,7 +1388,7 @@ if.else.0:
   ret {i64, i1} %"tmp#12##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.tc2<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.tc2<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1419,7 +1419,7 @@ if.else.0:
   ret {i64, i1} %"tmp#16##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.tc3<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.tc3<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1444,7 +1444,7 @@ if.else.0:
   ret {i64, i1} %"tmp#12##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.tc3<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.tc3<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1475,7 +1475,7 @@ if.else.0:
   ret {i64, i1} %"tmp#16##0"
 }
 
-define external fastcc i64 @"dead_cell_size.t.td<0>"(i64 %"td1##0") {
+define external fastcc i64 @"dead_cell_size#.t#.td<0>"(i64 %"td1##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1484,7 +1484,7 @@ define external fastcc i64 @"dead_cell_size.t.td<0>"(i64 %"td1##0") {
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.td<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.td<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1509,7 +1509,7 @@ if.else.0:
   ret {i64, i1} %"tmp#12##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.td1<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.td1<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1534,7 +1534,7 @@ if.else.0:
   ret {i64, i1} %"tmp#12##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t.td1<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t#.td1<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1565,8 +1565,8 @@ if.else.0:
   ret {i64, i1} %"tmp#16##0"
 }
 
-define external fastcc i1 @"dead_cell_size.t.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#0##0" = tail call fastcc i1 @"dead_cell_size.t.=<0>"(i64 %"#left##0", i64 %"#right##0")
+define external fastcc i1 @"dead_cell_size#.t#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = tail call fastcc i1 @"dead_cell_size#.t#.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"
 }
@@ -1690,13 +1690,13 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'dead_cell_size.t2'
 
 source_filename = "!ROOT!/final-dump/dead_cell_size.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"dead_cell_size.t2.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"dead_cell_size#.t2#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#0##0" = icmp ne i64 %"#left##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1716,7 +1716,7 @@ if.else.0:
   ret i1 %"tmp#14##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t2.a<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t2#.a<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1731,7 +1731,7 @@ if.else.0:
   ret {i64, i1} %"tmp#6##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t2.a<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t2#.a<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1750,11 +1750,11 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc i64 @"dead_cell_size.t2.t2a<0>"() {
+define external fastcc i64 @"dead_cell_size#.t2#.t2a<0>"() {
   ret i64 0
 }
 
-define external fastcc i64 @"dead_cell_size.t2.t2b<0>"(i64 %"a##0") {
+define external fastcc i64 @"dead_cell_size#.t2#.t2b<0>"(i64 %"a##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1762,7 +1762,7 @@ define external fastcc i64 @"dead_cell_size.t2.t2b<0>"(i64 %"a##0") {
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i1} @"dead_cell_size.t2.t2b<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"dead_cell_size#.t2#.t2b<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -1777,8 +1777,8 @@ if.else.0:
   ret {i64, i1} %"tmp#6##0"
 }
 
-define external fastcc i1 @"dead_cell_size.t2.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#0##0" = tail call fastcc i1 @"dead_cell_size.t2.=<0>"(i64 %"#left##0", i64 %"#right##0")
+define external fastcc i1 @"dead_cell_size#.t2#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = tail call fastcc i1 @"dead_cell_size#.t2#.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"
 }

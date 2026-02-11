@@ -24,12 +24,12 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'purity_warning'
 
 source_filename = "!ROOT!/final-dump/purity_warning.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"purity_warning.<0>"() {
+define external fastcc void @"purity_warning#.<0>"() {
   ret void
 }
 final-dump/purity_warning.wybe:1:2: Calling proc wybe.list.length<0> with unneeded ! marker

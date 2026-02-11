@@ -128,17 +128,17 @@ foo(?foo#1##0:T <{}; {}; {1}>, #result##0:anon_field_variable(T) <{}; {}; {1}>, 
 ; ModuleID = 'anon_field_variable'
 
 source_filename = "!ROOT!/final-dump/anon_field_variable.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"foo\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 3, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"anon_field_variable.<0>"() {
+define external fastcc void @"anon_field_variable#.<0>"() {
   %"tmp#12##0" = call ccc ptr @wybe_malloc(i32 8)
   %"tmp#5##0" = ptrtoint ptr %"tmp#12##0" to i64
   %"tmp#13##0" = inttoptr i64 %"tmp#5##0" to ptr
@@ -148,14 +148,14 @@ define external fastcc void @"anon_field_variable.<0>"() {
   %"tmp#8##0" = icmp eq i1 %"tmp#7##0", 0
   br i1 %"tmp#8##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
   ret void
 }
 
-define external fastcc i64 @"anon_field_variable.bar<0>"(i64 %"bar#1##0", i64 %"field##0", i64 %"bar#3##0") {
+define external fastcc i64 @"anon_field_variable#.bar<0>"(i64 %"bar#1##0", i64 %"field##0", i64 %"bar#3##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 24)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -170,7 +170,7 @@ define external fastcc i64 @"anon_field_variable.bar<0>"(i64 %"bar#1##0", i64 %"
   ret i64 %"tmp#6##0"
 }
 
-define external fastcc {i64, i64, i64, i1} @"anon_field_variable.bar<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, i64, i1} @"anon_field_variable#.bar<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i1
   %"tmp#1##0" = and i1 %"tmp#2##0", 1
   %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
@@ -198,7 +198,7 @@ if.else.0:
   ret {i64, i64, i64, i1} %"tmp#19##0"
 }
 
-define external fastcc {i64, i1} @"anon_field_variable.field<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"anon_field_variable#.field<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i1
   %"tmp#1##0" = and i1 %"tmp#2##0", 1
   %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
@@ -216,7 +216,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"anon_field_variable.field<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"anon_field_variable#.field<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i1
   %"tmp#1##0" = and i1 %"tmp#2##0", 1
   %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
@@ -240,7 +240,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc i64 @"anon_field_variable.foo<0>"(i64 %"foo#1##0") {
+define external fastcc i64 @"anon_field_variable#.foo<0>"(i64 %"foo#1##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -248,7 +248,7 @@ define external fastcc i64 @"anon_field_variable.foo<0>"(i64 %"foo#1##0") {
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i1} @"anon_field_variable.foo<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"anon_field_variable#.foo<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i1
   %"tmp#1##0" = and i1 %"tmp#2##0", 1
   %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 0

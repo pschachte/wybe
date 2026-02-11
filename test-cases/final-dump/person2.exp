@@ -36,17 +36,17 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'person2'
 
 source_filename = "!ROOT!/final-dump/person2.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"Smith\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 5, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"person2.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+define external fastcc void @"person2#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   ret void
 }
 
@@ -162,14 +162,14 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'person2.person'
 
 source_filename = "!ROOT!/final-dump/person2.wybe"
-target triple    ????
+target triple   = ????
 
 
-declare external fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
+declare external fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"person2.person.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"person2#.person#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#11##0" = inttoptr i64 %"#left##0" to ptr
   %"#left#firstname##0" = load i64, ptr %"tmp#11##0"
   %"tmp#12##0" = add i64 %"#left##0", 8
@@ -180,24 +180,24 @@ define external fastcc i1 @"person2.person.=<0>"(i64 %"#left##0", i64 %"#right##
   %"tmp#15##0" = add i64 %"#right##0", 8
   %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
   %"#right#lastname##0" = load i64, ptr %"tmp#16##0"
-  %"tmp#7##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#firstname##0", i64 %"#right#firstname##0", i64 %"#left#firstname##0", i64 %"#right#firstname##0")
+  %"tmp#7##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#firstname##0", i64 %"#right#firstname##0", i64 %"#left#firstname##0", i64 %"#right#firstname##0")
   %"tmp#1##0" = icmp eq i2 %"tmp#7##0", 1
   br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#10##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#lastname##0", i64 %"#right#lastname##0", i64 %"#left#lastname##0", i64 %"#right#lastname##0")
+  %"tmp#10##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#lastname##0", i64 %"#right#lastname##0", i64 %"#left#lastname##0", i64 %"#right#lastname##0")
   %"tmp#17##0" = icmp eq i2 %"tmp#10##0", 1
   ret i1 %"tmp#17##0"
 if.else.0:
   ret i1 0
 }
 
-define external fastcc i64 @"person2.person.firstname<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"person2#.person#.firstname<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#0##0"
   ret i64 %"tmp#1##0"
 }
 
-define external fastcc i64 @"person2.person.firstname<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"person2#.person#.firstname<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
@@ -207,14 +207,14 @@ define external fastcc i64 @"person2.person.firstname<1>"(i64 %"#rec##0", i64 %"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"person2.person.lastname<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"person2#.person#.lastname<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 8
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#1##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"person2.person.lastname<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"person2#.person#.lastname<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
@@ -225,7 +225,7 @@ define external fastcc i64 @"person2.person.lastname<1>"(i64 %"#rec##0", i64 %"#
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"person2.person.person<0>"(i64 %"firstname##0", i64 %"lastname##0") {
+define external fastcc i64 @"person2#.person#.person<0>"(i64 %"firstname##0", i64 %"lastname##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -236,7 +236,7 @@ define external fastcc i64 @"person2.person.person<0>"(i64 %"firstname##0", i64 
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64} @"person2.person.person<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64} @"person2#.person#.person<1>"(i64 %"#result##0") {
   %"tmp#0##0" = inttoptr i64 %"#result##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#0##0"
   %"tmp#2##0" = add i64 %"#result##0", 8
@@ -247,7 +247,7 @@ define external fastcc {i64, i64} @"person2.person.person<1>"(i64 %"#result##0")
   ret {i64, i64} %"tmp#6##0"
 }
 
-define external fastcc i1 @"person2.person.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"person2#.person#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#10##0" = inttoptr i64 %"#left##0" to ptr
   %"tmp#3##0" = load i64, ptr %"tmp#10##0"
   %"tmp#11##0" = add i64 %"#left##0", 8
@@ -258,11 +258,11 @@ define external fastcc i1 @"person2.person.~=<0>"(i64 %"#left##0", i64 %"#right#
   %"tmp#14##0" = add i64 %"#right##0", 8
   %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
   %"tmp#6##0" = load i64, ptr %"tmp#15##0"
-  %"tmp#7##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"tmp#3##0", i64 %"tmp#5##0", i64 %"tmp#3##0", i64 %"tmp#5##0")
+  %"tmp#7##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"tmp#3##0", i64 %"tmp#5##0", i64 %"tmp#3##0", i64 %"tmp#5##0")
   %"tmp#8##0" = icmp eq i2 %"tmp#7##0", 1
   br i1 %"tmp#8##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#9##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"tmp#4##0", i64 %"tmp#6##0", i64 %"tmp#4##0", i64 %"tmp#6##0")
+  %"tmp#9##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"tmp#4##0", i64 %"tmp#6##0", i64 %"tmp#4##0", i64 %"tmp#6##0")
   %"tmp#0##0" = icmp eq i2 %"tmp#9##0", 1
   %"tmp#16##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#16##0"

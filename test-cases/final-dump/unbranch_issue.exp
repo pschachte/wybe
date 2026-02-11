@@ -42,19 +42,19 @@ test#cont#1(b##0:wybe.bool, tmp#2##0:wybe.int, tmp#3##0:wybe.int, ?#success##0:w
 ; ModuleID = 'unbranch_issue'
 
 source_filename = "!ROOT!/final-dump/unbranch_issue.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#unbranch_issue.n" = global i64 undef
 
-define external fastcc i1 @"unbranch_issue.test<0>"() {
+define external fastcc i1 @"unbranch_issue#.test<0>"() {
   %"tmp#2##0" = load i64, ptr @"resource#unbranch_issue.n"
-  %"tmp#5##0" = tail call fastcc i1 @"unbranch_issue.test#cont#1<0>"(i1 0, i64 %"tmp#2##0", i64 %"tmp#2##0")
+  %"tmp#5##0" = tail call fastcc i1 @"unbranch_issue#.test#cont#1<0>"(i1 0, i64 %"tmp#2##0", i64 %"tmp#2##0")
   ret i1 %"tmp#5##0"
 }
 
-define external fastcc i1 @"unbranch_issue.test#cont#1<0>"(i1 %"b##0", i64 %"tmp#2##0", i64 %"tmp#3##0") {
+define external fastcc i1 @"unbranch_issue#.test#cont#1<0>"(i1 %"b##0", i64 %"tmp#2##0", i64 %"tmp#3##0") {
   br i1 %"b##0", label %if.then.0, label %if.else.0
 if.then.0:
   store i64 %"tmp#3##0", ptr @"resource#unbranch_issue.n"

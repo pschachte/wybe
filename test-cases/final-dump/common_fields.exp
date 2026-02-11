@@ -599,21 +599,21 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'common_fields'
 
 source_filename = "!ROOT!/final-dump/common_fields.wybe"
-target triple    ????
+target triple   = ????
 
 @"array#0" = private unnamed_addr constant [ 4 x i64 ] [i64 0, i64 -1, i64 -2, i64 -3]
 @"array#1" = private unnamed_addr constant [ 4 x i64 ] [i64 24, i64 15, i64 22, i64 5]
 @"array#2" = private unnamed_addr constant [ 4 x i64 ] [i64 32, i64 24, i64 32, i64 16]
 
-declare external fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
-declare external fastcc void @"wybe.string.print<0>"(i64)
-declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
+declare external fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2, i64, i64, i64, i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"common_fields.<0>"() {
+define external fastcc void @"common_fields#.<0>"() {
   %"tmp#68##0" = call ccc ptr @wybe_malloc(i32 32)
   %"tmp#30##0" = ptrtoint ptr %"tmp#68##0" to i64
   %"tmp#69##0" = inttoptr i64 %"tmp#30##0" to ptr
@@ -638,34 +638,34 @@ define external fastcc void @"common_fields.<0>"() {
   %"tmp#81##0" = inttoptr i64 %"tmp#80##0" to ptr
   store i64 1, ptr %"tmp#81##0"
   %"tmp#1##0" = or i64 %"tmp#42##0", 1
-  %"tmp#2##0" = tail call fastcc i64 @"common_fields.title<0>"(i64 %"tmp#30##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#2##0")
+  %"tmp#2##0" = tail call fastcc i64 @"common_fields#.title<0>"(i64 %"tmp#30##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
-  %"tmp#3##0" = tail call fastcc i64 @"common_fields.id<0>"(i64 %"tmp#1##0")
+  %"tmp#3##0" = tail call fastcc i64 @"common_fields#.id<0>"(i64 %"tmp#1##0")
   call ccc void @print_int(i64 %"tmp#3##0")
   call ccc void @putchar(i8 10)
-  %"c##1" = tail call fastcc i64 @"common_fields.id<1>[410bae77d3]"(i64 %"tmp#1##0", i64 10)
-  %"tmp#4##0" = tail call fastcc i64 @"common_fields.id<0>"(i64 %"c##1")
+  %"c##1" = tail call fastcc i64 @"common_fields#.id<1>[410bae77d3]"(i64 %"tmp#1##0", i64 10)
+  %"tmp#4##0" = tail call fastcc i64 @"common_fields#.id<0>"(i64 %"c##1")
   call ccc void @print_int(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)
-  %"tmp#82##0" = tail call fastcc {i64, i1} @"common_fields.genre<0>"(i64 %"tmp#30##0")
+  %"tmp#82##0" = tail call fastcc {i64, i1} @"common_fields#.genre<0>"(i64 %"tmp#30##0")
   %"tmp#5##0" = extractvalue {i64, i1}%"tmp#82##0", 0
   %"tmp#9##0" = extractvalue {i64, i1}%"tmp#82##0", 1
   br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#83##0" = tail call fastcc {i64, i1} @"common_fields.genre<1>"(i64 %"tmp#30##0", i64 1439)
+  %"tmp#83##0" = tail call fastcc {i64, i1} @"common_fields#.genre<1>"(i64 %"tmp#30##0", i64 1439)
   %"b##1" = extractvalue {i64, i1}%"tmp#83##0", 0
   %"tmp#10##0" = extractvalue {i64, i1}%"tmp#83##0", 1
   br i1 %"tmp#10##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#5##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#5##0")
   call ccc void @putchar(i8 10)
-  %"tmp#84##0" = tail call fastcc {i64, i1} @"common_fields.genre<0>"(i64 %"b##1")
+  %"tmp#84##0" = tail call fastcc {i64, i1} @"common_fields#.genre<0>"(i64 %"b##1")
   %"tmp#6##0" = extractvalue {i64, i1}%"tmp#84##0", 0
   %"tmp#8##0" = extractvalue {i64, i1}%"tmp#84##0", 1
   br i1 %"tmp#8##0", label %if.then.2, label %if.else.2
 if.then.2:
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#6##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#6##0")
   call ccc void @putchar(i8 10)
   ret void
 if.else.2:
@@ -676,7 +676,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc i1 @"common_fields.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"common_fields#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#80##0" = trunc i64 %"#left##0" to i2
   %"tmp#23##0" = and i2 %"tmp#80##0", 3
   switch i2 %"tmp#23##0", label %case.3.switch.0 [
@@ -712,15 +712,15 @@ if.then.1:
   %"tmp#94##0" = add i64 %"#right##0", 24
   %"tmp#95##0" = inttoptr i64 %"tmp#94##0" to ptr
   %"#right#id##0" = load i64, ptr %"tmp#95##0"
-  %"tmp#71##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#title##0", i64 %"#right#title##0", i64 %"#left#title##0", i64 %"#right#title##0")
+  %"tmp#71##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#title##0", i64 %"#right#title##0", i64 %"#left#title##0", i64 %"#right#title##0")
   %"tmp#2##0" = icmp eq i2 %"tmp#71##0", 1
   br i1 %"tmp#2##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#74##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#author##0", i64 %"#right#author##0", i64 %"#left#author##0", i64 %"#right#author##0")
+  %"tmp#74##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#author##0", i64 %"#right#author##0", i64 %"#left#author##0", i64 %"#right#author##0")
   %"tmp#3##0" = icmp eq i2 %"tmp#74##0", 1
   br i1 %"tmp#3##0", label %if.then.3, label %if.else.3
 if.then.3:
-  %"tmp#77##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#genre##0", i64 %"#right#genre##0", i64 %"#left#genre##0", i64 %"#right#genre##0")
+  %"tmp#77##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#genre##0", i64 %"#right#genre##0", i64 %"#left#genre##0", i64 %"#right#genre##0")
   %"tmp#4##0" = icmp eq i2 %"tmp#77##0", 1
   br i1 %"tmp#4##0", label %if.then.4, label %if.else.4
 if.then.4:
@@ -758,7 +758,7 @@ if.then.5:
   %"tmp#109##0" = add i64 %"#right##0", 15
   %"tmp#110##0" = inttoptr i64 %"tmp#109##0" to ptr
   %"tmp#111##0" = load i64, ptr %"tmp#110##0"
-  %"tmp#61##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#title##1", i64 %"tmp#106##0", i64 %"#left#title##1", i64 %"tmp#106##0")
+  %"tmp#61##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#title##1", i64 %"tmp#106##0", i64 %"#left#title##1", i64 %"tmp#106##0")
   %"tmp#7##0" = icmp eq i2 %"tmp#61##0", 1
   br i1 %"tmp#7##0", label %if.then.6, label %if.else.6
 if.then.6:
@@ -803,15 +803,15 @@ if.then.8:
   %"tmp#130##0" = add i64 %"#right##0", 22
   %"tmp#131##0" = inttoptr i64 %"tmp#130##0" to ptr
   %"tmp#132##0" = load i64, ptr %"tmp#131##0"
-  %"tmp#47##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#title##2", i64 %"tmp#124##0", i64 %"#left#title##2", i64 %"tmp#124##0")
+  %"tmp#47##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#title##2", i64 %"tmp#124##0", i64 %"#left#title##2", i64 %"tmp#124##0")
   %"tmp#11##0" = icmp eq i2 %"tmp#47##0", 1
   br i1 %"tmp#11##0", label %if.then.9, label %if.else.9
 if.then.9:
-  %"tmp#50##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#director##0", i64 %"#right#director##0", i64 %"#left#director##0", i64 %"#right#director##0")
+  %"tmp#50##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#director##0", i64 %"#right#director##0", i64 %"#left#director##0", i64 %"#right#director##0")
   %"tmp#12##0" = icmp eq i2 %"tmp#50##0", 1
   br i1 %"tmp#12##0", label %if.then.10, label %if.else.10
 if.then.10:
-  %"tmp#53##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#genre##1", i64 %"tmp#129##0", i64 %"#left#genre##1", i64 %"tmp#129##0")
+  %"tmp#53##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#genre##1", i64 %"tmp#129##0", i64 %"#left#genre##1", i64 %"tmp#129##0")
   %"tmp#13##0" = icmp eq i2 %"tmp#53##0", 1
   br i1 %"tmp#13##0", label %if.then.11, label %if.else.11
 if.then.11:
@@ -843,7 +843,7 @@ if.then.12:
   %"tmp#142##0" = add i64 %"#right##0", 5
   %"tmp#143##0" = inttoptr i64 %"tmp#142##0" to ptr
   %"tmp#144##0" = load i64, ptr %"tmp#143##0"
-  %"tmp#39##0" = tail call fastcc i2 @"wybe.string.<=>#cont#2<0>"(i2 1, i64 %"#left#title##3", i64 %"tmp#141##0", i64 %"#left#title##3", i64 %"tmp#141##0")
+  %"tmp#39##0" = tail call fastcc i2 @"wybe#.string#.<=>#cont#2<0>"(i2 1, i64 %"#left#title##3", i64 %"tmp#141##0", i64 %"#left#title##3", i64 %"tmp#141##0")
   %"tmp#16##0" = icmp eq i2 %"tmp#39##0", 1
   br i1 %"tmp#16##0", label %if.then.13, label %if.else.13
 if.then.13:
@@ -855,7 +855,7 @@ if.else.12:
   ret i1 0
 }
 
-define external fastcc i64 @"common_fields.DVD<0>"(i64 %"title##0", i64 %"director##0", i64 %"genre##0", i64 %"id##0") {
+define external fastcc i64 @"common_fields#.DVD<0>"(i64 %"title##0", i64 %"director##0", i64 %"genre##0", i64 %"id##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -873,7 +873,7 @@ define external fastcc i64 @"common_fields.DVD<0>"(i64 %"title##0", i64 %"direct
   ret i64 %"tmp#8##0"
 }
 
-define external fastcc {i64, i64, i64, i64, i1} @"common_fields.DVD<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, i64, i64, i1} @"common_fields#.DVD<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 2
@@ -906,7 +906,7 @@ if.else.0:
   ret {i64, i64, i64, i64, i1} %"tmp#24##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.author<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"common_fields#.author<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 0
@@ -924,7 +924,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.author<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"common_fields#.author<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 0
@@ -946,7 +946,7 @@ if.else.0:
   ret {i64, i1} %"tmp#11##0"
 }
 
-define external fastcc i64 @"common_fields.book<0>"(i64 %"title##0", i64 %"author##0", i64 %"genre##0", i64 %"id##0") {
+define external fastcc i64 @"common_fields#.book<0>"(i64 %"title##0", i64 %"author##0", i64 %"genre##0", i64 %"id##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -963,7 +963,7 @@ define external fastcc i64 @"common_fields.book<0>"(i64 %"title##0", i64 %"autho
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64, i64, i64, i1} @"common_fields.book<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, i64, i64, i1} @"common_fields#.book<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 0
@@ -995,7 +995,7 @@ if.else.0:
   ret {i64, i64, i64, i64, i1} %"tmp#23##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.director<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"common_fields#.director<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 2
@@ -1013,7 +1013,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.director<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"common_fields#.director<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 2
@@ -1037,7 +1037,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.frequency<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"common_fields#.frequency<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 1
@@ -1055,7 +1055,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.frequency<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"common_fields#.frequency<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 1
@@ -1079,7 +1079,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.genre<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"common_fields#.genre<0>"(i64 %"#rec##0") {
   %"tmp#4##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#4##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 0
@@ -1107,7 +1107,7 @@ if.else.1:
   ret {i64, i1} %"tmp#16##0"
 }
 
-define external fastcc {i64, i1} @"common_fields.genre<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"common_fields#.genre<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#4##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#4##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 0
@@ -1145,7 +1145,7 @@ if.else.1:
   ret {i64, i1} %"tmp#22##0"
 }
 
-define external fastcc i64 @"common_fields.id<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"common_fields#.id<0>"(i64 %"#rec##0") {
   %"tmp#24##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#24##0", 3
   %"tmp#26##0" = zext i2 %"tmp#1##0" to i64
@@ -1161,7 +1161,7 @@ define external fastcc i64 @"common_fields.id<0>"(i64 %"#rec##0") {
   ret i64 %"tmp#31##0"
 }
 
-define external fastcc i64 @"common_fields.id<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"common_fields#.id<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#33##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#33##0", 3
   %"tmp#35##0" = zext i2 %"tmp#1##0" to i64
@@ -1184,7 +1184,7 @@ define external fastcc i64 @"common_fields.id<1>"(i64 %"#rec##0", i64 %"#field##
   ret i64 %"tmp#43##0"
 }
 
-define external fastcc i64 @"common_fields.id<1>[410bae77d3]"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"common_fields#.id<1>[410bae77d3]"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#33##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#33##0", 3
   %"tmp#35##0" = zext i2 %"tmp#1##0" to i64
@@ -1200,7 +1200,7 @@ define external fastcc i64 @"common_fields.id<1>[410bae77d3]"(i64 %"#rec##0", i6
   ret i64 %"#rec##0"
 }
 
-define external fastcc i64 @"common_fields.magazine<0>"(i64 %"title##0", i64 %"frequency##0", i64 %"id##0") {
+define external fastcc i64 @"common_fields#.magazine<0>"(i64 %"title##0", i64 %"frequency##0", i64 %"id##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 24)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1215,7 +1215,7 @@ define external fastcc i64 @"common_fields.magazine<0>"(i64 %"title##0", i64 %"f
   ret i64 %"tmp#6##0"
 }
 
-define external fastcc {i64, i64, i64, i1} @"common_fields.magazine<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, i64, i1} @"common_fields#.magazine<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 1
@@ -1243,7 +1243,7 @@ if.else.0:
   ret {i64, i64, i64, i1} %"tmp#19##0"
 }
 
-define external fastcc i64 @"common_fields.other<0>"(i64 %"title##0", i64 %"id##0") {
+define external fastcc i64 @"common_fields#.other<0>"(i64 %"title##0", i64 %"id##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1255,7 +1255,7 @@ define external fastcc i64 @"common_fields.other<0>"(i64 %"title##0", i64 %"id##
   ret i64 %"tmp#4##0"
 }
 
-define external fastcc {i64, i64, i1} @"common_fields.other<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, i1} @"common_fields#.other<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i2
   %"tmp#1##0" = and i2 %"tmp#2##0", 3
   %"tmp#0##0" = icmp eq i2 %"tmp#1##0", 3
@@ -1278,7 +1278,7 @@ if.else.0:
   ret {i64, i64, i1} %"tmp#14##0"
 }
 
-define external fastcc i64 @"common_fields.title<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"common_fields#.title<0>"(i64 %"#rec##0") {
   %"tmp#24##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#24##0", 3
   %"tmp#26##0" = zext i2 %"tmp#1##0" to i64
@@ -1294,7 +1294,7 @@ define external fastcc i64 @"common_fields.title<0>"(i64 %"#rec##0") {
   ret i64 %"tmp#31##0"
 }
 
-define external fastcc i64 @"common_fields.title<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"common_fields#.title<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#6##0" = trunc i64 %"#rec##0" to i2
   %"tmp#1##0" = and i2 %"tmp#6##0", 3
   switch i2 %"tmp#1##0", label %case.3.switch.0 [
@@ -1345,8 +1345,8 @@ case.3.switch.0:
   ret i64 %"tmp#29##0"
 }
 
-define external fastcc i1 @"common_fields.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#0##0" = tail call fastcc i1 @"common_fields.=<0>"(i64 %"#left##0", i64 %"#right##0")
+define external fastcc i1 @"common_fields#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = tail call fastcc i1 @"common_fields#.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"
 }

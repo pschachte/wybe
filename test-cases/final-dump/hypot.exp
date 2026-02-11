@@ -197,7 +197,7 @@ hypot(s1##0:wybe.float, s2##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 ; ModuleID = 'hypot'
 
 source_filename = "!ROOT!/final-dump/hypot.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c" = \00", align 8
 @"cstring#1" = private unnamed_addr constant [ ?? x i8 ] c" degrees\00", align 8
@@ -242,7 +242,7 @@ target triple    ????
 @"string#40" = private unnamed_addr constant {i64, i64} { i64 10, i64 ptrtoint( ptr @"cstring#19" to i64 ) }, align 8
 @"string#41" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#20" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc double @acos(double)
 declare external ccc double @asin(double)
 declare external ccc double @atan(double)
@@ -262,114 +262,114 @@ declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"hypot.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#35" to i64 ))
+define external fastcc void @"hypot#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#35" to i64 ))
   %"tmp#0##0" = call ccc double @llvm.sqrt.f64(double 25.0)
   call ccc void @print_float(double %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#24" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#24" to i64 ))
   call ccc void @print_float(double 78.53981633974483)
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#33" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#33" to i64 ))
   call ccc void @print_float(double 2.7182818284590455)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   %"tmp#3##0" = call ccc double @llvm.exp.f64(double 1.0)
   call ccc void @print_float(double %"tmp#3##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#40" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#40" to i64 ))
   %"tmp#4##0" = call ccc double @llvm.sin.f64(double 30.0)
   call ccc void @print_float(double %"tmp#4##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#32" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#32" to i64 ))
   %"tmp#5##0" = call ccc double @llvm.cos.f64(double 30.0)
   call ccc void @print_float(double %"tmp#5##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#39" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#39" to i64 ))
   %"tmp#6##0" = call ccc double @llvm.sin.f64(double 0.5235987755982988)
   call ccc void @print_float(double %"tmp#6##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#31" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#31" to i64 ))
   %"tmp#8##0" = call ccc double @llvm.cos.f64(double 0.5235987755982988)
   call ccc void @print_float(double %"tmp#8##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#41" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#41" to i64 ))
   %"tmp#10##0" = fdiv double %"tmp#6##0", %"tmp#8##0"
   call ccc void @print_float(double %"tmp#10##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#25" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#25" to i64 ))
   %"tmp#12##0" = call ccc double @asin(double 0.5)
   call ccc void @print_float(double %"tmp#12##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   %"tmp#13##0" = fmul double %"tmp#12##0", 57.29577951308232
   call ccc void @print_float(double %"tmp#13##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#23" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#23" to i64 ))
   %"tmp#138##0" = call ccc double @llvm.sqrt.f64(double 3.0)
   %"tmp#122##0" = fdiv double %"tmp#138##0", 2.0
   %"tmp#15##0" = call ccc double @acos(double %"tmp#122##0")
   call ccc void @print_float(double %"tmp#15##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   %"tmp#18##0" = fmul double %"tmp#15##0", 57.29577951308232
   call ccc void @print_float(double %"tmp#18##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#26" to i64 ))
   %"tmp#140##0" = fdiv double %"tmp#138##0", 3.0
   %"tmp#22##0" = call ccc double @atan(double %"tmp#140##0")
   call ccc void @print_float(double %"tmp#22##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   %"tmp#25##0" = fmul double %"tmp#22##0", 57.29577951308232
   call ccc void @print_float(double %"tmp#25##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#27" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#27" to i64 ))
   %"tmp#30##0" = call ccc double @atan2(double -1.0, double -1.0)
   %"tmp#29##0" = call ccc double @atan(double %"tmp#30##0")
   call ccc void @print_float(double %"tmp#29##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#21" to i64 ))
   %"tmp#31##0" = fmul double %"tmp#30##0", 57.29577951308232
   call ccc void @print_float(double %"tmp#31##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#22" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#37" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#37" to i64 ))
   %"tmp#33##0" = call ccc double @llvm.log.f64(double 2.7182818284590455)
   call ccc void @print_float(double %"tmp#33##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#30" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#30" to i64 ))
   %"tmp#35##0" = call ccc double @llvm.log10.f64(double 2.7182818284590455)
   call ccc void @print_float(double %"tmp#35##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#28" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#28" to i64 ))
   %"tmp#37##0" = call ccc double @llvm.log2.f64(double 2.7182818284590455)
   call ccc void @print_float(double %"tmp#37##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#34" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#34" to i64 ))
   %"tmp#39##0" = call ccc double @llvm.floor.f64(double 3.141592653589793)
   call ccc void @print_float(double %"tmp#39##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#29" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#29" to i64 ))
   %"tmp#41##0" = call ccc double @llvm.ceil.f64(double 3.141592653589793)
   call ccc void @print_float(double %"tmp#41##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#38" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#38" to i64 ))
   %"tmp#43##0" = call ccc double @llvm.round.f64(double 3.141592653589793)
   call ccc void @print_float(double %"tmp#43##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#36" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#36" to i64 ))
   %"tmp#45##0" = fptosi double %"tmp#43##0" to i64
   call ccc void @print_int(i64 %"tmp#45##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc double @"hypot.area<0>"(double %"r##0") {
+define external fastcc double @"hypot#.area<0>"(double %"r##0") {
   %"tmp#2##0" = fmul double %"r##0", %"r##0"
   %"tmp#6##0" = fmul double 3.141592653589793, %"tmp#2##0"
   ret double %"tmp#6##0"
 }
 
-define external fastcc double @"hypot.hypot<0>"(double %"s1##0", double %"s2##0") {
+define external fastcc double @"hypot#.hypot<0>"(double %"s1##0", double %"s2##0") {
   %"tmp#2##0" = fmul double %"s1##0", %"s1##0"
   %"tmp#3##0" = fmul double %"s2##0", %"s2##0"
   %"tmp#1##0" = fadd double %"tmp#2##0", %"tmp#3##0"

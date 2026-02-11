@@ -42,21 +42,21 @@ bug#cont#1(i##0:wybe.int, [?i##0:wybe.int])<{}; {}; {}>:
 ; ModuleID = 'unbranch_inout'
 
 source_filename = "!ROOT!/final-dump/unbranch_inout.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"unbranch_inout.<0>"() {
+define external fastcc void @"unbranch_inout#.<0>"() {
   call ccc void @print_int(i64 1)
   ret void
 }
 
-define external fastcc i64 @"unbranch_inout.bug<0>"(i64 %"i##0") {
+define external fastcc i64 @"unbranch_inout#.bug<0>"(i64 %"i##0") {
   ret i64 %"i##0"
 }
 
-define external fastcc void @"unbranch_inout.bug#cont#1<0>"(i64 %"i##0") {
+define external fastcc void @"unbranch_inout#.bug#cont#1<0>"(i64 %"i##0") {
   ret void
 }

@@ -251,16 +251,16 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'mixed_fields'
 
 source_filename = "!ROOT!/final-dump/mixed_fields.wybe"
-target triple    ????
+target triple   = ????
 
 
-declare external fastcc void @"wybe.bool.print<0>"(i1)
+declare external fastcc void @"wybe#.bool#.print<0>"(i1)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"mixed_fields.<0>"() {
+define external fastcc void @"mixed_fields#.<0>"() {
   %"tmp#14##0" = call ccc ptr @wybe_malloc(i32 32)
   %"tmp#8##0" = ptrtoint ptr %"tmp#14##0" to i64
   %"tmp#15##0" = inttoptr i64 %"tmp#8##0" to ptr
@@ -280,11 +280,11 @@ define external fastcc void @"mixed_fields.<0>"() {
   %"tmp#24##0" = add i64 %"tmp#8##0", 24
   %"tmp#25##0" = inttoptr i64 %"tmp#24##0" to ptr
   store i64 17, ptr %"tmp#25##0"
-  tail call fastcc void @"mixed_fields.printit<0>"(i64 %"tmp#8##0")
+  tail call fastcc void @"mixed_fields#.printit<0>"(i64 %"tmp#8##0")
   ret void
 }
 
-define external fastcc i1 @"mixed_fields.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"mixed_fields#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#21##0" = inttoptr i64 %"#left##0" to ptr
   %"#left#f2##0" = load i8, ptr %"tmp#21##0"
   %"tmp#22##0" = add i64 %"#left##0", 1
@@ -348,14 +348,14 @@ if.else.0:
   ret i1 0
 }
 
-define external fastcc i64 @"mixed_fields.f1<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"mixed_fields#.f1<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 8
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#1##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"mixed_fields.f1<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"mixed_fields#.f1<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -366,13 +366,13 @@ define external fastcc i64 @"mixed_fields.f1<1>"(i64 %"#rec##0", i64 %"#field##0
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i8 @"mixed_fields.f2<0>"(i64 %"#rec##0") {
+define external fastcc i8 @"mixed_fields#.f2<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = load i8, ptr %"tmp#0##0"
   ret i8 %"tmp#1##0"
 }
 
-define external fastcc i64 @"mixed_fields.f2<1>"(i64 %"#rec##0", i8 %"#field##0") {
+define external fastcc i64 @"mixed_fields#.f2<1>"(i64 %"#rec##0", i8 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -382,14 +382,14 @@ define external fastcc i64 @"mixed_fields.f2<1>"(i64 %"#rec##0", i8 %"#field##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"mixed_fields.f3<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"mixed_fields#.f3<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 16
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#1##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"mixed_fields.f3<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"mixed_fields#.f3<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -400,14 +400,14 @@ define external fastcc i64 @"mixed_fields.f3<1>"(i64 %"#rec##0", i64 %"#field##0
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i1 @"mixed_fields.f4<0>"(i64 %"#rec##0") {
+define external fastcc i1 @"mixed_fields#.f4<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 1
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i1, ptr %"tmp#1##0"
   ret i1 %"tmp#2##0"
 }
 
-define external fastcc i64 @"mixed_fields.f4<1>"(i64 %"#rec##0", i1 %"#field##0") {
+define external fastcc i64 @"mixed_fields#.f4<1>"(i64 %"#rec##0", i1 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -418,14 +418,14 @@ define external fastcc i64 @"mixed_fields.f4<1>"(i64 %"#rec##0", i1 %"#field##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"mixed_fields.f5<0>"(i64 %"#rec##0") {
+define external fastcc i64 @"mixed_fields#.f5<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 24
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#1##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"mixed_fields.f5<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc i64 @"mixed_fields#.f5<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -436,14 +436,14 @@ define external fastcc i64 @"mixed_fields.f5<1>"(i64 %"#rec##0", i64 %"#field##0
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i8 @"mixed_fields.f6<0>"(i64 %"#rec##0") {
+define external fastcc i8 @"mixed_fields#.f6<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = add i64 %"#rec##0", 2
   %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
   %"tmp#2##0" = load i8, ptr %"tmp#1##0"
   ret i8 %"tmp#2##0"
 }
 
-define external fastcc i64 @"mixed_fields.f6<1>"(i64 %"#rec##0", i8 %"#field##0") {
+define external fastcc i64 @"mixed_fields#.f6<1>"(i64 %"#rec##0", i8 %"#field##0") {
   %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
   %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
@@ -454,7 +454,7 @@ define external fastcc i64 @"mixed_fields.f6<1>"(i64 %"#rec##0", i8 %"#field##0"
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"mixed_fields.mixed<0>"(i64 %"f1##0", i8 %"f2##0", i64 %"f3##0", i1 %"f4##0", i64 %"f5##0", i8 %"f6##0") {
+define external fastcc i64 @"mixed_fields#.mixed<0>"(i64 %"f1##0", i8 %"f2##0", i64 %"f3##0", i1 %"f4##0", i64 %"f5##0", i8 %"f6##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -477,7 +477,7 @@ define external fastcc i64 @"mixed_fields.mixed<0>"(i64 %"f1##0", i8 %"f2##0", i
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i8, i64, i1, i64, i8} @"mixed_fields.mixed<1>"(i64 %"#result##0") {
+define external fastcc {i64, i8, i64, i1, i64, i8} @"mixed_fields#.mixed<1>"(i64 %"#result##0") {
   %"tmp#0##0" = inttoptr i64 %"#result##0" to ptr
   %"tmp#1##0" = load i8, ptr %"tmp#0##0"
   %"tmp#2##0" = add i64 %"#result##0", 1
@@ -504,7 +504,7 @@ define external fastcc {i64, i8, i64, i1, i64, i8} @"mixed_fields.mixed<1>"(i64 
   ret {i64, i8, i64, i1, i64, i8} %"tmp#22##0"
 }
 
-define external fastcc void @"mixed_fields.printit<0>"(i64 %"ob##0") {
+define external fastcc void @"mixed_fields#.printit<0>"(i64 %"ob##0") {
   %"tmp#35##0" = add i64 %"ob##0", 8
   %"tmp#36##0" = inttoptr i64 %"tmp#35##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#36##0"
@@ -522,7 +522,7 @@ define external fastcc void @"mixed_fields.printit<0>"(i64 %"ob##0") {
   %"tmp#40##0" = add i64 %"ob##0", 1
   %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
   %"tmp#3##0" = load i1, ptr %"tmp#41##0"
-  tail call fastcc void @"wybe.bool.print<0>"(i1 %"tmp#3##0")
+  tail call fastcc void @"wybe#.bool#.print<0>"(i1 %"tmp#3##0")
   call ccc void @putchar(i8 10)
   %"tmp#42##0" = add i64 %"ob##0", 24
   %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
@@ -537,8 +537,8 @@ define external fastcc void @"mixed_fields.printit<0>"(i64 %"ob##0") {
   ret void
 }
 
-define external fastcc i1 @"mixed_fields.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#0##0" = tail call fastcc i1 @"mixed_fields.=<0>"(i64 %"#left##0", i64 %"#right##0")
+define external fastcc i1 @"mixed_fields#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = tail call fastcc i1 @"mixed_fields#.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"
 }

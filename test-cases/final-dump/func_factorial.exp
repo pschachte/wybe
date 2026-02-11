@@ -47,28 +47,28 @@ factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 ; ModuleID = 'func_factorial'
 
 source_filename = "!ROOT!/final-dump/func_factorial.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"func_factorial.<0>"() {
-  %"tmp#0##0" = tail call fastcc i64 @"func_factorial.factorial<0>"(i64 5)
+define external fastcc void @"func_factorial#.<0>"() {
+  %"tmp#0##0" = tail call fastcc i64 @"func_factorial#.factorial<0>"(i64 5)
   call ccc void @print_int(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc i64 @"func_factorial.factorial<0>"(i64 %"n##0") {
+define external fastcc i64 @"func_factorial#.factorial<0>"(i64 %"n##0") {
   %"tmp#4##0" = icmp sle i64 %"n##0", 0
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
   ret i64 1
 if.else.0:
   %"tmp#3##0" = sub i64 %"n##0", 1
-  %"tmp#2##0" = tail call fastcc i64 @"func_factorial.factorial<0>"(i64 %"tmp#3##0")
+  %"tmp#2##0" = tail call fastcc i64 @"func_factorial#.factorial<0>"(i64 %"tmp#3##0")
   %"tmp#11##0" = mul i64 %"n##0", %"tmp#2##0"
   ret i64 %"tmp#11##0"
 }

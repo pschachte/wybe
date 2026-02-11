@@ -56,19 +56,19 @@ proc #cont#2 > {inline,semipure} (1 calls)
 ; ModuleID = 'afterbreak'
 
 source_filename = "!ROOT!/final-dump/afterbreak.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"afterbreak.<0>"() {
-  tail call fastcc void @"afterbreak.#cont#1<0>"(i64 1)
+define external fastcc void @"afterbreak#.<0>"() {
+  tail call fastcc void @"afterbreak#.#cont#1<0>"(i64 1)
   ret void
 }
 
-define external fastcc void @"afterbreak.#cont#1<0>"(i64 %"x##0") {
+define external fastcc void @"afterbreak#.#cont#1<0>"(i64 %"x##0") {
   %"tmp#1##0" = icmp sgt i64 %"x##0", 10
   br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -77,13 +77,13 @@ if.else.0:
   %"tmp#0##0" = add i64 %"x##0", 1
   call ccc void @print_int(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"afterbreak.#cont#1<0>"(i64 %"tmp#0##0")
+  tail call fastcc void @"afterbreak#.#cont#1<0>"(i64 %"tmp#0##0")
   ret void
 }
 
-define external fastcc void @"afterbreak.#cont#2<0>"(i64 %"y##0") {
+define external fastcc void @"afterbreak#.#cont#2<0>"(i64 %"y##0") {
   call ccc void @print_int(i64 %"y##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"afterbreak.#cont#1<0>"(i64 %"y##0")
+  tail call fastcc void @"afterbreak#.#cont#1<0>"(i64 %"y##0")
   ret void
 }

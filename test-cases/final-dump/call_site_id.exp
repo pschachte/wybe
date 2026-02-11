@@ -86,58 +86,58 @@ foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'call_site_id'
 
 source_filename = "!ROOT!/final-dump/call_site_id.wybe"
-target triple    ????
+target triple   = ????
 
 
-declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc i64 @read_int()
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"call_site_id.<0>"() {
+define external fastcc void @"call_site_id#.<0>"() {
   %"x##0" = call ccc i64 @read_int()
   %"y##0" = call ccc i64 @read_int()
   %"tmp#5##0" = icmp sgt i64 %"x##0", 0
   br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"call_site_id.foo<0>"(i64 %"x##0")
+  tail call fastcc void @"call_site_id#.foo<0>"(i64 %"x##0")
   %"tmp#3##0" = icmp sgt i64 %"y##0", 0
   br i1 %"tmp#3##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"call_site_id.foo<0>"(i64 %"y##0")
+  tail call fastcc void @"call_site_id#.foo<0>"(i64 %"y##0")
   ret void
 if.else.1:
   %"tmp#0##0" = sub i64 0, %"y##0"
-  tail call fastcc void @"call_site_id.foo<0>"(i64 %"tmp#0##0")
+  tail call fastcc void @"call_site_id#.foo<0>"(i64 %"tmp#0##0")
   ret void
 if.else.0:
   %"tmp#1##0" = sub i64 0, %"x##0"
-  tail call fastcc void @"call_site_id.foo<0>"(i64 %"tmp#1##0")
+  tail call fastcc void @"call_site_id#.foo<0>"(i64 %"tmp#1##0")
   %"tmp#4##0" = icmp sgt i64 %"y##0", 0
   br i1 %"tmp#4##0", label %if.then.2, label %if.else.2
 if.then.2:
-  tail call fastcc void @"call_site_id.foo<0>"(i64 %"y##0")
+  tail call fastcc void @"call_site_id#.foo<0>"(i64 %"y##0")
   ret void
 if.else.2:
   %"tmp#2##0" = sub i64 0, %"y##0"
-  tail call fastcc void @"call_site_id.foo<0>"(i64 %"tmp#2##0")
+  tail call fastcc void @"call_site_id#.foo<0>"(i64 %"tmp#2##0")
   ret void
 }
 
-define external fastcc void @"call_site_id.bar<0>"(i64 %"x##0") {
-  tail call fastcc void @"call_site_id.foo<0>"(i64 %"x##0")
+define external fastcc void @"call_site_id#.bar<0>"(i64 %"x##0") {
+  tail call fastcc void @"call_site_id#.foo<0>"(i64 %"x##0")
   ret void
 }
 
-define external fastcc void @"call_site_id.foo<0>"(i64 %"x##0") {
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1155)
+define external fastcc void @"call_site_id#.foo<0>"(i64 %"x##0") {
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1155)
   %"tmp#1##0" = mul i64 %"x##0", 5
   %"tmp#0##0" = add i64 %"tmp#1##0", 10
   call ccc void @print_int(i64 %"tmp#0##0")

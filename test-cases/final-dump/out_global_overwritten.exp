@@ -39,7 +39,7 @@ out()<{}; {<<out_global_overwritten.res>>}; {}>:
 ; ModuleID = 'out_global_overwritten'
 
 source_filename = "!ROOT!/final-dump/out_global_overwritten.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
@@ -47,16 +47,16 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#out_global_overwritten.res" = global i64 undef
 
-define external fastcc void @"out_global_overwritten.<0>"() {
+define external fastcc void @"out_global_overwritten#.<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#out_global_overwritten.res"
-  tail call fastcc void @"out_global_overwritten.out<0>"()
+  tail call fastcc void @"out_global_overwritten#.out<0>"()
   call ccc void @print_int(i64 10)
   call ccc void @putchar(i8 10)
   store i64 %"tmp#0##0", ptr @"resource#out_global_overwritten.res"
   ret void
 }
 
-define external fastcc void @"out_global_overwritten.out<0>"() {
+define external fastcc void @"out_global_overwritten#.out<0>"() {
   store i64 11, ptr @"resource#out_global_overwritten.res"
   ret void
 }

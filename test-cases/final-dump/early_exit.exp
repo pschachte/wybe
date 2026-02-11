@@ -29,18 +29,18 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'early_exit'
 
 source_filename = "!ROOT!/final-dump/early_exit.wybe"
-target triple    ????
+target triple   = ????
 
 @"cstring#0" = private unnamed_addr constant [ ?? x i8 ] c"should print this\00", align 8
 @"string#1" = private unnamed_addr constant {i64, i64} { i64 17, i64 ptrtoint( ptr @"cstring#0" to i64 ) }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @exit(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"early_exit.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+define external fastcc void @"early_exit#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @putchar(i8 10)
   call ccc void @exit(i64 1)
   ret void

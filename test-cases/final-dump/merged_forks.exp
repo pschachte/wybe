@@ -245,34 +245,34 @@ not_dense_but_similar(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'merged_forks'
 
 source_filename = "!ROOT!/final-dump/merged_forks.wybe"
-target triple    ????
+target triple   = ????
 
 @"array#0" = private unnamed_addr constant [ 2 x i64 ] [i64 2, i64 3]
 @"array#1" = private unnamed_addr constant [ 2 x i64 ] [i64 3, i64 2]
 @"array#2" = private unnamed_addr constant [ 2 x i64 ] [i64 8, i64 1]
 @"array#3" = private unnamed_addr constant [ 2 x i64 ] [i64 9, i64 1]
 
-declare external fastcc i64 @"wybe.bool.fmt<0>"(i1)
-declare external fastcc void @"wybe.bool.print<0>"(i1)
-declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
-declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
+declare external fastcc i64 @"wybe#.bool#.fmt<0>"(i1)
+declare external fastcc void @"wybe#.bool#.print<0>"(i1)
+declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"merged_forks.<0>"() {
-  tail call fastcc void @"merged_forks.nested_same_default<0>"(i1 1, i64 0)
-  tail call fastcc void @"merged_forks.nested_same_default<0>"(i1 1, i64 1)
-  tail call fastcc void @"merged_forks.nested_same_default<0>"(i1 1, i64 2)
-  tail call fastcc void @"merged_forks.nested_same_default<0>"(i1 1, i64 3)
-  tail call fastcc void @"merged_forks.nested_same_default<0>"(i1 0, i64 0)
-  tail call fastcc void @"merged_forks.nested_same_default<0>"(i1 0, i64 1)
-  tail call fastcc void @"merged_forks.nested_same_default<0>"(i1 0, i64 2)
-  tail call fastcc void @"merged_forks.nested_same_default<0>"(i1 0, i64 3)
+define external fastcc void @"merged_forks#.<0>"() {
+  tail call fastcc void @"merged_forks#.nested_same_default<0>"(i1 1, i64 0)
+  tail call fastcc void @"merged_forks#.nested_same_default<0>"(i1 1, i64 1)
+  tail call fastcc void @"merged_forks#.nested_same_default<0>"(i1 1, i64 2)
+  tail call fastcc void @"merged_forks#.nested_same_default<0>"(i1 1, i64 3)
+  tail call fastcc void @"merged_forks#.nested_same_default<0>"(i1 0, i64 0)
+  tail call fastcc void @"merged_forks#.nested_same_default<0>"(i1 0, i64 1)
+  tail call fastcc void @"merged_forks#.nested_same_default<0>"(i1 0, i64 2)
+  tail call fastcc void @"merged_forks#.nested_same_default<0>"(i1 0, i64 3)
   ret void
 }
 
-define external fastcc void @"merged_forks.defaulty<0>"(i64 %"x##0") {
+define external fastcc void @"merged_forks#.defaulty<0>"(i64 %"x##0") {
   %"tmp#29##0" = icmp ule i64 %"x##0", 2
   br i1 %"tmp#29##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -285,7 +285,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"merged_forks.leq_2<0>"(i64 %"x##0") {
+define external fastcc void @"merged_forks#.leq_2<0>"(i64 %"x##0") {
   %"tmp#27##0" = icmp ule i64 %"x##0", 2
   %"tmp#30##0" = zext i1 %"tmp#27##0" to i64
   %"tmp#29##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#3", i64 0, i64 %"tmp#30##0"
@@ -295,8 +295,8 @@ define external fastcc void @"merged_forks.leq_2<0>"(i64 %"x##0") {
   ret void
 }
 
-define external fastcc void @"merged_forks.nested<0>"(i1 %"b##0", i64 %"x##0") {
-  tail call fastcc void @"wybe.bool.print<0>"(i1 %"b##0")
+define external fastcc void @"merged_forks#.nested<0>"(i1 %"b##0", i64 %"x##0") {
+  tail call fastcc void @"wybe#.bool#.print<0>"(i1 %"b##0")
   %"tmp#55##0" = icmp ule i64 %"x##0", 2
   %"tmp#60##0" = zext i1 %"tmp#55##0" to i64
   %"tmp#59##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#3", i64 0, i64 %"tmp#60##0"
@@ -306,12 +306,12 @@ define external fastcc void @"merged_forks.nested<0>"(i1 %"b##0", i64 %"x##0") {
   ret void
 }
 
-define external fastcc void @"merged_forks.nested_different_default<0>"(i1 %"b##0", i64 %"x##0") {
+define external fastcc void @"merged_forks#.nested_different_default<0>"(i1 %"b##0", i64 %"x##0") {
   br i1 %"b##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#1##0" = tail call fastcc i64 @"wybe.bool.fmt<0>"(i1 1)
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#1##0", i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.bool#.fmt<0>"(i1 1)
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#1##0", i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
   %"tmp#7##0" = icmp eq i64 %"x##0", 0
   br i1 %"tmp#7##0", label %if.then.1, label %if.else.1
 if.then.1:
@@ -327,9 +327,9 @@ if.else.1:
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
-  %"tmp#4##0" = tail call fastcc i64 @"wybe.bool.fmt<0>"(i1 0)
-  %"tmp#3##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#4##0", i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#3##0")
+  %"tmp#4##0" = tail call fastcc i64 @"wybe#.bool#.fmt<0>"(i1 0)
+  %"tmp#3##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#4##0", i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#3##0")
   %"tmp#9##0" = icmp eq i64 %"x##0", 0
   br i1 %"tmp#9##0", label %if.then.2, label %if.else.2
 if.then.2:
@@ -346,13 +346,13 @@ if.else.2:
   ret void
 }
 
-define external fastcc void @"merged_forks.nested_disjoint_same_default<0>"(i1 %"b##0", i64 %"x##0") {
+define external fastcc void @"merged_forks#.nested_disjoint_same_default<0>"(i1 %"b##0", i64 %"x##0") {
   %"tmp#85##0" = zext i1 %"b##0" to i64
   %"tmp#84##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#0", i64 0, i64 %"tmp#85##0"
   %"tmp#83##0" = load i64, ptr %"tmp#84##0"
-  %"tmp#1##0" = tail call fastcc i64 @"wybe.bool.fmt<0>"(i1 %"b##0")
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#1##0", i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.bool#.fmt<0>"(i1 %"b##0")
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#1##0", i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
   switch i64 %"x##0", label %default.switch.0 [
     i64 0, label %case.0.switch.0
     i64 2, label %case.2.switch.0
@@ -380,13 +380,13 @@ default.switch.0:
   ret void
 }
 
-define external fastcc void @"merged_forks.nested_same_default<0>"(i1 %"b##0", i64 %"x##0") {
+define external fastcc void @"merged_forks#.nested_same_default<0>"(i1 %"b##0", i64 %"x##0") {
   %"tmp#61##0" = zext i1 %"b##0" to i64
   %"tmp#60##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#1", i64 0, i64 %"tmp#61##0"
   %"tmp#59##0" = load i64, ptr %"tmp#60##0"
-  %"tmp#1##0" = tail call fastcc i64 @"wybe.bool.fmt<0>"(i1 %"b##0")
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 %"tmp#1##0", i64 1155)
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.bool#.fmt<0>"(i1 %"b##0")
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#1##0", i64 1155)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
   %"tmp#7##0" = icmp eq i64 %"x##0", 0
   br i1 %"tmp#7##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -403,7 +403,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"merged_forks.not_dense<0>"(i64 %"x##0") {
+define external fastcc void @"merged_forks#.not_dense<0>"(i64 %"x##0") {
   %"tmp#2##0" = icmp eq i64 %"x##0", 0
   br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -420,7 +420,7 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"merged_forks.not_dense_but_similar<0>"(i64 %"x##0") {
+define external fastcc void @"merged_forks#.not_dense_but_similar<0>"(i64 %"x##0") {
   %"tmp#2##0" = icmp eq i64 %"x##0", 0
   call ccc void @print_int(i64 0)
   call ccc void @putchar(i8 10)

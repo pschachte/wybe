@@ -34,18 +34,18 @@ exit_bool(b##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'terminal_ok'
 
 source_filename = "!ROOT!/final-dump/terminal_ok.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @exit(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"terminal_ok.<0>"() {
+define external fastcc void @"terminal_ok#.<0>"() {
   call ccc void @exit(i64 0)
   ret void
 }
 
-define external fastcc void @"terminal_ok.exit_bool<0>"(i1 %"b##0") {
+define external fastcc void @"terminal_ok#.exit_bool<0>"(i1 %"b##0") {
   %"tmp#1##0" = zext i1 %"b##0" to i64
   call ccc void @exit(i64 %"tmp#1##0")
   ret void
