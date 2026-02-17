@@ -48,8 +48,7 @@ bar(?bar#1##0:wybe.int, ?field##0:T <{}; {}; {3}>, ?bar#3##0:T <{}; {}; {3}>, #r
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
-    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#0##0:wybe.bool)
-    case ~tmp#0##0:wybe.bool of
+    case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?bar#1##0:wybe.int)
@@ -70,8 +69,7 @@ field(#rec##0:anon_field_variable(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>,
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
-    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#0##0:wybe.bool)
-    case ~tmp#0##0:wybe.bool of
+    case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(undef:T, ?#result##0:T)
@@ -86,8 +84,7 @@ field(#rec##0:anon_field_variable(T) <{}; {}; {0}>, ?#rec##1:anon_field_variable
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
-    foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#0##0:wybe.bool)
-    case ~tmp#0##0:wybe.bool of
+    case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(~#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T))
@@ -173,8 +170,7 @@ define external fastcc i64 @"anon_field_variable#.bar<0>"(i64 %"bar#1##0", i64 %
 define external fastcc {i64, i64, i64, i1} @"anon_field_variable#.bar<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i1
   %"tmp#1##0" = and i1 %"tmp#2##0", 1
-  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
-  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+  br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#3##0" = add i64 %"#result##0", -1
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
@@ -201,8 +197,7 @@ if.else.0:
 define external fastcc {i64, i1} @"anon_field_variable#.field<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i1
   %"tmp#1##0" = and i1 %"tmp#2##0", 1
-  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
-  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+  br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#3##0" = add i64 %"#rec##0", 7
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
@@ -219,8 +214,7 @@ if.else.0:
 define external fastcc {i64, i1} @"anon_field_variable#.field<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i1
   %"tmp#1##0" = and i1 %"tmp#2##0", 1
-  %"tmp#0##0" = icmp eq i1 %"tmp#1##0", 1
-  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+  br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#3##0" = sub i64 %"#rec##0", 1
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr

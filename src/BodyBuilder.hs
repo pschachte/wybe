@@ -439,7 +439,8 @@ instr prim pos = do
         prim' <- argExpandedPrim prim
         outNaming <- gets outSubst
         logBuild $ "With outSubst " ++ simpleShowMap outNaming
-        logBuild $ "Generating instr " ++ show prim ++ " -> " ++ show prim'
+        logBuild $ "Generating instr " ++ show prim ++ 
+                    if prim==prim' then "" else " -> " ++ show prim'
         instr' prim' pos
       _ ->
         shouldnt "instr in Forked context"
@@ -1002,6 +1003,11 @@ simplifyOp "and" _ [ArgInt (-1) _, arg, output] =
   primMove arg output
 simplifyOp "and" _ [arg, ArgInt (-1) _, output] =
   primMove arg output
+-- XXX I belive this is correct, but it triggers a bug in BodyBuilder, so leaving it out for now  
+-- simplifyOp "and" _ [ArgInt mask (Representation (Bits n)), arg, output]
+--   | mask == (2 ^ n) - 1 = primMove arg output
+-- simplifyOp "and" _ [arg, ArgInt mask (Representation (Bits n)), output]
+--   | mask == (2 ^ n) - 1 = primMove arg output
 simplifyOp "and" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "and" flags [arg2, arg1, output]
 simplifyOp "or" _ [ArgInt n1 ty, ArgInt n2 _, output] =
@@ -1042,10 +1048,18 @@ simplifyOp "lshr" _ [arg, ArgInt 0 _, output] =
 -- Integer comparisons, including special handling of unsigned comparison to 0
 simplifyOp "icmp_eq" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1==n2) output
+simplifyOp "icmp_eq" flags [ArgInt 1 (Representation (Bits 1)), arg, output] =
+  primMove arg output
+simplifyOp "icmp_eq" flags [arg, ArgInt 1 (Representation (Bits 1)), output] =
+  primMove arg output
 simplifyOp "icmp_eq" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "icmp_eq" flags [arg2, arg1, output]
 simplifyOp "icmp_ne" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1/=n2) output
+simplifyOp "icmp_ne" flags [ArgInt 0 (Representation (Bits 1)), arg, output] =
+  primMove arg output
+simplifyOp "icmp_ne" flags [arg, ArgInt 0 (Representation (Bits 1)), output] =
+  primMove arg output
 simplifyOp "icmp_ne" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "icmp_ne" flags [arg2, arg1, output]
 simplifyOp "icmp_slt" _ [ArgInt n1 _, ArgInt n2 _, output] =
