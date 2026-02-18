@@ -1,8 +1,16 @@
 Error detected during type checking of module(s) type_ambig
 final-dump/type_ambig.wybe:1:25: Ambiguous overloading: call could refer to:
     wybe.string.print<0>
+    wybe.int8.print<0>
+    wybe.int64.print<0>
+    wybe.int32.print<0>
+    wybe.int16.print<0>
     wybe.int.print<0>
     wybe.float.print<0>
+    wybe.count8.print<0>
+    wybe.count64.print<0>
+    wybe.count32.print<0>
+    wybe.count16.print<0>
     wybe.count.print<0>
     wybe.char.print<0>
     wybe.c_string.print<0>

@@ -45,8 +45,16 @@ AFTER BUILDING MAIN:
                     use wybe.comparison
                     use wybe.control
                     use wybe.count
+                    use wybe.count16
+                    use wybe.count32
+                    use wybe.count64
+                    use wybe.count8
                     use wybe.float
                     use wybe.int
+                    use wybe.int16
+                    use wybe.int32
+                    use wybe.int64
+                    use wybe.int8
                     use wybe.io
                     use wybe.lazy
                     use wybe.list
@@ -588,8 +596,16 @@ AFTER EVERYTHING:
                     use wybe.comparison
                     use wybe.control
                     use wybe.count
+                    use wybe.count16
+                    use wybe.count32
+                    use wybe.count64
+                    use wybe.count8
                     use wybe.float
                     use wybe.int
+                    use wybe.int16
+                    use wybe.int32
+                    use wybe.int64
+                    use wybe.int8
                     use wybe.io
                     use wybe.lazy
                     use wybe.list

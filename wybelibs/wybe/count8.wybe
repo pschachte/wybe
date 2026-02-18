@@ -1,17 +1,17 @@
-# purpose: Standard fixed-width unsigned integer type
-# since  : 0.1
+# purpose: fixed 8 bit unsigned integer type
+# since  : 0.2
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.comparison, wybe.int, wybe.io, wybe.string, wybe.char
-use wybe.control, wybe.c_string
+use wybe.control, wybe.c_string, wybe.count
 
-representation is unsigned
+representation is 8 bit unsigned
 
-## Constants:  We assume a 64 bit address architecture
+## Constants
 
 pub def bound_minimum:_ = 0:_
-pub def bound_maximum:_ = 18_446_744_073_709_551_615:_
+pub def bound_maximum:_ = 255:_
 
 # Overloaded versions based on an argument
 pub def bound_minimum(x:_):_ = bound_minimum
@@ -35,7 +35,7 @@ pub def (!x:_ += y:_) { ?x = x + y }
 # some values may fail.
 pub def {partial} (x:_ - y:_):_ = foreign llvm sub(x,y) where { y >= x }
 pub def (?x:_ - y:_):_ = ?z where { ?x = foreign llvm add(z,y) }
-pub def {partial} (x:_ - ?y:_):_ = ?z where { z >= x & ?y = foreign llvm sub(z,x) }
+pub def (x:_ - ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
 
 # Subtraction assignment.
 pub def {partial} (!x:_ -= y:_) { ?x = x - y }
@@ -111,8 +111,8 @@ def fmtnz(n:_, minlength:int, fill:char):string =
 
 ## I/O
 
-pub def foreign c print=print_count(x:_) use !io 
+pub def foreign c print=print_count8(x:_) use !io 
 
 pub def println(x:_) use !io { !print(x); !nl }
 
-pub def foreign c read=read_count(?x:_) use !io 
+pub def foreign c read=read_count8(?x:_) use !io 

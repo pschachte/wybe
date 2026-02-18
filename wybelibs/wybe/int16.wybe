@@ -1,17 +1,18 @@
-# purpose: Standard fixed-width signed integer library
+# purpose: Standard fixed-width 16 bit integer library
 # since  : 0.1
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use foreign library m
-use wybe.bool, wybe.comparison, wybe.io, wybe.count, wybe.string, wybe.char
+use wybe.bool, wybe.comparison, wybe.io, wybe.count, wybe.int,
+    wybe.string, wybe.char
 
-representation is signed
+representation is 16 bit signed
 
-## Constants:  We assume a 64 bit address architecture
+## Constants
 
-pub def bound_minimum:_ = -9_223_372_036_854_775_808:_
-pub def bound_maximum:_ =  9_223_372_036_854_775_807:_
+pub def bound_minimum:_ = -32_768:_
+pub def bound_maximum:_ =  32_767:_
 
 # Overloaded versions based on an argument
 pub def bound_minimum(x:_):_ = bound_minimum
@@ -105,8 +106,9 @@ pub def (x:_ <=> y:_):comparison =
 pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
 
-# Conversion. (Lossy:  turns negative numbers into large positive ones)
-def foreign lpvm count=cast(x:_):count
+# Conversion
+def foreign lpvm count=cast(x:_):count # Lossy:  turns negative numbers into large positive ones
+def foreign lpvm int=cast(x:_):int # Lossless
 
 
 ## Other operations
@@ -119,23 +121,23 @@ pub def foreign c power=ipow(x:_, y:_):_
 pub def (x:_ ** y:_):_ = power(x, y)
 
 # Increment and Decrement.
-pub def incr(!x:_) { ?x = x + 1 }
-pub def decr(!x:_) { ?x = x - 1 }
+pub def incr(!x:_) { ?x = x + 1:_ }
+pub def decr(!x:_) { ?x = x - 1:_ }
 
 # The sign of an integer: +1, -1, or 0
 pub def foreign c signum(x:_):_
 
 # Absolute value
-pub def abs(x:_):_ = if {x < 0 :: -x | else :: x}
-pub def abs(x:_):count = if {x < 0 :: count(-x) | else :: count(x)}
+pub def abs(x:_):_ = if {x < 0:_ :: -x | else :: x}
+pub def abs(x:_):count = if {x < 0:_ :: count(-x) | else :: count(x)}
 
 ## Formatting
 pub def fmt(x:_):string = fmt(x, 0)
 
-pub def fmt(x:_, minlength:_):string = fmt(x, minlength, ' ')
+pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
 
-pub def fmt(x:_, minlength:_, fill:char):string = result where {
-    if { x >= 0 :: 
+pub def fmt(x:_, minlength:int, fill:char):string = result where {
+    if { x >= 0:_ :: 
             ?result = fmt(count(x))
             repetition(fill, minlength-length(result)) ,, !result
        | else  ::
@@ -150,8 +152,8 @@ pub def fmt(x:_, minlength:_, fill:char):string = result where {
 
 ## I/O
 
-pub def foreign c print=print_int(x:_) use !io 
+pub def foreign c print=print_int16(x:_) use !io 
 
 pub def println(x:_) use !io { !print(x); !nl }
 
-pub def foreign c read=read_int(?x:_) use !io 
+pub def foreign c read=read_int16(?x:_) use !io 
