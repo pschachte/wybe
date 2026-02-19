@@ -1,14 +1,17 @@
-# purpose: Standard fixed-width signed integer library
-# since  : 0.1
+# purpose: Standard fixed-width 64 bit integer library
+# since  : 0.2
+# On 64-bit platforms, this is the same as int.  It is provided for
+# completeness and portability.
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use foreign library m
-use wybe.bool, wybe.comparison, wybe.io, wybe.count, wybe.string, wybe.char
+use wybe.bool, wybe.comparison, wybe.io, wybe.count, wybe.int,
+    wybe.string, wybe.char
 
-representation is signed
+representation is 64 bit signed
 
-## Constants:  We assume a 64 bit address architecture
+## Constants
 
 pub def bound_minimum:_ = -9_223_372_036_854_775_808:_
 pub def bound_maximum:_ =  9_223_372_036_854_775_807:_
@@ -33,7 +36,7 @@ pub def (x:_  - ?y:_):_ = ?z where { ?y = x - z }
 
 # Unary negation.  This operation is reversible:  you can compute the argument 
 # from the value.
-pub def -(x:_):_  = 0 - x
+pub def -(x:_):_  = 0:_ - x
 pub def -(?x:_):_ = ?y where { ?x = -y }
 
 # Multiplication.
@@ -81,36 +84,37 @@ pub def (x:_ <=> y:_):comparison =
 pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
 
-# Conversion. (Lossy:  turns negative numbers into large positive ones)
-pub def foreign lpvm count=cast(x:_):count
+# Conversion
+pub def foreign lpvm count=cast(x:_):count # Lossy:  turns negative numbers into large positive ones
+pub def foreign lpvm int=cast(x:_):int # Lossless
 
 
 ## Other operations
 
 # Integer square root.
-pub def foreign c sqrt=isqrt(x:_):_
+pub def foreign c sqrt=isqrt64(x:_):_
 
 # Integer exponentiation.
-pub def foreign c power=ipow(x:_, y:_):_
+pub def foreign c power=ipow64(x:_, y:_):_
 pub def (x:_ ** y:_):_ = power(x, y)
 
 # Increment and Decrement.
-pub def incr(!x:_) { ?x = x + 1 }
-pub def decr(!x:_) { ?x = x - 1 }
+pub def incr(!x:_) { ?x = x + 1:_ }
+pub def decr(!x:_) { ?x = x - 1:_ }
 
 # The sign of an integer: +1, -1, or 0
 pub def signum(x:_):_ = if { x < 0:_ :: -1:_ | x = 0:_ :: 0:_ | else :: 1:_ }
 
 # Absolute value
-pub def abs(x:_):_ = if {x < 0 :: -x | else :: x}
+pub def abs(x:_):_ = if {x < 0:_ :: -x | else :: x}
 
 ## Formatting
 pub def fmt(x:_):string = fmt(x, 0)
 
-pub def fmt(x:_, minlength:_):string = fmt(x, minlength, ' ')
+pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
 
-pub def fmt(x:_, minlength:_, fill:char):string = result where {
-    if { x >= 0 :: 
+pub def fmt(x:_, minlength:int, fill:char):string = result where {
+    if { x >= 0:_ :: 
             ?result = fmt(count(x))
             repetition(fill, minlength-length(result)) ,, !result
        | else  ::
@@ -125,8 +129,8 @@ pub def fmt(x:_, minlength:_, fill:char):string = result where {
 
 ## I/O
 
-pub def foreign c print=print_int(x:_) use !io 
+pub def foreign c print=print_int64(x:_) use !io 
 
 pub def println(x:_) use !io { !print(x); !nl }
 
-pub def foreign c read=read_int(?x:_) use !io 
+pub def foreign c read=read_int64(?x:_) use !io 

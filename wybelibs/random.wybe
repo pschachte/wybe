@@ -13,7 +13,7 @@ pub def foreign c random=rand(?n:int) use !random
 # Generate a random number between 0 and hi-1
 pub def random(?n:int, hi:int) use !random {
     !random(?n)
-    !n %= hi
+    !n % hi
 }
 
 # Generate a random number between lo and hi-1

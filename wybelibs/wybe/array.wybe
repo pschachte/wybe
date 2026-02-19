@@ -40,7 +40,7 @@ pub def array(x:T, len:int):_(T) = ar where {
     do {
         while offset < size
         foreign lpvm mutate(ar, ?ar, offset, 1, size, 0, x)
-        !offset += word_size_bytes
+        !offset + word_size_bytes
     }
 }
 
@@ -75,7 +75,7 @@ pub def array(ls:list(T)):_(T) = ar where {
     ?offset = word_size_bytes
     for ?x in ls {
         foreign lpvm mutate(ar, ?ar, offset, 1, size, 0, x)
-        !offset += word_size_bytes
+        !offset + word_size_bytes
     }
 }
 

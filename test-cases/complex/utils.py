@@ -111,6 +111,8 @@ class Context:
         output = output.replace("/private/tmp/", "/tmp/")
         output = output.replace(self.tmp_dir, "!TMP!")
         output = output.replace(self.root_dir, "!ROOT!")
+        # Hack around weird MacOS tmp dir
+        output = output.replace("/private!TMP!", "!TMP!")
         return output
 
     def execute_program(self, exe: str, check: bool,

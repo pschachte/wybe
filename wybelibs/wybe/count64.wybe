@@ -1,14 +1,16 @@
-# purpose: Standard fixed-width unsigned integer type
-# since  : 0.1
+# purpose: fixed 64 bit unsigned integer type
+# since  : 0.2
+# On 64-bit platforms, this is the same as count.  It is provided for
+# completeness and portability.
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.comparison, wybe.int, wybe.io, wybe.string, wybe.char
-use wybe.control, wybe.c_string
+use wybe.control, wybe.c_string, wybe.count
 
-representation is unsigned
+representation is 64 bit unsigned
 
-## Constants:  We assume a 64 bit address architecture
+## Constants
 
 pub def bound_minimum:_ = 0:_
 pub def bound_maximum:_ = 18_446_744_073_709_551_615:_
@@ -69,17 +71,18 @@ pub def (x:_ <=> y:_):comparison =
 pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
 
-# Conversion (this is lossy:  it can produce negative numbers!)
-pub def foreign lpvm int=cast(x:_):int
+# Conversion
+pub def foreign lpvm int=cast(x:_):int  # Lossy:  this can produce negative numbers!
+pub def foreign lpvm count=cast(x:_):count  # Lossless
 
 
 ## Other
 
 # Integer square root.
-pub def foreign c sqrt=usqrt(x:_):_
+pub def foreign c sqrt=usqrt64(x:_):_
 
 # Integer exponentiation.
-pub def foreign c power=upow(x:_, y:_):_
+pub def foreign c power=upow64(x:_, y:_):_
 pub def (x:_ ** y:_):_ = power(x, y)
 
 # Increment.
@@ -108,8 +111,8 @@ def fmtnz(n:_, minlength:int, fill:char):string =
 
 ## I/O
 
-pub def foreign c print=print_count(x:_) use !io 
+pub def foreign c print=print_count64(x:_) use !io 
 
 pub def println(x:_) use !io { !print(x); !nl }
 
-pub def foreign c read=read_count(?x:_) use !io 
+pub def foreign c read=read_count64(?x:_) use !io 
