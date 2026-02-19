@@ -24,8 +24,8 @@ pub def bound_maximum(x:_):_ = bound_maximum
 # the other argument and the value. However, as a count cannot be negative, some
 # values may fail.
 pub def foreign llvm `+`=add(x:_, y:_):_
-pub def {partial} (?x:_ + y:_):_ = ?z where { z >= y & ?x = foreign llvm sub(z,y) }
-pub def {partial} (x:_ + ?y:_):_ = ?z where { z >= x & ?y = foreign llvm sub(z,x) }
+pub def {partial} (?x:_ + y:_):_ = ?z where { ?x = z - y }
+pub def {partial} (x:_ + ?y:_):_ = ?z where { ?y = z - x }
 
 # Addition assignment.
 pub def (!x:_ += y:_) { ?x = x + y }
@@ -33,9 +33,9 @@ pub def (!x:_ += y:_) { ?x = x + y }
 # Subtraction.  This operation is reversible:  you can compute either argument
 # from the other argument and the value. However, as a count cannot be negative, 
 # some values may fail.
-pub def {partial} (x:_ - y:_):_ = foreign llvm sub(x,y) where { y >= x }
-pub def (?x:_ - y:_):_ = ?z where { ?x = foreign llvm add(z,y) }
-pub def {partial} (x:_ - ?y:_):_ = ?z where { z >= x & ?y = foreign llvm sub(z,x) }
+pub def {partial} (x:_ - y:_):_ = foreign llvm sub(x,y) where { x >= y }
+pub def (?x:_ - y:_):_ = ?z where { ?x = z + y }
+pub def {partial} (x:_ - ?y:_):_ = ?z where { ?y = x - z }
 
 # Subtraction assignment.
 pub def {partial} (!x:_ -= y:_) { ?x = x - y }
@@ -59,6 +59,11 @@ pub def foreign llvm `%`=urem(x:_, y:_):_
 pub def (!x:_ %= y:_) { ?x = x % y }
 
 
+# Bit-shift left and right, shifting zero bits from the end.
+pub def foreign llvm `<<`=shl(x:_, s:_):_
+pub def foreign llvm `>>`=lshr(x:_, s:_):_
+
+
 ## Comparisons
 
 # Equality and disequality.
@@ -80,10 +85,17 @@ pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
 
 # Conversion (this is lossy:  it can produce negative numbers!)
-def foreign lpvm int=cast(x:_):int
+pub def foreign lpvm int=cast(x:_):int
 
 
 ## Other
+
+# Integer square root.
+pub def foreign c sqrt=usqrt(x:_):_
+
+# Integer exponentiation.
+pub def foreign c power=upow(x:_, y:_):_
+pub def (x:_ ** y:_):_ = power(x, y)
 
 # Increment.
 pub def incr(!x:_) { ?x = x + 1:_ }
