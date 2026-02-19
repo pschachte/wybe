@@ -47,10 +47,6 @@ intptr_t isqrt(intptr_t x) {
     return (intptr_t)s;
 }
 
-intptr_t signum(intptr_t x) {
-    return (x > 0) - (x < 0); 
-}
-
 
 /********************** Support for Wybe count type **********************/
 
@@ -115,11 +111,6 @@ int64_t isqrt64(int64_t x) {
     return (int64_t)s;
 }
 
-int64_t signum64(int64_t x) {
-    return (x > 0) - (x < 0); 
-}
-
-
 /********************** Support for Wybe count64 type **********************/
 
 uint64_t print_count64(uint64_t x) { return (uint64_t)printf("%"PRIu64, x); }
@@ -181,10 +172,6 @@ int32_t isqrt32(int32_t x) {
     double s;
     s = sqrt((double) x);
     return (int32_t)s;
-}
-
-int32_t signum32(int32_t x) {
-    return (x > 0) - (x < 0); 
 }
 
 
@@ -251,10 +238,6 @@ int16_t isqrt16(int16_t x) {
     return (int16_t)s;
 }
 
-int16_t signum16(int16_t x) {
-    return (x > 0) - (x < 0); 
-}
-
 
 /********************** Support for Wybe count16 type **********************/
 
@@ -317,10 +300,6 @@ int8_t isqrt8(int8_t x) {
     double s;
     s = sqrt((double) x);
     return (int8_t)s;
-}
-
-int8_t signum8(int8_t x) {
-    return (x > 0) - (x < 0); 
 }
 
 

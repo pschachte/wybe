@@ -22,8 +22,8 @@ pub def bound_maximum(x:_):_ = bound_maximum
 # Addition.  This operation is reversible:  you can compute either argument from
 # the other argument and the value.
 pub def foreign llvm `+`=add(x:_, y:_):_
-pub def (?x:_ + y:_):_  = ?z where { ?x = foreign llvm sub(z,y) }
-pub def (x:_  + ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
+pub def (?x:_ + y:_):_  = ?z where { ?x = z - y }
+pub def (x:_  + ?y:_):_ = ?z where { ?y = z - x }
 
 # Addition assignment.
 pub def (!x:_ += y:_) { ?x = x + y }
@@ -31,13 +31,13 @@ pub def (!x:_ += y:_) { ?x = x + y }
 # Subtraction.  This operation is reversible:  you can compute either argument
 # from the other argument and the value.
 pub def foreign llvm `-`=sub(x:_, y:_):_
-pub def (?x:_ - y:_):_  = ?z where { ?x = foreign llvm add(z,y) }
-pub def (x:_  - ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
+pub def (?x:_ - y:_):_  = ?z where { ?x = z + y }
+pub def (x:_  - ?y:_):_ = ?z where { ?y = x - z }
 
 # Unary negation.  This operation is reversible:  you can compute the argument 
 # from the value.
-pub def -(x:_):_  = foreign llvm sub(0,x)
-pub def -(?x:_):_ = ?y where { ?x = foreign llvm sub(0,y) }
+pub def -(x:_):_  = 0 - x
+pub def -(?x:_):_ = ?y where { ?x = -y }
 
 # Subtraction assignment.
 pub def (!x:_ -= y:_) { ?x = x - y }
@@ -106,7 +106,7 @@ pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
 
 # Conversion. (Lossy:  turns negative numbers into large positive ones)
-def foreign lpvm count=cast(x:_):count
+pub def foreign lpvm count=cast(x:_):count
 
 
 ## Other operations
@@ -123,11 +123,10 @@ pub def incr(!x:_) { ?x = x + 1 }
 pub def decr(!x:_) { ?x = x - 1 }
 
 # The sign of an integer: +1, -1, or 0
-pub def foreign c signum(x:_):_
+pub def signum(x:_):_ = if { x < 0:_ :: -1:_ | x = 0:_ :: 0:_ | else :: 1:_ }
 
 # Absolute value
 pub def abs(x:_):_ = if {x < 0 :: -x | else :: x}
-pub def abs(x:_):count = if {x < 0 :: count(-x) | else :: count(x)}
 
 ## Formatting
 pub def fmt(x:_):string = fmt(x, 0)
