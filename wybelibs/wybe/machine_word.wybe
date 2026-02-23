@@ -5,8 +5,15 @@ pragma no_standard_library # Standard library can't depend on itself!
 
 representation is address
 
-use wybe.int
+use wybe.int, wybe.count
 
-pub def word_size_bytes:int = foreign lpvm sizeof(_:_)
+pub def {inline} word_size_bytes:int = foreign lpvm sizeof(_:_)
 
-pub def word_size_bits:int = foreign lpvm {bits} sizeof(_:_)
+pub def {inline} word_size_bits:int = foreign lpvm {bits} sizeof(_:_)
+
+pub type endianness { pub constructors little_endian | big_endian }
+
+pub def endianness:endianness =
+    if { foreign c is_little_endian():count ~= 0:count :: little_endian
+       | else :: big_endian 
+    }

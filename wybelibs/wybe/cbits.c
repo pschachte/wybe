@@ -381,6 +381,15 @@ int64_t read_char() {
 int64_t log_char(const char c) { return (int64_t)fprintf(stderr, "%c", c); }
 
 
+/****************** Support for determining endianness ******************/
+
+
+uintptr_t is_little_endian() {
+    uintptr_t endianness_check = 0x1;
+    return (*(char*)&endianness_check == 0x1);
+}
+
+
 /********************** Support for memory management **********************/
 
 void *wybe_malloc(int64_t size) {
