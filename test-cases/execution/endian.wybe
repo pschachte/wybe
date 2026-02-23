@@ -1,0 +1,12 @@
+# Test case for wybe.machine_word_endianness and formatting counts as hex.
+!println "endianness = $(if {endianness = little_endian :: "little" | else :: "big"})"
+
+?x = 0x123456789abcdef0:count
+!println "hex output of 0x123456789abcdef0 = 0x$(x, 0, '0', 16)"
+!println "-1 = 0x$(count(-1), 0, '0', 16)"
+!println "0x0 (4 places) = 0x$(0:count, 4, '0', 16)"
+!println "42 (octal) = 0$(42:count, 0, '0', 8)"
+
+?y = 0xd3:count8
+!println "8 bit 0xd3 = 0x$(y, 0, '0', 16)"
+
