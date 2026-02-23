@@ -59,6 +59,7 @@ AFTER BUILDING MAIN:
                     use wybe.lazy
                     use wybe.list
                     use wybe.machine_word
+                    use wybe.machine_word.endianness
                     use wybe.memory_management
                     use wybe.opaque_pointer
                     use wybe.phantom
@@ -610,6 +611,7 @@ AFTER EVERYTHING:
                     use wybe.lazy
                     use wybe.list
                     use wybe.machine_word
+                    use wybe.machine_word.endianness
                     use wybe.memory_management
                     use wybe.opaque_pointer
                     use wybe.phantom

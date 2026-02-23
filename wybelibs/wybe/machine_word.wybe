@@ -7,9 +7,9 @@ representation is address
 
 use wybe.int, wybe.count
 
-pub def word_size_bytes:int = foreign lpvm sizeof(_:_)
+pub def {inline} word_size_bytes:int = foreign lpvm sizeof(_:_)
 
-pub def word_size_bits:int = foreign lpvm {bits} sizeof(_:_)
+pub def {inline} word_size_bits:int = foreign lpvm {bits} sizeof(_:_)
 
 pub type endianness { pub constructors little_endian | big_endian }
 
