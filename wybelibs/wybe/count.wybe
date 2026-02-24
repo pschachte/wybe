@@ -71,6 +71,7 @@ pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
 
 # Conversion (this is lossy:  it can produce negative numbers!)
 pub def foreign lpvm int=cast(x:_):int
+pub def foreign lpvm from_int=cast(x:int):_
 
 
 ## Other
@@ -93,16 +94,25 @@ pub def fmt(x:_):string = fmt(x, 0)
 
 pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
 
-pub def fmt(n:_, minlength:int, fill:char):string =
-    (if { n = 0:_ :: "0"
-        | else    :: fmtnz(n, minlength, fill)
+pub def fmt(n:_, minlength:int, fill:char):string = fmt(n, minlength, fill, 10:_)
+
+# A quick hack:  allow the base as in int, so it doesn't need explicit type.
+pub def fmt(n:_, minlength:int, fill:char, base:int):string =
+    fmt(n, minlength, fill, count(base))
+
+pub def fmt(n:_, minlength:int, fill:char, base:_):string =
+    (if { n = 0:_ :: repetition(fill, max(0,minlength)) ,, "0"
+        | else    :: fmtnz(n, minlength, fill, base)
     })
 
-def fmtnz(n:_, minlength:int, fill:char):string =
+def fmtnz(n:_, minlength:int, fill:char, base:_):string =
     (if { n = 0:_ :: repetition(fill, max(0,minlength))
         | else    ::
-            fmtnz(n/10:_, minlength-1, fill) ,,
-                (chr(ord('0')+int(n%10:_)) | shouldnt)
+            let { ?digit = n % base } in
+            fmtnz(n/base, minlength-1, fill, base) ,,
+                if { digit <= 9:_ :: (chr(ord('0')+int(n%base)) | shouldnt)
+                   | else         :: (chr(ord('A')+int(n%base)-10) | shouldnt)
+                }
     })
 
 

@@ -33,7 +33,7 @@ proc #cont#1 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.count.fmt<2>(~tmp#2##0:wybe.count, 0:wybe.int, ' ':wybe.char, ?tmp#1##0:wybe.string) #6 @cond_expr_no_else:nn:nn
+    wybe.count.fmt<4>(~tmp#2##0:wybe.count, 0:wybe.int, ' ':wybe.char, 10:wybe.count, ?tmp#1##0:wybe.string) #6 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("5:int -> ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #1 @cond_expr_no_else:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @cond_expr_no_else:nn:nn
@@ -55,7 +55,7 @@ proc #cont#2 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.count.fmt<2>(~tmp#6##0:wybe.count, 0:wybe.int, ' ':wybe.char, ?tmp#5##0:wybe.string) #6 @cond_expr_no_else:nn:nn
+    wybe.count.fmt<4>(~tmp#6##0:wybe.count, 0:wybe.int, ' ':wybe.char, 10:wybe.count, ?tmp#5##0:wybe.string) #6 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("-5:int -> ":wybe.string, ~tmp#5##0:wybe.string, ?tmp#4##0:wybe.string) #1 @cond_expr_no_else:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @cond_expr_no_else:nn:nn
@@ -189,7 +189,7 @@ target triple   = ????
 @"string#6" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#2" to i64 ) }, align 8
 @"string#7" = private unnamed_addr constant {i64, i64} { i64 18, i64 ptrtoint( ptr @"cstring#3" to i64 ) }, align 8
 
-declare external fastcc i64 @"wybe#.count#.fmt<2>"(i64, i64, i8)
+declare external fastcc i64 @"wybe#.count#.fmt<4>"(i64, i64, i8, i64)
 declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
 declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
@@ -210,7 +210,7 @@ if.else.0:
 }
 
 define external fastcc void @"cond_expr_no_else#.#cont#1<0>"(i64 %"tmp#2##0") {
-  %"tmp#1##0" = tail call fastcc i64 @"wybe#.count#.fmt<2>"(i64 %"tmp#2##0", i64 0, i8 32)
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.count#.fmt<4>"(i64 %"tmp#2##0", i64 0, i8 32, i64 10)
   %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#5" to i64 ), i64 %"tmp#1##0")
   tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
@@ -227,7 +227,7 @@ if.else.0:
 }
 
 define external fastcc void @"cond_expr_no_else#.#cont#2<0>"(i64 %"tmp#6##0") {
-  %"tmp#5##0" = tail call fastcc i64 @"wybe#.count#.fmt<2>"(i64 %"tmp#6##0", i64 0, i8 32)
+  %"tmp#5##0" = tail call fastcc i64 @"wybe#.count#.fmt<4>"(i64 %"tmp#6##0", i64 0, i8 32, i64 10)
   %"tmp#4##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#4" to i64 ), i64 %"tmp#5##0")
   tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)

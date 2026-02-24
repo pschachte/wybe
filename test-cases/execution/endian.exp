@@ -1,0 +1,6 @@
+endianness = little
+hex output of 0x123456789abcdef0 = 0x123456789ABCDEF0
+-1 = 0xFFFFFFFFFFFFFFFF
+0x0 (4 places) = 0x00000
+42 (octal) = 052
+8 bit 0xd3 = 0xD3

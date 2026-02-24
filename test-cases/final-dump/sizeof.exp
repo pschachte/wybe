@@ -39,7 +39,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @sizeof:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @sizeof:nn:nn
     foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
-    wybe.count.fmt<2>(8:wybe.count, 0:wybe.int, ' ':wybe.char, ?tmp#11##0:wybe.string) #24 @sizeof:nn:nn
+    wybe.count.fmt<4>(8:wybe.count, 0:wybe.int, ' ':wybe.char, 10:wybe.count, ?tmp#11##0:wybe.string) #24 @sizeof:nn:nn
     wybe.string.,,<0>("Char bits: ":wybe.string, ~tmp#11##0:wybe.string, ?tmp#10##0:wybe.string) #10 @sizeof:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#10##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @sizeof:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @sizeof:nn:nn
@@ -78,7 +78,7 @@ target triple   = ????
 @"string#10" = private unnamed_addr constant {i64, i64} { i64 13, i64 ptrtoint( ptr @"cstring#4" to i64 ) }, align 8
 @"string#11" = private unnamed_addr constant {i64, i64} { i64 12, i64 ptrtoint( ptr @"cstring#5" to i64 ) }, align 8
 
-declare external fastcc i64 @"wybe#.count#.fmt<2>"(i64, i64, i8)
+declare external fastcc i64 @"wybe#.count#.fmt<4>"(i64, i64, i8, i64)
 declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
@@ -99,7 +99,7 @@ define external fastcc void @"sizeof#.<0>"() {
   %"tmp#8##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#7" to i64 ), i64 %"tmp#9##0")
   tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#8##0")
   call ccc void @putchar(i8 10)
-  %"tmp#11##0" = tail call fastcc i64 @"wybe#.count#.fmt<2>"(i64 8, i64 0, i8 32)
+  %"tmp#11##0" = tail call fastcc i64 @"wybe#.count#.fmt<4>"(i64 8, i64 0, i8 32, i64 10)
   %"tmp#10##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#6" to i64 ), i64 %"tmp#11##0")
   tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#10##0")
   call ccc void @putchar(i8 10)
