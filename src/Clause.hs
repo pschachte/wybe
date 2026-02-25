@@ -274,13 +274,13 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
                           . trustFromJust ("untyped higher-order term " ++ show fn) . maybeExpType $ content fn
             fn' <- compileHigherFunc fn
             return $ PrimHigher callSiteID fn' impurity' args'
-compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
-    repSize <- case content arg of
-        Typed _ ty _ -> typeRepSize . trustFromJust "sizeof with unkown typerep" <$> lift (lookupTypeRepresentation ty)
-        _ -> shouldnt $ "untyped in sizeof " ++ show arg
-    out' <- placedApply compileArg out
-    let size = if "bits" `elem` flags then repSize else (repSize + bitsInByte - 1) `div` bitsInByte
-    return $ PrimForeign "llvm" "move" [] $ ArgInt (fromIntegral size) intType : out'
+-- compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
+--     repSize <- case content arg of
+--         Typed _ ty _ -> typeRepSize . trustFromJust "sizeof with unkown typerep" <$> lift (lookupTypeRepresentation ty)
+--         _ -> shouldnt $ "untyped in sizeof " ++ show arg
+--     out' <- placedApply compileArg out
+--     let size = if "bits" `elem` flags then repSize else (repSize + bitsInByte - 1) `div` bitsInByte
+--     return $ PrimForeign "llvm" "move" [] $ ArgInt (fromIntegral size) intType : out'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'

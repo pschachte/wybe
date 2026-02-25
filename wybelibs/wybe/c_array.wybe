@@ -15,14 +15,15 @@ pub type raw_array is address {}
 ## Construction procedures
 
 # Construct a c_array filled with the given element of a given length.
-pub def c_array(x:T, len:int):_(T) = ar where {
-    ?size = len * word_size_bytes
+pub def {inline} c_array(x:T, len:int):_(T) = ar where {
+    ?eltsize = foreign lpvm sizeof(x)
+    ?size = len * eltsize
     foreign lpvm alloc(size, ?data)
     ?offset = 0
     do {
         while offset < size
         foreign lpvm mutate(data, ?data, offset, 1, size, 0, x)
-        !offset + word_size_bytes
+        !offset + eltsize
     }
     ?ar = c_array(len, data)
 }
@@ -31,14 +32,15 @@ pub def c_array(x:T, len:int):_(T) = ar where {
 ## Conversion procedures
 
 # Convert a list into a c_array
-pub def c_array(ls:list(T)):_(T) = ar where {
+pub def {inline} c_array(ls:list(T)):_(T) = ar where {
+    ?eltsize = foreign lpvm sizeof(_:T)
     ?len = length(ls) 
-    ?size = len * word_size_bytes
+    ?size = len * eltsize
     foreign lpvm alloc(size, ?data)
     ?offset = 0
     for ?x in ls {
         foreign lpvm mutate(data, ?data, offset, 1, size, 0, x)
-        !offset + word_size_bytes
+        !offset + eltsize
     }
     ?ar = c_array(len, data)
 }
@@ -48,11 +50,12 @@ pub def c_array(ls:list(T)):_(T) = ar where {
 
 # Get the head and tail of a c_array.
 # Fails if the c_array is empty
-pub def {test} `[|]`(?head:T, ?tail:_(T), a:_(T)) {
+pub def {test,inline} `[|]`(?head:T, ?tail:_(T), a:_(T)) {
+    ?eltsize = foreign lpvm sizeof(_:T):int
     c_array(?length, ?data) = a
     (length > 0)
-    foreign lpvm access(data, 0, word_size_bytes, 0, ?head)
-    foreign llvm add(data, word_size_bytes, ?data)
+    foreign lpvm access(data, 0, eltsize, 0, ?head)
+    foreign llvm add(data, eltsize, ?data)
     ?tail = c_array(length - 1, data)
 }
 
@@ -73,7 +76,8 @@ pub def {test} `[]`(a:_(T), idx:int):T = x where {
 # probably want `[]`.
 # Get the element of a c_array at a given index
 pub def {inline} unsafe_get(a:_(T), idx:int):T = x where {
-    foreign lpvm access(a^raw_data, idx * word_size_bytes, word_size_bytes, 0, ?x)
+    ?eltsize = foreign lpvm sizeof(_:T)
+    foreign lpvm access(a^raw_data, idx * eltsize, eltsize, 0, ?x)
 }
 
 # Update the c_array at the given index to the given element.
@@ -87,7 +91,8 @@ pub def {test} `[]`(!a:_(T), idx:int, x:T) {
 # probably want `[]`.
 # Update the c_array at the given index to the given element
 pub def {inline} unsafe_update(!a:_(T), idx:int, x:T) {
-    foreign lpvm mutate(a^raw_data, ?data, idx * word_size_bytes, 0, 
-                                           a^length * word_size_bytes, 0, x)
+    ?eltsize = foreign lpvm sizeof(x)
+    foreign lpvm mutate(a^raw_data, ?data, idx * eltsize, 0, 
+                                           a^length * eltsize, 0, x)
     !a^raw_data = data
 }

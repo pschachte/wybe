@@ -2449,10 +2449,10 @@ modifier (in curly braces, after `lpvm`).
 The size of a type is the size of its largest constructor.
 Because Wybe will automatically box values that are larger than a word of
 memory, `sizeof` will never return a value larger than the size of an address.
-
 The first argument can be anything except for an outwards-flowing variable. 
-The type of the second argument, *int_type*, can have any integer represented
-type,
+To find the size of a type *ty* where no value of that type is readily
+available, you can use `_:`*ty* as the argument.
+The type of the second argument, *int_type*, can have any integer type,
 therefore, it is generally recommended to explicitly specify the type of this
 argument if it can't otherwise be inferred from context.
 
@@ -2460,6 +2460,14 @@ This instruction is resolved statically, with _no_ runtime cost.
 Note that, for values of a generic type, the size returned is the size of a
 generic value (that is, the size of a pointer), rather than the size of the
 type of the value actually passed.
+To work around this limitation, a procedure can be marked `{inline}`; the actual
+type will then be available in the procedure body.
+
+> [!CAUTION]
+> Loops cannot be inlined, so applying to `foreign lpvm sizeof` to a
+> generic typed value in a loop body will give the size of a pointer.  To avoid
+> this, call `foreign lpvm sizeof` outside the loop, storing the result in a
+> variable, and use the value of the variable inside the loop.
 
 
 #### Handling impurity

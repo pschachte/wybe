@@ -1,0 +1,13 @@
+# Test that the size of array elements matches their type.
+
+?array1 = array([0x67452301:count32, 0xefcdab89:count32, 0x98badcfe:count32, 0x10325476:count32|[]:list(count32)]):array(count32)
+?array2 = array('a', 10)
+
+!print "Length of 4 element array of 32 bit elements = "
+!println array1^length
+!print "Size of 4 element array of 32 bit elements = "
+!println foreign lpvm sizeof(array1):int
+!print "Length of 10 element array of char elements = "
+!println array2^length
+!print "Size of 10 element array of char elements = "
+!println foreign lpvm sizeof(array2):int

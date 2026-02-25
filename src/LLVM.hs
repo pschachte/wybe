@@ -1043,6 +1043,26 @@ writeLPVMCall "mutate" _ args pos = do
         (ins,outs,oRefs,iRefs) ->
             shouldnt $ "lpvm mutate with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
+-- Handle any sizeof calls that haven't be handled by BodyBuilder, which should
+-- only be those where the type is a type variable.
+writeLPVMCall "sizeof" flags args pos = do
+    releaseDeferredCall
+    args' <- partitionArgs "lpvm sizeof instruction" args
+    let divisor = if "bits" `elem` flags then 1 else 8
+    case args' of
+        ([val],[var]) -> do
+            let varTy = argType var
+            sz <- typeRepSize <$> typeRep (argType val)
+            let ty = Representation $ Bits 6
+            writeLLVMCall "move" [] [ArgInt (fromIntegral $ sz `div` divisor) ty, var] Nothing
+        ([],[placeholder,var]) -> do
+            let varTy = argType var
+            sz <- typeRepSize <$> typeRep (argType placeholder)
+            let ty = Representation $ Bits 6
+            writeLLVMCall "move" [] [ArgInt (fromIntegral $ sz `div` divisor) ty, var] Nothing
+        (ins, outs) ->
+            shouldnt $ "lpvm sizeof with arguments " ++ show ins ++ " and outputs "
+                ++ show outs
 writeLPVMCall op flags args pos =
     shouldnt $ "unknown lpvm operation:  " ++ op
 
@@ -1806,7 +1826,7 @@ type LLVMType = String
 --   constant value.
 type LLVMName = String
 
--- | An LLVM value (constant or LLVMName), preceded by and LLVMType
+-- | An LLVM value (constant or LLVMName), preceded by an LLVMType
 type LLVMArg = String
 
 -- | Information we collect about external things referenced by this module, so

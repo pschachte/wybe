@@ -571,7 +571,7 @@ argExpandedPrim call@(PrimHigher id fn impurity args) = do
             return $ PrimHigher id fn' impurity args'
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
-    return $ simplifyForeign lang nm flags args'
+    simplifyForeign lang nm flags args'
 
 -- |Replace any unneeded arguments corresponding to unneeded parameters with
 --  ArgUnneeded.  For unneeded *output* parameters, there must be an
@@ -949,10 +949,11 @@ updateVariableFlows prim = do
 
 -- |Transform primitives with all inputs known into a move instruction by
 --  performing the operation at compile-time.
-simplifyForeign ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
-simplifyForeign "llvm" op flags args = simplifyOp op flags args
+simplifyForeign ::  String -> ProcName -> [Ident] -> [PrimArg]
+                -> BodyBuilder Prim
+simplifyForeign "llvm" op flags args = return $ simplifyOp op flags args
 simplifyForeign "lpvm" op flags args = simplifyLPVM op flags args
-simplifyForeign lang op flags args = PrimForeign lang op flags args
+simplifyForeign lang op flags args = return $ PrimForeign lang op flags args
 
 
 -- | Simplify and canonicalise llvm instructions where possible. This
@@ -1178,14 +1179,25 @@ simplifyOp name flags args = PrimForeign "llvm" name flags args
 
 -- | Simplify and canonicalise llpm instructions where possible.  For now, this only 
 --   handles cast instructions for constants.
-simplifyLPVM :: ProcName -> [Ident] -> [PrimArg] -> Prim
+simplifyLPVM :: ProcName -> [Ident] -> [PrimArg] -> BodyBuilder Prim
 simplifyLPVM "cast" _ [ArgInt n _, output] =
-  primMove (ArgInt n (argType output)) output
+  return $ primMove (ArgInt n (argType output)) output
 simplifyLPVM "cast" _ [ArgChar ch _, output] =
-  primMove (ArgInt (fromIntegral $ ord ch) (argType output)) output
+  return $ primMove (ArgInt (fromIntegral $ ord ch) (argType output)) output
 simplifyLPVM "cast" _ [ArgFloat n _, output] =
-  primMove (ArgFloat n (argType output)) output
-simplifyLPVM name flags args = PrimForeign "lpvm" name flags args
+  return $ primMove (ArgFloat n (argType output)) output
+simplifyLPVM "sizeof" flags [arg, output] = do
+  ty <- lift $ lookupType "lpvm sizeof argument" Nothing $ argType arg
+  if genericType ty
+  then return $ PrimForeign "lpvm" "sizeof" flags [arg, output]
+  else do
+    -- compute size; if not finding bit size, compute ceiling of size / 8
+    let sizeFn sz = if "bits" `elem` flags then sz else (sz+7) `div` 8
+    mbSize <- (typeRepSize <$>) <$> lift (lookupTypeRepresentation ty)
+    maybe (shouldnt $ "sizeof of type with no representation: " ++ show ty)
+          (\sz -> return $ primMove (ArgInt (fromIntegral $ sizeFn sz) intType) output)
+          mbSize
+simplifyLPVM name flags args = return $ PrimForeign "lpvm" name flags args
 
 
 boolConstant :: Bool -> PrimArg

@@ -1,0 +1,9 @@
+# Test case for arrays of less-than-word-size elements.
+
+?ar1 = c_array([17:int8,42:int8,86:int8])
+
+!println "ar1^length = $(ar1^length)"
+!println "ar1[0] = $((ar1[0] | -1:int8))"
+!println "ar1[1] = $((ar1[1] | -1:int8))"
+!println "ar1[2] = $((ar1[2] | -1:int8))"
+
