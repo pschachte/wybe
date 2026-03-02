@@ -880,7 +880,14 @@ addTypeRep repn pos = do
 
 -- |Set the type representation of the current module.
 setTypeRep :: TypeRepresentation -> Compiler ()
-setTypeRep repn = updateModule (\m -> m { modTypeRep = Just repn
+setTypeRep repn = do
+    -- XXX Rip out this test when we box and unbox large primitives for generics
+    let sz = typeRepSize repn
+    when (sz > wordSize)
+      $ nyi $ "Declared " ++ show sz
+        ++ "-bit representation type is larger than word size"
+
+    updateModule (\m -> m { modTypeRep = Just repn
                                         , modIsType  = True })
 
 
