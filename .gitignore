@@ -60,3 +60,9 @@ stack.yaml.lock
 LOG*
 src/c_config
 src/CConfig.hs
+benchmarks/wc/wybe_wc
+benchmarks/wc/rust_wc
+benchmarks/wc/haskell_wc_efficient
+benchmarks/wc/haskell_wc
+benchmarks/wc/c_wc
+benchmarks/wc/wc-stats.tex
