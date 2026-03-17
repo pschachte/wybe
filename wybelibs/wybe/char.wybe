@@ -17,6 +17,17 @@ pub def bound_minimum(x:_):_ = bound_minimum
 pub def bound_maximum(x:_):_ = bound_maximum
 
 
+# Bit-shift left and right, shifting zero bits from the end.
+pub def foreign llvm `<<`=shl(x:_, s:_):_
+pub def foreign llvm `>>`=lshr(x:_, s:_):_
+
+# Bitwise logical operations.
+pub def foreign llvm bitwise_and=and(x:_, y:_):_
+pub def foreign llvm bitwise_or=or(x:_, y:_):_
+pub def foreign llvm bitwise_xor=xor(x:_, y:_):_
+pub def {inline}     bitwise_not(x:_):_ = bitwise_xor(x, bound_maximum)
+
+
 ## Comparisons
 
 # Equality and disequality.
@@ -53,26 +64,26 @@ pub def unsafe_chr(i:count):_ = foreign lpvm cast(i)
 
 ## Character classification and case conversion
 
-def foreign c {test} isspace(x:int):int
-pub def {test,inline} is_whitespace(x:_) { isspace(ord(x)) ~= 0 }
+# This definition is very ASCII-specific.
+pub def {test,inline} is_whitespace(x:_) { x = ' ' | x <= '\r' & x >= '\t' }
 
-def foreign c {test} isdigit(x:int):int
-pub def {test,inline} is_digit(x:_) { isdigit(ord(x)) ~= 0 }
+pub def {test,inline} is_digit(x:_) { x >= '0' & x <= '9' }
 
-def foreign c {test} isupper(x:int):int
-pub def {test,inline} is_upper(x:_) { isupper(ord(x)) ~= 0 }
+pub def {test,inline} is_upper(x:_) { x >= 'A' & x <= 'Z' }
 
-def foreign c {test} islower(x:int):int
-pub def {test,inline} is_lower(x:_) { islower(ord(x)) ~= 0 }
+pub def {test,inline} is_lower(x:_) { x >= 'a' & x <= 'z' }
 
-def foreign c {test} isalpha(x:int):int
-pub def {test,inline} is_alpha(x:_) { isalpha(ord(x)) ~= 0 }
+pub def {test,inline} is_alpha(x:_) { is_upper(bitwise_and(x, '\xDF')) }
 
-def foreign c {test} isalnum(x:int):int
-pub def {test,inline} is_alphanumeric(x:_) { isalnum(ord(x)) ~= 0 }
+pub def {test,inline} is_alphanumeric(x:_) { is_digit(x) | is_alpha(x) }
 
-pub def {inline} to_upper(x:_):_ = unsafe_chr(bitwise_and(ord(x), bitwise_not(32)))
-pub def {inline} to_lower(x:_):_ = unsafe_chr(bitwise_or(ord(x), 32))
+# Maps letters to upper case, leaving non-letters unchanged.
+pub def {inline} to_upper(x:_):_ =
+    if { is_lower(x) :: bitwise_and(x, '\xDF') | else :: x }
+
+# Maps letters to lower case, leaving non-letters unchanged.
+pub def {inline} to_lower(x:_):_ =
+    if { is_upper(x) :: bitwise_or(x, '\x20') | else :: x }
 
 
 ## Formatting
