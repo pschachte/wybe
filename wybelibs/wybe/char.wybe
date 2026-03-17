@@ -7,6 +7,27 @@ use wybe.bool, wybe.count, wybe.int, wybe.comparison, wybe.string, wybe.io
 
 representation is 8 bit unsigned
 
+## Constants:  We assume a 64 bit address architecture
+
+pub def bound_minimum:_ = 0:_
+pub def bound_maximum:_ = 255:_
+
+# Overloaded versions based on an argument
+pub def bound_minimum(x:_):_ = bound_minimum
+pub def bound_maximum(x:_):_ = bound_maximum
+
+
+# Bit-shift left and right, shifting zero bits from the end.
+pub def foreign llvm `<<`=shl(x:_, s:_):_
+pub def foreign llvm `>>`=lshr(x:_, s:_):_
+
+# Bitwise logical operations.
+pub def foreign llvm bitwise_and=and(x:_, y:_):_
+pub def foreign llvm bitwise_or=or(x:_, y:_):_
+pub def foreign llvm bitwise_xor=xor(x:_, y:_):_
+pub def {inline}     bitwise_not(x:_):_ = bitwise_xor(x, bound_maximum)
+
+
 ## Comparisons
 
 # Equality and disequality.
@@ -33,30 +54,43 @@ pub def foreign lpvm ord=cast(c:_):int
 pub def foreign lpvm ord=cast(c:_):count
 
 # Char of an int character code
-pub def {test} chr(i:int):_ = foreign lpvm cast(i) where { 0 <= i ; i <= 255 }
+pub def {test} chr(i:int):_ = unsafe_chr(i) where { 0 <= i ; i <= 255 }
+pub def unsafe_chr(i:int):_ = foreign lpvm cast(i)
 
 # Char of a count (unsigned) character code
-pub def {test} chr(i:count):_ = foreign lpvm cast(i) where { i <= 255:count }
+pub def {test} chr(i:count):_ = unsafe_chr(i) where { i <= 255:count }
+pub def unsafe_chr(i:count):_ = foreign lpvm cast(i)
+
+
+## Character classification and case conversion
+
+# This definition is very ASCII-specific.
+pub def {test,inline} is_whitespace(x:_) { x = ' ' | x <= '\r' & x >= '\t' }
+
+pub def {test,inline} is_digit(x:_) { x >= '0' & x <= '9' }
+
+pub def {test,inline} is_upper(x:_) { x >= 'A' & x <= 'Z' }
+
+pub def {test,inline} is_lower(x:_) { x >= 'a' & x <= 'z' }
+
+pub def {test,inline} is_alpha(x:_) { is_upper(bitwise_and(x, '\xDF')) }
+
+pub def {test,inline} is_alphanumeric(x:_) { is_digit(x) | is_alpha(x) }
+
+# Maps letters to upper case, leaving non-letters unchanged.
+pub def {inline} to_upper(x:_):_ =
+    if { is_lower(x) :: bitwise_and(x, '\xDF') | else :: x }
+
+# Maps letters to lower case, leaving non-letters unchanged.
+pub def {inline} to_lower(x:_):_ =
+    if { is_upper(x) :: bitwise_or(x, '\x20') | else :: x }
+
 
 ## Formatting
 pub def fmt(x:_):string = string(x)
 pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
 pub def fmt(x:_, minlength:int, fill:_):string =
     fmt(string(x), minlength, fill)
-
-pub def {test} is_whitespace(x:_) {
-    x = ' ' | x = '\t' | x = '\n' | x = '\r' | x = '\f' | x = '\v'
-}
-
-pub def {test} is_digit(x:_) { x >= '0' & x <= '9' }
-
-pub def {test} is_upper(x:_) { x >= 'A' & x <= 'Z' }
-
-pub def {test} is_lower(x:_) { x >= 'a' & x <= 'z' }
-
-pub def {test} is_alpha(x:_) { is_upper(x) | is_lower(x) }
-
-pub def {test} is_alphanumeric(x:_) { is_alpha(x) | is_digit(x) }
 
 ## I/O
 
