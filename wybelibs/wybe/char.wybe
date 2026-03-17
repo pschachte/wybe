@@ -7,6 +7,16 @@ use wybe.bool, wybe.count, wybe.int, wybe.comparison, wybe.string, wybe.io
 
 representation is 8 bit unsigned
 
+## Constants:  We assume a 64 bit address architecture
+
+pub def bound_minimum:_ = 0:_
+pub def bound_maximum:_ = 255:_
+
+# Overloaded versions based on an argument
+pub def bound_minimum(x:_):_ = bound_minimum
+pub def bound_maximum(x:_):_ = bound_maximum
+
+
 ## Comparisons
 
 # Equality and disequality.
@@ -33,30 +43,43 @@ pub def foreign lpvm ord=cast(c:_):int
 pub def foreign lpvm ord=cast(c:_):count
 
 # Char of an int character code
-pub def {test} chr(i:int):_ = foreign lpvm cast(i) where { 0 <= i ; i <= 255 }
+pub def {test} chr(i:int):_ = unsafe_chr(i) where { 0 <= i ; i <= 255 }
+pub def unsafe_chr(i:int):_ = foreign lpvm cast(i)
 
 # Char of a count (unsigned) character code
-pub def {test} chr(i:count):_ = foreign lpvm cast(i) where { i <= 255:count }
+pub def {test} chr(i:count):_ = unsafe_chr(i) where { i <= 255:count }
+pub def unsafe_chr(i:count):_ = foreign lpvm cast(i)
+
+
+## Character classification and case conversion
+
+def foreign c {test} isspace(x:int):int
+pub def {test,inline} is_whitespace(x:_) { isspace(ord(x)) ~= 0 }
+
+def foreign c {test} isdigit(x:int):int
+pub def {test,inline} is_digit(x:_) { isdigit(ord(x)) ~= 0 }
+
+def foreign c {test} isupper(x:int):int
+pub def {test,inline} is_upper(x:_) { isupper(ord(x)) ~= 0 }
+
+def foreign c {test} islower(x:int):int
+pub def {test,inline} is_lower(x:_) { islower(ord(x)) ~= 0 }
+
+def foreign c {test} isalpha(x:int):int
+pub def {test,inline} is_alpha(x:_) { isalpha(ord(x)) ~= 0 }
+
+def foreign c {test} isalnum(x:int):int
+pub def {test,inline} is_alphanumeric(x:_) { isalnum(ord(x)) ~= 0 }
+
+pub def {inline} to_upper(x:_):_ = unsafe_chr(bitwise_and(ord(x), bitwise_not(32)))
+pub def {inline} to_lower(x:_):_ = unsafe_chr(bitwise_or(ord(x), 32))
+
 
 ## Formatting
 pub def fmt(x:_):string = string(x)
 pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
 pub def fmt(x:_, minlength:int, fill:_):string =
     fmt(string(x), minlength, fill)
-
-pub def {test} is_whitespace(x:_) {
-    x = ' ' | x = '\t' | x = '\n' | x = '\r' | x = '\f' | x = '\v'
-}
-
-pub def {test} is_digit(x:_) { x >= '0' & x <= '9' }
-
-pub def {test} is_upper(x:_) { x >= 'A' & x <= 'Z' }
-
-pub def {test} is_lower(x:_) { x >= 'a' & x <= 'z' }
-
-pub def {test} is_alpha(x:_) { is_upper(x) | is_lower(x) }
-
-pub def {test} is_alphanumeric(x:_) { is_alpha(x) | is_digit(x) }
 
 ## I/O
 
