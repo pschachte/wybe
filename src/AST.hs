@@ -24,7 +24,7 @@ module AST (
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
-  genericType, higherOrderType, isHigherOrder,
+  genericType, isTypeVariable, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
@@ -2810,6 +2810,10 @@ genericType TypeVariable{}   = True
 genericType Representation{} = False
 genericType AnyType          = False
 genericType InvalidType      = False
+
+isTypeVariable :: TypeSpec -> Bool
+isTypeVariable TypeVariable{} = True
+isTypeVariable _              = False
 
 
 -- |Return true if the type is a higher order type or a parameter is a higher
