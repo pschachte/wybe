@@ -343,7 +343,7 @@ recordExtern :: ModSpec -> Prim -> LLVM ()
 recordExtern mod (PrimCall _ pspec _ args _) = recordExternProc mod pspec args
 recordExtern _ PrimHigher{} = return ()
 recordExtern _ (PrimForeign "llvm" _ _ _) = return ()
-recordExtern _ (PrimForeign "lpvm" "alloc" _ _) =
+recordExtern _ (PrimForeign "lpvm" nm _ _) | nm `elem` ["alloc", "box"] =
     recordExternSpec externAlloc
 recordExtern mod (PrimForeign "lpvm" "load" _ [ArgGlobal glob ty,_]) =
     recordExternVar mod glob ty
@@ -975,6 +975,25 @@ writeLPVMCall "store" _ args pos = do
         ([val,ptr],[]) -> llvmStore ptr val
         (ins, outs) ->
             shouldnt $ "lpvm store with inputs " ++ show ins ++ " and outputs "
+                ++ show outs
+writeLPVMCall "box" _ args pos = do
+    releaseDeferredCall
+    args' <- partitionArgs "lpvm box instruction" args
+    case args' of
+        ([unboxed, size], [boxed]) -> do
+            heapAlloc boxed size pos
+            llvmStore boxed unboxed
+        (ins,outs) ->
+            shouldnt $ "lpvm box with inputs " ++ show ins ++ " and outputs "
+                ++ show outs
+writeLPVMCall "unbox" _ args pos = do
+    releaseDeferredCall
+    args' <- partitionArgs "lpvm unbox instruction" args
+    case args' of
+        ([boxed, _], [unboxed]) -> do
+            llvmLoad boxed unboxed
+        (ins,outs) ->
+            shouldnt $ "lpvm box with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
 writeLPVMCall "access" _ args pos = do
     releaseDeferredCall

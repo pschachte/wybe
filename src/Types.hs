@@ -1026,7 +1026,8 @@ typecheckProcDecl (RoughProc m name) = do
 data CallInfo
     = FirstInfo {                            -- A first order call
         fiProc         :: ProcSpec           -- ^the called proc
-      , fiTypes        :: [TypeSpec]         -- ^its formal param types
+      , fiOriginalTypes:: [TypeSpec]         -- ^its formal param types (unaltered)
+      , fiTypes        :: [TypeSpec]         -- ^its formal param types (unified with current types)
       , fiFlows        :: [FlowDirection]    -- ^its formal param flows
       , fiDetism       :: Determinism        -- ^its determinism
       , fiImpurity     :: Impurity           -- ^its impurity
@@ -1043,7 +1044,7 @@ data CallInfo
 
 
 instance Show CallInfo where
-    show (FirstInfo procSpec tys flows detism impurity inRes outRes _ partial) =
+    show (FirstInfo procSpec _ tys flows detism impurity inRes outRes _ partial) =
         (if partial then "partial application of " else "")
         ++ showProcModifiers' (ProcModifiers detism MayInline impurity
                                 RegularProc False)
@@ -1449,7 +1450,7 @@ firstInfo def proc = do
         detism = procDetism def
         imp = procImpurity def
     types' <- refreshTypes types
-    return $ FirstInfo proc types' flows detism imp inResources outResources needsResBang False
+    return $ FirstInfo proc types types' flows detism imp inResources outResources needsResBang False
 
 
 -- |Return the "primitive" expr of the specified expr.  This unwraps Typed
@@ -2594,19 +2595,22 @@ finaliseCall :: Bool -> Bool -> OptPos -> [Placed Exp]
 finaliseCall resourceful final pos args
              match@FirstInfo{ fiProc=matchProc
                             , fiDetism=matchDetism
+                            , fiPartial=isPartial
+                            , fiTypes=matchTypes
+                            , fiOriginalTypes=matchOriginalTypes
+                            , fiFlows=matchFlows
                             , fiImpurity=matchImpurity
                             , fiInRes=inResources
                             , fiOutRes=outResources
-                            , fiNeedsResBang=needsResBang
-                            , fiPartial=isPartial} stmt = do
+                            , fiNeedsResBang=needsResBang} stmt = do
     let matchName = procSpecName matchProc
     let allResources = inResources `Set.union` outResources
     assigned <- get
     let impurity = bindingImpurity assigned
     let currResources = bindingResources assigned
-    let isPartial = fiPartial match
     tys <- lift $ mapM (expType >=> ultimateType) args
-    (args',stmts) <- lift $ matchArguments (zipWith TypeFlow tys (fiFlows match)) args
+    (preStmts, args', postStmts) <- 
+        lift $ finaliseArguments matchOriginalTypes (zipWith TypeFlow tys matchFlows) args
     let outOfScope = allResources `Set.difference`
                     (currResources `Set.union` specialResourcesSet)
     let specials = Set.map resourceName
@@ -2663,9 +2667,10 @@ finaliseCall resourceful final pos args
         bindingStateSeq matchDetism matchImpurity (pexpListOutputs args')
         logModed $ "Generated special stmts = " ++ show specialInstrs
         logModed $ "New instr = " ++ show stmt'
-        logModed $ "Generated extra stmts = " ++ show stmts
-        (specialInstrs ++).(maybePlace stmt' pos :)
-            <$> modecheckStmts final stmts
+        logModed $ "Generated extra stmts = " ++ show (preStmts, postStmts)
+        preStmts' <- modecheckStmts final preStmts
+        postStmts' <- modecheckStmts final postStmts
+        return $ specialInstrs ++ preStmts' ++ [maybePlace stmt' pos] ++ postStmts'
 finaliseCall resourceful final pos args (HigherInfo fn) _ = do
     detism <- getsTy tyDeterminism
     modecheckStmt final
@@ -2697,32 +2702,59 @@ detismPurityErrors pos kind name contextDetism contextImpurity
         | impurity == Pure && banged && not usesResources]
 
 
-matchArguments :: [TypeFlow] -> [Placed Exp] -> Typed ([Placed Exp],[Placed Stmt])
-matchArguments [] [] = return ([],[])
-matchArguments [] _ = shouldnt "matchArguments arity mismatch"
-matchArguments _ [] = shouldnt "matchArguments arity mismatch"
-matchArguments (typeflow:typeflows) (arg:args) = do
-    (arg', stmts1) <- matchArgument typeflow arg
-    (args', stmts2) <- matchArguments typeflows args
-    return (arg':args', stmts1++stmts2)
+finaliseArguments :: [TypeSpec] -> [TypeFlow] -> [Placed Exp] -> Typed ([Placed Stmt], [Placed Exp],[Placed Stmt])
+finaliseArguments _ [] [] = return ([],[],[])
+finaliseArguments tys (typeflow:typeflows) (arg:args) = do
+    let (ty, tys') = case tys of
+            [] -> (typeFlowType typeflow, tys)
+            (ty:tys) -> (ty, tys)
+    (arg', impliedTest) <- impliedMode typeflow arg
+    (pre1, arg'', post1) <- typeAndBoxArgument ty typeflow arg'
+    (pre2, args', post2) <- finaliseArguments tys' typeflows args
+    return (pre1 ++ pre2, arg'':args', post1 ++ impliedTest ++ post2)
+finaliseArguments tys tfs as = shouldnt $ "finaliseArguments arity mismatch " ++ show tys ++ show tfs ++ show as
 
 
 -- |Transform an argument as supplied to match the param it is passed to.  This
 -- includes handling implied modes by generating a fresh variable to pass in the
--- call, and generating code to match it with the provided input.  Thus also
--- attaches the correct type to the argument.
-matchArgument :: TypeFlow -> Placed Exp -> Typed (Placed Exp,[Placed Stmt])
-matchArgument typeflow arg
+-- call, and generating code to match it with the provided input.  
+impliedMode :: TypeFlow -> Placed Exp -> Typed (Placed Exp, [Placed Stmt])
+impliedMode typeflow pArg
     | ParamOut == typeFlowMode typeflow
-      && ParamIn == flattenedExpFlow (content arg) = do
+      && ParamIn == flattenedExpFlow arg = do
           var <- genSym
           let inTypeFlow = typeflow {typeFlowMode = ParamIn}
-              arg' = setPExpTypeFlow inTypeFlow arg
-              setVar = Unplaced $ setExpTypeFlow typeflow (varSet var)
-              getVar = Unplaced $ setExpTypeFlow inTypeFlow (varGet var)
-              call = ProcCall (regularProc "=") SemiDet False [getVar, arg']
-          return (setVar, [maybePlace call $ place arg])
-    | otherwise = return (setPExpTypeFlow typeflow arg,[])
+              setVar = setExpTypeFlow typeflow (varSet var) `maybePlace` pos
+              getVar = setExpTypeFlow inTypeFlow (varGet var) `maybePlace` pos
+              call = ProcCall (regularProc "=") SemiDet False [getVar, pArg]
+          return (setVar, [maybePlace call pos])
+    | otherwise = return (pArg,[])
+  where (arg, pos) = unPlace pArg
+
+
+typeAndBoxArgument :: TypeSpec -> TypeFlow -> Placed Exp -> Typed ([Placed Stmt], Placed Exp, [Placed Stmt])
+typeAndBoxArgument calleeType typeFlow@(TypeFlow _ calleeFlow) pArg = do
+    if isTypeVariable calleeType
+    then do
+        callerType <- expType pArg >>= ultimateType
+        size <- typeRepSize . trustFromJust "boxUnboxArgument" <$> lift (lookupTypeRepresentation callerType)
+        if size > wordSize
+        then do
+            boxedName <- genSym
+            let sizeArg = intCast (iVal $ (size + wordSizeBytes - 1) `div` wordSizeBytes) `maybePlace` pos
+            return ([ForeignCall "lpvm" "box" [] 
+                        [setPExpTypeFlow (TypeFlow callerType ParamIn) pArg, sizeArg, varSetTyped boxedName calleeType `maybePlace` pos] 
+                      `maybePlace` pos 
+                    | flowsIn calleeFlow], 
+                    setPExpTypeFlow typeFlow{typeFlowType=calleeType} (varGet boxedName `maybePlace` pos),
+                    [ForeignCall "lpvm" "unbox" [] 
+                        [varGetTyped boxedName calleeType `maybePlace` pos, sizeArg, setPExpTypeFlow (TypeFlow callerType ParamOut) pArg] 
+                      `maybePlace` pos 
+                    | flowsOut calleeFlow]
+                    )
+        else return ([], setPExpTypeFlow typeFlow pArg, [])
+    else return ([], setPExpTypeFlow typeFlow pArg, [])
+  where (arg, pos) = unPlace pArg
 
 
 -- |Return a list of error messages for too weak a determinism at the end of a

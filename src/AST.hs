@@ -24,7 +24,7 @@ module AST (
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
-  genericType, higherOrderType, isHigherOrder,
+  genericType, isTypeVariable, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
@@ -881,12 +881,6 @@ addTypeRep repn pos = do
 -- |Set the type representation of the current module.
 setTypeRep :: TypeRepresentation -> Compiler ()
 setTypeRep repn = do
-    -- XXX Rip out this test when we box and unbox large primitives for generics
-    let sz = typeRepSize repn
-    when (sz > wordSize)
-      $ nyi $ "Declared " ++ show sz
-        ++ "-bit representation type is larger than word size"
-
     updateModule (\m -> m { modTypeRep = Just repn
                                         , modIsType  = True })
 
@@ -2816,6 +2810,10 @@ genericType TypeVariable{}   = True
 genericType Representation{} = False
 genericType AnyType          = False
 genericType InvalidType      = False
+
+isTypeVariable :: TypeSpec -> Bool
+isTypeVariable TypeVariable{} = True
+isTypeVariable _              = False
 
 
 -- |Return true if the type is a higher order type or a parameter is a higher
