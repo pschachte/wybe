@@ -941,11 +941,28 @@ writeLLVMCall op flags args pos = do
 
 -- | Generate LPVM (memory management) instruction
 writeLPVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
-writeLPVMCall "alloc" _ args pos = do
+writeLPVMCall "alloc" flags args pos = do
     releaseDeferredCall
     args' <- partitionArgs "lpvm alloc instruction" args
     case args' of
-        ([sz],[out]) -> heapAlloc out sz pos
+        ([sz],[out]) ->
+            if "stack" `elem` flags
+            then case argIntVal sz of
+                -- Stack-allocate: emit alloca and cast the pointer to i64.
+                -- Requires a constant size (guaranteed by escape analysis).
+                -- Side-effect: any call that receives this address as an i64
+                -- argument cannot be a tail call (the callee would dereference
+                -- a pointer into a stack frame that tail-call would have freed).
+                -- LLVM enforces this automatically; sets doesAlloca accordingly.
+                Just sizeVal -> do
+                    -- alloca returns ptr; ptrtoint to the i64 Wybe expects
+                    (writeTmp, readTmp) <- freshTempArgs $ Representation CPointer
+                    llvmAssignResult writeTmp $ "alloca i8, i64 " ++ show sizeVal
+                        ++ ", align " ++ show wordSizeBytes
+                    typeConvert readTmp out
+                    modify $ \s -> s { doesAlloca = True }
+                Nothing -> shouldnt "stack alloc with non-constant size"
+            else heapAlloc out sz pos
         _            -> shouldnt $ "lpvm alloc with arguments " ++ show args
 writeLPVMCall "cast" _ args pos = do
     releaseDeferredCall

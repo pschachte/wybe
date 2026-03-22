@@ -9,7 +9,7 @@
 
 module AliasAnalysis (
     AliasMapLocal, AliasMapLocalItem(..), aliasSccBottomUp, currentAliasInfo,
-    isAliasInfoChanged, updateAliasedByPrim, isArgUnaliased,
+    isAliasInfoChanged, updateAliasedByPrim, isArgUnaliased, isArgEscaped,
     isArgVarUsedOnceInArgs, DeadCells, updateDeadCellsByAccessArgs,
     assignDeadCellsByAllocArgs
     ) where
@@ -524,6 +524,23 @@ isArgUnaliased aliasMap ArgVar{argVarName=varName, argVarFinal=final} =
         Nothing
 isArgUnaliased _ (ArgInt _ _) = Just []
 isArgUnaliased _ _ = Nothing
+
+
+-- | Check if the argument escapes the current procedure via alias analysis.
+-- Returns True if it's aliased to something outside the local scope (a global
+-- or an output parameter).  This is one of two escape checks used at alloc
+-- sites; the other is the mutation-chain reachability set in Transform.hs
+-- (computeEscapedVars).  An alloc must be heap-allocated if either check fires.
+isArgEscaped :: AliasMapLocal -> PrimArg -> Bool
+isArgEscaped aliasMap ArgVar{argVarName=varName} =
+    let items = connectedItemsInDS (LiveVar varName) aliasMap |> Set.toList in
+    any (\case
+            AliasByGlobal _     -> True
+            AliasByParam _      -> True
+            MaybeAliasByParam _ -> True
+            _                   -> False
+        ) items
+isArgEscaped _ _ = True  -- constants/globals are conservatively considered escaped
 
 
 -- return True if the given arg is only used once in given list of arg.
