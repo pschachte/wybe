@@ -45,9 +45,17 @@ pub def foreign llvm `/`=udiv(x:_, y:_):_
 # Modulus.
 pub def foreign llvm `%`=urem(x:_, y:_):_
 
+## Bitwise operations
+
 # Bit-shift left and right, shifting zero bits from the end.
 pub def foreign llvm `<<`=shl(x:_, s:_):_
 pub def foreign llvm `>>`=lshr(x:_, s:_):_
+
+# Bitwise logical operations.
+pub def foreign llvm bitwise_and=and(x:_, y:_):_
+pub def foreign llvm bitwise_or=or(x:_, y:_):_
+pub def foreign llvm bitwise_xor=xor(x:_, y:_):_
+pub def {inline}     bitwise_not(x:_):_ = bitwise_xor(x, bound_maximum)
 
 
 ## Comparisons
