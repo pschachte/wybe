@@ -33,20 +33,20 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'main_hello2'
 
 source_filename = "!ROOT!/final-dump/main_hello2.wybe"
-target triple    ????
+target triple   = ????
 
 @"main_hello2#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"hello, \00", align 8
 @"main_hello2#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"world!\00", align 8
 @"main_hello2#constant#2" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"main_hello2#constant#0" }, align 8
 @"main_hello2#constant#3" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"main_hello2#constant#1" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"main_hello2.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"main_hello2#constant#2" to i64 ))
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"main_hello2#constant#3" to i64 ))
+define external fastcc void @"main_hello2#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"main_hello2#constant#2" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"main_hello2#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

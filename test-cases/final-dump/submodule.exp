@@ -23,7 +23,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'submodule'
 
 source_filename = "!ROOT!/final-dump/submodule.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -64,23 +64,23 @@ semi_hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'submodule.privatetest'
 
 source_filename = "!ROOT!/final-dump/submodule.wybe"
-target triple    ????
+target triple   = ????
 
 @"submodule.privatetest#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"public proc in a private module\00", align 8
 @"submodule.privatetest#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"private proc in a private module\00", align 8
 @"submodule.privatetest#constant#2" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"submodule.privatetest#constant#0" }, align 8
 @"submodule.privatetest#constant#3" = private unnamed_addr constant {i64, ptr} { i64 32, ptr @"submodule.privatetest#constant#1" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"submodule.privatetest.hidden<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.privatetest#constant#3" to i64 ))
+define external fastcc void @"submodule#.privatetest#.hidden<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"submodule.privatetest#constant#3" to i64 ))
   ret void
 }
 
-define external fastcc void @"submodule.privatetest.semi_hidden<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.privatetest#constant#2" to i64 ))
+define external fastcc void @"submodule#.privatetest#.semi_hidden<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"submodule.privatetest#constant#2" to i64 ))
   ret void
 }
 
@@ -120,22 +120,22 @@ visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'submodule.publictest'
 
 source_filename = "!ROOT!/final-dump/submodule.wybe"
-target triple    ????
+target triple   = ????
 
 @"submodule.publictest#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"public proc in a public module\00", align 8
 @"submodule.publictest#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"private proc in a public module\00", align 8
 @"submodule.publictest#constant#2" = private unnamed_addr constant {i64, ptr} { i64 30, ptr @"submodule.publictest#constant#0" }, align 8
 @"submodule.publictest#constant#3" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"submodule.publictest#constant#1" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"submodule.publictest.semi_visible<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.publictest#constant#3" to i64 ))
+define external fastcc void @"submodule#.publictest#.semi_visible<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"submodule.publictest#constant#3" to i64 ))
   ret void
 }
 
-define external fastcc void @"submodule.publictest.visible<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"submodule.publictest#constant#2" to i64 ))
+define external fastcc void @"submodule#.publictest#.visible<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"submodule.publictest#constant#2" to i64 ))
   ret void
 }

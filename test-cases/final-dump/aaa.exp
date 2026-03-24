@@ -41,8 +41,8 @@ declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"aaa.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"aaa#constant#1" to i64 ))
+define external fastcc void @"aaa#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"aaa#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -85,8 +85,8 @@ declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"bbb.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"bbb#constant#1" to i64 ))
+define external fastcc void @"bbb#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"bbb#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -129,8 +129,8 @@ declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"ccc.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"ccc#constant#1" to i64 ))
+define external fastcc void @"ccc#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"ccc#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -172,8 +172,8 @@ declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"ddd.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"ddd#constant#1" to i64 ))
+define external fastcc void @"ddd#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"ddd#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

@@ -80,48 +80,48 @@ loop3#cont#1()<{}; {}; {}>:
 ; ModuleID = 'loop_terminators'
 
 source_filename = "!ROOT!/final-dump/loop_terminators.wybe"
-target triple    ????
+target triple   = ????
 
 @"loop_terminators#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"lol\00", align 8
 @"loop_terminators#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"loop_terminators:14:11\00", align 8
 @"loop_terminators#constant#2" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"loop_terminators#constant#0" }, align 8
 
-declare external fastcc i64 @"wybe.string.c_string<0>"(i64)
+declare external fastcc i64 @"wybe#.string#.c_string<0>"(i64)
 declare external ccc void @error_exit(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"loop_terminators.loop0<0>"() {
+define external fastcc void @"loop_terminators#.loop0<0>"() {
   ret void
 }
 
-define external fastcc void @"loop_terminators.loop0#cont#1<0>"() {
+define external fastcc void @"loop_terminators#.loop0#cont#1<0>"() {
   ret void
 }
 
-define external fastcc void @"loop_terminators.loop1<0>"() {
+define external fastcc void @"loop_terminators#.loop1<0>"() {
   ret void
 }
 
-define external fastcc void @"loop_terminators.loop1#cont#1<0>"() {
+define external fastcc void @"loop_terminators#.loop1#cont#1<0>"() {
   ret void
 }
 
-define external fastcc void @"loop_terminators.loop2<0>"() {
+define external fastcc void @"loop_terminators#.loop2<0>"() {
   ret void
 }
 
-define external fastcc void @"loop_terminators.loop2#cont#1<0>"() {
+define external fastcc void @"loop_terminators#.loop2#cont#1<0>"() {
   ret void
 }
 
-define external fastcc void @"loop_terminators.loop3<0>"() {
-  %"tmp#1##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"loop_terminators#constant#2" to i64 ))
+define external fastcc void @"loop_terminators#.loop3<0>"() {
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"loop_terminators#constant#2" to i64 ))
   call ccc void @error_exit(ptr @"loop_terminators#constant#1", i64 %"tmp#1##0")
   ret void
 }
 
-define external fastcc void @"loop_terminators.loop3#cont#1<0>"() {
-  %"tmp#7##0" = tail call fastcc i64 @"wybe.string.c_string<0>"(i64 ptrtoint( ptr @"loop_terminators#constant#2" to i64 ))
+define external fastcc void @"loop_terminators#.loop3#cont#1<0>"() {
+  %"tmp#7##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 ptrtoint( ptr @"loop_terminators#constant#2" to i64 ))
   call ccc void @error_exit(ptr @"loop_terminators#constant#1", i64 %"tmp#7##0")
   ret void
 }

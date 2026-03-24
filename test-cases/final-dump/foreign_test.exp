@@ -103,7 +103,7 @@ neq(x##0:wybe.c_string, y##0:wybe.c_string, ?#success##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'foreign_test'
 
 source_filename = "!ROOT!/final-dump/foreign_test.wybe"
-target triple    ????
+target triple   = ????
 
 @"foreign_test#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"string\00", align 8
 @"foreign_test#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"strong\00", align 8
@@ -114,55 +114,55 @@ target triple    ????
 @"foreign_test#constant#7" = private unnamed_addr constant {i64, ptr} { i64 25, ptr @"foreign_test#constant#4" }, align 8
 @"foreign_test#constant#8" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"foreign_test#constant#2" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc i64 @strcmp(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"foreign_test.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"foreign_test#constant#8" to i64 ))
+define external fastcc void @"foreign_test#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"foreign_test#constant#8" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"foreign_test.#cont#2<0>"()
+  tail call fastcc void @"foreign_test#.#cont#2<0>"()
   ret void
 }
 
-define external fastcc void @"foreign_test.#cont#1<0>"() {
-  tail call fastcc void @"foreign_test.#cont#2<0>"()
+define external fastcc void @"foreign_test#.#cont#1<0>"() {
+  tail call fastcc void @"foreign_test#.#cont#2<0>"()
   ret void
 }
 
-define external fastcc void @"foreign_test.#cont#2<0>"() {
+define external fastcc void @"foreign_test#.#cont#2<0>"() {
   %"tmp#8##0" = call ccc i64 @strcmp(ptr @"foreign_test#constant#0", ptr @"foreign_test#constant#0")
   %"tmp#5##0" = icmp ne i64 %"tmp#8##0", 0
   br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"foreign_test#constant#7" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"foreign_test#constant#7" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"foreign_test.#cont#3<0>"()
+  tail call fastcc void @"foreign_test#.#cont#3<0>"()
   ret void
 if.else.0:
-  tail call fastcc void @"foreign_test.#cont#3<0>"()
+  tail call fastcc void @"foreign_test#.#cont#3<0>"()
   ret void
 }
 
-define external fastcc void @"foreign_test.#cont#3<0>"() {
+define external fastcc void @"foreign_test#.#cont#3<0>"() {
   %"tmp#7##0" = call ccc i64 @strcmp(ptr @"foreign_test#constant#0", ptr @"foreign_test#constant#1")
   %"tmp#4##0" = icmp ne i64 %"tmp#7##0", 0
   br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"foreign_test#constant#6" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"foreign_test#constant#6" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
   ret void
 }
 
-define external fastcc i1 @"foreign_test.lt<0>"(i64 %"x##0", i64 %"y##0") {
+define external fastcc i1 @"foreign_test#.lt<0>"(i64 %"x##0", i64 %"y##0") {
   %"tmp#1##0" = icmp slt i64 %"x##0", %"y##0"
   ret i1 %"tmp#1##0"
 }
 
-define external fastcc i1 @"foreign_test.neq<0>"(i64 %"x##0", i64 %"y##0") {
+define external fastcc i1 @"foreign_test#.neq<0>"(i64 %"x##0", i64 %"y##0") {
   %"tmp#0##0" = call ccc i64 @strcmp(i64 %"x##0", i64 %"y##0")
   %"tmp#2##0" = icmp ne i64 %"tmp#0##0", 0
   ret i1 %"tmp#2##0"

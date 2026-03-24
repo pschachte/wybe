@@ -21,11 +21,11 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.length1<0>(constant_struct#constant#2:wybe.list(T), 0:wybe.int, ?tmp#0##0:wybe.int) #12 @constant_struct:nn:nn
+    wybe.list.length1<0>(constant_struct#constant#2:wybe.list(wybe.int), 0:wybe.int, ?tmp#0##0:wybe.int) #12 @constant_struct:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @constant_struct:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#24##0:wybe.phantom, ?%tmp#25##0:wybe.phantom) @constant_struct:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @constant_struct:nn:nn
-    wybe.list.length1<0>(constant_struct#constant#3:wybe.list(T), 0:wybe.int, ?tmp#5##0:wybe.int) #13 @constant_struct:nn:nn
+    wybe.list.length1<0>(constant_struct#constant#3:wybe.list(wybe.int), 0:wybe.int, ?tmp#5##0:wybe.int) #13 @constant_struct:nn:nn
     foreign c print_int(~tmp#5##0:wybe.int, ~tmp#26##0:wybe.phantom, ?%tmp#42##0:wybe.phantom) @constant_struct:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#42##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @constant_struct:nn:nn
     foreign lpvm store(~%tmp#43##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @constant_struct:nn:nn
@@ -36,23 +36,23 @@ module top-level code > public {semipure} (0 calls)
 ; ModuleID = 'constant_struct'
 
 source_filename = "!ROOT!/final-dump/constant_struct.wybe"
-target triple    ????
+target triple   = ????
 
 @"constant_struct#constant#0" = private unnamed_addr constant {i64, i64} { i64 3, i64 0 }, align 8
 @"constant_struct#constant#1" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"constant_struct#constant#0" }, align 8
 @"constant_struct#constant#2" = private unnamed_addr constant {i64, ptr} { i64 1, ptr @"constant_struct#constant#1" }, align 8
 @"constant_struct#constant#3" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"constant_struct#constant#1" }, align 8
 
-declare external fastcc i64 @"wybe.list.length1<0>"(i64, i64)
+declare external fastcc i64 @"wybe#.list#.length1<0>"(i64, i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"constant_struct.<0>"() {
-  %"tmp#0##0" = tail call fastcc i64 @"wybe.list.length1<0>"(i64 ptrtoint( ptr @"constant_struct#constant#2" to i64 ), i64 0)
+define external fastcc void @"constant_struct#.<0>"() {
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.list#.length1<0>"(i64 ptrtoint( ptr @"constant_struct#constant#2" to i64 ), i64 0)
   call ccc void @print_int(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  %"tmp#5##0" = tail call fastcc i64 @"wybe.list.length1<0>"(i64 ptrtoint( ptr @"constant_struct#constant#3" to i64 ), i64 0)
+  %"tmp#5##0" = tail call fastcc i64 @"wybe#.list#.length1<0>"(i64 ptrtoint( ptr @"constant_struct#constant#3" to i64 ), i64 0)
   call ccc void @print_int(i64 %"tmp#5##0")
   call ccc void @putchar(i8 10)
   ret void

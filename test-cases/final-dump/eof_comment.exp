@@ -30,17 +30,17 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'eof_comment'
 
 source_filename = "!ROOT!/final-dump/eof_comment.wybe"
-target triple    ????
+target triple   = ????
 
 @"eof_comment#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Wominjeka!\00", align 8
 @"eof_comment#constant#1" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"eof_comment#constant#0" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"eof_comment.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"eof_comment#constant#1" to i64 ))
+define external fastcc void @"eof_comment#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"eof_comment#constant#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }

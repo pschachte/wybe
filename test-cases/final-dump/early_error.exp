@@ -44,28 +44,28 @@ my_error(msg##0:wybe.string)<{}; {}; {}>:
 ; ModuleID = 'early_error'
 
 source_filename = "!ROOT!/final-dump/early_error.wybe"
-target triple    ????
+target triple   = ????
 
 @"early_error#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"should print this\00", align 8
 @"early_error#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"should print this error message\00", align 8
 @"early_error#constant#3" = private unnamed_addr constant {i64, ptr} { i64 17, ptr @"early_error#constant#0" }, align 8
 @"early_error#constant#4" = private unnamed_addr constant {i64, ptr} { i64 31, ptr @"early_error#constant#1" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @exit(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @puts(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"early_error.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"early_error#constant#3" to i64 ))
+define external fastcc void @"early_error#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"early_error#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   call ccc void @puts(ptr @"early_error#constant#4")
   call ccc void @exit(i64 1)
   ret void
 }
 
-define external fastcc void @"early_error.my_error<0>"(i64 %"msg##0") {
+define external fastcc void @"early_error#.my_error<0>"(i64 %"msg##0") {
   call ccc void @puts(i64 %"msg##0")
   call ccc void @exit(i64 1)
   ret void

@@ -81,16 +81,16 @@ define external fastcc void @"alias_des#.<0>"() {
   ret void
 }
 
-define external fastcc void @"alias_des.foo<0>"() {
-  %"p2##0" = tail call fastcc i64 @"alias_des.replicate<0>"()
+define external fastcc void @"alias_des#.foo<0>"() {
+  %"p2##0" = tail call fastcc i64 @"alias_des#.replicate<0>"()
   %"tmp#7##0" = inttoptr i64 %"p2##0" to ptr
   store i64 20000, ptr %"tmp#7##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias_des#constant#6" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"p2##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"alias_des#constant#6" to i64 ))
+  tail call fastcc void @"position#.printPosition<0>"(i64 %"p2##0")
   ret void
 }
 
-define external fastcc i64 @"alias_des.replicate<0>"() {
+define external fastcc i64 @"alias_des#.replicate<0>"() {
   %"tmp#34##0" = call ccc ptr @wybe_malloc(i32 16)
   call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#34##0", ptr @"alias_des#constant#3", i64 16, i1 0)
   %"tmp#35##0" = ptrtoint ptr %"tmp#34##0" to i64
@@ -106,10 +106,10 @@ define external fastcc i64 @"alias_des.replicate<0>"() {
   %"tmp#42##0" = add i64 %"tmp#41##0", 8
   %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
   store i64 %"tmp#4##0", ptr %"tmp#43##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias_des#constant#4" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#35##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"alias_des#constant#5" to i64 ))
-  tail call fastcc void @"position.printPosition<0>"(i64 %"tmp#41##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"alias_des#constant#4" to i64 ))
+  tail call fastcc void @"position#.printPosition<0>"(i64 %"tmp#35##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"alias_des#constant#5" to i64 ))
+  tail call fastcc void @"position#.printPosition<0>"(i64 %"tmp#41##0")
   ret i64 %"tmp#41##0"
 }
 
@@ -173,12 +173,12 @@ declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"position.printPosition<0>"(i64 %"pos##0") {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"position#constant#1" to i64 ))
+define external fastcc void @"position#.printPosition<0>"(i64 %"pos##0") {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"position#constant#1" to i64 ))
   %"tmp#28##0" = inttoptr i64 %"pos##0" to ptr
   %"tmp#0##0" = load i64, ptr %"tmp#28##0"
   call ccc void @print_int(i64 %"tmp#0##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1203)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1203)
   %"tmp#29##0" = add i64 %"pos##0", 8
   %"tmp#30##0" = inttoptr i64 %"tmp#29##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#30##0"

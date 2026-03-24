@@ -65,7 +65,7 @@ unknown(?#success##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'io_flow_ok'
 
 source_filename = "!ROOT!/final-dump/io_flow_ok.wybe"
-target triple    ????
+target triple   = ????
 
 @"io_flow_ok#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"hello world!\00", align 8
 @"io_flow_ok#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"OK\00", align 8
@@ -75,30 +75,30 @@ target triple    ????
 @"io_flow_ok#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"io_flow_ok#constant#1" }, align 8
 @"io_flow_ok#constant#6" = private unnamed_addr constant [ 2 x ptr ] [ptr @"io_flow_ok#constant#4", ptr @"io_flow_ok#constant#5"]
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"io_flow_ok.<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
+define external fastcc void @"io_flow_ok#.<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#2##0" = tail call fastcc i1 @"io_flow_ok.unknown<0>"()
+  %"tmp#2##0" = tail call fastcc i1 @"io_flow_ok#.unknown<0>"()
   %"tmp#26##0" = zext i1 %"tmp#2##0" to i64
   %"tmp#25##0" = getelementptr inbounds [ 2 x i64 ], ptr @"io_flow_ok#constant#6", i64 0, i64 %"tmp#26##0"
   %"tmp#24##0" = load i64, ptr %"tmp#25##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#24##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#24##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
-  call ccc void @putchar(i8 10)
-  ret void
-}
-
-define external fastcc void @"io_flow_ok.aok<0>"() {
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 }
 
-define external fastcc i1 @"io_flow_ok.unknown<0>"() {
+define external fastcc void @"io_flow_ok#.aok<0>"() {
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"io_flow_ok#constant#3" to i64 ))
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc i1 @"io_flow_ok#.unknown<0>"() {
   ret i1 1
 }

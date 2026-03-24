@@ -181,7 +181,7 @@ print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'multictr2'
 
 source_filename = "!ROOT!/final-dump/multictr2.wybe"
-target triple    ????
+target triple   = ????
 
 @"multictr2#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"c01(\00", align 8
 @"multictr2#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"c03(\00", align 8
@@ -200,14 +200,14 @@ target triple    ????
 @"multictr2#constant#14" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"multictr2#constant#1" }, align 8
 @"multictr2#constant#15" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"multictr2#constant#0" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
-declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @print_float(double)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"multictr2.print_t<0>"(i64 %"x##0") {
+define external fastcc void @"multictr2#.print_t<0>"(i64 %"x##0") {
   %"tmp#170##0" = trunc i64 %"x##0" to i3
   %"tmp#27##0" = and i3 %"tmp#170##0", 7
   switch i3 %"tmp#27##0", label %case.7.switch.0 [
@@ -222,63 +222,63 @@ define external fastcc void @"multictr2.print_t<0>"(i64 %"x##0") {
 case.0.switch.0:
   %"tmp#171##0" = inttoptr i64 %"x##0" to ptr
   %"a##0" = load i64, ptr %"tmp#171##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#15" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#15" to i64 ))
   call ccc void @print_int(i64 %"a##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.1.switch.0:
   %"tmp#172##0" = add i64 %"x##0", -1
   %"tmp#173##0" = inttoptr i64 %"tmp#172##0" to ptr
   %"a##1" = load i64, ptr %"tmp#173##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#14" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#14" to i64 ))
   call ccc void @print_int(i64 %"a##1")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.2.switch.0:
   %"tmp#174##0" = add i64 %"x##0", -2
   %"tmp#175##0" = inttoptr i64 %"tmp#174##0" to ptr
   %"a##2" = load i64, ptr %"tmp#175##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#14" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#14" to i64 ))
   call ccc void @print_int(i64 %"a##2")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.3.switch.0:
   %"tmp#176##0" = add i64 %"x##0", -3
   %"tmp#177##0" = inttoptr i64 %"tmp#176##0" to ptr
   %"a##3" = load i64, ptr %"tmp#177##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#13" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#13" to i64 ))
   call ccc void @print_int(i64 %"a##3")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.4.switch.0:
   %"tmp#178##0" = add i64 %"x##0", -4
   %"tmp#179##0" = inttoptr i64 %"tmp#178##0" to ptr
   %"a##4" = load i64, ptr %"tmp#179##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#12" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#12" to i64 ))
   call ccc void @print_int(i64 %"a##4")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.5.switch.0:
   %"tmp#180##0" = add i64 %"x##0", -5
   %"tmp#181##0" = inttoptr i64 %"tmp#180##0" to ptr
   %"a##5" = load i64, ptr %"tmp#181##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#11" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#11" to i64 ))
   call ccc void @print_int(i64 %"a##5")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.6.switch.0:
   %"tmp#182##0" = add i64 %"x##0", -6
   %"tmp#183##0" = inttoptr i64 %"tmp#182##0" to ptr
   %"a##6" = load i64, ptr %"tmp#183##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#10" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#10" to i64 ))
   call ccc void @print_int(i64 %"a##6")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 case.7.switch.0:
@@ -291,13 +291,13 @@ case.7.switch.0:
   %"tmp#188##0" = add i64 %"x##0", 9
   %"tmp#189##0" = inttoptr i64 %"tmp#188##0" to ptr
   %"c##0" = load double, ptr %"tmp#189##0"
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#8" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#8" to i64 ))
   call ccc void @print_int(i64 %"a##7")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#9" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#9" to i64 ))
   call ccc void @print_int(i64 %"b##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#9" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"multictr2#constant#9" to i64 ))
   call ccc void @print_float(double %"c##0")
-  tail call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 1191)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1191)
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -1049,13 +1049,13 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'multictr2.t'
 
 source_filename = "!ROOT!/final-dump/multictr2.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"multictr2.t.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+define external fastcc i1 @"multictr2#.t#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#95##0" = trunc i64 %"#left##0" to i3
   %"tmp#28##0" = and i3 %"tmp#95##0", 7
   switch i3 %"tmp#28##0", label %case.7.switch.0 [
@@ -1217,7 +1217,7 @@ if.else.8:
   ret i1 0
 }
 
-define external fastcc i64 @"multictr2.t.c01<0>"(i64 %"f01##0") {
+define external fastcc i64 @"multictr2#.t#.c01<0>"(i64 %"f01##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1225,7 +1225,7 @@ define external fastcc i64 @"multictr2.t.c01<0>"(i64 %"f01##0") {
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.c01<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.c01<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 0
@@ -1242,7 +1242,7 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc i64 @"multictr2.t.c02<0>"(i64 %"f02##0") {
+define external fastcc i64 @"multictr2#.t#.c02<0>"(i64 %"f02##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1251,7 +1251,7 @@ define external fastcc i64 @"multictr2.t.c02<0>"(i64 %"f02##0") {
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.c02<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.c02<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 1
@@ -1269,7 +1269,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc i64 @"multictr2.t.c03<0>"(i64 %"f03##0") {
+define external fastcc i64 @"multictr2#.t#.c03<0>"(i64 %"f03##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1278,7 +1278,7 @@ define external fastcc i64 @"multictr2.t.c03<0>"(i64 %"f03##0") {
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.c03<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.c03<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 2
@@ -1296,7 +1296,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc i64 @"multictr2.t.c04<0>"(i64 %"f04##0") {
+define external fastcc i64 @"multictr2#.t#.c04<0>"(i64 %"f04##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1305,7 +1305,7 @@ define external fastcc i64 @"multictr2.t.c04<0>"(i64 %"f04##0") {
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.c04<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.c04<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 3
@@ -1323,7 +1323,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc i64 @"multictr2.t.c05<0>"(i64 %"f05##0") {
+define external fastcc i64 @"multictr2#.t#.c05<0>"(i64 %"f05##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1332,7 +1332,7 @@ define external fastcc i64 @"multictr2.t.c05<0>"(i64 %"f05##0") {
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.c05<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.c05<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 4
@@ -1350,7 +1350,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc i64 @"multictr2.t.c06<0>"(i64 %"f06##0") {
+define external fastcc i64 @"multictr2#.t#.c06<0>"(i64 %"f06##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1359,7 +1359,7 @@ define external fastcc i64 @"multictr2.t.c06<0>"(i64 %"f06##0") {
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.c06<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.c06<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 5
@@ -1377,7 +1377,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc i64 @"multictr2.t.c07<0>"(i64 %"f07##0") {
+define external fastcc i64 @"multictr2#.t#.c07<0>"(i64 %"f07##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 8)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1386,7 +1386,7 @@ define external fastcc i64 @"multictr2.t.c07<0>"(i64 %"f07##0") {
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.c07<1>"(i64 %"#result##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.c07<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 6
@@ -1404,7 +1404,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc i64 @"multictr2.t.c08<0>"(i64 %"f08_a##0", i64 %"f08_b##0", double %"f08_c##0") {
+define external fastcc i64 @"multictr2#.t#.c08<0>"(i64 %"f08_a##0", i64 %"f08_b##0", double %"f08_c##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 24)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -1419,7 +1419,7 @@ define external fastcc i64 @"multictr2.t.c08<0>"(i64 %"f08_a##0", i64 %"f08_b##0
   ret i64 %"tmp#6##0"
 }
 
-define external fastcc {i64, i64, double, i1} @"multictr2.t.c08<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, double, i1} @"multictr2#.t#.c08<1>"(i64 %"#result##0") {
   %"tmp#2##0" = trunc i64 %"#result##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
@@ -1447,7 +1447,7 @@ if.else.0:
   ret {i64, i64, double, i1} %"tmp#19##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f01<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f01<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 0
@@ -1464,7 +1464,7 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f01<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f01<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 0
@@ -1485,7 +1485,7 @@ if.else.0:
   ret {i64, i1} %"tmp#10##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f02<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f02<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 1
@@ -1503,7 +1503,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f02<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f02<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 1
@@ -1527,7 +1527,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f03<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f03<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 2
@@ -1545,7 +1545,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f03<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f03<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 2
@@ -1569,7 +1569,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f04<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f04<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 3
@@ -1587,7 +1587,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f04<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f04<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 3
@@ -1611,7 +1611,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f05<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f05<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 4
@@ -1629,7 +1629,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f05<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f05<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 4
@@ -1653,7 +1653,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f06<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f06<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 5
@@ -1671,7 +1671,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f06<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f06<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 5
@@ -1695,7 +1695,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f07<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f07<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 6
@@ -1713,7 +1713,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f07<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f07<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 6
@@ -1737,7 +1737,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f08_a<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f08_a<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
@@ -1755,7 +1755,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f08_a<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f08_a<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
@@ -1779,7 +1779,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f08_b<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f08_b<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
@@ -1797,7 +1797,7 @@ if.else.0:
   ret {i64, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f08_b<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f08_b<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
@@ -1821,7 +1821,7 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc {double, i1} @"multictr2.t.f08_c<0>"(i64 %"#rec##0") {
+define external fastcc {double, i1} @"multictr2#.t#.f08_c<0>"(i64 %"#rec##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
@@ -1839,7 +1839,7 @@ if.else.0:
   ret {double, i1} %"tmp#9##0"
 }
 
-define external fastcc {i64, i1} @"multictr2.t.f08_c<1>"(i64 %"#rec##0", double %"#field##0") {
+define external fastcc {i64, i1} @"multictr2#.t#.f08_c<1>"(i64 %"#rec##0", double %"#field##0") {
   %"tmp#2##0" = trunc i64 %"#rec##0" to i3
   %"tmp#1##0" = and i3 %"tmp#2##0", 7
   %"tmp#0##0" = icmp eq i3 %"tmp#1##0", 7
@@ -1863,8 +1863,8 @@ if.else.0:
   ret {i64, i1} %"tmp#13##0"
 }
 
-define external fastcc i1 @"multictr2.t.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
-  %"tmp#0##0" = tail call fastcc i1 @"multictr2.t.=<0>"(i64 %"#left##0", i64 %"#right##0")
+define external fastcc i1 @"multictr2#.t#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = tail call fastcc i1 @"multictr2#.t#.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"
 }

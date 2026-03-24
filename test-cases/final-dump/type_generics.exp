@@ -151,15 +151,15 @@ foo2(x##0:T0 <{}; {}; {0}>, ?y##0:T0 <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; 
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#7##0:wybe.list(T0)) @type_generics:nn:nn
     foreign lpvm mutate(~tmp#7##0:wybe.list(T0), ?tmp#8##0:wybe.list(T0), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T0) @type_generics:nn:nn
-    foreign lpvm mutate(~tmp#8##0:wybe.list(T0), ?tmp#0##0:wybe.list(9), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T0)) @type_generics:nn:nn
+    foreign lpvm mutate(~tmp#8##0:wybe.list(T0), ?tmp#0##0:wybe.list(Type9), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T0)) @type_generics:nn:nn
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.bool) @type_generics:nn:nn
     case ~tmp#11##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool) @type_generics:nn:nn
-        foreign llvm move(undef:T0, ?y##0:12) @type_generics:nn:nn
+        foreign llvm move(undef:T0, ?y##0:Type12) @type_generics:nn:nn
 
     1:
-        foreign lpvm access(~tmp#0##0:wybe.list(T0), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:12) @type_generics:nn:nn
+        foreign lpvm access(~tmp#0##0:wybe.list(T0), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:Type12) @type_generics:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool) @type_generics:nn:nn
 
 

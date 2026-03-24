@@ -64,11 +64,11 @@ target triple   = ????
 @"upto#constant#2" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"upto#constant#1" }, align 8
 @"wybe.control#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"shouldn't happen!\00", align 8
 
-declare external fastcc i64 @"wybe.int.fmt<2>"(i64, i64, i8)
-declare external fastcc {i64, i1} @"wybe.list.[]<0>"(i64, i64)
-declare external fastcc i64 @"wybe.string.,,<0>"(i64, i64)
-declare external fastcc void @"wybe.string.print<0>"(i64)
-declare external fastcc void @"wybe.string.print<0>[410bae77d3]"(i64)
+declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
+declare external fastcc {i64, i1} @"wybe#.list#.[]<0>"(i64, i64)
+declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @error_exit(i64, i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -82,9 +82,9 @@ define external fastcc void @"upto#.<0>"() {
   %"tmp#5##0" = extractvalue {i64, i1}%"tmp#13##0", 1
   br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#8##0" = call fastcc i64 @"wybe.int.fmt<2>"(i64 %"tmp#1##0", i64 0, i8 32)
-  %"tmp#9##0" = call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"upto#constant#2" to i64 ), i64 %"tmp#8##0")
-  call fastcc void @"wybe.string.print<0>[410bae77d3]"(i64 %"tmp#9##0")
+  %"tmp#8##0" = call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"tmp#1##0", i64 0, i8 32)
+  %"tmp#9##0" = call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"upto#constant#2" to i64 ), i64 %"tmp#8##0")
+  call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#9##0")
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
@@ -92,10 +92,10 @@ if.else.0:
   ret void
 }
 
-define external fastcc void @"upto.#cont#1<0>"(i64 %"result##0") {
-  %"tmp#3##0" = tail call fastcc i64 @"wybe.int.fmt<2>"(i64 %"result##0", i64 0, i8 32)
-  %"tmp#2##0" = tail call fastcc i64 @"wybe.string.,,<0>"(i64 ptrtoint( ptr @"upto#constant#2" to i64 ), i64 %"tmp#3##0")
-  tail call fastcc void @"wybe.string.print<0>"(i64 %"tmp#2##0")
+define external fastcc void @"upto#.#cont#1<0>"(i64 %"result##0") {
+  %"tmp#3##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"result##0", i64 0, i8 32)
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"upto#constant#2" to i64 ), i64 %"tmp#3##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   ret void
 }
