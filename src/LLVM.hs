@@ -1544,7 +1544,7 @@ llvmConstValue (GenericStructMember val) =
 
 -- | The LLVMArg translation of a ProcSpec.
 funcRef :: ProcSpec -> LLVMArg
-funcRef pspec = "ptr " ++ llvmGlobalName (show pspec)
+funcRef pspec = "ptr " ++ fst (llvmProcName pspec)
 
 
 -- | The variable name of a PrimArg; report an error if not a variable.
@@ -2175,7 +2175,14 @@ stackAlloc result size = do
 llvmProcName :: ProcSpec -> (LLVMName,String)
 llvmProcName ProcSpec{procSpecMod=[],procSpecName=""} =
     (llvmGlobalName "main", "ccc")
-llvmProcName pspec = (llvmGlobalName $ show pspec, "fastcc")
+llvmProcName pspec = 
+    (llvmGlobalName $ mangleProcSpec pspec, "fastcc")
+
+
+-- | Mangle a proc spec
+mangleProcSpec :: ProcSpec -> String
+mangleProcSpec pspec@ProcSpec{procSpecMod=mod} = 
+    show pspec{procSpecMod=(++ [specialChar]) <$> mod}
 
 
 -- | Make a suitable LLVM name for a global variable or constant.  We prefix it

@@ -226,7 +226,7 @@ repeated(x##0:wybe.int)<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>
 ; ModuleID = 'foreign_def_unordered'
 
 source_filename = "!ROOT!/final-dump/foreign_def_unordered.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc i64 @a_in_b_inout(i64, i64)
@@ -251,11 +251,11 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#foreign_def_unordered.a" = global i64 undef
 @"resource#foreign_def_unordered.b" = global i64 undef
 
-define external fastcc void @"foreign_def_unordered.a_in_b_in<0>"() {
+define external fastcc void @"foreign_def_unordered#.a_in_b_in<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.a_in_b_inout<0>"() {
+define external fastcc void @"foreign_def_unordered#.a_in_b_inout<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"b##1" = call ccc i64 @a_in_b_inout(i64 %"tmp#0##0", i64 %"b##0")
@@ -263,14 +263,14 @@ define external fastcc void @"foreign_def_unordered.a_in_b_inout<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.a_in_b_out<0>"() {
+define external fastcc void @"foreign_def_unordered#.a_in_b_out<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"b##0" = call ccc i64 @a_in_b_out(i64 %"tmp#0##0")
   store i64 %"b##0", ptr @"resource#foreign_def_unordered.b"
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.a_inout_b_in<0>"() {
+define external fastcc void @"foreign_def_unordered#.a_inout_b_in<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"a##1" = call ccc i64 @a_inout_b_in(i64 %"a##0", i64 %"tmp#0##0")
@@ -278,7 +278,7 @@ define external fastcc void @"foreign_def_unordered.a_inout_b_in<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.a_inout_b_inout<0>"() {
+define external fastcc void @"foreign_def_unordered#.a_inout_b_inout<0>"() {
   %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"tmp#0##0" = call ccc {i64, i64} @a_inout_b_inout(i64 %"a##0", i64 %"b##0")
@@ -289,7 +289,7 @@ define external fastcc void @"foreign_def_unordered.a_inout_b_inout<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.a_inout_b_out<0>"() {
+define external fastcc void @"foreign_def_unordered#.a_inout_b_out<0>"() {
   %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"tmp#0##0" = call ccc {i64, i64} @a_inout_b_out(i64 %"a##0")
   %"a##1" = extractvalue {i64, i64}%"tmp#0##0", 0
@@ -299,14 +299,14 @@ define external fastcc void @"foreign_def_unordered.a_inout_b_out<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.a_out_b_in<0>"() {
+define external fastcc void @"foreign_def_unordered#.a_out_b_in<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"a##0" = call ccc i64 @a_out_b_in(i64 %"tmp#0##0")
   store i64 %"a##0", ptr @"resource#foreign_def_unordered.a"
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.a_out_b_inout<0>"() {
+define external fastcc void @"foreign_def_unordered#.a_out_b_inout<0>"() {
   %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"tmp#0##0" = call ccc {i64, i64} @a_out_b_inout(i64 %"b##0")
   %"a##0" = extractvalue {i64, i64}%"tmp#0##0", 0
@@ -316,7 +316,7 @@ define external fastcc void @"foreign_def_unordered.a_out_b_inout<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.a_out_b_out<0>"() {
+define external fastcc void @"foreign_def_unordered#.a_out_b_out<0>"() {
   %"tmp#0##0" = call ccc {i64, i64} @a_out_b_out()
   %"a##0" = extractvalue {i64, i64}%"tmp#0##0", 0
   %"b##0" = extractvalue {i64, i64}%"tmp#0##0", 1
@@ -325,11 +325,11 @@ define external fastcc void @"foreign_def_unordered.a_out_b_out<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.b_in_a_in<0>"() {
+define external fastcc void @"foreign_def_unordered#.b_in_a_in<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.b_in_a_inout<0>"() {
+define external fastcc void @"foreign_def_unordered#.b_in_a_inout<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"a##1" = call ccc i64 @b_in_a_inout(i64 %"tmp#0##0", i64 %"a##0")
@@ -337,14 +337,14 @@ define external fastcc void @"foreign_def_unordered.b_in_a_inout<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.b_in_a_out<0>"() {
+define external fastcc void @"foreign_def_unordered#.b_in_a_out<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"a##0" = call ccc i64 @b_in_a_out(i64 %"tmp#0##0")
   store i64 %"a##0", ptr @"resource#foreign_def_unordered.a"
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.b_inout_a_in<0>"() {
+define external fastcc void @"foreign_def_unordered#.b_inout_a_in<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"b##1" = call ccc i64 @b_inout_a_in(i64 %"b##0", i64 %"tmp#0##0")
@@ -352,7 +352,7 @@ define external fastcc void @"foreign_def_unordered.b_inout_a_in<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.b_inout_a_inout<0>"() {
+define external fastcc void @"foreign_def_unordered#.b_inout_a_inout<0>"() {
   %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"tmp#0##0" = call ccc {i64, i64} @b_inout_a_inout(i64 %"b##0", i64 %"a##0")
@@ -363,7 +363,7 @@ define external fastcc void @"foreign_def_unordered.b_inout_a_inout<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.b_inout_a_out<0>"() {
+define external fastcc void @"foreign_def_unordered#.b_inout_a_out<0>"() {
   %"b##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"tmp#0##0" = call ccc {i64, i64} @b_inout_a_out(i64 %"b##0")
   %"b##1" = extractvalue {i64, i64}%"tmp#0##0", 0
@@ -373,14 +373,14 @@ define external fastcc void @"foreign_def_unordered.b_inout_a_out<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.b_out_a_in<0>"() {
+define external fastcc void @"foreign_def_unordered#.b_out_a_in<0>"() {
   %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"b##0" = call ccc i64 @b_out_a_in(i64 %"tmp#0##0")
   store i64 %"b##0", ptr @"resource#foreign_def_unordered.b"
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.b_out_a_inout<0>"() {
+define external fastcc void @"foreign_def_unordered#.b_out_a_inout<0>"() {
   %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"tmp#0##0" = call ccc {i64, i64} @b_out_a_inout(i64 %"a##0")
   %"b##0" = extractvalue {i64, i64}%"tmp#0##0", 0
@@ -390,7 +390,7 @@ define external fastcc void @"foreign_def_unordered.b_out_a_inout<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.b_out_a_out<0>"() {
+define external fastcc void @"foreign_def_unordered#.b_out_a_out<0>"() {
   %"tmp#0##0" = call ccc {i64, i64} @b_out_a_out()
   %"b##0" = extractvalue {i64, i64}%"tmp#0##0", 0
   %"a##0" = extractvalue {i64, i64}%"tmp#0##0", 1
@@ -399,14 +399,14 @@ define external fastcc void @"foreign_def_unordered.b_out_a_out<0>"() {
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.out_in<0>"() {
+define external fastcc void @"foreign_def_unordered#.out_in<0>"() {
   %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"a##1" = call ccc i64 @out_in(i64 %"a##0")
   store i64 %"a##1", ptr @"resource#foreign_def_unordered.a"
   ret void
 }
 
-define external fastcc void @"foreign_def_unordered.repeated<0>"(i64 %"x##0") {
+define external fastcc void @"foreign_def_unordered#.repeated<0>"(i64 %"x##0") {
   %"tmp#0##0" = load i64, ptr @"resource#foreign_def_unordered.b"
   %"a##0" = load i64, ptr @"resource#foreign_def_unordered.a"
   %"a##1" = call ccc i64 @repeated(i64 %"x##0", i64 %"a##0", i64 %"tmp#0##0", i64 %"tmp#0##0", i64 %"a##0")

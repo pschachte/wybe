@@ -1,0 +1,136 @@
+# purpose: fixed 32 bit unsigned integer type
+# since  : 0.2
+# On 32-bit platforms, this is the same as count.  It is provided for
+# completeness and portability.
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.bool, wybe.comparison, wybe.int, wybe.io, wybe.string, wybe.char
+use wybe.control, wybe.c_string, wybe.count
+
+representation is 32 bit unsigned
+
+## Constants
+
+pub def bound_minimum:_ = 0:_
+pub def bound_maximum:_ = 4_294_967_295:_
+
+# Overloaded versions based on an argument
+pub def bound_minimum(x:_):_ = bound_minimum
+pub def bound_maximum(x:_):_ = bound_maximum
+
+
+## Common count operations
+
+# Addition.  This operation is reversible:  you can compute either argument from
+# the other argument and the value. However, as a count cannot be negative, some
+# values may fail.
+pub def foreign llvm `+`=add(x:_, y:_):_
+pub def {partial} (?x:_ + y:_):_ = ?z where { ?x = z - y }
+pub def {partial} (x:_ + ?y:_):_ = ?z where { ?y = z - x }
+
+# Subtraction.  This operation is reversible:  you can compute either argument
+# from the other argument and the value. However, as a count cannot be negative, 
+# some values may fail.
+pub def {partial} (x:_ - y:_):_ = foreign llvm sub(x,y) where { x >= y }
+pub def (?x:_ - y:_):_ = ?z where { ?x = z + y }
+pub def {partial} (x:_ - ?y:_):_ = ?z where { ?y = x - z }
+
+# Multiplication.
+pub def foreign llvm `*`=mul(x:_, y:_):_
+
+# Division.
+pub def foreign llvm `/`=udiv(x:_, y:_):_
+
+# Modulus.
+pub def foreign llvm `%`=urem(x:_, y:_):_
+
+## Bitwise operations
+
+# Bit-shift left and right, shifting zero bits from the end.
+pub def foreign llvm `<<`=shl(x:_, s:_):_
+pub def foreign llvm `>>`=lshr(x:_, s:_):_
+
+# Bitwise logical operations.
+pub def foreign llvm bitwise_and=and(x:_, y:_):_
+pub def foreign llvm bitwise_or=or(x:_, y:_):_
+pub def foreign llvm bitwise_xor=xor(x:_, y:_):_
+pub def {inline}     bitwise_not(x:_):_ = bitwise_xor(x, bound_maximum)
+
+
+## Comparisons
+
+# Equality and disequality.
+pub def foreign llvm {test} `=` =icmp_eq(x:_, y:_)
+pub def foreign llvm {test} `~=`=icmp_ne(x:_, y:_)
+
+# Inequalities.
+pub def foreign llvm {test} `<` =icmp_ult(x:_, y:_)
+pub def foreign llvm {test} `<=`=icmp_ule(x:_, y:_)
+pub def foreign llvm {test} `>` =icmp_ugt(x:_, y:_)
+pub def foreign llvm {test} `>=`=icmp_uge(x:_, y:_)
+
+# Three-way comparison.
+pub def (x:_ <=> y:_):comparison = 
+    if { x < y :: lesser | x = y :: equal | else :: greater }
+
+# Minimum and maximum of two counts.
+pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
+pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
+
+# Conversion
+pub def foreign lpvm int=cast(x:_):int  # Lossy:  can produce negative numbers!
+pub def foreign lpvm from_int=cast(x:int):_  # Lossy:  truncates to 32 bits
+pub def foreign lpvm count=cast(x:_):count  # Lossless
+pub def foreign lpvm from_count=cast(x:count):_  # Lossy:  truncates to 32 bits
+
+
+## Other
+
+# Integer square root.
+pub def foreign c sqrt=usqrt32(x:_):_
+
+# Integer exponentiation.
+pub def foreign c power=upow32(x:_, y:_):_
+pub def (x:_ ** y:_):_ = power(x, y)
+
+# Increment.
+pub def incr(!x:_) { ?x = x + 1:_ }
+
+# Decrement.
+pub def {partial} decr(!x:_) { ?x = x - 1:_ }
+
+## Formatting
+pub def fmt(x:_):string = fmt(x, 0)
+
+pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
+
+pub def fmt(n:_, minlength:int, fill:char):string = fmt(n, minlength, fill, 10:_)
+
+# A quick hack:  allow the base as in int, so it doesn't need explicit type.
+pub def fmt(n:_, minlength:int, fill:char, base:int):string =
+    fmt(n, minlength, fill, from_int(base))
+
+pub def fmt(n:_, minlength:int, fill:char, base:_):string =
+    (if { n = 0:_ :: repetition(fill, max(0,minlength)) ,, "0"
+        | else    :: fmtnz(n, minlength, fill, base)
+    })
+
+def fmtnz(n:_, minlength:int, fill:char, base:_):string =
+    (if { n = 0:_ :: repetition(fill, max(0,minlength))
+        | else    ::
+            let { ?digit = n % base } in
+            fmtnz(n/base, minlength-1, fill, base) ,,
+                if { digit <= 9:_ :: (chr(ord('0')+int(n%base)) | shouldnt)
+                   | else         :: (chr(ord('A')+int(n%base)-10) | shouldnt)
+                }
+    })
+
+
+## I/O
+
+pub def foreign c print=print_count32(x:_) use !io 
+
+pub def println(x:_) use !io { !print(x); !nl }
+
+pub def foreign c read=read_count32(?x:_) use !io 

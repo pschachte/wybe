@@ -2,7 +2,15 @@
 # since  : 0.1
 
 pub def {semipure} logmsg(x:int) { foreign c {impure} log_int(x) }
+pub def {semipure} logmsg(x:int64) { foreign c {impure} log_int64(x) }
+pub def {semipure} logmsg(x:int32) { foreign c {impure} log_int32(x) }
+pub def {semipure} logmsg(x:int16) { foreign c {impure} log_int16(x) }
+pub def {semipure} logmsg(x:int8) { foreign c {impure} log_int8(x) }
 pub def {semipure} logmsg(x:count) { foreign c {impure} log_count(x) }
+pub def {semipure} logmsg(x:count64) { foreign c {impure} log_count64(x) }
+pub def {semipure} logmsg(x:count32) { foreign c {impure} log_count32(x) }
+pub def {semipure} logmsg(x:count16) { foreign c {impure} log_count16(x) }
+pub def {semipure} logmsg(x:count8) { foreign c {impure} log_count8(x) }
 pub def {semipure} logmsg(x:float) { foreign c {impure} log_float(x) }
 pub def {semipure} logmsg(x:char) { foreign c {impure} log_char(x) }
 pub def {semipure} logmsg(x:string) { !logmsg(c_string(x)) }

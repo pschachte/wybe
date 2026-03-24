@@ -1,0 +1,417 @@
+Testing int:
+x = 7, y = 6, z = 42
+bound_minimum(x) = -9223372036854775808
+bound_maximum(x) = 9223372036854775807
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+-x = -7
+-(-7) = 7
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = 448
+z >> 2 = 10
+logical_bitshift(-7,6) = 288230376151711743
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1) is equal
+y <=> x is lesser
+x = (y+1) is true
+x ~= (y+1) is false
+x < (y+1) is false
+x <= (y+1) is true
+x > (y+1) is false
+x >= (y+1) is true
+max(x,y) is 7
+min(x,y) is 6
+count(bound_maximum(x)) is 9223372036854775807
+count(bound_minimum(x)) is 9223372036854775808
+sqrt(z) is 6
+x ** y = 117649
+signum(x) is 1
+signum(x-y-1) is 0
+signum(-7) is -1
+abs(7) is 7
+abs(-7) is 7
+
+Testing int64:
+x = 7, y = 6, z = 42
+bound_minimum(x) = -9223372036854775808
+bound_maximum(x) = 9223372036854775807
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+-x = -7
+-(-7) = 7
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = 448
+z >> 2:int64 = 10
+logical_bitshift(-7,6) = 288230376151711743
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1:int64) is equal
+y <=> x is lesser
+x = (y+1:int64) is true
+x ~= (y+1:int64) is false
+x < (y+1:int64) is false
+x <= (y+1:int64) is true
+x > (y+1:int64) is false
+x >= (y+1:int64) is true
+max(x,y) is 7
+min(x,y) is 6
+count(bound_maximum(x)) is 9223372036854775807
+count(bound_minimum(x)) is 9223372036854775808
+int(bound_maximum(x)) is 9223372036854775807
+int(bound_minimum(x)) is -9223372036854775808
+sqrt(z) is 6
+x ** y = 117649
+signum(x) is 1
+signum(x-y-1:int64) is 0
+signum(-7) is -1
+abs(7) is 7
+abs(-7) is 7
+
+Testing int32:
+x = 7, y = 6, z = 42
+bound_minimum(x) = -2147483648
+bound_maximum(x) = 2147483647
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+-x = -7
+-(-7) = 7
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = 448
+z >> 2:int32 = 10
+logical_bitshift(-7,6) = -1
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1:int32) is equal
+y <=> x is lesser
+x = (y+1:int32) is true
+x ~= (y+1:int32) is false
+x < (y+1:int32) is false
+x <= (y+1:int32) is true
+x > (y+1:int32) is false
+x >= (y+1:int32) is true
+max(x,y) is 7
+min(x,y) is 6
+count(bound_maximum(x)) is 2147483647
+count(bound_minimum(x)) is 18446744071562067968
+int(bound_maximum(x)) is 2147483647
+int(bound_minimum(x)) is -2147483648
+sqrt(z) is 6
+x ** y = 117649
+signum(x) is 1
+signum(x-y-1:int32) is 0
+signum(-7) is -1
+abs(7) is 7
+abs(-7) is 7
+
+Testing int16:
+x = 7, y = 6, z = 42
+bound_minimum(x) = -32768
+bound_maximum(x) = 32767
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+-x = -7
+-(-7) = 7
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = 448
+z >> 2:int16 = 10
+logical_bitshift(-7,6) = -1
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1:int16) is equal
+y <=> x is lesser
+x = (y+1:int16) is true
+x ~= (y+1:int16) is false
+x < (y+1:int16) is false
+x <= (y+1:int16) is true
+x > (y+1:int16) is false
+x >= (y+1:int16) is true
+max(x,y) is 7
+min(x,y) is 6
+count(bound_maximum(x)) is 32767
+count(bound_minimum(x)) is 18446744073709518848
+int(bound_maximum(x)) is 32767
+int(bound_minimum(x)) is -32768
+sqrt(z) is 6
+x ** y = -13423
+signum(x) is 1
+signum(x-y-1:int16) is 0
+signum(-7) is -1
+abs(7) is 7
+abs(-7) is 7
+
+Testing int8:
+x = 7, y = 6, z = 42
+bound_minimum(x) = -128
+bound_maximum(x) = 127
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+-x = -7
+-(-7) = 7
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = -64
+z >> 2:int8 = 10
+logical_bitshift(-7,6) = -1
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1:int8) is equal
+y <=> x is lesser
+x = (y+1:int8) is true
+x ~= (y+1:int8) is false
+x < (y+1:int8) is false
+x <= (y+1:int8) is true
+x > (y+1:int8) is false
+x >= (y+1:int8) is true
+max(x,y) is 7
+min(x,y) is 6
+count(bound_maximum(x)) is 127
+count(bound_minimum(x)) is 18446744073709551488
+int(bound_maximum(x)) is 127
+int(bound_minimum(x)) is -128
+sqrt(z) is 6
+x ** y = -111
+signum(x) is 1
+signum(x-y-1:int8) is 0
+signum(-7) is -1
+abs(7) is 7
+abs(-7) is 7
+
+Testing count:
+x = 7, y = 6, z = 42
+bound_minimum(x) = 0
+bound_maximum(x) = 18446744073709551615
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = 448
+z >> 2:count = 10
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1:count) is equal
+y <=> x is lesser
+x = (y+1:count) is true
+x ~= (y+1:count) is false
+x < (y+1:count) is false
+x <= (y+1:count) is true
+x > (y+1:count) is false
+x >= (y+1:count) is true
+max(x,y) is 7
+min(x,y) is 6
+int(bound_maximum(x)) is -1
+int(bound_minimum(x)) is 0
+sqrt(z) is 6
+x ** y = 117649
+
+Testing count64:
+x = 7, y = 6, z = 42
+bound_minimum(x) = 0
+bound_maximum(x) = 18446744073709551615
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = 448
+z >> 2:count64 = 10
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1:count64) is equal
+y <=> x is lesser
+x = (y+1:count64) is true
+x ~= (y+1:count64) is false
+x < (y+1:count64) is false
+x <= (y+1:count64) is true
+x > (y+1:count64) is false
+x >= (y+1:count64) is true
+max(x,y) is 7
+min(x,y) is 6
+int(bound_maximum(x)) is -1
+int(bound_minimum(x)) is 0
+sqrt(z) is 6
+x ** y = 117649
+
+Testing count32:
+x = 7, y = 6, z = 42
+bound_minimum(x) = 0
+bound_maximum(x) = 4294967295
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = 448
+z >> 2:count32 = 10
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1:count32) is equal
+y <=> x is lesser
+x = (y+1:count32) is true
+x ~= (y+1:count32) is false
+x < (y+1:count32) is false
+x <= (y+1:count32) is true
+x > (y+1:count32) is false
+x >= (y+1:count32) is true
+max(x,y) is 7
+min(x,y) is 6
+int(bound_maximum(x)) is 4294967295
+int(bound_minimum(x)) is 0
+sqrt(z) is 6
+x ** y = 117649
+
+Testing count16:
+x = 7, y = 6, z = 42
+bound_minimum(x) = 0
+bound_maximum(x) = 65535
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = 448
+z >> 2:count16 = 10
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1:count16) is equal
+y <=> x is lesser
+x = (y+1:count16) is true
+x ~= (y+1:count16) is false
+x < (y+1:count16) is false
+x <= (y+1:count16) is true
+x > (y+1:count16) is false
+x >= (y+1:count16) is true
+max(x,y) is 7
+min(x,y) is 6
+int(bound_maximum(x)) is 65535
+int(bound_minimum(x)) is 0
+sqrt(z) is 6
+x ** y = 52113
+
+Testing count8:
+x = 7, y = 6, z = 42
+bound_minimum(x) = 0
+bound_maximum(x) = 255
+x + y = 13
+7 + 35 = 42
+36 + 6 = 42
+x - y = 1
+42 - 36 = 6
+13 - 7 = 6
+x * y = 42
+x / y = 1
+x % y = 1
+x << y = 192
+z >> 2:count8 = 10
+x = y is false
+x ~= y is true
+x < y is false
+x <= y is false
+x > y is true
+x >= y is true
+x <=> y is greater
+x <=> (y+1:count8) is equal
+y <=> x is lesser
+x = (y+1:count8) is true
+x ~= (y+1:count8) is false
+x < (y+1:count8) is false
+x <= (y+1:count8) is true
+x > (y+1:count8) is false
+x >= (y+1:count8) is true
+max(x,y) is 7
+min(x,y) is 6
+int(bound_maximum(x)) is 255
+int(bound_minimum(x)) is 0
+sqrt(z) is 6
+x ** y = 145

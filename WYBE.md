@@ -2341,7 +2341,11 @@ an unsigned primitive number type comprising *n* bits, where *n* is any non-nega
 integer. Represents integers between 0 and 2<sup>*n*</sup>-1 inclusive.
 - *n* `bit float`
 a floating point number type comprising *n* bits, where *n* is one of 16, 32,
-64, or 128.  
+64, or 128.
+
+> [!WARNING]
+> Currently, *n* is limited to at most 64 for all `signed`, `unsigned`, and
+> `float` representation types.
 
 Like a `constructor` declaration, a `representation` declaration makes the
 enclosing module into a type.  Also like a `constructor` declaration, a submodule
@@ -2444,11 +2448,22 @@ representation. This just allows getting around LLVM strong typing; it does not
 actually require any instructions.
 
 - `foreign lpvm sizeof(`*arg:type*, `?`*size:int_type*`)` Get the size of the *type* of 
-the first argument in bytes. To get the size in bits, specify the `bits` modifier.
-The size of a type is the size of it's largest constructor (at most a machine word), or the size of its' representation.
+the first argument in bytes. To get the size in bits, specify the `bits`
+modifier (in curly braces, after `lpvm`).
+The size of a type is the size of its largest constructor.
+Because Wybe will automatically box values that are larger than a word of
+memory, `sizeof` will never return a value larger than the size of an address.
+
 The first argument can be anything except for an outwards-flowing variable. 
-The type of the second argument, *int_type*, can have any integer represented type. 
+The type of the second argument, *int_type*, can have any integer represented
+type,
+therefore, it is generally recommended to explicitly specify the type of this
+argument if it can't otherwise be inferred from context.
+
 This instruction is resolved statically, with _no_ runtime cost.
+Note that, for values of a generic type, the size returned is the size of a
+generic value (that is, the size of a pointer), rather than the size of the
+type of the value actually passed.
 
 
 #### Handling impurity

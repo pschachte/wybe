@@ -22,7 +22,7 @@ pub def c_array(x:T, len:int):_(T) = ar where {
     do {
         while offset < size
         foreign lpvm mutate(data, ?data, offset, 1, size, 0, x)
-        !offset += word_size_bytes
+        !offset + word_size_bytes
     }
     ?ar = c_array(len, data)
 }
@@ -38,7 +38,7 @@ pub def c_array(ls:list(T)):_(T) = ar where {
     ?offset = 0
     for ?x in ls {
         foreign lpvm mutate(data, ?data, offset, 1, size, 0, x)
-        !offset += word_size_bytes
+        !offset + word_size_bytes
     }
     ?ar = c_array(len, data)
 }

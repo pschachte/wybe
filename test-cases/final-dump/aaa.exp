@@ -32,12 +32,12 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'aaa'
 
 source_filename = "!ROOT!/final-dump/aaa.wybe"
-target triple    ????
+target triple   = ????
 
 @"aaa#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"AAA: Init\00", align 8
 @"aaa#constant#1" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"aaa#constant#0" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -76,12 +76,12 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'bbb'
 
 source_filename = "!ROOT!/final-dump/bbb.wybe"
-target triple    ????
+target triple   = ????
 
 @"bbb#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"BBB: Init\00", align 8
 @"bbb#constant#1" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"bbb#constant#0" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -120,12 +120,12 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'ccc'
 
 source_filename = "!ROOT!/final-dump/ccc.wybe"
-target triple    ????
+target triple   = ????
 
 @"ccc#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"CCC: Init\00", align 8
 @"ccc#constant#1" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"ccc#constant#0" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -163,12 +163,12 @@ module top-level code > public {inline,semipure} (0 calls)
 ; ModuleID = 'ddd'
 
 source_filename = "!ROOT!/final-dump/ddd.wybe"
-target triple    ????
+target triple   = ????
 
 @"ddd#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"DDD: Init\00", align 8
 @"ddd#constant#1" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"ddd#constant#0" }, align 8
 
-declare external fastcc void @"wybe.string.print<0>"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 

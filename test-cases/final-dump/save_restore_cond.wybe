@@ -1,6 +1,6 @@
 def {test, noinline} suc { pass }
 if {
-    ?a = 0; suc; !a += 1 ::
+    ?a = 0; suc; !a + 1 ::
         pass
 |   else ::
         pass

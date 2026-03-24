@@ -53,7 +53,7 @@ second([a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>
 ; ModuleID = 'uneeded_closure_args'
 
 source_filename = "!ROOT!/final-dump/uneeded_closure_args.wybe"
-target triple    ????
+target triple   = ????
 
 @"uneeded_closure_args#constant#0" = private unnamed_addr constant {ptr} { ptr @"uneeded_closure_args.#closure#1<0>" }, align 8
 
@@ -66,16 +66,16 @@ define external fastcc void @"uneeded_closure_args.<0>"() {
   ret void
 }
 
-define external fastcc i64 @"uneeded_closure_args.#closure#1<0>"(ptr %"#env##0", i64 %"generic#b##0") {
+define external fastcc i64 @"uneeded_closure_args#.#closure#1<0>"(ptr %"#env##0", i64 %"generic#b##0") {
   ret i64 %"generic#b##0"
 }
 
-define external fastcc i64 @"uneeded_closure_args.call<0>"(ptr %"f##0", i64 %"a##0") {
+define external fastcc i64 @"uneeded_closure_args#.call<0>"(ptr %"f##0", i64 %"a##0") {
   %"tmp#1##0" = load ptr, ptr %"f##0"
   %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(ptr %"f##0", i64 %"a##0")
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"uneeded_closure_args.second<0>"(i64 %"b##0") {
+define external fastcc i64 @"uneeded_closure_args#.second<0>"(i64 %"b##0") {
   ret i64 %"b##0"
 }
