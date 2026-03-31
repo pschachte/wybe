@@ -37,10 +37,10 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:alias_type1.position) @alias_type1:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#6##0:alias_type1.position) @alias_type1:nn:nn
     foreign lpvm mutate(~tmp#6##0:alias_type1.position, ?tmp#7##0:alias_type1.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @alias_type1:nn:nn
     foreign lpvm mutate(~tmp#7##0:alias_type1.position, ?tmp#8##0:alias_type1.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @alias_type1:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:alias_type1.posrec) @alias_type1:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#11##0:alias_type1.posrec) @alias_type1:nn:nn
     foreign lpvm mutate(~tmp#11##0:alias_type1.posrec, ?tmp#12##0:alias_type1.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @alias_type1:nn:nn
     foreign lpvm mutate(~tmp#12##0:alias_type1.posrec, ?tmp#13##0:alias_type1.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#8##0:alias_type1.position) @alias_type1:nn:nn
     foreign lpvm {noalias} mutate(~tmp#8##0:alias_type1.position, ?pos##1:alias_type1.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int) @alias_type1:nn:nn
@@ -68,14 +68,14 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"alias_type1#.<0>"() {
-  %"tmp#26##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#26##0" = alloca i8, i64 16, align 8
   %"tmp#6##0" = ptrtoint ptr %"tmp#26##0" to i64
   %"tmp#27##0" = inttoptr i64 %"tmp#6##0" to ptr
   store i64 100, ptr %"tmp#27##0"
   %"tmp#28##0" = add i64 %"tmp#6##0", 8
   %"tmp#29##0" = inttoptr i64 %"tmp#28##0" to ptr
   store i64 100, ptr %"tmp#29##0"
-  %"tmp#30##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#30##0" = alloca i8, i64 16, align 8
   %"tmp#11##0" = ptrtoint ptr %"tmp#30##0" to i64
   %"tmp#31##0" = inttoptr i64 %"tmp#11##0" to ptr
   store i64 1, ptr %"tmp#31##0"

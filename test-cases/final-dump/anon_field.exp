@@ -27,11 +27,11 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?tmp#21##0:anon_field) @anon_field:nn:nn
+    foreign lpvm {stack} alloc(24:wybe.int, ?tmp#21##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#21##0:anon_field, ?tmp#22##0:anon_field, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:wybe.bool) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#22##0:anon_field, ?tmp#23##0:anon_field, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#23##0:anon_field, ?tmp#0##0:anon_field, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @anon_field:nn:nn
-    foreign lpvm alloc(8:wybe.int, ?tmp#25##0:anon_field) @anon_field:nn:nn
+    foreign lpvm {stack} alloc(8:wybe.int, ?tmp#25##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#25##0:anon_field, ?tmp#26##0:anon_field, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 1:wybe.int) @anon_field:nn:nn
     foreign llvm or(~tmp#26##0:anon_field, 1:wybe.int, ?tmp#2##0:anon_field) @anon_field:nn:nn
     anon_field.=<0>(~tmp#0##0:anon_field, ~tmp#2##0:anon_field, ?tmp#17##0:wybe.bool) #3 @anon_field:nn:nn
@@ -53,7 +53,7 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?tmp#20##0:anon_field) @anon_field:nn:nn
+    foreign lpvm {stack} alloc(24:wybe.int, ?tmp#20##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#20##0:anon_field, ?tmp#21##0:anon_field, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:wybe.bool) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#21##0:anon_field, ?tmp#22##0:anon_field, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#22##0:anon_field, ?tmp#4##0:anon_field, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @anon_field:nn:nn
@@ -77,11 +77,11 @@ proc #cont#2 > {semipure} (3 calls)
 #cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?tmp#18##0:anon_field) @anon_field:nn:nn
+    foreign lpvm {stack} alloc(24:wybe.int, ?tmp#18##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#18##0:anon_field, ?tmp#19##0:anon_field, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:wybe.bool) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#19##0:anon_field, ?tmp#20##0:anon_field, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#20##0:anon_field, ?tmp#6##0:anon_field, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @anon_field:nn:nn
-    foreign lpvm alloc(24:wybe.int, ?tmp#24##0:anon_field) @anon_field:nn:nn
+    foreign lpvm {stack} alloc(24:wybe.int, ?tmp#24##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#24##0:anon_field, ?tmp#25##0:anon_field, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:wybe.bool) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#25##0:anon_field, ?tmp#26##0:anon_field, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#26##0:anon_field, ?tmp#8##0:anon_field, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @anon_field:nn:nn
@@ -104,7 +104,7 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?tmp#15##0:anon_field) @anon_field:nn:nn
+    foreign lpvm {stack} alloc(8:wybe.int, ?tmp#15##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~tmp#15##0:anon_field, ?tmp#16##0:anon_field, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 1:wybe.int) @anon_field:nn:nn
     foreign llvm or(~tmp#16##0:anon_field, 2:wybe.int, ?tmp#11##0:anon_field) @anon_field:nn:nn
     foreign llvm and(tmp#11##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#18##0:2 bit unsigned) @anon_field:nn:nn
@@ -378,7 +378,7 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"anon_field#.<0>"() {
-  %"tmp#30##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#30##0" = alloca i8, i64 24, align 8
   %"tmp#21##0" = ptrtoint ptr %"tmp#30##0" to i64
   %"tmp#31##0" = inttoptr i64 %"tmp#21##0" to ptr
   store i1 0, ptr %"tmp#31##0"
@@ -388,25 +388,25 @@ define external fastcc void @"anon_field#.<0>"() {
   %"tmp#34##0" = add i64 %"tmp#21##0", 16
   %"tmp#35##0" = inttoptr i64 %"tmp#34##0" to ptr
   store i64 1, ptr %"tmp#35##0"
-  %"tmp#36##0" = call ccc ptr @wybe_malloc(i32 8)
+  %"tmp#36##0" = alloca i8, i64 8, align 8
   %"tmp#25##0" = ptrtoint ptr %"tmp#36##0" to i64
   %"tmp#37##0" = inttoptr i64 %"tmp#25##0" to ptr
   store i64 1, ptr %"tmp#37##0"
   %"tmp#2##0" = or i64 %"tmp#25##0", 1
-  %"tmp#17##0" = tail call fastcc i1 @"anon_field#.=<0>"(i64 %"tmp#21##0", i64 %"tmp#2##0")
+  %"tmp#17##0" = call fastcc i1 @"anon_field#.=<0>"(i64 %"tmp#21##0", i64 %"tmp#2##0")
   br i1 %"tmp#17##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"anon_field#.#cont#1<0>"()
+  call fastcc void @"anon_field#.#cont#1<0>"()
   ret void
 if.else.0:
-  tail call fastcc void @"anon_field#.#cont#1<0>"()
+  call fastcc void @"anon_field#.#cont#1<0>"()
   ret void
 }
 
 define external fastcc void @"anon_field#.#cont#1<0>"() {
-  %"tmp#31##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#31##0" = alloca i8, i64 24, align 8
   %"tmp#20##0" = ptrtoint ptr %"tmp#31##0" to i64
   %"tmp#32##0" = inttoptr i64 %"tmp#20##0" to ptr
   store i1 0, ptr %"tmp#32##0"
@@ -421,17 +421,17 @@ define external fastcc void @"anon_field#.#cont#1<0>"() {
   %"tmp#25##0" = icmp eq i2 %"tmp#24##0", 0
   br i1 %"tmp#25##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"anon_field#.#cont#2<0>"()
+  call fastcc void @"anon_field#.#cont#2<0>"()
   ret void
 if.else.0:
-  tail call fastcc void @"anon_field#.#cont#2<0>"()
+  call fastcc void @"anon_field#.#cont#2<0>"()
   ret void
 }
 
 define external fastcc void @"anon_field#.#cont#2<0>"() {
-  %"tmp#30##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#30##0" = alloca i8, i64 24, align 8
   %"tmp#18##0" = ptrtoint ptr %"tmp#30##0" to i64
   %"tmp#31##0" = inttoptr i64 %"tmp#18##0" to ptr
   store i1 0, ptr %"tmp#31##0"
@@ -441,7 +441,7 @@ define external fastcc void @"anon_field#.#cont#2<0>"() {
   %"tmp#34##0" = add i64 %"tmp#18##0", 16
   %"tmp#35##0" = inttoptr i64 %"tmp#34##0" to ptr
   store i64 1, ptr %"tmp#35##0"
-  %"tmp#36##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#36##0" = alloca i8, i64 24, align 8
   %"tmp#24##0" = ptrtoint ptr %"tmp#36##0" to i64
   %"tmp#37##0" = inttoptr i64 %"tmp#24##0" to ptr
   store i1 0, ptr %"tmp#37##0"
@@ -451,20 +451,20 @@ define external fastcc void @"anon_field#.#cont#2<0>"() {
   %"tmp#40##0" = add i64 %"tmp#24##0", 16
   %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
   store i64 1, ptr %"tmp#41##0"
-  %"tmp#14##0" = tail call fastcc i1 @"anon_field#.=<0>"(i64 %"tmp#18##0", i64 %"tmp#24##0")
+  %"tmp#14##0" = call fastcc i1 @"anon_field#.=<0>"(i64 %"tmp#18##0", i64 %"tmp#24##0")
   br i1 %"tmp#14##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"anon_field#.#cont#3<0>"()
+  call fastcc void @"anon_field#.#cont#3<0>"()
   ret void
 if.else.0:
-  tail call fastcc void @"anon_field#.#cont#3<0>"()
+  call fastcc void @"anon_field#.#cont#3<0>"()
   ret void
 }
 
 define external fastcc void @"anon_field#.#cont#3<0>"() {
-  %"tmp#25##0" = call ccc ptr @wybe_malloc(i32 8)
+  %"tmp#25##0" = alloca i8, i64 8, align 8
   %"tmp#15##0" = ptrtoint ptr %"tmp#25##0" to i64
   %"tmp#26##0" = inttoptr i64 %"tmp#15##0" to ptr
   store i64 1, ptr %"tmp#26##0"
@@ -480,7 +480,7 @@ if.then.0:
   %"tmp#13##0" = icmp ne i64 %"tmp#10##0", 2
   br i1 %"tmp#13##0", label %if.then.1, label %if.else.1
 if.then.1:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.1:

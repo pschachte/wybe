@@ -93,7 +93,7 @@ find_test(modulus##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(8,(test_loop.find_modulo#cont#1<0>,fromList [NonAliasedParamCond 1 []]))]
-    foreign lpvm alloc(24:wybe.int, ?tmp#5##0:test_loop.int_seq) @test_loop:nn:nn
+    foreign lpvm {stack} alloc(24:wybe.int, ?tmp#5##0:test_loop.int_seq) @test_loop:nn:nn
     foreign lpvm mutate(~tmp#5##0:test_loop.int_seq, ?tmp#6##0:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int) @test_loop:nn:nn
     foreign lpvm mutate(~tmp#6##0:test_loop.int_seq, ?tmp#7##0:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int) @test_loop:nn:nn
     foreign lpvm mutate(~tmp#7##0:test_loop.int_seq, ?tmp#8##0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 10:wybe.int) @test_loop:nn:nn
@@ -209,7 +209,7 @@ if.else.0:
 }
 
 define external fastcc void @"test_loop#.find_test<0>"(i64 %"modulus##0") {
-  %"tmp#22##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#22##0" = alloca i8, i64 24, align 8
   %"tmp#5##0" = ptrtoint ptr %"tmp#22##0" to i64
   %"tmp#23##0" = inttoptr i64 %"tmp#5##0" to ptr
   store i64 2, ptr %"tmp#23##0"
@@ -219,19 +219,19 @@ define external fastcc void @"test_loop#.find_test<0>"(i64 %"modulus##0") {
   %"tmp#26##0" = add i64 %"tmp#5##0", 16
   %"tmp#27##0" = inttoptr i64 %"tmp#26##0" to ptr
   store i64 10, ptr %"tmp#27##0"
-  %"tmp#28##0" = tail call fastcc {i64, i1} @"test_loop#.find_modulo#cont#1<0>[6dacb8fd25]"(i64 %"modulus##0", i64 %"tmp#5##0")
+  %"tmp#28##0" = call fastcc {i64, i1} @"test_loop#.find_modulo#cont#1<0>[6dacb8fd25]"(i64 %"modulus##0", i64 %"tmp#5##0")
   %"i##0" = extractvalue {i64, i1}%"tmp#28##0", 0
   %"tmp#1##0" = extractvalue {i64, i1}%"tmp#28##0", 1
   br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @print_int(i64 %"modulus##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   call ccc void @print_int(i64 %"i##0")
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @print_int(i64 %"modulus##0")
   call ccc void @putchar(i8 10)
   ret void

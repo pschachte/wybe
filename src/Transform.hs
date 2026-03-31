@@ -26,7 +26,8 @@ import           Data.Maybe    as Maybe
 import           Data.Set      as Set
 import           Flow          ((|>))
 import           Options       (LogSelection (Transform),
-                                OptFlag(MultiSpecz), optimisationEnabled)
+                                OptFlag(MultiSpecz, StackAlloc),
+                                optimisationEnabled)
 import           Util
 import           Snippets      (primMove)
 import Data.Tuple.HT (mapFst)
@@ -71,16 +72,8 @@ initAliasMap proto speczVersion = do
 
 
 -- | Collect all prims from a body, including all fork branches (conservative).
-collectAllBodyPrims :: ProcBody -> [Placed Prim]
-collectAllBodyPrims ProcBody{bodyPrims=prims, bodyFork=fork} =
-    prims ++ case fork of
-        NoFork -> []
-        PrimFork _ _ _ branches dflt ->
-            concatMap (collectAllBodyPrims . snd) branches
-            ++ concatMap collectAllBodyPrims (Maybe.maybeToList dflt)
-        MergedFork{forkBody=body', forkDefault=dflt} ->
-            collectAllBodyPrims body'
-            ++ concatMap collectAllBodyPrims (Maybe.maybeToList dflt)
+collectAllBodyPrims :: ProcBody -> [Prim]
+collectAllBodyPrims = foldBodyPrims (\_ p ps -> p : ps) [] (++)
 
 
 -- | Returns True if this prim is lpvm alloc or lpvm mutate.
@@ -89,11 +82,12 @@ isAllocOrMutate (PrimForeign "lpvm" "alloc"  _ _) = True
 isAllocOrMutate (PrimForeign "lpvm" "mutate" _ _) = True
 isAllocOrMutate _                                  = False
 
--- | Compute the set of variables whose allocated memory must survive the
--- procedure's return (i.e. must be heap-allocated).  A variable escapes if it
--- is an output parameter, or if its pointer reaches an escaping variable
--- through the mutation/pass-through graph.  This is a conservative backward
--- reachability analysis; allocs NOT in this set are safe to stack-allocate.
+-- | Compute the set of variables that may escape the procedure body, i.e.,
+-- variables whose values could possibly be referred to after the procedure
+-- returns.  A variable escapes if it is an output parameter, or if its pointer
+-- reaches an escaping variable through the mutation/pass-through graph.  This
+-- is a conservative backward reachability analysis; allocs NOT in this set are
+-- safe to stack-allocate.
 -- Note: stack-allocated values passed as pointer arguments to callees will
 -- prevent LLVM from using tail-call optimisation on those call sites.
 computeEscapedVars :: PrimProto -> ProcBody -> Set PrimVarName
@@ -102,10 +96,16 @@ computeEscapedVars proto body =
                     [ primParamName p
                     | p <- primProtoParams proto
                     , isOutputFlow (primParamFlow p) ]
-        prims = List.map content $ collectAllBodyPrims body
+        prims = collectAllBodyPrims body
         -- For mutate(fIn, fOut, offset, destr, size, startOff, member, ...),
         -- if fOut escapes then:
-        --   (a) fIn escapes (same struct, just a new version)
+        --   (a) fIn escapes (same struct, just a new version).  Note: this
+        --       analysis runs before the destructive-update transformation sets
+        --       the destr flag, so we conservatively treat fIn as escaping even
+        --       for non-destructive mutates.  For a truly non-destructive mutate
+        --       fIn would not escape (since fOut is a fresh copy), but we cannot
+        --       determine that here.  This limits stack allocation for fIn in
+        --       such cases.
         --   (b) any field value (member) stored into it also escapes,
         --       because that pointer will be embedded in the escaping struct.
         mutateEdges = [ (argVarName fOut, argVarName vin)
@@ -114,28 +114,31 @@ computeEscapedVars proto body =
                 , argIsVar fOut
                 , vin <- fIn : [ m | m <- List.drop 6 args, argIsVar m ] ]
         -- For any non-alloc/non-mutate instruction, propagate escape backward:
-        --   • foreign ops (e.g. llvm or for constructor tagging, llvm move,
+        --   • foreign llvm/lpvm ops (e.g. constructor tagging, llvm move,
         --     lpvm cast): type-match only — an input escapes iff an output of
-        --     the same type escapes.  This is sound because foreign ops can't
+        --     the same type escapes.  This is sound because these ops can't
         --     embed a value into a result of a different type.
-        --   • user-defined calls (PrimCall): we have no visibility into the
-        --     callee, so conservatively mark ALL inputs as escaping when ANY
-        --     output escapes.  This is needed because the callee may store an
-        --     input of any type into any of its outputs.
+        --   • user-defined calls (PrimCall) and foreign calls to other
+        --     languages (e.g. C): we have no visibility into the callee, so
+        --     conservatively mark ALL inputs as escaping when ANY output
+        --     escapes.  A foreign C call, for instance, may store an input
+        --     into a C struct that another C function reads later.
         passEdges = [ (outName, inName)
                     | prim <- prims
                     , not (isAllocOrMutate prim)
                     , let (allArgs, _) = primArgs prim
-                    , let isUserCall = case prim of
-                                        PrimCall {} -> True
-                                        _           -> False
+                    , let isConservativeCall = case prim of
+                                        PrimCall {}    -> True
+                                        PrimHigher {}  -> True
+                                        PrimForeign lang _ _ _ ->
+                                            lang /= "llvm" && lang /= "lpvm"
                     , ArgVar{argVarName=outName, argVarType=outType,
                              argVarFlow=outFlow} <- allArgs
                     , isOutputFlow outFlow
                     , ArgVar{argVarName=inName, argVarType=inType,
                              argVarFlow=inFlow} <- allArgs
                     , not (isOutputFlow inFlow)
-                    , isUserCall || inType == outType ]
+                    , isConservativeCall || inType == outType ]
         allEdges = mutateEdges ++ passEdges
         go escaped =
             let newEsc = Set.fromList
@@ -261,7 +264,7 @@ transformPrim callSiteMap escapedVars (aliasMap, deadCells) prim = do
             PrimForeign "lpvm" "alloc" flags args  -> do
                 let (result, deadCells') =
                         assignDeadCellsByAllocArgs deadCells args
-                -- [Escape Analysis]
+                -- [Stack allocation via escape analysis]
                 -- Check if the alloc result escapes via:
                 --   (a) the incremental alias map (globals, aliased params)
                 --   (b) the pre-computed mutation-chain escape set
@@ -272,16 +275,19 @@ transformPrim callSiteMap escapedVars (aliasMap, deadCells) prim = do
                         _                   -> True
                 let escaped   = escapedByAlias || escapedByMutation
                 let constSize = argIsConst sizeArg
+                let alreadyStack = "stack" `List.elem` flags
+                doStackAlloc <- lift $ gets (optimisationEnabled StackAlloc . options)
                 lift $ logTransform $ "alloc result: " ++ show outVar
                         ++ " | escapedByAlias=" ++ show escapedByAlias
                         ++ " | escapedByMutation=" ++ show escapedByMutation
                         ++ " | constSize=" ++ show constSize
-                        ++ (if not escaped && constSize
+                        ++ " | alreadyStack=" ++ show alreadyStack
+                        ++ (if not escaped && constSize && not alreadyStack && doStackAlloc
                             then " => stack-allocate"
                             else " => heap-allocate")
                 let primc' = case result of
                         Nothing ->
-                            if not escaped && constSize
+                            if not escaped && constSize && not alreadyStack && doStackAlloc
                             then PrimForeign "lpvm" "alloc" ("stack":flags) args
                             else primc
                         Just ((selectedCell, startOffset), []) ->

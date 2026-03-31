@@ -17,7 +17,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?tmp#5##0:anon_field_variable(wybe.bool)) @anon_field_variable:nn:nn
+    foreign lpvm {stack} alloc(8:wybe.int, ?tmp#5##0:anon_field_variable(wybe.bool)) @anon_field_variable:nn:nn
     foreign lpvm mutate(~tmp#5##0:anon_field_variable(wybe.bool), ?tmp#0##0:anon_field_variable(wybe.bool), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 0:wybe.bool) @anon_field_variable:nn:nn
     foreign llvm and(~tmp#0##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#7##0:1 bit unsigned) @anon_field_variable:nn:nn
     foreign llvm icmp_eq(~tmp#7##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#8##0:wybe.bool) @anon_field_variable:nn:nn
@@ -136,7 +136,7 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"anon_field_variable#.<0>"() {
-  %"tmp#12##0" = call ccc ptr @wybe_malloc(i32 8)
+  %"tmp#12##0" = alloca i8, i64 8, align 8
   %"tmp#5##0" = ptrtoint ptr %"tmp#12##0" to i64
   %"tmp#13##0" = inttoptr i64 %"tmp#5##0" to ptr
   store i1 0, ptr %"tmp#13##0"
@@ -145,7 +145,7 @@ define external fastcc void @"anon_field_variable#.<0>"() {
   %"tmp#8##0" = icmp eq i1 %"tmp#7##0", 0
   br i1 %"tmp#8##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#1" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:

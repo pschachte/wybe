@@ -53,15 +53,15 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(dead_cell_size.bar<0>,fromList [NonAliasedParamCond 0 []])),(7,(dead_cell_size.diff_type<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(8:wybe.int, ?tmp#7##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm {stack} alloc(8:wybe.int, ?tmp#7##0:dead_cell_size.t) @dead_cell_size:nn:nn
     foreign lpvm mutate(~tmp#7##0:dead_cell_size.t, ?tmp#8##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
     dead_cell_size.foo<0>(~tmp#8##0:dead_cell_size.t, ?tmp#0##0:dead_cell_size.t) #1 @dead_cell_size:nn:nn
     dead_cell_size.print_t<0>(~tmp#0##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @dead_cell_size:nn:nn
-    foreign lpvm alloc(8:wybe.int, ?tmp#10##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm {stack} alloc(8:wybe.int, ?tmp#10##0:dead_cell_size.t) @dead_cell_size:nn:nn
     foreign lpvm mutate(~tmp#10##0:dead_cell_size.t, ?tmp#11##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
     dead_cell_size.bar<0>[410bae77d3](~tmp#11##0:dead_cell_size.t, ?tmp#2##0:dead_cell_size.t) #4 @dead_cell_size:nn:nn
     dead_cell_size.print_t<0>(~tmp#2##0:dead_cell_size.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @dead_cell_size:nn:nn
-    foreign lpvm alloc(8:wybe.int, ?tmp#13##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm {stack} alloc(8:wybe.int, ?tmp#13##0:dead_cell_size.t) @dead_cell_size:nn:nn
     foreign lpvm mutate(~tmp#13##0:dead_cell_size.t, ?tmp#14##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
     dead_cell_size.diff_type<0>[410bae77d3](~tmp#14##0:dead_cell_size.t, ?tmp#4##0:dead_cell_size.t2) #7 @dead_cell_size:nn:nn
     dead_cell_size.print_t2<0>(~tmp#4##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @dead_cell_size:nn:nn
@@ -325,24 +325,24 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"dead_cell_size#.<0>"() {
-  %"tmp#15##0" = call ccc ptr @wybe_malloc(i32 8)
+  %"tmp#15##0" = alloca i8, i64 8, align 8
   %"tmp#7##0" = ptrtoint ptr %"tmp#15##0" to i64
   %"tmp#16##0" = inttoptr i64 %"tmp#7##0" to ptr
   store i64 9, ptr %"tmp#16##0"
-  %"tmp#0##0" = tail call fastcc i64 @"dead_cell_size#.foo<0>"(i64 %"tmp#7##0")
-  tail call fastcc void @"dead_cell_size#.print_t<0>"(i64 %"tmp#0##0")
-  %"tmp#17##0" = call ccc ptr @wybe_malloc(i32 8)
+  %"tmp#0##0" = call fastcc i64 @"dead_cell_size#.foo<0>"(i64 %"tmp#7##0")
+  call fastcc void @"dead_cell_size#.print_t<0>"(i64 %"tmp#0##0")
+  %"tmp#17##0" = alloca i8, i64 8, align 8
   %"tmp#10##0" = ptrtoint ptr %"tmp#17##0" to i64
   %"tmp#18##0" = inttoptr i64 %"tmp#10##0" to ptr
   store i64 9, ptr %"tmp#18##0"
-  %"tmp#2##0" = tail call fastcc i64 @"dead_cell_size#.bar<0>[410bae77d3]"(i64 %"tmp#10##0")
-  tail call fastcc void @"dead_cell_size#.print_t<0>"(i64 %"tmp#2##0")
-  %"tmp#19##0" = call ccc ptr @wybe_malloc(i32 8)
+  %"tmp#2##0" = call fastcc i64 @"dead_cell_size#.bar<0>[410bae77d3]"(i64 %"tmp#10##0")
+  call fastcc void @"dead_cell_size#.print_t<0>"(i64 %"tmp#2##0")
+  %"tmp#19##0" = alloca i8, i64 8, align 8
   %"tmp#13##0" = ptrtoint ptr %"tmp#19##0" to i64
   %"tmp#20##0" = inttoptr i64 %"tmp#13##0" to ptr
   store i64 9, ptr %"tmp#20##0"
-  %"tmp#4##0" = tail call fastcc i64 @"dead_cell_size#.diff_type<0>[410bae77d3]"(i64 %"tmp#13##0")
-  tail call fastcc void @"dead_cell_size#.print_t2<0>"(i64 %"tmp#4##0")
+  %"tmp#4##0" = call fastcc i64 @"dead_cell_size#.diff_type<0>[410bae77d3]"(i64 %"tmp#13##0")
+  call fastcc void @"dead_cell_size#.print_t2<0>"(i64 %"tmp#4##0")
   ret void
 }
 

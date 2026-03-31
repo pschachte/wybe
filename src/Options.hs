@@ -177,7 +177,7 @@ logSelectionDescription LastCallAnalysis
 
 
 -- | Enumeration of compiler optimisations
-data OptFlag = LLVMOpt | MultiSpecz | TailCallModCons
+data OptFlag = LLVMOpt | MultiSpecz | TailCallModCons | StackAlloc
     deriving (Eq, Ord, Enum, Bounded, Show)
 
 -- | Default optimisations enabled:  all of them
@@ -208,15 +208,16 @@ optimisationEnabled flag Options{optOptimisations=opts} = flag `Set.member` opts
 
 -- | Description of an OptFlag
 optimisationFlagDesc :: OptFlag -> String
-optimisationFlagDesc flag 
-    = desc' ++ 
+optimisationFlagDesc flag
+    = desc' ++
         " (default: " ++ if optimisationEnabled flag defaultOptions
                          then "enabled)" else "disabled)"
-  where 
-    desc' = case flag of 
+  where
+    desc' = case flag of
         LLVMOpt         -> "run the LLVM optimisations on the emitted LLVM"
         MultiSpecz      -> "run the multiple specialisation optimisation"
         TailCallModCons -> "run the tail-call-modulo-construction optimisation "
+        StackAlloc      -> "stack-allocate structures that do not escape their procedure"
 
 
 -- | Command line flag for a given OptFlag
@@ -224,6 +225,7 @@ optimisationFlag :: OptFlag -> String
 optimisationFlag LLVMOpt = "llvm-opt"
 optimisationFlag MultiSpecz = "multi-specz"
 optimisationFlag TailCallModCons = "tcmc"
+optimisationFlag StackAlloc = "stack-alloc"
 
 
 -- |Command line option parser and help text

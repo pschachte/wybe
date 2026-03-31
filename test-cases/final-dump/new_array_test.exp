@@ -112,7 +112,7 @@ proc #cont#4 > {semipure} (2 calls)
         foreign lpvm access(~ar##0:wybe.array(wybe.int), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#16##0:wybe.int) @new_array_test:nn:nn
         foreign llvm mul(~tmp#16##0:wybe.int, 8:wybe.int, ?tmp#17##0:wybe.int) @new_array_test:nn:nn
         foreign llvm add(tmp#15##0:wybe.c_array.raw_array, ~tmp#17##0:wybe.int, ?tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
-        foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
+        foreign lpvm {stack} alloc(16:wybe.int, ?tmp#19##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#19##0:wybe.array.array_iterator(wybe.int), ?tmp#20##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#20##0:wybe.array.array_iterator(wybe.int), ?tmp#21##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#21##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @new_array_test:nn:nn
@@ -149,7 +149,7 @@ proc #cont#4 > {semipure} (2 calls)
         foreign lpvm access(~ar##0:wybe.array(wybe.int), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#16##0:wybe.int) @new_array_test:nn:nn
         foreign llvm mul(~tmp#16##0:wybe.int, 8:wybe.int, ?tmp#17##0:wybe.int) @new_array_test:nn:nn
         foreign llvm add(tmp#15##0:wybe.c_array.raw_array, ~tmp#17##0:wybe.int, ?tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
-        foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
+        foreign lpvm {stack} alloc(16:wybe.int, ?tmp#19##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#19##0:wybe.array.array_iterator(wybe.int), ?tmp#20##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#20##0:wybe.array.array_iterator(wybe.int), ?tmp#21##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#21##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @new_array_test:nn:nn
@@ -187,7 +187,7 @@ proc #cont#4 > {semipure} (2 calls)
         foreign lpvm access(~ar##0:wybe.array(wybe.int), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#16##0:wybe.int) @new_array_test:nn:nn
         foreign llvm mul(~tmp#16##0:wybe.int, 8:wybe.int, ?tmp#17##0:wybe.int) @new_array_test:nn:nn
         foreign llvm add(tmp#15##0:wybe.c_array.raw_array, ~tmp#17##0:wybe.int, ?tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
-        foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
+        foreign lpvm {stack} alloc(16:wybe.int, ?tmp#19##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#19##0:wybe.array.array_iterator(wybe.int), ?tmp#20##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#20##0:wybe.array.array_iterator(wybe.int), ?tmp#21##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#18##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#21##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @new_array_test:nn:nn
@@ -375,14 +375,14 @@ if.else.0:
   %"tmp#16##0" = load i64, ptr %"tmp#43##0"
   %"tmp#17##0" = mul i64 %"tmp#16##0", 8
   %"tmp#18##0" = add i64 %"tmp#15##0", %"tmp#17##0"
-  %"tmp#44##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#44##0" = alloca i8, i64 16, align 8
   %"tmp#19##0" = ptrtoint ptr %"tmp#44##0" to i64
   %"tmp#45##0" = inttoptr i64 %"tmp#19##0" to ptr
   store i64 %"tmp#15##0", ptr %"tmp#45##0"
   %"tmp#46##0" = add i64 %"tmp#19##0", 8
   %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
   store i64 %"tmp#18##0", ptr %"tmp#47##0"
-  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
+  call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
   ret void
 }
 
@@ -423,14 +423,14 @@ if.else.0:
   %"tmp#16##0" = load i64, ptr %"tmp#39##0"
   %"tmp#17##0" = mul i64 %"tmp#16##0", 8
   %"tmp#18##0" = add i64 %"tmp#15##0", %"tmp#17##0"
-  %"tmp#40##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#40##0" = alloca i8, i64 16, align 8
   %"tmp#19##0" = ptrtoint ptr %"tmp#40##0" to i64
   %"tmp#41##0" = inttoptr i64 %"tmp#19##0" to ptr
   store i64 %"tmp#15##0", ptr %"tmp#41##0"
   %"tmp#42##0" = add i64 %"tmp#19##0", 8
   %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
   store i64 %"tmp#18##0", ptr %"tmp#43##0"
-  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
+  call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
   ret void
 }
 
@@ -476,13 +476,13 @@ if.else.0:
   %"tmp#16##0" = load i64, ptr %"tmp#43##0"
   %"tmp#17##0" = mul i64 %"tmp#16##0", 8
   %"tmp#18##0" = add i64 %"tmp#15##0", %"tmp#17##0"
-  %"tmp#44##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#44##0" = alloca i8, i64 16, align 8
   %"tmp#19##0" = ptrtoint ptr %"tmp#44##0" to i64
   %"tmp#45##0" = inttoptr i64 %"tmp#19##0" to ptr
   store i64 %"tmp#15##0", ptr %"tmp#45##0"
   %"tmp#46##0" = add i64 %"tmp#19##0", 8
   %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
   store i64 %"tmp#18##0", ptr %"tmp#47##0"
-  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
+  call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#19##0")
   ret void
 }

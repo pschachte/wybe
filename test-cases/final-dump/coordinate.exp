@@ -30,7 +30,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?tmp#7##0:coordinate.Coordinate) @coordinate:nn:nn
+    foreign lpvm {stack} alloc(24:wybe.int, ?tmp#7##0:coordinate.Coordinate) @coordinate:nn:nn
     foreign lpvm mutate(~tmp#7##0:coordinate.Coordinate, ?tmp#8##0:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int) @coordinate:nn:nn
     foreign lpvm mutate(~tmp#8##0:coordinate.Coordinate, ?tmp#9##0:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int) @coordinate:nn:nn
     foreign lpvm mutate(~tmp#9##0:coordinate.Coordinate, ?tmp#19##0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int) @coordinate:nn:nn
@@ -75,7 +75,7 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"coordinate#.<0>"() {
-  %"tmp#24##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#24##0" = alloca i8, i64 24, align 8
   %"tmp#7##0" = ptrtoint ptr %"tmp#24##0" to i64
   %"tmp#25##0" = inttoptr i64 %"tmp#7##0" to ptr
   store i64 1000, ptr %"tmp#25##0"
@@ -88,13 +88,13 @@ define external fastcc void @"coordinate#.<0>"() {
   %"tmp#30##0" = add i64 %"tmp#7##0", 16
   %"tmp#31##0" = inttoptr i64 %"tmp#30##0" to ptr
   store i64 8000, ptr %"tmp#31##0"
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
   %"tmp#32##0" = add i64 %"tmp#7##0", 16
   %"tmp#33##0" = inttoptr i64 %"tmp#32##0" to ptr
   %"tmp#2##0" = load i64, ptr %"tmp#33##0"
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   call ccc void @print_int(i64 1000)
   call ccc void @putchar(i8 10)
   ret void

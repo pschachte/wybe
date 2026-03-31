@@ -29,7 +29,7 @@ proc bar > public (1 calls)
 bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position) @alias_cyclic:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#3##0:position.position) @alias_cyclic:nn:nn
     foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @alias_cyclic:nn:nn
     foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 900:wybe.int) @alias_cyclic:nn:nn
     alias_cyclic.updateX<0>(tmp#0##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias_cyclic:nn:nn
@@ -124,18 +124,18 @@ define external fastcc void @"alias_cyclic#.<0>"() {
 }
 
 define external fastcc void @"alias_cyclic#.bar<0>"() {
-  %"tmp#5##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#5##0" = alloca i8, i64 16, align 8
   %"tmp#3##0" = ptrtoint ptr %"tmp#5##0" to i64
   %"tmp#6##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i64 100, ptr %"tmp#6##0"
   %"tmp#7##0" = add i64 %"tmp#3##0", 8
   %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
   store i64 900, ptr %"tmp#8##0"
-  %"p2##0" = tail call fastcc i64 @"alias_cyclic#.updateX<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
-  tail call fastcc void @"position#.printPosition<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
-  tail call fastcc void @"position#.printPosition<0>"(i64 %"p2##0")
+  %"p2##0" = call fastcc i64 @"alias_cyclic#.updateX<0>"(i64 %"tmp#3##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#2" to i64 ))
+  call fastcc void @"position#.printPosition<0>"(i64 %"tmp#3##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  call fastcc void @"position#.printPosition<0>"(i64 %"p2##0")
   ret void
 }
 
