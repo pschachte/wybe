@@ -1,0 +1,40 @@
+# Test for the --stack-alloc-limit compiler flag.
+#
+# `small` holds one int  (~8 bytes on a 64-bit system).
+# `large` holds two ints (~16 bytes).
+#
+# Both are allocated locally in each test proc, so escape analysis marks
+# them as non-escaping.  The size limit then decides which get {stack}.
+#
+# Run with default limit (4096): both should show {stack} in the LPVM dump.
+# Run with --stack-alloc-limit 12: only `small` should show {stack};
+#   `large` exceeds 12 bytes and falls back to heap allocation.
+
+pub type small { pub small(val:int) }
+
+pub type large { pub large(x:int, y:int) }
+
+# Allocates a small value locally — never returned or stored.
+# Expected: stack-allocated regardless of limit (8 bytes <= any reasonable limit).
+def {noinline} test_small use !io {
+    ?s = small(42)
+    !println(s^val)
+}
+
+# Allocates a large value locally — never returned or stored.
+# Expected: stack-allocated with default limit (16 <= 4096),
+#           heap-allocated when --stack-alloc-limit 12 is passed.
+def {noinline} test_large use !io {
+    ?p = large(1, 2)
+    !println(p^x)
+}
+
+# Returns a large value — must always be heap-allocated (escapes).
+def {noinline} test_escape(?p:large) {
+    ?p = large(3, 4)
+}
+
+!test_small
+!test_large
+test_escape(?p)
+!println(p^x)
