@@ -109,17 +109,29 @@ resolveLLVMArgType SizeFromLargest outTy inTys =
 maxSizeRep :: TypeRepresentation -> TypeRepresentation -> TypeRepresentation
 maxSizeRep (Bits sz1) (Bits sz2)         = Bits (max sz1 sz2)
 maxSizeRep (Bits sz1) (Signed sz2)       = Bits (max sz1 sz2)
-maxSizeRep (Bits sz) Pointer             = Pointer
-maxSizeRep Pointer (Bits sz)             = Pointer
+maxSizeRep (Bits sz) Pointer             = maxPointerSize sz Bits Pointer
+maxSizeRep Pointer (Bits sz)             = maxPointerSize sz Bits Pointer
+maxSizeRep (Bits sz) CPointer             = maxPointerSize sz Bits CPointer
+maxSizeRep CPointer (Bits sz)             = maxPointerSize sz Bits CPointer
 maxSizeRep (Signed sz1) (Bits sz2)       = Bits (max sz1 sz2)
 maxSizeRep (Signed sz1) (Signed sz2)     = Signed (max sz1 sz2)
-maxSizeRep (Signed sz) Pointer           = Pointer
-maxSizeRep Pointer (Signed sz)           = Pointer
+maxSizeRep (Signed sz) Pointer           = maxPointerSize sz Signed Pointer
+maxSizeRep Pointer (Signed sz)           = maxPointerSize sz Signed Pointer
+maxSizeRep (Signed sz) CPointer           = maxPointerSize sz Signed CPointer
+maxSizeRep CPointer (Signed sz)           = maxPointerSize sz Signed CPointer
 maxSizeRep (Floating sz1) (Floating sz2) = Floating (max sz1 sz2)
 maxSizeRep rep1 rep2 | rep1 == rep2      = rep1
 maxSizeRep rep1 rep2 =
     shouldnt $ "Generating LLVM instruction with incompatible types "
              ++ show rep1 ++ " and " ++ show rep2
+
+
+-- Pick the best (largest) representation for a pointer type and an integer type
+-- of the specified size, given a fixed size integer constructor and a pointer
+-- representation.
+maxPointerSize :: Int -> (Int -> TypeRepresentation) -> TypeRepresentation
+               -> TypeRepresentation
+maxPointerSize sz intRep ptrRep = if sz <= wordSize then ptrRep else intRep sz
 
 
 data BinOpInfo = BinOpInfo {
@@ -1467,7 +1479,7 @@ marshallArgument arg cType = do
 argTypeRep :: PrimArg -> LLVM TypeRepresentation
 argTypeRep ArgGlobal{}                = return CPointer
 argTypeRep ArgClosure{}               = return CPointer
-argTypeRep ArgConstRef{}              = return CPointer
+argTypeRep (ArgConstRef _ ty)         = return CPointer
 argTypeRep arg                        = typeRep $ argType arg
 
 

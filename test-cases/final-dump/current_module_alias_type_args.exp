@@ -13,15 +13,21 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {inline,semipure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: current_module_alias_type_args.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @current_module_alias_type_args:nn:nn
-    foreign c print_int(42:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @current_module_alias_type_args:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @current_module_alias_type_args:nn:nn
-    foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @current_module_alias_type_args:nn:nn
+    foreign llvm icmp_ne(0:wybe.int, current_module_alias_type_args#constant#0:wybe.int, ?tmp#9##0:wybe.bool) @current_module_alias_type_args:nn:nn
+    case ~tmp#9##0:wybe.bool of
+    0:
+
+    1:
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @current_module_alias_type_args:nn:nn
+        foreign c print_int(42:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @current_module_alias_type_args:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @current_module_alias_type_args:nn:nn
+        foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @current_module_alias_type_args:nn:nn
+
 
 
 proc cons > {inline} (3 calls)
@@ -128,21 +134,27 @@ tail(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#rec##1:current_m
 ; ModuleID = 'current_module_alias_type_args'
 
 source_filename = "!ROOT!/final-dump/current_module_alias_type_args.wybe"
-target triple    ????
+target triple   = ????
 
+@"current_module_alias_type_args#constant#0" = private unnamed_addr constant {i64, i64} { i64 42, i64 0 }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"current_module_alias_type_args.<0>"() {
+define external fastcc void @"current_module_alias_type_args#.<0>"() {
+  %"tmp#9##0" = icmp ne ptr inttoptr( i64 0 to ptr ), @"current_module_alias_type_args#constant#0"
+  br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
+if.then.0:
   call ccc void @print_int(i64 42)
   call ccc void @putchar(i8 10)
   ret void
+if.else.0:
+  ret void
 }
 
-define external fastcc i64 @"current_module_alias_type_args.cons<0>"(i64 %"head##0", i64 %"tail##0") {
+define external fastcc i64 @"current_module_alias_type_args#.cons<0>"(i64 %"head##0", i64 %"tail##0") {
   %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
   %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
@@ -153,7 +165,7 @@ define external fastcc i64 @"current_module_alias_type_args.cons<0>"(i64 %"head#
   ret i64 %"#rec##0"
 }
 
-define external fastcc {i64, i64, i1} @"current_module_alias_type_args.cons<1>"(i64 %"#result##0") {
+define external fastcc {i64, i64, i1} @"current_module_alias_type_args#.cons<1>"(i64 %"#result##0") {
   %"tmp#0##0" = icmp ne i64 %"#result##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -173,11 +185,11 @@ if.else.0:
   ret {i64, i64, i1} %"tmp#11##0"
 }
 
-define external fastcc i64 @"current_module_alias_type_args.empty<0>"() {
+define external fastcc i64 @"current_module_alias_type_args#.empty<0>"() {
   ret i64 0
 }
 
-define external fastcc {i64, i1} @"current_module_alias_type_args.head<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"current_module_alias_type_args#.head<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -192,7 +204,7 @@ if.else.0:
   ret {i64, i1} %"tmp#6##0"
 }
 
-define external fastcc {i64, i1} @"current_module_alias_type_args.head<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"current_module_alias_type_args#.head<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -211,7 +223,7 @@ if.else.0:
   ret {i64, i1} %"tmp#8##0"
 }
 
-define external fastcc {i64, i1} @"current_module_alias_type_args.tail<0>"(i64 %"#rec##0") {
+define external fastcc {i64, i1} @"current_module_alias_type_args#.tail<0>"(i64 %"#rec##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -227,7 +239,7 @@ if.else.0:
   ret {i64, i1} %"tmp#7##0"
 }
 
-define external fastcc {i64, i1} @"current_module_alias_type_args.tail<1>"(i64 %"#rec##0", i64 %"#field##0") {
+define external fastcc {i64, i1} @"current_module_alias_type_args#.tail<1>"(i64 %"#rec##0", i64 %"#field##0") {
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
