@@ -22,13 +22,13 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(8,(caret.#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:position.position) @caret:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#15##0:position.position) @caret:nn:nn
     foreign lpvm mutate(~tmp#15##0:position.position, ?tmp#16##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @caret:nn:nn
     foreign lpvm mutate(~tmp#16##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @caret:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:position.position) @caret:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#19##0:position.position) @caret:nn:nn
     foreign lpvm mutate(~tmp#19##0:position.position, ?tmp#20##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int) @caret:nn:nn
     foreign lpvm mutate(~tmp#20##0:position.position, ?tmp#2##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12:wybe.int) @caret:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:caret.region) @caret:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#23##0:caret.region) @caret:nn:nn
     foreign lpvm mutate(~tmp#23##0:caret.region, ?tmp#24##0:caret.region, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:position.position) @caret:nn:nn
     foreign lpvm mutate(~tmp#24##0:caret.region, ?tmp#25##0:caret.region, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#2##0:position.position) @caret:nn:nn
     foreign lpvm access(~tmp#2##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int) @caret:nn:nn
@@ -116,21 +116,21 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"caret#.<0>"() {
-  %"tmp#34##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#34##0" = alloca i8, i64 16, align 8
   %"tmp#15##0" = ptrtoint ptr %"tmp#34##0" to i64
   %"tmp#35##0" = inttoptr i64 %"tmp#15##0" to ptr
   store i64 0, ptr %"tmp#35##0"
   %"tmp#36##0" = add i64 %"tmp#15##0", 8
   %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
   store i64 1, ptr %"tmp#37##0"
-  %"tmp#38##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#38##0" = alloca i8, i64 16, align 8
   %"tmp#19##0" = ptrtoint ptr %"tmp#38##0" to i64
   %"tmp#39##0" = inttoptr i64 %"tmp#19##0" to ptr
   store i64 10, ptr %"tmp#39##0"
   %"tmp#40##0" = add i64 %"tmp#19##0", 8
   %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
   store i64 12, ptr %"tmp#41##0"
-  %"tmp#42##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#42##0" = alloca i8, i64 16, align 8
   %"tmp#23##0" = ptrtoint ptr %"tmp#42##0" to i64
   %"tmp#43##0" = inttoptr i64 %"tmp#23##0" to ptr
   store i64 %"tmp#15##0", ptr %"tmp#43##0"
@@ -139,10 +139,10 @@ define external fastcc void @"caret#.<0>"() {
   store i64 %"tmp#19##0", ptr %"tmp#45##0"
   %"tmp#46##0" = inttoptr i64 %"tmp#19##0" to ptr
   %"ten##0" = load i64, ptr %"tmp#46##0"
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#3" to i64 ))
   call ccc void @print_int(i64 %"ten##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"caret#.#cont#1<0>[410bae77d3]"(i64 %"tmp#23##0")
+  call fastcc void @"caret#.#cont#1<0>[410bae77d3]"(i64 %"tmp#23##0")
   ret void
 }
 

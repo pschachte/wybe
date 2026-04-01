@@ -30,7 +30,7 @@ proc foobar > (0 calls)
 foobar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?tmp#8##0:stmt_if.tree) @stmt_if:nn:nn
+    foreign lpvm {stack} alloc(24:wybe.int, ?tmp#8##0:stmt_if.tree) @stmt_if:nn:nn
     foreign lpvm mutate(~tmp#8##0:stmt_if.tree, ?tmp#9##0:stmt_if.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:stmt_if.tree) @stmt_if:nn:nn
     foreign lpvm mutate(~tmp#9##0:stmt_if.tree, ?tmp#10##0:stmt_if.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @stmt_if:nn:nn
     foreign lpvm mutate(~tmp#10##0:stmt_if.tree, ?tmp#11##0:stmt_if.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:stmt_if.tree) @stmt_if:nn:nn
@@ -114,7 +114,7 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"stmt_if#.foobar<0>"() {
-  %"tmp#20##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#20##0" = alloca i8, i64 24, align 8
   %"tmp#8##0" = ptrtoint ptr %"tmp#20##0" to i64
   %"tmp#21##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i64 0, ptr %"tmp#21##0"
@@ -124,13 +124,13 @@ define external fastcc void @"stmt_if#.foobar<0>"() {
   %"tmp#24##0" = add i64 %"tmp#8##0", 16
   %"tmp#25##0" = inttoptr i64 %"tmp#24##0" to ptr
   store i64 0, ptr %"tmp#25##0"
-  %"tmp#4##0" = tail call fastcc i1 @"stmt_if#.lookup<0>"(i64 1, i64 %"tmp#8##0")
+  %"tmp#4##0" = call fastcc i1 @"stmt_if#.lookup<0>"(i64 1, i64 %"tmp#8##0")
   %"tmp#27##0" = zext i1 %"tmp#4##0" to i64
   %"tmp#26##0" = getelementptr inbounds [ 2 x i64 ], ptr @"array#8", i64 0, i64 %"tmp#27##0"
   %"tmp#19##0" = load i64, ptr %"tmp#26##0"
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#19##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#19##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"stmt_if#.foobar#cont#1<0>"(i64 %"tmp#8##0")
+  call fastcc void @"stmt_if#.foobar#cont#1<0>"(i64 %"tmp#8##0")
   ret void
 }
 

@@ -20,11 +20,11 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(9,(mytree.printTree1<0>,fromList [NonAliasedParamCond 1 []])),(10,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(24:wybe.int, ?tmp#10##0:mytree.tree) @alias_fork1:nn:nn
+    foreign lpvm {stack} alloc(24:wybe.int, ?tmp#10##0:mytree.tree) @alias_fork1:nn:nn
     foreign lpvm mutate(~tmp#10##0:mytree.tree, ?tmp#11##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @alias_fork1:nn:nn
     foreign lpvm mutate(~tmp#11##0:mytree.tree, ?tmp#12##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 222:wybe.int) @alias_fork1:nn:nn
     foreign lpvm mutate(~tmp#12##0:mytree.tree, ?tmp#0##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @alias_fork1:nn:nn
-    foreign lpvm alloc(24:wybe.int, ?tmp#16##0:mytree.tree) @alias_fork1:nn:nn
+    foreign lpvm {stack} alloc(24:wybe.int, ?tmp#16##0:mytree.tree) @alias_fork1:nn:nn
     foreign lpvm mutate(~tmp#16##0:mytree.tree, ?tmp#17##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @alias_fork1:nn:nn
     foreign lpvm mutate(~tmp#17##0:mytree.tree, ?tmp#18##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 111:wybe.int) @alias_fork1:nn:nn
     foreign lpvm mutate(~tmp#18##0:mytree.tree, ?tmp#3##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @alias_fork1:nn:nn
@@ -104,7 +104,7 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"alias_fork1#.<0>"() {
-  %"tmp#23##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#23##0" = alloca i8, i64 24, align 8
   %"tmp#10##0" = ptrtoint ptr %"tmp#23##0" to i64
   %"tmp#24##0" = inttoptr i64 %"tmp#10##0" to ptr
   store i64 0, ptr %"tmp#24##0"
@@ -114,7 +114,7 @@ define external fastcc void @"alias_fork1#.<0>"() {
   %"tmp#27##0" = add i64 %"tmp#10##0", 16
   %"tmp#28##0" = inttoptr i64 %"tmp#27##0" to ptr
   store i64 0, ptr %"tmp#28##0"
-  %"tmp#29##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#29##0" = alloca i8, i64 24, align 8
   %"tmp#16##0" = ptrtoint ptr %"tmp#29##0" to i64
   %"tmp#30##0" = inttoptr i64 %"tmp#16##0" to ptr
   store i64 0, ptr %"tmp#30##0"
@@ -124,9 +124,9 @@ define external fastcc void @"alias_fork1#.<0>"() {
   %"tmp#33##0" = add i64 %"tmp#16##0", 16
   %"tmp#34##0" = inttoptr i64 %"tmp#33##0" to ptr
   store i64 0, ptr %"tmp#34##0"
-  %"tmp#6##0" = tail call fastcc i64 @"alias_fork1#.simpleMerge<0>"(i64 %"tmp#10##0", i64 %"tmp#16##0")
-  %"tmp#20##0" = tail call fastcc i64 @"mytree#.printTree1<0>[6dacb8fd25]"(i64 %"tmp#6##0", i64 1519)
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1527)
+  %"tmp#6##0" = call fastcc i64 @"alias_fork1#.simpleMerge<0>"(i64 %"tmp#10##0", i64 %"tmp#16##0")
+  %"tmp#20##0" = call fastcc i64 @"mytree#.printTree1<0>[6dacb8fd25]"(i64 %"tmp#6##0", i64 1519)
+  call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1527)
   call ccc void @putchar(i8 10)
   ret void
 }

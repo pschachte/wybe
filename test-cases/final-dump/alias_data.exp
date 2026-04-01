@@ -36,10 +36,10 @@ proc bar > public (1 calls)
 bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:student.course) @alias_data:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#4##0:student.course) @alias_data:nn:nn
     foreign lpvm mutate(~tmp#4##0:student.course, ?tmp#5##0:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 101:wybe.int) @alias_data:nn:nn
     foreign lpvm mutate(~tmp#5##0:student.course, ?tmp#0##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, "intro to cs":wybe.string) @alias_data:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#8##0:student.student) @alias_data:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#8##0:student.student) @alias_data:nn:nn
     foreign lpvm mutate(~tmp#8##0:student.student, ?tmp#9##0:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 9401:wybe.int) @alias_data:nn:nn
     foreign lpvm mutate(~tmp#9##0:student.student, ?tmp#1##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#0##0:student.course) @alias_data:nn:nn
     wybe.string.print<0>("student1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @alias_data:nn:nn
@@ -84,26 +84,26 @@ define external fastcc i64 @"alias_data#.backup<0>"(i64 %"student1##0") {
 }
 
 define external fastcc void @"alias_data#.bar<0>"() {
-  %"tmp#17##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#17##0" = alloca i8, i64 16, align 8
   %"tmp#4##0" = ptrtoint ptr %"tmp#17##0" to i64
   %"tmp#18##0" = inttoptr i64 %"tmp#4##0" to ptr
   store i64 101, ptr %"tmp#18##0"
   %"tmp#19##0" = add i64 %"tmp#4##0", 8
   %"tmp#20##0" = inttoptr i64 %"tmp#19##0" to ptr
   store i64 ptrtoint( ptr @"string#3" to i64 ), ptr %"tmp#20##0"
-  %"tmp#21##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#21##0" = alloca i8, i64 16, align 8
   %"tmp#8##0" = ptrtoint ptr %"tmp#21##0" to i64
   %"tmp#22##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i64 9401, ptr %"tmp#22##0"
   %"tmp#23##0" = add i64 %"tmp#8##0", 8
   %"tmp#24##0" = inttoptr i64 %"tmp#23##0" to ptr
   store i64 %"tmp#4##0", ptr %"tmp#24##0"
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"student#.printStudent<0>"(i64 %"tmp#8##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  call fastcc void @"student#.printStudent<0>"(i64 %"tmp#8##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"student#.printStudent<0>"(i64 %"tmp#8##0")
+  call fastcc void @"student#.printStudent<0>"(i64 %"tmp#8##0")
   ret void
 }
 
@@ -143,10 +143,10 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:student.course) @student:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#4##0:student.course) @student:nn:nn
     foreign lpvm mutate(~tmp#4##0:student.course, ?tmp#5##0:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 90048:wybe.int) @student:nn:nn
     foreign lpvm mutate(~tmp#5##0:student.course, ?tmp#6##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, "Declarative Programming":wybe.string) @student:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:student.student) @student:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#9##0:student.student) @student:nn:nn
     foreign lpvm mutate(~tmp#9##0:student.student, ?tmp#10##0:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12345:wybe.int) @student:nn:nn
     foreign lpvm mutate(~tmp#10##0:student.student, ?tmp#11##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:student.course) @student:nn:nn
     student.printStudent<0>(~tmp#11##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @student:nn:nn
@@ -202,21 +202,21 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"student#.<0>"() {
-  %"tmp#12##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#12##0" = alloca i8, i64 16, align 8
   %"tmp#4##0" = ptrtoint ptr %"tmp#12##0" to i64
   %"tmp#13##0" = inttoptr i64 %"tmp#4##0" to ptr
   store i64 90048, ptr %"tmp#13##0"
   %"tmp#14##0" = add i64 %"tmp#4##0", 8
   %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
   store i64 ptrtoint( ptr @"string#4" to i64 ), ptr %"tmp#15##0"
-  %"tmp#16##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#16##0" = alloca i8, i64 16, align 8
   %"tmp#9##0" = ptrtoint ptr %"tmp#16##0" to i64
   %"tmp#17##0" = inttoptr i64 %"tmp#9##0" to ptr
   store i64 12345, ptr %"tmp#17##0"
   %"tmp#18##0" = add i64 %"tmp#9##0", 8
   %"tmp#19##0" = inttoptr i64 %"tmp#18##0" to ptr
   store i64 %"tmp#4##0", ptr %"tmp#19##0"
-  tail call fastcc void @"student#.printStudent<0>"(i64 %"tmp#9##0")
+  call fastcc void @"student#.printStudent<0>"(i64 %"tmp#9##0")
   ret void
 }
 

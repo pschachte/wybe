@@ -39,7 +39,7 @@ proc replicate > public (1 calls)
 replicate(?p2##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#8##0:position.position) @alias_des:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#8##0:position.position) @alias_des:nn:nn
     foreign lpvm mutate(~tmp#8##0:position.position, ?tmp#9##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 101:wybe.int) @alias_des:nn:nn
     foreign lpvm mutate(~tmp#9##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 102:wybe.int) @alias_des:nn:nn
     foreign lpvm access(tmp#0##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @alias_des:nn:nn
@@ -90,7 +90,7 @@ define external fastcc void @"alias_des#.foo<0>"() {
 }
 
 define external fastcc i64 @"alias_des#.replicate<0>"() {
-  %"tmp#23##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#23##0" = alloca i8, i64 16, align 8
   %"tmp#8##0" = ptrtoint ptr %"tmp#23##0" to i64
   %"tmp#24##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i64 101, ptr %"tmp#24##0"
@@ -115,10 +115,10 @@ define external fastcc i64 @"alias_des#.replicate<0>"() {
   %"tmp#35##0" = add i64 %"tmp#14##0", 8
   %"tmp#36##0" = inttoptr i64 %"tmp#35##0" to ptr
   store i64 %"tmp#4##0", ptr %"tmp#36##0"
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
-  tail call fastcc void @"position#.printPosition<0>"(i64 %"tmp#8##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
-  tail call fastcc void @"position#.printPosition<0>"(i64 %"tmp#14##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#4" to i64 ))
+  call fastcc void @"position#.printPosition<0>"(i64 %"tmp#8##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#5" to i64 ))
+  call fastcc void @"position#.printPosition<0>"(i64 %"tmp#14##0")
   ret i64 %"tmp#14##0"
 }
 

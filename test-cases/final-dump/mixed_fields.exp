@@ -34,7 +34,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(32:wybe.int, ?tmp#8##0:mixed_fields) @mixed_fields:nn:nn
+    foreign lpvm {stack} alloc(32:wybe.int, ?tmp#8##0:mixed_fields) @mixed_fields:nn:nn
     foreign lpvm mutate(~tmp#8##0:mixed_fields, ?tmp#9##0:mixed_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 'a':wybe.char) @mixed_fields:nn:nn
     foreign lpvm mutate(~tmp#9##0:mixed_fields, ?tmp#10##0:mixed_fields, 1:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 1:wybe.bool) @mixed_fields:nn:nn
     foreign lpvm mutate(~tmp#10##0:mixed_fields, ?tmp#11##0:mixed_fields, 2:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 'A':wybe.char) @mixed_fields:nn:nn
@@ -261,7 +261,7 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"mixed_fields#.<0>"() {
-  %"tmp#14##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#14##0" = alloca i8, i64 32, align 8
   %"tmp#8##0" = ptrtoint ptr %"tmp#14##0" to i64
   %"tmp#15##0" = inttoptr i64 %"tmp#8##0" to ptr
   store i8 97, ptr %"tmp#15##0"
@@ -280,7 +280,7 @@ define external fastcc void @"mixed_fields#.<0>"() {
   %"tmp#24##0" = add i64 %"tmp#8##0", 24
   %"tmp#25##0" = inttoptr i64 %"tmp#24##0" to ptr
   store i64 17, ptr %"tmp#25##0"
-  tail call fastcc void @"mixed_fields#.printit<0>"(i64 %"tmp#8##0")
+  call fastcc void @"mixed_fields#.printit<0>"(i64 %"tmp#8##0")
   ret void
 }
 

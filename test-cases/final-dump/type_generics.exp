@@ -133,7 +133,7 @@ proc foo > (12 calls)
 foo(x##0:T <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#5##0:wybe.list(T)) @type_generics:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#5##0:wybe.list(T)) @type_generics:nn:nn
     foreign lpvm mutate(~tmp#5##0:wybe.list(T), ?tmp#6##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @type_generics:nn:nn
     foreign lpvm mutate(~tmp#6##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @type_generics:nn:nn
     wybe.list.length1<0>(~tmp#0##0:wybe.list(T), 0:wybe.int, ?tmp#2##0:wybe.int) #4 @type_generics:nn:nn
@@ -148,7 +148,7 @@ proc foo2 > (18 calls)
 foo2(x##0:T0 <{}; {}; {0}>, ?y##0:T0 <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#7##0:wybe.list(T0)) @type_generics:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#7##0:wybe.list(T0)) @type_generics:nn:nn
     foreign lpvm mutate(~tmp#7##0:wybe.list(T0), ?tmp#8##0:wybe.list(T0), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T0) @type_generics:nn:nn
     foreign lpvm mutate(~tmp#8##0:wybe.list(T0), ?tmp#0##0:wybe.list(9), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T0)) @type_generics:nn:nn
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.bool) @type_generics:nn:nn
@@ -276,21 +276,21 @@ if.else.0:
 }
 
 define external fastcc void @"type_generics#.foo<0>"(i64 %"x##0") {
-  %"tmp#12##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#12##0" = alloca i8, i64 16, align 8
   %"tmp#5##0" = ptrtoint ptr %"tmp#12##0" to i64
   %"tmp#13##0" = inttoptr i64 %"tmp#5##0" to ptr
   store i64 %"x##0", ptr %"tmp#13##0"
   %"tmp#14##0" = add i64 %"tmp#5##0", 8
   %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
   store i64 0, ptr %"tmp#15##0"
-  %"tmp#2##0" = tail call fastcc i64 @"wybe#.list#.length1<0>"(i64 %"tmp#5##0", i64 0)
+  %"tmp#2##0" = call fastcc i64 @"wybe#.list#.length1<0>"(i64 %"tmp#5##0", i64 0)
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   ret void
 }
 
 define external fastcc {i64, i1} @"type_generics#.foo2<0>"(i64 %"x##0") {
-  %"tmp#13##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#13##0" = alloca i8, i64 16, align 8
   %"tmp#7##0" = ptrtoint ptr %"tmp#13##0" to i64
   %"tmp#14##0" = inttoptr i64 %"tmp#7##0" to ptr
   store i64 %"x##0", ptr %"tmp#14##0"

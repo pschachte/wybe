@@ -28,7 +28,7 @@ proc bar > public (1 calls)
 bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position) @alias4:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#3##0:position.position) @alias4:nn:nn
     foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @alias4:nn:nn
     foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @alias4:nn:nn
     alias4.replicate1<0>(tmp#0##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias4:nn:nn
@@ -56,7 +56,7 @@ proc replicate1 > public (1 calls)
 replicate1(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:position.position) @alias4:nn:nn
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#6##0:position.position) @alias4:nn:nn
     foreign lpvm mutate(~tmp#6##0:position.position, ?tmp#7##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @alias4:nn:nn
     foreign lpvm mutate(~tmp#7##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @alias4:nn:nn
     wybe.string.print<0>("random replicate1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @alias4:nn:nn
@@ -104,40 +104,40 @@ define external fastcc void @"alias4#.<0>"() {
 }
 
 define external fastcc void @"alias4#.bar<0>"() {
-  %"tmp#13##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#13##0" = alloca i8, i64 16, align 8
   %"tmp#3##0" = ptrtoint ptr %"tmp#13##0" to i64
   %"tmp#14##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i64 100, ptr %"tmp#14##0"
   %"tmp#15##0" = add i64 %"tmp#3##0", 8
   %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
   store i64 100, ptr %"tmp#16##0"
-  %"p2##0" = tail call fastcc i64 @"alias4#.replicate1<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
+  %"p2##0" = call fastcc i64 @"alias4#.replicate1<0>"(i64 %"tmp#3##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#6" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
-  tail call fastcc void @"position#.printPosition<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
-  tail call fastcc void @"position#.printPosition<0>"(i64 %"p2##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#8" to i64 ))
+  call fastcc void @"position#.printPosition<0>"(i64 %"tmp#3##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  call fastcc void @"position#.printPosition<0>"(i64 %"p2##0")
   %"tmp#17##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i64 555, ptr %"tmp#17##0"
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#7" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
-  tail call fastcc void @"position#.printPosition<0>"(i64 %"tmp#3##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
-  tail call fastcc void @"position#.printPosition<0>"(i64 %"p2##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#9" to i64 ))
+  call fastcc void @"position#.printPosition<0>"(i64 %"tmp#3##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#10" to i64 ))
+  call fastcc void @"position#.printPosition<0>"(i64 %"p2##0")
   ret void
 }
 
 define external fastcc i64 @"alias4#.replicate1<0>"(i64 %"p1##0") {
-  %"tmp#21##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#21##0" = alloca i8, i64 16, align 8
   %"tmp#6##0" = ptrtoint ptr %"tmp#21##0" to i64
   %"tmp#22##0" = inttoptr i64 %"tmp#6##0" to ptr
   store i64 0, ptr %"tmp#22##0"
   %"tmp#23##0" = add i64 %"tmp#6##0", 8
   %"tmp#24##0" = inttoptr i64 %"tmp#23##0" to ptr
   store i64 0, ptr %"tmp#24##0"
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
+  call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#11" to i64 ))
   call ccc void @putchar(i8 10)
   %"tmp#25##0" = inttoptr i64 %"tmp#6##0" to ptr
   %"tmp#1##0" = load i64, ptr %"tmp#25##0"
