@@ -6,6 +6,8 @@
 The [Wybe](README.md) programming language is intended to be easy to learn and easy to use,
 but powerful and efficient enough for practical use.  It is intended to
 support best programming practice, but not necessarily *common* practice.
+The principles underlying Wybe's design are presented in
+[Wybe: Design of a Programming Language](https://www.mdpi.com/2674-113X/5/2/14).
 
 Wybe combines the best features of declarative and imperative languages,
 in particular borrowing features from functional, logic, imperative, and
