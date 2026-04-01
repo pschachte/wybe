@@ -507,6 +507,34 @@ writeAssemblyConstants = do
     llvmBlankLine
 
 
+-- -- | Write out a declaration for a string and record its name.  This code
+-- -- assumes that the CString that a WybeString refers to has already been
+-- -- declared and recorded.  This will happen because sets are sorted
+-- -- alphabetically, and CString comes before WybeString.
+-- writeConstDeclaration :: StaticConstSpec -> Int -> LLVM ()
+-- writeConstDeclaration spec@(WybeStringSpec str) n = do
+--     let stringName = specialName2 "string" $ show n
+--     modify $ \s -> s { constNames=Map.insert spec stringName
+--                                        $ constNames s}
+--     textName <- lookupConstant $ CStringSpec str
+--     declareStructConstant stringName
+--         [ (ArgInt (fromIntegral $ length str) (Representation $ Bits wordSize)
+--           , Bits wordSize)
+--         , (ArgGlobal (GlobalVariable textName) (Representation CPointer)
+--           , Pointer)]
+--         Nothing
+-- writeConstDeclaration spec@(CStringSpec str) n = do
+--     let textName = specialName2 "cstring" $ show n
+--     modify $ \s -> s { constNames=Map.insert spec textName
+--                                        $ constNames s}
+--     declareStringConstant textName str Nothing
+-- writeConstDeclaration spec@(ClosureSpec pspec args) n = do
+--     let closureName = specialName2 "closure" $ show n
+--     modify $ \s -> s { constNames=Map.insert spec closureName $ constNames s}
+--     argRep <- typeRep AnyType
+--     paramTys <- partitionClosureParams pspec args >>= mapM typeRep . (argType <$>) . fst 
+
+
 -- | Write out a declaration for a string and record its name.  This code
 -- assumes that the CString that a WybeString refers to has already been
 -- declared and recorded.  This will happen because sets are sorted
@@ -1548,7 +1576,7 @@ llvmConstValue (FloatStructMember val _) = return $ show val
 llvmConstValue (PointerStructMember structID) =
     return $ llvmGlobalName $ structConstName structID
 llvmConstValue (FnPointerStructMember pspec) =
-    return $ llvmGlobalName (show pspec)
+    return $ llvmGlobalName $ mangleProcSpec pspec
 llvmConstValue (UndefStructMember sz) = return "undef"
 llvmConstValue (GenericStructMember val) =
     convertedConstant val Pointer
