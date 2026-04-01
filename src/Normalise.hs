@@ -13,7 +13,7 @@ module Normalise (normalise, normaliseItem, completeNormalisation) where
 
 import AST
 import Config (wordSize, wordSizeBytes, availableTagBits,
-               tagMask, smallestAllocatedAddress, currentModuleAlias, specialName2, specialName, initProcName)
+               tagMask, smallestAllocatedAddress, currentModuleAlias, specialName2, specialName, initProcName, byteBits)
 import Control.Monad
 import Control.Monad.State (gets)
 import Control.Monad.Trans (lift,liftIO)
@@ -410,7 +410,7 @@ completeType modspec (TypeDef params ctors) = do
           tagBits tagLimit)
          infos
 
-    let rep = typeRepresentation reps numConsts
+    let rep = newTypeRep reps numConsts
     setTypeRep rep
     logNormalise $ "Representation of type " ++ showModSpec modspec
                    ++ " is " ++ show rep
@@ -470,11 +470,11 @@ fixAnonFieldName _ _ param pos = (param `maybePlace` pos, False)
 -- | Determine the appropriate representation for a type based on a list of
 -- the representations of all the non-constant constructors and the number
 -- of constant constructors.
-typeRepresentation :: [TypeRepresentation] -> Int -> TypeRepresentation
-typeRepresentation [] numConsts =
+newTypeRep :: [TypeRepresentation] -> Int -> TypeRepresentation
+newTypeRep [] numConsts =
     Bits $ ceiling $ logBase 2 $ fromIntegral numConsts
-typeRepresentation [rep] 0      = rep
-typeRepresentation _ _          = Pointer
+newTypeRep [rep] 0      = rep
+newTypeRep _ _          = Pointer
 
 
 ----------------------------------------------------------------
@@ -661,7 +661,7 @@ layoutRecord paramInfos tag tagLimit =
     let sizes = (2^) <$> [0..floor $ logBase 2 $ fromIntegral wordSizeBytes]
         fields = List.map
                 (\(CtorParamInfo param anon rep sz) ->
-                    let byteSize = (sz + 7) `div` 8
+                    let byteSize = (sz + 7) `div` byteBits
                         wordSize = (byteSize + wordSizeBytes - 1)
                                     `div` wordSizeBytes * wordSizeBytes
                         alignment =

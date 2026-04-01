@@ -13,6 +13,7 @@ AFTER EVERYTHING:
                     type_enum.season.summer<0>
                     type_enum.season.winter<0>
                     type_enum.season.~=<0>
+  constants       : 
   imports         : public use type_enum.season
                     use wybe
   resources       : 
@@ -42,6 +43,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
                     type_enum.season.summer<0>
                     type_enum.season.winter<0>
                     type_enum.season.~=<0>
+  constants       : 
   imports         : use type_enum
                     use wybe
   resources       : 

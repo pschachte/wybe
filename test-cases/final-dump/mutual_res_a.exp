@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: a_res: mutual_res_a.a_res
   public procs    : 
+  constants       : 
   imports         : use mutual_res_b
                     use wybe
   resources       : a_res: fromList [(mutual_res_a.a_res,wybe.int = 42 @mutual_res_a:nn:nn @mutual_res_a:nn:nn)]
@@ -32,6 +33,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
   public submods  : 
   public resources: b_res: mutual_res_b.b_res
   public procs    : 
+  constants       : 
   imports         : use mutual_res_a
                     use wybe
   resources       : b_res: fromList [(mutual_res_b.b_res,wybe.char = 'c' @mutual_res_b:nn:nn @mutual_res_b:nn:nn)]

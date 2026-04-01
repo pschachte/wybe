@@ -7,8 +7,8 @@
 
 module Util (sameLength, maybeNth, insertAt,
              setMapInsert, showArguments,
-             fillLines, nop, sccElts, DisjointSet,
-             emptyDS, addOneToDS, unionTwoInDS,
+             fillLines, nop, sccElts, mapFst4, thd4, 
+             DisjointSet, emptyDS, addOneToDS, unionTwoInDS,
              combineTwoDS, removeSingletonFromDS,
              addConnectedGroupToDS, removeOneFromDS,
              removeFromDS, connectedItemsInDS,
@@ -23,6 +23,8 @@ module Util (sameLength, maybeNth, insertAt,
 import           Config ( localCacheLibDir )
 import           Control.Monad ( when, unless )
 import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Maybe (MaybeT(runMaybeT, MaybeT))
+import           Control.Monad.Extra (ifM)
 import           Crypto.Hash ( hashWith, hashlazy, SHA1(..), Digest )
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.ByteString.Lazy  as BL
@@ -32,20 +34,14 @@ import           Data.Map     as Map
 import           Data.Map.Merge.Lazy (merge,dropMissing,zipWithMaybeMatched)
 import           Data.Maybe   (isJust)
 import           Data.Set     as Set
+import           Data.Foldable (foldrM)
 import qualified Data.Text.Internal.Builder as BS
 import qualified Data.Text.Internal.Builder as BS.UTF8
 import           GHC.Generics (Generic)
 import           Flow         ((|>))
 import           System.FilePath ( (<.>), (</>), takeDirectory )
-import System.Directory
-    ( doesFileExist,
-      removeFile,
-      createDirectoryIfMissing,
-      getPermissions )
-import System.Directory.Extra (Permissions(writable))
-import Control.Monad.Trans.Maybe (MaybeT(runMaybeT, MaybeT))
-import Data.Foldable (foldrM)
-import Control.Monad.Extra (ifM)
+import           System.Directory ( doesFileExist, removeFile, createDirectoryIfMissing, getPermissions )
+import           System.Directory.Extra (Permissions(writable))
 
 
 -- |Do the the two lists have the same length?
@@ -120,6 +116,16 @@ nop = return ()
 sccElts :: SCC a -> [a]
 sccElts (AcyclicSCC single) = [single]
 sccElts (CyclicSCC multi)   = multi
+
+
+-- Map the first elemt of a 4-tuple
+mapFst4 :: (a0 -> a1) -> (a0, b, c, d) -> (a1, b, c, d)
+mapFst4 f (a, b, c, d) = (f a, b, c, d)
+
+
+
+thd4 :: (a, b, c, d) -> c
+thd4 (_, _, c, _) = c
 
 
 ----------------------------------------------------------------

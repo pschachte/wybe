@@ -41,6 +41,7 @@ import AST
 import Config
 import Debug.Trace
 import Snippets
+import Util
 import Options (LogSelection(Flatten))
 import Data.Map as Map
 import Data.Set as Set
@@ -510,8 +511,13 @@ flattenExp expr@(IntValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(FloatValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
-flattenExp expr@(StringValue _ _) ty castFrom pos =
+flattenExp expr@(ConstStruct _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
+flattenExp expr@(StringValue str WybeString) ty castFrom pos = do
+    return $ typeAndPlace expr ty castFrom pos
+flattenExp expr@(StringValue cstr CString) _ castFrom pos = do
+    exp' <- lift $ cStringExpr cstr
+    flattenExp exp' cStringType castFrom pos
 flattenExp expr@(CharValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(Var "_" flow _) ty castFrom pos = do
@@ -647,10 +653,20 @@ flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
     flattenCall (ForeignCall lang name flags) True ty castFrom pos exps
 flattenExp (Typed exp AnyType _) ty castFrom pos = do
     flattenExp exp ty castFrom pos
-flattenExp (Typed exp ty castFrom) _ _ pos = do
+flattenExp typed@(Typed exp ty castFrom) AnyType ctxtCastFrom pos = do
+    logFlatten $ "  Flattening typed exp " ++ show typed
+                ++ " with no context type "
+                ++ " and context cast from " ++ show ctxtCastFrom
     lift $ explicitTypeSpecificationWarning pos ty
     lift $ forM_ castFrom (explicitTypeSpecificationWarning pos)
     flattenExp exp ty castFrom pos
+flattenExp typed@(Typed exp ty castFrom) ctxtTy ctxtCastFrom pos = do
+    logFlatten $ "  Flattening doubly typed exp " ++ show typed
+                ++ " with context type " ++ show ctxtTy
+                ++ " and context cast from " ++ show ctxtCastFrom
+    lift $ explicitTypeSpecificationWarning pos ty
+    lift $ forM_ castFrom (explicitTypeSpecificationWarning pos)
+    flattenExp exp ctxtTy castFrom pos
 
 
 -- | Flatten something, and produce an anonymous procedure from the resultant flattened
@@ -763,6 +779,10 @@ typeAndPlace exp ty castFrom = maybePlace (maybeType exp ty castFrom)
 
 
 maybeType :: Exp -> TypeSpec -> Maybe TypeSpec -> Exp
+maybeType (Typed exp ty castFrom1) AnyType castFrom2 =
+    maybeType exp ty (castFrom2 `orElse` castFrom1)
+maybeType (Typed exp _ castFrom1) ty castFrom2 =
+    maybeType exp ty (castFrom2 `orElse` castFrom1)
 maybeType exp AnyType Nothing = exp
 maybeType exp ty castFrom = Typed exp ty castFrom
 

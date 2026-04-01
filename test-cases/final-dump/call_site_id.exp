@@ -10,6 +10,7 @@ AFTER EVERYTHING:
   public procs    : call_site_id.<0>
                     call_site_id.bar<0>
                     call_site_id.foo<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
@@ -65,19 +66,19 @@ proc foo > public (1 calls)
 foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(0,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(1,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @call_site_id:nn:nn
+  MultiSpeczDepInfo: [(1,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(9,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(11,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(13,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @call_site_id:nn:nn
-    wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @call_site_id:nn:nn
     wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @call_site_id:nn:nn
-    wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @call_site_id:nn:nn
     wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @call_site_id:nn:nn
-    wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @call_site_id:nn:nn
+    wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @call_site_id:nn:nn
+    wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @call_site_id:nn:nn
+    wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @call_site_id:nn:nn
+    wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @call_site_id:nn:nn
     foreign llvm mul(~x##0:wybe.int, 5:wybe.int, ?tmp#1##0:wybe.int) @call_site_id:nn:nn
     foreign llvm add(~tmp#1##0:wybe.int, 10:wybe.int, ?tmp#0##0:wybe.int) @call_site_id:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#42##0:wybe.phantom) @call_site_id:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#42##0:wybe.phantom, ?%tmp#43##0:wybe.phantom) @call_site_id:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @call_site_id:nn:nn
     foreign lpvm store(~%tmp#44##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @call_site_id:nn:nn
 
   LLVM code       :

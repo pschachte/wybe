@@ -15,6 +15,7 @@ AFTER EVERYTHING:
                     position_float.position.y<0>
                     position_float.position.y<1>
                     position_float.position.~=<0>
+  constants       : 
   imports         : public use position_float.position
                     use wybe
   resources       : 
@@ -46,6 +47,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
                     position_float.position.y<0>
                     position_float.position.y<1>
                     position_float.position.~=<0>
+  constants       : 
   imports         : use position_float
                     use wybe
   resources       : 

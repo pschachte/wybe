@@ -29,7 +29,7 @@ import           Options       (LogSelection (Transform),
                                 OptFlag(MultiSpecz), optimisationEnabled)
 import           Util
 import           Snippets      (primMove)
-import Data.Tuple.HT (mapFst)
+import           Data.Tuple.HT (mapFst)
 
 
 ----------------------------------------------------------------
@@ -145,7 +145,8 @@ transformForks caller body (aliasMap, deadCells) callSiteMap = do
             completeFork
         MergedFork{} -> do
             lift $ logTransform "Unmerging fork:"
-            transformForks caller body{bodyFork=unMergeFork fork} (aliasMap, deadCells) callSiteMap
+            fork' <- lift $ unMergeFork fork
+            transformForks caller body{bodyFork=fork'} (aliasMap, deadCells) callSiteMap
         NoFork -> do
             -- NoFork: transform prims done
             lift $ logTransform "No fork."

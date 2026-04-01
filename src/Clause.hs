@@ -17,15 +17,15 @@ import           Data.List                         as List
 import           Data.Map                          as Map
 import           Data.Maybe                        as Maybe
 import           Data.Set                          as Set
+import           Data.Char                         (ord)
 import           UnivSet                           as USet
 import           Options                           (LogSelection (Clause))
 import           Snippets
 import           Text.ParserCombinators.Parsec.Pos
 import           Util
 import           Resources
-import UnivSet (emptyUnivSet)
-import AST (emptyGlobalFlows)
-import Config (bitsInByte)
+import           UnivSet                           (emptyUnivSet)
+import           Config                            (byteBits)
 
 
 ----------------------------------------------------------------
@@ -279,7 +279,7 @@ compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
         Typed _ ty _ -> typeRepSize . trustFromJust "sizeof with unkown typerep" <$> lift (lookupTypeRepresentation ty)
         _ -> shouldnt $ "untyped in sizeof " ++ show arg
     out' <- placedApply compileArg out
-    let size = if "bits" `elem` flags then repSize else (repSize + bitsInByte - 1) `div` bitsInByte
+    let size = if "bits" `elem` flags then repSize else (repSize + byteBits - 1) `div` byteBits
     return $ PrimForeign "llvm" "move" [] $ ArgInt (fromIntegral size) intType : out'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
@@ -306,8 +306,9 @@ compileArg exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
 compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp [PrimArg]
 compileArg' typ (IntValue int) _ = return [ArgInt int typ]
 compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
-compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
-compileArg' typ (CharValue char) _ = return [ArgChar char typ]
+compileArg' typ (ConstStruct structID) _ = do
+    return [ArgConstRef structID typ]
+compileArg' typ (CharValue char) _ = return [ArgInt (fromIntegral $ ord char) typ]
 compileArg' typ (Global info) _ = return [ArgGlobal info typ]
 compileArg' typ (Closure ms es) _ = do
     as <- concat <$> mapM (placedApply compileArg) es
@@ -327,8 +328,9 @@ compileArg' typ var@(Var name flow flowType) pos = do
             return [ArgVar nextName typ FlowOut flowType False]
         else return []
     return $ inArg ++ outArg
-compileArg' _ (Typed exp _ _) pos =
-    shouldnt $ "Compiling multi-typed expression " ++ show exp
+compileArg' ty (Typed exp t1 _) pos =
+    shouldnt $ "Compiling multi-typed expression "
+                ++ show exp ++ ":" ++ show t1 ++ ":" ++ show ty
 compileArg' typ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 

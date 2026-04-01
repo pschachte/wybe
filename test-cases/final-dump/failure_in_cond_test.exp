@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : failure_in_cond_test.<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : multi_out.<0>
                     multi_out.onetwothree<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

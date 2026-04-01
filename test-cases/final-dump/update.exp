@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : update.inc2<0>
                     update.inc2<1>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

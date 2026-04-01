@@ -21,6 +21,7 @@ AFTER EVERYTHING:
                     type_int.myint.><0>
                     type_int.myint.>=<0>
                     type_int.myint.~=<0>
+  constants       : 
   imports         : public use type_int.myint
                     use wybe
   resources       : 
@@ -58,6 +59,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
                     type_int.myint.><0>
                     type_int.myint.>=<0>
                     type_int.myint.~=<0>
+  constants       : 
   imports         : use type_int
                     use wybe
   resources       : 
