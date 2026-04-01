@@ -1,0 +1,46 @@
+representation is 128 bit signed
+
+# if only these could be created automatically!
+pub def foreign llvm `-`=sub(x:_, y:_):_
+pub def -(x:_):_  = 0:_ - x
+pub def foreign llvm `/`=sdiv(x:_, y:_):_
+pub def foreign llvm `%`=srem(x:_, y:_):_
+pub def foreign llvm {test} `=`=icmp_eq(x:_, y:_)
+pub def foreign llvm {test} `<`=icmp_slt(x:_, y:_)
+pub def foreign llvm {test} `>`=icmp_sgt(x:_, y:_)
+
+def print(x:_) use !io {
+    if { x = 0:_ :: 
+        !print('0')
+    | else ::
+        if { x < 0:_ ::
+            !print('-') 
+            ?x = -x
+        }
+
+        ?s = []
+        do {
+            while x > 0:_
+            [numeral(foreign lpvm cast(x % 10:_)) | !s]
+            !x / 10:_
+        }
+        
+        for ?c in s {
+            !print(c)
+        }
+    }
+}
+
+def numeral(x:int):char = c where {
+    ?c = chr(ord('0') + x) | !shouldnt
+}
+
+def {noinline} copy(x:_):_ = x
+def {noinline} force_box(x:X):X = x
+
+!print(force_box(force_box(copy(18446744073709551617:_))))
+!nl
+!print(force_box(18446744073709551617:_))
+!nl
+!print(force_box(copy(18446744073709551617:_)))
+!nl
