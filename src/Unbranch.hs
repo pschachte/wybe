@@ -76,12 +76,14 @@ import Control.Monad.Trans       (lift)
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Data.List                 as List
+import Data.List.Extra           as List
 import Data.Set                  as Set
 import Data.Map                  as Map
 import Data.Maybe
-import Data.Tuple.HT             (mapFst)
+import Data.Tuple.HT             (mapFst, mapSnd3)
 import Options                   (LogSelection(Unbranch))
 import Util
+import Config                    (byteBits)
 
 
 -- |Transform away all loops, and all conditionals other than as the final
@@ -141,7 +143,10 @@ unbranchBody name tmpCtr params detism impurity body = do
     logMsg Unbranch $ "** Unbranching with output params:" ++ show outparams
     logMsg Unbranch $ "** Unbranching with output args:" ++ show outvars
     (stmts',st) <- runStateT (unbranchStmts stmts) unbrancher
-    return (stmts',brTempCtr st, brNewDefs st)
+    return (stmts', brTempCtr st, toProcDef <$> Map.assocs (brNewDefs st))
+  where 
+    toProcDef (_, Right def) = def
+    toProcDef (name, Left proto) = shouldnt $ "proc " ++ name ++ " without def filled in " ++ show proto
 
 
 ----------------------------------------------------------------
@@ -213,7 +218,8 @@ data UnbrancherState = Unbrancher {
                                   -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
     brInOutVars  :: Set VarName,  -- ^In/Out argument names
-    brNewDefs    :: [ProcDef],    -- ^Generated unbranched auxilliary procedures
+    brNewDefs    :: Map ProcName (Either ProcProto ProcDef),    
+                                  -- ^Generated unbranched auxilliary procedures
     brClosures   :: Map (ProcSpec, Map Integer Exp) ProcSpec,
                                   -- ^Generated procs for closures
     brPreassigned:: Set VarName,  -- ^Variables already assigned at entry to
@@ -248,7 +254,7 @@ initUnbrancherState loopinfo tmpCtr detism impurity params =
                  , flowsOut fl && flowsIn fl]
         alt = selectDetism [] [move boolFalse testOutExp] detism
     in Unbrancher loopinfo defined tmpCtr outParams outArgs
-            (Set.fromList inOuts) [] Map.empty Set.empty detism impurity
+            (Set.fromList inOuts) Map.empty Map.empty Set.empty detism impurity
             alt True
 
 
@@ -325,7 +331,15 @@ genProc proto detism stmts = do
                   ++ showProcDef 8 procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
-    modify (\s -> s { brNewDefs = procDef:brNewDefs s })
+    modify (\s -> s { brNewDefs = Map.insert name (Right procDef) $ brNewDefs s })
+
+
+-- | Add a new ProcProto, with the body to be filled in later
+genProcProto :: ProcProto -> Unbrancher ()
+genProcProto proto = do
+    logUnbranch $ "Generating proc proto: " ++ show proto 
+    let name = procProtoName proto
+    modify (\s -> s { brNewDefs = Map.insert name (Left proto) $ brNewDefs s })
 
 
 -- |Return a fresh variable name.
@@ -445,7 +459,8 @@ unbranchStmt stmt@(ProcCall func SemiDet _ args) pos stmts = do
     mustBeSemiDet ("SemiDet proc call " ++ show stmt)
     logUnbranch $ "converting SemiDet proc call" ++ show stmt
     (args', val) <- addTestOutExp func args
-    args'' <- unbranchArgs args'
+    tys <- paramTypes func
+    (preArgs, args'', postArgs) <- unbranchArgs tys args'
     condVars <- gets brVars
     stmts' <- unbranchStmts stmts
     vars <- gets brVars
@@ -454,29 +469,33 @@ unbranchStmt stmt@(ProcCall func SemiDet _ args) pos stmts = do
     logUnbranch $ "mkCond " ++ show sense ++ " " ++ show val
                 ++ showBody 4 stmts' ++ "\nelse"
                 ++ showBody 4 alt
-    func' <- unbranchProcFunctor func
-    result <- (maybePlace (ProcCall func' Det False args'') pos :)
-               <$> mkCond sense val pos stmts' alt condVars vars
+    (preFunc, func', postFunc) <- unbranchProcFunctor func
+    result <- (preFunc ++) . (preArgs ++) . (maybePlace (ProcCall func' Det False args'') pos :)
+               <$> mkCond sense val pos (postFunc ++ postArgs ++ stmts') alt condVars vars
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
 unbranchStmt stmt@(ProcCall func calldetism r args) pos stmts = do
     alt <- gets brAlternate
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
-    args' <- unbranchArgs args
-    func' <- unbranchProcFunctor func
-    let stmt' = ProcCall func' calldetism r args'
+    tys <- paramTypes func
+    (preArgs, args', postArgs) <- unbranchArgs tys args
+    (preFunc, func', postFunc) <- unbranchProcFunctor func
+    let pre = preFunc ++ preArgs
+        post = postFunc ++ postArgs
+        stmt' = ProcCall func' calldetism r args'
     case calldetism of
-      Terminal -> return [maybePlace stmt' pos] -- no execution after Terminal
-      Failure  -> return [maybePlace stmt' pos] -- no execution after Failure
-      Det      -> leaveStmtAsIs stmt' pos stmts
+      Terminal -> return $ pre ++ [maybePlace stmt' pos] -- no execution after Terminal
+      Failure  -> return $ pre ++ [maybePlace stmt' pos] -- no execution after Failure
+      Det      -> leaveStmtAsIs pre stmt' post pos stmts
     --   SemiDet case already covered
 unbranchStmt stmt@(ForeignCall l nm fs args) pos stmts = do
     alt <- gets brAlternate
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
-    args' <- unbranchArgs args
+    let tys = trustFromJust "Unbranching foreign call arg" . maybeExpType . content <$> args 
+    (pre, args', post) <- unbranchArgs tys args
     let stmt' = ForeignCall l nm fs args'
-    leaveStmtAsIs stmt' pos stmts
+    leaveStmtAsIs pre stmt' post pos stmts
 unbranchStmt stmt@(TestBool val) pos stmts = do
     alt <- gets brAlternate
     mustBeSemiDet (showStmt 4 stmt)
@@ -581,11 +600,11 @@ unbranchStmt Next pos _ = do
     return [nxt]
 
 -- |Emit the supplied statement, and process the remaining statements.
-leaveStmtAsIs :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
-leaveStmtAsIs stmt pos stmts = do
-    logUnbranch $ "Leaving stmt as is: " ++ showStmt 4 stmt
+leaveStmtAsIs :: [Placed Stmt] -> Stmt -> [Placed Stmt] -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
+leaveStmtAsIs pre stmt post pos stmts = do
+    logUnbranch $ "Leaving stmt as is: " ++ showBody 4 (pre ++ (maybePlace stmt pos : post)) 
     stmts' <- unbranchStmts stmts
-    return $ maybePlace stmt pos:stmts'
+    return $ pre ++ (maybePlace stmt pos:post) ++ stmts'
 
 
 -- | Execute the given code if the context is semi-deterministic; otherwise
@@ -667,6 +686,14 @@ flatStmt Next          = True
 flatStmt _             = False
 
 
+paramTypes :: ProcFunctor -> Unbrancher [TypeSpec]
+paramTypes Higher{} = return []
+paramTypes func@(First mod name num) = do
+    defs <- gets brNewDefs
+    case Map.lookup name defs of
+        Just def -> return $ paramType . content <$> procProtoParams (either id procProto def)
+        _ -> paramType <$$> lift (getParams (ProcSpec mod name (fromMaybe 0 num) generalVersion))
+
 -- |A symbol table containing all input parameters
 inputParams :: [Param] -> VarDict
 inputParams params =
@@ -696,20 +723,21 @@ unbranchParam param@Param{paramType=ty} = param{paramType=unbranchType ty}
 
 
 -- Unbranch a ProcFunctore, tansforming expressions in Highers
-unbranchProcFunctor :: ProcFunctor -> Unbrancher ProcFunctor
-unbranchProcFunctor func@First{} = return func
-unbranchProcFunctor (Higher fn)  = Higher . head <$> unbranchArgs [fn]
+unbranchProcFunctor :: ProcFunctor -> Unbrancher ([Placed Stmt], ProcFunctor, [Placed Stmt])
+unbranchProcFunctor func@First{} = return ([], func, [])
+unbranchProcFunctor (Higher fn)  = mapSnd3 (Higher . head) <$> unbranchArgs [] [fn]
 
 
 -- |Add all output arguments of a param list to the symbol table
 --  and hoist all closures
-unbranchArgs :: [Placed Exp] -> Unbrancher [Placed Exp]
-unbranchArgs args = do
+unbranchArgs :: [TypeSpec] -> [Placed Exp] -> Unbrancher ([Placed Stmt], [Placed Exp], [Placed Stmt])
+unbranchArgs tys args = do
     detism <- gets brDetism
     selectDetism (return ())
           (mapM_ (noteReassignment . content) args) detism
     mapM_ (defArg . content) args
-    mapM (placedApply unbranchExp) args
+    List.foldr (\(pre, exp, post) (pres, exps, posts) -> (pre ++ pres, exp : exps, post ++ posts)) ([], [], []) 
+        <$> zipWithM (placedApply . unbranchExp AnyType) (tys ++ repeat AnyType) args
 
 
 noteReassignment :: Exp -> Unbrancher ()
@@ -727,13 +755,13 @@ noteReassignment _ = return ()
 
 -- | Unbranch an expression, transforming Closures and AnonProcs into fresh
 -- 'closure' procs.  This shouldn't be called outside of unbranchArgs.
-unbranchExp :: Exp -> OptPos -> Unbrancher (Placed Exp)
-unbranchExp (Typed exp ty cast) pos = do
-    exp' <- content <$> unbranchExp exp Nothing
+unbranchExp :: TypeSpec -> TypeSpec -> Exp -> OptPos -> Unbrancher ([Placed Stmt], Placed Exp, [Placed Stmt])
+unbranchExp _ calleeTy (Typed exp ty cast) pos = do
+    (pre, exp', post) <- unbranchExp ty calleeTy exp Nothing
     let ty' = unbranchType ty
     let cast' = unbranchType <$> cast
-    return $ maybePlace (Typed exp' ty' cast') pos
-unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
+    return (pre, maybePlace (Typed (content exp') ty' cast') pos, post)
+unbranchExp callerTy calleeTy exp@(AnonProc mods params pstmts clsd res) pos = do
     let clsd' = trustFromJust "unbranch anon proc without closed" clsd
     let res' = trustFromJust "unbranch anon proc without resources" res
     name <- newProcName "anon"
@@ -750,14 +778,47 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
     procSpec <- lift $ addProcDef procDef'
-    addClosure procSpec freeVars pos name
-unbranchExp exp@(Closure ps free) pos = do
-    free' <- unbranchArgs free
+    ([],,[]) <$> addClosure procSpec freeVars pos name
+unbranchExp callerTy calleeTy exp@(Closure ps free) pos = do
+    tys <- paramType <$$> lift (getParams ps)
+    (pre, free', post) <- unbranchArgs (List.take (length free) tys) free
+    unless (List.null post) $ shouldnt $ "unbranchExp of " ++ show exp ++ " with unexpected post " ++ show post
     isClosure <- lift $ isClosureProc ps
-    if isClosure
+    (pre,,[]) <$> if isClosure
     then return $ maybePlace exp pos
     else newProcName "closure" >>= addClosure ps free pos
-unbranchExp exp pos = return $ maybePlace exp pos
+unbranchExp callerTy calleeTy exp pos = do
+    logUnbranch $ "Unbranching " ++ show exp ++ " with " ++ show (callerTy, calleeTy)
+    callerSize <- typeRepSize . trustFromJust "unbranchExp callerSize" <$> lift (lookupTypeRepresentation callerTy)
+    logUnbranch $ "Unbranching " ++ show exp ++ " with " ++ show (callerSize, wordSize)
+    if callerSize > wordSize && typeNeedsBoxing calleeTy
+    then do 
+        box <- tempVar
+        logUnbranch $ "Boxing " ++ show exp ++ " into " ++ box
+        let size    = (callerSize + byteBits - 1) `div` byteBits
+            flow    = flattenedExpFlow exp
+            getBox  = varGet box `withType` AnyType `maybePlace` pos
+            setBox  = varSet box `withType` AnyType `maybePlace` pos
+            zero    = iVal 0 `withType` intType `maybePlace` pos
+            expSize = iVal size `withType` intType `maybePlace` pos
+            setFlow flow exp = (if expIsVar exp then setExpTypeFlow (TypeFlow callerTy flow) exp else Typed exp callerTy Nothing) `maybePlace` pos
+        when (flowsIn flow) $ defVar box AnyType
+        return (concat [[ForeignCall "lpvm" "alloc" [] 
+                            [expSize, setBox] `maybePlace` pos,
+                         ForeignCall "lpvm" "mutate" [] 
+                            [getBox, setBox, zero, zero, expSize, zero, setFlow ParamIn exp] `maybePlace` pos
+                        ] | flowsIn flow], 
+                Var box flow Ordinary `maybePlace` pos, 
+                       [ForeignCall "lpvm" "access" [] 
+                            [getBox, zero, expSize, zero, setFlow ParamOut exp] `maybePlace` pos | flowsOut flow])
+    else return ([], maybePlace exp pos, [])
+
+
+-- | Test if a type needs to be boxed for large types
+typeNeedsBoxing :: TypeSpec -> Bool
+typeNeedsBoxing AnyType        = True -- conservative 
+typeNeedsBoxing TypeVariable{} = True
+typeNeedsBoxing _              = False 
 
 
 -- | Create and add a closure of the given ProcSpec with the given name
@@ -914,11 +975,12 @@ factorLoopProc break inVars pos res stmts = do
                     inVars
     next <- newProcCall pname usedVars pos Det -- Continuation procs always Det
     let loopinfo = Just (LoopInfo next break)
+    proto <- newProcProto pname usedVars res
+    genProcProto proto
     oldLoopinfo <- gets brLoopInfo
     modify (\s -> s { brLoopInfo = loopinfo })
     stmts' <- withVars usedVars $ unbranchStmts stmts
     modify (\s -> s { brLoopInfo = oldLoopinfo })
-    proto <- newProcProto pname usedVars res
     genProc proto Det stmts'
     return next
 

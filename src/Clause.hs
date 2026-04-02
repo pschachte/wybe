@@ -328,9 +328,9 @@ compileArg' typ var@(Var name flow flowType) pos = do
             return [ArgVar nextName typ FlowOut flowType False]
         else return []
     return $ inArg ++ outArg
-compileArg' ty (Typed exp t1 _) pos =
+compileArg' ty exp@Typed{} pos =
     shouldnt $ "Compiling multi-typed expression "
-                ++ show exp ++ ":" ++ show t1 ++ ":" ++ show ty
+                ++ show exp ++ " with type " ++ show ty
 compileArg' typ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
