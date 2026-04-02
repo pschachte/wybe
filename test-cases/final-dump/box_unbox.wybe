@@ -2,6 +2,7 @@ representation is 128 bit signed
 
 # if only these could be created automatically!
 pub def foreign llvm `-`=sub(x:_, y:_):_
+pub def foreign llvm `+`=add(x:_, y:_):_
 pub def -(x:_):_  = 0:_ - x
 pub def foreign llvm `/`=sdiv(x:_, y:_):_
 pub def foreign llvm `%`=srem(x:_, y:_):_
@@ -9,7 +10,7 @@ pub def foreign llvm {test} `=`=icmp_eq(x:_, y:_)
 pub def foreign llvm {test} `<`=icmp_slt(x:_, y:_)
 pub def foreign llvm {test} `>`=icmp_sgt(x:_, y:_)
 
-def print(x:_) use !io {
+pub def print(x:_) use !io {
     if { x = 0:_ :: 
         !print('0')
     | else ::
@@ -35,8 +36,8 @@ def numeral(x:int):char = c where {
     ?c = chr(ord('0') + x) | !shouldnt
 }
 
-def {noinline} copy(x:_):_ = x
-def {noinline} force_box(x:X):X = x
+pub def {noinline} copy(x:_):_ = x
+pub def {noinline} force_box(x:X):X = x
 
 !print(force_box(force_box(copy(18446744073709551617:_))))
 !nl
