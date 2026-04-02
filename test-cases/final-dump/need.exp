@@ -34,7 +34,7 @@ proc #anon#1 > {inline,impure} (1 calls)
 #anon#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    need.iota<0>(1000:wybe.int, outByReference tmp#0##0:wybe.list(wybe.int)) #1 @need:nn:nn
+    need.iota<0>(1000:wybe.int, outByReference tmp#1##0:wybe.list(wybe.int)) #1 @need:nn:nn
 
 
 proc iota > public (2 calls)
@@ -90,9 +90,9 @@ define external fastcc void @"need#.#anon#1<0>"() {
 }
 
 define external fastcc void @"need#.#anon#1<1>"(ptr %"#env##0") {
-  %"tmp#1##0" = alloca i8, i64 8, align 8
-  call fastcc void @"need#.iota<0>"(i64 1000, ptr %"tmp#1##0")
-  %"tmp#0##0" = load i64, ptr %"tmp#1##0"
+  %"tmp#2##0" = alloca i8, i64 8, align 8
+  call fastcc void @"need#.iota<0>"(i64 1000, ptr %"tmp#2##0")
+  %"tmp#1##0" = load i64, ptr %"tmp#2##0"
   ret void
 }
 

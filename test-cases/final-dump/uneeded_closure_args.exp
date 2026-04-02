@@ -26,7 +26,7 @@ module top-level code > public {semipure} (0 calls)
 
 proc #closure#1 > {inline} (1 calls)
 0: uneeded_closure_args.#closure#1<0>
-#closure#1([^a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>)<{}; {}; {}>:
+#closure#1([^a##0:A <{}; {}; {0}>], b##0, ?#result##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
@@ -66,8 +66,8 @@ define external fastcc void @"uneeded_closure_args#.<0>"() {
   ret void
 }
 
-define external fastcc i64 @"uneeded_closure_args#.#closure#1<0>"(ptr %"#env##0", i64 %"generic#b##0") {
-  ret i64 %"generic#b##0"
+define external fastcc i64 @"uneeded_closure_args#.#closure#1<0>"(ptr %"#env##0", i64 %"b##0") {
+  ret i64 %"b##0"
 }
 
 define external fastcc i64 @"uneeded_closure_args#.call<0>"(ptr %"f##0", i64 %"a##0") {

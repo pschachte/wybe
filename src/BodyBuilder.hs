@@ -708,12 +708,8 @@ argExpandedPrim call@(PrimHigher id fn impurity args) = do
     fn' <- expandArg True fn
     case fn' of
         ArgClosure pspec clsd _ -> do
-            pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
-            logBuild $ "As first-order call to " ++ show pspec'
-            params <- lift $ getPrimParams pspec'
-            let args' = zipWith (setArgType . primParamType) params args
             gFlows <- lift $ getProcGlobalFlows pspec
-            argExpandedPrim $ PrimCall id pspec' impurity (clsd ++ args') gFlows
+            argExpandedPrim $ PrimCall id pspec impurity (fn':args) gFlows
         _ -> do
             logBuild $ "Leaving as higher call to " ++ show fn'
             args' <- mapM (expandArg True) args

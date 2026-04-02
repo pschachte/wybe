@@ -136,7 +136,7 @@ proc #anon#1 > {inline,semipure} (1 calls)
 #anon#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    benchmark_fib.naive_fib<0>(42:wybe.int, ?tmp#0##0:wybe.int) #1 @benchmark_fib:nn:nn
+    benchmark_fib.naive_fib<0>(42:wybe.int, ?tmp#6##0:wybe.int) #1 @benchmark_fib:nn:nn
 
 
 proc fib > (1 calls)
@@ -285,7 +285,7 @@ define external fastcc void @"benchmark_fib#.#anon#1<0>"() {
 }
 
 define external fastcc void @"benchmark_fib#.#anon#1<1>"(ptr %"#env##0") {
-  %"tmp#0##0" = tail call fastcc i64 @"benchmark_fib#.naive_fib<0>"(i64 42)
+  %"tmp#6##0" = tail call fastcc i64 @"benchmark_fib#.naive_fib<0>"(i64 42)
   ret void
 }
 
