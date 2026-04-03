@@ -286,14 +286,16 @@ expandPrim call@(PrimCall id pspec impurity args gFlows) pos = do
         addInstr call' pos
     else do
         def <- lift2 $ getProcDef pspec
-        let args'' = case (isClosureVariant $ procVariant def, args') of
-                (True, ArgClosure _ closed _:rest) -> closed ++ rest 
-                (True, _) -> shouldnt $ "closure call with no closure arg " ++ show call
-                _ -> args'
-        case procImpln def of
+        let (args'', pspec') = case (procVariant def, args') of
+                (ClosureProc pspec' simple, ArgClosure _ closed _:rest) -> 
+                    (closed ++ rest, if simple then pspec' else pspec) 
+                (ClosureProc{}, _) -> shouldnt $ "closure call with no closure arg " ++ show call
+                _ -> (args', pspec)
+        def' <- if pspec == pspec' then return def else lift2 $ getProcDef pspec'
+        case procImpln def' of
             ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
             ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
-                if procInline def
+                if procInline def'
                 then inlineCall proto args'' body pos
                 else do
                     logExpansion "  Not inlinable"

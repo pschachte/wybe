@@ -46,7 +46,7 @@ proc #anon#1 > {inline} (1 calls)
     foreign llvm icmp_eq(~p##0:wybe.int, 3:wybe.int, ?#success##0:wybe.bool) @bug_497:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: bug_497.#anon#1<1>
-#anon#1(^p##0:wybe.int, anon#1#1##0, ?#success##0)<{}; {}; {}>:
+#anon#1(^p##0:wybe.int, anon#1#1##0 <{}; {}; {1}>, ?#success##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.int.fmt<2>(^p##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#9##0:wybe.string) #1 @bug_497:nn:nn
@@ -90,7 +90,7 @@ proc#anon#1(^p##0:wybe.int, anon#1#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}
     foreign llvm icmp_eq(~p##0:wybe.int, 3:wybe.int, ?#success##0:wybe.bool) @bug_497:nn:nn
 proc proc#anon#1 > {inline} (1 calls)
 1: bug_497.proc#anon#1<1>
-proc#anon#1(^p##0:wybe.int, anon#1#1##0, ?#success##0)<{}; {}; {}>:
+proc#anon#1(^p##0:wybe.int, anon#1#1##0 <{}; {}; {1}>, ?#success##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.int.fmt<2>(^p##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#8##0:wybe.string) #1 @bug_497:nn:nn

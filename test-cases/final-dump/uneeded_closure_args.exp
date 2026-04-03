@@ -26,7 +26,7 @@ module top-level code > public {semipure} (0 calls)
 
 proc #closure#1 > {inline} (1 calls)
 0: uneeded_closure_args.#closure#1<0>
-#closure#1([^a##0:A <{}; {}; {0}>], b##0, ?#result##0)<{}; {}; {}>:
+#closure#1([^a##0:A <{}; {}; {0}>], b##0 <{}; {}; {1}>, ?#result##0 <{}; {}; {1}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn

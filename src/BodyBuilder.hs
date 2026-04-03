@@ -708,8 +708,13 @@ argExpandedPrim call@(PrimHigher id fn impurity args) = do
     fn' <- expandArg True fn
     case fn' of
         ArgClosure pspec clsd _ -> do
-            gFlows <- lift $ getProcGlobalFlows pspec
-            argExpandedPrim $ PrimCall id pspec impurity (fn':args) gFlows
+            (pspec', simple) <- lift (getProcDef pspec <&> procVariant) <&> \case
+              ClosureProc pspec' simple -> (pspec', simple)
+              _ -> shouldnt $ "call to non-closure " ++ show pspec
+            let (finalPspec, finalArgs) = if simple then (pspec', clsd ++ args) else (pspec, fn':args)
+            gFlows <- lift $ getProcGlobalFlows finalPspec
+            logBuild $ "As first-order call to " ++ show finalPspec
+            argExpandedPrim $ PrimCall id finalPspec impurity finalArgs gFlows
         _ -> do
             logBuild $ "Leaving as higher call to " ++ show fn'
             args' <- mapM (expandArg True) args

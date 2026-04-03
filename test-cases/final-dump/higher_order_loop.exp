@@ -26,7 +26,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 proc #closure#1 > {inline} (1 calls)
 0: higher_order_loop.#closure#1<0>
-#closure#1(x##0)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#closure#1(x##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
@@ -37,7 +37,7 @@ proc #closure#1 > {inline} (1 calls)
 
 proc #closure#2 > {inline} (1 calls)
 0: higher_order_loop.#closure#2<0>
-#closure#2(x##0)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#closure#2(x##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn

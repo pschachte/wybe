@@ -47,7 +47,7 @@ proc #anon#1 > {inline} (1 calls)
     higher_order_append.append<0>(~anon#1#1##0:wybe.list(wybe.int), ~cons##0:wybe.list(wybe.int), outByReference anon#1#2##0:wybe.list(wybe.int)) #0 @higher_order_append:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: higher_order_append.#anon#1<1>
-#anon#1(^cons##0:wybe.list(wybe.int), anon#1#1##0, ?anon#1#2##0)<{}; {}; {}>:
+#anon#1(^cons##0:wybe.list(wybe.int), anon#1#1##0 <{}; {}; {1}>, ?anon#1#2##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_append.append<0>(~anon#1#1##0:wybe.list(wybe.int), ~^cons##0:wybe.list(wybe.int), outByReference anon#1#2##0:wybe.list(wybe.int)) #1 @higher_order_append:nn:nn
@@ -55,7 +55,7 @@ proc #anon#1 > {inline} (1 calls)
 
 proc #closure#1 > {inline} (2 calls)
 0: higher_order_append.#closure#1<0>
-#closure#1(l##0)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#closure#1(l##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.list.print<0>(higher_order_append.print_list_of_ints#closure#1<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0, 1}> #1 @higher_order_append:nn:nn
@@ -92,7 +92,7 @@ print_list_of_ints(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>};
 
 proc print_list_of_ints#closure#1 > {inline} (1 calls)
 0: higher_order_append.print_list_of_ints#closure#1<0>
-print_list_of_ints#closure#1(x##0)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+print_list_of_ints#closure#1(x##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @int:nn:nn

@@ -30,7 +30,7 @@ proc #anon#1 > {inline} (1 calls)
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: bug_509.#anon#1<1>
-#anon#1([^t##0:wybe.int], anon#1#1##0, ?anon#1#2##0)<{}; {}; {}>:
+#anon#1([^t##0:wybe.int], anon#1#1##0 <{}; {}; {1}>, ?anon#1#2##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn

@@ -86,7 +86,7 @@ module AST (
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
-  maybeGetClosureOf, isClosureProc, isClosureVariant, isConstructorVariant,
+  isClosureProc, isClosureVariant, isConstructorVariant,
   GlobalFlows(..), emptyGlobalFlows, univGlobalFlows, makeGlobalFlows,
   addGlobalFlow, hasGlobalFlow, globalFlowsUnion, globalFlowsUnions, globalFlowsIntersection,
   -- *Stateful monad for the compilation process
@@ -2211,7 +2211,7 @@ data ProcVariant
     | SetterProc VarName TypeSpec
     | GeneratedProc
     | AnonymousProc
-    | ClosureProc ProcSpec
+    | ClosureProc ProcSpec Bool
     deriving (Eq, Ord, Show, Generic)
 
 
@@ -2243,23 +2243,14 @@ showSuperProc AnySuperproc = ""
 showSuperProc (SuperprocIs super) = " (subproc of " ++ show super ++ ")"
 
 
--- |Maybe get the ProcSpec of a ClosureOf Proc via a ProcSpec
-maybeGetClosureOf :: ProcSpec -> Compiler (Maybe ProcSpec)
-maybeGetClosureOf pspec = do
-    variant <- procVariant <$> getProcDef pspec
-    return $ case variant of
-        ClosureProc cls -> Just cls
-        _ -> Nothing
-
-
 -- |Check if a ProcSpec refers to a closure proc
 isClosureProc :: ProcSpec -> Compiler Bool
 isClosureProc pspec = isClosureVariant . procVariant <$> getProcDef pspec
 
 
 isClosureVariant :: ProcVariant -> Bool
-isClosureVariant (ClosureProc _) = True
-isClosureVariant _               = False
+isClosureVariant (ClosureProc _ _) = True
+isClosureVariant _                 = False
 
 isConstructorVariant :: ProcVariant -> Bool
 isConstructorVariant (ConstructorProc _) = True

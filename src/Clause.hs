@@ -374,7 +374,7 @@ compileParam allFlows startVars endVars procName idx param@(Param name ty flow f
                             ++ " of proc " ++ show procName))
                 name startVars
           gFlows
-            | (isResourcefulHigherOrder ||| genericType) ty
+            | (isResourcefulHigherOrder ||| genericType ||| (==AnyType)) ty
             = emptyGlobalFlows{globalFlowsParams=USet.singleton inIdx}
             | otherwise = emptyGlobalFlows
     ]
@@ -387,7 +387,7 @@ compileParam allFlows startVars endVars procName idx param@(Param name ty flow f
                 name endVars
           gFlows
             | isResourcefulHigherOrder ty = univGlobalFlows
-            | genericType ty = emptyGlobalFlows{globalFlowsParams=UniversalSet}
+            | genericType ty || ty == AnyType = emptyGlobalFlows{globalFlowsParams=UniversalSet}
             | otherwise = emptyGlobalFlows
     ]
   where
