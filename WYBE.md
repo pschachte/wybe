@@ -2345,10 +2345,6 @@ integer. Represents integers between 0 and 2<sup>*n*</sup>-1 inclusive.
 a floating point number type comprising *n* bits, where *n* is one of 16, 32,
 64, or 128.
 
-> [!WARNING]
-> Currently, *n* is limited to at most 64 for all `signed`, `unsigned`, and
-> `float` representation types.
-
 Like a `constructor` declaration, a `representation` declaration makes the
 enclosing module into a type.  Also like a `constructor` declaration, a submodule
 declaration may be combined with the specification of a representation using the

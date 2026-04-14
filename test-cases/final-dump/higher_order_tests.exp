@@ -47,7 +47,7 @@ proc #anon#1 > {inline} (1 calls)
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 proc #anon#1 > {inline} (3 calls)
 1: higher_order_tests.#anon#1<1>
-#anon#1(anon#1#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+#anon#1(anon#1#1##0 <{}; {}; {0}>, ?#success##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
@@ -61,7 +61,7 @@ proc #anon#2 > {inline} (1 calls)
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @higher_order_tests:nn:nn
 proc #anon#2 > {inline} (3 calls)
 1: higher_order_tests.#anon#2<1>
-#anon#2(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+#anon#2(anon#2#1##0 <{}; {}; {0}>, ?#success##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @higher_order_tests:nn:nn
@@ -261,9 +261,8 @@ define external fastcc i1 @"higher_order_tests#.#anon#1<0>"() {
   ret i1 1
 }
 
-define external fastcc i64 @"higher_order_tests#.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
-  %"tmp#1##0" = zext i1 1 to i64
-  ret i64 %"tmp#1##0"
+define external fastcc i64 @"higher_order_tests#.#anon#1<1>"(ptr %"#env##0", i64 %"anon#1#1##0") {
+  ret i64 1
 }
 
 define external fastcc i1 @"higher_order_tests#.#anon#2<0>"(i64 %"anon#2#1##0") {
@@ -271,10 +270,10 @@ define external fastcc i1 @"higher_order_tests#.#anon#2<0>"(i64 %"anon#2#1##0") 
   ret i1 %"tmp#13##0"
 }
 
-define external fastcc i64 @"higher_order_tests#.#anon#2<1>"(ptr %"#env##0", i64 %"generic#anon#2#1##0") {
-  %"#success##0" = icmp eq i64 %"generic#anon#2#1##0", 1
-  %"tmp#1##0" = zext i1 %"#success##0" to i64
-  ret i64 %"tmp#1##0"
+define external fastcc i64 @"higher_order_tests#.#anon#2<1>"(ptr %"#env##0", i64 %"anon#2#1##0") {
+  %"tmp#11##0" = icmp eq i64 %"anon#2#1##0", 1
+  %"tmp#12##0" = zext i1 %"tmp#11##0" to i64
+  ret i64 %"tmp#12##0"
 }
 
 define external fastcc void @"higher_order_tests#.#cont#1<0>"(ptr %"t##0") {

@@ -30,7 +30,7 @@ proc proc > {noinline} (1 calls)
 proc(p##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_eq(~^p##0:wybe.int, 3:wybe.int, ?#success##0:wybe.int) @bug_510_llvm_retval:nn:nn
+    foreign llvm icmp_eq(~^p##0:wybe.int, 3:wybe.int, ?#success##0:wybe.bool) @bug_510_llvm_retval:nn:nn
 
 
 proc proc#anon#1 > {inline} (1 calls)
@@ -41,7 +41,7 @@ proc#anon#1(^p##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
     foreign llvm icmp_eq(~p##0:wybe.int, 3:wybe.int, ?#success##0:wybe.bool) @bug_510_llvm_retval:nn:nn
 proc proc#anon#1 > {inline} (1 calls)
 1: bug_510_llvm_retval.proc#anon#1<1>
-proc#anon#1(^p##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+proc#anon#1(^p##0:wybe.int, ?#success##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~^p##0:wybe.int, 3:wybe.int, ?#success##0:wybe.bool) @bug_510_llvm_retval:nn:nn
@@ -68,9 +68,7 @@ define external fastcc void @"bug_510_llvm_retval#.<0>"() {
 
 define external fastcc i1 @"bug_510_llvm_retval#.proc<0>"(i64 %"p##0") {
   %"tmp#2##0" = icmp eq i64 %"p##0", 3
-  %"tmp#3##0" = zext i1 %"tmp#2##0" to i64
-  %"tmp#4##0" = trunc i64 %"tmp#3##0" to i1
-  ret i1 %"tmp#4##0"
+  ret i1 %"tmp#2##0"
 }
 
 define external fastcc i1 @"bug_510_llvm_retval#.proc#anon#1<0>"(i64 %"p##0") {
@@ -81,7 +79,7 @@ define external fastcc i1 @"bug_510_llvm_retval#.proc#anon#1<0>"(i64 %"p##0") {
 define external fastcc i64 @"bug_510_llvm_retval#.proc#anon#1<1>"(ptr %"#env##0") {
   %"tmp#1##0" = getelementptr inbounds {ptr, i64}, ptr %"#env##0", i64 0, i32 1
   %"p##0" = load i64, ptr %"tmp#1##0"
-  %"#success##0" = icmp eq i64 %"p##0", 3
-  %"tmp#2##0" = zext i1 %"#success##0" to i64
-  ret i64 %"tmp#2##0"
+  %"tmp#2##0" = icmp eq i64 %"p##0", 3
+  %"tmp#3##0" = zext i1 %"tmp#2##0" to i64
+  ret i64 %"tmp#3##0"
 }

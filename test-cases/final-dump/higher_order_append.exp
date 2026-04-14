@@ -47,7 +47,7 @@ proc #anon#1 > {inline} (1 calls)
     higher_order_append.append<0>(~anon#1#1##0:wybe.list(wybe.int), ~cons##0:wybe.list(wybe.int), outByReference anon#1#2##0:wybe.list(wybe.int)) #0 @higher_order_append:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: higher_order_append.#anon#1<1>
-#anon#1(^cons##0:wybe.list(wybe.int), anon#1#1##0:wybe.list(wybe.int), ?anon#1#2##0:wybe.list(wybe.int))<{}; {}; {}>:
+#anon#1(^cons##0:wybe.list(wybe.int), anon#1#1##0 <{}; {}; {1}>, ?anon#1#2##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_append.append<0>(~anon#1#1##0:wybe.list(wybe.int), ~^cons##0:wybe.list(wybe.int), outByReference anon#1#2##0:wybe.list(wybe.int)) #1 @higher_order_append:nn:nn
@@ -55,7 +55,7 @@ proc #anon#1 > {inline} (1 calls)
 
 proc #closure#1 > {inline} (2 calls)
 0: higher_order_append.#closure#1<0>
-#closure#1(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#closure#1(l##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.list.print<0>(higher_order_append.print_list_of_ints#closure#1<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0, 1}> #1 @higher_order_append:nn:nn
@@ -92,12 +92,12 @@ print_list_of_ints(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>};
 
 proc print_list_of_ints#closure#1 > {inline} (1 calls)
 0: higher_order_append.print_list_of_ints#closure#1<0>
-print_list_of_ints#closure#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+print_list_of_ints#closure#1(x##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~x##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~x##0:wybe.int, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @int:nn:nn
+    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
   LLVM code       :
 
@@ -144,17 +144,17 @@ define external fastcc i64 @"higher_order_append#.#anon#1<0>"(i64 %"cons##0", i6
   ret i64 %"tmp#16##0"
 }
 
-define external fastcc i64 @"higher_order_append#.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
-  %"tmp#2##0" = getelementptr inbounds {ptr, i64}, ptr %"#env##0", i64 0, i32 1
-  %"cons##0" = load i64, ptr %"tmp#2##0"
-  %"tmp#3##0" = alloca i8, i64 8, align 8
-  call fastcc void @"higher_order_append#.append<0>"(i64 %"generic#anon#1#1##0", i64 %"cons##0", ptr %"tmp#3##0")
-  %"anon#1#2##0" = load i64, ptr %"tmp#3##0"
-  ret i64 %"anon#1#2##0"
+define external fastcc i64 @"higher_order_append#.#anon#1<1>"(ptr %"#env##0", i64 %"anon#1#1##0") {
+  %"tmp#17##0" = getelementptr inbounds {ptr, i64}, ptr %"#env##0", i64 0, i32 1
+  %"cons##0" = load i64, ptr %"tmp#17##0"
+  %"tmp#18##0" = alloca i8, i64 8, align 8
+  call fastcc void @"higher_order_append#.append<0>"(i64 %"anon#1#1##0", i64 %"cons##0", ptr %"tmp#18##0")
+  %"tmp#19##0" = load i64, ptr %"tmp#18##0"
+  ret i64 %"tmp#19##0"
 }
 
-define external fastcc void @"higher_order_append#.#closure#1<0>"(ptr %"#env##0", i64 %"generic#l##0") {
-  tail call fastcc void @"wybe#.list#.print<0>"(ptr @"higher_order_append#constant#0", i64 %"generic#l##0")
+define external fastcc void @"higher_order_append#.#closure#1<0>"(ptr %"#env##0", i64 %"l##0") {
+  tail call fastcc void @"wybe#.list#.print<0>"(ptr @"higher_order_append#constant#0", i64 %"l##0")
   ret void
 }
 
@@ -186,7 +186,7 @@ define external fastcc void @"higher_order_append#.print_list_of_ints<0>"(i64 %"
   ret void
 }
 
-define external fastcc void @"higher_order_append#.print_list_of_ints#closure#1<0>"(ptr %"#env##0", i64 %"generic#x##0") {
-  call ccc void @print_int(i64 %"generic#x##0")
+define external fastcc void @"higher_order_append#.print_list_of_ints#closure#1<0>"(ptr %"#env##0", i64 %"x##0") {
+  call ccc void @print_int(i64 %"x##0")
   ret void
 }

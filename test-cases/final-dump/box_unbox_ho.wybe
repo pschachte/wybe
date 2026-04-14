@@ -1,0 +1,30 @@
+
+use box_unbox
+
+def {noinline} do_something(f:{resource}(X, ?X), a:X, ?b:X) {
+    !f(a, ?b)
+}
+
+def print_add(x:box_unbox, y:box_unbox, ?z:box_unbox) use !io {
+    !print(x)
+    !nl
+    x + y = ?z
+}
+
+?x = copy(18446744073709551617:box_unbox)
+!print_add(x, x, ?z)
+!print(z); !nl
+
+!do_something({resource}{
+    !print_add(@, 2:box_unbox, ?@)
+}, x, ?z)
+!print(z); !nl
+
+!do_something(print_add(x), x, ?z)
+!print(z); !nl
+
+# testing expansion
+?f = print_add(x)
+!f(x, ?z)
+!print(z); !nl
+

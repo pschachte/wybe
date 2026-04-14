@@ -328,9 +328,9 @@ compileArg' typ var@(Var name flow flowType) pos = do
             return [ArgVar nextName typ FlowOut flowType False]
         else return []
     return $ inArg ++ outArg
-compileArg' ty (Typed exp t1 _) pos =
+compileArg' ty exp@Typed{} pos =
     shouldnt $ "Compiling multi-typed expression "
-                ++ show exp ++ ":" ++ show t1 ++ ":" ++ show ty
+                ++ show exp ++ " with type " ++ show ty
 compileArg' typ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
@@ -374,7 +374,7 @@ compileParam allFlows startVars endVars procName idx param@(Param name ty flow f
                             ++ " of proc " ++ show procName))
                 name startVars
           gFlows
-            | (isResourcefulHigherOrder ||| genericType) ty
+            | (isResourcefulHigherOrder ||| genericType ||| (==AnyType)) ty
             = emptyGlobalFlows{globalFlowsParams=USet.singleton inIdx}
             | otherwise = emptyGlobalFlows
     ]
@@ -387,7 +387,7 @@ compileParam allFlows startVars endVars procName idx param@(Param name ty flow f
                 name endVars
           gFlows
             | isResourcefulHigherOrder ty = univGlobalFlows
-            | genericType ty = emptyGlobalFlows{globalFlowsParams=UniversalSet}
+            | genericType ty || ty == AnyType = emptyGlobalFlows{globalFlowsParams=UniversalSet}
             | otherwise = emptyGlobalFlows
     ]
   where

@@ -30,7 +30,7 @@ proc #anon#1 > {inline} (1 calls)
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: bug_509.#anon#1<1>
-#anon#1([^t##0:wybe.int], anon#1#1##0:wybe.bool, ?anon#1#2##0:wybe.bool)<{}; {}; {}>:
+#anon#1([^t##0:wybe.int], anon#1#1##0 <{}; {}; {1}>, ?anon#1#2##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn
@@ -67,11 +67,11 @@ define external fastcc i1 @"bug_509#.#anon#1<0>"(i1 %"anon#1#1##0") {
   ret i1 %"tmp#4##0"
 }
 
-define external fastcc i64 @"bug_509#.#anon#1<1>"(ptr %"#env##0", i64 %"generic#anon#1#1##0") {
-  %"anon#1#1##0" = trunc i64 %"generic#anon#1#1##0" to i1
-  %"anon#1#2##0" = icmp eq i1 %"anon#1#1##0", 1
-  %"tmp#2##0" = zext i1 %"anon#1#2##0" to i64
-  ret i64 %"tmp#2##0"
+define external fastcc i64 @"bug_509#.#anon#1<1>"(ptr %"#env##0", i64 %"anon#1#1##0") {
+  %"tmp#4##0" = trunc i64 %"anon#1#1##0" to i1
+  %"tmp#5##0" = icmp eq i1 %"tmp#4##0", 1
+  %"tmp#6##0" = zext i1 %"tmp#5##0" to i64
+  ret i64 %"tmp#6##0"
 }
 
 define external fastcc i1 @"bug_509#.call<0>"(ptr %"f##0") {

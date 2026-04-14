@@ -275,7 +275,7 @@ expandFork var ty bodies = do
 -- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Expander ()
-expandPrim (PrimCall id pspec impurity args gFlows) pos = do
+expandPrim call@(PrimCall id pspec impurity args gFlows) pos = do
     args' <- mapM expandArg args
     let call' = PrimCall id pspec impurity args' gFlows
     logExpansion $ "  Expand call " ++ show call'
@@ -286,11 +286,17 @@ expandPrim (PrimCall id pspec impurity args gFlows) pos = do
         addInstr call' pos
     else do
         def <- lift2 $ getProcDef pspec
-        case procImpln def of
+        let (args'', pspec') = case (procVariant def, args') of
+                (ClosureProc pspec' simple, ArgClosure _ closed _:rest) -> 
+                    (closed ++ rest, if simple then pspec' else pspec) 
+                (ClosureProc{}, _) -> shouldnt $ "closure call with no closure arg " ++ show call
+                _ -> (args', pspec)
+        def' <- if pspec == pspec' then return def else lift2 $ getProcDef pspec'
+        case procImpln def' of
             ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
             ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
-                if procInline def
-                then inlineCall proto args' body pos
+                if procInline def'
+                then inlineCall proto args'' body pos
                 else do
                     logExpansion "  Not inlinable"
                     addInstr call' pos
@@ -322,11 +328,8 @@ expandHigherOrder prim pos = do
             fn' <- expandArg fn
             case fn' of
                 ArgClosure pspec closed _ -> do
-                    pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
-                    logExpansion $ "  As first order call to " ++ show pspec'
                     gFlows <- lift2 $ getProcGlobalFlows pspec
-                    expandPrim (PrimCall id pspec' impurity (closed ++ args)
-                                         gFlows) pos
+                    expandPrim (PrimCall id pspec impurity (fn':args) gFlows) pos
                 _ -> do
                     args' <- mapM expandArg args
                     logExpansion $ "  As higher call to " ++ show fn'
@@ -448,10 +451,6 @@ inputOutputParams proto =
 addOutputNaming :: OptPos -> (PrimParam,PrimArg) -> Expander ()
 addOutputNaming _ (param@(PrimParam pname ty FlowOut _ _),
                      v@ArgVar{argVarName=vname}) = do
-    when (AnyType == ty) $
-      shouldnt $ "Danger: untyped param: " ++ show param
-    when (AnyType == argType v) $
-      shouldnt $ "Danger: untyped argument: " ++ show v
     logExpansion $ "  recording output naming for " ++ show pname
       ++ " -> " ++ show vname
     modify (\s -> s { writeNaming = Map.insert pname v (writeNaming s)})
