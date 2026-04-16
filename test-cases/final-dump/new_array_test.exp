@@ -134,10 +134,11 @@ proc #cont#4 > {semipure} (2 calls)
                 foreign c {terminal,semipure} error_exit(c"new_array_test:8:19":wybe.c_string, c"shouldn't happen!":wybe.c_string) @new_array_test:nn:nn
 
             1:
-                foreign llvm add(i##0:wybe.int, 1:wybe.int, ?tmp#29##0:wybe.int) @new_array_test:nn:nn
-                foreign llvm mul(~tmp#29##0:wybe.int, 8:wybe.int, ?tmp#30##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm mul(i##0:wybe.int, 8:wybe.int, ?tmp#29##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm add(~tmp#29##0:wybe.int, 8:wybe.int, ?tmp#30##0:wybe.int) @new_array_test:nn:nn
                 foreign llvm mul(~tmp#27##0:wybe.int, 8:wybe.int, ?tmp#32##0:wybe.int) @new_array_test:nn:nn
-                foreign lpvm mutate(~ar##0:wybe.array(wybe.int), ?ar##1:wybe.array(wybe.int), ~tmp#30##0:wybe.int, 0:wybe.int, ~tmp#32##0:wybe.int, 0:wybe.int, ~i##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm add(~tmp#32##0:wybe.int, 8:wybe.int, ?tmp#33##0:wybe.int) @new_array_test:nn:nn
+                foreign lpvm mutate(~ar##0:wybe.array(wybe.int), ?ar##1:wybe.array(wybe.int), ~tmp#30##0:wybe.int, 0:wybe.int, ~tmp#33##0:wybe.int, 0:wybe.int, ~i##0:wybe.int) @new_array_test:nn:nn
                 new_array_test.#cont#4<0>[6dacb8fd25](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
 
 
@@ -169,10 +170,11 @@ proc #cont#4 > {semipure} (2 calls)
                 foreign c {terminal,semipure} error_exit(c"new_array_test:8:19":wybe.c_string, c"shouldn't happen!":wybe.c_string) @new_array_test:nn:nn
 
             1:
-                foreign llvm add(i##0:wybe.int, 1:wybe.int, ?tmp#29##0:wybe.int) @new_array_test:nn:nn
-                foreign llvm mul(~tmp#29##0:wybe.int, 8:wybe.int, ?tmp#30##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm mul(i##0:wybe.int, 8:wybe.int, ?tmp#29##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm add(~tmp#29##0:wybe.int, 8:wybe.int, ?tmp#30##0:wybe.int) @new_array_test:nn:nn
                 foreign llvm mul(~tmp#27##0:wybe.int, 8:wybe.int, ?tmp#32##0:wybe.int) @new_array_test:nn:nn
-                foreign lpvm mutate(~ar##0:wybe.array(wybe.int), ?ar##1:wybe.array(wybe.int), ~tmp#30##0:wybe.int, 1:wybe.int, ~tmp#32##0:wybe.int, 0:wybe.int, ~i##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm add(~tmp#32##0:wybe.int, 8:wybe.int, ?tmp#33##0:wybe.int) @new_array_test:nn:nn
+                foreign lpvm mutate(~ar##0:wybe.array(wybe.int), ?ar##1:wybe.array(wybe.int), ~tmp#30##0:wybe.int, 1:wybe.int, ~tmp#33##0:wybe.int, 0:wybe.int, ~i##0:wybe.int) @new_array_test:nn:nn
                 new_array_test.#cont#4<0>[7477e50a09](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
 
 
@@ -205,10 +207,11 @@ proc #cont#4 > {semipure} (2 calls)
                 foreign c {terminal,semipure} error_exit(c"new_array_test:8:19":wybe.c_string, c"shouldn't happen!":wybe.c_string) @new_array_test:nn:nn
 
             1:
-                foreign llvm add(i##0:wybe.int, 1:wybe.int, ?tmp#29##0:wybe.int) @new_array_test:nn:nn
-                foreign llvm mul(~tmp#29##0:wybe.int, 8:wybe.int, ?tmp#30##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm mul(i##0:wybe.int, 8:wybe.int, ?tmp#29##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm add(~tmp#29##0:wybe.int, 8:wybe.int, ?tmp#30##0:wybe.int) @new_array_test:nn:nn
                 foreign llvm mul(~tmp#27##0:wybe.int, 8:wybe.int, ?tmp#32##0:wybe.int) @new_array_test:nn:nn
-                foreign lpvm mutate(~ar##0:wybe.array(wybe.int), ?ar##1:wybe.array(wybe.int), ~tmp#30##0:wybe.int, 0:wybe.int, ~tmp#32##0:wybe.int, 0:wybe.int, ~i##0:wybe.int) @new_array_test:nn:nn
+                foreign llvm add(~tmp#32##0:wybe.int, 8:wybe.int, ?tmp#33##0:wybe.int) @new_array_test:nn:nn
+                foreign lpvm mutate(~ar##0:wybe.array(wybe.int), ?ar##1:wybe.array(wybe.int), ~tmp#30##0:wybe.int, 0:wybe.int, ~tmp#33##0:wybe.int, 0:wybe.int, ~i##0:wybe.int) @new_array_test:nn:nn
                 new_array_test.#cont#4<0>[6dacb8fd25](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
 
 
@@ -329,32 +332,33 @@ if.else.0:
 }
 
 define external fastcc void @"new_array_test#.#cont#4<0>"(i64 %"ar##0", i64 %"tmp#1##0") {
-  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>"(i64 %"tmp#1##0")
-  %"i##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 0
-  %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#34##0", 1
-  %"tmp#14##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 2
+  %"tmp#35##0" = tail call fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>"(i64 %"tmp#1##0")
+  %"i##0" = extractvalue {i64, i64, i1}%"tmp#35##0", 0
+  %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#35##0", 1
+  %"tmp#14##0" = extractvalue {i64, i64, i1}%"tmp#35##0", 2
   br i1 %"tmp#14##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#26##0" = icmp sge i64 %"i##0", 0
   br i1 %"tmp#26##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#35##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#27##0" = load i64, ptr %"tmp#35##0"
+  %"tmp#36##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#27##0" = load i64, ptr %"tmp#36##0"
   %"tmp#28##0" = icmp slt i64 %"i##0", %"tmp#27##0"
   br i1 %"tmp#28##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#29##0" = add i64 %"i##0", 1
-  %"tmp#30##0" = mul i64 %"tmp#29##0", 8
+  %"tmp#29##0" = mul i64 %"i##0", 8
+  %"tmp#30##0" = add i64 %"tmp#29##0", 8
   %"tmp#32##0" = mul i64 %"tmp#27##0", 8
-  %"tmp#36##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#38##0" = trunc i64 %"tmp#32##0" to i32
-  %"tmp#37##0" = call ccc ptr @wybe_malloc(i32 %"tmp#38##0")
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#37##0", ptr %"tmp#36##0", i64 %"tmp#32##0", i1 0)
-  %"tmp#39##0" = ptrtoint ptr %"tmp#37##0" to i64
-  %"tmp#40##0" = add i64 %"tmp#39##0", %"tmp#30##0"
-  %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
-  store i64 %"i##0", ptr %"tmp#41##0"
-  tail call fastcc void @"new_array_test#.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#39##0", i64 %"tmp#1##1")
+  %"tmp#33##0" = add i64 %"tmp#32##0", 8
+  %"tmp#37##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#39##0" = trunc i64 %"tmp#33##0" to i32
+  %"tmp#38##0" = call ccc ptr @wybe_malloc(i32 %"tmp#39##0")
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#38##0", ptr %"tmp#37##0", i64 %"tmp#33##0", i1 0)
+  %"tmp#40##0" = ptrtoint ptr %"tmp#38##0" to i64
+  %"tmp#41##0" = add i64 %"tmp#40##0", %"tmp#30##0"
+  %"tmp#42##0" = inttoptr i64 %"tmp#41##0" to ptr
+  store i64 %"i##0", ptr %"tmp#42##0"
+  tail call fastcc void @"new_array_test#.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#40##0", i64 %"tmp#1##1")
   ret void
 if.else.2:
   call ccc void @error_exit(ptr @"new_array_test#constant#0", ptr @"wybe.control#constant#1")
@@ -364,42 +368,43 @@ if.else.1:
   ret void
 if.else.0:
   %"tmp#16##0" = add i64 %"ar##0", 8
-  %"tmp#42##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#17##0" = load i64, ptr %"tmp#42##0"
+  %"tmp#43##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#17##0" = load i64, ptr %"tmp#43##0"
   %"tmp#18##0" = mul i64 %"tmp#17##0", 8
   %"tmp#19##0" = add i64 %"tmp#16##0", %"tmp#18##0"
-  %"tmp#43##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#20##0" = ptrtoint ptr %"tmp#43##0" to i64
-  %"tmp#44##0" = inttoptr i64 %"tmp#20##0" to ptr
-  store i64 %"tmp#16##0", ptr %"tmp#44##0"
-  %"tmp#45##0" = add i64 %"tmp#20##0", 8
-  %"tmp#46##0" = inttoptr i64 %"tmp#45##0" to ptr
-  store i64 %"tmp#19##0", ptr %"tmp#46##0"
+  %"tmp#44##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#20##0" = ptrtoint ptr %"tmp#44##0" to i64
+  %"tmp#45##0" = inttoptr i64 %"tmp#20##0" to ptr
+  store i64 %"tmp#16##0", ptr %"tmp#45##0"
+  %"tmp#46##0" = add i64 %"tmp#20##0", 8
+  %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
+  store i64 %"tmp#19##0", ptr %"tmp#47##0"
   tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#20##0")
   ret void
 }
 
 define external fastcc void @"new_array_test#.#cont#4<0>[7477e50a09]"(i64 %"ar##0", i64 %"tmp#1##0") {
-  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
-  %"i##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 0
-  %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#34##0", 1
-  %"tmp#14##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 2
+  %"tmp#35##0" = tail call fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
+  %"i##0" = extractvalue {i64, i64, i1}%"tmp#35##0", 0
+  %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#35##0", 1
+  %"tmp#14##0" = extractvalue {i64, i64, i1}%"tmp#35##0", 2
   br i1 %"tmp#14##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#26##0" = icmp sge i64 %"i##0", 0
   br i1 %"tmp#26##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#35##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#27##0" = load i64, ptr %"tmp#35##0"
+  %"tmp#36##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#27##0" = load i64, ptr %"tmp#36##0"
   %"tmp#28##0" = icmp slt i64 %"i##0", %"tmp#27##0"
   br i1 %"tmp#28##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#29##0" = add i64 %"i##0", 1
-  %"tmp#30##0" = mul i64 %"tmp#29##0", 8
+  %"tmp#29##0" = mul i64 %"i##0", 8
+  %"tmp#30##0" = add i64 %"tmp#29##0", 8
   %"tmp#32##0" = mul i64 %"tmp#27##0", 8
-  %"tmp#36##0" = add i64 %"ar##0", %"tmp#30##0"
-  %"tmp#37##0" = inttoptr i64 %"tmp#36##0" to ptr
-  store i64 %"i##0", ptr %"tmp#37##0"
+  %"tmp#33##0" = add i64 %"tmp#32##0", 8
+  %"tmp#37##0" = add i64 %"ar##0", %"tmp#30##0"
+  %"tmp#38##0" = inttoptr i64 %"tmp#37##0" to ptr
+  store i64 %"i##0", ptr %"tmp#38##0"
   tail call fastcc void @"new_array_test#.#cont#4<0>[7477e50a09]"(i64 %"ar##0", i64 %"tmp#1##1")
   ret void
 if.else.2:
@@ -410,48 +415,49 @@ if.else.1:
   ret void
 if.else.0:
   %"tmp#16##0" = add i64 %"ar##0", 8
-  %"tmp#38##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#17##0" = load i64, ptr %"tmp#38##0"
+  %"tmp#39##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#17##0" = load i64, ptr %"tmp#39##0"
   %"tmp#18##0" = mul i64 %"tmp#17##0", 8
   %"tmp#19##0" = add i64 %"tmp#16##0", %"tmp#18##0"
-  %"tmp#39##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#20##0" = ptrtoint ptr %"tmp#39##0" to i64
-  %"tmp#40##0" = inttoptr i64 %"tmp#20##0" to ptr
-  store i64 %"tmp#16##0", ptr %"tmp#40##0"
-  %"tmp#41##0" = add i64 %"tmp#20##0", 8
-  %"tmp#42##0" = inttoptr i64 %"tmp#41##0" to ptr
-  store i64 %"tmp#19##0", ptr %"tmp#42##0"
+  %"tmp#40##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#20##0" = ptrtoint ptr %"tmp#40##0" to i64
+  %"tmp#41##0" = inttoptr i64 %"tmp#20##0" to ptr
+  store i64 %"tmp#16##0", ptr %"tmp#41##0"
+  %"tmp#42##0" = add i64 %"tmp#20##0", 8
+  %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
+  store i64 %"tmp#19##0", ptr %"tmp#43##0"
   tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#20##0")
   ret void
 }
 
 define external fastcc void @"new_array_test#.#cont#4<0>[6dacb8fd25]"(i64 %"ar##0", i64 %"tmp#1##0") {
-  %"tmp#34##0" = tail call fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
-  %"i##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 0
-  %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#34##0", 1
-  %"tmp#14##0" = extractvalue {i64, i64, i1}%"tmp#34##0", 2
+  %"tmp#35##0" = tail call fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>[785a827a1b]"(i64 %"tmp#1##0")
+  %"i##0" = extractvalue {i64, i64, i1}%"tmp#35##0", 0
+  %"tmp#1##1" = extractvalue {i64, i64, i1}%"tmp#35##0", 1
+  %"tmp#14##0" = extractvalue {i64, i64, i1}%"tmp#35##0", 2
   br i1 %"tmp#14##0", label %if.then.0, label %if.else.0
 if.then.0:
   %"tmp#26##0" = icmp sge i64 %"i##0", 0
   br i1 %"tmp#26##0", label %if.then.1, label %if.else.1
 if.then.1:
-  %"tmp#35##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#27##0" = load i64, ptr %"tmp#35##0"
+  %"tmp#36##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#27##0" = load i64, ptr %"tmp#36##0"
   %"tmp#28##0" = icmp slt i64 %"i##0", %"tmp#27##0"
   br i1 %"tmp#28##0", label %if.then.2, label %if.else.2
 if.then.2:
-  %"tmp#29##0" = add i64 %"i##0", 1
-  %"tmp#30##0" = mul i64 %"tmp#29##0", 8
+  %"tmp#29##0" = mul i64 %"i##0", 8
+  %"tmp#30##0" = add i64 %"tmp#29##0", 8
   %"tmp#32##0" = mul i64 %"tmp#27##0", 8
-  %"tmp#36##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#38##0" = trunc i64 %"tmp#32##0" to i32
-  %"tmp#37##0" = call ccc ptr @wybe_malloc(i32 %"tmp#38##0")
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#37##0", ptr %"tmp#36##0", i64 %"tmp#32##0", i1 0)
-  %"tmp#39##0" = ptrtoint ptr %"tmp#37##0" to i64
-  %"tmp#40##0" = add i64 %"tmp#39##0", %"tmp#30##0"
-  %"tmp#41##0" = inttoptr i64 %"tmp#40##0" to ptr
-  store i64 %"i##0", ptr %"tmp#41##0"
-  tail call fastcc void @"new_array_test#.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#39##0", i64 %"tmp#1##1")
+  %"tmp#33##0" = add i64 %"tmp#32##0", 8
+  %"tmp#37##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#39##0" = trunc i64 %"tmp#33##0" to i32
+  %"tmp#38##0" = call ccc ptr @wybe_malloc(i32 %"tmp#39##0")
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#38##0", ptr %"tmp#37##0", i64 %"tmp#33##0", i1 0)
+  %"tmp#40##0" = ptrtoint ptr %"tmp#38##0" to i64
+  %"tmp#41##0" = add i64 %"tmp#40##0", %"tmp#30##0"
+  %"tmp#42##0" = inttoptr i64 %"tmp#41##0" to ptr
+  store i64 %"i##0", ptr %"tmp#42##0"
+  tail call fastcc void @"new_array_test#.#cont#4<0>[6dacb8fd25]"(i64 %"tmp#40##0", i64 %"tmp#1##1")
   ret void
 if.else.2:
   call ccc void @error_exit(ptr @"new_array_test#constant#0", ptr @"wybe.control#constant#1")
@@ -461,17 +467,17 @@ if.else.1:
   ret void
 if.else.0:
   %"tmp#16##0" = add i64 %"ar##0", 8
-  %"tmp#42##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#17##0" = load i64, ptr %"tmp#42##0"
+  %"tmp#43##0" = inttoptr i64 %"ar##0" to ptr
+  %"tmp#17##0" = load i64, ptr %"tmp#43##0"
   %"tmp#18##0" = mul i64 %"tmp#17##0", 8
   %"tmp#19##0" = add i64 %"tmp#16##0", %"tmp#18##0"
-  %"tmp#43##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#20##0" = ptrtoint ptr %"tmp#43##0" to i64
-  %"tmp#44##0" = inttoptr i64 %"tmp#20##0" to ptr
-  store i64 %"tmp#16##0", ptr %"tmp#44##0"
-  %"tmp#45##0" = add i64 %"tmp#20##0", 8
-  %"tmp#46##0" = inttoptr i64 %"tmp#45##0" to ptr
-  store i64 %"tmp#19##0", ptr %"tmp#46##0"
+  %"tmp#44##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#20##0" = ptrtoint ptr %"tmp#44##0" to i64
+  %"tmp#45##0" = inttoptr i64 %"tmp#20##0" to ptr
+  store i64 %"tmp#16##0", ptr %"tmp#45##0"
+  %"tmp#46##0" = add i64 %"tmp#20##0", 8
+  %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
+  store i64 %"tmp#19##0", ptr %"tmp#47##0"
   tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#20##0")
   ret void
 }

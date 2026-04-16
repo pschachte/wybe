@@ -17,10 +17,9 @@ pub def {test} (x:_ >= y:_) { foreign c strcmp(x,y):int >= 0 }
 pub def foreign c length=strlen(str:_):int
 
 pub def {test} `[|]`(?head:char, ?tail:_, str:_) {
-    foreign lpvm access(str, 0, 0, 0, ?head)
-    foreign llvm icmp_ne(head, '\0', ?not_done)
-    (not_done = true)
-    foreign llvm add(str, 1, ?tail)
+    ?head = unsafe_c_string_index(str, 0)
+    head ~= '\0'
+    foreign llvm add(str, foreign lpvm sizeof(_:char), ?tail)
 }
 
 pub def {test} [](str:_, idx:int):char = c where {
@@ -30,7 +29,7 @@ pub def {test} [](str:_, idx:int):char = c where {
 }
 
 pub def unsafe_c_string_index(str:_, idx:int):char 
-    = foreign lpvm access(str, idx, 1, 0)
+    = foreign lpvm access(str, idx, foreign lpvm sizeof(_:char):int, 0)
 
 pub def foreign c print=print_string(x:_) use !io
 
