@@ -8,6 +8,7 @@
 module Util (sameLength, maybeNth, insertAt,
              setMapInsert, showArguments,
              fillLines, nop, sccElts, mapFst4, thd4, 
+             nextPowerOf2, prevPowerOf2, ceilDiv,
              DisjointSet, emptyDS, addOneToDS, unionTwoInDS,
              combineTwoDS, removeSingletonFromDS,
              addConnectedGroupToDS, removeOneFromDS,
@@ -123,9 +124,24 @@ mapFst4 :: (a0 -> a1) -> (a0, b, c, d) -> (a1, b, c, d)
 mapFst4 f (a, b, c, d) = (f a, b, c, d)
 
 
-
+-- Get the third of a 4-tuple
 thd4 :: (a, b, c, d) -> c
 thd4 (_, _, c, _) = c
+
+
+-- Find the next power of 2 no greater than the given integer
+nextPowerOf2 :: (Integral b, Integral a) => a -> b
+nextPowerOf2 n = ceiling $ logBase 2 $ fromIntegral n
+
+
+-- Find the previous power of 2 no lesser than the given integer
+prevPowerOf2 :: (Integral b, Integral a) => a -> b
+prevPowerOf2 n = floor $ logBase 2 $ fromIntegral n
+
+
+-- Ceiling'ed integer division
+ceilDiv :: Integral a => a -> a -> a
+ceilDiv a b = (a + b - 1) `div` b
 
 
 ----------------------------------------------------------------
@@ -394,4 +410,3 @@ createLocalCacheFile file = do
     srcFileHash <- _getFileHash file
     writeFile meta srcFileHash
     return cacheFile
-

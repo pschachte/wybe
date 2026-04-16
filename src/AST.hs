@@ -361,7 +361,7 @@ typeSize :: TypeSpec -> Compiler Int
 typeSize ty = do
     rep <- trustFromJust ("lookupTypeRepresentation of " ++ show ty)
             <$> lookupTypeRepresentation ty
-    return $ 1 + ((typeRepSize rep - 1) `div` byteBits)
+    return $ typeRepSize rep `ceilDiv` byteBits
 
 
 -- | Crude division of types useful for categorising primitive operations
@@ -915,14 +915,16 @@ addTypeRep repn pos = do
       then errmsg pos
            $ "Can't declare representation of type " ++ show currMod
              ++ " with constructors"
-      else do setTypeRep repn
-              addKnownType currMod
+      else do
+        setTypeRep repn (Just $ typeRepSize repn)
+        addKnownType currMod
 
 -- |Set the type representation of the current module.
-setTypeRep :: TypeRepresentation -> Compiler ()
-setTypeRep repn = do
+setTypeRep :: TypeRepresentation -> Maybe Int -> Compiler ()
+setTypeRep repn size = do
     updateModule (\m -> m { modTypeRep = Just repn
-                                        , modIsType  = True })
+                          , modTypeSize = size
+                          , modIsType  = True })
 
 
 -- |Add the specified data constructor to the current module.  This makes the
@@ -1430,6 +1432,7 @@ data Module = Module {
   modParams :: [TypeVarName],      -- ^The type parameters, if a type
   modIsType :: Bool,               -- ^Is this module a type, defined early
   modTypeRep :: Maybe TypeRepresentation, -- ^Type representation, when known
+  modTypeSize :: Maybe Int,        -- ^The maximum size required to allocate an object of this type
   modInterface :: ModuleInterface, -- ^The public face of this module
   modInterfaceHash :: InterfaceHash,
                                    -- ^Hash of the "modInterface" above
@@ -1461,6 +1464,7 @@ emptyModule = Module
     , modParams         = []
     , modIsType         = False
     , modTypeRep        = Nothing
+    , modTypeSize       = Nothing
     , modInterface      = emptyInterface
     , modInterfaceHash  = Nothing
     , modImplementation = Just emptyImplementation

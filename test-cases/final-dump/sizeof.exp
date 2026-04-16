@@ -10,21 +10,32 @@ AFTER EVERYTHING:
   public procs    : sizeof.<0>
   constants       : 0:: CStringInfo {cstringChars = "Int bytes: "}
                     1:: CStringInfo {cstringChars = "Int bits: "}
-                    2:: CStringInfo {cstringChars = "Char bytes: "}
-                    3:: CStringInfo {cstringChars = "Char bits: "}
-                    4:: CStringInfo {cstringChars = "Narrow bits: "}
-                    5:: CStringInfo {cstringChars = "Small bits: "}
-                    6:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"Int bytes: "]}
-                    7:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember c"Int bits: "]}
-                    8:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"Char bytes: "]}
-                    9:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"Char bits: "]}
-                    10:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember c"Narrow bits: "]}
-                    11:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"Small bits: "]}
+                    2:: CStringInfo {cstringChars = "Int bits (unboxed): "}
+                    3:: CStringInfo {cstringChars = "Char bytes: "}
+                    4:: CStringInfo {cstringChars = "Char bits: "}
+                    5:: CStringInfo {cstringChars = "Narrow bits: "}
+                    6:: CStringInfo {cstringChars = "Narrow bits (unboxed): "}
+                    7:: CStringInfo {cstringChars = "Wide bits: "}
+                    8:: CStringInfo {cstringChars = "Wide bits (unboxed): "}
+                    9:: CStringInfo {cstringChars = "Wider bits: "}
+                    10:: CStringInfo {cstringChars = "Wider bits (unboxed): "}
+                    11:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"Int bytes: "]}
+                    12:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember c"Int bits: "]}
+                    13:: StructInfo {structSize = 16, structData = [IntStructMember 20 8,PointerStructMember c"Int bits (unboxed): "]}
+                    14:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"Char bytes: "]}
+                    15:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"Char bits: "]}
+                    16:: StructInfo {structSize = 16, structData = [IntStructMember 13 8,PointerStructMember c"Narrow bits: "]}
+                    17:: StructInfo {structSize = 16, structData = [IntStructMember 23 8,PointerStructMember c"Narrow bits (unboxed): "]}
+                    18:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"Wide bits: "]}
+                    19:: StructInfo {structSize = 16, structData = [IntStructMember 21 8,PointerStructMember c"Wide bits (unboxed): "]}
+                    20:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"Wider bits: "]}
+                    21:: StructInfo {structSize = 16, structData = [IntStructMember 22 8,PointerStructMember c"Wider bits (unboxed): "]}
   imports         : use sizeof.narrow
                     use sizeof.wide
+                    use sizeof.wider
                     use wybe
   resources       : 
-  submodules      : sizeof.narrow, sizeof.wide
+  submodules      : sizeof.narrow, sizeof.wide, sizeof.wider
   procs           : 
 
 module top-level code > public {semipure} (0 calls)
@@ -32,42 +43,68 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(25,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(29,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(31,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(33,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(35,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.int.fmt<2>(8:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#5##0:wybe.string) #24 @sizeof:nn:nn
-    wybe.string.,,<0>("Int bytes: ":wybe.string, ~tmp#5##0:wybe.string, ?tmp#4##0:wybe.string) #2 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @sizeof:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @sizeof:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @sizeof:nn:nn
-    foreign lpvm store(~%tmp#31##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
-    wybe.int.fmt<2>(64:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#7##0:wybe.string) #26 @sizeof:nn:nn
-    wybe.string.,,<0>("Int bits: ":wybe.string, tmp#7##0:wybe.string, ?tmp#6##0:wybe.string) #6 @sizeof:nn:nn
-    wybe.string.print<0>(~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @sizeof:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @sizeof:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @sizeof:nn:nn
-    foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
-    wybe.int.fmt<2>(1:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#9##0:wybe.string) #28 @sizeof:nn:nn
-    wybe.string.,,<0>("Char bytes: ":wybe.string, ~tmp#9##0:wybe.string, ?tmp#8##0:wybe.string) #10 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#8##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #29 @sizeof:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#46##0:wybe.phantom) @sizeof:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @sizeof:nn:nn
-    foreign lpvm store(~%tmp#47##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
-    wybe.count.fmt<4>(8:wybe.count, 0:wybe.int, 32:wybe.char, 10:wybe.count, ?tmp#11##0:wybe.string) #30 @sizeof:nn:nn
-    wybe.string.,,<0>("Char bits: ":wybe.string, ~tmp#11##0:wybe.string, ?tmp#10##0:wybe.string) #14 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#10##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @sizeof:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#54##0:wybe.phantom) @sizeof:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#54##0:wybe.phantom, ?tmp#55##0:wybe.phantom) @sizeof:nn:nn
-    foreign lpvm store(~%tmp#55##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
-    wybe.int.fmt<2>(3:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#14##0:wybe.string) #32 @sizeof:nn:nn
-    wybe.string.,,<0>("Narrow bits: ":wybe.string, ~tmp#14##0:wybe.string, ?tmp#13##0:wybe.string) #18 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#13##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @sizeof:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#62##0:wybe.phantom) @sizeof:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#62##0:wybe.phantom, ?tmp#63##0:wybe.phantom) @sizeof:nn:nn
-    foreign lpvm store(~%tmp#63##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
-    wybe.string.,,<0>("Small bits: ":wybe.string, ~tmp#7##0:wybe.string, ?tmp#16##0:wybe.string) #22 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#16##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #35 @sizeof:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#70##0:wybe.phantom) @sizeof:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#70##0:wybe.phantom, ?tmp#71##0:wybe.phantom) @sizeof:nn:nn
-    foreign lpvm store(~%tmp#71##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+  MultiSpeczDepInfo: [(45,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(51,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(53,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(57,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(63,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(65,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.int.fmt<2>(8:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#7##0:wybe.string) #44 @sizeof:nn:nn
+    wybe.string.,,<0>("Int bytes: ":wybe.string, ~tmp#7##0:wybe.string, ?tmp#6##0:wybe.string) #2 @sizeof:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #45 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#51##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#51##0:wybe.phantom, ?tmp#52##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#52##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.int.fmt<2>(64:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#9##0:wybe.string) #46 @sizeof:nn:nn
+    wybe.string.,,<0>("Int bits: ":wybe.string, tmp#9##0:wybe.string, ?tmp#8##0:wybe.string) #6 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#8##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #47 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#59##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#59##0:wybe.phantom, ?tmp#60##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#60##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.string.,,<0>("Int bits (unboxed): ":wybe.string, tmp#9##0:wybe.string, ?tmp#10##0:wybe.string) #10 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#10##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #49 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#67##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#67##0:wybe.phantom, ?tmp#68##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#68##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.int.fmt<2>(1:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#13##0:wybe.string) #50 @sizeof:nn:nn
+    wybe.string.,,<0>("Char bytes: ":wybe.string, ~tmp#13##0:wybe.string, ?tmp#12##0:wybe.string) #14 @sizeof:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#12##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #51 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#75##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#75##0:wybe.phantom, ?tmp#76##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#76##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.count.fmt<4>(8:wybe.count, 0:wybe.int, 32:wybe.char, 10:wybe.count, ?tmp#15##0:wybe.string) #52 @sizeof:nn:nn
+    wybe.string.,,<0>("Char bits: ":wybe.string, ~tmp#15##0:wybe.string, ?tmp#14##0:wybe.string) #18 @sizeof:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#14##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #53 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#83##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#83##0:wybe.phantom, ?tmp#84##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#84##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.int.fmt<2>(3:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#18##0:wybe.string) #54 @sizeof:nn:nn
+    wybe.string.,,<0>("Narrow bits: ":wybe.string, tmp#18##0:wybe.string, ?tmp#17##0:wybe.string) #22 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#17##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #55 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#91##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#91##0:wybe.phantom, ?tmp#92##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#92##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.string.,,<0>("Narrow bits (unboxed): ":wybe.string, ~tmp#18##0:wybe.string, ?tmp#20##0:wybe.string) #26 @sizeof:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #57 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#99##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#99##0:wybe.phantom, ?tmp#100##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#100##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.string.,,<0>("Wide bits: ":wybe.string, tmp#9##0:wybe.string, ?tmp#23##0:wybe.string) #30 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#23##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #59 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#107##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#107##0:wybe.phantom, ?tmp#108##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#108##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.string.,,<0>("Wide bits (unboxed): ":wybe.string, tmp#9##0:wybe.string, ?tmp#26##0:wybe.string) #34 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#26##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #61 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#115##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#115##0:wybe.phantom, ?tmp#116##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#116##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.string.,,<0>("Wider bits: ":wybe.string, ~tmp#9##0:wybe.string, ?tmp#29##0:wybe.string) #38 @sizeof:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#29##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #63 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#123##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#123##0:wybe.phantom, ?tmp#124##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#124##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
+    wybe.int.fmt<2>(128:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#33##0:wybe.string) #64 @sizeof:nn:nn
+    wybe.string.,,<0>("Wider bits (unboxed): ":wybe.string, ~tmp#33##0:wybe.string, ?tmp#32##0:wybe.string) #42 @sizeof:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#32##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #65 @sizeof:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#131##0:wybe.phantom) @sizeof:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#131##0:wybe.phantom, ?tmp#132##0:wybe.phantom) @sizeof:nn:nn
+    foreign lpvm store(~%tmp#132##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
 
   LLVM code       :
 
@@ -79,16 +116,26 @@ target triple   = ????
 
 @"sizeof#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Int bytes: \00", align 8
 @"sizeof#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"Int bits: \00", align 8
-@"sizeof#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"Char bytes: \00", align 8
-@"sizeof#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"Char bits: \00", align 8
-@"sizeof#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"Narrow bits: \00", align 8
-@"sizeof#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"Small bits: \00", align 8
-@"sizeof#constant#6" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"sizeof#constant#0" }, align 8
-@"sizeof#constant#7" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"sizeof#constant#1" }, align 8
-@"sizeof#constant#8" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"sizeof#constant#2" }, align 8
-@"sizeof#constant#9" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"sizeof#constant#3" }, align 8
-@"sizeof#constant#10" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"sizeof#constant#4" }, align 8
-@"sizeof#constant#11" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"sizeof#constant#5" }, align 8
+@"sizeof#constant#2" = private unnamed_addr constant [ ?? x i8 ] c"Int bits (unboxed): \00", align 8
+@"sizeof#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"Char bytes: \00", align 8
+@"sizeof#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"Char bits: \00", align 8
+@"sizeof#constant#5" = private unnamed_addr constant [ ?? x i8 ] c"Narrow bits: \00", align 8
+@"sizeof#constant#6" = private unnamed_addr constant [ ?? x i8 ] c"Narrow bits (unboxed): \00", align 8
+@"sizeof#constant#7" = private unnamed_addr constant [ ?? x i8 ] c"Wide bits: \00", align 8
+@"sizeof#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"Wide bits (unboxed): \00", align 8
+@"sizeof#constant#9" = private unnamed_addr constant [ ?? x i8 ] c"Wider bits: \00", align 8
+@"sizeof#constant#10" = private unnamed_addr constant [ ?? x i8 ] c"Wider bits (unboxed): \00", align 8
+@"sizeof#constant#11" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"sizeof#constant#0" }, align 8
+@"sizeof#constant#12" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"sizeof#constant#1" }, align 8
+@"sizeof#constant#13" = private unnamed_addr constant {i64, ptr} { i64 20, ptr @"sizeof#constant#2" }, align 8
+@"sizeof#constant#14" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"sizeof#constant#3" }, align 8
+@"sizeof#constant#15" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"sizeof#constant#4" }, align 8
+@"sizeof#constant#16" = private unnamed_addr constant {i64, ptr} { i64 13, ptr @"sizeof#constant#5" }, align 8
+@"sizeof#constant#17" = private unnamed_addr constant {i64, ptr} { i64 23, ptr @"sizeof#constant#6" }, align 8
+@"sizeof#constant#18" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"sizeof#constant#7" }, align 8
+@"sizeof#constant#19" = private unnamed_addr constant {i64, ptr} { i64 21, ptr @"sizeof#constant#8" }, align 8
+@"sizeof#constant#20" = private unnamed_addr constant {i64, ptr} { i64 12, ptr @"sizeof#constant#9" }, align 8
+@"sizeof#constant#21" = private unnamed_addr constant {i64, ptr} { i64 22, ptr @"sizeof#constant#10" }, align 8
 
 declare external fastcc i64 @"wybe#.count#.fmt<4>"(i64, i64, i8, i64)
 declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
@@ -99,28 +146,44 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"sizeof#.<0>"() {
-  %"tmp#5##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 8, i64 0, i8 32)
-  %"tmp#4##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#6" to i64 ), i64 %"tmp#5##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#4##0")
+  %"tmp#7##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 8, i64 0, i8 32)
+  %"tmp#6##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#11" to i64 ), i64 %"tmp#7##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#6##0")
   call ccc void @putchar(i8 10)
-  %"tmp#7##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 64, i64 0, i8 32)
-  %"tmp#6##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#7" to i64 ), i64 %"tmp#7##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#6##0")
+  %"tmp#9##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 64, i64 0, i8 32)
+  %"tmp#8##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#12" to i64 ), i64 %"tmp#9##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#8##0")
   call ccc void @putchar(i8 10)
-  %"tmp#9##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 1, i64 0, i8 32)
-  %"tmp#8##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#8" to i64 ), i64 %"tmp#9##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#8##0")
+  %"tmp#10##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#13" to i64 ), i64 %"tmp#9##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#10##0")
   call ccc void @putchar(i8 10)
-  %"tmp#11##0" = tail call fastcc i64 @"wybe#.count#.fmt<4>"(i64 8, i64 0, i8 32, i64 10)
-  %"tmp#10##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#9" to i64 ), i64 %"tmp#11##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#10##0")
+  %"tmp#13##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 1, i64 0, i8 32)
+  %"tmp#12##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#14" to i64 ), i64 %"tmp#13##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#12##0")
   call ccc void @putchar(i8 10)
-  %"tmp#14##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 3, i64 0, i8 32)
-  %"tmp#13##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#10" to i64 ), i64 %"tmp#14##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#13##0")
+  %"tmp#15##0" = tail call fastcc i64 @"wybe#.count#.fmt<4>"(i64 8, i64 0, i8 32, i64 10)
+  %"tmp#14##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#15" to i64 ), i64 %"tmp#15##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#14##0")
   call ccc void @putchar(i8 10)
-  %"tmp#16##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#11" to i64 ), i64 %"tmp#7##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#16##0")
+  %"tmp#18##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 3, i64 0, i8 32)
+  %"tmp#17##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#16" to i64 ), i64 %"tmp#18##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#17##0")
+  call ccc void @putchar(i8 10)
+  %"tmp#20##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#17" to i64 ), i64 %"tmp#18##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#20##0")
+  call ccc void @putchar(i8 10)
+  %"tmp#23##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#18" to i64 ), i64 %"tmp#9##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#23##0")
+  call ccc void @putchar(i8 10)
+  %"tmp#26##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#19" to i64 ), i64 %"tmp#9##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#26##0")
+  call ccc void @putchar(i8 10)
+  %"tmp#29##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#20" to i64 ), i64 %"tmp#9##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#29##0")
+  call ccc void @putchar(i8 10)
+  %"tmp#33##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 128, i64 0, i8 32)
+  %"tmp#32##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#21" to i64 ), i64 %"tmp#33##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#32##0")
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -154,9 +217,9 @@ five(?#result##0:sizeof.narrow)<{}; {}; {}>:
     foreign llvm move(4:sizeof.narrow, ?#result##0:sizeof.narrow)
 
 
-proc foure > {inline} (0 calls)
-0: sizeof.narrow.foure<0>
-foure(?#result##0:sizeof.narrow)<{}; {}; {}>:
+proc four > {inline} (0 calls)
+0: sizeof.narrow.four<0>
+four(?#result##0:sizeof.narrow)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(3:sizeof.narrow, ?#result##0:sizeof.narrow)
@@ -214,7 +277,7 @@ define external fastcc i3 @"sizeof#.narrow#.five<0>"() {
   ret i3 4
 }
 
-define external fastcc i3 @"sizeof#.narrow#.foure<0>"() {
+define external fastcc i3 @"sizeof#.narrow#.four<0>"() {
   ret i3 3
 }
 
@@ -374,6 +437,447 @@ if.else.0:
 
 define external fastcc i1 @"sizeof#.wide#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
   %"tmp#0##0" = tail call fastcc i1 @"sizeof#.wide#.=<0>"(i64 %"#left##0", i64 %"#right##0")
+  %"tmp#1##0" = xor i1 %"tmp#0##0", 1
+  ret i1 %"tmp#1##0"
+}
+
+--------------------------------------------------
+ Module sizeof.wider
+  representation  : pointer
+  public submods  : 
+  public resources: 
+  public procs    : sizeof.wider.=<0>
+                    sizeof.wider.~=<0>
+  constants       : 
+  imports         : use sizeof
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc = > public (4 calls)
+0: sizeof.wider.=<0>
+=(#left##0:sizeof.wider, #right##0:sizeof.wider, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm icmp_eq(~#right##0:sizeof.wider, 0:sizeof.wider, ?#success##0:wybe.bool)
+
+    1:
+        foreign llvm and(#left##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#11##0:1 bit unsigned)
+        foreign llvm icmp_eq(tmp#11##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#12##0:wybe.bool)
+        case ~tmp#12##0:wybe.bool of
+        0:
+            case ~tmp#11##0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+            1:
+                foreign llvm lshr(~#left##0:sizeof.wider, 1:sizeof.wider, ?tmp#16##0:sizeof.wider) @sizeof:nn:nn
+                foreign llvm and(~tmp#16##0:sizeof.wider, 255:sizeof.wider, ?tmp#17##0:sizeof.wider) @sizeof:nn:nn
+                foreign lpvm cast(~tmp#17##0:sizeof.wider, ?#left#c##0:wybe.char) @sizeof:nn:nn
+                foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#19##0:wybe.bool)
+                case ~tmp#19##0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                1:
+                    foreign llvm and(#right##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#20##0:1 bit unsigned)
+                    case ~tmp#20##0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                    1:
+                        foreign llvm lshr(~#right##0:sizeof.wider, 1:sizeof.wider, ?tmp#21##0:sizeof.wider) @sizeof:nn:nn
+                        foreign llvm and(~tmp#21##0:sizeof.wider, 255:sizeof.wider, ?tmp#22##0:sizeof.wider) @sizeof:nn:nn
+                        foreign lpvm cast(~tmp#22##0:sizeof.wider, ?#right#c##0:wybe.char) @sizeof:nn:nn
+                        foreign llvm icmp_eq(~#left#c##0:wybe.char, ~#right#c##0:wybe.char, ?#success##0:wybe.bool) @char:nn:nn
+
+
+
+
+        1:
+            foreign lpvm access(#left##0:sizeof.wider, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#wider#1##0:sizeof.wider) @sizeof:nn:nn
+            foreign lpvm access(~#left##0:sizeof.wider, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#wider#2##0:sizeof.wide) @sizeof:nn:nn
+            foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.bool)
+            case ~tmp#26##0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+            1:
+                foreign llvm and(#right##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#27##0:1 bit unsigned)
+                foreign llvm icmp_eq(~tmp#27##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#28##0:wybe.bool)
+                case ~tmp#28##0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                1:
+                    foreign lpvm access(#right##0:sizeof.wider, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#wider#1##0:sizeof.wider) @sizeof:nn:nn
+                    foreign lpvm access(~#right##0:sizeof.wider, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#wider#2##0:sizeof.wide) @sizeof:nn:nn
+                    sizeof.wider.=<0>(~#left#wider#1##0:sizeof.wider, ~#right#wider#1##0:sizeof.wider, ?tmp#3##0:wybe.bool) #2
+                    case ~tmp#3##0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+                    1:
+                        sizeof.wide.=<0>(~#left#wider#2##0:sizeof.wide, ~#right#wider#2##0:sizeof.wide, ?#success##0:wybe.bool) #3
+
+
+
+
+
+
+
+proc c > {inline} (0 calls)
+0: sizeof.wider.c<0>
+c(#rec##0:sizeof.wider, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.char, ?#result##0:wybe.char)
+
+    1:
+        foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#2##0:1 bit unsigned)
+        case ~tmp#2##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.char, ?#result##0:wybe.char)
+
+        1:
+            foreign llvm lshr(~#rec##0:sizeof.wider, 1:sizeof.wider, ?#rec##1:sizeof.wider) @sizeof:nn:nn
+            foreign llvm and(~#rec##1:sizeof.wider, 255:sizeof.wider, ?#field##0:sizeof.wider) @sizeof:nn:nn
+            foreign lpvm cast(~#field##0:sizeof.wider, ?#result##0:wybe.char) @sizeof:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+proc c > {inline} (0 calls)
+1: sizeof.wider.c<1>
+c(#rec##0:sizeof.wider, ?#rec##2:sizeof.wider, #field##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:sizeof.wider, ?#rec##2:sizeof.wider)
+
+    1:
+        foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#2##0:1 bit unsigned)
+        case ~tmp#2##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(~#rec##0:sizeof.wider, ?#rec##2:sizeof.wider)
+
+        1:
+            foreign llvm and(~#rec##0:sizeof.wider, -511:sizeof.wider, ?#rec##1:sizeof.wider) @sizeof:nn:nn
+            foreign lpvm cast(~#field##0:wybe.char, ?#temp##0:sizeof.wider) @sizeof:nn:nn
+            foreign llvm shl(~#temp##0:sizeof.wider, 1:sizeof.wider, ?#temp##1:sizeof.wider) @sizeof:nn:nn
+            foreign llvm or(~#rec##1:sizeof.wider, ~#temp##1:sizeof.wider, ?#rec##2:sizeof.wider) @sizeof:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc foo > {inline} (0 calls)
+0: sizeof.wider.foo<0>
+foo(c##0:wybe.char, ?#result##3:sizeof.wider)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~c##0:wybe.char, ?#temp##0:sizeof.wider) @sizeof:nn:nn
+    foreign llvm shl(~#temp##0:sizeof.wider, 1:sizeof.wider, ?#temp##1:sizeof.wider) @sizeof:nn:nn
+    foreign llvm or(~#temp##1:sizeof.wider, 512:sizeof.wider, ?#result##2:sizeof.wider) @sizeof:nn:nn
+    foreign llvm or(~#result##2:sizeof.wider, 1:sizeof.wider, ?#result##3:sizeof.wider) @sizeof:nn:nn
+proc foo > {inline} (8 calls)
+1: sizeof.wider.foo<1>
+foo(?c##0:wybe.char, #result##0:sizeof.wider, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.char, ?c##0:wybe.char)
+
+    1:
+        foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#2##0:1 bit unsigned)
+        case ~tmp#2##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.char, ?c##0:wybe.char)
+
+        1:
+            foreign llvm lshr(~#result##0:sizeof.wider, 1:sizeof.wider, ?#temp##0:sizeof.wider) @sizeof:nn:nn
+            foreign llvm and(~#temp##0:sizeof.wider, 255:sizeof.wider, ?#temp2##0:sizeof.wider) @sizeof:nn:nn
+            foreign lpvm cast(~#temp2##0:sizeof.wider, ?c##0:wybe.char) @sizeof:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc wider > {inline} (0 calls)
+0: sizeof.wider.wider<0>
+wider(wider#1##0:sizeof.wider, wider#2##0:sizeof.wide, ?#result##0:sizeof.wider)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:sizeof.wider) @sizeof:nn:nn
+    foreign lpvm mutate(~#rec##0:sizeof.wider, ?#rec##1:sizeof.wider, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~wider#1##0:sizeof.wider) @sizeof:nn:nn
+    foreign lpvm mutate(~#rec##1:sizeof.wider, ?#result##0:sizeof.wider, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~wider#2##0:sizeof.wide) @sizeof:nn:nn
+proc wider > {inline} (16 calls)
+1: sizeof.wider.wider<1>
+wider(?wider#1##0:sizeof.wider, ?wider#2##0:sizeof.wide, #result##0:sizeof.wider, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:sizeof.wider, ?wider#1##0:sizeof.wider)
+        foreign llvm move(undef:sizeof.wide, ?wider#2##0:sizeof.wide)
+
+    1:
+        foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#2##0:1 bit unsigned)
+        foreign llvm icmp_eq(~tmp#2##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:sizeof.wider, ?wider#1##0:sizeof.wider)
+            foreign llvm move(undef:sizeof.wide, ?wider#2##0:sizeof.wide)
+
+        1:
+            foreign lpvm access(#result##0:sizeof.wider, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?wider#1##0:sizeof.wider) @sizeof:nn:nn
+            foreign lpvm access(~#result##0:sizeof.wider, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?wider#2##0:sizeof.wide) @sizeof:nn:nn
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+proc xxx > {inline} (0 calls)
+0: sizeof.wider.xxx<0>
+xxx(?#result##0:sizeof.wider)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:sizeof.wider, ?#result##0:sizeof.wider)
+
+
+proc ~= > public {inline} (0 calls)
+0: sizeof.wider.~=<0>
+~=(#left##0:sizeof.wider, #right##0:sizeof.wider, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    sizeof.wider.=<0>(~#left##0:sizeof.wider, ~#right##0:sizeof.wider, ?tmp#0##0:wybe.bool) #0
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk 0.2 -- see https://github.com/pschachte/wybe
+; ModuleID = 'sizeof.wider'
+
+source_filename = "!ROOT!/final-dump/sizeof.wybe"
+target triple   = ????
+
+
+declare external ccc ptr @wybe_malloc(i32)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i1 @"sizeof#.wider#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = icmp ne i64 %"#left##0", 0
+  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#29##0" = trunc i64 %"#left##0" to i1
+  %"tmp#11##0" = and i1 %"tmp#29##0", 1
+  %"tmp#12##0" = icmp eq i1 %"tmp#11##0", 0
+  br i1 %"tmp#12##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"tmp#30##0" = inttoptr i64 %"#left##0" to ptr
+  %"#left#wider#1##0" = load i64, ptr %"tmp#30##0"
+  %"tmp#31##0" = add i64 %"#left##0", 8
+  %"tmp#32##0" = inttoptr i64 %"tmp#31##0" to ptr
+  %"#left#wider#2##0" = load i64, ptr %"tmp#32##0"
+  %"tmp#26##0" = icmp ne i64 %"#right##0", 0
+  br i1 %"tmp#26##0", label %if.then.2, label %if.else.2
+if.then.2:
+  %"tmp#33##0" = trunc i64 %"#right##0" to i1
+  %"tmp#27##0" = and i1 %"tmp#33##0", 1
+  %"tmp#28##0" = icmp eq i1 %"tmp#27##0", 0
+  br i1 %"tmp#28##0", label %if.then.3, label %if.else.3
+if.then.3:
+  %"tmp#34##0" = inttoptr i64 %"#right##0" to ptr
+  %"#right#wider#1##0" = load i64, ptr %"tmp#34##0"
+  %"tmp#35##0" = add i64 %"#right##0", 8
+  %"tmp#36##0" = inttoptr i64 %"tmp#35##0" to ptr
+  %"#right#wider#2##0" = load i64, ptr %"tmp#36##0"
+  %"tmp#3##0" = tail call fastcc i1 @"sizeof#.wider#.=<0>"(i64 %"#left#wider#1##0", i64 %"#right#wider#1##0")
+  br i1 %"tmp#3##0", label %if.then.4, label %if.else.4
+if.then.4:
+  %"tmp#37##0" = tail call fastcc i1 @"sizeof#.wide#.=<0>"(i64 %"#left#wider#2##0", i64 %"#right#wider#2##0")
+  ret i1 %"tmp#37##0"
+if.else.4:
+  ret i1 0
+if.else.3:
+  ret i1 0
+if.else.2:
+  ret i1 0
+if.else.1:
+  br i1 %"tmp#11##0", label %if.then.5, label %if.else.5
+if.then.5:
+  %"tmp#16##0" = lshr i64 %"#left##0", 1
+  %"tmp#17##0" = and i64 %"tmp#16##0", 255
+  %"#left#c##0" = trunc i64 %"tmp#17##0" to i8
+  %"tmp#19##0" = icmp ne i64 %"#right##0", 0
+  br i1 %"tmp#19##0", label %if.then.6, label %if.else.6
+if.then.6:
+  %"tmp#38##0" = trunc i64 %"#right##0" to i1
+  %"tmp#20##0" = and i1 %"tmp#38##0", 1
+  br i1 %"tmp#20##0", label %if.then.7, label %if.else.7
+if.then.7:
+  %"tmp#21##0" = lshr i64 %"#right##0", 1
+  %"tmp#22##0" = and i64 %"tmp#21##0", 255
+  %"#right#c##0" = trunc i64 %"tmp#22##0" to i8
+  %"tmp#39##0" = icmp eq i8 %"#left#c##0", %"#right#c##0"
+  ret i1 %"tmp#39##0"
+if.else.7:
+  ret i1 0
+if.else.6:
+  ret i1 0
+if.else.5:
+  ret i1 0
+if.else.0:
+  %"tmp#40##0" = icmp eq i64 %"#right##0", 0
+  ret i1 %"tmp#40##0"
+}
+
+define external fastcc {i8, i1} @"sizeof#.wider#.c<0>"(i64 %"#rec##0") {
+  %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
+  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#3##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#2##0" = and i1 %"tmp#3##0", 1
+  br i1 %"tmp#2##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"#rec##1" = lshr i64 %"#rec##0", 1
+  %"#field##0" = and i64 %"#rec##1", 255
+  %"tmp#4##0" = trunc i64 %"#field##0" to i8
+  %"tmp#5##0" = insertvalue {i8, i1} undef, i8 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i8, i1} %"tmp#5##0", i1 1, 1
+  ret {i8, i1} %"tmp#6##0"
+if.else.1:
+  %"tmp#7##0" = insertvalue {i8, i1} undef, i8 undef, 0
+  %"tmp#8##0" = insertvalue {i8, i1} %"tmp#7##0", i1 0, 1
+  ret {i8, i1} %"tmp#8##0"
+if.else.0:
+  %"tmp#9##0" = insertvalue {i8, i1} undef, i8 undef, 0
+  %"tmp#10##0" = insertvalue {i8, i1} %"tmp#9##0", i1 0, 1
+  ret {i8, i1} %"tmp#10##0"
+}
+
+define external fastcc {i64, i1} @"sizeof#.wider#.c<1>"(i64 %"#rec##0", i8 %"#field##0") {
+  %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
+  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#3##0" = trunc i64 %"#rec##0" to i1
+  %"tmp#2##0" = and i1 %"tmp#3##0", 1
+  br i1 %"tmp#2##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"#rec##1" = and i64 %"#rec##0", -511
+  %"#temp##0" = zext i8 %"#field##0" to i64
+  %"#temp##1" = shl i64 %"#temp##0", 1
+  %"tmp#4##0" = or i64 %"#rec##1", %"#temp##1"
+  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
+  ret {i64, i1} %"tmp#6##0"
+if.else.1:
+  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 %"#rec##0", 0
+  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
+  ret {i64, i1} %"tmp#8##0"
+if.else.0:
+  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 0, 0
+  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 0, 1
+  ret {i64, i1} %"tmp#10##0"
+}
+
+define external fastcc i64 @"sizeof#.wider#.foo<0>"(i8 %"c##0") {
+  %"#temp##0" = zext i8 %"c##0" to i64
+  %"#temp##1" = shl i64 %"#temp##0", 1
+  %"#result##2" = or i64 %"#temp##1", 512
+  %"tmp#0##0" = or i64 %"#result##2", 1
+  ret i64 %"tmp#0##0"
+}
+
+define external fastcc {i8, i1} @"sizeof#.wider#.foo<1>"(i64 %"#result##0") {
+  %"tmp#0##0" = icmp ne i64 %"#result##0", 0
+  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#3##0" = trunc i64 %"#result##0" to i1
+  %"tmp#2##0" = and i1 %"tmp#3##0", 1
+  br i1 %"tmp#2##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"#temp##0" = lshr i64 %"#result##0", 1
+  %"#temp2##0" = and i64 %"#temp##0", 255
+  %"tmp#4##0" = trunc i64 %"#temp2##0" to i8
+  %"tmp#5##0" = insertvalue {i8, i1} undef, i8 %"tmp#4##0", 0
+  %"tmp#6##0" = insertvalue {i8, i1} %"tmp#5##0", i1 1, 1
+  ret {i8, i1} %"tmp#6##0"
+if.else.1:
+  %"tmp#7##0" = insertvalue {i8, i1} undef, i8 undef, 0
+  %"tmp#8##0" = insertvalue {i8, i1} %"tmp#7##0", i1 0, 1
+  ret {i8, i1} %"tmp#8##0"
+if.else.0:
+  %"tmp#9##0" = insertvalue {i8, i1} undef, i8 undef, 0
+  %"tmp#10##0" = insertvalue {i8, i1} %"tmp#9##0", i1 0, 1
+  ret {i8, i1} %"tmp#10##0"
+}
+
+define external fastcc i64 @"sizeof#.wider#.wider<0>"(i64 %"wider#1##0", i64 %"wider#2##0") {
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  store i64 %"wider#1##0", ptr %"tmp#1##0"
+  %"tmp#2##0" = add i64 %"#rec##0", 8
+  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  store i64 %"wider#2##0", ptr %"tmp#3##0"
+  ret i64 %"#rec##0"
+}
+
+define external fastcc {i64, i64, i1} @"sizeof#.wider#.wider<1>"(i64 %"#result##0") {
+  %"tmp#0##0" = icmp ne i64 %"#result##0", 0
+  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#3##0" = trunc i64 %"#result##0" to i1
+  %"tmp#2##0" = and i1 %"tmp#3##0", 1
+  %"tmp#1##0" = icmp eq i1 %"tmp#2##0", 0
+  br i1 %"tmp#1##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"tmp#4##0" = inttoptr i64 %"#result##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#4##0"
+  %"tmp#6##0" = add i64 %"#result##0", 8
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  %"tmp#8##0" = load i64, ptr %"tmp#7##0"
+  %"tmp#9##0" = insertvalue {i64, i64, i1} undef, i64 %"tmp#5##0", 0
+  %"tmp#10##0" = insertvalue {i64, i64, i1} %"tmp#9##0", i64 %"tmp#8##0", 1
+  %"tmp#11##0" = insertvalue {i64, i64, i1} %"tmp#10##0", i1 1, 2
+  ret {i64, i64, i1} %"tmp#11##0"
+if.else.1:
+  %"tmp#12##0" = insertvalue {i64, i64, i1} undef, i64 undef, 0
+  %"tmp#13##0" = insertvalue {i64, i64, i1} %"tmp#12##0", i64 undef, 1
+  %"tmp#14##0" = insertvalue {i64, i64, i1} %"tmp#13##0", i1 0, 2
+  ret {i64, i64, i1} %"tmp#14##0"
+if.else.0:
+  %"tmp#15##0" = insertvalue {i64, i64, i1} undef, i64 undef, 0
+  %"tmp#16##0" = insertvalue {i64, i64, i1} %"tmp#15##0", i64 undef, 1
+  %"tmp#17##0" = insertvalue {i64, i64, i1} %"tmp#16##0", i1 0, 2
+  ret {i64, i64, i1} %"tmp#17##0"
+}
+
+define external fastcc i64 @"sizeof#.wider#.xxx<0>"() {
+  ret i64 0
+}
+
+define external fastcc i1 @"sizeof#.wider#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = tail call fastcc i1 @"sizeof#.wider#.=<0>"(i64 %"#left##0", i64 %"#right##0")
   %"tmp#1##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#1##0"
 }

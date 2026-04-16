@@ -303,7 +303,7 @@ completeTypeSCC (CyclicSCC modTypeDefs) = do
              logNormalise $ "   " ++ showModSpec mod ++ " = " ++ show typedef)
           modTypeDefs
     -- First set representations to addresses, then layout types
-    mapM_ ((setTypeRep Pointer `inModule`) . fst) modTypeDefs
+    mapM_ ((setTypeRep Pointer Nothing `inModule`) . fst) modTypeDefs
     mapM_ (uncurry completeType) modTypeDefs
 
 
@@ -389,7 +389,7 @@ completeType modspec (TypeDef params ctors) = do
          | numNonConsts == 0
          = (0, 0)
          | otherwise
-         = (ceiling $ logBase 2 (fromIntegral numNonConsts), wordSizeBytes - 1)
+         = (nextPowerOf2 numNonConsts, wordSizeBytes - 1)
     logNormalise $ "Complete " ++ showModSpec modspec
                    ++ " with " ++ show tagBits ++ " tag bits and "
                    ++ show tagLimit ++ " tag limit"
@@ -404,14 +404,15 @@ completeType modspec (TypeDef params ctors) = do
 
     (nonConstCtors',infos) <- unzip <$> zipWithM nonConstCtorInfo nonConstCtors [0..]
     isUnique <- tmUniqueness . typeModifiers <$> getModuleInterface
-    (reps,nonconstItemsList,gettersSetters) <-
-         unzip3 <$> mapM
+    (reps,sizes,nonconstItemsList,gettersSetters) <-
+         unzip4 <$> mapM
          (nonConstCtorItems isUnique typespec numConsts numNonConsts
           tagBits tagLimit)
          infos
 
     let rep = newTypeRep reps numConsts
-    setTypeRep rep
+    setTypeRep rep (Just $ maximum $ nextPowerOf2 numConsts:sizes)
+
     logNormalise $ "Representation of type " ++ showModSpec modspec
                    ++ " is " ++ show rep
 
@@ -471,8 +472,7 @@ fixAnonFieldName _ _ param pos = (param `maybePlace` pos, False)
 -- the representations of all the non-constant constructors and the number
 -- of constant constructors.
 newTypeRep :: [TypeRepresentation] -> Int -> TypeRepresentation
-newTypeRep [] numConsts =
-    Bits $ ceiling $ logBase 2 $ fromIntegral numConsts
+newTypeRep [] numConsts = Bits $ nextPowerOf2 numConsts
 newTypeRep [rep] 0      = rep
 newTypeRep _ _          = Pointer
 
@@ -586,16 +586,16 @@ constCtorItems typeSpec ((vis, placedProto), num) =
 -- |All items needed to implement a non-const contructor for the specified type.
 nonConstCtorItems :: Bool -> TypeSpec -> Int -> Int -> Int -> Int
                   -> CtorInfo
-                  -> Compiler (TypeRepresentation, [Item], [(VarName, GetterSetterInfo)])
+                  -> Compiler (TypeRepresentation, Int, [Item], [(VarName, GetterSetterInfo)])
 nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
                   info@(CtorInfo ctorName paramInfos vis pos tag bits) = do
     -- If we're unboxed and there are const ctors, then we need an extra
     -- bit to make sure the unboxed value is > than any const value
     let nonConstsize = bits + tagBits
-    let (size,nonConstBit)
+    let (sizeBits, nonConstBit)
           = if numConsts == 0
             then (nonConstsize,Nothing)
-            else let constSize = ceiling $ logBase 2 $ fromIntegral numConsts
+            else let constSize = nextPowerOf2 numConsts
                      size' = 1 + max nonConstsize constSize
                  in (size', Just $ size' - 1)
     logNormalise $ "Making constructor items for type " ++ show typeSpec
@@ -604,7 +604,7 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
     logNormalise $ show tagBits ++ " tag bit(s)"
     logNormalise $ "nonConst bit = " ++ show nonConstBit
 
-    if size <= wordSize && tag <= tagLimit
+    if sizeBits <= wordSize && tag <= tagLimit
       then do -- unboxed representation
         let fields =
                 fst
@@ -616,7 +616,8 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
                         shift + sz))
                 ([],tagBits)
                 paramInfos
-        return (Bits size,
+        return (Bits sizeBits,
+                sizeBits,
                 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit
                 fields pos
                 ++ unboxedDeconstructorItems vis uniq ctorName typeSpec
@@ -627,8 +628,8 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
                     fields
                 )
       else do -- boxed representation
-        let (fields,size) = layoutRecord paramInfos tag tagLimit
-        logNormalise $ "Laid out structure size " ++ show size
+        let (fields,sizeBytes) = layoutRecord paramInfos tag tagLimit
+        logNormalise $ "Laid out structure size " ++ show sizeBytes
             ++ ": " ++ show fields
         let ptrCount = length $ List.filter ((==Pointer) . paramInfoTypeRep) paramInfos
         logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
@@ -636,13 +637,14 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
                         ++ show numNonConsts ++ " non-const constructors"
         let params = paramInfoParam <$> paramInfos
         return (Pointer,
+                sizeBytes * byteBits,
                 constructorItems vis ctorName typeSpec params fields
-                    size tag tagLimit pos
+                    sizeBytes tag tagLimit pos
                 ++ deconstructorItems uniq vis ctorName typeSpec params numConsts
-                        numNonConsts tag tagBits tagLimit pos fields size,
+                        numNonConsts tag tagBits tagLimit pos fields sizeBytes,
                 concatMap
                     (boxedGetterSetterStmts vis typeSpec numConsts numNonConsts
-                    ptrCount size tag tagBits tagLimit)
+                    ptrCount sizeBytes tag tagBits tagLimit)
                     fields
                 )
 
@@ -658,7 +660,7 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
 -- aligned on word boundaries).
 layoutRecord :: [CtorParamInfo] -> Int -> Int -> ([FieldInfo], Int)
 layoutRecord paramInfos tag tagLimit =
-    let sizes = (2^) <$> [0..floor $ logBase 2 $ fromIntegral wordSizeBytes]
+    let sizes = (2^) <$> [0..prevPowerOf2 wordSizeBytes]
         fields = List.map
                 (\(CtorParamInfo param anon rep sz) ->
                     let byteSize = (sz + 7) `div` byteBits

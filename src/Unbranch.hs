@@ -813,7 +813,7 @@ typeNeedsBoxing _              = False
 -- | Stmts to box and unbox an expression of a given size, with the boxed variable.
 boxUnbox :: OptPos -> VarName -> Int -> Exp -> TypeSpec -> FlowDirection -> ([Placed Stmt], Placed Exp, [Placed Stmt]) 
 boxUnbox pos box sizeBits exp ty flow = 
-    let sizeBytes = (sizeBits + byteBits - 1) `div` byteBits
+    let sizeBytes = sizeBits `ceilDiv` byteBits
         sizeExp   = iVal sizeBytes `withType` intType `maybePlace` pos
         getBox    = varGet box `withType` AnyType `maybePlace` pos
         setBox    = varSet box `withType` AnyType `maybePlace` pos
