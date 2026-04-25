@@ -38,3 +38,9 @@ foreign lpvm {bits} sizeof(_:wider, ?wider_bits:int)
 foreign lpvm {bits, unboxed} sizeof(_:wider, ?wider_bits:int)
 !println("Wider bits (unboxed): $wider_bits")
 
+type wider_int is 128 bit unsigned {}
+
+foreign lpvm {bits} sizeof(_:wider_int, ?wider_int_bits:int)
+!println("Wider int bits: $wider_int_bits")
+foreign lpvm {bits, unboxed} sizeof(_:wider_int, ?wider_int_bits:int)
+!println("Wider int bits (unboxed): $wider_int_bits")
