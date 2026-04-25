@@ -1,0 +1,9 @@
+# Ignore all extension-less files
+*/
+!*/*.*
+# ... except some are okay
+!*/Makefile
+!*/BENCHMARKS
+
+*/*.o
+*/*-stats.tex
