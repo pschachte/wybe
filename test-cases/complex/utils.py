@@ -104,7 +104,7 @@ class Context:
         return (r.returncode, self.normalise(r.stdout.decode("utf-8")))
     
     def normalise(self, output: str) -> str:
-        output = re.sub(r"@([A-Za-z_]\w*):[0-9:]*", r"@\1:nn:nn", output)
+        output = re.sub(r"@([A-Za-z0-9_-]\w*):[0-9:]*", r"@\1:nn:nn", output)
         output = re.sub(r"\[ [0-9][0-9]* x i8 \]", "[ ?? x i8 ]", output)
         output = re.sub(r"(target triple *= *).*", r"\1???", output)
         # Hack around weird MacOS tmp dir
