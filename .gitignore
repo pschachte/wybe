@@ -66,3 +66,7 @@ benchmarks/wc/haskell_wc_efficient
 benchmarks/wc/haskell_wc
 benchmarks/wc/c_wc
 benchmarks/wc/wc-stats.tex
+
+samples/*
+!samples/*.*
+samples/*.o
