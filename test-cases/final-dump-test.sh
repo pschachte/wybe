@@ -54,5 +54,5 @@ else
 	echo -e "ALL TESTS PASS"
 fi
 if [ -n "$NEW" ] ; then
-	echo -e "New tests: $NEW\nDo .\update-exp to specify expected output"
+	echo -e "New tests: $NEW\nDo ./update-exp to specify expected output"
 fi
