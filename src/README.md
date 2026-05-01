@@ -463,7 +463,7 @@ last call before it, whenever all the inputs to those instructions are
 available before the last call.
 
 One particular trick employed to make this possible is
-last-call-module-construction optimisation.  The idea here is to invert the
+last-call-modulo-construction optimisation.  The idea here is to invert the
 direction of data flow, turing an output into an input, by passing in the
 address to which to write the output.  When the instruction following the
 last call in a body simply writes an output of that call into one memory

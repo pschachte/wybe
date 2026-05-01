@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   public procs    : bug228-okay.<0>
   constants       : 
   imports         : use wybe
-  resources       : res: fromList [(bug228-okay.res,wybe.int @bug228-okay:1:1)]
+  resources       : res: fromList [(bug228-okay.res,wybe.int @bug228-okay:nn:nn)]
   procs           : 
 
 module top-level code > public {semipure} (0 calls)
@@ -18,12 +18,12 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @bug228-okay:15:2
-    foreign c print_int(1:wybe.int, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @bug228-okay:15:2
-    foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @bug228-okay:15:2
-    foreign c print_int(2:wybe.int, ~tmp#4##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @bug228-okay:16:2
-    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @bug228-okay:16:2
-    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug228-okay:16:2
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @bug228-okay:nn:nn
+    foreign c print_int(1:wybe.int, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @bug228-okay:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @bug228-okay:nn:nn
+    foreign c print_int(2:wybe.int, ~tmp#4##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @bug228-okay:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @bug228-okay:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @bug228-okay:nn:nn
 
 
 proc bar > {inline} (1 calls)
@@ -31,10 +31,10 @@ proc bar > {inline} (1 calls)
 bar(?out1##0:wybe.int, ?out2##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<bug228-okay.res>>:wybe.int, ?%tmp#1##0:wybe.int) @bug228-okay:7:5
-    foreign llvm move(2:wybe.int, ?out2##0:wybe.int) @bug228-okay:9:10
-    foreign lpvm store(~%tmp#1##0:wybe.int, <<bug228-okay.res>>:wybe.int) @bug228-okay:7:5
-    foreign llvm move(1:wybe.int, ?out1##0:wybe.int) @bug228-okay:11:6
+    foreign lpvm load(<<bug228-okay.res>>:wybe.int, ?%tmp#1##0:wybe.int) @bug228-okay:nn:nn
+    foreign llvm move(2:wybe.int, ?out2##0:wybe.int) @bug228-okay:nn:nn
+    foreign lpvm store(~%tmp#1##0:wybe.int, <<bug228-okay.res>>:wybe.int) @bug228-okay:nn:nn
+    foreign llvm move(1:wybe.int, ?out1##0:wybe.int) @bug228-okay:nn:nn
 
 
 proc init_res > {inline} (1 calls)
@@ -42,7 +42,7 @@ proc init_res > {inline} (1 calls)
 init_res()<{}; {<<bug228-okay.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm store(2:wybe.int, <<bug228-okay.res>>:wybe.int) @bug228-okay:3:26
+    foreign lpvm store(2:wybe.int, <<bug228-okay.res>>:wybe.int) @bug228-okay:nn:nn
 
   LLVM code       :
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # update expected outputs to match actual ones, if appropriate
 
 PAGER=${PAGER:-more}
@@ -16,17 +16,21 @@ prefix () {
 }
 
 
+force_accept=0
 # Determine whether to accept compiler output as expected.  Inputs are:
 #    source file name
 #    compiler output file name
 #    current expected output file name, or empty for new test cases
 agree () {
+    if [ $force_accept -ne 0 ] ; then
+        return 0
+    fi 
     if [ -r "$3" ] ; then
         action=diff
-        valid="yes accept|no keep|diff|unified|previous|current|quit"
+        valid="yes accept|no keep|diff|unified|previous|current|force accept|quit"
     else
         action=current
-        valid="yes accept|no reject|current|quit"
+        valid="yes accept|no reject|current|force accept|quit"
     fi
     while true ; do
         destination=$PAGER
@@ -50,18 +54,19 @@ agree () {
         esac
         echo "Accept output for $1?"
         echo "(upper case to see output without paging)"
-	read -p "$valid: " action
-	case "$action" in
-	    [yYaA]*) return 0 ;;   # 0 means true
-	    [nNrR]*) return 1 ;;   # non-0 means false
-	    [qQ]*) echo "Quitting..." ; exit 0 ;;
+        read -p "$valid: " action
+        case "$action" in
+            [fF]*) force_accept=1 ;& # FALLTHROUGH
+            [yYaA]*) return 0 ;;   # 0 means true
+            [nNrR]*) return 1 ;;   # non-0 means false
+            [qQ]*) echo "Quitting..." ; exit 0 ;;
             [dDuUpP]*) if [ ! -r "$3" ] ; then
                         echo "No previous expected output!"
                         action=ask
                     fi ;;
             [cC]) ;;
-	    *) echo "Please answer $valid." ;;
-	esac
+            *) echo "Please answer $valid." ;;
+        esac
     done
 }
 
