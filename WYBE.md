@@ -2448,15 +2448,15 @@ actually require any instructions.
 - `foreign lpvm sizeof(`*arg:type*, `?`*size:int_type*`)` Get the size of the *type* of 
 the first argument in bytes. To get the size in bits, specify the `bits`
 modifier (in curly braces, after `lpvm`).
-The size of a type is the size of its largest constructor.
-Because Wybe will automatically box values that are larger than a word of
-memory, `sizeof` will never return a value larger than the size of an address.
+By default, the size of a type is the size of its largest constructor, 
+capped to the size of an address due to Wybe automatically boxing large values.
+To get the size of the largest constructor after unboxing, the `unboxed` flag
+must be specified.
 
 The first argument can be anything except for an outwards-flowing variable. 
 The type of the second argument, *int_type*, can have any integer represented
-type,
-therefore, it is generally recommended to explicitly specify the type of this
-argument if it can't otherwise be inferred from context.
+type, therefore, it is generally recommended to explicitly specify the type of
+this argument if it can't otherwise be inferred from context.
 
 This instruction is resolved statically, with _no_ runtime cost.
 Note that, for values of a generic type, the size returned is the size of a

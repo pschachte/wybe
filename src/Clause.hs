@@ -25,7 +25,7 @@ import           Text.ParserCombinators.Parsec.Pos
 import           Util
 import           Resources
 import           UnivSet                           (emptyUnivSet)
-import           Config                            (byteBits)
+import           Config                            (byteBits, wordSize)
 
 
 ----------------------------------------------------------------
@@ -275,12 +275,18 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
             fn' <- compileHigherFunc fn
             return $ PrimHigher callSiteID fn' impurity' args'
 compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
-    repSize <- case content arg of
-        Typed _ ty _ -> typeRepSize . trustFromJust "sizeof with unkown typerep" <$> lift (lookupTypeRepresentation ty)
-        _ -> shouldnt $ "untyped in sizeof " ++ show arg
+    let ty = trustFromJust ("untyped in sizeof " ++ show arg)
+           $ maybeExpType $ content arg
+    unboxedSize <- case ty of
+        Representation repn -> return $ typeRepSize repn
+        TypeSpec modSpec name _ ->
+            trustFromJust "compileSimpleStmt sizeof modTypeSize" 
+                    <$> lift (getSpecModule "compileSimpleStmt sizeof" modTypeSize (modSpec ++ [name]))
+        _ -> return wordSize
+    let size = if "unboxed" `elem` flags then unboxedSize else min unboxedSize wordSize
+    let sizeInUnit = if "bits" `elem` flags then size else size `ceilDiv` byteBits
     out' <- placedApply compileArg out
-    let size = if "bits" `elem` flags then repSize else (repSize + byteBits - 1) `div` byteBits
-    return $ PrimForeign "llvm" "move" [] $ ArgInt (fromIntegral size) intType : out'
+    return $ PrimForeign "lpvm" "cast" [] $ ArgInt (fromIntegral sizeInUnit) intType : out'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'

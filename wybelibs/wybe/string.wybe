@@ -35,7 +35,7 @@ pub def {inline} unsafe_cstring_to_string(str:c_string, len:int):_ =
 pub def string(str:c_string):_ = s where {
     ?len = length(str)
     ?s = if { len = 0 :: empty 
-            | len = 1 :: singleton(foreign lpvm access(str, 0, 1, 0)) 
+            | len = 1 :: singleton(foreign lpvm access(str, 0, foreign lpvm sizeof(_:char):int, 0)) 
             | else    :: buffer(len, str)
             }
 }
@@ -153,9 +153,7 @@ pub def (x:_ <=> y:_):comparison = c where {
         }
     }
     if { c = equal :: 
-        ?lx = length(x)
-        ?ly = length(y)
-        if { lx < ly :: ?c = lesser | lx > ly :: ?c = greater } 
+        ?c = (length(x) <=> length(y))
     }
 }
 
@@ -194,7 +192,7 @@ def pack(s:_, !raw:c_string, size:int, !offset:int) {
         buffer(_, ?str) :: 
             for ?c in str {
                 foreign lpvm mutate(raw, ?raw, offset, true, size, 0, c)
-                incr(!offset)
+                !offset + foreign lpvm sizeof(_:char)
             }
       | concat(?left, ?right) :: 
             pack(left, !raw, size, !offset)
@@ -202,11 +200,11 @@ def pack(s:_, !raw:c_string, size:int, !offset:int) {
       | slice(_, _) :: 
             for ?c in s {
                 foreign lpvm mutate(raw, ?raw, offset, true, size, 0, c)
-                incr(!offset)
+                !offset + foreign lpvm sizeof(_:char)
             }
       | singleton(?c) ::
             foreign lpvm mutate(raw, ?raw, offset, true, size, 0, c)
-            incr(!offset)
+            !offset + foreign lpvm sizeof(_:char)
       | else :: !shouldnt
     }
 }
