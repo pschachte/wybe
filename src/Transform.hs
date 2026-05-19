@@ -275,6 +275,11 @@ transformPrim callSiteMap escapedVars (aliasMap, deadCells) prim = do
                         ArgVar{argVarName=n} -> Set.member n escapedVars
                         _                   -> True
                 let escaped   = escapedByAlias || escapedByMutation
+                -- NOTE: We only stack-allocate constant-sized allocs. LLVM does
+                -- support variable-sized alloca (for C99 VLAs), but it forces a
+                -- frame pointer, blocking tail-call optimisation. It also makes
+                -- --stack-alloc-limit unenforceable at compile time. In practice
+                -- this is not a limitation: Wybe types are always statically sized.
                 let constSize = argIsConst sizeArg
                 let alreadyStack = "stack" `List.elem` flags
                 doStackAlloc <- lift $ gets (optimisationEnabled StackAlloc . options)
