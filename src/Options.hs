@@ -61,6 +61,7 @@ data Options = Options
     , optErrors        :: Set String 
                                    -- ^Erroneous flag error messages
     , optNoEnv         :: Bool     -- ^Don't read WYBEARGS
+    , optStackAllocLimit :: Integer -- ^Max bytes for a single stack allocation
     } deriving Show
 
 
@@ -85,6 +86,7 @@ defaultOptions = Options
   , optNoVerifyLLVM  = False
   , optErrors        = Set.empty
   , optNoEnv         = False
+  , optStackAllocLimit = 4096
   }
 
 
@@ -256,6 +258,9 @@ options =
     , Option ['x'] ["opt"]
         (ReqArg addOptFlags "FLAGS")
         "add comma-separated optimisation flags"
+    , Option [] ["stack-alloc-limit"]
+        (ReqArg setStackAllocLimit "BYTES")
+        "max bytes for a single stack allocation [default 4096]"
     , Option [] ["llc-path"]
         (ReqArg (\ llc opts -> opts { optLlcBin = llc }) "PATH")
         "specify the path of the 'llc' used"
@@ -416,6 +421,16 @@ setLLVMOptLevel str opts=
     case readMaybe str of
         Nothing -> addOptError opts $ "LLVM opt level should be a number: " ++ str 
         Just lvl -> opts{optLLVMOptLevel=lvl}
+
+-- Set the stack allocation size limit specified by the string.
+-- Add an error message if the string is not a positive number.
+setStackAllocLimit :: String -> Options -> Options
+setStackAllocLimit str opts =
+    case readMaybe str of
+        Nothing  -> addOptError opts $ "stack-alloc-limit should be a positive integer: " ++ str
+        Just lim
+            | lim <= 0  -> addOptError opts $ "stack-alloc-limit must be positive: " ++ str
+            | otherwise -> opts{optStackAllocLimit=lim}
 
 -- | Adds an error to the set of errors
 addOptError :: Options -> String -> Options

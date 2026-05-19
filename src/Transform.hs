@@ -27,7 +27,8 @@ import           Data.Set      as Set
 import           Flow          ((|>))
 import           Options       (LogSelection (Transform),
                                 OptFlag(MultiSpecz, StackAlloc),
-                                optimisationEnabled)
+                                optimisationEnabled,
+                                optStackAllocLimit)
 import           Util
 import           Snippets      (primMove)
 import           Data.Tuple.HT (mapFst)
@@ -277,17 +278,20 @@ transformPrim callSiteMap escapedVars (aliasMap, deadCells) prim = do
                 let constSize = argIsConst sizeArg
                 let alreadyStack = "stack" `List.elem` flags
                 doStackAlloc <- lift $ gets (optimisationEnabled StackAlloc . options)
+                stackLimit <- lift $ gets (optStackAllocLimit . options)
+                let withinLimit = maybe False (<= stackLimit) (argIntVal sizeArg)
                 lift $ logTransform $ "alloc result: " ++ show outVar
                         ++ " | escapedByAlias=" ++ show escapedByAlias
                         ++ " | escapedByMutation=" ++ show escapedByMutation
                         ++ " | constSize=" ++ show constSize
+                        ++ " | withinLimit=" ++ show withinLimit
                         ++ " | alreadyStack=" ++ show alreadyStack
-                        ++ (if not escaped && constSize && not alreadyStack && doStackAlloc
+                        ++ (if not escaped && constSize && withinLimit && not alreadyStack && doStackAlloc
                             then " => stack-allocate"
                             else " => heap-allocate")
                 let primc' = case result of
                         Nothing ->
-                            if not escaped && constSize && not alreadyStack && doStackAlloc
+                            if not escaped && constSize && withinLimit && not alreadyStack && doStackAlloc
                             then PrimForeign "lpvm" "alloc" ("stack":flags) args
                             else primc
                         Just ((selectedCell, startOffset), []) ->
