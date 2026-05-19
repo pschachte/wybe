@@ -48,6 +48,9 @@ pub def foreign llvm `/`=sdiv(x:_, y:_):_
 # Modulus.
 pub def foreign llvm `%`=srem(x:_, y:_):_
 
+
+## Bitwise operations
+
 # Bit-shift left.
 pub def foreign llvm `<<`=shl(x:_, s:_):_
 
@@ -62,6 +65,12 @@ pub def foreign llvm `>>`=ashr(x:_, s:_):_
 #      -3 >> 1 = 9223372036854775806 (11...101 >> 1 = 01...110)
 # on a 64-bit machine
 pub def foreign llvm logical_bitshift=lshr(x:_, s:_):_
+
+# Bitwise logical operations.
+pub def foreign llvm bitwise_and=and(x:_, y:_):_
+pub def foreign llvm bitwise_or=or(x:_, y:_):_
+pub def foreign llvm bitwise_xor=xor(x:_, y:_):_
+pub def {inline}     bitwise_not(x:_):_ = bitwise_xor(x, (-1):_)
 
 
 ## Comparisons

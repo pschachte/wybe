@@ -26,9 +26,10 @@ use wybe.bool, wybe.int, wybe.machine_word, wybe.list, wybe.c_array
 representation (T) is address 
 
 ## Accessor procedures backward compatible with original array type
-pub def length(a:_(T)):int = foreign lpvm access(a, 0, word_size_bytes, 0)
+pub def length(a:_(T)):int = 
+    foreign lpvm access(a, 0, foreign lpvm sizeof(_:int):int, 0)
 pub def raw_data(a:_(T)):raw_array =
-    foreign llvm add(a, word_size_bytes)
+    foreign llvm add(a, foreign lpvm sizeof(_:int):int)
 
 
 ## Construction procedures
@@ -36,11 +37,11 @@ pub def raw_data(a:_(T)):raw_array =
 # Construct an array filled with the given element of a given length.
 pub def array(x:T, len:int):_(T) = ar where {
     allocate_array(len, ?ar, ?size)
-    ?offset = word_size_bytes
+    ?offset = foreign lpvm sizeof(_:int)
     do {
         while offset < size
         foreign lpvm mutate(ar, ?ar, offset, 1, size, 0, x)
-        !offset + word_size_bytes
+        !offset + foreign lpvm sizeof(_:T)
     }
 }
 
@@ -53,10 +54,10 @@ pub def array(len:int):_(T) = ar where {
 # Construct a Wybe array from a c_array.  This will need to copy the data.
 pub def array(data:c_array(T)):_(T) = ar where {
     allocate_array(data^length, ?ar, ?size)
-    ?i = 0
+    ?i = foreign lpvm sizeof(_:int):int
     for ?elt in data {
         foreign lpvm mutate(ar, ?ar, i, 1, size, 0, elt)
-        !i + word_size_bytes
+        !i + foreign lpvm sizeof(_:T)
     }
 }
 
@@ -72,10 +73,10 @@ pub def {test, inline} inbounds(a:_(T), idx:int) {
 # Convert a list into an array
 pub def array(ls:list(T)):_(T) = ar where {
     allocate_array(length(ls), ?ar, ?size)
-    ?offset = word_size_bytes
+    ?offset = foreign lpvm sizeof(_:int):int
     for ?x in ls {
         foreign lpvm mutate(ar, ?ar, offset, 1, size, 0, x)
-        !offset + word_size_bytes
+        !offset + foreign lpvm sizeof(_:T)
     }
 }
 
@@ -112,9 +113,9 @@ pub def slice(a:_(T), start:int, end:int):_(T) = subarray where {
     max(!start, 0)
     min(!end, a^length)
     max(!start, end)
-    foreign llvm add(a^raw_data, (start-1) * word_size_bytes, ?start_address)
-    ?slice_size = (end - start + 1) * word_size_bytes
+    foreign llvm add(a:!_(T), start * foreign lpvm sizeof(_:T), ?start_address)
     ?sz = end - start
+    ?slice_size = foreign lpvm sizeof(_:T) + sz * foreign lpvm sizeof(_:T)
     foreign lpvm mutate(start_address, ?start_address, 0, 0, slice_size, 0, sz)
     foreign llvm move(start_address, ?subarray:!_(T))
 }
@@ -124,7 +125,7 @@ pub def slice(a:_(T), start:int, end:int):_(T) = subarray where {
 # Get an iterator over the values in an array
 pub def {inline} values(ar:_(T)):array_iterator(T) =
     array_iterator(ar^raw_data,
-            foreign llvm add(ar^raw_data, ar^length * word_size_bytes))
+            foreign llvm add(ar^raw_data, ar^length * foreign lpvm sizeof(_:T)))
 
 # XXX make this implementation as private as possible
 # This could be implemented the same way as `slice` above, but if the array is
@@ -137,8 +138,8 @@ pub type array_iterator(T) {
 
     pub def {test,inline} `[|]`(?head:T, ?it:_(T), it:_(T)) {
         foreign llvm {test} icmp_slt(it^curr, it^end)
-        foreign lpvm access(it^curr, 0, word_size_bytes, 0, ?head)
-        foreign llvm add(it^curr, word_size_bytes, ?next)
+        foreign lpvm access(it^curr, 0, foreign lpvm sizeof(_:T):int, 0, ?head)
+        foreign llvm add(it^curr, foreign lpvm sizeof(_:T):int, ?next)
         !it^curr = next
     }
 }
@@ -149,7 +150,7 @@ pub type array_iterator(T) {
 # WARNING: does not initialise the array.
 # Allocate space for an array and record the size.
 def {inline} allocate_array(len:int,?ar:_(T),?size:int) {
-    ?size = (len + 1) * word_size_bytes
+    ?size = foreign lpvm sizeof(_:int) + len * foreign lpvm sizeof(_:T)
     ?ar = foreign lpvm alloc(size)
     foreign lpvm mutate(ar, ?ar, 0, 1, size, 0, len)
 }
@@ -158,13 +159,13 @@ def {inline} allocate_array(len:int,?ar:_(T),?size:int) {
 # probably want `[]`.
 # Get the element of an array at a given index
 pub def {inline} unsafe_get(a:_(T), idx:int):T = x where {
-    foreign lpvm access(a^raw_data, idx * word_size_bytes, word_size_bytes, 0, ?x)
+    foreign lpvm access(a^raw_data, idx * foreign lpvm sizeof(_:T), foreign lpvm sizeof(_:T):int, 0, ?x)
 }
 
 # WARNING: does not check that the index is in the bound of the array. You 
 # probably want `[]`.
 # Update the array at the given index to the given element
 pub def {inline} unsafe_update(!a:_(T), idx:int, x:T) {
-    foreign lpvm mutate(a, ?a, (idx+1) * word_size_bytes, 0, 
-                                           a^length * word_size_bytes, 0, x)
+    foreign lpvm mutate(a, ?a, foreign lpvm sizeof(_:int) + idx * foreign lpvm sizeof(_:T), 0, 
+                               foreign lpvm sizeof(_:int) + a^length * foreign lpvm sizeof(_:T), 0, x)
 }

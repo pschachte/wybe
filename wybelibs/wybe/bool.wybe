@@ -3,7 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.c_string, wybe.string, wybe.char, wybe.int, wybe.io
+use wybe.c_string, wybe.string, wybe.char, wybe.int, wybe.io, wybe.comparison
 
 pub constructors false | true
 
@@ -51,6 +51,10 @@ pub def foreign llvm `<` =icmp_slt(x:_, y:_):_
 pub def foreign llvm `<=`=icmp_sle(x:_, y:_):_
 pub def foreign llvm `>` =icmp_sgt(x:_, y:_):_
 pub def foreign llvm `>=`=icmp_sge(x:_, y:_):_
+
+# Three-way comparison.
+pub def (x:_ <=> y:_):comparison = 
+    if { x < y :: lesser | x = y :: equal | else :: greater }
 
 
 ## Other

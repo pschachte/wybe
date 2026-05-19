@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : bug_var_def.<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

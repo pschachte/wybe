@@ -22,8 +22,7 @@ import           Data.List             as List
 import           Data.List.Extra       (lower)
 import           Data.Map              as Map
 import           Data.Maybe            (fromMaybe)
-import Data.Set as Set
-    ( Set, empty, fromList, union, insert, delete, member, toList )
+import           Data.Set              as Set ( Set, empty, fromList, union, insert, delete, member, toList )
 import           Data.Either           as Either
 import           Text.Read             (readMaybe)
 import           Control.Monad
@@ -32,11 +31,7 @@ import           System.Environment
 import           System.Exit
 import           System.FilePath
 import           Version
-import System.Directory
-    ( makeAbsolute,
-      doesDirectoryExist,
-      getPermissions,
-      Permissions(readable) )
+import           System.Directory      ( makeAbsolute,  doesDirectoryExist,  getPermissions,  Permissions(readable) )
 import           System.Console.ANSI
 import qualified ShellWords            as SW
 import Distribution.InstalledPackageInfo (showInstalledPackageInfo)

@@ -43,6 +43,8 @@ instance Binary ProcFunctor
 instance Binary ParamInfo
 instance Binary Prim
 instance Binary PrimVarName
+instance Binary ConstValue
+instance Binary StructInfo
 instance Binary PrimArg
 instance Binary ProcAnalysis
 instance Binary GlobalFlows
@@ -72,6 +74,7 @@ instance Binary Module
 instance Binary PubProcInfo
 instance Binary ModuleInterface
 instance Binary Pragma
+instance Binary StructID
 
 instance Binary ProcModifiers
 instance Binary Inlining

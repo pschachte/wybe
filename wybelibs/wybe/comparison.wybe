@@ -3,7 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.string, wybe.control
+use wybe.bool, wybe.string, wybe.c_string, wybe.int, wybe.control
 
 pub constructors lesser | equal | greater
 

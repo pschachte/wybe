@@ -27,11 +27,11 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
 import           Data.Maybe                as Maybe
+import           Data.Char                 (ord)
+import           Data.Tuple.HT             (mapFst)
 import           Data.Function             (on)
 import           Options                   (LogSelection (Expansion))
-import Distribution.Simple.Setup (emptyGlobalFlags)
-import Snippets
-import Data.Tuple.HT (mapFst)
+import           Snippets
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
@@ -237,7 +237,7 @@ expandBody (ProcBody prims fork) = do
         logExpansion $ "Finished expanding fork on " ++ show var'
       MergedFork{} -> do
         logExpansion "Expanding merged as fork..."
-        expandBody $ ProcBody prims $ unMergeFork fork
+        lift2 (unMergeFork fork) >>= expandBody . ProcBody prims 
         
 expandUnforked :: [Placed Prim] -> PrimFork -> Expander ()
 expandUnforked prims fork = do
@@ -275,7 +275,7 @@ expandFork var ty bodies = do
 -- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Expander ()
-expandPrim (PrimCall id pspec impurity args gFlows) pos = do
+expandPrim call@(PrimCall id pspec impurity args gFlows) pos = do
     args' <- mapM expandArg args
     let call' = PrimCall id pspec impurity args' gFlows
     logExpansion $ "  Expand call " ++ show call'
@@ -286,11 +286,17 @@ expandPrim (PrimCall id pspec impurity args gFlows) pos = do
         addInstr call' pos
     else do
         def <- lift2 $ getProcDef pspec
-        case procImpln def of
+        let (args'', pspec') = case (procVariant def, args') of
+                (ClosureProc pspec' simple, ArgClosure _ closed _:rest) -> 
+                    (closed ++ rest, if simple then pspec' else pspec) 
+                (ClosureProc{}, _) -> shouldnt $ "closure call with no closure arg " ++ show call
+                _ -> (args', pspec)
+        def' <- if pspec == pspec' then return def else lift2 $ getProcDef pspec'
+        case procImpln def' of
             ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
             ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
-                if procInline def
-                then inlineCall proto args' body pos
+                if procInline def'
+                then inlineCall proto args'' body pos
                 else do
                     logExpansion "  Not inlinable"
                     addInstr call' pos
@@ -322,11 +328,8 @@ expandHigherOrder prim pos = do
             fn' <- expandArg fn
             case fn' of
                 ArgClosure pspec closed _ -> do
-                    pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
-                    logExpansion $ "  As first order call to " ++ show pspec'
                     gFlows <- lift2 $ getProcGlobalFlows pspec
-                    expandPrim (PrimCall id pspec' impurity (closed ++ args)
-                                         gFlows) pos
+                    expandPrim (PrimCall id pspec impurity (fn':args) gFlows) pos
                 _ -> do
                     args' <- mapM expandArg args
                     logExpansion $ "  As higher call to " ++ show fn'
@@ -373,29 +376,29 @@ expandArg' :: PrimArg -> Expander PrimArg
 -- termToExp (StringConst pos [chr] DoubleQuote)
 --     = return $ Placed (Fncall ["wybe","string"] "singleton" False
 --                         [Unplaced (CharValue chr)]) pos
-expandArg' arg@(ArgString "" WybeString ty) = do
-    logExpansion "Optimising empty string"
-    newVarName <- lift freshVarName
-    let defVar = ArgVar newVarName ty FlowOut Ordinary False
-    let useVar = ArgVar newVarName ty FlowIn Ordinary False
-    logExpansion $ "    Generated fresh name " ++ show newVarName
-    callID <- genCallSiteID
-    let emptyStringProc = ProcSpec ["wybe","string"] "empty" 0 Set.empty
-    expandPrim (PrimCall callID emptyStringProc Pure [defVar] emptyGlobalFlows) Nothing
-    logExpansion $ "Empty string variable = " ++ show useVar
-    return useVar
-expandArg' arg@(ArgString [ch] WybeString ty) = do
-    logExpansion $ "Optimising singleton string \"" ++ [ch] ++ "\""
-    newVarName <- lift freshVarName
-    let defVar = ArgVar newVarName ty FlowOut Ordinary False
-    let useVar = ArgVar newVarName ty FlowIn Ordinary False
-    logExpansion $ "    Generated fresh name " ++ show newVarName
-    callID <- genCallSiteID
-    let emptyStringProc = ProcSpec ["wybe","string"] "singleton" 0 Set.empty
-    expandPrim (PrimCall callID emptyStringProc Pure
-                [ArgChar ch charType, defVar] emptyGlobalFlows) Nothing
-    logExpansion $ "Singleton string variable = " ++ show useVar
-    return useVar
+-- expandArg' arg@(ArgString "" WybeString ty) = do
+--     logExpansion "Optimising empty string"
+--     newVarName <- lift freshVarName
+--     let defVar = ArgVar newVarName ty FlowOut Ordinary False
+--     let useVar = ArgVar newVarName ty FlowIn Ordinary False
+--     logExpansion $ "    Generated fresh name " ++ show newVarName
+--     callID <- genCallSiteID
+--     let emptyStringProc = ProcSpec ["wybe","string"] "empty" 0 Set.empty
+--     expandPrim (PrimCall callID emptyStringProc Pure [defVar] emptyGlobalFlows) Nothing
+--     logExpansion $ "Empty string variable = " ++ show useVar
+--     return useVar
+-- expandArg' arg@(ArgString [ch] WybeString ty) = do
+--     logExpansion $ "Optimising singleton string \"" ++ [ch] ++ "\""
+--     newVarName <- lift freshVarName
+--     let defVar = ArgVar newVarName ty FlowOut Ordinary False
+--     let useVar = ArgVar newVarName ty FlowIn Ordinary False
+--     logExpansion $ "    Generated fresh name " ++ show newVarName
+--     callID <- genCallSiteID
+--     let emptyStringProc = ProcSpec ["wybe","string"] "singleton" 0 Set.empty
+--     expandPrim (PrimCall callID emptyStringProc Pure
+--                 [ArgChar ch charType, defVar] emptyGlobalFlows) Nothing
+--     logExpansion $ "Singleton string variable = " ++ show useVar
+--     return useVar
 expandArg' arg@(ArgVar var ty flow ft _) = do
     renameAll <- isJust <$> gets inlining
     if renameAll
@@ -448,10 +451,6 @@ inputOutputParams proto =
 addOutputNaming :: OptPos -> (PrimParam,PrimArg) -> Expander ()
 addOutputNaming _ (param@(PrimParam pname ty FlowOut _ _),
                      v@ArgVar{argVarName=vname}) = do
-    when (AnyType == ty) $
-      shouldnt $ "Danger: untyped param: " ++ show param
-    when (AnyType == argType v) $
-      shouldnt $ "Danger: untyped argument: " ++ show v
     logExpansion $ "  recording output naming for " ++ show pname
       ++ " -> " ++ show vname
     modify (\s -> s { writeNaming = Map.insert pname v (writeNaming s)})

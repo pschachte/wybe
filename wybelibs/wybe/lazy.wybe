@@ -3,7 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.int
+use wybe.int, wybe.bool
 
 # Construct a lazy value, with a nil-adic procedure used to compute the value when required
 pub def lazy(thinker:(?T)):_(T) = 
@@ -15,8 +15,9 @@ pub def {pure} get(lazy:_(T)):T = thought where {
     lazy = thunk(?thinker, ?thought)
     if { low_bit_unset(thinker) ::
         thinker(?thought)
-        foreign lpvm {impure} mutate(lazy, ?lazy, 0, 1, 16, 0, set_low_bit(thinker))
-        foreign lpvm {impure} mutate(lazy, ?lazy, 8, 1, 16, 0, thought)
+        ?size = foreign lpvm {unboxed} sizeof(lazy):int
+        foreign lpvm {impure} mutate(lazy, ?lazy, 0,                                true, size, 0, set_low_bit(thinker))
+        foreign lpvm {impure} mutate(lazy, ?lazy, foreign lpvm sizeof(thinker):int, true, size, 0, thought)
     }
 }
 
@@ -31,7 +32,7 @@ constructor(T) thunk(thinker:(?T), thought:T)
 ## Helpers 
 
 # Unset (zero) the low bit of some value
-def unset_low_bit(bits:T):T = 
+def {inline} unset_low_bit(bits:T):T = 
     foreign lpvm cast(
         foreign llvm and(
             foreign lpvm cast(bits), 
@@ -40,7 +41,7 @@ def unset_low_bit(bits:T):T =
     )
 
 # Set the low bit of some value
-def set_low_bit(bits:T):T = 
+def {inline} set_low_bit(bits:T):T = 
     foreign lpvm cast(
         foreign llvm or(
             foreign lpvm cast(bits), 
@@ -49,7 +50,7 @@ def set_low_bit(bits:T):T =
     )
 
 # Test if the low bit of some value is set
-def {test} low_bit_unset(bits:T) {
+def {test, inline} low_bit_unset(bits:T) {
     foreign llvm and(
         foreign lpvm cast(bits), 
         1

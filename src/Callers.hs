@@ -98,6 +98,9 @@ adjustNth fn n (e:es)
 --                     Handling the call graph
 ----------------------------------------------------------------
 -- Note: We do not consider Multiple Specialization in the call graph.
+-- XXX need to consider multiple specialization to improve optimisation of
+-- specialisations.  But we need to be careful this can't lead to infinite
+-- fixpoint iteration.
 
 getSccProcs :: ModSpec -> Compiler [SCC ProcSpec]
 getSccProcs thisMod = do

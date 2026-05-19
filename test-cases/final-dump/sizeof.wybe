@@ -1,7 +1,9 @@
 ?int_bytes = foreign lpvm sizeof(_:int):int
 ?int_bits = foreign lpvm {bits} sizeof(_:int):int
+?int_bits_unboxed = foreign lpvm {bits, unboxed} sizeof(_:int):int
 !println("Int bytes: $int_bytes")
 !println("Int bits: $int_bits")
+!println("Int bits (unboxed): $int_bits_unboxed")
 
 foreign lpvm sizeof('c', ?char_bytes:int)
 ?c = 'a'
@@ -10,15 +12,35 @@ foreign lpvm {bits} sizeof(c, ?char_bits:count)
 !println("Char bits: $char_bits")
 
 type narrow {
-    constructor one | two | three | foure | five
+    constructor one | two | three | four | five
 }
 
 foreign lpvm {bits} sizeof(_:narrow, ?narrow_bits:int)
 !println("Narrow bits: $narrow_bits")
+foreign lpvm {bits, unboxed} sizeof(_:narrow, ?narrow_bits:int)
+!println("Narrow bits (unboxed): $narrow_bits")
 
 type wide {
     constructor wide(_) | other
 }
 
 foreign lpvm {bits} sizeof(_:wide, ?wide_bits:int)
-!println("Small bits: $wide_bits")
+!println("Wide bits: $wide_bits")
+foreign lpvm {bits, unboxed} sizeof(_:wide, ?wide_bits:int)
+!println("Wide bits (unboxed): $wide_bits")
+
+type wider {
+    constructor wider(_, wide) | xxx | foo(c:char)
+}
+
+foreign lpvm {bits} sizeof(_:wider, ?wider_bits:int)
+!println("Wider bits: $wider_bits")
+foreign lpvm {bits, unboxed} sizeof(_:wider, ?wider_bits:int)
+!println("Wider bits (unboxed): $wider_bits")
+
+type wider_int is 128 bit unsigned {}
+
+foreign lpvm {bits} sizeof(_:wider_int, ?wider_int_bits:int)
+!println("Wider int bits: $wider_int_bits")
+foreign lpvm {bits, unboxed} sizeof(_:wider_int, ?wider_int_bits:int)
+!println("Wider int bits (unboxed): $wider_int_bits")

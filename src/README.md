@@ -68,6 +68,143 @@ The source files in this directory and their purposes are:
 ## BinaryFactory <a id=BinaryFactory></a>
 
 ## BodyBuilder <a id=BodyBuilder></a>
+# The BodyBuilder Monad
+
+This monad is used to build up a ProcBody one instruction at a time,
+optimising it as it goes.
+
+buildBody runs the monad, producing a ProcBody.
+instr adds a single instruction to then end of the procBody being built.
+Forks are produced by the following functions:
+  buildFork     initiates a fork on a specified variable
+  beginBranch   starts a new branch of the current fork
+  endBranch     ends the current branch
+  completeFork  completes the current fork
+
+No instructions can be added between buildFork and beginBranch, or
+between endBranch and beginBranch, or if the current state does not have
+a unique continuation. A new fork can be built within a branch, but must
+be completed before the branch is ended.
+
+A ProcBody is considered to have a unique continuation if it either
+does not end in a branch, or if all but at most one of the branches
+it ends with ends with a definite failure (a PrimTest (ArgInt 0 _)).
+
+The ProcBody type does not support having anything follow a fork. Once a
+ProcBody forks, the branches do not join again. Instead, each branch of
+a fork should end with a call to another proc, which does whatever
+should come after the fork. To handle this, once a fork is completed,
+the BodyBuilder starts a new Unforked instruction sequence, and records
+the completed fork as the prev of the Unforked sequence. This
+also permits a fork to follow the Unforked sequence which follows a
+fork. When producing the final ProcBody, if the current Unforked
+sequence is short (or empty) and there is a prev fork, we simply
+add the sequence to the end of each of branch of the fork and remove the
+Unforked sequence. If it is not short and there is a prev, we
+create a fresh proc whose input arguments are all the live variables,
+whose outputs are the current proc's outputs, and whose body is built
+from Unforked sequence, add a call to this fresh proc to each branch of
+the previous Forked sequence, and remove the Unforked.
+
+We handle a Forked sequence by generating a ProcBody for each branch,
+collecting these as the branches of a ProcBody, and taking the
+instructions from the preceding Unforked as the instruction sequence of
+the ProcBody.
+
+Note that for convenience/efficiency, we collect the instructions in a
+sequence and the branches in a fork in reverse order, so these are
+reversed when converting to a ProcBody.
+
+Some transformation is performed by the BodyBuilder monad; in
+particular, we keep track of variable=variable assignments, and replace
+references to the destination (left) variable with the source (right)
+variable.  This usually leaves the assignment dead, to be removed in
+the backward pass.  We also keep track of previous instructions, and later
+calls to the same instructions with the same inputs are replaced by
+assignments to the outputs with the old outputs.  We also handle some
+arithmetic equivalences, entailments, and tautologies (eg, on a branch
+where we know x==y, a call to x<=y will always return true; for
+unsigned x, x<0 is always false, and x>0 is replaced with x!=0).
+We also maintain a counter for temporary variable names.
+
+The BodyState has two constructors:  Unforked is used before the first
+fork, and after each new branch is created. Instructions can just be
+added to this. Forked is used after a new fork is begun and before its
+first branch is created, between ending a branch and starting a new one,
+and after the fork is completed. New instructions can be added and new
+forks built only when in the Unforked state. In the Forked state, we can
+only create a new branch.
+
+These constructors are used in a zipper-like structure, where the top of the
+structure is the part we're building, and below that is the parent, ie,
+the fork structure of which it's a part. This is implemented as follows:
+
+   buildFork is called when the state is Unforked.  It creates a new
+   Forked state, with the old state as its origin and an empty list
+   of bodies.  The new parent is the same as the old one.
+
+   beginBranch is called when the state is Forked.  It creates a new
+   Unforked state with the old state as parent.
+
+   endBranch is called with either a Forked or Unforked state.  It
+   adds the current state to the parent state's list of bodies and
+   makes that the new state.
+
+   completeFork is called when the state is Forked.  It doesn't
+   change the state.
+## Inferring constant structures
+
+We keep track of memory structures as they are constructed, so we can detect
+when a structure contains only constants.  A fresh allocation is considered
+to be fully constant, and any mutation of a constant structure to store a
+constant value is considered to create a new constant structure (regardless
+of whether the mutation is destructive).  Any other mutation of a constant
+does not produce a new constant.  We track which variables hold constant
+structures, and the contents of those structures.  References to such
+variables are replaced with references to the constant data.  Constant
+structures are registered with the module; this is handled in AST.hs.
+## Tracking Global Flows
+Global flows track where global variables (holding resource values) are used
+and modified in the program.  This allows us to determine when a global
+variable must be loaded from memory, when it must be stored back to memory,
+and when we can omit these operations and instead use local variable values.
+Global flows are a triple, <ins, outs, params>. ins is the (possibly
+infinite) inwards flowing resources (read: globals) and outs is obviously the
+outwards flowing globals. params is a set of indexes, for the arguments that
+may be called when a proc is called. These sets are used in the body builder
+to track which globals are known (and hence don't need to be read again) and
+may not need to be written to (if they are not read inside the proc).
+These sets are initially set quite liberally, being the set of inwards
+flowing resources, outwards flowing, and the indexes of all resourceful HO
+parameters. I believe in the body builder, there's some analysis that
+restricts these sets where possible. If a HO param is never called (for
+whatever reason), then you can remove that param from the set of indexes; if
+a global is never written to, then you can remove it from outs for a proc.
+When it comes to calling a proc, we first take the global flows of each
+argument -- if a HO parameter is a known proc then you take the global flows
+of that proc; if it's a parameter of the proc then it's <{}, {}, {idx}>; else
+it's a triple of universal sets. With the union of the global flows of the
+arguments, and the (non-params) global flows of the called proc. Inside the
+body builder, sets of "known" globals that were recently written to in the
+execution path are stored. After the call, these resources that are
+referenced in the outs are removed from the "known" globals, and must be read
+again -- this is because the proc may clobber the global. 
+## Reassembling the ProcBody
+
+Once we've built up a BodyState, this code assembles it into a new ProcBody.
+While we're at it, we also mark the last use of each variable, eliminate
+calls that don't produce any output needed later in the body, and eliminate
+any move instruction that moves a variable defined in the same block as the
+move and not used after the move.  Most other move instructions were removed
+while building BodyState, but that approach cannot eliminate moves to output
+parameters.
+All of this is mediated by the BkwdBuilder monad.  This monad is used to run
+backwards through the body we are currently building, keeping track of the
+variables that are used later in the computation but not defined later.
+We also try to detect nexted branches on the same variable, and fuse them
+into a single switch.
+In the end, this produces a new ProcBody equivalent to the initial one, but
+somewhat optimised.
 
 ## Builder <a id=Builder></a>
 The wybe compiler handles module dependencies, and builds

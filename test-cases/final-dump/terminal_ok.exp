@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : terminal_ok.<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

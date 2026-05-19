@@ -34,12 +34,15 @@ optimiseMod _ thisMod = do
     orderedProcs <- getSccProcs thisMod
     logOptimise $ "Optimise SCCs:\n" ++
         unlines (List.map (show . sccElts) orderedProcs)
-    -- XXX this is wrong:  it does not do a proper top-down
-    -- traversal, as it is not guaranteed to vist all callers before
-    -- visiting the called proc.  Need to construct inverse graph instead.
     -- mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse orderedProcs
 
     mapM_ optimiseSccBottomUp orderedProcs
+
+    structs <- getModule modStructs
+    logOptimise $ "Constants after optimisation of module "
+                ++ showModSpec thisMod ++ ": "
+                ++ showMap "{" ", " "}"
+                    ((++":: ") . show) show structs
 
     reexitModule
     return (False,[])
@@ -89,6 +92,9 @@ optimiseProcBottomUp :: ProcSpec -> Compiler Bool
 optimiseProcBottomUp pspec = do
     logOptimise $ "\n>>> Optimise (Bottom-up) " ++ show pspec
     updateProcDefM (optimiseProcDefBU pspec) pspec
+    structs <- getModule modStructs 
+    logOptimise $ "After expansion, recorded structs: "
+        ++ showMap "{" ", " "}" ((++"::") .show) show structs
     newDef <- getProcDef pspec
     return $ procInline newDef
 

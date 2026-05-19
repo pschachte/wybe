@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : stmt_unless.<0>
                     stmt_unless.mod<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
@@ -47,7 +48,7 @@ proc #cont#2 > {semipure} (1 calls)
     0:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @stmt_unless:nn:nn
         foreign c print_int(tmp#0##0:wybe.int, ~%tmp#10##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @stmt_unless:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @stmt_unless:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @stmt_unless:nn:nn
         foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_unless:nn:nn
         stmt_unless.#cont#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_unless:nn:nn
 

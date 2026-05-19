@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : mangle_llvm_names.<0>
+  constants       : 
   imports         : use mangle_llvm_names.foo
                     use wybe
   resources       : 
@@ -56,6 +57,7 @@ define external fastcc void @"mangle_llvm_names#.foo.bar<0>"() {
   public submods  : 
   public resources: 
   public procs    : mangle_llvm_names.foo.bar<0>
+  constants       : 
   imports         : use mangle_llvm_names
                     use wybe
   resources       : 

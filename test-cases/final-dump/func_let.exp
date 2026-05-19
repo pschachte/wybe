@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : func_let.<0>
                     func_let.quad<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 

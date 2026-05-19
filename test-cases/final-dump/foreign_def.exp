@@ -12,6 +12,7 @@ AFTER EVERYTHING:
                     foreign_def.fmult<0>
                     foreign_def.putc<0>
                     foreign_def.putchar<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
@@ -22,10 +23,10 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @foreign_def:nn:nn
-    foreign c putchar('W':wybe.char, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @foreign_def:nn:nn
-    foreign c putchar('y':wybe.char, ~tmp#2##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @foreign_def:nn:nn
-    foreign c putchar('b':wybe.char, ~tmp#5##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @foreign_def:nn:nn
-    foreign c putchar('e':wybe.char, ~tmp#8##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @foreign_def:nn:nn
+    foreign c putchar(87:wybe.char, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @foreign_def:nn:nn
+    foreign c putchar(121:wybe.char, ~tmp#2##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @foreign_def:nn:nn
+    foreign c putchar(98:wybe.char, ~tmp#5##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @foreign_def:nn:nn
+    foreign c putchar(101:wybe.char, ~tmp#8##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @foreign_def:nn:nn
     foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @foreign_def:nn:nn
 
 

@@ -1,6 +1,6 @@
 # Run all the benchmarks
 
-BENCHMARKS = nrev primes queens
+BENCHMARKS = nrev primes queens wc
 
 all:
 	@for b in $(BENCHMARKS); do \
