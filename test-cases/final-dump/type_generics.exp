@@ -284,7 +284,7 @@ define external fastcc void @"type_generics#.foo<0>"(i64 %"x##0") {
   %"tmp#14##0" = add i64 %"tmp#5##0", 8
   %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
   store i64 0, ptr %"tmp#15##0"
-  %"tmp#2##0" = call fastcc i64 @"wybe#.list#.length1<0>"(i64 %"tmp#5##0", i64 0)
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.list#.length1<0>"(i64 %"tmp#5##0", i64 0)
   call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   ret void

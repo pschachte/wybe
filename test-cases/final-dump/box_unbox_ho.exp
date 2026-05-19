@@ -276,35 +276,35 @@ define external fastcc void @"box_unbox#.<0>"() {
   store i128 %"tmp#2##0", ptr %"tmp#21##0"
   %"tmp#23##0" = zext i64 %"tmp#6##0" to i128
   %"tmp#22##0" = trunc i128 %"tmp#23##0" to i64
-  %"tmp#24##0" = call fastcc i64 @"box_unbox#.force_box<0>"(i64 %"tmp#22##0")
+  %"tmp#24##0" = tail call fastcc i64 @"box_unbox#.force_box<0>"(i64 %"tmp#22##0")
   %"tmp#7##0" = zext i64 %"tmp#24##0" to i128
   %"tmp#25##0" = trunc i128 %"tmp#7##0" to i64
-  %"tmp#26##0" = call fastcc i64 @"box_unbox#.force_box<0>"(i64 %"tmp#25##0")
+  %"tmp#26##0" = tail call fastcc i64 @"box_unbox#.force_box<0>"(i64 %"tmp#25##0")
   %"tmp#9##0" = zext i64 %"tmp#26##0" to i128
   %"tmp#28##0" = trunc i128 %"tmp#9##0" to i64
   %"tmp#27##0" = inttoptr i64 %"tmp#28##0" to ptr
   %"tmp#0##0" = load i128, ptr %"tmp#27##0"
-  call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#0##0")
+  tail call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  %"tmp#29##0" = call fastcc i64 @"box_unbox#.force_box<0>"(i64 ptrtoint( ptr @"box_unbox#constant#1" to i64 ))
+  %"tmp#29##0" = tail call fastcc i64 @"box_unbox#.force_box<0>"(i64 ptrtoint( ptr @"box_unbox#constant#1" to i64 ))
   %"tmp#11##0" = zext i64 %"tmp#29##0" to i128
   %"tmp#31##0" = trunc i128 %"tmp#11##0" to i64
   %"tmp#30##0" = inttoptr i64 %"tmp#31##0" to ptr
   %"tmp#3##0" = load i128, ptr %"tmp#30##0"
-  call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#3##0")
+  tail call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#3##0")
   call ccc void @putchar(i8 10)
-  %"tmp#5##0" = call fastcc i128 @"box_unbox#.copy<0>"(i128 18446744073709551617)
+  %"tmp#5##0" = tail call fastcc i128 @"box_unbox#.copy<0>"(i128 18446744073709551617)
   %"tmp#32##0" = trunc i128 %"tmp#11##0" to i64
   %"tmp#33##0" = inttoptr i64 %"tmp#32##0" to ptr
   store i128 %"tmp#5##0", ptr %"tmp#33##0"
   %"tmp#35##0" = zext i64 %"tmp#32##0" to i128
   %"tmp#34##0" = trunc i128 %"tmp#35##0" to i64
-  %"tmp#36##0" = call fastcc i64 @"box_unbox#.force_box<0>"(i64 %"tmp#34##0")
+  %"tmp#36##0" = tail call fastcc i64 @"box_unbox#.force_box<0>"(i64 %"tmp#34##0")
   %"tmp#13##0" = zext i64 %"tmp#36##0" to i128
   %"tmp#38##0" = trunc i128 %"tmp#13##0" to i64
   %"tmp#37##0" = inttoptr i64 %"tmp#38##0" to ptr
   %"tmp#4##0" = load i128, ptr %"tmp#37##0"
-  call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#4##0")
+  tail call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#4##0")
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -430,10 +430,10 @@ if.then.0:
   %"tmp#24##0" = inttoptr i64 %"tmp#23##0" to ptr
   store i64 %"s##0", ptr %"tmp#24##0"
   %"tmp#20##0" = sdiv i128 %"x##0", 10
-  call fastcc void @"box_unbox#.print#cont#4<0>"(i64 %"tmp#17##0", i128 %"tmp#20##0")
+  tail call fastcc void @"box_unbox#.print#cont#4<0>"(i64 %"tmp#17##0", i128 %"tmp#20##0")
   ret void
 if.else.0:
-  call fastcc void @"box_unbox#.print#cont#3<0>"(i64 %"s##0")
+  tail call fastcc void @"box_unbox#.print#cont#3<0>"(i64 %"s##0")
   ret void
 }
 
@@ -593,12 +593,12 @@ define external fastcc void @"box_unbox_ho#.<0>"() {
   store i128 %"tmp#0##0", ptr %"tmp#35##0"
   %"tmp#37##0" = zext i64 %"tmp#5##0" to i128
   %"tmp#36##0" = trunc i128 %"tmp#37##0" to i64
-  %"tmp#38##0" = call fastcc i64 @"box_unbox_ho#.do_something<0>"(ptr @"box_unbox_ho#constant#0", i64 %"tmp#36##0")
+  %"tmp#38##0" = tail call fastcc i64 @"box_unbox_ho#.do_something<0>"(ptr @"box_unbox_ho#constant#0", i64 %"tmp#36##0")
   %"tmp#6##0" = zext i64 %"tmp#38##0" to i128
   %"tmp#40##0" = trunc i128 %"tmp#6##0" to i64
   %"tmp#39##0" = inttoptr i64 %"tmp#40##0" to ptr
   %"z##1" = load i128, ptr %"tmp#39##0"
-  call fastcc void @"box_unbox#.print<0>"(i128 %"z##1")
+  tail call fastcc void @"box_unbox#.print<0>"(i128 %"z##1")
   call ccc void @putchar(i8 10)
   %"tmp#41##0" = trunc i128 %"tmp#6##0" to i64
   %"tmp#42##0" = inttoptr i64 %"tmp#41##0" to ptr
@@ -611,16 +611,16 @@ define external fastcc void @"box_unbox_ho#.<0>"() {
   store i128 %"tmp#0##0", ptr %"tmp#46##0"
   %"tmp#48##0" = zext i64 %"tmp#41##0" to i128
   %"tmp#47##0" = trunc i128 %"tmp#48##0" to i64
-  %"tmp#49##0" = call fastcc i64 @"box_unbox_ho#.do_something<0>"(ptr %"tmp#43##0", i64 %"tmp#47##0")
+  %"tmp#49##0" = tail call fastcc i64 @"box_unbox_ho#.do_something<0>"(ptr %"tmp#43##0", i64 %"tmp#47##0")
   %"tmp#10##0" = zext i64 %"tmp#49##0" to i128
   %"tmp#51##0" = trunc i128 %"tmp#10##0" to i64
   %"tmp#50##0" = inttoptr i64 %"tmp#51##0" to ptr
   %"z##2" = load i128, ptr %"tmp#50##0"
-  call fastcc void @"box_unbox#.print<0>"(i128 %"z##2")
+  tail call fastcc void @"box_unbox#.print<0>"(i128 %"z##2")
   call ccc void @putchar(i8 10)
-  call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#0##0")
+  tail call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#0##0")
   call ccc void @putchar(i8 10)
-  call fastcc void @"box_unbox#.print<0>"(i128 %"z##0")
+  tail call fastcc void @"box_unbox#.print<0>"(i128 %"z##0")
   call ccc void @putchar(i8 10)
   ret void
 }

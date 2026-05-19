@@ -379,7 +379,7 @@ if.else.0:
   %"tmp#46##0" = add i64 %"tmp#20##0", 8
   %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
   store i64 %"tmp#19##0", ptr %"tmp#47##0"
-  call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#20##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#20##0")
   ret void
 }
 
@@ -426,7 +426,7 @@ if.else.0:
   %"tmp#42##0" = add i64 %"tmp#20##0", 8
   %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
   store i64 %"tmp#19##0", ptr %"tmp#43##0"
-  call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#20##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#20##0")
   ret void
 }
 
@@ -478,6 +478,6 @@ if.else.0:
   %"tmp#46##0" = add i64 %"tmp#20##0", 8
   %"tmp#47##0" = inttoptr i64 %"tmp#46##0" to ptr
   store i64 %"tmp#19##0", ptr %"tmp#47##0"
-  call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#20##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 0, i64 %"tmp#20##0")
   ret void
 }

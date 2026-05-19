@@ -101,7 +101,7 @@ define external fastcc void @"type_list#.<0>"() {
   %"tmp#37##0" = alloca i8, i64 8, align 8
   call fastcc void @"type_list#.,,<0>"(i64 ptrtoint( ptr @"type_list#constant#2" to i64 ), i64 ptrtoint( ptr @"type_list#constant#4" to i64 ), ptr %"tmp#37##0")
   %"tmp#8##0" = load i64, ptr %"tmp#37##0"
-  %"tmp#7##0" = call fastcc i64 @"type_list#.length<0>"(i64 %"tmp#8##0")
+  %"tmp#7##0" = tail call fastcc i64 @"type_list#.length<0>"(i64 %"tmp#8##0")
   call ccc void @print_int(i64 %"tmp#7##0")
   ret void
 }

@@ -350,7 +350,7 @@ define external fastcc void @"bug214#.<0>"() {
   %"tmp#23##0" = add i64 %"tmp#19##0", 8
   %"tmp#24##0" = inttoptr i64 %"tmp#23##0" to ptr
   store i64 0, ptr %"tmp#24##0"
-  call fastcc void @"bug214#.#cont#2<0>[7477e50a09]"(i64 %"tmp#0##0", i64 %"tmp#19##0")
+  tail call fastcc void @"bug214#.#cont#2<0>[7477e50a09]"(i64 %"tmp#0##0", i64 %"tmp#19##0")
   ret void
 }
 
