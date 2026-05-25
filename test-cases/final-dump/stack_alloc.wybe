@@ -21,7 +21,7 @@ def {noinline} test_local use !io {
 # escaped), so p also does not escape.
 def {noinline} test_pass_through use !io {
     ?p = position(1, 2)
-    !pass_back(p, ?q)
+    pass_back(p, ?q)
     !println(q^x)
 }
 
@@ -34,5 +34,5 @@ def {noinline} test_escape(?p:position) {
 
 !test_local
 !test_pass_through
-!test_escape(?p)
+test_escape(?p)
 !println(p^x)

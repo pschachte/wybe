@@ -406,5 +406,3 @@ define external fastcc void @"stack_alloc#.test_pass_through<0>"() {
   call ccc void @putchar(i8 10)
   ret void
 }
-final-dump/stack_alloc.wybe:24:6: Calling proc stack_alloc.pass_back<0> with unneeded ! marker
-final-dump/stack_alloc.wybe:37:2: Calling proc stack_alloc.test_escape<0> with unneeded ! marker
