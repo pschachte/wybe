@@ -332,14 +332,21 @@ define external fastcc i64 @"mixed_fields#.f1<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"mixed_fields#.f1<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 8, i1 0)
   %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
-  %"tmp#3##0" = add i64 %"tmp#2##0", 8
+  %"tmp#3##0" = add i64 %"tmp#2##0", 16
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#4##0"
-  ret i64 %"tmp#2##0"
+  %"tmp#5##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#6##0" = add i64 %"tmp#5##0", 16
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#7##0", ptr %"tmp#4##0", i64 16, i1 0)
+  %"tmp#8##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#9##0" = add i64 %"tmp#8##0", 8
+  %"tmp#10##0" = inttoptr i64 %"tmp#9##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#10##0"
+  ret i64 %"tmp#8##0"
 }
 
 define external fastcc i8 @"mixed_fields#.f2<0>"(i64 %"#rec##0") {
@@ -349,10 +356,10 @@ define external fastcc i8 @"mixed_fields#.f2<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"mixed_fields#.f2<1>"(i64 %"#rec##0", i8 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
-  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 32, i1 0)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
   store i8 %"#field##0", ptr %"tmp#3##0"
   ret i64 %"tmp#2##0"
@@ -366,14 +373,21 @@ define external fastcc i64 @"mixed_fields#.f3<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"mixed_fields#.f3<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 16, i1 0)
   %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
-  %"tmp#3##0" = add i64 %"tmp#2##0", 16
+  %"tmp#3##0" = add i64 %"tmp#2##0", 24
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#4##0"
-  ret i64 %"tmp#2##0"
+  %"tmp#5##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#6##0" = add i64 %"tmp#5##0", 24
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#7##0", ptr %"tmp#4##0", i64 8, i1 0)
+  %"tmp#8##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#9##0" = add i64 %"tmp#8##0", 16
+  %"tmp#10##0" = inttoptr i64 %"tmp#9##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#10##0"
+  ret i64 %"tmp#8##0"
 }
 
 define external fastcc i1 @"mixed_fields#.f4<0>"(i64 %"#rec##0") {
@@ -384,10 +398,10 @@ define external fastcc i1 @"mixed_fields#.f4<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"mixed_fields#.f4<1>"(i64 %"#rec##0", i1 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
-  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 32, i1 0)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#3##0" = add i64 %"tmp#2##0", 1
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i1 %"#field##0", ptr %"tmp#4##0"
@@ -402,10 +416,10 @@ define external fastcc i64 @"mixed_fields#.f5<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"mixed_fields#.f5<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
-  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 24, i1 0)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#3##0" = add i64 %"tmp#2##0", 24
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i64 %"#field##0", ptr %"tmp#4##0"
@@ -420,10 +434,10 @@ define external fastcc i8 @"mixed_fields#.f6<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"mixed_fields#.f6<1>"(i64 %"#rec##0", i8 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
-  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 32, i1 0)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#3##0" = add i64 %"tmp#2##0", 2
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i8 %"#field##0", ptr %"tmp#4##0"

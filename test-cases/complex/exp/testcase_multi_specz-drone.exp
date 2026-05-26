@@ -1063,98 +1063,134 @@ case.100.switch.0:
   %"tmp#67##0" = inttoptr i64 %"tmp#66##0" to ptr
   %"tmp#12##0" = load i64, ptr %"tmp#67##0"
   %"tmp#11##0" = sub i64 %"tmp#12##0", 1
-  %"tmp#68##0" = inttoptr i64 %"d##0" to ptr
-  %"tmp#69##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#69##0", ptr %"tmp#68##0", i64 32, i1 0)
+  %"tmp#68##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#69##0" = inttoptr i64 %"d##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#68##0", ptr %"tmp#69##0", i64 16, i1 0)
   %"tmp#70##0" = ptrtoint ptr %"tmp#69##0" to i64
-  %"tmp#71##0" = add i64 %"tmp#70##0", 16
+  %"tmp#71##0" = add i64 %"tmp#70##0", 24
   %"tmp#72##0" = inttoptr i64 %"tmp#71##0" to ptr
-  store i64 %"tmp#11##0", ptr %"tmp#72##0"
-  %"tmp#73##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#70##0", i1 1)
-  %"tmp#74##0" = insertvalue {i64, i1} undef, i64 %"tmp#73##0", 0
-  %"tmp#75##0" = insertvalue {i64, i1} %"tmp#74##0", i1 1, 1
-  ret {i64, i1} %"tmp#75##0"
+  %"tmp#73##0" = ptrtoint ptr %"tmp#68##0" to i64
+  %"tmp#74##0" = add i64 %"tmp#73##0", 24
+  %"tmp#75##0" = inttoptr i64 %"tmp#74##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#75##0", ptr %"tmp#72##0", i64 8, i1 0)
+  %"tmp#76##0" = ptrtoint ptr %"tmp#68##0" to i64
+  %"tmp#77##0" = add i64 %"tmp#76##0", 16
+  %"tmp#78##0" = inttoptr i64 %"tmp#77##0" to ptr
+  store i64 %"tmp#11##0", ptr %"tmp#78##0"
+  %"tmp#79##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#76##0", i1 1)
+  %"tmp#80##0" = insertvalue {i64, i1} undef, i64 %"tmp#79##0", 0
+  %"tmp#81##0" = insertvalue {i64, i1} %"tmp#80##0", i1 1, 1
+  ret {i64, i1} %"tmp#81##0"
 case.101.switch.0:
-  %"tmp#76##0" = inttoptr i64 %"d##0" to ptr
-  %"tmp#8##0" = load i64, ptr %"tmp#76##0"
+  %"tmp#82##0" = inttoptr i64 %"d##0" to ptr
+  %"tmp#8##0" = load i64, ptr %"tmp#82##0"
   %"tmp#7##0" = add i64 %"tmp#8##0", 1
-  %"tmp#77##0" = inttoptr i64 %"d##0" to ptr
-  %"tmp#78##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#78##0", ptr %"tmp#77##0", i64 32, i1 0)
-  %"tmp#79##0" = ptrtoint ptr %"tmp#78##0" to i64
-  %"tmp#80##0" = inttoptr i64 %"tmp#79##0" to ptr
-  store i64 %"tmp#7##0", ptr %"tmp#80##0"
-  %"tmp#81##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#79##0", i1 1)
-  %"tmp#82##0" = insertvalue {i64, i1} undef, i64 %"tmp#81##0", 0
-  %"tmp#83##0" = insertvalue {i64, i1} %"tmp#82##0", i1 1, 1
-  ret {i64, i1} %"tmp#83##0"
-case.110.switch.0:
-  %"tmp#84##0" = add i64 %"d##0", 8
-  %"tmp#85##0" = inttoptr i64 %"tmp#84##0" to ptr
-  %"tmp#2##0" = load i64, ptr %"tmp#85##0"
-  %"tmp#1##0" = sub i64 %"tmp#2##0", 1
-  %"tmp#86##0" = inttoptr i64 %"d##0" to ptr
-  %"tmp#87##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#87##0", ptr %"tmp#86##0", i64 32, i1 0)
-  %"tmp#88##0" = ptrtoint ptr %"tmp#87##0" to i64
-  %"tmp#89##0" = add i64 %"tmp#88##0", 8
+  %"tmp#83##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#84##0" = ptrtoint ptr %"tmp#83##0" to i64
+  %"tmp#85##0" = add i64 %"tmp#84##0", 8
+  %"tmp#86##0" = inttoptr i64 %"tmp#85##0" to ptr
+  %"tmp#87##0" = add i64 %"d##0", 8
+  %"tmp#88##0" = inttoptr i64 %"tmp#87##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#86##0", ptr %"tmp#88##0", i64 24, i1 0)
+  %"tmp#89##0" = ptrtoint ptr %"tmp#83##0" to i64
   %"tmp#90##0" = inttoptr i64 %"tmp#89##0" to ptr
-  store i64 %"tmp#1##0", ptr %"tmp#90##0"
-  %"tmp#91##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#88##0", i1 1)
+  store i64 %"tmp#7##0", ptr %"tmp#90##0"
+  %"tmp#91##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#89##0", i1 1)
   %"tmp#92##0" = insertvalue {i64, i1} undef, i64 %"tmp#91##0", 0
   %"tmp#93##0" = insertvalue {i64, i1} %"tmp#92##0", i1 1, 1
   ret {i64, i1} %"tmp#93##0"
-case.115.switch.0:
+case.110.switch.0:
   %"tmp#94##0" = add i64 %"d##0", 8
   %"tmp#95##0" = inttoptr i64 %"tmp#94##0" to ptr
-  %"tmp#4##0" = load i64, ptr %"tmp#95##0"
-  %"tmp#3##0" = add i64 %"tmp#4##0", 1
-  %"tmp#96##0" = inttoptr i64 %"d##0" to ptr
-  %"tmp#97##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#97##0", ptr %"tmp#96##0", i64 32, i1 0)
+  %"tmp#2##0" = load i64, ptr %"tmp#95##0"
+  %"tmp#1##0" = sub i64 %"tmp#2##0", 1
+  %"tmp#96##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#97##0" = inttoptr i64 %"d##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#96##0", ptr %"tmp#97##0", i64 8, i1 0)
   %"tmp#98##0" = ptrtoint ptr %"tmp#97##0" to i64
-  %"tmp#99##0" = add i64 %"tmp#98##0", 8
+  %"tmp#99##0" = add i64 %"tmp#98##0", 16
   %"tmp#100##0" = inttoptr i64 %"tmp#99##0" to ptr
-  store i64 %"tmp#3##0", ptr %"tmp#100##0"
-  %"tmp#101##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#98##0", i1 1)
-  %"tmp#102##0" = insertvalue {i64, i1} undef, i64 %"tmp#101##0", 0
-  %"tmp#103##0" = insertvalue {i64, i1} %"tmp#102##0", i1 1, 1
-  ret {i64, i1} %"tmp#103##0"
+  %"tmp#101##0" = ptrtoint ptr %"tmp#96##0" to i64
+  %"tmp#102##0" = add i64 %"tmp#101##0", 16
+  %"tmp#103##0" = inttoptr i64 %"tmp#102##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#103##0", ptr %"tmp#100##0", i64 16, i1 0)
+  %"tmp#104##0" = ptrtoint ptr %"tmp#96##0" to i64
+  %"tmp#105##0" = add i64 %"tmp#104##0", 8
+  %"tmp#106##0" = inttoptr i64 %"tmp#105##0" to ptr
+  store i64 %"tmp#1##0", ptr %"tmp#106##0"
+  %"tmp#107##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#104##0", i1 1)
+  %"tmp#108##0" = insertvalue {i64, i1} undef, i64 %"tmp#107##0", 0
+  %"tmp#109##0" = insertvalue {i64, i1} %"tmp#108##0", i1 1, 1
+  ret {i64, i1} %"tmp#109##0"
+case.115.switch.0:
+  %"tmp#110##0" = add i64 %"d##0", 8
+  %"tmp#111##0" = inttoptr i64 %"tmp#110##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#111##0"
+  %"tmp#3##0" = add i64 %"tmp#4##0", 1
+  %"tmp#112##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#113##0" = inttoptr i64 %"d##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#112##0", ptr %"tmp#113##0", i64 8, i1 0)
+  %"tmp#114##0" = ptrtoint ptr %"tmp#113##0" to i64
+  %"tmp#115##0" = add i64 %"tmp#114##0", 16
+  %"tmp#116##0" = inttoptr i64 %"tmp#115##0" to ptr
+  %"tmp#117##0" = ptrtoint ptr %"tmp#112##0" to i64
+  %"tmp#118##0" = add i64 %"tmp#117##0", 16
+  %"tmp#119##0" = inttoptr i64 %"tmp#118##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#119##0", ptr %"tmp#116##0", i64 16, i1 0)
+  %"tmp#120##0" = ptrtoint ptr %"tmp#112##0" to i64
+  %"tmp#121##0" = add i64 %"tmp#120##0", 8
+  %"tmp#122##0" = inttoptr i64 %"tmp#121##0" to ptr
+  store i64 %"tmp#3##0", ptr %"tmp#122##0"
+  %"tmp#123##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#120##0", i1 1)
+  %"tmp#124##0" = insertvalue {i64, i1} undef, i64 %"tmp#123##0", 0
+  %"tmp#125##0" = insertvalue {i64, i1} %"tmp#124##0", i1 1, 1
+  ret {i64, i1} %"tmp#125##0"
 case.117.switch.0:
-  %"tmp#104##0" = add i64 %"d##0", 16
-  %"tmp#105##0" = inttoptr i64 %"tmp#104##0" to ptr
-  %"tmp#10##0" = load i64, ptr %"tmp#105##0"
+  %"tmp#126##0" = add i64 %"d##0", 16
+  %"tmp#127##0" = inttoptr i64 %"tmp#126##0" to ptr
+  %"tmp#10##0" = load i64, ptr %"tmp#127##0"
   %"tmp#9##0" = add i64 %"tmp#10##0", 1
-  %"tmp#106##0" = inttoptr i64 %"d##0" to ptr
-  %"tmp#107##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#107##0", ptr %"tmp#106##0", i64 32, i1 0)
-  %"tmp#108##0" = ptrtoint ptr %"tmp#107##0" to i64
-  %"tmp#109##0" = add i64 %"tmp#108##0", 16
-  %"tmp#110##0" = inttoptr i64 %"tmp#109##0" to ptr
-  store i64 %"tmp#9##0", ptr %"tmp#110##0"
-  %"tmp#111##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#108##0", i1 1)
-  %"tmp#112##0" = insertvalue {i64, i1} undef, i64 %"tmp#111##0", 0
-  %"tmp#113##0" = insertvalue {i64, i1} %"tmp#112##0", i1 1, 1
-  ret {i64, i1} %"tmp#113##0"
+  %"tmp#128##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#129##0" = inttoptr i64 %"d##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#128##0", ptr %"tmp#129##0", i64 16, i1 0)
+  %"tmp#130##0" = ptrtoint ptr %"tmp#129##0" to i64
+  %"tmp#131##0" = add i64 %"tmp#130##0", 24
+  %"tmp#132##0" = inttoptr i64 %"tmp#131##0" to ptr
+  %"tmp#133##0" = ptrtoint ptr %"tmp#128##0" to i64
+  %"tmp#134##0" = add i64 %"tmp#133##0", 24
+  %"tmp#135##0" = inttoptr i64 %"tmp#134##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#135##0", ptr %"tmp#132##0", i64 8, i1 0)
+  %"tmp#136##0" = ptrtoint ptr %"tmp#128##0" to i64
+  %"tmp#137##0" = add i64 %"tmp#136##0", 16
+  %"tmp#138##0" = inttoptr i64 %"tmp#137##0" to ptr
+  store i64 %"tmp#9##0", ptr %"tmp#138##0"
+  %"tmp#139##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#136##0", i1 1)
+  %"tmp#140##0" = insertvalue {i64, i1} undef, i64 %"tmp#139##0", 0
+  %"tmp#141##0" = insertvalue {i64, i1} %"tmp#140##0", i1 1, 1
+  ret {i64, i1} %"tmp#141##0"
 case.119.switch.0:
-  %"tmp#114##0" = inttoptr i64 %"d##0" to ptr
-  %"tmp#6##0" = load i64, ptr %"tmp#114##0"
+  %"tmp#142##0" = inttoptr i64 %"d##0" to ptr
+  %"tmp#6##0" = load i64, ptr %"tmp#142##0"
   %"tmp#5##0" = sub i64 %"tmp#6##0", 1
-  %"tmp#115##0" = inttoptr i64 %"d##0" to ptr
-  %"tmp#116##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#116##0", ptr %"tmp#115##0", i64 32, i1 0)
-  %"tmp#117##0" = ptrtoint ptr %"tmp#116##0" to i64
-  %"tmp#118##0" = inttoptr i64 %"tmp#117##0" to ptr
-  store i64 %"tmp#5##0", ptr %"tmp#118##0"
-  %"tmp#119##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#117##0", i1 1)
-  %"tmp#120##0" = insertvalue {i64, i1} undef, i64 %"tmp#119##0", 0
-  %"tmp#121##0" = insertvalue {i64, i1} %"tmp#120##0", i1 1, 1
-  ret {i64, i1} %"tmp#121##0"
+  %"tmp#143##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#144##0" = ptrtoint ptr %"tmp#143##0" to i64
+  %"tmp#145##0" = add i64 %"tmp#144##0", 8
+  %"tmp#146##0" = inttoptr i64 %"tmp#145##0" to ptr
+  %"tmp#147##0" = add i64 %"d##0", 8
+  %"tmp#148##0" = inttoptr i64 %"tmp#147##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#146##0", ptr %"tmp#148##0", i64 24, i1 0)
+  %"tmp#149##0" = ptrtoint ptr %"tmp#143##0" to i64
+  %"tmp#150##0" = inttoptr i64 %"tmp#149##0" to ptr
+  store i64 %"tmp#5##0", ptr %"tmp#150##0"
+  %"tmp#151##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>[410bae77d3]"(i64 %"tmp#149##0", i1 1)
+  %"tmp#152##0" = insertvalue {i64, i1} undef, i64 %"tmp#151##0", 0
+  %"tmp#153##0" = insertvalue {i64, i1} %"tmp#152##0", i1 1, 1
+  ret {i64, i1} %"tmp#153##0"
 default.switch.0:
-  %"tmp#122##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>"(i64 %"d##0", i1 0)
-  %"tmp#123##0" = insertvalue {i64, i1} undef, i64 %"tmp#122##0", 0
-  %"tmp#124##0" = insertvalue {i64, i1} %"tmp#123##0", i1 0, 1
-  ret {i64, i1} %"tmp#124##0"
+  %"tmp#154##0" = tail call fastcc i64 @"drone#.do_action#cont#1<0>"(i64 %"d##0", i1 0)
+  %"tmp#155##0" = insertvalue {i64, i1} undef, i64 %"tmp#154##0", 0
+  %"tmp#156##0" = insertvalue {i64, i1} %"tmp#155##0", i1 0, 1
+  ret {i64, i1} %"tmp#156##0"
 }
 
 define external fastcc i64 @"drone#.do_action#cont#1<0>"(i64 %"d##0", i1 %"success##0") {
@@ -1164,10 +1200,10 @@ if.then.0:
   %"tmp#22##0" = inttoptr i64 %"tmp#21##0" to ptr
   %"tmp#15##0" = load i64, ptr %"tmp#22##0"
   %"tmp#14##0" = add i64 %"tmp#15##0", 1
-  %"tmp#23##0" = inttoptr i64 %"d##0" to ptr
-  %"tmp#24##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#24##0", ptr %"tmp#23##0", i64 32, i1 0)
-  %"tmp#25##0" = ptrtoint ptr %"tmp#24##0" to i64
+  %"tmp#23##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#24##0" = inttoptr i64 %"d##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#23##0", ptr %"tmp#24##0", i64 24, i1 0)
+  %"tmp#25##0" = ptrtoint ptr %"tmp#23##0" to i64
   %"tmp#26##0" = add i64 %"tmp#25##0", 24
   %"tmp#27##0" = inttoptr i64 %"tmp#26##0" to ptr
   store i64 %"tmp#14##0", ptr %"tmp#27##0"
@@ -1520,10 +1556,10 @@ define external fastcc i64 @"drone#.drone_info#.count<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"drone#.drone_info#.count<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
-  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 24, i1 0)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#3##0" = add i64 %"tmp#2##0", 24
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i64 %"#field##0", ptr %"tmp#4##0"
@@ -1573,13 +1609,17 @@ define external fastcc i64 @"drone#.drone_info#.x<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"drone#.drone_info#.x<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
-  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#2##0" = add i64 %"tmp#1##0", 8
   %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#3##0"
-  ret i64 %"tmp#2##0"
+  %"tmp#4##0" = add i64 %"#rec##0", 8
+  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#3##0", ptr %"tmp#5##0", i64 24, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#7##0"
+  ret i64 %"tmp#6##0"
 }
 
 define external fastcc i64 @"drone#.drone_info#.y<0>"(i64 %"#rec##0") {
@@ -1590,14 +1630,21 @@ define external fastcc i64 @"drone#.drone_info#.y<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"drone#.drone_info#.y<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 8, i1 0)
   %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
-  %"tmp#3##0" = add i64 %"tmp#2##0", 8
+  %"tmp#3##0" = add i64 %"tmp#2##0", 16
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#4##0"
-  ret i64 %"tmp#2##0"
+  %"tmp#5##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#6##0" = add i64 %"tmp#5##0", 16
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#7##0", ptr %"tmp#4##0", i64 16, i1 0)
+  %"tmp#8##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#9##0" = add i64 %"tmp#8##0", 8
+  %"tmp#10##0" = inttoptr i64 %"tmp#9##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#10##0"
+  ret i64 %"tmp#8##0"
 }
 
 define external fastcc i64 @"drone#.drone_info#.z<0>"(i64 %"#rec##0") {
@@ -1608,14 +1655,21 @@ define external fastcc i64 @"drone#.drone_info#.z<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"drone#.drone_info#.z<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 32)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 32, i1 0)
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 32)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 16, i1 0)
   %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
-  %"tmp#3##0" = add i64 %"tmp#2##0", 16
+  %"tmp#3##0" = add i64 %"tmp#2##0", 24
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#4##0"
-  ret i64 %"tmp#2##0"
+  %"tmp#5##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#6##0" = add i64 %"tmp#5##0", 24
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#7##0", ptr %"tmp#4##0", i64 8, i1 0)
+  %"tmp#8##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#9##0" = add i64 %"tmp#8##0", 16
+  %"tmp#10##0" = inttoptr i64 %"tmp#9##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#10##0"
+  ret i64 %"tmp#8##0"
 }
 
 define external fastcc i1 @"drone#.drone_info#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {

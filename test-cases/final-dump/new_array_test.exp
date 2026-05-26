@@ -289,14 +289,18 @@ if.then.0:
   %"tmp#28##0" = inttoptr i64 %"tmp#14##0" to ptr
   %"i##0" = load i64, ptr %"tmp#28##0"
   %"tmp#17##0" = add i64 %"tmp#14##0", 8
-  %"tmp#29##0" = inttoptr i64 %"tmp#4##0" to ptr
-  %"tmp#30##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#30##0", ptr %"tmp#29##0", i64 16, i1 0)
-  %"tmp#31##0" = ptrtoint ptr %"tmp#30##0" to i64
+  %"tmp#29##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#30##0" = ptrtoint ptr %"tmp#29##0" to i64
+  %"tmp#31##0" = add i64 %"tmp#30##0", 8
   %"tmp#32##0" = inttoptr i64 %"tmp#31##0" to ptr
-  store i64 %"tmp#17##0", ptr %"tmp#32##0"
+  %"tmp#33##0" = add i64 %"tmp#4##0", 8
+  %"tmp#34##0" = inttoptr i64 %"tmp#33##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#32##0", ptr %"tmp#34##0", i64 8, i1 0)
+  %"tmp#35##0" = ptrtoint ptr %"tmp#29##0" to i64
+  %"tmp#36##0" = inttoptr i64 %"tmp#35##0" to ptr
+  store i64 %"tmp#17##0", ptr %"tmp#36##0"
   %"sum##1" = add i64 %"i##0", %"sum##0"
-  tail call fastcc void @"new_array_test#.#cont#3<0>"(i64 %"sum##1", i64 %"tmp#31##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>"(i64 %"sum##1", i64 %"tmp#35##0")
   ret void
 if.else.0:
   %"tmp#19##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
@@ -350,11 +354,11 @@ if.then.2:
   %"tmp#30##0" = add i64 %"tmp#29##0", 8
   %"tmp#32##0" = mul i64 %"tmp#27##0", 8
   %"tmp#33##0" = add i64 %"tmp#32##0", 8
-  %"tmp#37##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#39##0" = trunc i64 %"tmp#33##0" to i32
-  %"tmp#38##0" = call ccc ptr @wybe_malloc(i32 %"tmp#39##0")
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#38##0", ptr %"tmp#37##0", i64 %"tmp#33##0", i1 0)
-  %"tmp#40##0" = ptrtoint ptr %"tmp#38##0" to i64
+  %"tmp#38##0" = trunc i64 %"tmp#33##0" to i32
+  %"tmp#37##0" = call ccc ptr @wybe_malloc(i32 %"tmp#38##0")
+  %"tmp#39##0" = inttoptr i64 %"ar##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#37##0", ptr %"tmp#39##0", i64 %"tmp#33##0", i1 0)
+  %"tmp#40##0" = ptrtoint ptr %"tmp#37##0" to i64
   %"tmp#41##0" = add i64 %"tmp#40##0", %"tmp#30##0"
   %"tmp#42##0" = inttoptr i64 %"tmp#41##0" to ptr
   store i64 %"i##0", ptr %"tmp#42##0"
@@ -449,11 +453,11 @@ if.then.2:
   %"tmp#30##0" = add i64 %"tmp#29##0", 8
   %"tmp#32##0" = mul i64 %"tmp#27##0", 8
   %"tmp#33##0" = add i64 %"tmp#32##0", 8
-  %"tmp#37##0" = inttoptr i64 %"ar##0" to ptr
-  %"tmp#39##0" = trunc i64 %"tmp#33##0" to i32
-  %"tmp#38##0" = call ccc ptr @wybe_malloc(i32 %"tmp#39##0")
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#38##0", ptr %"tmp#37##0", i64 %"tmp#33##0", i1 0)
-  %"tmp#40##0" = ptrtoint ptr %"tmp#38##0" to i64
+  %"tmp#38##0" = trunc i64 %"tmp#33##0" to i32
+  %"tmp#37##0" = call ccc ptr @wybe_malloc(i32 %"tmp#38##0")
+  %"tmp#39##0" = inttoptr i64 %"ar##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#37##0", ptr %"tmp#39##0", i64 %"tmp#33##0", i1 0)
+  %"tmp#40##0" = ptrtoint ptr %"tmp#37##0" to i64
   %"tmp#41##0" = add i64 %"tmp#40##0", %"tmp#30##0"
   %"tmp#42##0" = inttoptr i64 %"tmp#41##0" to ptr
   store i64 %"i##0", ptr %"tmp#42##0"
