@@ -44,17 +44,17 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    char-escape.test<0>(0:wybe.char, 0:wybe.int, "null":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @char-escape:12:2
-    char-escape.test<0>(7:wybe.char, 7:wybe.int, "bell":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @char-escape:13:2
-    char-escape.test<0>(8:wybe.char, 8:wybe.int, "backspace":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @char-escape:14:2
-    char-escape.test<0>(27:wybe.char, 27:wybe.int, "escape":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @char-escape:15:2
-    char-escape.test<0>(12:wybe.char, 12:wybe.int, "formfeed":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @char-escape:16:2
-    char-escape.test<0>(10:wybe.char, 10:wybe.int, "newline":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @char-escape:17:2
-    char-escape.test<0>(13:wybe.char, 13:wybe.int, "carriage return":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @char-escape:18:2
-    char-escape.test<0>(9:wybe.char, 9:wybe.int, "horizontal tab":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @char-escape:19:2
-    char-escape.test<0>(11:wybe.char, 11:wybe.int, "vertical tab":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @char-escape:20:2
-    char-escape.test<0>(32:wybe.char, 32:wybe.int, "hex":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @char-escape:21:2
-    wybe.string.print<0>("\astring with hex character escapes!\n":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @char-escape:23:2
+    char-escape.test<0>(0:wybe.char, 0:wybe.int, "null":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @char-escape:nn:nn
+    char-escape.test<0>(7:wybe.char, 7:wybe.int, "bell":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @char-escape:nn:nn
+    char-escape.test<0>(8:wybe.char, 8:wybe.int, "backspace":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @char-escape:nn:nn
+    char-escape.test<0>(27:wybe.char, 27:wybe.int, "escape":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @char-escape:nn:nn
+    char-escape.test<0>(12:wybe.char, 12:wybe.int, "formfeed":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @char-escape:nn:nn
+    char-escape.test<0>(10:wybe.char, 10:wybe.int, "newline":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @char-escape:nn:nn
+    char-escape.test<0>(13:wybe.char, 13:wybe.int, "carriage return":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @char-escape:nn:nn
+    char-escape.test<0>(9:wybe.char, 9:wybe.int, "horizontal tab":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @char-escape:nn:nn
+    char-escape.test<0>(11:wybe.char, 11:wybe.int, "vertical tab":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @char-escape:nn:nn
+    char-escape.test<0>(32:wybe.char, 32:wybe.int, "hex":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @char-escape:nn:nn
+    wybe.string.print<0>("\astring with hex character escapes!\n":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @char-escape:nn:nn
 
 
 proc test > (10 calls)
@@ -63,15 +63,15 @@ test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 2]
   MultiSpeczDepInfo: [(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [2]]))]
-    foreign lpvm cast(~ch##0:wybe.char, ?tmp#0##0:wybe.int) @char-escape:4:10
-    foreign llvm icmp_eq(~code##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#3##0:wybe.bool) @char-escape:4:10
+    foreign lpvm cast(~ch##0:wybe.char, ?tmp#0##0:wybe.int) @char-escape:nn:nn
+    foreign llvm icmp_eq(~code##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#3##0:wybe.bool) @char-escape:nn:nn
     factored ~tmp#3##0:wybe.bool of
       ?tmp#22##0:wybe.string <- char-escape#constant#15[PointerStructMember " char escapes don't work",PointerStructMember " char escapes work"]
-        wybe.string.print<0>(~name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @char-escape:5:14
-        wybe.string.print<0>(~tmp#22##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @char-escape:5:29
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @char-escape:5:29
-        foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @char-escape:5:29
-        foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char-escape:5:29
+        wybe.string.print<0>(~name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @char-escape:nn:nn
+        wybe.string.print<0>(~tmp#22##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @char-escape:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @char-escape:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @char-escape:nn:nn
+        foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char-escape:nn:nn
 
   LLVM code       :
 
