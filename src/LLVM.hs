@@ -988,7 +988,7 @@ writeLPVMCall "mutate" _ args pos = do
         (_,_,_:_,_) ->
              shouldnt $ "LPVM mutate instruction with out-by-reference arg: "
                         ++ show args
-        (struct:offset:destr:size:startOffset:restIns,
+        partArgs@(struct:offset:destr:size:startOffset:restIns,
                 [struct2@ArgVar{argVarName=struct2Name}],_,iRefs) -> do
             when (List.null iRefs) releaseDeferredCall
             case destr of
@@ -1001,7 +1001,7 @@ writeLPVMCall "mutate" _ args pos = do
                         <$> case (restIns,iRefs) of
                         ([member],[]) -> argTypeRep member
                         ([],[takeRef]) -> argTypeRep takeRef
-                        _ -> return $ Bits 0 -- error will be reported later
+                        _ -> mutateErr partArgs
                     duplicateStruct struct offset size startOffset holeSize struct2
                 _ ->
                     nyi "lpvm mutate instr with non-const destructive flag"
@@ -1028,13 +1028,16 @@ writeLPVMCall "mutate" _ args pos = do
                     takeRefs <- gets takeRefVars
                     logLLVM $ "take-ref pointers = " ++ show takeRefs
                     typeConvert ptrArg writeCPtrArg
-                _ ->
-                    shouldnt $ "lpvm mutate with inputs "
-                            ++ show (struct:offset:destr:size:startOffset:restIns)
-                            ++ " and output " ++ show struct2
-        (ins,outs,oRefs,iRefs) ->
-            shouldnt $ "lpvm mutate with inputs " ++ show ins ++ " and outputs "
-                ++ show outs
+                _ -> mutateErr partArgs
+        partArgs -> mutateErr partArgs
+    where mutateErr (ins, outs, [], []) =
+            shouldnt $ "lpvm mutate with inputs " ++ show ins
+                            ++ " and outputs " ++ show outs
+          mutateErr (ins, outs, oRefs, iRefs) =
+            shouldnt $ "lpvm mutate with inputs " ++ show ins
+                            ++ ", outputs " ++ show outs
+                            ++ ", out-by-ref args " ++ show oRefs
+                            ++ ", and take-ref args " ++ show iRefs
 writeLPVMCall op flags args pos =
     shouldnt $ "unknown lpvm operation:  " ++ op
 
@@ -1253,7 +1256,7 @@ duplicateStruct struct hole size startOffset holeSize newStruct = do
                 ++  ", extra " ++ show extra
     -- Allocate memory
     (writeDstCPtr,readDstCPtr) <- freshCPtrArgs
-    marshalledCCall mallocFn [] [size,writeDstCPtr] ["int","pointer"] Nothing
+    heapAlloc writeDstCPtr size Nothing
     -- Copy old to new struct, if necessary
     case copyBytes of
         ArgInt 0 _ -> logLLVM "No bytes to copy"
