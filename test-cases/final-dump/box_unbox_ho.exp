@@ -640,13 +640,11 @@ define external fastcc i64 @"box_unbox_ho#.#anon#1<1>"(ptr %"#env##0", i64 %"ano
   %"tmp#4##0" = add i128 %"tmp#3##0", 2
   %"tmp#9##0" = call ccc ptr @wybe_malloc(i32 16)
   %"anon#1#2##0" = ptrtoint ptr %"tmp#9##0" to i64
-  %"tmp#10##0" = inttoptr i64 %"anon#1#2##0" to ptr
-  %"tmp#11##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#11##0", ptr %"tmp#10##0", i64 16, i1 0)
-  %"tmp#12##0" = ptrtoint ptr %"tmp#11##0" to i64
-  %"tmp#13##0" = inttoptr i64 %"tmp#12##0" to ptr
-  store i128 %"tmp#4##0", ptr %"tmp#13##0"
-  ret i64 %"tmp#12##0"
+  %"tmp#10##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#11##0" = ptrtoint ptr %"tmp#10##0" to i64
+  %"tmp#12##0" = inttoptr i64 %"tmp#11##0" to ptr
+  store i128 %"tmp#4##0", ptr %"tmp#12##0"
+  ret i64 %"tmp#11##0"
 }
 
 define external fastcc i64 @"box_unbox_ho#.#closure#1<0>"(ptr %"#env##0", i64 %"y##0") {
@@ -659,13 +657,11 @@ define external fastcc i64 @"box_unbox_ho#.#closure#1<0>"(ptr %"#env##0", i64 %"
   %"tmp#8##0" = add i128 %"tmp#7##0", %"x##0"
   %"tmp#15##0" = call ccc ptr @wybe_malloc(i32 16)
   %"z##0" = ptrtoint ptr %"tmp#15##0" to i64
-  %"tmp#16##0" = inttoptr i64 %"z##0" to ptr
-  %"tmp#17##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#17##0", ptr %"tmp#16##0", i64 16, i1 0)
-  %"tmp#18##0" = ptrtoint ptr %"tmp#17##0" to i64
-  %"tmp#19##0" = inttoptr i64 %"tmp#18##0" to ptr
-  store i128 %"tmp#8##0", ptr %"tmp#19##0"
-  ret i64 %"tmp#18##0"
+  %"tmp#16##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#17##0" = ptrtoint ptr %"tmp#16##0" to i64
+  %"tmp#18##0" = inttoptr i64 %"tmp#17##0" to ptr
+  store i128 %"tmp#8##0", ptr %"tmp#18##0"
+  ret i64 %"tmp#17##0"
 }
 
 define external fastcc i64 @"box_unbox_ho#.do_something<0>"(ptr %"f##0", i64 %"a##0") {
