@@ -846,7 +846,7 @@ expType' :: Exp -> OptPos -> Typed TypeSpec
 expType' IntValue{} _          = return $ TypeSpec ["wybe"] "int" []
 expType' FloatValue{} _        = return $ TypeSpec ["wybe"] "float" []
 expType' CharValue{} _         = return $ TypeSpec ["wybe"] "char" []
-expType' StringValue{} _       = return stringType 
+expType' StringValue{} _       = return stringType
 expType' expr@ConstStruct{} _  = return AnyType -- will be explicitly typed
 expType' (AnonProc mods params pstmts _ _) _ = do
     mapM_ ultimateVarType $ paramName <$> params
@@ -1058,12 +1058,6 @@ instance Show CallInfo where
                      ++ (('?':) . resourceName <$> Set.toList outRes))
     show (HigherInfo fn) = "higher " ++ show fn
     show (TestInfo exp) = "test " ++ show exp
-
-
-callInfoTypes :: CallInfo -> Maybe [TypeSpec]
-callInfoTypes FirstInfo{fiTypes=tys} = Just tys
-callInfoTypes HigherInfo{} = Nothing
-callInfoTypes TestInfo{} = Nothing
 
 
 -- |Check if a FirstInfo is for a proc with a single Bool output as last arg,
@@ -1516,8 +1510,9 @@ typecheckCalls (stmtTyping@(StmtTypings pstmt typs):calls)
     matches <- mapM
                (matchTypes name callee stmtPos resful actualTypes actualModes)
                typs
-    let canonMatches = ap (,) (fmap (canonicalise 0) . callInfoTypes . fst)
-                    <$> catOKs matches
+    canonMatches <-
+        mapM (\match -> (match, ) <$> uncurry (canonicaliseMatch stmtPos) match)
+            $ catOKs matches
     let validTypes = fst <$> nubBy ((==) `on` snd) canonMatches
     logTyped $ "Valid types = " ++ show (snd <$> validTypes)
     let matchErrs = concatMap errList matches
@@ -1754,6 +1749,16 @@ refreshTypes tys = do
     return tys'
 
 
+canonicaliseMatch :: OptPos -> CallInfo -> Typing -> Typed [TypeSpec]
+canonicaliseMatch pos callInfo typing = do
+    ultimateTypes <- fst <$> getTyping (put typing >> callInfoTypes callInfo >>= mapM ultimateType)
+    return $ fst $ canonicalise 0 ultimateTypes
+  where
+    callInfoTypes FirstInfo{fiTypes=tys} = return tys
+    callInfoTypes (HigherInfo exp) = (:[]) <$> expType' exp pos
+    callInfoTypes (TestInfo exp) = (:[]) <$> expType' exp pos
+
+
 ----------------------------------------------------------------
 --                            Mode Checking
 --
@@ -1875,7 +1880,7 @@ initBindingState :: ProcDef -> BindingState
 initBindingState pdef =
     BindingState Det impurity resources emptyUnivSet UniversalSet Set.empty proc
     where impurity = expectedImpurity $ procImpurity pdef
-          resources = Set.fromList 
+          resources = Set.fromList
                     $ List.map resourceFlowRes
                         (procProtoResources $ procProto pdef)
           proc = procName pdef
@@ -2090,11 +2095,11 @@ modeCheckProcDecl pdef = do
     let outParams = Set.fromList $ paramName <$>
             List.filter (flowsOut . paramFlow) params
     let inResources =
-            Set.fromList 
+            Set.fromList
             $ List.map (resourceName . resourceFlowRes)
             $ List.filter (flowsIn . resourceFlowFlow) resources
     let outResources =
-            Set.fromList 
+            Set.fromList
             $ List.map (resourceName . resourceFlowRes)
             $ List.filter (flowsIn . resourceFlowFlow) resources
     let inputs = Set.union inParams inResources
@@ -2504,7 +2509,7 @@ modeCheckExps (pexp:pexps) = do
     (pexp', stmt) <- placedApply modeCheckExp pexp
     logModed $ "Mode check exp resulted in " ++ show (content pexp')
     (pexps', stmts) <- modeCheckExps pexps
-    return (pexp' : pexps', List.map Unplaced stmt ++ stmts) 
+    return (pexp' : pexps', List.map Unplaced stmt ++ stmts)
 
 
 -- | Mode check an Expression
@@ -2540,10 +2545,10 @@ modeCheckExp (StringValue str WybeString) pos = do
     (name, args) <- case str of
         [] -> return ("empty", [setVar])
         [ch] -> return ("singleton", [Typed (CharValue ch) charType Nothing, setVar])
-        _ -> do 
+        _ -> do
             cStringArg <- lift2 $ cStringExpr str
             return ("unsafe_cstring_to_string", [cStringArg, iVal (length str) `withType` intType, setVar])
-    return (varGetTyped var stringType `maybePlace` pos, 
+    return (varGetTyped var stringType `maybePlace` pos,
             [ProcCall (First ["wybe","string"] name $ Just 0) Det False $ (`maybePlace` pos) <$> args])
 modeCheckExp exp pos =
     return (maybePlace exp pos, [])
@@ -2925,7 +2930,7 @@ checkLPVMArgs "cast" _ [old,new] stmt pos = return ()
 checkLPVMArgs "cast" _ [] stmt pos = return ()
 checkLPVMArgs "cast" _ args stmt pos =
     typeError (ReasonForeignArity "cast" (length args) 2 pos)
-checkLPVMArgs "sizeof" _ [thing,sz] stmt pos = 
+checkLPVMArgs "sizeof" _ [thing,sz] stmt pos =
     reportErrorUnless (ReasonForeignArgRep "sizeof" 1 sz "integer" pos)
                       (integerTypeRep sz)
 checkLPVMArgs "sizeof" _ args stmt pos =
