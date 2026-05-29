@@ -1096,8 +1096,8 @@ testToBoolFn _ = Nothing
 -- if the call has an arity lower than expected or, in the case of a resourceful
 -- call where the call does not have a ! prefix, at most 1 more than the expected
 -- arity. The Bool returned indicates if the call should have a ! or not
-procToPartial :: [FlowDirection] -> Bool -> CallInfo -> (Maybe CallInfo, Bool)
-procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
+procToPartial :: Bool -> [FlowDirection] -> Bool -> CallInfo -> (Maybe CallInfo, Bool)
+procToPartial allowPartial callFlows hasBang info@FirstInfo{fiPartial=False,
                                                fiTypes=tys,
                                                fiFlows=flows,
                                                fiInRes=inRes,
@@ -1107,6 +1107,7 @@ procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
                                                fiImpurity=impurity}
     | not hasBang && not (List.null callFlows) && last callFlows == ParamOut
                   && (length callFlows < length tys
+                     || allowPartial && length callFlows == length tys
                      || length callFlows <= length tys + 1 && usesResources)
         = (Just info{fiPartial=True,
                      fiTypes=closedTys ++ [higherTy],
@@ -1121,7 +1122,7 @@ procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
                                 $ ProcModifiers detism MayInline
                                     impurity RegularProc resful)
                     $ zipWith TypeFlow higherTys higherFls
-procToPartial _ _ _ = (Nothing, False)
+procToPartial _ _ _ _ = (Nothing, False)
 
 
 -- |A single call statement together with the determinism context in which
@@ -1417,7 +1418,8 @@ callInfos vars pstmt = do
                     Just pid -> return [ProcSpec m name pid generalVersion]
                 defs <- lift $ mapM getProcDef procs
                 firstInfos <- zipWithM firstInfo defs procs
-                return $ StmtTypings pstmt firstInfos
+                let partialInfos = List.map (fst . procToPartial True (flattenedExpFlow . content <$> args) resful) firstInfos
+                return $ StmtTypings pstmt $ firstInfos ++ catMaybes partialInfos
         ProcCall (Higher fn) _ _ _ ->
             return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
@@ -1483,13 +1485,18 @@ typecheckCalls [] residue True foreigns =
 typecheckCalls [] residue False foreigns = do
     let (typings@StmtTypings{typingInfos=infos},rest) = findMinimumTyping residue
     logTyped $ "Recursively checking types with " ++ show typings
-    typings' <- mapM (getTyping . typecheckCallWithInfo typings rest foreigns) infos
-    case List.filter (List.null . typingErrs) $ snd <$> typings' of
-        [typing] -> put typing
-        _ -> do
-            -- 1st equation handles empty residue case
-            typeError $ overloadErr $ head residue
-            typecheckCalls [] [] False foreigns
+    typings' <- zip infos <$> snd <$$> mapM (getTyping . typecheckCallWithInfo typings rest foreigns) infos
+    case List.filter (List.null . typingErrs . snd) typings' of
+        [(_, typing)] -> put typing
+        valid -> case List.filter (not . isPartial . fst) valid of
+            [(_, typing)] -> put typing
+            _ ->  do
+                -- 1st equation handles empty residue case
+                typeError $ overloadErr $ head residue
+                typecheckCalls [] [] False foreigns
+  where
+    isPartial FirstInfo{fiPartial=p} = p
+    isPartial _ = False
 typecheckCalls (stmtTyping@(StmtTypings pstmt typs):calls)
         residue chg foreigns = do
     logTyped $ "Type checking call " ++ show pstmt
@@ -1582,9 +1589,6 @@ matchTypes caller callee pos hasBang callTypes callFlows
         calleeInfo@FirstInfo{fiTypes=tys}
     -- Handle case whre call should have a ! but doesnt, and the call
     -- can be made partial
-    | not hasBang && needsBang && isJust partialCallInfo
-    = matchTypeList callee pos callTypes calleeInfo'''
-    -- Handle case where call arity is correct
     | sameLength callTypes tys
     = matchTypeList callee pos callTypes calleeInfo
     -- Handle case of SemiDet context call to bool function as a proc call
@@ -1598,9 +1602,6 @@ matchTypes caller callee pos hasBang callTypes callFlows
             OK _ | all flowsOut $ fiFlows calleeInfo ->
                 return $ Err [ReasonBadReification callee pos]
             _ -> return match
-    -- Handle case where the call is partial
-    | isJust partialCallInfo
-    = matchTypeList callee pos callTypes calleeInfo'''
     -- Handle call with one in/out arg to proc with no in/out params, and
     -- one too few args.
     | notElem ParamInOut (fiFlows calleeInfo) && 1 == length extraTypes
@@ -1613,8 +1614,6 @@ matchTypes caller callee pos hasBang callTypes callFlows
           calleeInfo' = fromJust testInfo
           detCallInfo = testToBoolFn calleeInfo
           calleeInfo'' = fromJust detCallInfo
-          (partialCallInfo, needsBang) = procToPartial callFlows hasBang calleeInfo
-          calleeInfo''' = fromJust partialCallInfo
           extraTypes = catMaybes
                        $ zipWith
                          (\t f -> if f==ParamInOut then Just t else Nothing)
