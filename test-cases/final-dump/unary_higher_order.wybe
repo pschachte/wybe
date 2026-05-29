@@ -1,0 +1,14 @@
+def return_number(?result) {
+    ?result = 42
+}
+
+def fetch_number(f:(?int)):int = number where {
+    f(?number)
+}
+
+def {noinline} main use !io {
+    ?result = fetch_number(return_number)
+    !print result
+}
+
+!main
