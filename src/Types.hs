@@ -360,7 +360,7 @@ typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
                 | (v,typs) <- varAmbigs]
 typeErrorMessage (ReasonUndef callFrom callTo pos) =
     Message Error pos $
-        showProcName callTo ++ " unknown in " ++ showProcName callFrom
+        "`" ++ callTo ++ "` unknown in " ++ showProcName callFrom
 typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
     Message Error pos $
         "Call from " ++ showProcName callFrom
