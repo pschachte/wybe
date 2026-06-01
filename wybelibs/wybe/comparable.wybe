@@ -1,11 +1,11 @@
-# purpose: comparable abstract type
+# purpose: comparable trait
 # since  : 0.3
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.comparison, wybe.bool
 
-abstract_type
+trait is
 
 abstract (_ <=> _):comparison
 

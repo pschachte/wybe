@@ -11,7 +11,7 @@ use wybe.string, wybe.int, wybe.comparison, wybe.bool, wybe.comparable
 
 # annotate a type variable with an abstract type; for all instances of that
 # type, it can be assumed that that type implements that abstract type
-pub constructors (K:comparable,V) empty
+pub constructors (K<:comparable,V) empty
         | node(left:_(K,V), key:K, value:V, right:_(K,V))
 
 
