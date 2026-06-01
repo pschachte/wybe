@@ -3,13 +3,11 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.int, wybe.bool, wybe.c_string, wybe.string
+use wybe.int, wybe.bool, wybe.c_string, wybe.string, wybe.c_string
 
 # Exit right away with the specified code (0 = successful termination).
 
-pub def {terminal,semipure} exit(code:int) {
-    foreign c {terminal,semipure} exit(code)
-}
+pub def foreign c {terminal,semipure} exit(code:int)
 
 
 # Print the source location and and error message, and abort the computation.
@@ -28,11 +26,11 @@ pub def {terminal,semipure} error(message:c_string) use call_source_location {
 
 
 pub def {terminal,semipure} shouldnt use call_source_location {
-    !error("shouldn't happen!")
+    !error(c"shouldn't happen!")
 }
 
 pub def {terminal,pure} shouldnt(?result:T) use call_source_location {
-    !error("shouldn't happen!")
+    !error(c"shouldn't happen!")
 }
 
 pub def {semipure} assert(condition:bool) use call_source_location {

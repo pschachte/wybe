@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: res: resource_conflict_a.res
   public procs    : 
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(resource_conflict_a.res,wybe.int = 42 @resource_conflict_a:nn:nn @resource_conflict_a:nn:nn)]
   procs           : 
@@ -19,7 +20,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'resource_conflict_a'
 
 source_filename = "!ROOT!/final-dump/resource_conflict_a.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

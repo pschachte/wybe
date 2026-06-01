@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : proc_print2.print2<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
@@ -18,8 +19,8 @@ print2(x##0:wybe.int, y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @proc_print2:nn:nn
-    foreign c print_int(~x##0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @proc_print2:nn:nn
-    foreign c print_int(~y##0:wybe.int, ~tmp#2##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @proc_print2:nn:nn
+    foreign c print_int(~x##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @proc_print2:nn:nn
+    foreign c print_int(~y##0:wybe.int, ~tmp#2##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @proc_print2:nn:nn
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_print2:nn:nn
 
   LLVM code       :
@@ -28,13 +29,13 @@ print2(x##0:wybe.int, y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 ; ModuleID = 'proc_print2'
 
 source_filename = "!ROOT!/final-dump/proc_print2.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @print_int(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"proc_print2.print2<0>"(i64 %"x##0", i64 %"y##0") {
+define external fastcc void @"proc_print2#.print2<0>"(i64 %"x##0", i64 %"y##0") {
   call ccc void @print_int(i64 %"x##0")
   call ccc void @print_int(i64 %"y##0")
   ret void

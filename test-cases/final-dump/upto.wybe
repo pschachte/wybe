@@ -1,0 +1,11 @@
+# test last call modulo construction optimisation
+
+module submod {
+pub def upto(lo:int, hi:int):list(int) =
+    (if{ lo >= hi :: []
+       | else :: [lo | upto(lo + 1, hi)]})
+}
+
+?lst = upto(0, 10)
+(?result = lst[3] | !shouldnt)
+!println "lst[3] = $result"

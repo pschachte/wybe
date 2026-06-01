@@ -34,7 +34,7 @@ def main() -> None:
         # diff results
         if not os.path.exists(exp_file_path):
             new_cases.append(out_file_path)
-            print("[31m?[39m", end="")
+            print("[31m?[39m", end="", flush=True)
         else:
             # XXX For now, we use "diff" and "dwdiff" in shell to match
             # the behavior of other scripts. We should consider using
@@ -46,12 +46,12 @@ def main() -> None:
                     out_file_path, exp_file_path],
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
             if code == 0:
-                print(".", end="")
+                print(".", end="", flush=True)
             else:
                 failed_cases.append(out_file_path)
                 subprocess.run("dwdiff -c -d '()<>~!@:?.%#' '{}' '{}' >> ../ERRS 2>&1".format(
                     exp_file_path, out_file_path), shell=True)
-                print("[31mX[39m", end="")
+                print("[31mX[39m", end="", flush=True)
     print()
 
     if failed_cases:

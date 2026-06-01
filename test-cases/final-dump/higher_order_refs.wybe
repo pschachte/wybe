@@ -16,3 +16,16 @@ def {noinline} app(f:(I, ?J), i:I):J = f(i)
 !println(app(add_one, 1))
 
 !println(app(`+`(10), 1))
+
+use logging
+!foo('a', true, 'b', 3)
+def {noinline} foo(w: char, x:bool, y:char, z:int) use !io {
+    !println(app({
+        !logmsg(w)
+        !logmsg(x)
+        !logmsg(y)
+        !logmsg(z)
+        !lognl;
+        @ + z = ?@
+    }, 100))
+}

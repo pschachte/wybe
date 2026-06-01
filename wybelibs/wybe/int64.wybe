@@ -1,0 +1,145 @@
+# purpose: Standard fixed-width 64 bit integer library
+# since  : 0.2
+# On 64-bit platforms, this is the same as int.  It is provided for
+# completeness and portability.
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use foreign library m
+use wybe.bool, wybe.comparison, wybe.io, wybe.count, wybe.int,
+    wybe.string, wybe.char
+
+representation is 64 bit signed
+
+## Constants
+
+pub def bound_minimum:_ = -9_223_372_036_854_775_808:_
+pub def bound_maximum:_ =  9_223_372_036_854_775_807:_
+
+# Overloaded versions based on an argument
+pub def bound_minimum(x:_):_ = bound_minimum
+pub def bound_maximum(x:_):_ = bound_maximum
+
+## Common integer operations
+
+# Addition.  This operation is reversible:  you can compute either argument from
+# the other argument and the value.
+pub def foreign llvm `+`=add(x:_, y:_):_
+pub def (?x:_ + y:_):_  = ?z where { ?x = z - y }
+pub def (x:_  + ?y:_):_ = ?z where { ?y = z - x }
+
+# Subtraction.  This operation is reversible:  you can compute either argument
+# from the other argument and the value.
+pub def foreign llvm `-`=sub(x:_, y:_):_
+pub def (?x:_ - y:_):_  = ?z where { ?x = z + y }
+pub def (x:_  - ?y:_):_ = ?z where { ?y = x - z }
+
+# Unary negation.  This operation is reversible:  you can compute the argument 
+# from the value.
+pub def -(x:_):_  = 0:_ - x
+pub def -(?x:_):_ = ?y where { ?x = -y }
+
+# Multiplication.
+pub def foreign llvm `*`=mul(x:_, y:_):_
+
+# Integer division.
+pub def foreign llvm `/`=sdiv(x:_, y:_):_
+
+# Modulus.
+pub def foreign llvm `%`=srem(x:_, y:_):_
+
+
+## Bitwise operations
+
+# Bit-shift left.
+pub def foreign llvm `<<`=shl(x:_, s:_):_
+
+# Arithmetic bit-shift right (pad with sign-bit).
+# e.g.  3 >> 1 =  1 (00...011 >> 1 = 00...001)
+#      -3 >> 1 = -2 (11...101 >> 1 = 11...110)
+# on a 64-bit machine
+pub def foreign llvm `>>`=ashr(x:_, s:_):_
+
+# Logical bit-shift right (pad with zeroes).
+# e.g.  3 >> 1 = 1                   (00...011 >> 1 = 00...001)
+#      -3 >> 1 = 9223372036854775806 (11...101 >> 1 = 01...110)
+# on a 64-bit machine
+pub def foreign llvm logical_bitshift=lshr(x:_, s:_):_
+
+# Bitwise logical operations.
+pub def foreign llvm bitwise_and=and(x:_, y:_):_
+pub def foreign llvm bitwise_or=or(x:_, y:_):_
+pub def foreign llvm bitwise_xor=xor(x:_, y:_):_
+pub def {inline}     bitwise_not(x:_):_ = bitwise_xor(x, (-1):_)
+
+
+## Comparisons
+
+# Equality and disequality.
+pub def foreign llvm {test} `=` =icmp_eq(x:_, y:_)
+pub def foreign llvm {test} `~=`=icmp_ne(x:_, y:_)
+
+# Inequalities.
+pub def foreign llvm {test} `<` =icmp_slt(x:_, y:_)
+pub def foreign llvm {test} `<=`=icmp_sle(x:_, y:_)
+pub def foreign llvm {test} `>` =icmp_sgt(x:_, y:_)
+pub def foreign llvm {test} `>=`=icmp_sge(x:_, y:_)
+
+# Three-way comparison.
+pub def (x:_ <=> y:_):comparison = 
+    if { x < y :: lesser | x = y :: equal | else :: greater }
+
+# Minimum and maximum of two integers.
+pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
+pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
+
+# Conversion
+pub def foreign lpvm count=cast(x:_):count # Lossy:  turns negative numbers into large positive ones
+pub def foreign lpvm int=cast(x:_):int # Lossless
+
+
+## Other operations
+
+# Integer square root.
+pub def foreign c sqrt=isqrt64(x:_):_
+
+# Integer exponentiation.
+pub def foreign c power=ipow64(x:_, y:_):_
+pub def (x:_ ** y:_):_ = power(x, y)
+
+# Increment and Decrement.
+pub def incr(!x:_) { ?x = x + 1:_ }
+pub def decr(!x:_) { ?x = x - 1:_ }
+
+# The sign of an integer: +1, -1, or 0
+pub def signum(x:_):_ = if { x < 0:_ :: -1:_ | x = 0:_ :: 0:_ | else :: 1:_ }
+
+# Absolute value
+pub def abs(x:_):_ = if {x < 0:_ :: -x | else :: x}
+
+## Formatting
+pub def fmt(x:_):string = fmt(x, 0)
+
+pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
+
+pub def fmt(x:_, minlength:int, fill:char):string = result where {
+    if { x >= 0:_ :: 
+            ?result = fmt(count(x))
+            repetition(fill, minlength-length(result)) ,, !result
+       | else  ::
+            ?result = fmt(count(-x))
+            if { fill = '0' :: # - sign goes before fill
+                ('-' ,, repetition(fill, minlength-length(result)-1)) ,, !result
+               | else ::
+                (repetition(fill, minlength-length(result)-1) ,, '-') ,, !result
+            }
+    }
+}
+
+## I/O
+
+pub def foreign c print=print_int64(x:_) use !io 
+
+pub def println(x:_) use !io { !print(x); !nl }
+
+pub def foreign c read=read_int64(?x:_) use !io 

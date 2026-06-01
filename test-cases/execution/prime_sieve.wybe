@@ -1,0 +1,24 @@
+use logging
+
+def sieve(n:int):int = prime where {
+    ?primes = []
+    ?count = 0
+    ?prime = 1
+    do {
+        while count < n
+        !prime + 1
+        !logmsg("Checking $prime in $(length(primes)) primes; have found $count primes.\n")
+        unless any(@(divides(@,prime)), primes)
+        !logmsg("It is prime:  collecting it.\n")
+        [prime|!primes]
+        !count + 1
+    }
+}
+
+def {test} divides(a:int, b:int) {
+    !logmsg("Checking if $a divides $b: $(if {b%a=0:: "yep\n" | else:: "nope\n"})")
+    b % a = 0
+}
+
+?n = 5
+!println(sieve(n))

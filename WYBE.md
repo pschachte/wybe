@@ -6,6 +6,8 @@
 The [Wybe](README.md) programming language is intended to be easy to learn and easy to use,
 but powerful and efficient enough for practical use.  It is intended to
 support best programming practice, but not necessarily *common* practice.
+The principles underlying Wybe's design are presented in
+[Wybe: Design of a Programming Language](https://www.mdpi.com/2674-113X/5/2/14).
 
 Wybe combines the best features of declarative and imperative languages,
 in particular borrowing features from functional, logic, imperative, and
@@ -329,9 +331,10 @@ Sometimes you may wish to specify which module the procedure *name* exists in.
 You can further specify which module the procedure *name* is from by preceding
 *name* with a `.` separated module specification, such as *parent*`.`*mod*`.`*name*.
 
-As a convenience, if the first module name in a module specification is `_`, the
-`_` is equivalent to the current module. For example in a module named `foo`,
-`_.`*name* is equivalent to `foo.`*name*
+As a convenience, if the leading module names in a module specification are `_`, the
+series of `_` are equivalent to a prefix of the current module. For example in a 
+module named `foo.bar`, `_.`*name* is equivalent to `foo.bar.`*name*, and `_._`*name* 
+is equivalent to `foo.`*name*.
 
 A procedure call must be preceded by an exclamation point (`!`) if it uses any
 resources, as described in the section on
@@ -2223,22 +2226,38 @@ which is equivalent to defining the following:
 
 Note that all parameters must be typed.
 
-Resources can optionally be specified with a `use` clause, that follows the same syntax
-for a regular Wybe procedure definition. Resources are added as additonal arguments to 
-the foreign call after the other arguments, in the order specified in the source code.
-If resources are repeated in the `use` clause, they are added as multiple arguments in 
-the generated foreign call.
-
-Modifiers can also optionally be specified, with the syntax being identical to a Wybe 
+Modifiers can optionally be specified, with the syntax being identical to a Wybe 
 procedure definition, and are added to the foreign procedure call. 
 In addition, inlining (`inline`, `noinline`) can be specified for the for a 
 foreign procedure, but only inline/don't inline the generated Wybe procedure, and don't 
 apply to the generated foreign call.
 
+Resources can also optionally be specified with a `use` clause, that follows the same syntax
+for a regular Wybe procedure definition. Resources are added as additonal arguments to 
+the foreign call after the other arguments, in the order specified in the source code.
+If resources are repeated in the `use` clause, they are added as multiple arguments in 
+the generated foreign call.
+
 With both resources and modifiers, this would be as follows:
 
 > `def` `foreign` *language* `{` *modifiers* `}` *function*`(`*param*, *param*, ...`)` `use` *resources*
 
+Similar to the syntax for function definitions, an optional type can be specified. This cannot be used
+in conjunction with resources. The syntax is as follows:
+
+> `def` `foreign` *language* *function*`(`*param*, *param*, ...`)` `:` *type*
+
+and is equivalent to the following: 
+
+> `def` *function*`(`*param*, *param*, ... `)` `:` *type* `=` `foreign` *language* *function*`(`*param*, *param*, ... `)`
+
+The Wybe procedure (or function) can also use a different name to the foreign procedure (or function), using the following syntax:
+
+> `def` `foreign` *language* *alias* `=` *function*`(`*param*, *param*, ...`)`
+
+which defines a Wybe procedure with the name *alias*, which internally calls the foreign procedure *function*, i.e.,
+
+> `def` *alias*`(`*param*, *param*, ...`)` `{` `foreign` *language* *function*`(`*param*, *param*, ...`)` `}`
 
 #### Using LLVM instructions
 
@@ -2396,7 +2415,7 @@ declaration has the form:
 
 where *rep* has one of these forms:
 
-- `pointer`
+- `address`
  the type is the address of a Wybe data structure.  Foreign code should not
 treat this as an ordinary pointer.
 - `opaque`
@@ -2409,22 +2428,23 @@ an unsigned primitive number type comprising *n* bits, where *n* is any non-nega
 integer. Represents integers between 0 and 2<sup>*n*</sup>-1 inclusive.
 - *n* `bit float`
 a floating point number type comprising *n* bits, where *n* is one of 16, 32,
-64, or 128.  
+64, or 128.
 
 Like a `constructor` declaration, a `representation` declaration makes the
-enclosing module into type.  Also like a `constructor` declaration, a submodule
+enclosing module into a type.  Also like a `constructor` declaration, a submodule
 declaration may be combined with the specification of a representation using the
 form:
 
 > `type` *type* `is` *rep* `{` *defs* `}`
 
-where *rep* is as above, and *defs* specifies other members of the type.
+where *rep* is as above, and *defs* specifies zero or more other members of the
+type.
 
 Note that it is not permitted to specify both constructors and an explicit
 representation for a type.
 
-To make a representation type [unique](#unique-types), follow `is` with
-`{unique}`.
+To make a representation type [unique](#unique-types), place `{unique}` between
+`is` and the desired representation.
 
 #### Type casting
 In some cases, foreign code may need to cast values of one Wybe type to another,
@@ -2509,6 +2529,24 @@ this instruction is permitted to perform the operation destructively, making
 converting its type from *type1* to *type2*, without changing the
 representation. This just allows getting around LLVM strong typing; it does not
 actually require any instructions.
+
+- `foreign lpvm sizeof(`*arg:type*, `?`*size:int_type*`)` Get the size of the *type* of 
+the first argument in bytes. To get the size in bits, specify the `bits`
+modifier (in curly braces, after `lpvm`).
+By default, the size of a type is the size of its largest constructor, 
+capped to the size of an address due to Wybe automatically boxing large values.
+To get the size of the largest constructor after unboxing, the `unboxed` flag
+must be specified.
+
+The first argument can be anything except for an outwards-flowing variable. 
+The type of the second argument, *int_type*, can have any integer represented
+type, therefore, it is generally recommended to explicitly specify the type of
+this argument if it can't otherwise be inferred from context.
+
+This instruction is resolved statically, with _no_ runtime cost.
+Note that, for values of a generic type, the size returned is the size of a
+generic value (that is, the size of a pointer), rather than the size of the
+type of the value actually passed.
 
 
 #### Handling impurity

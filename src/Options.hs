@@ -15,12 +15,14 @@ module Options (Options(..),
                 OptFlag(..),
                 optimisationEnabled,
                 handleCmdline, 
-                defaultOptions) where
+                defaultOptions,
+                putInColour, putLnInColour) where
 
 import           Data.List             as List
 import           Data.List.Extra       (lower)
 import           Data.Map              as Map
-import           Data.Set              as Set
+import           Data.Maybe            (fromMaybe)
+import           Data.Set              as Set ( Set, empty, fromList, union, insert, delete, member, toList )
 import           Data.Either           as Either
 import           Text.Read             (readMaybe)
 import           Control.Monad
@@ -29,8 +31,11 @@ import           System.Environment
 import           System.Exit
 import           System.FilePath
 import           Version
-import           System.Directory
+import           System.Directory      ( makeAbsolute,  doesDirectoryExist,  getPermissions,  Permissions(readable) )
 import           System.Console.ANSI
+import qualified ShellWords            as SW
+import Distribution.InstalledPackageInfo (showInstalledPackageInfo)
+
 
 -- |Command line options for the wybe compiler.
 data Options = Options
@@ -55,6 +60,7 @@ data Options = Options
     , optNoVerifyLLVM  :: Bool     -- ^Don't run LLVM verification
     , optErrors        :: Set String 
                                    -- ^Erroneous flag error messages
+    , optNoEnv         :: Bool     -- ^Don't read WYBEARGS
     } deriving Show
 
 
@@ -78,6 +84,7 @@ defaultOptions = Options
   , optNoFont        = False
   , optNoVerifyLLVM  = False
   , optErrors        = Set.empty
+  , optNoEnv         = False
   }
 
 
@@ -265,6 +272,9 @@ options =
     , Option []    ["no-verify-llvm"]
         (NoArg (\opts -> opts { optNoVerifyLLVM = True }))
         "disable verification of generated LLVM code"
+    , Option []    ["no-env"]
+        (NoArg (\opts -> opts { optNoEnv = True }))
+        $ "disable reading compiler switches from '" ++ envArgs ++ "'"
     ]
 
 
@@ -272,23 +282,35 @@ options =
 header :: String
 header = "Usage: wybemk [OPTION...] targets..."
 
+-- |Environment variables used by the compiler
+envLibs :: String
+envLibs = "WYBELIBS"
+
+envArgs :: String
+envArgs = "WYBEARGS"
+
 -- |Parse command line arguments
-compilerOpts :: [String] -> IO (Options, [String])
+compilerOpts :: [String] -> (Options, [String])
 compilerOpts argv =
-  case getOpt Permute options argv of
-    (o,n,[]  ) -> return (List.foldl (flip id) defaultOptions o, n)
-    (_,_,errs) -> ioError (userError (concat errs ++ usageInfo header options))
+    let (o, files, errs) =  getOpt Permute options argv
+        opts = List.foldl (flip id) defaultOptions o
+    in if List.null errs
+    then (opts, files)
+    else (opts{optErrors=Set.fromList errs `Set.union` optErrors opts}, files)
 
 -- |Parse the command line and handle all options asking to print
 --  something and exit.
 handleCmdline :: IO (Options, [String])
 handleCmdline = do
     argv <- getArgs
-    assocList <- getEnvironment
-    let env = Map.fromList assocList
-    (opts0,files) <- compilerOpts argv
+    let (cmdLineOpts, files) = compilerOpts argv
+    env <- Map.fromList <$> getEnvironment
+    let opts0 = 
+            if optNoEnv cmdLineOpts 
+            then cmdLineOpts 
+            else handleEnvArgs cmdLineOpts argv files $ fromMaybe "" (Map.lookup envArgs env)
     let libs0 = case optLibDirs opts0 of
-                [] -> maybe [libDir] splitSearchPath $ Map.lookup "WYBELIBS" env
+                [] -> maybe [libDir] splitSearchPath $ Map.lookup envLibs env
                 lst -> lst
     libs <- mapM makeAbsolute libs0
     let opts = opts0 { optLibDirs = libs }
@@ -326,26 +348,76 @@ handleCmdline = do
     else let errs = optErrors opts
          in if not $ List.null errs 
     then do
-        unless (optNoFont opts) $ setSGR [SetColor Foreground Vivid Red]
-        putStrLn $ "Command line option errors:\n  " ++ intercalate "\n  " (Set.toList errs)
+        putLnInColour opts Red $ "Command line option errors:\n  "
+                            ++ intercalate "\n  " (Set.toList errs)
+        putStrLn $ usageInfo header options
         exitFailure
     else if List.null files
     then do
         putStrLn $ usageInfo header options
         exitFailure
-    else return (opts,files)
+    else do
+        badLibDirs <- filterM notReadableDirectory $ optLibDirs opts
+        if List.null badLibDirs
+        then return (opts, nub files)
+        else do
+            putLnInColour opts Red $ "Not readable library directory(s):\n  "
+                                ++ intercalate "\n  " badLibDirs
+            exitFailure
+
+
+-- |Return True iff the specified name isn't a directory or isn't readable
+notReadableDirectory :: String -> IO Bool
+notReadableDirectory dirName = do
+    exists <- doesDirectoryExist dirName
+    if not exists then return True
+    else not . readable <$> getPermissions dirName
+
+
+-- |Print the specified string to stdout.  Unless the options say not to, show
+-- it in the specified colour, changing back to normal output afterwards.
+-- Doesn't print a newline afterward.
+putInColour :: Options -> Color -> String -> IO ()
+putInColour opts colour text = do
+    if optNoFont opts
+    then putStr text
+    else do
+        setSGR [SetColor Foreground Vivid colour]
+        putStr text
+        setSGR [Reset]
+
+
+-- |Print the specified string to stdout, followed by a newline.  Unless the
+-- options say not to, show it in the specified colour, changing back to normal
+-- output afterwards.
+putLnInColour :: Options -> Color -> String -> IO ()
+putLnInColour opts colour text = putInColour opts colour $ text ++ "\n"
     
+
+
+-- |Parse and add options from envArg.
+-- Ensures that no files are specified in envArg
+handleEnvArgs :: Options -> [String] -> [String] -> String -> Options
+handleEnvArgs cmdLineOpts argv files envArg = 
+    case SW.parse envArg of
+      Left err -> addOptError cmdLineOpts $ "Error parsing " ++ envArgs ++ ":\n" ++ err
+      Right envArgv -> 
+        let (opts, files') = compilerOpts (envArgv ++ argv)
+        in if files' /= files
+        then addOptError opts $ "Files cannot be specified in " ++ envArgs ++ ": " ++ intercalate ", " (files' List.\\ files)
+        else opts
 
 -- Set the LLVM optimisation level specified by the string.
 -- Add an error message if the string is not a number.
 setLLVMOptLevel :: String -> Options -> Options
-setLLVMOptLevel str opts@Options{optErrors=errors}=
+setLLVMOptLevel str opts=
     case readMaybe str of
-        Nothing -> opts{optErrors=("LLVM opt level should be a number: " ++ str) 
-                                    `Set.insert` errors}
+        Nothing -> addOptError opts $ "LLVM opt level should be a number: " ++ str 
         Just lvl -> opts{optLLVMOptLevel=lvl}
 
-
+-- | Adds an error to the set of errors
+addOptError :: Options -> String -> Options
+addOptError opts@Options{optErrors=errs} err = opts{optErrors=Set.insert err errs}
 
 -- |The inverse of intercalate:  split up a list into sublists separated
 --  by the separator list.

@@ -8,6 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: count: res_decl.count
   public procs    : 
+  constants       : 
   imports         : use wybe
   resources       : count: fromList [(res_decl.count,wybe.int @res_decl:nn:nn)]
   procs           : 
@@ -19,7 +20,7 @@ AFTER EVERYTHING:
 ; ModuleID = 'res_decl'
 
 source_filename = "!ROOT!/final-dump/res_decl.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

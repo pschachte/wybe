@@ -1,0 +1,38 @@
+# Wybe solution to the n queens problem
+
+def {partial} queens(n:int):list(int) = place_queens(n, n-1, 0, [])
+
+def {partial} place_queens(n:int, row:int, col:int, qs:list(int)):list(int) =
+    if { row < 0 :: qs
+       | col >= n :: fail
+       | safe(col, row-col, row+col, row+1, qs) ::
+         (  place_queens(n, row - 1, 0, [col | qs])
+         | place_queens(n, row, col + 1, qs)
+         )
+       | else :: place_queens(n, row, col + 1, qs)
+    }
+
+def {partial} safe(col:int, diag1:int, diag2:int, row:int, qs:list(int)) {
+    for ?c in qs {
+        if { ( c = col | row-c = diag1 | row+c = diag2) :: fail }
+        !row + 1
+    }
+}
+
+def show_queens(qs:list(int)) use !io {
+    ?n = length(qs)
+    for ?q in qs {
+        for ?c in 0 .. n {
+            !print( if{ q = c :: 'Q' | else :: '.'} )
+        }
+        !nl
+    }
+}
+
+?n = 32
+if{ ?qs = queens(n) ::
+        !println "$n Queens Solution:"
+        !show_queens(qs)
+  | else ::
+        !println "No solution to $n queens problem."
+}

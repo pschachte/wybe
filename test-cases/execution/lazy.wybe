@@ -1,0 +1,12 @@
+use logging
+
+?computer = lazy({
+    !logmsg("Thinking...\n")
+    foreign c {semipure} sleep(1)
+    ?@ = 42
+})
+
+!println("The answer is...")
+!println(computer^get)
+!println("The answer is now...")
+!println(computer^get)

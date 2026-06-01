@@ -346,6 +346,7 @@ uniquenessCheckExp IntValue{} _ = return ()
 uniquenessCheckExp FloatValue{} _ = return ()
 uniquenessCheckExp CharValue{} _ = return ()
 uniquenessCheckExp StringValue{} _ = return ()
+uniquenessCheckExp ConstStruct{} _ = return ()
 uniquenessCheckExp var@Var{} _ =
     shouldnt $ "Untyped variable " ++ show var ++ " in uniqueness checking"
 uniquenessCheckExp FailExpr _ = return ()

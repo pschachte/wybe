@@ -237,30 +237,41 @@ fromUseItemParser v = do
     return $ ImportItems v m ids (Just pos)
 
 
--- | Parse a procedure or function, since both items share the same prefix of
--- 'visibility' 'determinism'.
+-- | Parse a (possibly foreign) procedure or function, since these items share the same prefix of
+-- 'visibility' def.
 procOrFuncItem :: Visibility -> Parser Item
 procOrFuncItem vis = do
     pos <- tokenPosition <$> ident "def"
-    mbLanguage <- optionMaybe (ident "foreign" *> identString)
+    mbLang <- optionMaybe (ident "foreign" *> identString)
+    case mbLang of
+        Just lang -> foreignProcOrFuncItem vis pos lang
+        Nothing -> wybeProcOrFuncItem vis pos
+
+-- | Parse a Wybe procedure or function
+wybeProcOrFuncItem :: Visibility -> SourcePos -> ParsecT [Token] () Identity Item
+wybeProcOrFuncItem vis pos = do
     mods <- modifierList >>= parseWith (processProcModifiers pos "procedure or function declaration")
     (proto, returnType) <- limitedTerm prototypePrecedence >>= parseWith termToPrototype
-    do
+    (do
         body <- symbol "=" *> expr
-        if isNothing mbLanguage
-        then return $ FuncDecl vis mods proto returnType body $ Just pos
-        else fail "unexpected foreign language in function declaration"
-        <|> if returnType /= AnyType
+        return $ FuncDecl vis mods proto returnType body $ Just pos
+     ) <|> (
+        if returnType /= AnyType
         then fail "unexpected return type in proc declaration"
         else do
-            rs <- useResourceFlowSpecs
-            let proto' = proto { procProtoResources = rs }
-            case mbLanguage of
-                Just language -> return $ ForeignProcDecl vis language mods proto' $ Just pos
-                Nothing -> do
-                    body <- embracedTerm >>= parseWith termToBody
-                    return $ ProcDecl vis mods proto' body $ Just pos
+            ress <- useResourceFlowSpecs
+            body <- embracedTerm >>= parseWith termToBody
+            return $ ProcDecl vis mods proto{ procProtoResources = ress } body $ Just pos
+     )
 
+-- Parse a 'foreign' procedure or function
+foreignProcOrFuncItem :: Visibility -> SourcePos -> String -> Parser Item
+foreignProcOrFuncItem vis pos lang = do
+    mods <- modifierList >>= parseWith (processProcModifiers pos "foreign procedure or function declaration")
+    mbAlias <- optionMaybe (try $ identString <* symbol "=") 
+    (proto, returnType) <- limitedTerm prototypePrecedence >>= parseWith termToPrototype
+    ress <- if returnType == AnyType then useResourceFlowSpecs else return []
+    return $ ForeignProcDecl vis lang mods mbAlias proto { procProtoResources = ress } returnType $ Just pos
 
 
 -- | Parse an optional series of resource flows

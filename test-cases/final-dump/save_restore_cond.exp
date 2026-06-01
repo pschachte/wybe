@@ -8,21 +8,17 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : save_restore_cond.<0>
+  constants       : 
   imports         : use wybe
   resources       : 
   procs           : 
 
-module top-level code > public {semipure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: save_restore_cond.<0>
 ()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     save_restore_cond.suc<0>(?tmp#0##0:wybe.bool) #0 @save_restore_cond:nn:nn
-    case ~tmp#0##0:wybe.bool of
-    0:
-
-    1:
-
 
 
 proc suc > {noinline} (3 calls)
@@ -38,20 +34,16 @@ suc(?#success##0:wybe.bool)<{}; {}; {}>:
 ; ModuleID = 'save_restore_cond'
 
 source_filename = "!ROOT!/final-dump/save_restore_cond.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"save_restore_cond.<0>"() {
-  %"tmp#0##0" = tail call fastcc i1 @"save_restore_cond.suc<0>"()
-  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
-if.then.0:
-  ret void
-if.else.0:
+define external fastcc void @"save_restore_cond#.<0>"() {
+  %"tmp#0##0" = tail call fastcc i1 @"save_restore_cond#.suc<0>"()
   ret void
 }
 
-define external fastcc i1 @"save_restore_cond.suc<0>"() {
+define external fastcc i1 @"save_restore_cond#.suc<0>"() {
   ret i1 1
 }

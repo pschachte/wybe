@@ -1,6 +1,10 @@
 pub def foreign c putchar(c:char) use !io
+pub def foreign c putc=putchar(c:char) use !io
 
 !putchar 'W'
 !putchar 'y'
-!putchar 'b'
-!putchar 'e'
+!putc 'b'
+!putc 'e'
+
+pub def foreign llvm fmul(x:float, y:float):float
+pub def foreign llvm fmult=fmul(x:float, y:float):float

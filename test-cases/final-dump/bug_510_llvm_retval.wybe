@@ -1,0 +1,6 @@
+?p = 3
+!println(proc(p))
+def {noinline, test} proc(p:int) {
+    ?f = {test}{ (p = 3) }
+    f
+}

@@ -5,7 +5,7 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module Snippets (castFromTo, castTo, withType, intType, intCast,
+module Snippets (castFromTo, castTo, withType, intType, intCast, int32Type,
                  tagType, tagCast, phantomType, stringType, cStringType,
                  charType, isTypeVar,
                  varSet, varGet, varGetSet,
@@ -47,6 +47,10 @@ intCast = (`castTo` intType)
 -- |The type of a secondary tag (currently 16 bits unsigned)
 tagType :: TypeSpec
 tagType = Representation $ Bits 16
+
+-- |The type of a secondary tag (currently 16 bits unsigned)
+int32Type :: TypeSpec
+int32Type = Representation $ Bits 32
 
 -- |Cast an expr to the int type
 tagCast :: Exp -> Exp

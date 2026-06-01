@@ -7,8 +7,8 @@ pub resource argc:int
 pub resource argv:raw_array
 
 
-# The command line arguments. This is a C array of strings.
-pub resource arguments:array(c_string) = array(argc, argv)
+# The command line arguments. This is a c_array of strings.
+pub resource arguments:c_array(c_string) = c_array(argc, argv)
 
 # The command that caused execution of this program.  This is not necessarily an
 # absolute file name.

@@ -17,14 +17,15 @@ import           Data.List                         as List
 import           Data.Map                          as Map
 import           Data.Maybe                        as Maybe
 import           Data.Set                          as Set
+import           Data.Char                         (ord)
 import           UnivSet                           as USet
 import           Options                           (LogSelection (Clause))
 import           Snippets
 import           Text.ParserCombinators.Parsec.Pos
 import           Util
 import           Resources
-import UnivSet (emptyUnivSet)
-import AST (emptyGlobalFlows)
+import           UnivSet                           (emptyUnivSet)
+import           Config                            (byteBits, wordSize)
 
 
 ----------------------------------------------------------------
@@ -163,7 +164,7 @@ compileProc proc procID =
             gFlows  = makeGlobalFlows (zip [0..] params') $ procProtoResources proto
         let proto' = PrimProto (procProtoName proto) params' gFlows
         logClause $ "  comparams  : " ++ show params'
-        logClause $ "  globalFlows: " ++ show gFlows 
+        logClause $ "  globalFlows: " ++ show gFlows
         callSiteCount <- gets nextCallSiteID
         mSpec <- lift $ getModule modSpec
         let pSpec = ProcSpec mSpec procName procID Set.empty
@@ -240,24 +241,10 @@ compileCond front pos expr thn els params detism = do
         Var _ ParamIn _ ->
             return $ ProcBody front
                 $ PrimFork (fromJust name') boolType False
-                [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
+                  (zip [0..] [appendToBody els' elsAssigns, appendToBody thn' thnAssigns])
                 Nothing
         _ ->
             shouldnt $ "TestBool with invalid argument " ++ show expr
-
--- |Add the specified statements at the end of the given body
-appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
-appendToBody (ProcBody prims NoFork) after
-    = ProcBody (prims++after) NoFork
-appendToBody (ProcBody prims (PrimFork v ty lst bodies deflt)) after
-    = let bodies' = List.map (`appendToBody` after) bodies
-      in ProcBody prims $ PrimFork v ty lst bodies'
-                            $ (`appendToBody` after) <$> deflt
-
--- |Add the specified statements at the front of the given body
-prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
-prependToBody before (ProcBody prims fork)
-    = ProcBody (before++prims) fork
 
 compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
 compileSimpleStmt stmt = do
@@ -281,10 +268,25 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
             let pSpec = ProcSpec mod name procID' generalVersion
             impurity' <- max impurity . procImpurity <$> lift (getProcDef pSpec)
             gFlows <- lift $ getProcGlobalFlows pSpec
-            return $ PrimCall callSiteID pSpec impurity  args' gFlows
+            return $ PrimCall callSiteID pSpec impurity' args' gFlows
         Higher fn -> do
+            let impurity' = max impurity . modifierImpurity . higherTypeModifiers 
+                          . trustFromJust ("untyped higher-order term " ++ show fn) . maybeExpType $ content fn
             fn' <- compileHigherFunc fn
-            return $ PrimHigher callSiteID fn' impurity args'
+            return $ PrimHigher callSiteID fn' impurity' args'
+compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
+    let ty = trustFromJust ("untyped in sizeof " ++ show arg)
+           $ maybeExpType $ content arg
+    unboxedSize <- case ty of
+        Representation repn -> return $ typeRepSize repn
+        TypeSpec modSpec name _ ->
+            trustFromJust "compileSimpleStmt sizeof modTypeSize" 
+                    <$> lift (getSpecModule "compileSimpleStmt sizeof" modTypeSize (modSpec ++ [name]))
+        _ -> return wordSize
+    let size = if "unboxed" `elem` flags then unboxedSize else min unboxedSize wordSize
+    let sizeInUnit = if "bits" `elem` flags then size else size `ceilDiv` byteBits
+    out' <- placedApply compileArg out
+    return $ PrimForeign "lpvm" "cast" [] $ ArgInt (fromIntegral sizeInUnit) intType : out'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
@@ -310,8 +312,9 @@ compileArg exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
 compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp [PrimArg]
 compileArg' typ (IntValue int) _ = return [ArgInt int typ]
 compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
-compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
-compileArg' typ (CharValue char) _ = return [ArgChar char typ]
+compileArg' typ (ConstStruct structID) _ = do
+    return [ArgConstRef structID typ]
+compileArg' typ (CharValue char) _ = return [ArgInt (fromIntegral $ ord char) typ]
 compileArg' typ (Global info) _ = return [ArgGlobal info typ]
 compileArg' typ (Closure ms es) _ = do
     as <- concat <$> mapM (placedApply compileArg) es
@@ -331,8 +334,9 @@ compileArg' typ var@(Var name flow flowType) pos = do
             return [ArgVar nextName typ FlowOut flowType False]
         else return []
     return $ inArg ++ outArg
-compileArg' _ (Typed exp _ _) pos =
-    shouldnt $ "Compiling multi-typed expression " ++ show exp
+compileArg' ty exp@Typed{} pos =
+    shouldnt $ "Compiling multi-typed expression "
+                ++ show exp ++ " with type " ++ show ty
 compileArg' typ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
@@ -375,24 +379,24 @@ compileParam allFlows startVars endVars procName idx param@(Param name ty flow f
                 (shouldnt ("compileParam for input param " ++ show param
                             ++ " of proc " ++ show procName))
                 name startVars
-          gFlows 
-            | (isResourcefulHigherOrder ||| genericType) ty 
+          gFlows
+            | (isResourcefulHigherOrder ||| genericType ||| (==AnyType)) ty
             = emptyGlobalFlows{globalFlowsParams=USet.singleton inIdx}
             | otherwise = emptyGlobalFlows
     ]
-    ++ 
+    ++
     [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False gFlows)
     | flowsOut flow
     , let num = Map.findWithDefault
                 (shouldnt ("compileParam for output param " ++ show param
                             ++ " of proc " ++ show procName))
                 name endVars
-          gFlows 
+          gFlows
             | isResourcefulHigherOrder ty = univGlobalFlows
-            | genericType ty = emptyGlobalFlows{globalFlowsParams=UniversalSet}
+            | genericType ty || ty == AnyType = emptyGlobalFlows{globalFlowsParams=UniversalSet}
             | otherwise = emptyGlobalFlows
     ]
-  where 
+  where
     inIdx = idx
     outIdx = if flowsIn flow then idx + 1 else idx
 

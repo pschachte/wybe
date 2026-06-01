@@ -1,0 +1,515 @@
+# Test the int, int64, int32, int16, and int8 library types
+
+def test_int(x:int, y:int) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    x + ?y1 = z
+    ?x1 + y = z
+    !println("$x + $y1 = $z")
+    !println("$x1 + $y = $z")
+    !println("x - y = $(x - y)")
+    z - ?x1 = y
+    ?z1 - x = y
+    !println("$z - $x1 = $y")
+    !println("$z1 - $x = $y")
+    !println("-x = $(-x)")
+    x = -(?xm)
+    !println("-($xm) = $x")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2 = $(z >> 2)")
+    !println("logical_bitshift($xm,$y) = $(logical_bitshift(xm,y))")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1) is $(x <=> (y+1))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1) is $(x = (y+1))")
+    !println("x ~= (y+1) is $(x ~= (y+1))")
+    !println("x < (y+1) is $(x < (y+1))")
+    !println("x <= (y+1) is $(x <= (y+1))")
+    !println("x > (y+1) is $(x > (y+1))")
+    !println("x >= (y+1) is $(x >= (y+1))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("count(bound_maximum(x)) is $(count(bound_maximum(x)))")
+    !println("count(bound_minimum(x)) is $(count(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+    !println("signum(x) is $(signum(x))")
+    !println("signum(x-y-1) is $(signum(x-y-1))")
+    !println("signum($xm) is $(signum(xm))")
+    !println("abs($x) is $(abs(x))")
+    !println("abs($xm) is $(abs(xm))")
+}
+
+
+def test_int64(x:int64, y:int64) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    x + ?y1 = z
+    ?x1 + y = z
+    !println("$x + $y1 = $z")
+    !println("$x1 + $y = $z")
+    !println("x - y = $(x - y)")
+    z - ?x1 = y
+    ?z1 - x = y
+    !println("$z - $x1 = $y")
+    !println("$z1 - $x = $y")
+    !println("-x = $(-x)")
+    x = -(?xm)
+    !println("-($xm) = $x")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2:int64 = $(z >> 2:int64)")
+    !println("logical_bitshift($xm,$y) = $(logical_bitshift(xm,y))")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1:int64) is $(x <=> (y+1:int64))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1:int64) is $(x = (y+1:int64))")
+    !println("x ~= (y+1:int64) is $(x ~= (y+1:int64))")
+    !println("x < (y+1:int64) is $(x < (y+1:int64))")
+    !println("x <= (y+1:int64) is $(x <= (y+1:int64))")
+    !println("x > (y+1:int64) is $(x > (y+1:int64))")
+    !println("x >= (y+1:int64) is $(x >= (y+1:int64))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("count(bound_maximum(x)) is $(count(bound_maximum(x)))")
+    !println("count(bound_minimum(x)) is $(count(bound_minimum(x)))")
+    !println("int(bound_maximum(x)) is $(int(bound_maximum(x)))")
+    !println("int(bound_minimum(x)) is $(int(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+    !println("signum(x) is $(signum(x))")
+    !println("signum(x-y-1:int64) is $(signum(x-y-1:int64))")
+    !println("signum($xm) is $(signum(xm))")
+    !println("abs($x) is $(abs(x))")
+    !println("abs($xm) is $(abs(xm))")
+}
+
+
+def test_int32(x:int32, y:int32) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    x + ?y1 = z
+    ?x1 + y = z
+    !println("$x + $y1 = $z")
+    !println("$x1 + $y = $z")
+    !println("x - y = $(x - y)")
+    z - ?x1 = y
+    ?z1 - x = y
+    !println("$z - $x1 = $y")
+    !println("$z1 - $x = $y")
+    !println("-x = $(-x)")
+    x = -(?xm)
+    !println("-($xm) = $x")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2:int32 = $(z >> 2:int32)")
+    !println("logical_bitshift($xm,$y) = $(logical_bitshift(xm,y))")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1:int32) is $(x <=> (y+1:int32))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1:int32) is $(x = (y+1:int32))")
+    !println("x ~= (y+1:int32) is $(x ~= (y+1:int32))")
+    !println("x < (y+1:int32) is $(x < (y+1:int32))")
+    !println("x <= (y+1:int32) is $(x <= (y+1:int32))")
+    !println("x > (y+1:int32) is $(x > (y+1:int32))")
+    !println("x >= (y+1:int32) is $(x >= (y+1:int32))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("count(bound_maximum(x)) is $(count(bound_maximum(x)))")
+    !println("count(bound_minimum(x)) is $(count(bound_minimum(x)))")
+    !println("int(bound_maximum(x)) is $(int(bound_maximum(x)))")
+    !println("int(bound_minimum(x)) is $(int(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+    !println("signum(x) is $(signum(x))")
+    !println("signum(x-y-1:int32) is $(signum(x-y-1:int32))")
+    !println("signum($xm) is $(signum(xm))")
+    !println("abs($x) is $(abs(x))")
+    !println("abs($xm) is $(abs(xm))")
+}
+
+
+def test_int16(x:int16, y:int16) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    x + ?y1 = z
+    ?x1 + y = z
+    !println("$x + $y1 = $z")
+    !println("$x1 + $y = $z")
+    !println("x - y = $(x - y)")
+    z - ?x1 = y
+    ?z1 - x = y
+    !println("$z - $x1 = $y")
+    !println("$z1 - $x = $y")
+    !println("-x = $(-x)")
+    x = -(?xm)
+    !println("-($xm) = $x")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2:int16 = $(z >> 2:int16)")
+    !println("logical_bitshift($xm,$y) = $(logical_bitshift(xm,y))")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1:int16) is $(x <=> (y+1:int16))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1:int16) is $(x = (y+1:int16))")
+    !println("x ~= (y+1:int16) is $(x ~= (y+1:int16))")
+    !println("x < (y+1:int16) is $(x < (y+1:int16))")
+    !println("x <= (y+1:int16) is $(x <= (y+1:int16))")
+    !println("x > (y+1:int16) is $(x > (y+1:int16))")
+    !println("x >= (y+1:int16) is $(x >= (y+1:int16))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("count(bound_maximum(x)) is $(count(bound_maximum(x)))")
+    !println("count(bound_minimum(x)) is $(count(bound_minimum(x)))")
+    !println("int(bound_maximum(x)) is $(int(bound_maximum(x)))")
+    !println("int(bound_minimum(x)) is $(int(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+    !println("signum(x) is $(signum(x))")
+    !println("signum(x-y-1:int16) is $(signum(x-y-1:int16))")
+    !println("signum($xm) is $(signum(xm))")
+    !println("abs($x) is $(abs(x))")
+    !println("abs($xm) is $(abs(xm))")
+}
+
+
+def test_int8(x:int8, y:int8) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    x + ?y1 = z
+    ?x1 + y = z
+    !println("$x + $y1 = $z")
+    !println("$x1 + $y = $z")
+    !println("x - y = $(x - y)")
+    z - ?x1 = y
+    ?z1 - x = y
+    !println("$z - $x1 = $y")
+    !println("$z1 - $x = $y")
+    !println("-x = $(-x)")
+    x = -(?xm)
+    !println("-($xm) = $x")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2:int8 = $(z >> 2:int8)")
+    !println("logical_bitshift($xm,$y) = $(logical_bitshift(xm,y))")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1:int8) is $(x <=> (y+1:int8))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1:int8) is $(x = (y+1:int8))")
+    !println("x ~= (y+1:int8) is $(x ~= (y+1:int8))")
+    !println("x < (y+1:int8) is $(x < (y+1:int8))")
+    !println("x <= (y+1:int8) is $(x <= (y+1:int8))")
+    !println("x > (y+1:int8) is $(x > (y+1:int8))")
+    !println("x >= (y+1:int8) is $(x >= (y+1:int8))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("count(bound_maximum(x)) is $(count(bound_maximum(x)))")
+    !println("count(bound_minimum(x)) is $(count(bound_minimum(x)))")
+    !println("int(bound_maximum(x)) is $(int(bound_maximum(x)))")
+    !println("int(bound_minimum(x)) is $(int(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+    !println("signum(x) is $(signum(x))")
+    !println("signum(x-y-1:int8) is $(signum(x-y-1:int8))")
+    !println("signum($xm) is $(signum(xm))")
+    !println("abs($x) is $(abs(x))")
+    !println("abs($xm) is $(abs(xm))")
+}
+
+
+def test_count(x:count, y:count) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    if {x + ?y1 = z :: !println("$x + $y1 = $z") | else :: !println("$x + ?y1 = $z FAILS")}
+    if {?x1 + y = z :: !println("$x1 + $y = $z") | else :: !println("?x1 + $y = $z FAILS")}
+    ?dif = ("$(x - y)" | "FAIL")
+    !println("x - y = $dif")
+    if {z - ?x1 = y :: !println("$z - $x1 = $y") | else :: !println("$z - ?x1 = y FAILS") }
+    ?z1 - x = y
+    !println("$z1 - $x = $y")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2:count = $(z >> 2:count)")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1:count) is $(x <=> (y+1:count))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1:count) is $(x = (y+1:count))")
+    !println("x ~= (y+1:count) is $(x ~= (y+1:count))")
+    !println("x < (y+1:count) is $(x < (y+1:count))")
+    !println("x <= (y+1:count) is $(x <= (y+1:count))")
+    !println("x > (y+1:count) is $(x > (y+1:count))")
+    !println("x >= (y+1:count) is $(x >= (y+1:count))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("int(bound_maximum(x)) is $(int(bound_maximum(x)))")
+    !println("int(bound_minimum(x)) is $(int(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+}
+
+
+def test_count64(x:count64, y:count64) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    if {x + ?y1 = z :: !println("$x + $y1 = $z") | else :: !println("$x + ?y1 = $z FAILS")}
+    if {?x1 + y = z :: !println("$x1 + $y = $z") | else :: !println("?x1 + $y = $z FAILS")}
+    ?dif = ("$(x - y)" | "FAIL")
+    !println("x - y = $dif")
+    if {z - ?x1 = y :: !println("$z - $x1 = $y") | else :: !println("$z - ?x1 = y FAILS") }
+    ?z1 - x = y
+    !println("$z1 - $x = $y")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2:count64 = $(z >> 2:count64)")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1:count64) is $(x <=> (y+1:count64))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1:count64) is $(x = (y+1:count64))")
+    !println("x ~= (y+1:count64) is $(x ~= (y+1:count64))")
+    !println("x < (y+1:count64) is $(x < (y+1:count64))")
+    !println("x <= (y+1:count64) is $(x <= (y+1:count64))")
+    !println("x > (y+1:count64) is $(x > (y+1:count64))")
+    !println("x >= (y+1:count64) is $(x >= (y+1:count64))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("int(bound_maximum(x)) is $(int(bound_maximum(x)))")
+    !println("int(bound_minimum(x)) is $(int(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+}
+
+
+def test_count32(x:count32, y:count32) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    if {x + ?y1 = z :: !println("$x + $y1 = $z") | else :: !println("$x + ?y1 = $z FAILS")}
+    if {?x1 + y = z :: !println("$x1 + $y = $z") | else :: !println("?x1 + $y = $z FAILS")}
+    ?dif = ("$(x - y)" | "FAIL")
+    !println("x - y = $dif")
+    if {z - ?x1 = y :: !println("$z - $x1 = $y") | else :: !println("$z - ?x1 = y FAILS") }
+    ?z1 - x = y
+    !println("$z1 - $x = $y")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2:count32 = $(z >> 2:count32)")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1:count32) is $(x <=> (y+1:count32))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1:count32) is $(x = (y+1:count32))")
+    !println("x ~= (y+1:count32) is $(x ~= (y+1:count32))")
+    !println("x < (y+1:count32) is $(x < (y+1:count32))")
+    !println("x <= (y+1:count32) is $(x <= (y+1:count32))")
+    !println("x > (y+1:count32) is $(x > (y+1:count32))")
+    !println("x >= (y+1:count32) is $(x >= (y+1:count32))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("int(bound_maximum(x)) is $(int(bound_maximum(x)))")
+    !println("int(bound_minimum(x)) is $(int(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+}
+
+
+def test_count16(x:count16, y:count16) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    if {x + ?y1 = z :: !println("$x + $y1 = $z") | else :: !println("$x + ?y1 = $z FAILS")}
+    if {?x1 + y = z :: !println("$x1 + $y = $z") | else :: !println("?x1 + $y = $z FAILS")}
+    ?dif = ("$(x - y)" | "FAIL")
+    !println("x - y = $dif")
+    if {z - ?x1 = y :: !println("$z - $x1 = $y") | else :: !println("$z - ?x1 = y FAILS") }
+    ?z1 - x = y
+    !println("$z1 - $x = $y")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2:count16 = $(z >> 2:count16)")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1:count16) is $(x <=> (y+1:count16))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1:count16) is $(x = (y+1:count16))")
+    !println("x ~= (y+1:count16) is $(x ~= (y+1:count16))")
+    !println("x < (y+1:count16) is $(x < (y+1:count16))")
+    !println("x <= (y+1:count16) is $(x <= (y+1:count16))")
+    !println("x > (y+1:count16) is $(x > (y+1:count16))")
+    !println("x >= (y+1:count16) is $(x >= (y+1:count16))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("int(bound_maximum(x)) is $(int(bound_maximum(x)))")
+    !println("int(bound_minimum(x)) is $(int(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+}
+
+
+def test_count8(x:count8, y:count8) use !io {
+    ?z = x * y
+    !println("x = $x, y = $y, z = $z")
+    !println("bound_minimum(x) = $(bound_minimum(x))")
+    !println("bound_maximum(x) = $(bound_maximum(x))")
+    !println("x + y = $(x+y)")
+    if {x + ?y1 = z :: !println("$x + $y1 = $z") | else :: !println("$x + ?y1 = $z FAILS")}
+    if {?x1 + y = z :: !println("$x1 + $y = $z") | else :: !println("?x1 + $y = $z FAILS")}
+    ?dif = ("$(x - y)" | "FAIL")
+    !println("x - y = $dif")
+    if {z - ?x1 = y :: !println("$z - $x1 = $y") | else :: !println("$z - ?x1 = y FAILS") }
+    ?z1 - x = y
+    !println("$z1 - $x = $y")
+    !println("x * y = $(x * y)")
+    !println("x / y = $(x / y)")
+    !println("x % y = $(x % y)")
+    !println("x << y = $(x << y)")
+    !println("z >> 2:count8 = $(z >> 2:count8)")
+    !println("x = y is $(x = y)")
+    !println("x ~= y is $(x ~= y)")
+    !println("x < y is $(x < y)")
+    !println("x <= y is $(x <= y)")
+    !println("x > y is $(x > y)")
+    !println("x >= y is $(x >= y)")
+    !println("x <=> y is $(x <=> y)")
+    !println("x <=> (y+1:count8) is $(x <=> (y+1:count8))")
+    !println("y <=> x is $(y <=> x)")
+    !println("x = (y+1:count8) is $(x = (y+1:count8))")
+    !println("x ~= (y+1:count8) is $(x ~= (y+1:count8))")
+    !println("x < (y+1:count8) is $(x < (y+1:count8))")
+    !println("x <= (y+1:count8) is $(x <= (y+1:count8))")
+    !println("x > (y+1:count8) is $(x > (y+1:count8))")
+    !println("x >= (y+1:count8) is $(x >= (y+1:count8))")
+    !println("max(x,y) is $(max(x,y))")
+    !println("min(x,y) is $(min(x,y))")
+    !println("int(bound_maximum(x)) is $(int(bound_maximum(x)))")
+    !println("int(bound_minimum(x)) is $(int(bound_minimum(x)))")
+    !println("sqrt(z) is $(sqrt(z))")
+    !println("x ** y = $(x ** y)")
+}
+
+
+
+!println("Testing int:")
+!test_int(7, 6)
+!nl
+!println("Testing int64:")
+!test_int64(7:int64, 6:int64)
+!nl
+!println("Testing int32:")
+!test_int32(7:int32, 6:int32)
+!nl
+!println("Testing int16:")
+!test_int16(7:int16, 6:int16)
+!nl
+!println("Testing int8:")
+!test_int8(7:int8, 6:int8)
+!nl
+!println("Testing count:")
+!test_count(7:count, 6:count)
+!nl
+!println("Testing count64:")
+!test_count64(7:count64, 6:count64)
+!nl
+!println("Testing count32:")
+!test_count32(7:count32, 6:count32)
+!nl
+!println("Testing count16:")
+!test_count16(7:count16, 6:count16)
+!nl
+!println("Testing count8:")
+!test_count8(7:count8, 6:count8)

@@ -13,7 +13,7 @@ module Normalise (normalise, normaliseItem, completeNormalisation) where
 
 import AST
 import Config (wordSize, wordSizeBytes, availableTagBits,
-               tagMask, smallestAllocatedAddress, currentModuleAlias, specialName2, specialName, initProcName)
+               tagMask, smallestAllocatedAddress, currentModuleAlias, specialName2, specialName, initProcName, byteBits)
 import Control.Monad
 import Control.Monad.State (gets)
 import Control.Monad.Trans (lift,liftIO)
@@ -111,10 +111,10 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                  [result, varSet outputVariableName `maybePlace` pos])
               pos]
         pos)
-normaliseItem (ForeignProcDecl vis lang mods proto@(ProcProto name params resources) pos) = do
+normaliseItem (ForeignProcDecl vis lang mods mbAlias proto@(ProcProto name params resources) resulttype pos) = do
     when (mods{modifierImpurity=Pure, modifierDetism=Det, modifierInline=MayInline} /= defaultProcModifiers)
         $ errmsg pos
-        $ "Foreign procedure declaration of " ++ name
+        $ "Foreign procedure declaration of " ++ procName
             ++ " has illegal procedure modifiers. Only purity, determinism, and inlining can be specified."
     mapM_ ((\(Param{paramType=ty, paramName=name}, pos) -> do
             when (ty == AnyType)
@@ -123,16 +123,20 @@ normaliseItem (ForeignProcDecl vis lang mods proto@(ProcProto name params resour
         ) . unPlace) params
 
     normaliseItem
-        (ProcDecl vis mods proto
+        (ProcDecl vis mods proto{procProtoName=procName, procProtoParams=params'}
             [maybePlace (ForeignCall lang name mods' exps) pos] pos)
   where
-    mods' = List.filter (not . List.null) 
+    procName = fromMaybe name mbAlias
+    mods' = List.filter (not . List.null)
                 [ impurityName (modifierImpurity mods)
                 , determinismName (modifierDetism mods) ]
     exps = List.map (uncurry (flip rePlace . paramToVar) . unPlace) params
+        ++ [varSet outputVariableName `maybePlace` pos | resulttype /= AnyType]
         ++ List.map (\(ResourceFlowSpec rs@(ResourceSpec _ r) dir) ->
                         Var r dir (Resource rs) `maybePlace` pos)
                     resources
+    params' = params
+        ++ [Param outputVariableName resulttype ParamOut Ordinary `maybePlace` pos | resulttype /= AnyType]
 normaliseItem item@ProcDecl{} = do
     logNormalise $ "Recording proc without flattening:" ++ show item
     addProc 0 item
@@ -158,7 +162,9 @@ normaliseSubmodule name vis pos items = do
     alreadyExists <- isJust <$> getLoadingModule subModSpec
     if alreadyExists
       then reenterModule subModSpec
-      else enterModule parentOrigin subModSpec (Just parentModSpec)
+      else do
+        root <- getModule modRootModSpec
+        enterModule parentOrigin subModSpec root
     -- submodule always imports parent module
     updateImplementation $ \i -> i { modNestedIn = Just parentModSpec }
     addImport parentModSpec (importSpec Nothing Private)
@@ -297,7 +303,7 @@ completeTypeSCC (CyclicSCC modTypeDefs) = do
              logNormalise $ "   " ++ showModSpec mod ++ " = " ++ show typedef)
           modTypeDefs
     -- First set representations to addresses, then layout types
-    mapM_ ((setTypeRep Pointer `inModule`) . fst) modTypeDefs
+    mapM_ ((setTypeRep Pointer Nothing `inModule`) . fst) modTypeDefs
     mapM_ (uncurry completeType) modTypeDefs
 
 
@@ -383,7 +389,7 @@ completeType modspec (TypeDef params ctors) = do
          | numNonConsts == 0
          = (0, 0)
          | otherwise
-         = (ceiling $ logBase 2 (fromIntegral numNonConsts), wordSizeBytes - 1)
+         = (nextPowerOf2 numNonConsts, wordSizeBytes - 1)
     logNormalise $ "Complete " ++ showModSpec modspec
                    ++ " with " ++ show tagBits ++ " tag bits and "
                    ++ show tagLimit ++ " tag limit"
@@ -398,14 +404,15 @@ completeType modspec (TypeDef params ctors) = do
 
     (nonConstCtors',infos) <- unzip <$> zipWithM nonConstCtorInfo nonConstCtors [0..]
     isUnique <- tmUniqueness . typeModifiers <$> getModuleInterface
-    (reps,nonconstItemsList,gettersSetters) <-
-         unzip3 <$> mapM
+    (reps,sizes,nonconstItemsList,gettersSetters) <-
+         unzip4 <$> mapM
          (nonConstCtorItems isUnique typespec numConsts numNonConsts
           tagBits tagLimit)
          infos
 
-    let rep = typeRepresentation reps numConsts
-    setTypeRep rep
+    let rep = newTypeRep reps numConsts
+    setTypeRep rep (Just $ maximum $ nextPowerOf2 numConsts:sizes)
+
     logNormalise $ "Representation of type " ++ showModSpec modspec
                    ++ " is " ++ show rep
 
@@ -464,11 +471,10 @@ fixAnonFieldName _ _ param pos = (param `maybePlace` pos, False)
 -- | Determine the appropriate representation for a type based on a list of
 -- the representations of all the non-constant constructors and the number
 -- of constant constructors.
-typeRepresentation :: [TypeRepresentation] -> Int -> TypeRepresentation
-typeRepresentation [] numConsts =
-    Bits $ ceiling $ logBase 2 $ fromIntegral numConsts
-typeRepresentation [rep] 0      = rep
-typeRepresentation _ _          = Pointer
+newTypeRep :: [TypeRepresentation] -> Int -> TypeRepresentation
+newTypeRep [] numConsts = Bits $ nextPowerOf2 numConsts
+newTypeRep [rep] 0      = rep
+newTypeRep _ _          = Pointer
 
 
 ----------------------------------------------------------------
@@ -580,16 +586,16 @@ constCtorItems typeSpec ((vis, placedProto), num) =
 -- |All items needed to implement a non-const contructor for the specified type.
 nonConstCtorItems :: Bool -> TypeSpec -> Int -> Int -> Int -> Int
                   -> CtorInfo
-                  -> Compiler (TypeRepresentation, [Item], [(VarName, GetterSetterInfo)])
+                  -> Compiler (TypeRepresentation, Int, [Item], [(VarName, GetterSetterInfo)])
 nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
                   info@(CtorInfo ctorName paramInfos vis pos tag bits) = do
     -- If we're unboxed and there are const ctors, then we need an extra
     -- bit to make sure the unboxed value is > than any const value
     let nonConstsize = bits + tagBits
-    let (size,nonConstBit)
+    let (sizeBits, nonConstBit)
           = if numConsts == 0
             then (nonConstsize,Nothing)
-            else let constSize = ceiling $ logBase 2 $ fromIntegral numConsts
+            else let constSize = nextPowerOf2 numConsts
                      size' = 1 + max nonConstsize constSize
                  in (size', Just $ size' - 1)
     logNormalise $ "Making constructor items for type " ++ show typeSpec
@@ -598,7 +604,7 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
     logNormalise $ show tagBits ++ " tag bit(s)"
     logNormalise $ "nonConst bit = " ++ show nonConstBit
 
-    if size <= wordSize && tag <= tagLimit
+    if sizeBits <= wordSize && tag <= tagLimit
       then do -- unboxed representation
         let fields =
                 fst
@@ -610,7 +616,8 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
                         shift + sz))
                 ([],tagBits)
                 paramInfos
-        return (Bits size,
+        return (Bits sizeBits,
+                sizeBits,
                 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit
                 fields pos
                 ++ unboxedDeconstructorItems vis uniq ctorName typeSpec
@@ -621,8 +628,8 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
                     fields
                 )
       else do -- boxed representation
-        let (fields,size) = layoutRecord paramInfos tag tagLimit
-        logNormalise $ "Laid out structure size " ++ show size
+        let (fields,sizeBytes) = layoutRecord paramInfos tag tagLimit
+        logNormalise $ "Laid out structure size " ++ show sizeBytes
             ++ ": " ++ show fields
         let ptrCount = length $ List.filter ((==Pointer) . paramInfoTypeRep) paramInfos
         logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
@@ -630,13 +637,14 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
                         ++ show numNonConsts ++ " non-const constructors"
         let params = paramInfoParam <$> paramInfos
         return (Pointer,
+                sizeBytes * byteBits,
                 constructorItems vis ctorName typeSpec params fields
-                    size tag tagLimit pos
+                    sizeBytes tag tagLimit pos
                 ++ deconstructorItems uniq vis ctorName typeSpec params numConsts
-                        numNonConsts tag tagBits tagLimit pos fields size,
+                        numNonConsts tag tagBits tagLimit pos fields sizeBytes,
                 concatMap
                     (boxedGetterSetterStmts vis typeSpec numConsts numNonConsts
-                    ptrCount size tag tagBits tagLimit)
+                    ptrCount sizeBytes tag tagBits tagLimit)
                     fields
                 )
 
@@ -652,10 +660,10 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
 -- aligned on word boundaries).
 layoutRecord :: [CtorParamInfo] -> Int -> Int -> ([FieldInfo], Int)
 layoutRecord paramInfos tag tagLimit =
-    let sizes = (2^) <$> [0..floor $ logBase 2 $ fromIntegral wordSizeBytes]
+    let sizes = (2^) <$> [0..prevPowerOf2 wordSizeBytes]
         fields = List.map
                 (\(CtorParamInfo param anon rep sz) ->
-                    let byteSize = (sz + 7) `div` 8
+                    let byteSize = (sz + 7) `div` byteBits
                         wordSize = (byteSize + wordSizeBytes - 1)
                                     `div` wordSizeBytes * wordSizeBytes
                         alignment =
@@ -759,7 +767,9 @@ deconstructorItems uniq vis ctorName typeSpec params numConsts numNonConsts tag
 --  is necessary, just generate a Nop, rather than a true test.
 tagCheck :: OptPos -> Int -> Int -> Int -> Int -> Int -> Maybe Int -> Ident -> Placed Stmt
 tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
-    let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
+    let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
+        tagTy = Representation (Bits tagBits)
+    in
     -- If there are any constant constructors, be sure it's not one of them
     let tests =
           (case numConsts of
@@ -773,11 +783,11 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
            (case numNonConsts of
                1 -> []  -- Nothing to do if it's the only non-const constructor
                _ -> [comparison "icmp_eq"
-                     (intCast $ ForeignFn "llvm" "and" [] [Unplaced $ intCast $ varGet varName,
-                         Unplaced $ iVal (2^tagBits-1) `withType` intType])
-                     (intCast $ iVal (if tag > tagLimit
+                     (ForeignFn "llvm" "and" [] [Unplaced $ varGet varName `castTo` tagTy,
+                         Unplaced $ iVal (2^tagBits-1) `withType` tagTy] `withType` tagTy)
+                     (iVal (if tag > tagLimit
                                       then wordSizeBytes-1
-                                      else tag))])
+                                      else tag) `withType` tagTy)])
            ++
            -- If there's a secondary tag, check that, too.
            if tag > tagLimit

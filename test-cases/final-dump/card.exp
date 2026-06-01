@@ -45,6 +45,7 @@ AFTER EVERYTHING:
                     card.suit.spades<0>
                     card.suit.suits<0>
                     card.suit.~=<0>
+  constants       : 
   imports         : public use card.rank
                     public use card.suit
                     use wybe
@@ -71,8 +72,8 @@ proc #cont#1 > {semipure} (2 calls)
     0:
 
     1:
-        foreign lpvm access(tmp#0##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?s##0:card.suit) @card:nn:nn
-        foreign lpvm access(~tmp#0##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(card.suit)) @card:nn:nn
+        foreign lpvm access(tmp#0##0:wybe.list(card.suit), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?s##0:card.suit) @card:nn:nn
+        foreign lpvm access(~tmp#0##0:wybe.list(card.suit), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(card.suit)) @card:nn:nn
         card.rank.ranks<0>(?tmp#3##0:wybe.list(card.rank)) #1 @card:nn:nn
         card.#cont#2<0>(~s##0:card.suit, ~tmp#0##1:wybe.list(card.suit), ~tmp#3##0:wybe.list(card.rank))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @card:nn:nn
 
@@ -89,15 +90,15 @@ proc #cont#2 > {semipure} (2 calls)
         card.#cont#1<0>(~tmp#0##0:wybe.list(card.suit))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @card:nn:nn
 
     1:
-        foreign lpvm access(tmp#2##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?r##0:card.rank) @card:nn:nn
-        foreign lpvm access(~tmp#2##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##1:wybe.list(card.rank)) @card:nn:nn
+        foreign lpvm access(tmp#2##0:wybe.list(card.rank), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?r##0:card.rank) @card:nn:nn
+        foreign lpvm access(~tmp#2##0:wybe.list(card.rank), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##1:wybe.list(card.rank)) @card:nn:nn
         foreign lpvm cast(~r##0:card.rank, ?tmp#12##0:card) @card:nn:nn
         foreign llvm shl(~tmp#12##0:card, 2:card, ?tmp#13##0:card) @card:nn:nn
         foreign lpvm cast(s##0:card.suit, ?tmp#14##0:card) @card:nn:nn
         foreign llvm or(~tmp#13##0:card, ~tmp#14##0:card, ?tmp#4##0:card) @card:nn:nn
         card.print<0>(~tmp#4##0:card)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @card:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @card:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @card:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @card:nn:nn
         foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @card:nn:nn
         card.#cont#2<0>(~s##0:card.suit, ~tmp#0##0:wybe.list(card.suit), ~tmp#2##1:wybe.list(card.rank))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @card:nn:nn
 
@@ -196,19 +197,19 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'card'
 
 source_filename = "!ROOT!/final-dump/card.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc void @"card.<0>"() {
-  %"tmp#1##0" = tail call fastcc i64 @"card.suit.suits<0>"()
-  tail call fastcc void @"card.#cont#1<0>"(i64 %"tmp#1##0")
+define external fastcc void @"card#.<0>"() {
+  %"tmp#1##0" = tail call fastcc i64 @"card#.suit#.suits<0>"()
+  tail call fastcc void @"card#.#cont#1<0>"(i64 %"tmp#1##0")
   ret void
 }
 
-define external fastcc void @"card.#cont#1<0>"(i64 %"tmp#0##0") {
+define external fastcc void @"card#.#cont#1<0>"(i64 %"tmp#0##0") {
   %"tmp#10##0" = icmp ne i64 %"tmp#0##0", 0
   br i1 %"tmp#10##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -217,14 +218,14 @@ if.then.0:
   %"tmp#12##0" = add i64 %"tmp#0##0", 8
   %"tmp#13##0" = inttoptr i64 %"tmp#12##0" to ptr
   %"tmp#0##1" = load i64, ptr %"tmp#13##0"
-  %"tmp#3##0" = tail call fastcc i64 @"card.rank.ranks<0>"()
-  tail call fastcc void @"card.#cont#2<0>"(i2 %"s##0", i64 %"tmp#0##1", i64 %"tmp#3##0")
+  %"tmp#3##0" = tail call fastcc i64 @"card#.rank#.ranks<0>"()
+  tail call fastcc void @"card#.#cont#2<0>"(i2 %"s##0", i64 %"tmp#0##1", i64 %"tmp#3##0")
   ret void
 if.else.0:
   ret void
 }
 
-define external fastcc void @"card.#cont#2<0>"(i2 %"s##0", i64 %"tmp#0##0", i64 %"tmp#2##0") {
+define external fastcc void @"card#.#cont#2<0>"(i2 %"s##0", i64 %"tmp#0##0", i64 %"tmp#2##0") {
   %"tmp#9##0" = icmp ne i64 %"tmp#2##0", 0
   br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
 if.then.0:
@@ -237,21 +238,21 @@ if.then.0:
   %"tmp#13##0" = shl i6 %"tmp#12##0", 2
   %"tmp#14##0" = zext i2 %"s##0" to i6
   %"tmp#4##0" = or i6 %"tmp#13##0", %"tmp#14##0"
-  tail call fastcc void @"card.print<0>"(i6 %"tmp#4##0")
+  tail call fastcc void @"card#.print<0>"(i6 %"tmp#4##0")
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"card.#cont#2<0>"(i2 %"s##0", i64 %"tmp#0##0", i64 %"tmp#2##1")
+  tail call fastcc void @"card#.#cont#2<0>"(i2 %"s##0", i64 %"tmp#0##0", i64 %"tmp#2##1")
   ret void
 if.else.0:
-  tail call fastcc void @"card.#cont#1<0>"(i64 %"tmp#0##0")
+  tail call fastcc void @"card#.#cont#1<0>"(i64 %"tmp#0##0")
   ret void
 }
 
-define external fastcc i1 @"card.=<0>"(i6 %"#left##0", i6 %"#right##0") {
+define external fastcc i1 @"card#.=<0>"(i6 %"#left##0", i6 %"#right##0") {
   %"tmp#1##0" = icmp eq i6 %"#left##0", %"#right##0"
   ret i1 %"tmp#1##0"
 }
 
-define external fastcc i6 @"card.card<0>"(i4 %"rank##0", i2 %"suit##0") {
+define external fastcc i6 @"card#.card<0>"(i4 %"rank##0", i2 %"suit##0") {
   %"#temp##0" = zext i4 %"rank##0" to i6
   %"#temp##1" = shl i6 %"#temp##0", 2
   %"#temp##2" = zext i2 %"suit##0" to i6
@@ -259,7 +260,7 @@ define external fastcc i6 @"card.card<0>"(i4 %"rank##0", i2 %"suit##0") {
   ret i6 %"tmp#0##0"
 }
 
-define external fastcc {i4, i2} @"card.card<1>"(i6 %"#result##0") {
+define external fastcc {i4, i2} @"card#.card<1>"(i6 %"#result##0") {
   %"#temp##0" = lshr i6 %"#result##0", 2
   %"#temp2##0" = and i6 %"#temp##0", 15
   %"tmp#0##0" = trunc i6 %"#temp2##0" to i4
@@ -270,25 +271,25 @@ define external fastcc {i4, i2} @"card.card<1>"(i6 %"#result##0") {
   ret {i4, i2} %"tmp#3##0"
 }
 
-define external fastcc void @"card.print<0>"(i6 %"c##0") {
+define external fastcc void @"card#.print<0>"(i6 %"c##0") {
   %"tmp#3##0" = lshr i6 %"c##0", 2
   %"tmp#4##0" = and i6 %"tmp#3##0", 15
   %"tmp#0##0" = trunc i6 %"tmp#4##0" to i4
-  tail call fastcc void @"card.rank.print<0>"(i4 %"tmp#0##0")
+  tail call fastcc void @"card#.rank#.print<0>"(i4 %"tmp#0##0")
   %"tmp#6##0" = and i6 %"c##0", 3
   %"tmp#1##0" = trunc i6 %"tmp#6##0" to i2
-  tail call fastcc void @"card.suit.print<0>"(i2 %"tmp#1##0")
+  tail call fastcc void @"card#.suit#.print<0>"(i2 %"tmp#1##0")
   ret void
 }
 
-define external fastcc i4 @"card.rank<0>"(i6 %"#rec##0") {
+define external fastcc i4 @"card#.rank<0>"(i6 %"#rec##0") {
   %"#rec##1" = lshr i6 %"#rec##0", 2
   %"#field##0" = and i6 %"#rec##1", 15
   %"tmp#0##0" = trunc i6 %"#field##0" to i4
   ret i4 %"tmp#0##0"
 }
 
-define external fastcc i6 @"card.rank<1>"(i6 %"#rec##0", i4 %"#field##0") {
+define external fastcc i6 @"card#.rank<1>"(i6 %"#rec##0", i4 %"#field##0") {
   %"#rec##1" = and i6 %"#rec##0", -61
   %"#temp##0" = zext i4 %"#field##0" to i6
   %"#temp##1" = shl i6 %"#temp##0", 2
@@ -296,20 +297,20 @@ define external fastcc i6 @"card.rank<1>"(i6 %"#rec##0", i4 %"#field##0") {
   ret i6 %"tmp#0##0"
 }
 
-define external fastcc i2 @"card.suit<0>"(i6 %"#rec##0") {
+define external fastcc i2 @"card#.suit<0>"(i6 %"#rec##0") {
   %"#field##0" = and i6 %"#rec##0", 3
   %"tmp#0##0" = trunc i6 %"#field##0" to i2
   ret i2 %"tmp#0##0"
 }
 
-define external fastcc i6 @"card.suit<1>"(i6 %"#rec##0", i2 %"#field##0") {
+define external fastcc i6 @"card#.suit<1>"(i6 %"#rec##0", i2 %"#field##0") {
   %"#rec##1" = and i6 %"#rec##0", -4
   %"#temp##0" = zext i2 %"#field##0" to i6
   %"tmp#0##0" = or i6 %"#rec##1", %"#temp##0"
   ret i6 %"tmp#0##0"
 }
 
-define external fastcc i1 @"card.~=<0>"(i6 %"#left##0", i6 %"#right##0") {
+define external fastcc i1 @"card#.~=<0>"(i6 %"#left##0", i6 %"#right##0") {
   %"tmp#0##0" = icmp eq i6 %"#left##0", %"#right##0"
   %"tmp#3##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#3##0"
@@ -338,12 +339,27 @@ define external fastcc i1 @"card.~=<0>"(i6 %"#left##0", i6 %"#right##0") {
                     card.rank.r9<0>
                     card.rank.ranks<0>
                     card.rank.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "card:42:22"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 12 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,IntStructMember 0 8]}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 11 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#1]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 10 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#2]}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 9 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#3]}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 8 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#4]}
+                    6:: StructInfo {structSize = 16, structData = [IntStructMember 7 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#5]}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 6 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#6]}
+                    8:: StructInfo {structSize = 16, structData = [IntStructMember 5 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#7]}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 4 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#8]}
+                    10:: StructInfo {structSize = 16, structData = [IntStructMember 3 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#9]}
+                    11:: StructInfo {structSize = 16, structData = [IntStructMember 2 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#10]}
+                    12:: StructInfo {structSize = 16, structData = [IntStructMember 1 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#11]}
+                    13:: StructInfo {structSize = 16, structData = [IntStructMember 0 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.rank#constant#12]}
+                    14:: ArrayInfo {arrayData = [IntStructMember 50 1,IntStructMember 51 1,IntStructMember 52 1,IntStructMember 53 1,IntStructMember 54 1,IntStructMember 55 1,IntStructMember 56 1,IntStructMember 57 1,IntStructMember 84 1,IntStructMember 74 1,IntStructMember 81 1,IntStructMember 75 1,IntStructMember 65 1]}
   imports         : use card
                     use wybe
   resources       : 
   procs           : 
 
-proc = > public {inline} (106 calls)
+proc = > public {inline} (196 calls)
 0: card.rank.=<0>
 =(#left##0:card.rank, #right##0:card.rank, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -351,7 +367,7 @@ proc = > public {inline} (106 calls)
     foreign llvm icmp_eq(~#left##0:card.rank, ~#right##0:card.rank, ?#success##0:wybe.bool)
 
 
-proc ace > public {inline} (3 calls)
+proc ace > public {inline} (4 calls)
 0: card.rank.ace<0>
 ace(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -364,49 +380,16 @@ proc char > public (1 calls)
 char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    case ~r##0:card.rank of
-    0:
-        foreign llvm move('2':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    1:
-        foreign llvm move('3':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    2:
-        foreign llvm move('4':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    3:
-        foreign llvm move('5':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    4:
-        foreign llvm move('6':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    5:
-        foreign llvm move('7':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    6:
-        foreign llvm move('8':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    7:
-        foreign llvm move('9':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    8:
-        foreign llvm move('T':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    9:
-        foreign llvm move('J':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    10:
-        foreign llvm move('Q':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    11:
-        foreign llvm move('K':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    12:
-        foreign llvm move('A':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+    factored ~r##0:card.rank of
+      ?tmp#67##0:wybe.char <- card.rank#constant#14[IntStructMember 50 1,IntStructMember 51 1,IntStructMember 52 1,IntStructMember 53 1,IntStructMember 54 1,IntStructMember 55 1,IntStructMember 56 1,IntStructMember 57 1,IntStructMember 84 1,IntStructMember 74 1,IntStructMember 81 1,IntStructMember 75 1,IntStructMember 65 1]
+        foreign llvm move(~tmp#67##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
+    else:
+        foreign c {terminal,semipure} error_exit(c"card:42:22":wybe.c_string, c"shouldn't happen!":wybe.c_string) @card:nn:nn
+        foreign llvm move(undef:wybe.char, ?#result##0:wybe.char)
 
 
 
-proc jack > public {inline} (6 calls)
+proc jack > public {inline} (10 calls)
 0: card.rank.jack<0>
 jack(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -414,7 +397,7 @@ jack(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(9:card.rank, ?#result##0:card.rank)
 
 
-proc king > public {inline} (4 calls)
+proc king > public {inline} (6 calls)
 0: card.rank.king<0>
 king(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -429,11 +412,11 @@ print(r##0:card.rank)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     card.rank.char<0>(~r##0:card.rank, ?tmp#0##0:wybe.char) #0 @card:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @card:nn:nn
-    foreign c putchar(~tmp#0##0:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @card:nn:nn
+    foreign c putchar(~tmp#0##0:wybe.char, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @card:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @card:nn:nn
 
 
-proc queen > public {inline} (5 calls)
+proc queen > public {inline} (8 calls)
 0: card.rank.queen<0>
 queen(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -441,7 +424,7 @@ queen(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(10:card.rank, ?#result##0:card.rank)
 
 
-proc r10 > public {inline} (7 calls)
+proc r10 > public {inline} (12 calls)
 0: card.rank.r10<0>
 r10(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -449,7 +432,7 @@ r10(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(8:card.rank, ?#result##0:card.rank)
 
 
-proc r2 > public {inline} (16 calls)
+proc r2 > public {inline} (28 calls)
 0: card.rank.r2<0>
 r2(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -457,7 +440,7 @@ r2(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(0:card.rank, ?#result##0:card.rank)
 
 
-proc r3 > public {inline} (14 calls)
+proc r3 > public {inline} (26 calls)
 0: card.rank.r3<0>
 r3(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -465,7 +448,7 @@ r3(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(1:card.rank, ?#result##0:card.rank)
 
 
-proc r4 > public {inline} (13 calls)
+proc r4 > public {inline} (24 calls)
 0: card.rank.r4<0>
 r4(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -473,7 +456,7 @@ r4(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(2:card.rank, ?#result##0:card.rank)
 
 
-proc r5 > public {inline} (12 calls)
+proc r5 > public {inline} (22 calls)
 0: card.rank.r5<0>
 r5(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -481,7 +464,7 @@ r5(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(3:card.rank, ?#result##0:card.rank)
 
 
-proc r6 > public {inline} (11 calls)
+proc r6 > public {inline} (20 calls)
 0: card.rank.r6<0>
 r6(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -489,7 +472,7 @@ r6(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(4:card.rank, ?#result##0:card.rank)
 
 
-proc r7 > public {inline} (10 calls)
+proc r7 > public {inline} (18 calls)
 0: card.rank.r7<0>
 r7(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -497,7 +480,7 @@ r7(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(5:card.rank, ?#result##0:card.rank)
 
 
-proc r8 > public {inline} (9 calls)
+proc r8 > public {inline} (16 calls)
 0: card.rank.r8<0>
 r8(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -505,7 +488,7 @@ r8(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(6:card.rank, ?#result##0:card.rank)
 
 
-proc r9 > public {inline} (8 calls)
+proc r9 > public {inline} (14 calls)
 0: card.rank.r9<0>
 r9(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -513,50 +496,12 @@ r9(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(7:card.rank, ?#result##0:card.rank)
 
 
-proc ranks > public (0 calls)
+proc ranks > public {inline} (0 calls)
 0: card.rank.ranks<0>
 ranks(?#result##0:wybe.list(card.rank))<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#29##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#29##0:wybe.list(T), ?tmp#30##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#30##0:wybe.list(T), ?tmp#24##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#33##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#33##0:wybe.list(T), ?tmp#34##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 11:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#34##0:wybe.list(T), ?tmp#22##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#24##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#37##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#37##0:wybe.list(T), ?tmp#38##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#38##0:wybe.list(T), ?tmp#20##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#22##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#41##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#41##0:wybe.list(T), ?tmp#42##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 9:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#42##0:wybe.list(T), ?tmp#18##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#20##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#45##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#45##0:wybe.list(T), ?tmp#46##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 8:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#46##0:wybe.list(T), ?tmp#16##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#18##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#49##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#49##0:wybe.list(T), ?tmp#50##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 7:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#50##0:wybe.list(T), ?tmp#14##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#53##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#53##0:wybe.list(T), ?tmp#54##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 6:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#54##0:wybe.list(T), ?tmp#12##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#14##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#57##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#57##0:wybe.list(T), ?tmp#58##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 5:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#58##0:wybe.list(T), ?tmp#10##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#12##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#61##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#61##0:wybe.list(T), ?tmp#62##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#62##0:wybe.list(T), ?tmp#8##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#10##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#65##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#65##0:wybe.list(T), ?tmp#66##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#66##0:wybe.list(T), ?tmp#6##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#8##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#69##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#69##0:wybe.list(T), ?tmp#70##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#70##0:wybe.list(T), ?tmp#4##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#73##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#73##0:wybe.list(T), ?tmp#74##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#74##0:wybe.list(T), ?tmp#2##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#4##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#77##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#77##0:wybe.list(T), ?tmp#78##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#78##0:wybe.list(T), ?#result##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @card:nn:nn
+    foreign llvm move(card.rank#constant#13:wybe.list(card.rank), ?#result##0:wybe.list(card.rank)) @card:nn:nn
 
 
 proc ~= > public {inline} (0 calls)
@@ -573,215 +518,111 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'card.rank'
 
 source_filename = "!ROOT!/final-dump/card.wybe"
-target triple    ????
+target triple   = ????
 
+@"card.rank#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"card:42:22\00", align 8
+@"card.rank#constant#1" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, i64} { i8 12, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i64 0 }, align 8
+@"card.rank#constant#2" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 11, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#1" }, align 8
+@"card.rank#constant#3" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 10, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#2" }, align 8
+@"card.rank#constant#4" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 9, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#3" }, align 8
+@"card.rank#constant#5" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 8, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#4" }, align 8
+@"card.rank#constant#6" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 7, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#5" }, align 8
+@"card.rank#constant#7" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 6, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#6" }, align 8
+@"card.rank#constant#8" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 5, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#7" }, align 8
+@"card.rank#constant#9" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 4, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#8" }, align 8
+@"card.rank#constant#10" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 3, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#9" }, align 8
+@"card.rank#constant#11" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 2, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#10" }, align 8
+@"card.rank#constant#12" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 1, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#11" }, align 8
+@"card.rank#constant#13" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 0, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.rank#constant#12" }, align 8
+@"card.rank#constant#14" = private unnamed_addr constant [ ?? x i8 ] [i8 50, i8 51, i8 52, i8 53, i8 54, i8 55, i8 56, i8 57, i8 84, i8 74, i8 81, i8 75, i8 65]
+@"wybe.control#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"shouldn't happen!\00", align 8
 
+declare external ccc void @error_exit(i64, i64)
 declare external ccc void @putchar(i8)
-declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"card.rank.=<0>"(i4 %"#left##0", i4 %"#right##0") {
+define external fastcc i1 @"card#.rank#.=<0>"(i4 %"#left##0", i4 %"#right##0") {
   %"tmp#1##0" = icmp eq i4 %"#left##0", %"#right##0"
   ret i1 %"tmp#1##0"
 }
 
-define external fastcc i4 @"card.rank.ace<0>"() {
+define external fastcc i4 @"card#.rank#.ace<0>"() {
   ret i4 12
 }
 
-define external fastcc i8 @"card.rank.char<0>"(i4 %"r##0") {
-  switch i4 %"r##0", label %case.12.switch.0 [
-    i4 0, label %case.0.switch.0
-    i4 1, label %case.1.switch.0
-    i4 2, label %case.2.switch.0
-    i4 3, label %case.3.switch.0
-    i4 4, label %case.4.switch.0
-    i4 5, label %case.5.switch.0
-    i4 6, label %case.6.switch.0
-    i4 7, label %case.7.switch.0
-    i4 8, label %case.8.switch.0
-    i4 9, label %case.9.switch.0
-    i4 10, label %case.10.switch.0
-    i4 11, label %case.11.switch.0
-    i4 12, label %case.12.switch.0 ]
-case.0.switch.0:
-  ret i8 50
-case.1.switch.0:
-  ret i8 51
-case.2.switch.0:
-  ret i8 52
-case.3.switch.0:
-  ret i8 53
-case.4.switch.0:
-  ret i8 54
-case.5.switch.0:
-  ret i8 55
-case.6.switch.0:
-  ret i8 56
-case.7.switch.0:
-  ret i8 57
-case.8.switch.0:
-  ret i8 84
-case.9.switch.0:
-  ret i8 74
-case.10.switch.0:
-  ret i8 81
-case.11.switch.0:
-  ret i8 75
-case.12.switch.0:
-  ret i8 65
+define external fastcc i8 @"card#.rank#.char<0>"(i4 %"r##0") {
+  %"tmp#79##0" = icmp ule i4 %"r##0", 13
+  br i1 %"tmp#79##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#81##0" = zext i4 %"r##0" to i64
+  %"tmp#80##0" = getelementptr inbounds [ ?? x i8 ], ptr @"card.rank#constant#14", i64 0, i64 %"tmp#81##0"
+  %"tmp#67##0" = load i8, ptr %"tmp#80##0"
+  ret i8 %"tmp#67##0"
+if.else.0:
+  call ccc void @error_exit(ptr @"card.rank#constant#0", ptr @"wybe.control#constant#1")
+  ret i8 undef
 }
 
-define external fastcc i4 @"card.rank.jack<0>"() {
+define external fastcc i4 @"card#.rank#.jack<0>"() {
   ret i4 9
 }
 
-define external fastcc i4 @"card.rank.king<0>"() {
+define external fastcc i4 @"card#.rank#.king<0>"() {
   ret i4 11
 }
 
-define external fastcc void @"card.rank.print<0>"(i4 %"r##0") {
-  %"tmp#0##0" = tail call fastcc i8 @"card.rank.char<0>"(i4 %"r##0")
+define external fastcc void @"card#.rank#.print<0>"(i4 %"r##0") {
+  %"tmp#0##0" = tail call fastcc i8 @"card#.rank#.char<0>"(i4 %"r##0")
   call ccc void @putchar(i8 %"tmp#0##0")
   ret void
 }
 
-define external fastcc i4 @"card.rank.queen<0>"() {
+define external fastcc i4 @"card#.rank#.queen<0>"() {
   ret i4 10
 }
 
-define external fastcc i4 @"card.rank.r10<0>"() {
+define external fastcc i4 @"card#.rank#.r10<0>"() {
   ret i4 8
 }
 
-define external fastcc i4 @"card.rank.r2<0>"() {
+define external fastcc i4 @"card#.rank#.r2<0>"() {
   ret i4 0
 }
 
-define external fastcc i4 @"card.rank.r3<0>"() {
+define external fastcc i4 @"card#.rank#.r3<0>"() {
   ret i4 1
 }
 
-define external fastcc i4 @"card.rank.r4<0>"() {
+define external fastcc i4 @"card#.rank#.r4<0>"() {
   ret i4 2
 }
 
-define external fastcc i4 @"card.rank.r5<0>"() {
+define external fastcc i4 @"card#.rank#.r5<0>"() {
   ret i4 3
 }
 
-define external fastcc i4 @"card.rank.r6<0>"() {
+define external fastcc i4 @"card#.rank#.r6<0>"() {
   ret i4 4
 }
 
-define external fastcc i4 @"card.rank.r7<0>"() {
+define external fastcc i4 @"card#.rank#.r7<0>"() {
   ret i4 5
 }
 
-define external fastcc i4 @"card.rank.r8<0>"() {
+define external fastcc i4 @"card#.rank#.r8<0>"() {
   ret i4 6
 }
 
-define external fastcc i4 @"card.rank.r9<0>"() {
+define external fastcc i4 @"card#.rank#.r9<0>"() {
   ret i4 7
 }
 
-define external fastcc i64 @"card.rank.ranks<0>"() {
-  %"tmp#79##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#29##0" = ptrtoint ptr %"tmp#79##0" to i64
-  %"tmp#80##0" = inttoptr i64 %"tmp#29##0" to ptr
-  store i64 12, ptr %"tmp#80##0"
-  %"tmp#81##0" = add i64 %"tmp#29##0", 8
-  %"tmp#82##0" = inttoptr i64 %"tmp#81##0" to ptr
-  store i64 0, ptr %"tmp#82##0"
-  %"tmp#83##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#33##0" = ptrtoint ptr %"tmp#83##0" to i64
-  %"tmp#84##0" = inttoptr i64 %"tmp#33##0" to ptr
-  store i64 11, ptr %"tmp#84##0"
-  %"tmp#85##0" = add i64 %"tmp#33##0", 8
-  %"tmp#86##0" = inttoptr i64 %"tmp#85##0" to ptr
-  store i64 %"tmp#29##0", ptr %"tmp#86##0"
-  %"tmp#87##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#37##0" = ptrtoint ptr %"tmp#87##0" to i64
-  %"tmp#88##0" = inttoptr i64 %"tmp#37##0" to ptr
-  store i64 10, ptr %"tmp#88##0"
-  %"tmp#89##0" = add i64 %"tmp#37##0", 8
-  %"tmp#90##0" = inttoptr i64 %"tmp#89##0" to ptr
-  store i64 %"tmp#33##0", ptr %"tmp#90##0"
-  %"tmp#91##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#41##0" = ptrtoint ptr %"tmp#91##0" to i64
-  %"tmp#92##0" = inttoptr i64 %"tmp#41##0" to ptr
-  store i64 9, ptr %"tmp#92##0"
-  %"tmp#93##0" = add i64 %"tmp#41##0", 8
-  %"tmp#94##0" = inttoptr i64 %"tmp#93##0" to ptr
-  store i64 %"tmp#37##0", ptr %"tmp#94##0"
-  %"tmp#95##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#45##0" = ptrtoint ptr %"tmp#95##0" to i64
-  %"tmp#96##0" = inttoptr i64 %"tmp#45##0" to ptr
-  store i64 8, ptr %"tmp#96##0"
-  %"tmp#97##0" = add i64 %"tmp#45##0", 8
-  %"tmp#98##0" = inttoptr i64 %"tmp#97##0" to ptr
-  store i64 %"tmp#41##0", ptr %"tmp#98##0"
-  %"tmp#99##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#49##0" = ptrtoint ptr %"tmp#99##0" to i64
-  %"tmp#100##0" = inttoptr i64 %"tmp#49##0" to ptr
-  store i64 7, ptr %"tmp#100##0"
-  %"tmp#101##0" = add i64 %"tmp#49##0", 8
-  %"tmp#102##0" = inttoptr i64 %"tmp#101##0" to ptr
-  store i64 %"tmp#45##0", ptr %"tmp#102##0"
-  %"tmp#103##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#53##0" = ptrtoint ptr %"tmp#103##0" to i64
-  %"tmp#104##0" = inttoptr i64 %"tmp#53##0" to ptr
-  store i64 6, ptr %"tmp#104##0"
-  %"tmp#105##0" = add i64 %"tmp#53##0", 8
-  %"tmp#106##0" = inttoptr i64 %"tmp#105##0" to ptr
-  store i64 %"tmp#49##0", ptr %"tmp#106##0"
-  %"tmp#107##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#57##0" = ptrtoint ptr %"tmp#107##0" to i64
-  %"tmp#108##0" = inttoptr i64 %"tmp#57##0" to ptr
-  store i64 5, ptr %"tmp#108##0"
-  %"tmp#109##0" = add i64 %"tmp#57##0", 8
-  %"tmp#110##0" = inttoptr i64 %"tmp#109##0" to ptr
-  store i64 %"tmp#53##0", ptr %"tmp#110##0"
-  %"tmp#111##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#61##0" = ptrtoint ptr %"tmp#111##0" to i64
-  %"tmp#112##0" = inttoptr i64 %"tmp#61##0" to ptr
-  store i64 4, ptr %"tmp#112##0"
-  %"tmp#113##0" = add i64 %"tmp#61##0", 8
-  %"tmp#114##0" = inttoptr i64 %"tmp#113##0" to ptr
-  store i64 %"tmp#57##0", ptr %"tmp#114##0"
-  %"tmp#115##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#65##0" = ptrtoint ptr %"tmp#115##0" to i64
-  %"tmp#116##0" = inttoptr i64 %"tmp#65##0" to ptr
-  store i64 3, ptr %"tmp#116##0"
-  %"tmp#117##0" = add i64 %"tmp#65##0", 8
-  %"tmp#118##0" = inttoptr i64 %"tmp#117##0" to ptr
-  store i64 %"tmp#61##0", ptr %"tmp#118##0"
-  %"tmp#119##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#69##0" = ptrtoint ptr %"tmp#119##0" to i64
-  %"tmp#120##0" = inttoptr i64 %"tmp#69##0" to ptr
-  store i64 2, ptr %"tmp#120##0"
-  %"tmp#121##0" = add i64 %"tmp#69##0", 8
-  %"tmp#122##0" = inttoptr i64 %"tmp#121##0" to ptr
-  store i64 %"tmp#65##0", ptr %"tmp#122##0"
-  %"tmp#123##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#73##0" = ptrtoint ptr %"tmp#123##0" to i64
-  %"tmp#124##0" = inttoptr i64 %"tmp#73##0" to ptr
-  store i64 1, ptr %"tmp#124##0"
-  %"tmp#125##0" = add i64 %"tmp#73##0", 8
-  %"tmp#126##0" = inttoptr i64 %"tmp#125##0" to ptr
-  store i64 %"tmp#69##0", ptr %"tmp#126##0"
-  %"tmp#127##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#77##0" = ptrtoint ptr %"tmp#127##0" to i64
-  %"tmp#128##0" = inttoptr i64 %"tmp#77##0" to ptr
-  store i64 0, ptr %"tmp#128##0"
-  %"tmp#129##0" = add i64 %"tmp#77##0", 8
-  %"tmp#130##0" = inttoptr i64 %"tmp#129##0" to ptr
-  store i64 %"tmp#73##0", ptr %"tmp#130##0"
-  ret i64 %"tmp#77##0"
+define external fastcc i64 @"card#.rank#.ranks<0>"() {
+  %"tmp#79##0" = ptrtoint ptr @"card.rank#constant#13" to i64
+  ret i64 %"tmp#79##0"
 }
 
-define external fastcc i1 @"card.rank.~=<0>"(i4 %"#left##0", i4 %"#right##0") {
+define external fastcc i1 @"card#.rank#.~=<0>"(i4 %"#left##0", i4 %"#right##0") {
   %"tmp#0##0" = icmp eq i4 %"#left##0", %"#right##0"
   %"tmp#3##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#3##0"
@@ -801,12 +642,18 @@ define external fastcc i1 @"card.rank.~=<0>"(i4 %"#left##0", i4 %"#right##0") {
                     card.suit.spades<0>
                     card.suit.suits<0>
                     card.suit.~=<0>
+  constants       : 0:: CStringInfo {cstringChars = "card:12:25"}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 3 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,IntStructMember 0 8]}
+                    2:: StructInfo {structSize = 16, structData = [IntStructMember 2 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.suit#constant#1]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 1 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.suit#constant#2]}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 0 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,UndefStructMember 1,PointerStructMember card.suit#constant#3]}
+                    5:: ArrayInfo {arrayData = [IntStructMember 67 1,IntStructMember 68 1,IntStructMember 72 1,IntStructMember 83 1]}
   imports         : use card
                     use wybe
   resources       : 
   procs           : 
 
-proc = > public {inline} (16 calls)
+proc = > public {inline} (25 calls)
 0: card.suit.=<0>
 =(#left##0:card.suit, #right##0:card.suit, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -819,22 +666,12 @@ proc char > public (1 calls)
 char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    case ~s##0:card.suit of
-    0:
-        foreign llvm move('C':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    1:
-        foreign llvm move('D':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    2:
-        foreign llvm move('H':wybe.char, ?#result##0:wybe.char) @card:nn:nn
-
-    3:
-        foreign llvm move('S':wybe.char, ?#result##0:wybe.char) @card:nn:nn
+    factored ~s##0:card.suit of
+      ?tmp#22##0:wybe.char <- card.suit#constant#5[IntStructMember 67 1,IntStructMember 68 1,IntStructMember 72 1,IntStructMember 83 1]
+        foreign llvm move(~tmp#22##0:wybe.char, ?#result##0:wybe.char) @card:nn:nn
 
 
-
-proc clubs > public {inline} (7 calls)
+proc clubs > public {inline} (10 calls)
 0: card.suit.clubs<0>
 clubs(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -842,7 +679,7 @@ clubs(?#result##0:card.suit)<{}; {}; {}>:
     foreign llvm move(0:card.suit, ?#result##0:card.suit)
 
 
-proc diamonds > public {inline} (5 calls)
+proc diamonds > public {inline} (8 calls)
 0: card.suit.diamonds<0>
 diamonds(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -850,7 +687,7 @@ diamonds(?#result##0:card.suit)<{}; {}; {}>:
     foreign llvm move(1:card.suit, ?#result##0:card.suit)
 
 
-proc hearts > public {inline} (4 calls)
+proc hearts > public {inline} (6 calls)
 0: card.suit.hearts<0>
 hearts(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -865,11 +702,11 @@ print(r##0:card.suit)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     card.suit.char<0>(~r##0:card.suit, ?tmp#0##0:wybe.char) #0 @card:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @card:nn:nn
-    foreign c putchar(~tmp#0##0:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @card:nn:nn
+    foreign c putchar(~tmp#0##0:wybe.char, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @card:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @card:nn:nn
 
 
-proc spades > public {inline} (3 calls)
+proc spades > public {inline} (4 calls)
 0: card.suit.spades<0>
 spades(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -877,23 +714,12 @@ spades(?#result##0:card.suit)<{}; {}; {}>:
     foreign llvm move(3:card.suit, ?#result##0:card.suit)
 
 
-proc suits > public (0 calls)
+proc suits > public {inline} (0 calls)
 0: card.suit.suits<0>
 suits(?#result##0:wybe.list(card.suit))<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?tmp#12##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#12##0:wybe.list(T), ?tmp#6##0:wybe.list(card.suit), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?tmp#16##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#4##0:wybe.list(card.suit), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?tmp#20##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#20##0:wybe.list(T), ?tmp#2##0:wybe.list(card.suit), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#4##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:wybe.list(T)) @card:nn:nn
-    foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#24##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:T) @card:nn:nn
-    foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?#result##0:wybe.list(card.suit), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @card:nn:nn
+    foreign llvm move(card.suit#constant#4:wybe.list(card.suit), ?#result##0:wybe.list(card.suit)) @card:nn:nn
 
 
 proc ~= > public {inline} (0 calls)
@@ -910,89 +736,57 @@ proc ~= > public {inline} (0 calls)
 ; ModuleID = 'card.suit'
 
 source_filename = "!ROOT!/final-dump/card.wybe"
-target triple    ????
+target triple   = ????
 
+@"card.suit#constant#1" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, i64} { i8 3, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i64 0 }, align 8
+@"card.suit#constant#2" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 2, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.suit#constant#1" }, align 8
+@"card.suit#constant#3" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 1, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.suit#constant#2" }, align 8
+@"card.suit#constant#4" = private unnamed_addr constant {i8, i8, i8, i8, i8, i8, i8, i8, ptr} { i8 0, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, i8 undef, ptr @"card.suit#constant#3" }, align 8
+@"card.suit#constant#5" = private unnamed_addr constant [ ?? x i8 ] [i8 67, i8 68, i8 72, i8 83]
 
 declare external ccc void @putchar(i8)
-declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"card.suit.=<0>"(i2 %"#left##0", i2 %"#right##0") {
+define external fastcc i1 @"card#.suit#.=<0>"(i2 %"#left##0", i2 %"#right##0") {
   %"tmp#1##0" = icmp eq i2 %"#left##0", %"#right##0"
   ret i1 %"tmp#1##0"
 }
 
-define external fastcc i8 @"card.suit.char<0>"(i2 %"s##0") {
-  switch i2 %"s##0", label %case.3.switch.0 [
-    i2 0, label %case.0.switch.0
-    i2 1, label %case.1.switch.0
-    i2 2, label %case.2.switch.0
-    i2 3, label %case.3.switch.0 ]
-case.0.switch.0:
-  ret i8 67
-case.1.switch.0:
-  ret i8 68
-case.2.switch.0:
-  ret i8 72
-case.3.switch.0:
-  ret i8 83
+define external fastcc i8 @"card#.suit#.char<0>"(i2 %"s##0") {
+  %"tmp#26##0" = zext i2 %"s##0" to i64
+  %"tmp#25##0" = getelementptr inbounds [ ?? x i8 ], ptr @"card.suit#constant#5", i64 0, i64 %"tmp#26##0"
+  %"tmp#22##0" = load i8, ptr %"tmp#25##0"
+  ret i8 %"tmp#22##0"
 }
 
-define external fastcc i2 @"card.suit.clubs<0>"() {
+define external fastcc i2 @"card#.suit#.clubs<0>"() {
   ret i2 0
 }
 
-define external fastcc i2 @"card.suit.diamonds<0>"() {
+define external fastcc i2 @"card#.suit#.diamonds<0>"() {
   ret i2 1
 }
 
-define external fastcc i2 @"card.suit.hearts<0>"() {
+define external fastcc i2 @"card#.suit#.hearts<0>"() {
   ret i2 2
 }
 
-define external fastcc void @"card.suit.print<0>"(i2 %"r##0") {
-  %"tmp#0##0" = tail call fastcc i8 @"card.suit.char<0>"(i2 %"r##0")
+define external fastcc void @"card#.suit#.print<0>"(i2 %"r##0") {
+  %"tmp#0##0" = tail call fastcc i8 @"card#.suit#.char<0>"(i2 %"r##0")
   call ccc void @putchar(i8 %"tmp#0##0")
   ret void
 }
 
-define external fastcc i2 @"card.suit.spades<0>"() {
+define external fastcc i2 @"card#.suit#.spades<0>"() {
   ret i2 3
 }
 
-define external fastcc i64 @"card.suit.suits<0>"() {
-  %"tmp#25##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#11##0" = ptrtoint ptr %"tmp#25##0" to i64
-  %"tmp#26##0" = inttoptr i64 %"tmp#11##0" to ptr
-  store i64 3, ptr %"tmp#26##0"
-  %"tmp#27##0" = add i64 %"tmp#11##0", 8
-  %"tmp#28##0" = inttoptr i64 %"tmp#27##0" to ptr
-  store i64 0, ptr %"tmp#28##0"
-  %"tmp#29##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#15##0" = ptrtoint ptr %"tmp#29##0" to i64
-  %"tmp#30##0" = inttoptr i64 %"tmp#15##0" to ptr
-  store i64 2, ptr %"tmp#30##0"
-  %"tmp#31##0" = add i64 %"tmp#15##0", 8
-  %"tmp#32##0" = inttoptr i64 %"tmp#31##0" to ptr
-  store i64 %"tmp#11##0", ptr %"tmp#32##0"
-  %"tmp#33##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#19##0" = ptrtoint ptr %"tmp#33##0" to i64
-  %"tmp#34##0" = inttoptr i64 %"tmp#19##0" to ptr
-  store i64 1, ptr %"tmp#34##0"
-  %"tmp#35##0" = add i64 %"tmp#19##0", 8
-  %"tmp#36##0" = inttoptr i64 %"tmp#35##0" to ptr
-  store i64 %"tmp#15##0", ptr %"tmp#36##0"
-  %"tmp#37##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#23##0" = ptrtoint ptr %"tmp#37##0" to i64
-  %"tmp#38##0" = inttoptr i64 %"tmp#23##0" to ptr
-  store i64 0, ptr %"tmp#38##0"
-  %"tmp#39##0" = add i64 %"tmp#23##0", 8
-  %"tmp#40##0" = inttoptr i64 %"tmp#39##0" to ptr
-  store i64 %"tmp#19##0", ptr %"tmp#40##0"
-  ret i64 %"tmp#23##0"
+define external fastcc i64 @"card#.suit#.suits<0>"() {
+  %"tmp#25##0" = ptrtoint ptr @"card.suit#constant#4" to i64
+  ret i64 %"tmp#25##0"
 }
 
-define external fastcc i1 @"card.suit.~=<0>"(i2 %"#left##0", i2 %"#right##0") {
+define external fastcc i1 @"card#.suit#.~=<0>"(i2 %"#left##0", i2 %"#right##0") {
   %"tmp#0##0" = icmp eq i2 %"#left##0", %"#right##0"
   %"tmp#3##0" = xor i1 %"tmp#0##0", 1
   ret i1 %"tmp#3##0"

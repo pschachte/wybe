@@ -1,0 +1,39 @@
+Checking 2 in 0 primes; have found 0 primes.
+It is prime:  collecting it.
+Checking 3 in 1 primes; have found 1 primes.
+Checking if 2 divides 3: nope
+It is prime:  collecting it.
+Checking 4 in 2 primes; have found 2 primes.
+Checking if 3 divides 4: nope
+Checking if 2 divides 4: yep
+Checking 5 in 2 primes; have found 2 primes.
+Checking if 3 divides 5: nope
+Checking if 2 divides 5: nope
+It is prime:  collecting it.
+Checking 6 in 3 primes; have found 3 primes.
+Checking if 5 divides 6: nope
+Checking if 3 divides 6: yep
+Checking 7 in 3 primes; have found 3 primes.
+Checking if 5 divides 7: nope
+Checking if 3 divides 7: nope
+Checking if 2 divides 7: nope
+It is prime:  collecting it.
+Checking 8 in 4 primes; have found 4 primes.
+Checking if 7 divides 8: nope
+Checking if 5 divides 8: nope
+Checking if 3 divides 8: nope
+Checking if 2 divides 8: yep
+Checking 9 in 4 primes; have found 4 primes.
+Checking if 7 divides 9: nope
+Checking if 5 divides 9: nope
+Checking if 3 divides 9: yep
+Checking 10 in 4 primes; have found 4 primes.
+Checking if 7 divides 10: nope
+Checking if 5 divides 10: yep
+Checking 11 in 4 primes; have found 4 primes.
+Checking if 7 divides 11: nope
+Checking if 5 divides 11: nope
+Checking if 3 divides 11: nope
+Checking if 2 divides 11: nope
+It is prime:  collecting it.
+11

@@ -7,14 +7,15 @@
 
 module Util (sameLength, maybeNth, insertAt,
              setMapInsert, showArguments,
-             fillLines, nop, sccElts, DisjointSet,
-             emptyDS, addOneToDS, unionTwoInDS,
+             fillLines, nop, sccElts, mapFst4, thd4, 
+             nextPowerOf2, prevPowerOf2, ceilDiv,
+             DisjointSet, emptyDS, addOneToDS, unionTwoInDS,
              combineTwoDS, removeSingletonFromDS,
              addConnectedGroupToDS, removeOneFromDS,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
              intersectMapIdentity, orElse,
-             apply2way, (&&&), (|||), zipWith3M, zipWith3M_, lift2,
+             apply2way, (&&&), (|||), zipWith3M, zipWith3M_, lift2, (<$$>), (<&&>), (<||>),
              pathIsWriteable,
              useLocalCacheFileIfPossible, createLocalCacheFile
              ) where
@@ -23,6 +24,8 @@ module Util (sameLength, maybeNth, insertAt,
 import           Config ( localCacheLibDir )
 import           Control.Monad ( when, unless )
 import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Maybe (MaybeT(runMaybeT, MaybeT))
+import           Control.Monad.Extra (ifM)
 import           Crypto.Hash ( hashWith, hashlazy, SHA1(..), Digest )
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.ByteString.Lazy  as BL
@@ -32,14 +35,14 @@ import           Data.Map     as Map
 import           Data.Map.Merge.Lazy (merge,dropMissing,zipWithMaybeMatched)
 import           Data.Maybe   (isJust)
 import           Data.Set     as Set
+import           Data.Foldable (foldrM)
 import qualified Data.Text.Internal.Builder as BS
 import qualified Data.Text.Internal.Builder as BS.UTF8
 import           GHC.Generics (Generic)
 import           Flow         ((|>))
 import           System.FilePath ( (<.>), (</>), takeDirectory )
-import           System.Directory ( doesFileExist, removeFile, createDirectoryIfMissing )
-import System.Directory.Extra (Permissions(writable))
-import System.Directory (getPermissions)
+import           System.Directory ( doesFileExist, removeFile, createDirectoryIfMissing, getPermissions )
+import           System.Directory.Extra (Permissions(writable))
 
 
 -- |Do the the two lists have the same length?
@@ -105,6 +108,7 @@ fillLines' marginText currColumn lineLength (word1:word2:words) =
              fillLines' marginText (length marginText) lineLength (word2:words)
         else " " ++ fillLines' marginText nextColumn lineLength (word2:words)
 
+
 -- |Do nothing monadically.
 nop :: Monad m => m ()
 nop = return ()
@@ -113,6 +117,31 @@ nop = return ()
 sccElts :: SCC a -> [a]
 sccElts (AcyclicSCC single) = [single]
 sccElts (CyclicSCC multi)   = multi
+
+
+-- Map the first elemt of a 4-tuple
+mapFst4 :: (a0 -> a1) -> (a0, b, c, d) -> (a1, b, c, d)
+mapFst4 f (a, b, c, d) = (f a, b, c, d)
+
+
+-- Get the third of a 4-tuple
+thd4 :: (a, b, c, d) -> c
+thd4 (_, _, c, _) = c
+
+
+-- Find the next power of 2 no greater than the given integer
+nextPowerOf2 :: (Integral b, Integral a) => a -> b
+nextPowerOf2 n = ceiling $ logBase 2 $ fromIntegral n
+
+
+-- Find the previous power of 2 no lesser than the given integer
+prevPowerOf2 :: (Integral b, Integral a) => a -> b
+prevPowerOf2 n = floor $ logBase 2 $ fromIntegral n
+
+
+-- Ceiling'ed integer division
+ceilDiv :: Integral a => a -> a -> a
+ceilDiv a b = (a + b - 1) `div` b
 
 
 ----------------------------------------------------------------
@@ -282,6 +311,24 @@ lift2 :: (MonadTrans t1, MonadTrans t2, Monad m, Monad (t2 m)) => m a -> t1 (t2 
 lift2 act = lift $ lift act
 
 
+-- | Nested application of <$>
+infixr 5 <$$>
+(<$$>) :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)
+(<$$>) = (<$>) . (<$>) 
+
+
+infixr 3 <&&>, <||>
+
+-- && lifed into a Monad
+(<&&>) :: Monad m => m Bool -> m Bool -> m Bool
+(<&&>) t f = ifM t f (return False) 
+
+
+-- || lifed into a Monad
+(<||>) :: Monad m => m Bool -> m Bool -> m Bool
+(<||>) t f = ifM t (return True) t 
+
+
 -- | Check if we can write to the specified file path.
 pathIsWriteable :: FilePath -> IO Bool
 pathIsWriteable file = do
@@ -363,4 +410,3 @@ createLocalCacheFile file = do
     srcFileHash <- _getFileHash file
     writeFile meta srcFileHash
     return cacheFile
-

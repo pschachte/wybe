@@ -11,6 +11,7 @@
 --
 --  This code is used bottom-up, ie, callees are expanded before
 --  their callers, so it does not need to recursively expand calls.
+{-# LANGUAGE TupleSections #-}
 
 module Expansion (procExpansion) where
 
@@ -26,9 +27,11 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
 import           Data.Maybe                as Maybe
+import           Data.Char                 (ord)
+import           Data.Tuple.HT             (mapFst)
+import           Data.Function             (on)
 import           Options                   (LogSelection (Expansion))
-import Distribution.Simple.Setup (emptyGlobalFlags)
-import Snippets
+import           Snippets
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
@@ -135,6 +138,8 @@ data ExpanderState = Expander {
                                  -- being inlined
     renaming       :: Renaming,  -- ^The current variable renaming
     writeNaming    :: Renaming,  -- ^Renaming for new assignments
+    typeRenaming   :: Map TypeVarName TypeSpec,
+                                 -- ^Renaming for type variables
     noFork         :: Bool,      -- ^There's no fork at the end of this body
     nextCallSiteID :: CallSiteID -- ^The next callSiteID to use
     }
@@ -202,7 +207,7 @@ addInstr prim pos = do
 
 -- init a expander state based on the given call site count
 initExpanderState :: CallSiteID -> ExpanderState
-initExpanderState = Expander Nothing identityRenaming identityRenaming True
+initExpanderState = Expander Nothing identityRenaming identityRenaming Map.empty True
 
 
 ----------------------------------------------------------------
@@ -211,15 +216,13 @@ initExpanderState = Expander Nothing identityRenaming identityRenaming True
 
 expandBody :: ProcBody -> Expander ()
 expandBody (ProcBody prims fork) = do
-    logExpansion $ "Expanding unforked part of body:" ++ showPlacedPrims 4 prims
-    modify (\s -> s { noFork = fork == NoFork })
-    mapM_ (placedApply expandPrim) prims
-    logExpansion $ "Finished expanding unforked part of body"
     case fork of
       NoFork -> do
+        expandUnforked prims fork
         logExpansion "No fork for this body"
         return ()
       PrimFork var ty final bodies deflt -> do
+        expandUnforked prims fork
         st <- get
         logExpansion $ "Now expanding fork (" ++
           (if isJust (inlining st) then "without" else "WITH") ++ " inlining)"
@@ -230,29 +233,39 @@ expandBody (ProcBody prims fork) = do
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
                        ++ " with " ++ show (length bodies) ++ " branches"
-        expandFork var' ty $ bodies ++ maybeToList deflt
+        expandFork var' ty $ List.map (mapFst Just) bodies ++ maybeToList ((Nothing,) <$> deflt)
         logExpansion $ "Finished expanding fork on " ++ show var'
+      MergedFork{} -> do
+        logExpansion "Expanding merged as fork..."
+        lift2 (unMergeFork fork) >>= expandBody . ProcBody prims 
+        
+expandUnforked :: [Placed Prim] -> PrimFork -> Expander ()
+expandUnforked prims fork = do
+    logExpansion $ "Expanding unforked part of body:" ++ showPlacedPrims 4 prims
+    modify (\s -> s { noFork = fork == NoFork })
+    mapM_ (placedApply expandPrim) prims
+    logExpansion "Finished expanding unforked part of body"
 
 
-expandFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Expander ()
+expandFork :: PrimVarName -> TypeSpec -> [(Maybe Integer, ProcBody)] -> Expander ()
 expandFork var ty bodies = do
     maybeVal <- lift $ definiteVariableValue var
     case maybeVal of
       Just (ArgInt n _) | n < fromIntegral (length bodies) -> do
         logExpansion $ "Value of " ++ show var ++ " known to be " ++ show n
                        ++ ": expanding only that branch"
-        expandBody $ bodies !! fromIntegral n
+        expandBody . snd $ bodies !! fromIntegral n
       _ -> do
         lift $ buildFork var ty
-        zipWithM_ (\b n -> do
+        mapM_ (\(n, b) -> do
                   logExpansion $ "Beginning expansion of branch " ++ show n
                                  ++ " on " ++ show var
-                  lift beginBranch
+                  lift (beginBranch n)
                   expandBody b
                   lift endBranch
                   logExpansion $ "Finished expansion of branch " ++ show n
                                  ++ " on " ++ show var)
-               bodies [0..]
+               bodies
         lift completeFork
 
 
@@ -262,7 +275,7 @@ expandFork var ty bodies = do
 -- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Expander ()
-expandPrim (PrimCall id pspec impurity args gFlows) pos = do
+expandPrim call@(PrimCall id pspec impurity args gFlows) pos = do
     args' <- mapM expandArg args
     let call' = PrimCall id pspec impurity args' gFlows
     logExpansion $ "  Expand call " ++ show call'
@@ -273,11 +286,17 @@ expandPrim (PrimCall id pspec impurity args gFlows) pos = do
         addInstr call' pos
     else do
         def <- lift2 $ getProcDef pspec
-        case procImpln def of
+        let (args'', pspec') = case (procVariant def, args') of
+                (ClosureProc pspec' simple, ArgClosure _ closed _:rest) -> 
+                    (closed ++ rest, if simple then pspec' else pspec) 
+                (ClosureProc{}, _) -> shouldnt $ "closure call with no closure arg " ++ show call
+                _ -> (args', pspec)
+        def' <- if pspec == pspec' then return def else lift2 $ getProcDef pspec'
+        case procImpln def' of
             ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
             ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
-                if procInline def
-                then inlineCall proto args' body pos
+                if procInline def'
+                then inlineCall proto args'' body pos
                 else do
                     logExpansion "  Not inlinable"
                     addInstr call' pos
@@ -309,11 +328,8 @@ expandHigherOrder prim pos = do
             fn' <- expandArg fn
             case fn' of
                 ArgClosure pspec closed _ -> do
-                    pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
-                    logExpansion $ "  As first order call to " ++ show pspec'
                     gFlows <- lift2 $ getProcGlobalFlows pspec
-                    expandPrim (PrimCall id pspec' impurity (closed ++ args)
-                                         gFlows) pos
+                    expandPrim (PrimCall id pspec impurity (fn':args) gFlows) pos
                 _ -> do
                     args' <- mapM expandArg args
                     logExpansion $ "  As higher call to " ++ show fn'
@@ -328,9 +344,12 @@ inlineCall proto args body pos = do
     logExpansion $ "  Before inlining:"
     logExpansion $ "    renaming = " ++ show (renaming saved)
     modify (\s -> s { renaming = identityRenaming,
+                      typeRenaming = Map.empty,
                       inlining = Just pos })
-    mapM_ (addOutputNaming pos) $ zip (primProtoParams proto) args
-    mapM_ (addInputAssign pos) $ zip (primProtoParams proto) args
+    let paramsArgs = zip (primProtoParams proto) args
+    mapM_ (addOutputNaming pos) paramsArgs
+    mapM_ (addInputAssign pos) paramsArgs
+    mapM_ (uncurry addParamTypeRenaming) paramsArgs
     logExpansion $ "  Inlining defn: " ++ showBlock 4 body
     expandBody body
     -- restore the saved state except the "nextCallSiteID"
@@ -342,35 +361,45 @@ inlineCall proto args body pos = do
 
 
 expandArg :: PrimArg -> Expander PrimArg
+expandArg arg = do
+    arg' <- expandArg' arg
+    renaming <- isJust <$> gets inlining
+    if renaming 
+    then do
+        ty' <- expandType $ argType arg'
+        return $ setArgType ty' arg'
+    else return arg'
+
+expandArg' :: PrimArg -> Expander PrimArg
 -- termToExp (StringConst pos "" DoubleQuote)
 --     = return $ Placed (Fncall ["wybe","string"] "empty" False []) pos
 -- termToExp (StringConst pos [chr] DoubleQuote)
 --     = return $ Placed (Fncall ["wybe","string"] "singleton" False
 --                         [Unplaced (CharValue chr)]) pos
-expandArg arg@(ArgString "" WybeString ty) = do
-    logExpansion "Optimising empty string"
-    newVarName <- lift freshVarName
-    let defVar = ArgVar newVarName ty FlowOut Ordinary False
-    let useVar = ArgVar newVarName ty FlowIn Ordinary False
-    logExpansion $ "    Generated fresh name " ++ show newVarName
-    callID <- genCallSiteID
-    let emptyStringProc = ProcSpec ["wybe","string"] "empty" 0 Set.empty
-    expandPrim (PrimCall callID emptyStringProc Pure [defVar] emptyGlobalFlows) Nothing
-    logExpansion $ "Empty string variable = " ++ show useVar
-    return useVar
-expandArg arg@(ArgString [ch] WybeString ty) = do
-    logExpansion $ "Optimising singleton string \"" ++ [ch] ++ "\""
-    newVarName <- lift freshVarName
-    let defVar = ArgVar newVarName ty FlowOut Ordinary False
-    let useVar = ArgVar newVarName ty FlowIn Ordinary False
-    logExpansion $ "    Generated fresh name " ++ show newVarName
-    callID <- genCallSiteID
-    let emptyStringProc = ProcSpec ["wybe","string"] "singleton" 0 Set.empty
-    expandPrim (PrimCall callID emptyStringProc Pure
-                [ArgChar ch charType, defVar] emptyGlobalFlows) Nothing
-    logExpansion $ "Singleton string variable = " ++ show useVar
-    return useVar
-expandArg arg@(ArgVar var ty flow ft _) = do
+-- expandArg' arg@(ArgString "" WybeString ty) = do
+--     logExpansion "Optimising empty string"
+--     newVarName <- lift freshVarName
+--     let defVar = ArgVar newVarName ty FlowOut Ordinary False
+--     let useVar = ArgVar newVarName ty FlowIn Ordinary False
+--     logExpansion $ "    Generated fresh name " ++ show newVarName
+--     callID <- genCallSiteID
+--     let emptyStringProc = ProcSpec ["wybe","string"] "empty" 0 Set.empty
+--     expandPrim (PrimCall callID emptyStringProc Pure [defVar] emptyGlobalFlows) Nothing
+--     logExpansion $ "Empty string variable = " ++ show useVar
+--     return useVar
+-- expandArg' arg@(ArgString [ch] WybeString ty) = do
+--     logExpansion $ "Optimising singleton string \"" ++ [ch] ++ "\""
+--     newVarName <- lift freshVarName
+--     let defVar = ArgVar newVarName ty FlowOut Ordinary False
+--     let useVar = ArgVar newVarName ty FlowIn Ordinary False
+--     logExpansion $ "    Generated fresh name " ++ show newVarName
+--     callID <- genCallSiteID
+--     let emptyStringProc = ProcSpec ["wybe","string"] "singleton" 0 Set.empty
+--     expandPrim (PrimCall callID emptyStringProc Pure
+--                 [ArgChar ch charType, defVar] emptyGlobalFlows) Nothing
+--     logExpansion $ "Singleton string variable = " ++ show useVar
+--     return useVar
+expandArg' arg@(ArgVar var ty flow ft _) = do
     renameAll <- isJust <$> gets inlining
     if renameAll
     then case flow of
@@ -381,10 +410,30 @@ expandArg arg@(ArgVar var ty flow ft _) = do
         FlowOutByReference  -> shouldnt "FlowOutByReference not available at this stage of compilation"
         FlowTakeReference -> shouldnt "FlowTakeReference not available at this stage of compilation"
     else return arg
-expandArg arg@(ArgClosure ps as ty) = do
+expandArg' arg@(ArgClosure ps as ty) = do
     as' <- mapM expandArg as
     return $ ArgClosure ps as' ty
-expandArg arg = return arg
+expandArg' arg = return arg
+
+
+
+expandType :: TypeSpec -> Expander TypeSpec
+expandType (TypeVariable var) = do
+    renaming <- gets typeRenaming
+    case Map.lookup var renaming of
+        Just ty' -> return ty'
+        Nothing -> do
+            ty' <- TypeVariable . FauxTypeVar <$> lift freshTmp
+            modify $ \s -> s { typeRenaming=Map.insert var ty' $ typeRenaming s }
+            return ty'
+expandType ty@TypeSpec{typeParams=tys} = do
+    tys' <- mapM expandType tys
+    return ty{typeParams=tys'}
+expandType ty@HigherOrderType{higherTypeParams=tyFlows} = do
+    let (tys, flows) = unzipTypeFlows tyFlows
+    tys' <- mapM expandType tys
+    return ty{higherTypeParams=zipWith TypeFlow tys' flows}
+expandType ty = return ty
 
 
 inputOutputParams :: PrimProto -> (Set PrimVarName,Set PrimVarName)
@@ -402,10 +451,6 @@ inputOutputParams proto =
 addOutputNaming :: OptPos -> (PrimParam,PrimArg) -> Expander ()
 addOutputNaming _ (param@(PrimParam pname ty FlowOut _ _),
                      v@ArgVar{argVarName=vname}) = do
-    when (AnyType == ty) $
-      shouldnt $ "Danger: untyped param: " ++ show param
-    when (AnyType == argType v) $
-      shouldnt $ "Danger: untyped argument: " ++ show v
     logExpansion $ "  recording output naming for " ++ show pname
       ++ " -> " ++ show vname
     modify (\s -> s { writeNaming = Map.insert pname v (writeNaming s)})
@@ -423,21 +468,20 @@ addInputAssign pos (param@(PrimParam name ty FlowIn ft _),v) = do
 addInputAssign _ _ = return ()
 
 
-
--- renameParam :: Renaming -> PrimParam -> PrimParam
--- renameParam renaming param@(PrimParam name typ FlowOut ftype inf ) =
---     maybe param
---     (\arg -> case arg of
---           ArgVar name' _ _ _ _ -> PrimParam name' typ FlowOut ftype inf
---           _ -> param) $
---     Map.lookup name renaming
--- renameParam _ param = param
+-- |Add type renamings for all types in the PrimParam with the corresponding types from the PrimArg
+addParamTypeRenaming :: PrimParam -> PrimArg -> Expander ()
+addParamTypeRenaming param arg = 
+    addTypeRenaming (primParamType param) (argType arg)
 
 
--- singleCaller :: ProcDef -> Bool
--- singleCaller def =
---     let m = procCallers def
---     in  Map.size m == 1 && (snd . Map.findMin) m == 1
+-- |Add type renamings for all types in the first operand with the second.
+addTypeRenaming :: TypeSpec -> TypeSpec -> Expander ()
+addTypeRenaming (TypeVariable var) ty = modify $ \s -> s{typeRenaming=Map.insert var ty $ typeRenaming s}
+addTypeRenaming TypeSpec{typeParams=paramTys} TypeSpec{typeParams=argTys} = 
+    zipWithM_ addTypeRenaming paramTys argTys
+addTypeRenaming HigherOrderType{higherTypeParams=paramTyFlows} HigherOrderType{higherTypeParams=argTyFlows} = 
+    (zipWithM_ addTypeRenaming `on` fst . unzipTypeFlows) paramTyFlows argTyFlows
+addTypeRenaming _ _ = return ()
 
 
 -- |Log a message, if we are logging inlining and code expansion activity.

@@ -4,6 +4,7 @@
 --  Copyright: (c) 2024 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+{-# LANGUAGE LambdaCase #-}
 
 
 module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM, BinOpInfo(..) ) where
@@ -17,7 +18,7 @@ import           Options
 import           Version
 import           CConfig
 import           Snippets
-import           Util                            ((|||), showArguments, sameLength)
+import           Util                            ((|||), showArguments, sameLength, thd4)
 import           System.IO
 import           Data.Char                       (isAlphaNum)
 import           Data.Set                        as Set
@@ -36,6 +37,7 @@ import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
 import Distribution.TestSuite (TestInstance(name))
+import Distribution.Simple.Utils (info)
 
 
 -- BEGIN MAJOR DOC
@@ -107,17 +109,29 @@ resolveLLVMArgType SizeFromLargest outTy inTys =
 maxSizeRep :: TypeRepresentation -> TypeRepresentation -> TypeRepresentation
 maxSizeRep (Bits sz1) (Bits sz2)         = Bits (max sz1 sz2)
 maxSizeRep (Bits sz1) (Signed sz2)       = Bits (max sz1 sz2)
-maxSizeRep (Bits sz) Pointer             = Pointer
-maxSizeRep Pointer (Bits sz)             = Pointer
+maxSizeRep (Bits sz) Pointer             = maxPointerSize sz Bits Pointer
+maxSizeRep Pointer (Bits sz)             = maxPointerSize sz Bits Pointer
+maxSizeRep (Bits sz) CPointer             = maxPointerSize sz Bits CPointer
+maxSizeRep CPointer (Bits sz)             = maxPointerSize sz Bits CPointer
 maxSizeRep (Signed sz1) (Bits sz2)       = Bits (max sz1 sz2)
 maxSizeRep (Signed sz1) (Signed sz2)     = Signed (max sz1 sz2)
-maxSizeRep (Signed sz) Pointer           = Pointer
-maxSizeRep Pointer (Signed sz)           = Pointer
+maxSizeRep (Signed sz) Pointer           = maxPointerSize sz Signed Pointer
+maxSizeRep Pointer (Signed sz)           = maxPointerSize sz Signed Pointer
+maxSizeRep (Signed sz) CPointer           = maxPointerSize sz Signed CPointer
+maxSizeRep CPointer (Signed sz)           = maxPointerSize sz Signed CPointer
 maxSizeRep (Floating sz1) (Floating sz2) = Floating (max sz1 sz2)
 maxSizeRep rep1 rep2 | rep1 == rep2      = rep1
 maxSizeRep rep1 rep2 =
     shouldnt $ "Generating LLVM instruction with incompatible types "
              ++ show rep1 ++ " and " ++ show rep2
+
+
+-- Pick the best (largest) representation for a pointer type and an integer type
+-- of the specified size, given a fixed size integer constructor and a pointer
+-- representation.
+maxPointerSize :: Int -> (Int -> TypeRepresentation) -> TypeRepresentation
+               -> TypeRepresentation
+maxPointerSize sz intRep ptrRep = if sz <= wordSize then ptrRep else intRep sz
 
 
 data BinOpInfo = BinOpInfo {
@@ -234,6 +248,10 @@ writeLLVM handle modSpec withLPVM recursive = do
     reenterModule modSpec
     flip execStateT (initLLVMState handle) $ do
         forEachModule allMods preScanProcs
+        logLLVM "Generating LLVM code for modules:"
+        forEachModule allMods $ do
+            m <- lift $ getModule id
+            logLLVM $ show m ++ "\n"
         writeAssemblyPrologue
         writeAssemblyConstants
         writeAssemblyExterns
@@ -270,58 +288,105 @@ preScanProcs = do
     logLLVM $ "preScanProcs: "
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
     let bodies = concatMap (concatMap allProcBodies) procss
-    mapM_ (mapLPVMBodyM (recordExtern mod) prescanArg) bodies
-
-
--- | What's needed to identify a manifest constant string in generated LLVM
--- code.  Wybe string constants (usually) consist of a size and a pointer to a C
--- string, while C strings are C pointers to 0-terminated packed arrays of
--- bytes.
-data StaticConstSpec = CStringSpec String
-                     | WybeStringSpec String
-                     | ClosureSpec ProcSpec [PrimArg]
-    deriving (Eq,Ord)
-
-instance Show StaticConstSpec where
-    show (CStringSpec str) = 'c' : show str
-    show (WybeStringSpec str) = show str
-    show (ClosureSpec pspec args) = show pspec ++ showArguments args
+    mapM_ (mapLPVMBodyM (recordExtern mod) (prescanArg mod)) bodies
+    mapM_ (preScanBodyForks mod) bodies
+    consts <- lift $ getModule modStructs
+    logLLVM $ "after preScanProcs, consts = "
+                ++ showMap "{" ", " "}" ((++":: ") . show) show consts
 
 
 -- | If the specified PrimArg is a string constant or closure with only constant
 -- arguments, add it to the set.  For Wybe strings, add both the Wybe string and
 -- the C string, since the Wybe string constant refers to the C string.
-prescanArg :: PrimArg -> LLVM ()
-prescanArg (ArgString str WybeString _) = do
-    recordConst $ WybeStringSpec str
-    recordConst $ CStringSpec str
-prescanArg (ArgString str CString _) =
-    recordConst $ CStringSpec str
-prescanArg (ArgClosure pspec args _) = do
-    args' <- neededFreeArgs pspec args
-    if all argIsConst args'
-    then
-        recordConst $ ClosureSpec pspec args
-    else
-        recordExternSpec externAlloc
-prescanArg _ = return ()
+prescanArg :: ModSpec -> PrimArg -> LLVM ()
+prescanArg mod closure@(ArgClosure pspec args _) = do
+    (neededArgs, realParams) <- partitionClosureParams pspec args
+    let externArgs = primParamToArg envPrimParam : List.map primParamToArg realParams
+    recordExternProc mod pspec externArgs
+    recordExternSpec externAlloc
+    argConstValue closure >>= maybe (return ()) recordIfConst
+    mapM_ (prescanArg mod) args
+prescanArg _ arg =
+    argConstValue arg >>= maybe (return ()) recordIfConst
 
 
--- | Record that the specified constant needs to be declared in this LLVM module
-recordConst :: StaticConstSpec -> LLVM ()
-recordConst spec =
-    modify $ \s -> s {allConsts=Set.insert spec $ allConsts s}
+-- | Scan the forks of a ProcBody, recording any constants
+preScanBodyForks :: ModSpec -> ProcBody -> LLVM ()
+preScanBodyForks mod = preScanForks mod . bodyFork
 
+
+-- | Scan a fork (and subsequent forks), recording any constants
+preScanForks :: ModSpec -> PrimFork -> LLVM ()
+preScanForks _ NoFork = return ()
+preScanForks mod PrimFork{forkBodies=bodies, forkDefault=mbDflt} = do
+    mapM_ (preScanBodyForks mod . snd) bodies
+    forM_ mbDflt $ preScanBodyForks mod
+preScanForks mod MergedFork{forkTable=table, forkBody=body, forkDefault=mbDflt} = do
+    mapM_ (recordConst . thd4) table
+    preScanBodyForks mod body
+    forM_ mbDflt $ preScanBodyForks mod
+
+
+recordIfConst :: ConstValue -> LLVM ()
+recordIfConst (PointerStructMember structID) = do
+    constInfo <- lift $ lookupConstInfo structID
+    logLLVM $ "Recording const " ++ show structID
+                ++ " ( -> " ++ show constInfo ++ ")"
+    recordConst structID
+recordIfConst (GenericStructMember member) =
+    recordIfConst member
+recordIfConst _ = return ()
+
+
+-- | Record that the specified constant needs to be declared in this LLVM
+-- module, as well as any constants it refers to.
+recordConst :: StructID -> LLVM ()
+recordConst spec = do
+    logLLVM $ "Recording constant " ++ show spec
+    new <- gets $ Set.notMember spec . allConsts
+    when new $ do
+        modify $ \s -> s {allConsts=Set.insert spec $ allConsts s}
+        lift (lookupConstInfo spec) >>=
+                maybe (return ()) recordConstParts
+
+
+-- | Record the pointer parts of a constant structure.
+recordConstParts :: StructInfo -> LLVM ()
+recordConstParts CStringInfo{} = return ()
+recordConstParts StructInfo{structData=members} = do
+    logLLVM $ "Recording parts of constant struct " ++ show members
+    mapM_ recordIfConst members
+recordConstParts ArrayInfo{arrayData=elts} = do
+    logLLVM $ "Recording elts of constant array " ++ show elts
+    mapM_ recordIfConst elts
+
+
+-- | Produce a StructMember from a PrimArg, if it's a constant.  This may record
+-- new constants in the current module.
+argConstValue :: PrimArg -> LLVM (Maybe ConstValue)
+argConstValue ArgVar{} = return Nothing
+argConstValue (ArgInt n ty) = do
+    sz <- typeRepSize <$> lift (typeRepresentation ty)
+    return $ Just $ IntStructMember n (sz `div` byteBits)
+argConstValue (ArgFloat n ty) = do
+    sz <- typeRepSize <$> lift (typeRepresentation ty)
+    return $ Just $ FloatStructMember n (sz `div` byteBits)
+argConstValue ArgClosure{} = return Nothing -- const closures already handled
+argConstValue (ArgGlobal info _) = do
+    -- XXX ArgGlobal is a constant pointer to a global resource or global value,
+    -- but for now we don't support them in constant structures
+    return Nothing
+argConstValue (ArgConstRef structID _) = do
+    return $ Just $ PointerStructMember structID
+argConstValue ArgUnneeded{} = return Nothing
+argConstValue (ArgUndef ty) = do
+    sz <- typeRepSize <$> lift (typeRepresentation ty)
+    return $ Just $ UndefStructMember (sz `div` byteBits)
 
 
 -- | If needed, add an extern declaration for a prim to the set.
 recordExtern :: ModSpec -> Prim -> LLVM ()
-recordExtern mod (PrimCall _ pspec _ args _) = do
-    logLLVM $ "Check if " ++ show pspec ++ " is extern to " ++ showModSpec mod
-    unless (mod /= [] && mod `isPrefixOf` procSpecMod pspec) $ do
-        logLLVM " ... it is"
-        let (nm,cc) = llvmProcName pspec
-        recordExternFn cc nm args
+recordExtern mod (PrimCall _ pspec _ args _) = recordExternProc mod pspec args
 recordExtern _ PrimHigher{} = return ()
 recordExtern _ (PrimForeign "llvm" _ _ _) = return ()
 recordExtern _ (PrimForeign "lpvm" "alloc" _ _) =
@@ -339,6 +404,15 @@ recordExtern _ (PrimForeign "c" name _ args) =
     recordExternFn "ccc" (llvmForeignName name) args
 recordExtern _ (PrimForeign other name _ args) =
     shouldnt $ "Unknown foreign language " ++ other
+
+
+recordExternProc :: ModSpec -> ProcSpec -> [PrimArg] -> LLVM ()
+recordExternProc mod pspec args = do
+    logLLVM $ "Check if " ++ show pspec ++ " is extern to " ++ showModSpec mod
+    unless (mod /= [] && mod `isPrefixOf` procSpecMod pspec) $ do
+        logLLVM " ... it is"
+        let (nm,cc) = llvmProcName pspec
+        recordExternFn cc nm args
 
 
 recordExternSpec :: ExternSpec -> LLVM ()
@@ -428,8 +502,8 @@ writeAssemblyPrologue = do
 writeAssemblyConstants :: LLVM ()
 writeAssemblyConstants = do
     logLLVM "writeAssemblyConstants"
-    strings <- gets $ Set.toList . allConsts
-    zipWithM_ writeConstDeclaration strings [0..]
+    consts <- gets $ Set.toList . allConsts
+    mapM_ writeConstDeclaration consts
     llvmBlankLine
 
 
@@ -437,46 +511,12 @@ writeAssemblyConstants = do
 -- assumes that the CString that a WybeString refers to has already been
 -- declared and recorded.  This will happen because sets are sorted
 -- alphabetically, and CString comes before WybeString.
-writeConstDeclaration :: StaticConstSpec -> Int -> LLVM ()
-writeConstDeclaration spec@(WybeStringSpec str) n = do
-    let stringName = specialName2 "string" $ show n
-    modify $ \s -> s { constNames=Map.insert spec stringName
-                                       $ constNames s}
-    textName <- lookupConstant $ CStringSpec str
-    declareStructConstant stringName
-        [ (ArgInt (fromIntegral $ length str) (Representation $ Bits wordSize)
-          , Bits wordSize)
-        , (ArgGlobal (GlobalVariable textName) (Representation CPointer)
-          , Pointer)]
-        Nothing
-writeConstDeclaration spec@(CStringSpec str) n = do
-    let textName = specialName2 "cstring" $ show n
-    modify $ \s -> s { constNames=Map.insert spec textName
-                                       $ constNames s}
-    declareStringConstant textName str Nothing
-writeConstDeclaration spec@(ClosureSpec pspec args) n = do
-    let closureName = specialName2 "closure" $ show n
-    modify $ \s -> s { constNames=Map.insert spec closureName $ constNames s}
-    let pname = show pspec
-    argReps <- mapM argTypeRep args
-    declareStructConstant closureName
-        ((ArgGlobal (GlobalVariable pname) (Representation CPointer), CPointer)
-         : zip args argReps)
-        Nothing
-
-
--- | Find the global constant that holds the value of the specified string
--- constant.
-lookupConstant :: StaticConstSpec -> LLVM Ident
-lookupConstant spec =
-    trustFromJust ("lookupConstant " ++ show spec) <$> tryLookupConstant spec
-
-
--- | Find the global constant that holds the value of the specified string
--- constant.
-tryLookupConstant :: StaticConstSpec -> LLVM (Maybe Ident)
-tryLookupConstant spec =
-    gets $ Map.lookup spec . constNames
+writeConstDeclaration :: StructID -> LLVM ()
+writeConstDeclaration structID = do
+    info <- trustFromJust ("writeConstDeclaration of " ++ show structID)
+            <$> lift (lookupConstInfo structID)
+    let structName = structConstName structID
+    declareStructConstant structName info Nothing
 
 
 ----------------------------------------------------------------------------
@@ -554,86 +594,56 @@ writeAssemblyProcs = do
 -- | Generate and write out the LLVM code for the given proc with its proc
 -- number and all its specialisations.
 writeProcLLVM :: ProcDef -> Int -> LLVM ()
-writeProcLLVM def procNum =
-    case procImpln def of
-        ProcDefPrim {procImplnProcSpec=pspec, procImplnProto=proto,
-                     procImplnBody=body, procImplnSpeczBodies=specz} -> do
-            (proto', body') <- if isClosureVariant $ procVariant def
-                        then do
-                            logLLVM $ "Compiling closure variant for proc "
-                                        ++ showProcName (procName def) ++ ":"
-                            let (p',b') = closeClosure proto body
-                            logLLVM $ "Params: " ++ show p'
-                            logLLVM $ "Body  : " ++ show b'
-                            return (p',b')
-                        else return (proto, body)
-            let params = primProtoParams proto'
-            let tmpCount = procTmpCount def
-            -- XXX overriding procSpeczVersion should not be needed, but it is!
-            writeProcSpeczLLVM pspec{procSpeczVersion=Set.empty}
-                    tmpCount params body'
-            let msg = "Required specialisations should be generated by now"
-            let specz' = List.map (mapSnd (trustFromJust msg))
-                         $ Map.toList specz
-            -- Make sure there aren't collision in specz version id. If this
-            -- happens, we should increase the length of id (see AST.hs).
-            let hasDuplicates l = List.length l /= (Set.size . Set.fromList) l
-            when (hasDuplicates (List.map fst specz'))
-                    $ shouldnt $ "Specialisation version hash conflicts"
-                        ++ show (List.map fst specz')
-            mapM_ (\(speczVersion, speczBody) -> do
-                    -- rename this version of proc
-                    let pspec' = pspec{procSpeczVersion=speczVersion}
-                    writeProcSpeczLLVM pspec' tmpCount params speczBody
-                    ) specz'
-
-        _ -> shouldnt $ "Generating assembly code for uncompiled proc "
-                        ++ showProcName (procName def)
+writeProcLLVM def@ProcDef{
+        procName=name,
+        procImpln=ProcDefPrim{procImplnProcSpec=pspec, procImplnProto=proto,
+                              procImplnBody=body, procImplnSpeczBodies=specz}} procNum = do
+    (proto', free) <-
+        if isClosureVariant $ procVariant def
+        then do
+            logLLVM $ "Compiling closure variant for proc " ++ showProcName name
+            let (p',free) = closeClosureParams proto
+            logLLVM $ "LLVM Params: " ++ show p'
+            return (p', Just free)
+        else return (proto, Nothing)
+    let params = primProtoParams proto'
+    let tmpCount = procTmpCount def
+    -- XXX overriding procSpeczVersion should not be needed, but it is!
+    writeProcSpeczLLVM pspec{procSpeczVersion=Set.empty}
+        tmpCount params body free
+    let msg = "Required specialisations should be generated by now"
+    let specz' = List.map (mapSnd (trustFromJust msg))
+                    $ Map.toList specz
+    -- Make sure there aren't collision in specz version id. If this
+    -- happens, we should increase the length of id (see AST.hs).
+    let hasDuplicates l = List.length l /= (Set.size . Set.fromList) l
+    when (hasDuplicates (List.map fst specz'))
+            $ shouldnt $ "Specialisation version hash conflicts"
+                ++ show (List.map fst specz')
+    mapM_ (\(speczVersion, speczBody) -> do
+            -- rename this version of proc
+            let pspec' = pspec{procSpeczVersion=speczVersion}
+            writeProcSpeczLLVM pspec' tmpCount params speczBody free
+            ) specz'
+writeProcLLVM def _  = shouldnt $ "Generating assembly code for uncompiled proc " ++ showProcName (procName def)
 
 
--- | Updates a PrimProto and ProcBody as though the Free Params are accessed
--- via the closure environment
-closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
-closeClosure proto@PrimProto{primProtoParams=params}
-             body@ProcBody{bodyPrims=prims} =
-    (proto{primProtoParams=envPrimParam:genericParams},
-     body{bodyPrims=unpacker ++ inwardConverter ++ prims ++ outwardConverter})
+
+-- | Updates a PrimProto to remove any Free params (to be unmarshalled later),
+-- with a leading "env" param. Also yields the Free params for unmarshalling
+closeClosureParams :: PrimProto -> (PrimProto, [PrimParam])
+closeClosureParams proto@PrimProto{primProtoParams=params} =
+    (proto{primProtoParams=envPrimParam:realParams}, neededFree)
   where
-    (free, actualParams) = List.partition ((==Free) . primParamFlowType) params
-    genericParams = [p {primParamType=AnyType
-                       ,primParamName=genericVarName (primParamName p)}
-                    | p <- actualParams]
-    neededFree = List.filter (not . paramInfoUnneeded
-                                  . primParamInfo) free
-    unpacker = Unplaced <$>
-                [ primAccess (ArgVar envParamName AnyType FlowIn Ordinary False)
-                             (ArgInt (i * toInteger wordSizeBytes) intType)
-                             (ArgInt (toInteger wordSize) intType)
-                             (ArgInt 0 intType)
-                             (ArgVar genName AnyType FlowOut Free False)
-                | (i,PrimParam nm ty _ _ _) <- zip [1..] neededFree
-                , let genName = genericVarName nm]
-    inwardConverter = Unplaced <$>
-                [ PrimForeign "llvm" "move" [] [
-                    ArgVar (genericVarName nm) AnyType FlowIn Ordinary False,
-                    ArgVar nm ty FlowOut Ordinary False]
-                | PrimParam nm ty FlowIn _ _ <- actualParams ++ neededFree ]
-    outwardConverter = Unplaced <$>
-                [ PrimForeign "llvm" "move" [] [
-                    ArgVar nm ty FlowIn Ordinary False,
-                    ArgVar (genericVarName nm) AnyType FlowOut Ordinary False]
-                | PrimParam nm ty FlowOut _ _ <- actualParams ]
-
--- | Create a name for the generic type version of a variable/parameter
-genericVarName :: PrimVarName -> PrimVarName
-genericVarName p@PrimVarName{primVarName=v} = p {primVarName="generic#" ++ v}
+    (free, realParams) = List.partition ((==Free) . primParamFlowType) params
+    neededFree = List.filter (not . paramInfoUnneeded . primParamInfo) free
 
 
 -- | Write out the LLVM code for a single LPVM proc specialisation (including no
 -- specialisation), given the ProcSpec, temp variable count, parameter list, and
 -- body.
-writeProcSpeczLLVM :: ProcSpec -> Int -> [PrimParam] -> ProcBody -> LLVM ()
-writeProcSpeczLLVM pspec tmpCount params body = do
+writeProcSpeczLLVM :: ProcSpec -> Int -> [PrimParam] -> ProcBody -> Maybe [PrimParam] -> LLVM ()
+writeProcSpeczLLVM pspec tmpCount params body free = do
     logLLVM $ "Generating LLVM for proc " ++ show pspec
     initialiseLLVMForProc tmpCount
     let (name,cc) = llvmProcName pspec
@@ -649,6 +659,7 @@ writeProcSpeczLLVM pspec tmpCount params body = do
         "define external " ++ cc ++ " " ++ returnType ++ " "
             ++ name ++ "(" ++ intercalate ", " llParams ++ ")"
             ++ " {"
+    forM_ free writeClosureEnvUnmarshall
     writeAssemblyBody outs body
     llvmPutStrLn "}"
 
@@ -680,12 +691,21 @@ writeAssemblyBody outs ProcBody{bodyPrims=prims, bodyFork=fork} = do
             rep <- typeRep ty
             case (rep,branches,dflt) of
                 (Bits 0,_,_) -> shouldnt "Switch on a phantom!"
-                (_,[single],Nothing) -> writeAssemblyBody outs single
-                (Bits 1, [els,thn],Nothing) -> writeAssemblyIfElse outs v thn els
+                (_,[(_,single)],Nothing) -> writeAssemblyBody outs single
+                (Bits 1, [(0,els),(1,thn)],Nothing) -> writeAssemblyIfElse outs v thn els
                 (Bits _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
                 (Signed _, cases, dflt) -> writeAssemblySwitch outs v rep cases dflt
                 (rep,_,_) -> shouldnt $ "Switching on " ++ show rep ++ " type "
                                 ++ show ty
+        MergedFork var ty _ table body Nothing -> do
+            releaseDeferredCall
+            writeAssemblyMergedFork outs var ty table body
+        MergedFork var ty _ [] body dflt -> shouldnt "writeAssemblyBody empty table"
+        MergedFork var ty _ table@((_,_,structId, _):_) body dflt -> do
+            tmp <- makeTemp
+            len <- genericLength . arrayData . trustFromJust "writeAssemblyMergedFork" <$> lift (lookupConstInfo structId)
+            writeAssemblyBody outs $ guardedMergedFork tmp var ty len
+                                        (ProcBody [] fork{forkDefault=Nothing}) dflt
 
 
 -- | Generate and write out an LLVM if-then-else (switch on an i1 value)
@@ -706,10 +726,10 @@ writeAssemblyIfElse outs v thn els = do
 
 -- | Generate and write out an LLVM multi-way switch
 writeAssemblySwitch :: [PrimParam] -> PrimVarName -> TypeRepresentation
-                    -> [ProcBody] -> Maybe ProcBody -> LLVM ()
+                    -> [(Integer, ProcBody)] -> Maybe ProcBody -> LLVM ()
 writeAssemblySwitch outs v rep cases dflt = do
     releaseDeferredCall
-    let prefixes = ["case."++show n++".switch." | n <- [0..length cases-1]]
+    let prefixes = ["case."++show n++".switch." | (n, _) <- cases]
     (dfltLabel,numLabels) <- if isJust dflt
         then do
             (dfltLabel:numLabels) <- freshLables $ "default.switch.":prefixes
@@ -720,14 +740,15 @@ writeAssemblySwitch outs v rep cases dflt = do
     let llType = llvmTypeRep rep
     llvar <- varToRead v
     logLLVM $ "Switch on " ++ llvar ++ " with cases " ++ show cases
+    let switchValues = fst <$> cases
     llvmPutStrLnIndented $ "switch " ++ makeLLVMArg llType llvar ++ ", "
         ++ llvmLabelName dfltLabel ++ " [\n    "
         ++ intercalate "\n    "
                 [makeLLVMArg llType (show n) ++ ", " ++ llvmLabelName lbl
-                | (lbl,n) <- zip numLabels [0..]]
+                | (lbl,n) <- zip numLabels switchValues]
         ++ " ]"
     zipWithM_
-        (\lbl cs -> llvmPutStrLn (lbl ++ ":") >> writeAssemblyBody outs cs)
+        (\lbl (_,cs) -> llvmPutStrLn (lbl ++ ":") >> writeAssemblyBody outs cs)
         numLabels cases
     case dflt of
         Nothing -> return ()
@@ -735,6 +756,33 @@ writeAssemblySwitch outs v rep cases dflt = do
             llvmPutStrLn $ dfltLabel ++ ":"
             -- I don't think the Nothing case ever happens, but just in case...
             writeAssemblyBody outs dfltCode
+
+
+-- | Write out the assembly for a merged fork, loading the factored variables
+-- from the constant arrays extracted earlier
+writeAssemblyMergedFork :: [PrimParam] -> PrimVarName -> TypeSpec -> MergedForkTable -> ProcBody -> StateT LLVMState Compiler ()
+writeAssemblyMergedFork outs idxVar idxTy table body = do
+    releaseDeferredCall
+    forM_ table (\(var, ty, structId, _) -> do
+            len <- length . arrayData . trustFromJust "writeAssemblyMergedFork" <$> lift (lookupConstInfo structId)
+            varRep <- llvmTypeRep <$> typeRep ty
+            let llarrty = "[ " ++ show len ++ " x " ++ varRep ++ " ]"
+            ptr <- getElementPtr True llarrty (Just $ ArgConstRef structId AnyType)
+                        [ intConst 0
+                        , ArgVar idxVar (Representation $ Bits 64) FlowIn Ordinary False]
+            llvmLoad ptr $ ArgVar var ty FlowOut Ordinary False
+        )
+    writeAssemblyBody outs body
+
+
+-- | Unmarshall the Free params from the env param
+writeClosureEnvUnmarshall :: [PrimParam] -> LLVM ()
+writeClosureEnvUnmarshall params = do
+    structTy <- llvmStructType . (CPointer:) <$> mapM (typeRep . primParamType) params
+    forM_ (zip [1..] params) $ \(idx, param) -> do
+        eltPtr <- getElementPtr True structTy (Just $ primParamToArg envPrimParam)
+                    [intConst 0, ArgInt idx int32Type]
+        llvmLoad eltPtr $ primParamToArg param
 
 
 ----------------------------------------------------------------------------
@@ -784,23 +832,20 @@ writeWybeCall wybeProc args pos = do
 
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
-writeHOCall (ArgClosure pspec closed _) args pos = do
-    -- NB:  this case doesn't seem to ever occur
-    pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
-    logLLVM $ "Compiling HO call as first order call to " ++ show pspec'
-              ++ " closed over " ++ show closed
-    writeWybeCall pspec' (closed ++ args) pos
+writeHOCall closure@(ArgClosure pspec closed _) args pos = do
+    -- NB:  this case should have been handled earlier
+    shouldnt $ "Higher order call with constand closure should have been handled earlier: " ++ show closure
 writeHOCall closure args pos = do
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs $ closure:args
     unless (List.null oRefs && List.null iRefs)
         $ nyi $ "Higher order call with out-by-ref or take-ref argument "
                 ++ show (PrimHigher 0 closure Pure args)
     allPhantoms <- and <$> lift (mapM argIsPhantom outs)
-    let ty = argVarType closure
+    let ty = argType closure
     unless (allPhantoms && not (isResourcefulHigherOrder ty)
                 && modifierImpurity (higherTypeModifiers ty) <= Pure) $ do
         outTy <- llvmReturnType $ List.map argType outs
-        (writeFnPtr,readFnPtr) <- freshTempArgs $ Representation CPointer
+        (writeFnPtr,readFnPtr) <- freshCPtrArgs
         llvmLoad closure writeFnPtr
         fnVar <- llvmValue readFnPtr
         argList <- llvmArgumentList ins
@@ -826,7 +871,10 @@ tailMarker must = do
 writeActualCall :: ProcSpec -> [PrimArg] -> [PrimArg] -> String -> LLVM ()
 writeActualCall wybeProc ins outs tailKind = do
     params <- lift $ getPrimParams wybeProc
-    (inPs,outPs,oRefPs,iRefPs) <- partitionParams params
+    -- must ensure we obey the closure interface
+    isClosure <- lift $ isClosureProc wybeProc
+    let params' = if isClosure then envPrimParam : List.filter ((/=Free) . primParamFlowType) params else params
+    (inPs,outPs,oRefPs,iRefPs) <- partitionParams params'
     unless (List.null iRefPs)
       $ shouldnt $ "take-reference parameter(s) " ++ show iRefPs
     let allInPs = inPs ++ List.map convertOutByRefParam oRefPs
@@ -855,7 +903,7 @@ writeActualCall wybeProc ins outs tailKind = do
 writeLLVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
 writeLLVMCall op flags args pos = do
     (ins,outs) <- partitionArgs ("llvm " ++ op ++ " instruction") args
-    logLLVM $ "llvm instr args " ++ show args ++ " => ins "
+    logLLVM $ "llvm call " ++ show op ++ ", args " ++ show args ++ " => ins "
              ++ show ins ++ " ; outs " ++ show outs
     case (ins,outs) of
         ([],[]) -> return () -- eliminate if all data flow was phantoms
@@ -925,7 +973,8 @@ writeLPVMCall "access" _ args pos = do
                 ArgInt 0 _ -> return struct
                 _ -> do
                         (writeArg,readArg) <- freshTempArgs $ argType struct
-                        writeLLVMCall "add" [] [struct,offset,writeArg] Nothing
+                        struct' <- typeConvertedPrim Pointer struct
+                        writeLLVMCall "add" [] [struct',offset,writeArg] Nothing
                         return readArg
             lltype <- llvmTypeRep <$> argTypeRep member
             arg <- typeConvertedArg CPointer addrArg
@@ -939,7 +988,7 @@ writeLPVMCall "mutate" _ args pos = do
         (_,_,_:_,_) ->
              shouldnt $ "LPVM mutate instruction with out-by-reference arg: "
                         ++ show args
-        (struct:offset:destr:size:startOffset:restIns,
+        partArgs@(struct:offset:destr:size:startOffset:restIns,
                 [struct2@ArgVar{argVarName=struct2Name}],_,iRefs) -> do
             when (List.null iRefs) releaseDeferredCall
             case destr of
@@ -948,7 +997,12 @@ writeLPVMCall "mutate" _ args pos = do
                     typeConvert struct struct2
                 ArgInt 0 _ -> do
                     logLLVM "lpvm mutate non-destructive case"
-                    duplicateStruct struct startOffset size struct2
+                    holeSize <- fromIntegral . (`div` byteBits) . typeRepSize
+                        <$> case (restIns,iRefs) of
+                        ([member],[]) -> argTypeRep member
+                        ([],[takeRef]) -> argTypeRep takeRef
+                        _ -> mutateErr partArgs
+                    duplicateStruct struct offset size startOffset holeSize struct2
                 _ ->
                     nyi "lpvm mutate instr with non-const destructive flag"
             ptrArg <- case offset of
@@ -968,20 +1022,22 @@ writeLPVMCall "mutate" _ args pos = do
                     -- local variable to hold the pointer to the location the
                     -- value should be written in, once it's generated.
                     logLLVM "Special take-reference case"
-                    (writeCPtrArg,readCPtrArg) <-
-                        freshTempArgs $ Representation CPointer
+                    (writeCPtrArg,readCPtrArg) <- freshCPtrArgs
                     let takeRefVar = argVar "in lpvm mutate" takeRef
                     addTakeRefPointer takeRefVar readCPtrArg (argType takeRef)
                     takeRefs <- gets takeRefVars
                     logLLVM $ "take-ref pointers = " ++ show takeRefs
                     typeConvert ptrArg writeCPtrArg
-                _ ->
-                    shouldnt $ "lpvm mutate with inputs "
-                            ++ show (struct:offset:destr:size:startOffset:restIns)
-                            ++ " and output " ++ show struct2
-        (ins,outs,oRefs,iRefs) ->
-            shouldnt $ "lpvm mutate with inputs " ++ show ins ++ " and outputs "
-                ++ show outs
+                _ -> mutateErr partArgs
+        partArgs -> mutateErr partArgs
+    where mutateErr (ins, outs, [], []) =
+            shouldnt $ "lpvm mutate with inputs " ++ show ins
+                            ++ " and outputs " ++ show outs
+          mutateErr (ins, outs, oRefs, iRefs) =
+            shouldnt $ "lpvm mutate with inputs " ++ show ins
+                            ++ ", outputs " ++ show outs
+                            ++ ", out-by-ref args " ++ show oRefs
+                            ++ ", and take-ref args " ++ show iRefs
 writeLPVMCall op flags args pos =
     shouldnt $ "unknown lpvm operation:  " ++ op
 
@@ -1012,9 +1068,9 @@ marshalledCCall cfn flags args ctypes pos = do
 -- | Generate and write out the LLVM return statement.
 writeAssemblyReturn :: [PrimParam] -> LLVM ()
 writeAssemblyReturn [] = llvmPutStrLnIndented "ret void"
-writeAssemblyReturn [PrimParam{primParamName=v, primParamType=ty}] = do
+writeAssemblyReturn [param@PrimParam{primParamType=ty}] = do
     llty <- llvmTypeRep <$> typeRep ty
-    llvar <- varToRead v
+    llvar <- llvmValue $ primParamToArg param
     llvmPutStrLnIndented $ "ret " ++ makeLLVMArg llty llvar
 writeAssemblyReturn params = do
     retType <- llvmReturnType $ List.map primParamType params
@@ -1028,14 +1084,29 @@ writeAssemblyReturn params = do
 buildTuple :: LLVMType -> LLVMName -> Int -> [PrimParam] -> LLVM LLVMName
 buildTuple _ tuple _ [] = return tuple
 buildTuple outType tuple argNum
-           (PrimParam{primParamName=v, primParamType=ty}:params) = do
+           (param@PrimParam{primParamType=ty}:params) = do
     llty <- llvmTypeRep <$> typeRep ty
-    llvar <- varToRead v
+    llvar <- llvmValue $ primParamToArg param
     nextVar <- llvmLocalName <$> makeTemp
     llvmPutStrLnIndented $ nextVar ++ " = insertvalue " ++ outType ++ " "
                             ++ tuple ++ ", " ++ makeLLVMArg llty llvar
                             ++ ", " ++ show argNum
     buildTuple outType nextVar (argNum+1) params
+
+
+-- | Generate code for a getelementptr instruction, returning the elemnet pointer. 
+-- That is, for a given pointer to a given type, yield the pointer of the element 
+-- specified by the indices. No assumptions are made on the correctness of the indices. 
+-- If the pointer is Nothing, the LLVM instruction uses a `null` value
+getElementPtr :: Bool -> LLVMType -> Maybe PrimArg -> [PrimArg] -> LLVM PrimArg
+getElementPtr inbounds ty ptr idxs = do
+    (writeEltPtr, readEltPtr) <- freshCPtrArgs
+    llptr <- maybe (return "null") llvmValue ptr
+    llidxs <- mapM llvmArgument idxs
+    llvmAssignResult writeEltPtr $ "getelementptr " ++ (if inbounds then "inbounds " else "") ++ ty ++ ", "
+                                ++ llvmTypeRep CPointer ++ " " ++ llptr ++ ", "
+                                ++ intercalate ", " llidxs
+    return readEltPtr
 
 
 ----------------------------------------------------------------------------
@@ -1067,22 +1138,42 @@ declareStringConstant name str section = do
                     ++ ", align " ++ show wordSizeBytes
 
 
--- | Emit an LLVM declaration for a string constant, optionally specifying a
+-- | Emit an LLVM declaration for a struct constant, optionally specifying a
 -- file section.
-declareStructConstant :: LLVMName -> [ConstSpec] -> Maybe String -> LLVM ()
-declareStructConstant name fields section = do
-    llvmFields <- llvmConstStruct fields
+declareStructConstant :: LLVMName -> StructInfo -> Maybe String -> LLVM ()
+declareStructConstant name (StructInfo sz members) section = do
+    llvmFields <- llvmConstStruct members
     llvmPutStrLn $ llvmGlobalName name
                     ++ " = private unnamed_addr constant " ++ llvmFields
                     ++ maybe "" ((", section "++) . show) section
                     ++ ", align " ++ show wordSizeBytes
+declareStructConstant name (CStringInfo str) section = do
+    llvmPutStrLn $ llvmGlobalName name
+                    ++ " = private unnamed_addr constant "
+                    ++ showLLVMString str True
+                    ++ maybe "" ((", section "++) . show) section
+                    ++ ", align " ++ show wordSizeBytes
+declareStructConstant name (ArrayInfo elts) section = do
+    let reps = llvmConstValueRep <$> elts
+    llvmVals <- zipWithM convertedConstantArg elts reps
+    llvmPutStrLn $ llvmGlobalName name
+                    ++ " = private unnamed_addr constant [ " ++ show (length elts) ++ " x " ++ llvmTypeRep (head reps) ++ " ] "
+                    ++ "[" ++ intercalate ", " llvmVals ++ "]"
+
+-- | The representation of a constant value as seen by LLVM, as distinguished
+-- from the representation used by Wybe.  Pointer struct members are seen as
+-- CPointers, while other values are seen as their Wybe representation.
+llvmConstValueRep :: ConstValue -> TypeRepresentation
+llvmConstValueRep (PointerStructMember structID) = CPointer
+llvmConstValueRep other = constValueRepresentation other
 
 
 -- | Build a string giving the body of an llvm constant structure declaration
-llvmConstStruct :: [ConstSpec] -> LLVM String
-llvmConstStruct fields = do
-    llvmVals <- mapM (uncurry convertedConstantArg) fields
-    return $ llvmStructType (snd <$> fields)
+llvmConstStruct :: [ConstValue] -> LLVM String
+llvmConstStruct members = do
+    let reps = llvmConstValueRep <$> members
+    llvmVals <- zipWithM convertedConstantArg members reps
+    return $ llvmStructType reps
             ++ " { " ++ intercalate ", " llvmVals ++ " }"
 
 
@@ -1113,53 +1204,82 @@ llvmStoreValue ptr llVal = do
     llvmAssignResults [] $ "store " ++ llVal ++ ", " ++ cptr
 
 
--- | Generate LLVM store instructions to store all elements of the specified
--- list into words of memory beginning with the specified pointer.
-llvmStoreArray :: PrimArg -> [LLVMArg] -> LLVM ()
-llvmStoreArray ptr [] = return ()
-llvmStoreArray ptr (llVal:llVals) = do
-    llvmStoreValue ptr llVal
-    foldM_ (\p v -> do
-        cptr <- pointerOffset p wordSizeBytes
-        llvmStoreValue cptr llVal
-        return cptr
-      ) ptr llVals
-
-
--- | Compute the specified offset to a pointer, returning the result as a
--- CPointer ready to use for loading or storing.  The input pointer can be a
--- Pointer or CPointer.
-pointerOffset :: PrimArg -> Int -> LLVM PrimArg
-pointerOffset ptr 0 = typeConvertedPrim CPointer ptr
-pointerOffset ptr offset = do
-    addr <- typeConvertedPrim Pointer ptr
-    addrArg <- llvmArgument addr
-    (writePtr,readPtr) <- freshTempArgs $ Representation Pointer
-    llvmAssignConvertedResult writePtr Pointer
-        $ "add " ++ addrArg ++ ", " ++ show offset
-    return readPtr
-
-
 -- | Generate code to copy a structure, given a tagged pointer, the tag, the
 -- size of the structure, and the variable to write the new tagged pointer into.
-duplicateStruct :: PrimArg -> PrimArg -> PrimArg -> PrimArg -> LLVM ()
-duplicateStruct struct startOffset size newStruct = do
-    start <- case startOffset of
-        ArgInt 0 _ -> return struct
+-- The hole and holeSize arguments specify a region of the structure that can be
+-- left uninitialised, because it will be overwritten before it can be read.
+-- If the hole offset and structure size are known, we avoid copying the hole if
+-- it comes at the beginning or end of the structure by adjusting the size and
+-- possibly the start of the memory block to be copied.  If it comes in the
+-- middle of a small structure, we separately copy the memory before and after
+-- the hole, knowing that LLVM will expand each of the two copy operations into
+-- straight-line sequences of loads and stores.
+duplicateStruct :: PrimArg -> PrimArg -> PrimArg -> PrimArg -> Integer -> PrimArg
+                -> LLVM ()
+duplicateStruct struct hole size startOffset holeSize newStruct = do
+    logLLVM $ "duplicateStruct " ++ show struct
+                ++ " size " ++ show size
+                ++ " bytes with " ++ show holeSize
+                ++ " byte hole at offset " ++ show hole
+                ++ " and offset by " ++ show startOffset
+    -- These are: the offset from the start of the new and old structures to
+    -- copy; the number of bytes to copy; and optionally a pair of the start
+    -- offset from the first chunk to copy, and size, of the second chunk to
+    -- copy, when it's a small block and the hole is in the middle of the block.
+    (copyOffset,copyBytes,extra) <- case (hole,size,startOffset) of
+        (ArgInt strt _, ArgInt sz _, ArgInt offst _)
+            | holeSize `mod` fromIntegral wordSizeBytes == 0
+              && strt + offst == 0 -> do
+            -- hole is at block start and multiple of word size
+            return (intConst holeSize, intConst (sz - holeSize), Nothing)
+        (ArgInt end _, ArgInt sz _, ArgInt offst _)
+            | (end + offst) `mod` fromIntegral wordSizeBytes == 0 
+              && holeSize `mod` fromIntegral wordSizeBytes == 0
+              && sz == end + offst + holeSize -> do
+            -- hole is word aligned at block end
+            return (intConst 0, intConst (sz - holeSize), Nothing)
+        (ArgInt middle _, ArgInt sz _, ArgInt offst _)
+            | fromIntegral sz <= maximumSplitStructSize
+              && holeSize `mod` fromIntegral wordSizeBytes == 0
+              && (middle + offst) `mod` fromIntegral wordSizeBytes == 0 -> do
+            -- hole is word aligned in the middle of a small block: separately
+            -- copy memory before and after the hole
+            let realHole = middle+offst
+            let realAfterHole = realHole+holeSize
+            return (intConst 0, intConst realHole,
+                    Just (intConst realAfterHole, sz-realAfterHole))
         _ -> do
-            (writeStart,readStart) <- freshTempArgs $ Representation Pointer
-            writeLLVMCall "sub" [] [struct,startOffset,writeStart] Nothing
-            return readStart
-    (writeStartCPtr,readStartCPtr) <- freshTempArgs $ Representation CPointer
-    llvmStart <- llvmArgument start
-    typeConvert start writeStartCPtr
-    (writeCPtr,readCPtr) <- freshTempArgs $ Representation CPointer
-    marshalledCCall mallocFn [] [size,writeCPtr] ["int","pointer"] Nothing
-    copyfn <- llvmMemcpyFn
-    let nonvolatile = ArgInt 0 $ Representation $ Bits 1
-    writeCCall copyfn [] [readCPtr,readStartCPtr,size,nonvolatile] Nothing
-    (writePtr,readPtr) <- freshTempArgs $ Representation Pointer
-    typeConvert readCPtr writePtr
+            -- Not a special case we handle:  just copy the whole struct
+            return (intConst 0, size, Nothing)
+    logLLVM $ "Duplicating struct with copy offset " ++ show copyOffset
+                ++ ", copy bytes " ++ show copyBytes
+                ++  ", extra " ++ show extra
+    -- Allocate memory
+    (writeDstCPtr,readDstCPtr) <- freshCPtrArgs
+    heapAlloc writeDstCPtr size Nothing
+    -- Copy old to new struct, if necessary
+    case copyBytes of
+        ArgInt 0 _ -> logLLVM "No bytes to copy"
+        _ -> do
+            copyfn <- llvmMemcpyFn
+            let nonvolatile = ArgInt 0 $ Representation $ Bits 1
+            realReadDstCPtr <- llvmOffsetCPtr readDstCPtr copyOffset
+            src0 <- llvmOffsetPtr struct "sub" startOffset -- subtract the tag
+            src <- llvmOffsetPtr src0 "add" copyOffset -- add offset to block to copy
+            (writeSrcCPtr,readSrcCPtr) <- freshCPtrArgs
+            typeConvert src writeSrcCPtr
+            writeCCall copyfn []
+                [realReadDstCPtr,readSrcCPtr,copyBytes,nonvolatile] Nothing
+            -- Copy second part of old to new struct, if necessary
+            case extra of
+                Nothing -> return ()
+                Just (extraOffset,extraSize) -> do
+                    extraReadSrcCPtr <- llvmOffsetCPtr readSrcCPtr extraOffset
+                    extraReadDstCPtr <- llvmOffsetCPtr readDstCPtr extraOffset
+                    writeCCall copyfn [] [extraReadDstCPtr,extraReadSrcCPtr,
+                                        intConst extraSize,nonvolatile] Nothing
+    (writePtr,readPtr) <- freshPtrArgs
+    typeConvert readDstCPtr writePtr
     case startOffset of
         ArgInt 0 _ -> typeConvert readPtr newStruct
         _ -> writeLLVMCall "add" [] [readPtr,startOffset,newStruct] Nothing
@@ -1204,9 +1324,11 @@ llvmInstrArgumentList :: LLVMArgSize -> PrimArg -> [PrimArg]
         -> LLVM (String,TypeRepresentation)
 llvmInstrArgumentList argSize output inputs repFn = do
     (outTy : inTys) <- mapM argTypeRep $ output : inputs
+    logLLVM $ "llvmInstrArgumentList " ++ show inTys ++ " -> " ++ show outTy
     let typeRep = resolveLLVMArgType argSize outTy inTys
     let outTyRep = repFn typeRep
     let llArgTyRep = llvmTypeRep typeRep
+    logLLVM $ "  selected rep " ++ show typeRep ++ " -> " ++ show llArgTyRep ++ " yeilds " ++ show outTyRep
     argsString <- intercalate ", " <$> mapM (typeConverted typeRep) inputs
     return (makeLLVMArg llArgTyRep argsString, outTyRep)
 
@@ -1398,14 +1520,43 @@ marshallArgument arg cType = do
 
 -- | The LLVM type of the specified argument.  Wybe strings are Wybe pointers; C
 -- strings are also Wybe pointers, because we do address arithmetic on them;
--- globals are C pointers.  Other kinds of args are represented however their
--- types say they are.
+-- globals, closures, and structure constants are C pointers.  Other kinds of
+-- args are represented however their types say they are.
 argTypeRep :: PrimArg -> LLVM TypeRepresentation
-argTypeRep (ArgString _ WybeString _) = return Pointer
-argTypeRep (ArgString _ CString _)    = return Pointer
 argTypeRep ArgGlobal{}                = return CPointer
 argTypeRep ArgClosure{}               = return CPointer
+argTypeRep (ArgConstRef _ ty)         = return CPointer
 argTypeRep arg                        = typeRep $ argType arg
+
+
+-- | Produce an LLVM argument for an address offset from the specified base
+-- pointer by the specified offset.  If the offest is not zero, this generates
+-- an addition or subtraction instruction, as specified by the op string.
+llvmOffsetPtr :: PrimArg -> String -> PrimArg -> LLVM PrimArg
+llvmOffsetPtr base _ (ArgInt 0 _) = return base
+llvmOffsetPtr base op offset = do
+    logLLVM $ "offsetting pointer " ++ show base ++ " by offset " ++ show offset
+    baseptr <- typeConvertedPrim Pointer base 
+    (writeStart,readStart) <- freshPtrArgs
+    writeLLVMCall op [] [baseptr,offset,writeStart] Nothing
+    return readStart
+
+
+-- | Produce an LLVM argument for an opaque (CPointer) address offset from the
+-- specified base pointer by the specified offset.  If the offest is not zero,
+-- this generates code to convert the opqaue pointer to an integer address,
+-- performs the computation, and then converts the result back to an opaque
+-- pointer.
+llvmOffsetCPtr :: PrimArg -> PrimArg -> LLVM PrimArg
+llvmOffsetCPtr base (ArgInt 0 _) = return base
+llvmOffsetCPtr base offset = do
+    (writeBase,readBase) <- freshPtrArgs
+    typeConvert base writeBase
+    (writeStart,readStart) <- freshPtrArgs
+    (writeResult,readResult) <- freshCPtrArgs
+    writeLLVMCall "add" [] [readBase, offset, writeStart] Nothing
+    typeConvert readStart writeResult
+    return readResult
 
 
 -- | The LLVM argument for the specified PrimArg as an LLVM type and value
@@ -1436,43 +1587,57 @@ llvmValue argVar@ArgVar{argVarName=var, argVarType=ty} = do
             typeConverted thisRep argVar{argVarType=Representation defRep}
 llvmValue (ArgInt val _) = return $ show val
 llvmValue (ArgFloat val _) = return $ show val
-llvmValue (ArgString str stringVariant _) = do
-    let spec = case stringVariant of
-                WybeString -> WybeStringSpec str
-                CString    -> CStringSpec str
-    glob <- lookupConstant spec
-    convertedConstant
-        (ArgGlobal (GlobalVariable glob) $ Representation CPointer) Pointer
-llvmValue (ArgChar val _) = return $ show $ fromEnum val
 llvmValue arg@(ArgClosure pspec args ty) = do
     logLLVM $ "llvmValue of " ++ show arg
     -- See if we've already allocated a constant for this closure
-    glob <- tryLookupConstant $ ClosureSpec pspec args
-    case glob of
-        Just constName ->
-            return $ llvmGlobalName constName
+    argConstValue arg >>= \case
+        Just const -> llvmConstValue const
         Nothing -> do
-            (writePtr,readPtr) <- freshTempArgs $ Representation CPointer
-            let fnRef = funcRef pspec
-            let sizeVar =
-                    ArgInt (fromIntegral (wordSizeBytes * (1 + length args)))
-                            intType
-            logLLVM "Creating closure"
+            args' <- fst <$> partitionClosureParams pspec args
+            logLLVM $ "Creating closure with args " ++ show args'
+            (writePtr,readPtr) <- freshCPtrArgs
+            llClosureTy <- llvmStructType . (CPointer:)
+                             <$> mapM typeRep (argType <$> args')
+            -- The size of a structure can be determinied by the address after NULL for the given type,
+            -- which is effectively (int)(((llclosureTy*) NULL) + 1)
+            -- This is a free operation and is eliminated by llc, but takes a LLVM few instructions
+            sizeVar <- getElementPtr True llClosureTy Nothing [intConst 1]
             heapAlloc writePtr sizeVar Nothing
-            llArgs <- mapM llvmArgument args
-            llvmStoreArray readPtr (fnRef:llArgs)
+            llvmStoreValue writePtr $ funcRef pspec
+            forM_ (zip [1..] args') $ \(idx, arg) -> do
+                eltPtr <- getElementPtr True llClosureTy (Just writePtr) [intConst 0, ArgInt idx int32Type]
+                llvmStore eltPtr arg
             logLLVM $ "Finished creating closure; result is " ++ show readPtr
             rep <- typeRep ty
             logLLVM $ "Converting to representation " ++ show rep
             llvmValue readPtr
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
+llvmValue (ArgConstRef structID ty) = do
+    rep <- typeRep ty
+    logLLVM $ "llvmValue of constant " ++ show structID
+            ++ " with type " ++ show ty
+            ++ ", representation " ++ show rep
+    return $ llvmGlobalName $ structConstName structID
 llvmValue (ArgUnneeded val _) = return "undef"
 llvmValue (ArgUndef _) = return "undef"
 
 
+-- | Generate the LLVM code for the specified constant value.
+llvmConstValue :: ConstValue -> LLVM String
+llvmConstValue (IntStructMember val _) = return $ show val
+llvmConstValue (FloatStructMember val _) = return $ show val
+llvmConstValue (PointerStructMember structID) =
+    return $ llvmGlobalName $ structConstName structID
+llvmConstValue (FnPointerStructMember pspec) =
+    return $ llvmGlobalName $ mangleProcSpec pspec
+llvmConstValue (UndefStructMember sz) = return "undef"
+llvmConstValue (GenericStructMember val) =
+    convertedConstant val Pointer
+
+
 -- | The LLVMArg translation of a ProcSpec.
 funcRef :: ProcSpec -> LLVMArg
-funcRef pspec = "ptr " ++ llvmGlobalName (show pspec)
+funcRef pspec = "ptr " ++ fst (llvmProcName pspec)
 
 
 -- | The variable name of a PrimArg; report an error if not a variable.
@@ -1481,11 +1646,12 @@ argVar _ ArgVar{argVarName=var} =  var
 argVar msg _ = shouldnt $ "variable argument expected " ++ msg
 
 
-neededFreeArgs :: ProcSpec -> [PrimArg] -> LLVM [PrimArg]
-neededFreeArgs pspec args = lift $ do
-    params <- List.filter ((==Free) . primParamFlowType) . primProtoParams
-              . procImplnProto . procImpln <$> getProcDef pspec
-    List.map snd <$> filterM (paramIsReal . fst) (zip params args)
+partitionClosureParams :: ProcSpec -> [PrimArg] -> LLVM ([PrimArg], [PrimParam])
+partitionClosureParams pspec args = lift $ do
+    params <- getPrimParams pspec
+    let (closureParams, realParams) = List.partition ((==Free) . primParamFlowType) params
+    neededArgs <- List.map (uncurry (setArgType . primParamType)) <$> filterM (paramIsReal . fst) (zip closureParams args)
+    return (neededArgs, realParams)
 
 
 
@@ -1495,9 +1661,7 @@ neededFreeArgs pspec args = lift $ do
 
 -- | Return the representation for the specified type
 typeRep :: TypeSpec -> LLVM TypeRepresentation
-typeRep ty =
-    trustFromJust ("lookupTypeRepresentation of unknown type " ++ show ty)
-      <$> lift (lookupTypeRepresentation ty)
+typeRep = lift . typeRepresentation
 
 
 -- | Return the LLMV name and type representation of the specified resource.
@@ -1519,7 +1683,7 @@ llvmTypeRep (Floating 32)   = "float"
 llvmTypeRep (Floating 64)   = "double"
 llvmTypeRep (Floating 128)  = "fp128"
 llvmTypeRep (Floating n)    = shouldnt $ "invalid float size " ++ show n
-llvmTypeRep (Func _ _)      = llvmTypeRep Pointer
+llvmTypeRep (Func _ _)      = llvmTypeRep CPointer
 llvmTypeRep Pointer         = llvmTypeRep $ Bits wordSize
 llvmTypeRep CPointer        = "ptr"
 
@@ -1539,6 +1703,12 @@ llvmStructType tys = "{" ++ intercalate ", " (List.map llvmTypeRep tys) ++ "}"
 -- | The LLVM return type for proc with the specified list of output type specs.
 llvmReturnType :: [TypeSpec] -> LLVM LLVMType
 llvmReturnType specs = llvmRepReturnType <$> mapM typeRep specs
+
+
+
+-- |An LPVM integer constant argument
+intConst :: Integer -> PrimArg
+intConst val = ArgInt val intType
 
 
 ----------------------------------------------------------------------------
@@ -1597,55 +1767,54 @@ typeConvertedPrim toTy fromArg = do
 -- | LLVM code to convert PrimArg fromVal to representation toTy, returning an
 -- LLVMArg holding the converted value.
 typeConvertedArg :: TypeRepresentation -> PrimArg -> LLVM LLVMArg
-typeConvertedArg toTy fromArg
-    | argIsConst fromArg = convertedConstantArg fromArg toTy
-    | otherwise = typeConvertedPrim toTy fromArg >>= llvmArgument
+typeConvertedArg toTy fromArg =
+    argConstValue fromArg >>= \case
+        Just val -> convertedConstantArg val toTy
+        Nothing -> typeConvertedPrim toTy fromArg >>= llvmArgument
 
 
 -- | LLVM code to convert PrimArg fromVal to representation toTy, returning a
 -- LLVMName (ie, without type prefix) holding the converted value.
 typeConverted :: TypeRepresentation -> PrimArg -> LLVM LLVMName
-typeConverted toTy fromArg
-    | argIsConst fromArg = convertedConstant fromArg toTy
-    | otherwise = do
-        argRep <- argTypeRep fromArg
-        if equivLLTypes argRep toTy
-            then llvmValue fromArg
-            else do
-                (writeArg,readArg) <- freshTempArgs $ Representation toTy
-                typeConvert fromArg writeArg
-                llvmValue readArg
+typeConverted toTy fromArg =
+    argConstValue fromArg >>= \case
+        Just val -> convertedConstant val toTy
+        Nothing -> do
+            argRep <- argTypeRep fromArg
+            if equivLLTypes argRep toTy
+                then llvmValue fromArg
+                else do
+                    (writeArg,readArg) <- freshTempArgs $ Representation toTy
+                    typeConvert fromArg writeArg
+                    llvmValue readArg
 
 
 -- | An LLVM constant expression of the specified type toTy, when the constant
--- is initially of the specified type fromTy.  This may take the form of an
--- LLVM type conversion expression, which is fully evaluated at compile-time, so
--- it cannot involve conversion instructions.
-convertedConstant :: PrimArg -> TypeRepresentation -> LLVM LLVMName
-convertedConstant arg toTy = do
-    -- XXX should verify that arg is constant, if ArgGlobal is considered const
-    logLLVM $ "Converting constant " ++ show arg ++ " to type " ++ show toTy
-    fromTy <- argTypeRep arg
-    logLLVM $ "  conversion " ++ show fromTy ++ " -> " ++ show toTy
-            ++ (if trivialConstConversion fromTy toTy then " IS" else " is NOT")
+-- may initially have a different but convertable type.  This may take the form
+-- of an LLVM type conversion expression, which is fully evaluated at
+-- compile-time, so it cannot involve conversion instructions.
+convertedConstant :: ConstValue -> TypeRepresentation -> LLVM LLVMName
+convertedConstant const toRep = do
+    logLLVM $ "Converting constant " ++ show const ++ " to type " ++ show toRep
+    let fromRep = llvmConstValueRep const
+    logLLVM $ "  conversion " ++ show fromRep ++ " -> " ++ show toRep
+            ++ (if trivialConstConversion fromRep toRep then " IS" else " is NOT")
             ++ " trivial"
-    if trivialConstConversion fromTy toTy
-        then llvmValue arg
+    fromVal <- llvmConstValue const
+    let fromArg = makeLLVMArg (llvmTypeRep fromRep) fromVal
+    if trivialConstConversion fromRep toRep
+        then return fromVal
         else do
-            fromArg <- llvmArgument arg
-            return $ typeConvertOp fromTy toTy ++ "( "
-                         ++ fromArg ++ " to " ++ llvmTypeRep toTy ++ " )"
+            return $ typeConvertOp fromRep toRep ++ "( "
+                         ++ fromArg ++ " to " ++ llvmTypeRep toRep ++ " )"
 
-
--- | An LLVM constant expression of the specified type toTy, when the constant
--- is initially of the specified type fromTy.  This may take the form of an
--- LLVM type conversion expression, which is fully evaluated at compile-time, so
--- it cannot involve conversion instructions.
-convertedConstantArg :: PrimArg -> TypeRepresentation -> LLVM LLVMArg
-convertedConstantArg arg toTy = do
-    -- XXX should verify that arg is constant, if ArgGlobal is considered const
-    makeLLVMArg (llvmTypeRep toTy) <$> convertedConstant arg toTy
-
+-- | An LLVM argument of the specified type toTy, when the constant
+-- may initially have a different but convertable type.  This includes the LLVM
+-- type in the result.
+convertedConstantArg :: ConstValue -> TypeRepresentation -> LLVM LLVMArg
+convertedConstantArg const toRep = do
+    val <- convertedConstant const toRep
+    return $ makeLLVMArg (llvmTypeRep toRep) val
 
 
 -- Converting constants from the first type to the second is completely trivial,
@@ -1659,6 +1828,8 @@ trivialConstConversion (Signed _) (Signed _)      = True
 trivialConstConversion (Signed _) (Bits _)        = True
 trivialConstConversion (Signed _) Pointer         = True
 trivialConstConversion (Floating _) (Floating _)  = True
+trivialConstConversion CPointer Func{}            = True
+trivialConstConversion Func{} CPointer            = True
 trivialConstConversion Pointer (Bits b)           = b == wordSize
 trivialConstConversion Pointer (Signed b)         = b == wordSize
 trivialConstConversion _ _                        = False
@@ -1674,8 +1845,8 @@ equivLLTypes (Signed b) Pointer    = b == wordSize
 equivLLTypes (Signed b1) (Bits b2) = b1 == b2
 equivLLTypes (Bits b1) (Signed b2) = b1 == b2
 equivLLTypes Func{} Func{}         = True -- Since LLVM just considers them ptrs
-equivLLTypes Pointer Func{}        = True
-equivLLTypes Func{} Pointer        = True
+equivLLTypes CPointer Func{}       = True
+equivLLTypes Func{} CPointer       = True
 equivLLTypes t1 t2 = t1 == t2
 
 
@@ -1685,14 +1856,14 @@ typeConvertOp fromTy toTy
     | fromTy == toTy = "bitcast" -- use bitcast for no-op conversion
 typeConvertOp Pointer toTy   = typeConvertOp (Bits wordSize) toTy
 typeConvertOp fromTy Pointer = typeConvertOp fromTy (Bits wordSize)
-typeConvertOp Func{} toTy    = typeConvertOp (Bits wordSize) toTy
-typeConvertOp fromTy Func{}  = typeConvertOp fromTy (Bits wordSize)
+typeConvertOp Func{} toTy    = typeConvertOp CPointer toTy
+typeConvertOp fromTy Func{}  = typeConvertOp fromTy CPointer
 typeConvertOp (Bits m) (Bits n)
     | m < n = "zext"
     | n < m = "trunc"
     | otherwise = shouldnt "no-op unsigned conversion"
 typeConvertOp (Bits m) (Signed n)
-    | m < n = "sext"
+    | m < n = "zext"
     | n < m = "trunc"
     | otherwise = -- no instruction actually needed, but one is expected
         "bitcast"
@@ -1711,6 +1882,8 @@ typeConvertOp (Floating m) (Floating n)
     | n < m = "fptrunc"
     | otherwise = shouldnt "no-op floating point conversion"
 typeConvertOp CPointer (Bits _) = "ptrtoint"
+-- because CPointer is used for generic data
+typeConvertOp CPointer (Signed _) = "ptrtoint"
 -- These don't change representation, or change any bits.  They just
 -- re-interpret a FP number as an integer or vice versa.  This ensures we don't
 -- lose precision or waste time on round trip conversion.
@@ -1775,10 +1948,8 @@ type ConstSpec = (PrimArg,TypeRepresentation)
 -- | The LLVM State monad
 data LLVMState = LLVMState {
         -- These values apply to a whole module (and submodules)
-        allConsts :: Set StaticConstSpec,
+        allConsts :: Set StructID,
                                      -- ^ Static constants appearing in module
-        constNames :: Map StaticConstSpec Ident,
-                                    -- ^ local name given to static constants
         allExterns :: Map String ExternSpec,
                                     -- ^ Extern declarations needed by module
         fileHandle :: Handle,       -- ^ The file handle we're writing to
@@ -1808,7 +1979,7 @@ data LLVMState = LLVMState {
 
 -- | Set up LLVM monad to translate a module into the given file handle
 initLLVMState :: Handle -> LLVMState
-initLLVMState h = LLVMState Set.empty Map.empty Map.empty h 0 0 Set.empty
+initLLVMState h = LLVMState Set.empty Map.empty h 0 0 Set.empty
                      Map.empty Map.empty Nothing Map.empty Map.empty False
 
 
@@ -1869,6 +2040,17 @@ makeTemp = do
     ctr <- gets tmpCounter
     modify (\s -> s { tmpCounter = ctr + 1 })
     return $ PrimVarName (mkTempName ctr) 0
+
+-- |Return a pair of PrimArgs to write and read, respectively, a fresh temp
+-- variable of the specified type, along with the variable name.
+freshPtrArgs :: LLVM (PrimArg, PrimArg)
+freshPtrArgs = freshTempArgs $ Representation Pointer
+
+
+-- |Return a pair of PrimArgs to write and read, respectively, a fresh temp
+-- variable of the specified type, along with the variable name.
+freshCPtrArgs :: LLVM (PrimArg, PrimArg)
+freshCPtrArgs = freshTempArgs $ Representation CPointer
 
 
 -- |Return a pair of PrimArgs to write and read, respectively, a fresh temp
@@ -2062,7 +2244,7 @@ convertOutByRefArg ArgVar{argVarName=name, argVarType=ty,
                     return (ptrArg,True)
                 Nothing -> do
                     logLLVM " -> Not out-by-reference: making fresh alloca ptr"
-                    (writeArg,readArg) <- freshTempArgs $ Representation CPointer
+                    (writeArg,readArg) <- freshCPtrArgs
                     stackAlloc writeArg wordSizeBytes
                     addTakeRefPointer name readArg ty
                     return (readArg,False)
@@ -2103,7 +2285,14 @@ stackAlloc result size = do
 llvmProcName :: ProcSpec -> (LLVMName,String)
 llvmProcName ProcSpec{procSpecMod=[],procSpecName=""} =
     (llvmGlobalName "main", "ccc")
-llvmProcName pspec = (llvmGlobalName $ show pspec, "fastcc")
+llvmProcName pspec =
+    (llvmGlobalName $ mangleProcSpec pspec, "fastcc")
+
+
+-- | Mangle a proc spec
+mangleProcSpec :: ProcSpec -> String
+mangleProcSpec pspec@ProcSpec{procSpecMod=mod} =
+    show pspec{procSpecMod=(++ [specialChar]) <$> mod}
 
 
 -- | Make a suitable LLVM name for a global variable or constant.  We prefix it

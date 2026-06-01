@@ -1,0 +1,4 @@
+# Ignore all extension-less and .o files
+*
+!*.*
+*.o

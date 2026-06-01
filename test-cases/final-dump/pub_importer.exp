@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: res: exporter.res
   public procs    : exporter.fn<0>
                     exporter.three<0>
+  constants       : 
   imports         : use wybe
   resources       : res: fromList [(exporter.res,wybe.int = 3 @exporter:nn:nn @exporter:nn:nn)]
   procs           : 
@@ -34,19 +35,19 @@ three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
 ; ModuleID = 'exporter'
 
 source_filename = "!ROOT!/final-dump/exporter.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc i64 @ipow(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#exporter.res" = global i64 undef
 
-define external fastcc i64 @"exporter.fn<0>"(i64 %"i##0") {
+define external fastcc i64 @"exporter#.fn<0>"(i64 %"i##0") {
   %"tmp#3##0" = call ccc i64 @ipow(i64 2, i64 %"i##0")
   ret i64 %"tmp#3##0"
 }
 
-define external fastcc i64 @"exporter.three<0>"() {
+define external fastcc i64 @"exporter#.three<0>"() {
   %"tmp#1##0" = load i64, ptr @"resource#exporter.res"
   ret i64 %"tmp#1##0"
 }
@@ -58,6 +59,7 @@ define external fastcc i64 @"exporter.three<0>"() {
   public resources: res: exporter.res
   public procs    : exporter.fn<0>
                     exporter.three<0>
+  constants       : 
   imports         : public use exporter
                     use wybe
   resources       : 
@@ -70,7 +72,7 @@ define external fastcc i64 @"exporter.three<0>"() {
 ; ModuleID = 'pub_importer'
 
 source_filename = "!ROOT!/final-dump/pub_importer.wybe"
-target triple    ????
+target triple   = ????
 
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

@@ -20,9 +20,7 @@ cabal.sandbox.config
 ERRS
 Version.lhs
 wybemk
-*.aux
 *.bbl
-*.log
 *.dvi
 *.blg
 *.lof
@@ -44,7 +42,6 @@ miniworkshop.pdf
 
 *~
 compiler.pdf
-wybelibs/wybe.o
 
 # individual parser for testing purposes
 ParserTest.hs
