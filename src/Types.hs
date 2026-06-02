@@ -25,6 +25,7 @@ import           Data.Either         as Either
 import           Data.Set            as Set
 import           UnivSet             as USet
 import           Data.Tuple.Select
+import           Data.Tuple.Extra    ((***))
 import           Data.Foldable
 import           Data.Bifunctor
 import           Data.Functor        ((<&>))
@@ -1106,7 +1107,7 @@ procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
                                                fiDetism=detism,
                                                fiImpurity=impurity}
     | not hasBang && not (List.null callFlows) && last callFlows == ParamOut
-                  && (length callFlows < length tys
+                  && (length callFlows <= length tys
                      || length callFlows <= length tys + 1 && usesResources)
         = (Just info{fiPartial=True,
                      fiTypes=closedTys ++ [higherTy],
@@ -1417,7 +1418,9 @@ callInfos vars pstmt = do
                     Just pid -> return [ProcSpec m name pid generalVersion]
                 defs <- lift $ mapM getProcDef procs
                 firstInfos <- zipWithM firstInfo defs procs
-                return $ StmtTypings pstmt firstInfos
+                let flows = flattenedExpFlow . content <$> args
+                let partialInfos = List.map (fst . procToPartial flows resful) firstInfos
+                return $ StmtTypings pstmt $ firstInfos ++ catMaybes partialInfos
         ProcCall (Higher fn) _ _ _ ->
             return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
@@ -1480,16 +1483,25 @@ typecheckCalls [] [] _ foreigns =
     mapM_ (placedApply validateForeign) foreigns
 typecheckCalls [] residue True foreigns =
     typecheckCalls residue [] False foreigns
-typecheckCalls [] residue False foreigns = do
+typecheckCalls [] residue@(overloaded:_) False foreigns = do
     let (typings@StmtTypings{typingInfos=infos},rest) = findMinimumTyping residue
     logTyped $ "Recursively checking types with " ++ show typings
-    typings' <- mapM (getTyping . typecheckCallWithInfo typings rest foreigns) infos
-    case List.filter (List.null . typingErrs) $ snd <$> typings' of
-        [typing] -> put typing
-        _ -> do
-            -- 1st equation handles empty residue case
-            typeError $ overloadErr $ head residue
-            typecheckCalls [] [] False foreigns
+    let (partials, nonParials) = List.partition isPartial infos
+    typecheckCalls' typings nonParials rest $ 
+        typecheckCalls' typings partials rest $
+            do
+                typeError $ overloadErr overloaded
+                typecheckCalls [] [] False foreigns
+  where
+    typecheckCalls' typings infos rest alt = do 
+        typings' <- snd <$$> mapM (getTyping . typecheckCallWithInfo typings rest foreigns) infos
+        case List.filter (List.null . typingErrs) typings' of
+            [typing] -> do
+                logTyped "Found one valid typing"
+                put typing
+            valid -> do
+                logTyped $ "Still ambiguous: " ++ show (length valid) 
+                alt
 typecheckCalls (stmtTyping@(StmtTypings pstmt typs):calls)
         residue chg foreigns = do
     logTyped $ "Type checking call " ++ show pstmt
@@ -1552,17 +1564,21 @@ typecheckCalls (stmtTyping@(StmtTypings pstmt typs):calls)
 -- returning the "minimum" StmtTyping and all others
 findMinimumTyping :: [StmtTypings] -> (StmtTypings, [StmtTypings])
 findMinimumTyping [] = shouldnt "findMinimumTyping"
-findMinimumTyping (typing:typings) = findMinimumTyping' typings typing []
+findMinimumTyping (typing:typings) = go typings typing (size typing) []
+  where 
+    go [] typing' _ acc = (typing', acc)
+    go (typing:rest) typing' sizeTyping' acc
+        | sizeTyping < sizeTyping'
+        = go rest typing sizeTyping (typing':acc)
+        | otherwise
+        = go rest typing' sizeTyping' (typing:acc)
+      where sizeTyping = size typing
+    size = (length *** length) . List.partition (not . isPartial) . typingInfos
 
 
-findMinimumTyping' :: [StmtTypings] -> StmtTypings -> [StmtTypings]
-                   -> (StmtTypings, [StmtTypings])
-findMinimumTyping' [] typing' acc = (typing', acc)
-findMinimumTyping' (typing:rest) typing' acc
-    | length (typingInfos typing) < length (typingInfos typing')
-    = findMinimumTyping' rest typing (typing':acc)
-    | otherwise
-    = findMinimumTyping' rest typing' (typing:acc)
+isPartial :: CallInfo -> Bool
+isPartial FirstInfo{fiPartial=p} = p
+isPartial _ = False
 
 
 -- | Perform type checks replacing the typingInfos of the supplied StmtTypings
@@ -1570,6 +1586,7 @@ findMinimumTyping' (typing:rest) typing' acc
 typecheckCallWithInfo :: StmtTypings
                       -> [StmtTypings] -> [Placed Stmt] -> CallInfo -> Typed ()
 typecheckCallWithInfo typings rest fs info = do
+    logTyped $ "-> Trying info " ++ show info
     typecheckCalls (typings{typingInfos=[info]}:rest) [] False fs
 
 
@@ -1580,10 +1597,6 @@ matchTypes :: Ident -> Ident -> OptPos -> Bool -> [TypeSpec] -> [FlowDirection]
            -> CallInfo -> Typed (MaybeErr (CallInfo,Typing))
 matchTypes caller callee pos hasBang callTypes callFlows
         calleeInfo@FirstInfo{fiTypes=tys}
-    -- Handle case whre call should have a ! but doesnt, and the call
-    -- can be made partial
-    | not hasBang && needsBang && isJust partialCallInfo
-    = matchTypeList callee pos callTypes calleeInfo'''
     -- Handle case where call arity is correct
     | sameLength callTypes tys
     = matchTypeList callee pos callTypes calleeInfo
@@ -1598,9 +1611,6 @@ matchTypes caller callee pos hasBang callTypes callFlows
             OK _ | all flowsOut $ fiFlows calleeInfo ->
                 return $ Err [ReasonBadReification callee pos]
             _ -> return match
-    -- Handle case where the call is partial
-    | isJust partialCallInfo
-    = matchTypeList callee pos callTypes calleeInfo'''
     -- Handle call with one in/out arg to proc with no in/out params, and
     -- one too few args.
     | notElem ParamInOut (fiFlows calleeInfo) && 1 == length extraTypes
@@ -1613,8 +1623,6 @@ matchTypes caller callee pos hasBang callTypes callFlows
           calleeInfo' = fromJust testInfo
           detCallInfo = testToBoolFn calleeInfo
           calleeInfo'' = fromJust detCallInfo
-          (partialCallInfo, needsBang) = procToPartial callFlows hasBang calleeInfo
-          calleeInfo''' = fromJust partialCallInfo
           extraTypes = catMaybes
                        $ zipWith
                          (\t f -> if f==ParamInOut then Just t else Nothing)
