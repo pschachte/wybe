@@ -2219,11 +2219,11 @@ if.then.0:
   %"tmp#19##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.lesser<0>"(i64 %"t##0", i64 %"h##0", ptr %"tmp#19##0")
   %"tmp#3##0" = load i64, ptr %"tmp#19##0"
-  %"tmp#2##0" = call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#3##0")
+  %"tmp#2##0" = tail call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#3##0")
   %"tmp#20##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.greater<0>"(i64 %"t##0", i64 %"h##0", ptr %"tmp#20##0")
   %"tmp#6##0" = load i64, ptr %"tmp#20##0"
-  %"tmp#5##0" = call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#6##0")
+  %"tmp#5##0" = tail call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#6##0")
   %"tmp#21##0" = call ccc ptr @wybe_malloc(i32 16)
   %"tmp#13##0" = ptrtoint ptr %"tmp#21##0" to i64
   %"tmp#22##0" = inttoptr i64 %"tmp#13##0" to ptr
@@ -2251,11 +2251,11 @@ if.then.0:
   %"tmp#19##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.lesser<0>"(i64 %"t##0", i64 %"h##0", ptr %"tmp#19##0")
   %"tmp#3##0" = load i64, ptr %"tmp#19##0"
-  %"tmp#2##0" = call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#3##0")
+  %"tmp#2##0" = tail call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#3##0")
   %"tmp#20##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.greater<0>[410bae77d3]"(i64 %"t##0", i64 %"h##0", ptr %"tmp#20##0")
   %"tmp#6##0" = load i64, ptr %"tmp#20##0"
-  %"tmp#5##0" = call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#6##0")
+  %"tmp#5##0" = tail call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#6##0")
   %"tmp#21##0" = add i64 %"lst##0", 8
   %"tmp#22##0" = inttoptr i64 %"tmp#21##0" to ptr
   store i64 %"tmp#5##0", ptr %"tmp#22##0"
@@ -2928,9 +2928,9 @@ define external fastcc void @"int_list_test#.test_int_list<0>"(i64 %"x##0", i64 
   %"tmp#59##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.extend<0>[410bae77d3]"(i64 %"tmp#1##0", i64 %"z##1", ptr %"tmp#59##0")
   %"tmp#2##0" = load i64, ptr %"tmp#59##0"
-  call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
   call ccc void @putchar(i8 10)
-  call fastcc void @"int_list#.print<0>"(i64 %"tmp#2##0")
+  tail call fastcc void @"int_list#.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   %"tmp#60##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.insert<0>[410bae77d3]"(i64 %"tmp#2##0", i64 4, i64 78, ptr %"tmp#60##0")
@@ -2941,14 +2941,14 @@ define external fastcc void @"int_list_test#.test_int_list<0>"(i64 %"x##0", i64 
   %"tmp#62##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.remove<0>[410bae77d3]"(i64 %"tmp#4##0", i64 2, ptr %"tmp#62##0")
   %"tmp#5##0" = load i64, ptr %"tmp#62##0"
-  call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
   call ccc void @putchar(i8 10)
-  call fastcc void @"int_list#.print<0>"(i64 %"tmp#5##0")
+  tail call fastcc void @"int_list#.print<0>"(i64 %"tmp#5##0")
   call ccc void @putchar(i8 10)
-  %"l##5" = call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#5##0")
-  call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
+  %"l##5" = tail call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#5##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
   call ccc void @putchar(i8 10)
-  call fastcc void @"int_list#.print<0>"(i64 %"l##5")
+  tail call fastcc void @"int_list#.print<0>"(i64 %"l##5")
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -2971,9 +2971,9 @@ define external fastcc void @"int_list_test#.test_int_list<0>[9e35cb823b]"(i64 %
   %"tmp#59##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.extend<0>[410bae77d3]"(i64 %"tmp#1##0", i64 %"z##1", ptr %"tmp#59##0")
   %"tmp#2##0" = load i64, ptr %"tmp#59##0"
-  call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
   call ccc void @putchar(i8 10)
-  call fastcc void @"int_list#.print<0>"(i64 %"tmp#2##0")
+  tail call fastcc void @"int_list#.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   %"tmp#60##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.insert<0>[410bae77d3]"(i64 %"tmp#2##0", i64 4, i64 78, ptr %"tmp#60##0")
@@ -2984,14 +2984,14 @@ define external fastcc void @"int_list_test#.test_int_list<0>[9e35cb823b]"(i64 %
   %"tmp#62##0" = alloca i8, i64 8, align 8
   call fastcc void @"int_list#.remove<0>[410bae77d3]"(i64 %"tmp#4##0", i64 2, ptr %"tmp#62##0")
   %"tmp#5##0" = load i64, ptr %"tmp#62##0"
-  call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
   call ccc void @putchar(i8 10)
-  call fastcc void @"int_list#.print<0>"(i64 %"tmp#5##0")
+  tail call fastcc void @"int_list#.print<0>"(i64 %"tmp#5##0")
   call ccc void @putchar(i8 10)
-  %"l##5" = call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#5##0")
-  call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
+  %"l##5" = tail call fastcc i64 @"int_list#.sort<0>[410bae77d3]"(i64 %"tmp#5##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1207)
   call ccc void @putchar(i8 10)
-  call fastcc void @"int_list#.print<0>"(i64 %"l##5")
+  tail call fastcc void @"int_list#.print<0>"(i64 %"l##5")
   call ccc void @putchar(i8 10)
   ret void
 }

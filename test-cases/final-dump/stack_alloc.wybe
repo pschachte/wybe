@@ -1,0 +1,38 @@
+use position
+
+# A helper that accepts a position and passes it back unchanged.
+def {noinline} pass_back(p:position, ?q:position) {
+    ?q = p
+}
+
+# Test 1: local allocation — position is created and used only locally,
+# never returned or stored anywhere.
+# Expected: the alloc should be stack-allocated ({stack} flag on lpvm alloc).
+def {noinline} test_local(y:int) use !io {
+    ?p = position(1, y)
+    !println(p^x)
+}
+
+# Test 2: pass-through — the position is passed to another proc which returns
+# it unchanged, and the result is used locally (never returned by this proc).
+# Expected: the alloc should still be stack-allocated, since neither p nor q
+# is an output parameter of test_pass_through.  The escape analysis should
+# see that the conservative edge from pass_back does not fire (q is not
+# escaped), so p also does not escape.
+def {noinline} test_pass_through(y:int) use !io {
+    ?p = position(1, y)
+    pass_back(p, ?q)
+    !println(q^x)
+}
+
+# Test 3: genuine escape — the position is returned as an output parameter,
+# so it must remain live after the proc returns.
+# Expected: the alloc must NOT be stack-allocated (no {stack} flag).
+def {noinline} test_escape(y:int, ?p:position) {
+    ?p = position(3, y)
+}
+
+!test_local(2)
+!test_pass_through(2)
+test_escape(4, ?p)
+!println(p^x)

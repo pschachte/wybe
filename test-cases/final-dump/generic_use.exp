@@ -603,13 +603,13 @@ define external fastcc void @"generic_use#.<0>"() {
   %"tmp#24##0" = alloca i8, i64 8, align 8
   call fastcc void @"generic_use#.concat<0>"(i64 %"tmp#0##0", i64 %"tmp#1##0", ptr %"tmp#24##0")
   %"tmp#2##0" = load i64, ptr %"tmp#24##0"
-  call fastcc void @"generic_use#.print<0>"(i64 %"tmp#2##0")
+  tail call fastcc void @"generic_use#.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
-  %"tmp#3##0" = call fastcc i64 @"generic_use#.reverse1<0>[410bae77d3]"(i64 %"tmp#0##0", i64 0)
-  call fastcc void @"generic_use#.print<0>"(i64 %"tmp#3##0")
+  %"tmp#3##0" = tail call fastcc i64 @"generic_use#.reverse1<0>[410bae77d3]"(i64 %"tmp#0##0", i64 0)
+  tail call fastcc void @"generic_use#.print<0>"(i64 %"tmp#3##0")
   call ccc void @putchar(i8 10)
-  %"tmp#4##0" = call fastcc i64 @"generic_use#.nrev<0>[410bae77d3]"(i64 %"tmp#1##0")
-  call fastcc void @"generic_use#.print<0>"(i64 %"tmp#4##0")
+  %"tmp#4##0" = tail call fastcc i64 @"generic_use#.nrev<0>[410bae77d3]"(i64 %"tmp#1##0")
+  tail call fastcc void @"generic_use#.print<0>"(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)
   ret void
 }

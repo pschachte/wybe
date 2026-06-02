@@ -31,7 +31,7 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     box_unbox.copy<0>(18446744073709551617:box_unbox, ?tmp#2##0:box_unbox) #0 @box_unbox:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#6##0)
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#6##0)
     foreign lpvm mutate(~tmp#6##0, ?tmp#6##1, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:box_unbox)
     box_unbox.force_box<0>(~tmp#6##1:box_unbox, ?tmp#7##0:box_unbox) #1 @box_unbox:nn:nn
     box_unbox.force_box<0>(~tmp#7##0:box_unbox, ?tmp#9##0:box_unbox) #2 @box_unbox:nn:nn
@@ -228,7 +228,7 @@ print#cont#4(s##0:wybe.list(wybe.char), x##0:box_unbox)<{<<wybe.io.io>>}; {<<wyb
         foreign llvm srem(x##0:box_unbox, 10:box_unbox, ?tmp#14##0:box_unbox) @box_unbox:nn:nn
         foreign lpvm cast(~tmp#14##0:box_unbox, ?tmp#15##0:wybe.int) @box_unbox:nn:nn
         box_unbox.numeral<0>(~tmp#15##0:wybe.int, ?tmp#16##0:wybe.char) #4 @box_unbox:nn:nn
-        foreign lpvm alloc(16:wybe.int, ?tmp#17##0:wybe.list(wybe.char)) @box_unbox:nn:nn
+        foreign lpvm {stack} alloc(16:wybe.int, ?tmp#17##0:wybe.list(wybe.char)) @box_unbox:nn:nn
         foreign lpvm mutate(~tmp#17##0:wybe.list(wybe.char), ?tmp#18##0:wybe.list(wybe.char), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.char) @box_unbox:nn:nn
         foreign lpvm mutate(~tmp#18##0:wybe.list(wybe.char), ?tmp#19##0:wybe.list(wybe.char), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~s##0:wybe.list(wybe.char)) @box_unbox:nn:nn
         foreign llvm sdiv(~x##0:box_unbox, 10:box_unbox, ?tmp#20##0:box_unbox) @box_unbox:nn:nn
@@ -270,7 +270,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"box_unbox#.<0>"() {
   %"tmp#2##0" = tail call fastcc i128 @"box_unbox#.copy<0>"(i128 18446744073709551617)
-  %"tmp#20##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#20##0" = alloca i8, i64 16, align 8
   %"tmp#6##0" = ptrtoint ptr %"tmp#20##0" to i64
   %"tmp#21##0" = inttoptr i64 %"tmp#6##0" to ptr
   store i128 %"tmp#2##0", ptr %"tmp#21##0"
@@ -422,7 +422,7 @@ if.then.0:
   %"tmp#14##0" = srem i128 %"x##0", 10
   %"tmp#15##0" = trunc i128 %"tmp#14##0" to i64
   %"tmp#16##0" = tail call fastcc i8 @"box_unbox#.numeral<0>"(i64 %"tmp#15##0")
-  %"tmp#21##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#21##0" = alloca i8, i64 16, align 8
   %"tmp#17##0" = ptrtoint ptr %"tmp#21##0" to i64
   %"tmp#22##0" = inttoptr i64 %"tmp#17##0" to ptr
   store i8 %"tmp#16##0", ptr %"tmp#22##0"
