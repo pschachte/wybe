@@ -22,7 +22,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    higher_order_impure.#anon#1<1><>:{impure}() #0 @higher_order_impure:nn:nn
+    higher_order_impure.#anon#1<1>(higher_order_impure.#anon#1<1><>:{impure}(), _:wybe.list(wybe.int)) #0 @higher_order_impure:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @higher_order_impure:nn:nn
     foreign c print_float(3.0:wybe.float, ~%tmp#18##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @higher_order_impure:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @higher_order_impure:nn:nn
@@ -36,7 +36,7 @@ proc #anon#1 > {inline,impure} (1 calls)
   InterestingCallProperties: []
 proc #anon#1 > {inline,impure} (1 calls)
 1: higher_order_impure.#anon#1<1>
-#anon#1([^l2##0:wybe.list(wybe.int)])<{}; {}; {}>:
+#anon#1(@#env##0:opaque, [^l2##0:wybe.list(wybe.int)])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
@@ -64,8 +64,7 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"higher_order_impure#.<0>"() {
-  %"tmp#21##0" = load ptr, ptr @"higher_order_impure#constant#3"
-  tail call fastcc void %"tmp#21##0"(ptr @"higher_order_impure#constant#3")
+  tail call fastcc void @"higher_order_impure#.#anon#1<1>"(ptr @"higher_order_impure#constant#3")
   call ccc void @print_float(double 3.0)
   call ccc void @putchar(i8 10)
   ret void
