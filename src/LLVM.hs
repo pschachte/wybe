@@ -394,9 +394,7 @@ argConstValue (ArgUndef ty) = do
 -- | If needed, add an extern declaration for a prim to the set.
 recordExtern :: ModSpec -> Prim -> LLVM ()
 recordExtern mod (PrimCall _ pspec _ args _) = recordExternProc mod pspec args
-recordExtern mod (PrimHigher _ arg@(ArgConstRef cnst _) _ _) = recordConst mod cnst
-recordExtern mod (PrimHigher _ arg@(ArgClosure pspec _ _) _ _) = getProcArgs pspec >>= recordExternProc mod pspec
-recordExtern _ PrimHigher{} = return ()
+recordExtern _ PrimHigher{} = return () -- fn already handled by mapLPVMBodyM in preScanProcs
 recordExtern _ (PrimForeign "llvm" _ _ _) = return ()
 recordExtern _ (PrimForeign "lpvm" "alloc" _ _) =
     recordExternSpec externAlloc
