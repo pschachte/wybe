@@ -289,7 +289,7 @@ preScanProcs = do
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
     vTables <- lift $ getModule modVTables
     logLLVM $ "Start recording vTables in module " ++ showModSpec thisMod
-    mapM_ (recordConst . snd) vTables
+    mapM_ (recordConst mod . snd) vTables
     logLLVM "End recording vTables"
     let bodies = concatMap (concatMap allProcBodies) procss
     mapM_ (mapLPVMBodyM (recordExtern mod) (prescanArg mod)) bodies
@@ -308,10 +308,10 @@ prescanArg mod closure@(ArgClosure pspec args _) = do
     let externArgs = primParamToArg envPrimParam : List.map primParamToArg realParams
     recordExternProc mod pspec externArgs
     recordExternSpec externAlloc
-    argConstValue closure >>= maybe (return ()) recordIfConst
+    argConstValue closure >>= maybe (return ()) (recordIfConst mod)
     mapM_ (prescanArg mod) args
-prescanArg _ arg =
-    argConstValue arg >>= maybe (return ()) recordIfConst
+prescanArg mod arg =
+    argConstValue arg >>= maybe (return ()) (recordIfConst mod)
 
 
 -- | Scan the forks of a ProcBody, recording any constants
@@ -326,34 +326,42 @@ preScanForks mod PrimFork{forkBodies=bodies, forkDefault=mbDflt} = do
     mapM_ (preScanBodyForks mod . snd) bodies
     forM_ mbDflt $ preScanBodyForks mod
 preScanForks mod MergedFork{forkTable=table, forkBody=body, forkDefault=mbDflt} = do
-    mapM_ (recordConst . thd4) table
+    mapM_ (recordConst mod . thd4) table
     preScanBodyForks mod body
     forM_ mbDflt $ preScanBodyForks mod
 
 
-recordIfConst :: ConstValue -> LLVM ()
-recordIfConst (PointerStructMember structID) = do
+recordIfConst :: ModSpec -> ConstValue -> LLVM ()
+recordIfConst mod (PointerStructMember structID) = do
     constInfo <- lift $ lookupConstInfo structID
     logLLVM $ "Recording const " ++ show structID
                 ++ " ( -> " ++ show constInfo ++ ")"
-    recordConst structID
-recordIfConst (GenericStructMember member) =
-    recordIfConst member
-recordIfConst (FnPointerStructMember pspec@(ProcSpec mod _ _ _)) = do
-    thisMod <- lift getModuleSpec
-    unless (thisMod == mod) $ do
-        logLLVM $ "Recording extern proc " ++ show pspec
-        pdef <- lift $ getProcDef pspec
-        let params = (primProtoParams . procImplnProto . procImpln) pdef
-        let args = List.map primParamToArg params
-        recordExternProc thisMod pspec args
-recordIfConst _ = return ()
+    recordConst mod structID
+recordIfConst mod (GenericStructMember member) =
+    recordIfConst mod member
+recordIfConst mod (FnPointerStructMember pspec@(ProcSpec pmod _ _ _)) = do
+    isClosure <- lift $ isClosureProc pspec
+    if isClosure
+    then do
+        params <- lift $ getPrimParams pspec
+        (neededArgs, realParams) <- partitionClosureParams pspec (primParamToArg <$> params)
+        let externArgs = primParamToArg envPrimParam : List.map primParamToArg realParams
+        recordExternProc mod pspec externArgs
+    else do
+        thisMod <- lift getModuleSpec
+        unless (thisMod == pmod) $ do
+            logLLVM $ "Recording extern proc " ++ show pspec
+            pdef <- lift $ getProcDef pspec
+            let params = (primProtoParams . procImplnProto . procImpln) pdef
+            let args = List.map primParamToArg params
+            recordExternProc mod pspec args
+recordIfConst _ _ = return ()
 
 
 -- | Record that the specified constant needs to be declared in this LLVM
 -- module, as well as any constants it refers to.
-recordConst :: StructID -> LLVM ()
-recordConst spec = do
+recordConst :: ModSpec -> StructID -> LLVM ()
+recordConst mod spec = do
     logLLVM $ "Recording constant " ++ show spec
     new <- gets $ Set.notMember spec . allConsts
     when new $ do
@@ -375,24 +383,25 @@ recordConst spec = do
                         allConsts = Set.insert spec
                             $ maybe id Set.delete previous $ allConsts s,
                         allVTables = Map.insert ispec spec $ allVTables s }
-                    recordConstParts info
+                    recordConstParts mod info
             _ -> do
                 modify $ \s -> s {allConsts=Set.insert spec $ allConsts s}
-                maybe (return ()) recordConstParts info
+                lift (lookupConstInfo spec) >>=
+                    maybe (return ()) (recordConstParts mod)
 
 
 -- | Record the pointer parts of a constant structure.
-recordConstParts :: StructInfo -> LLVM ()
-recordConstParts CStringInfo{} = return ()
-recordConstParts StructInfo{structData=members} = do
+recordConstParts :: ModSpec -> StructInfo -> LLVM ()
+recordConstParts _ CStringInfo{} = return ()
+recordConstParts mod StructInfo{structData=members} = do
     logLLVM $ "Recording parts of constant struct " ++ show members
-    mapM_ recordIfConst members
-recordConstParts VTableInfo{vtableData=members} = do
+    mapM_ (recordIfConst mod) members
+recordConstParts mod VTableInfo{vtableData=members} = do
     logLLVM $ "Recording parts of vtable " ++ show members
-    mapM_ recordIfConst members
-recordConstParts ArrayInfo{arrayData=elts} = do
+    mapM_ (recordIfConst mod) members
+recordConstParts mod ArrayInfo{arrayData=elts} = do
     logLLVM $ "Recording elts of constant array " ++ show elts
-    mapM_ recordIfConst elts
+    mapM_ (recordIfConst mod) elts
 
 
 -- | Produce a StructMember from a PrimArg, if it's a constant.  This may record
@@ -423,6 +432,8 @@ argConstValue (ArgUndef ty) = do
 -- | If needed, add an extern declaration for a prim to the set.
 recordExtern :: ModSpec -> Prim -> LLVM ()
 recordExtern mod (PrimCall _ pspec _ args _) = recordExternProc mod pspec args
+recordExtern _ (PrimHigher _ arg@(ArgClosure pspec _ _) _ _) = return ()
+recordExtern _ (PrimHigher _ arg@ArgConstRef{} _ _) = return ()
 recordExtern _ PrimHigher{} = return ()
 recordExtern _ PrimVirtualCall{} = return ()
 recordExtern _ (PrimForeign "llvm" _ _ _) = return ()
