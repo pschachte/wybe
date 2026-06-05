@@ -36,9 +36,6 @@ import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
-import Distribution.TestSuite (TestInstance(name))
-import Distribution.Simple.Utils (info)
-import Crypto.PubKey.RSA.Prim (dp)
 
 
 -- BEGIN MAJOR DOC
