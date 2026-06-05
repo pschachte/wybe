@@ -38,7 +38,7 @@ run#anon#1(^func##0:{impure}())<{}; {}; {}>:
     ~func##0:{impure}() #0 @extern_anon_params_a:nn:nn
 proc run#anon#1 > {inline,impure} (1 calls)
 1: extern_anon_params_a.run#anon#1<1>
-run#anon#1(^func##0:{impure}())<{}; {}; {}>:
+run#anon#1(@#env##0:opaque, ^func##0:{impure}())<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~^func##0:{impure}() #0 @extern_anon_params_a:nn:nn

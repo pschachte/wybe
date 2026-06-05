@@ -117,7 +117,7 @@ module AST (
   ProcVariant(..), Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   outputVariableName, outputStatusName,
-  envParamName, envPrimParam, makeGlobalResourceName,
+  envParamName, envPrimParam, envParam, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
   showProcIdentifier, showProcName,
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
@@ -3587,7 +3587,7 @@ constantValue _ = return Nothing
 -- | Generate a StructId for a closure, if all its arguments are constants.
 closureStructId :: ProcSpec -> [PrimArg] -> Compiler (Maybe StructID)
 closureStructId pspec args = do
-    params <- getPrimParams pspec
+    params <- List.filter ((ClosureEnv/=) . primParamFlowType) <$> getPrimParams pspec
     let neededArgs = [arg | (arg, param) <- zip args params, paramIsNeeded param]
     mapM constantValue neededArgs >>= (\case
         Just args' -> do
@@ -3812,12 +3812,14 @@ data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                                    -- ^An argument to pass a resource
                  | Free            -- ^An argument to be passed in the closure
                                    -- environment
+                 | ClosureEnv
      deriving (Eq,Ord,Generic)
 
 instance Show ArgFlowType where
     show Ordinary = ""
     show (Resource _) = "%"
     show Free = "^"
+    show ClosureEnv = "@"
 
 
 -- |The dataflow direction of an actual argument.
@@ -3879,7 +3881,8 @@ argDescription (ArgVar var _ flow ftype _) =
     ++ (case ftype of
           Ordinary       -> " variable " ++ primVarName var
           Resource rspec -> " resource " ++ show rspec
-          Free           -> " closure argument ")
+          Free           -> " closure argument "
+          ClosureEnv     -> " closure env ")
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgClosure ms as _)
@@ -4086,12 +4089,16 @@ outputStatusName :: Ident
 outputStatusName = specialName "success"
 
 
-envParamName :: PrimVarName
-envParamName = PrimVarName (specialName "env") 0
+envParamName :: VarName
+envParamName = specialName "env"
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName (Representation CPointer) FlowIn Ordinary (ParamInfo False emptyGlobalFlows)
+envPrimParam = PrimParam (PrimVarName envParamName 0) (Representation CPointer) FlowIn ClosureEnv (ParamInfo False emptyGlobalFlows)
+
+
+envParam :: Param 
+envParam = Param envParamName (Representation CPointer) ParamIn ClosureEnv
 
 
 makeGlobalResourceName :: ResourceSpec -> String

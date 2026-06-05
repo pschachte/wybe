@@ -18,7 +18,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    unary_higher_order.#anon#1<1><>:(?wybe.int)(?tmp#0##0:wybe.int) #0 @unary_higher_order:nn:nn
+    unary_higher_order.#anon#1<1>(unary_higher_order.#anon#1<1><>:(?wybe.int), ?tmp#0##0:wybe.int) #0 @unary_higher_order:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @unary_higher_order:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @unary_higher_order:nn:nn
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @unary_higher_order:nn:nn
@@ -32,7 +32,7 @@ proc #anon#1 > {inline} (1 calls)
     foreign llvm move(42:wybe.int, ?anon#1#1##0:wybe.int) @unary_higher_order:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: unary_higher_order.#anon#1<1>
-#anon#1(?anon#1#1##0)<{}; {}; {}>:
+#anon#1(@#env##0:opaque, ?anon#1#1##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(42:wybe.int, ?anon#1#1##0:wybe.int) @unary_higher_order:nn:nn
@@ -67,8 +67,7 @@ declare external ccc void @print_int(i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"unary_higher_order#.<0>"() {
-  %"tmp#6##0" = load ptr, ptr @"unary_higher_order#constant#0"
-  %"tmp#0##0" = tail call fastcc i64 %"tmp#6##0"(ptr @"unary_higher_order#constant#0")
+  %"tmp#0##0" = tail call fastcc i64 @"unary_higher_order#.#anon#1<1>"(ptr @"unary_higher_order#constant#0")
   call ccc void @print_int(i64 %"tmp#0##0")
   ret void
 }

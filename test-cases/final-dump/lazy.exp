@@ -53,7 +53,7 @@ proc #anon#1 > {inline} (1 calls)
     foreign llvm move(42:wybe.int, ?anon#1#1##0:wybe.int) @lazy:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: lazy.#anon#1<1>
-#anon#1(?anon#1#1##0)<{}; {}; {}>:
+#anon#1(@#env##0:opaque, ?anon#1#1##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.c_string<0>("Thinking...\n":wybe.string, ?tmp#6##0:wybe.c_string) #1 @lazy:nn:nn

@@ -299,8 +299,7 @@ preScanProcs = do
 prescanArg :: ModSpec -> PrimArg -> LLVM ()
 prescanArg mod closure@(ArgClosure pspec args _) = do
     (neededArgs, realParams) <- partitionClosureParams pspec args
-    let externArgs = primParamToArg envPrimParam : List.map primParamToArg realParams
-    recordExternProc mod pspec externArgs
+    recordExternProc mod pspec $ List.map primParamToArg realParams
     recordExternSpec externAlloc
     argConstValue closure >>= maybe (return ()) (recordIfConst mod)
     mapM_ (prescanArg mod) args
@@ -342,7 +341,7 @@ getProcArgs :: ProcSpec -> LLVM [PrimArg]
 getProcArgs pspec = do
     params <- lift $ getPrimParams pspec
     (neededArgs, realParams) <- partitionClosureParams pspec (primParamToArg <$> params)
-    return $ primParamToArg envPrimParam : List.map primParamToArg realParams
+    return $ List.map primParamToArg realParams
 
 
 -- | Record that the specified constant needs to be declared in this LLVM
@@ -640,7 +639,7 @@ writeProcLLVM def _  = shouldnt $ "Generating assembly code for uncompiled proc 
 -- with a leading "env" param. Also yields the Free params for unmarshalling
 closeClosureParams :: PrimProto -> (PrimProto, [PrimParam])
 closeClosureParams proto@PrimProto{primProtoParams=params} =
-    (proto{primProtoParams=envPrimParam:realParams}, neededFree)
+    (proto{primProtoParams=realParams}, neededFree)
   where
     (free, realParams) = List.partition ((==Free) . primParamFlowType) params
     neededFree = List.filter (not . paramInfoUnneeded . primParamInfo) free
@@ -839,9 +838,11 @@ writeWybeCall wybeProc args pos = do
 
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
-writeHOCall closure@(ArgClosure pspec closed _) args pos = do
+writeHOCall closure@(ArgClosure _ _ _) args pos = do
     -- NB:  this case should have been handled earlier
-    shouldnt $ "Higher order call with constand closure should have been handled earlier: " ++ show closure
+    shouldnt $ "Higher order call with closure should have been handled earlier: " ++ show closure
+writeHOCall closure@(ArgConstRef _ _) args pos = do
+    shouldnt $ "Higher order call with constant should have been handled earlier: " ++ show closure
 writeHOCall closure args pos = do
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs $ closure:args
     unless (List.null oRefs && List.null iRefs)
@@ -880,7 +881,7 @@ writeActualCall wybeProc ins outs tailKind = do
     params <- lift $ getPrimParams wybeProc
     -- must ensure we obey the closure interface
     isClosure <- lift $ isClosureProc wybeProc
-    let params' = if isClosure then envPrimParam : List.filter ((/=Free) . primParamFlowType) params else params
+    let params' = if isClosure then List.filter ((/=Free) . primParamFlowType) params else params
     (inPs,outPs,oRefPs,iRefPs) <- partitionParams params'
     unless (List.null iRefPs)
       $ shouldnt $ "take-reference parameter(s) " ++ show iRefPs

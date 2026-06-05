@@ -847,12 +847,14 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
         Nothing -> do
             tmpCtr <- gets brTempCtr
             let body = pres ++ [ProcCall (First mod nm $ Just pID) detism False args `maybePlace` pos] ++ posts
+                simple = List.null pres && List.null posts
+                params'' = envParam `maybePlace` pos : params'
                 closureDef =
-                    ProcDef name (ProcProto name params' res) (ProcDefSrc body)
+                    ProcDef name (ProcProto name params'' res) (ProcDefSrc body)
                     Nothing tmpCtr 0 Map.empty Private detism Inline impurity
-                    (ClosureProc regularProcSpec $ List.null pres && List.null posts) NoSuperproc Map.empty
+                    (ClosureProc regularProcSpec simple) NoSuperproc Map.empty
             logUnbranch $ "Creating closure for " ++ show regularProcSpec
-            logUnbranch $ "  with params: " ++ show params'
+            logUnbranch $ "  with params: " ++ show params''
             logUnbranch $ "  with args  : " ++ show args
             logUnbranch $ "  with free  : " ++ show free
             pDefClosure' <- lift $ unbranchProc closureDef 0
