@@ -496,13 +496,13 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @box_unbox_ho:nn:nn
     foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @box_unbox_ho:nn:nn
     box_unbox.print<0>(~tmp#0##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @box_unbox_ho:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @box_unbox_ho:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @box_unbox_ho:nn:nn
-    foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @box_unbox_ho:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @box_unbox_ho:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @box_unbox_ho:nn:nn
+    foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @box_unbox_ho:nn:nn
     box_unbox.print<0>(~z##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @box_unbox_ho:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @box_unbox_ho:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @box_unbox_ho:nn:nn
-    foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @box_unbox_ho:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @box_unbox_ho:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @box_unbox_ho:nn:nn
+    foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @box_unbox_ho:nn:nn
 
 
 proc #anon#1 > {inline} (1 calls)
@@ -517,7 +517,7 @@ proc #anon#1 > {inline} (1 calls)
     foreign llvm add(~anon#1#1##0:box_unbox, 2:box_unbox, ?anon#1#2##0:box_unbox) @box_unbox_ho:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: box_unbox_ho.#anon#1<1>
-#anon#1(anon#1#1##0 <{}; {}; {0}>, ?anon#1#2##1)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#anon#1(@#env##0:opaque, anon#1#1##0 <{}; {}; {1}>, ?anon#1#2##1)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~anon#1#1##0, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:box_unbox)
@@ -532,7 +532,7 @@ proc #anon#1 > {inline} (1 calls)
 
 proc #closure#1 > {inline} (2 calls)
 0: box_unbox_ho.#closure#1<0>
-#closure#1(^x##0:box_unbox, y##0 <{}; {}; {1}>, ?z##1)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#closure#1(@#env##0:opaque, ^x##0:box_unbox, y##0 <{}; {}; {2}>, ?z##1)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~y##0, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#7##0:box_unbox) @box_unbox_ho:nn:nn
@@ -587,35 +587,35 @@ define external fastcc void @"box_unbox_ho#.<0>"() {
   %"z##0" = add i128 %"tmp#0##0", %"tmp#0##0"
   tail call fastcc void @"box_unbox#.print<0>"(i128 %"z##0")
   call ccc void @putchar(i8 10)
-  %"tmp#34##0" = call ccc ptr @wybe_malloc(i32 16)
-  %"tmp#5##0" = ptrtoint ptr %"tmp#34##0" to i64
-  %"tmp#35##0" = inttoptr i64 %"tmp#5##0" to ptr
-  store i128 %"tmp#0##0", ptr %"tmp#35##0"
-  %"tmp#37##0" = zext i64 %"tmp#5##0" to i128
-  %"tmp#36##0" = trunc i128 %"tmp#37##0" to i64
-  %"tmp#38##0" = tail call fastcc i64 @"box_unbox_ho#.do_something<0>"(ptr @"box_unbox_ho#constant#0", i64 %"tmp#36##0")
-  %"tmp#6##0" = zext i64 %"tmp#38##0" to i128
-  %"tmp#40##0" = trunc i128 %"tmp#6##0" to i64
-  %"tmp#39##0" = inttoptr i64 %"tmp#40##0" to ptr
-  %"z##1" = load i128, ptr %"tmp#39##0"
+  %"tmp#35##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#5##0" = ptrtoint ptr %"tmp#35##0" to i64
+  %"tmp#36##0" = inttoptr i64 %"tmp#5##0" to ptr
+  store i128 %"tmp#0##0", ptr %"tmp#36##0"
+  %"tmp#38##0" = zext i64 %"tmp#5##0" to i128
+  %"tmp#37##0" = trunc i128 %"tmp#38##0" to i64
+  %"tmp#39##0" = tail call fastcc i64 @"box_unbox_ho#.do_something<0>"(ptr @"box_unbox_ho#constant#0", i64 %"tmp#37##0")
+  %"tmp#6##0" = zext i64 %"tmp#39##0" to i128
+  %"tmp#41##0" = trunc i128 %"tmp#6##0" to i64
+  %"tmp#40##0" = inttoptr i64 %"tmp#41##0" to ptr
+  %"z##1" = load i128, ptr %"tmp#40##0"
   tail call fastcc void @"box_unbox#.print<0>"(i128 %"z##1")
   call ccc void @putchar(i8 10)
-  %"tmp#41##0" = trunc i128 %"tmp#6##0" to i64
-  %"tmp#42##0" = inttoptr i64 %"tmp#41##0" to ptr
-  store i128 %"tmp#0##0", ptr %"tmp#42##0"
-  %"tmp#44##0" = getelementptr inbounds {ptr, i128}, ptr null, i64 1
-  %"tmp#45##0" = ptrtoint ptr %"tmp#44##0" to i32
-  %"tmp#43##0" = call ccc ptr @wybe_malloc(i32 %"tmp#45##0")
-  store ptr @"box_unbox_ho#.#closure#1<0>", ptr %"tmp#43##0"
-  %"tmp#46##0" = getelementptr inbounds {ptr, i128}, ptr %"tmp#43##0", i64 0, i32 1
-  store i128 %"tmp#0##0", ptr %"tmp#46##0"
-  %"tmp#48##0" = zext i64 %"tmp#41##0" to i128
-  %"tmp#47##0" = trunc i128 %"tmp#48##0" to i64
-  %"tmp#49##0" = tail call fastcc i64 @"box_unbox_ho#.do_something<0>"(ptr %"tmp#43##0", i64 %"tmp#47##0")
-  %"tmp#10##0" = zext i64 %"tmp#49##0" to i128
-  %"tmp#51##0" = trunc i128 %"tmp#10##0" to i64
-  %"tmp#50##0" = inttoptr i64 %"tmp#51##0" to ptr
-  %"z##2" = load i128, ptr %"tmp#50##0"
+  %"tmp#42##0" = trunc i128 %"tmp#6##0" to i64
+  %"tmp#43##0" = inttoptr i64 %"tmp#42##0" to ptr
+  store i128 %"tmp#0##0", ptr %"tmp#43##0"
+  %"tmp#45##0" = getelementptr inbounds {ptr, i128}, ptr null, i64 1
+  %"tmp#46##0" = ptrtoint ptr %"tmp#45##0" to i32
+  %"tmp#44##0" = call ccc ptr @wybe_malloc(i32 %"tmp#46##0")
+  store ptr @"box_unbox_ho#.#closure#1<0>", ptr %"tmp#44##0"
+  %"tmp#47##0" = getelementptr inbounds {ptr, i128}, ptr %"tmp#44##0", i64 0, i32 1
+  store i128 %"tmp#0##0", ptr %"tmp#47##0"
+  %"tmp#49##0" = zext i64 %"tmp#42##0" to i128
+  %"tmp#48##0" = trunc i128 %"tmp#49##0" to i64
+  %"tmp#50##0" = tail call fastcc i64 @"box_unbox_ho#.do_something<0>"(ptr %"tmp#44##0", i64 %"tmp#48##0")
+  %"tmp#10##0" = zext i64 %"tmp#50##0" to i128
+  %"tmp#52##0" = trunc i128 %"tmp#10##0" to i64
+  %"tmp#51##0" = inttoptr i64 %"tmp#52##0" to ptr
+  %"z##2" = load i128, ptr %"tmp#51##0"
   tail call fastcc void @"box_unbox#.print<0>"(i128 %"z##2")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#0##0")
