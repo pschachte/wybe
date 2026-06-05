@@ -36,8 +36,6 @@ import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
-import Distribution.TestSuite (TestInstance(name))
-import Distribution.Simple.Utils (info)
 
 
 -- BEGIN MAJOR DOC
@@ -342,20 +340,22 @@ recordIfConst mod (GenericStructMember member) =
 recordIfConst mod (FnPointerStructMember pspec@(ProcSpec pmod _ _ _)) = do
     isClosure <- lift $ isClosureProc pspec
     if isClosure
-    then do
-        params <- lift $ getPrimParams pspec
-        (neededArgs, realParams) <- partitionClosureParams pspec (primParamToArg <$> params)
-        let externArgs = primParamToArg envPrimParam : List.map primParamToArg realParams
-        recordExternProc mod pspec externArgs
+    then getProcArgs pspec >>= recordExternProc mod pspec
     else do
         thisMod <- lift getModuleSpec
         unless (thisMod == pmod) $ do
             logLLVM $ "Recording extern proc " ++ show pspec
-            pdef <- lift $ getProcDef pspec
-            let params = (primProtoParams . procImplnProto . procImpln) pdef
+            params <- lift $ getPrimParams pspec
             let args = List.map primParamToArg params
             recordExternProc mod pspec args
 recordIfConst _ _ = return ()
+
+
+getProcArgs :: ProcSpec -> LLVM [PrimArg]
+getProcArgs pspec = do
+    params <- lift $ getPrimParams pspec
+    (neededArgs, realParams) <- partitionClosureParams pspec (primParamToArg <$> params)
+    return $ primParamToArg envPrimParam : List.map primParamToArg realParams
 
 
 -- | Record that the specified constant needs to be declared in this LLVM
@@ -432,8 +432,8 @@ argConstValue (ArgUndef ty) = do
 -- | If needed, add an extern declaration for a prim to the set.
 recordExtern :: ModSpec -> Prim -> LLVM ()
 recordExtern mod (PrimCall _ pspec _ args _) = recordExternProc mod pspec args
-recordExtern _ (PrimHigher _ arg@(ArgClosure pspec _ _) _ _) = return ()
-recordExtern _ (PrimHigher _ arg@ArgConstRef{} _ _) = return ()
+recordExtern mod (PrimHigher _ arg@(ArgConstRef cnst _) _ _) = recordConst mod cnst
+recordExtern mod (PrimHigher _ arg@(ArgClosure pspec _ _) _ _) = getProcArgs pspec >>= recordExternProc mod pspec
 recordExtern _ PrimHigher{} = return ()
 recordExtern _ PrimVirtualCall{} = return ()
 recordExtern _ (PrimForeign "llvm" _ _ _) = return ()
