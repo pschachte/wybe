@@ -26,7 +26,7 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast("Ada":wybe.string, ?tmp#0##0:trait_higher_order_box) @trait_higher_order:nn:nn
-    trait_higher_order.#closure#1<0>(trait_higher_order.#closure#1<0><>:(trait_higher_order_box, ?wybe.string), ~tmp#0##0:trait_higher_order_box, ?tmp#1##0:wybe.string) #0 @trait_higher_order:nn:nn
+    trait_higher_order.describe_box<0>(~tmp#0##0:trait_higher_order_box, ?tmp#1##0:wybe.string) #0 @trait_higher_order:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @trait_higher_order:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @trait_higher_order:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @trait_higher_order:nn:nn
@@ -62,7 +62,6 @@ target triple   = ????
 @"trait_higher_order#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"Ada\00", align 8
 @"trait_higher_order#constant#2" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"trait_higher_order#constant#0" }, align 8
 @"trait_higher_order#constant#3" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"trait_higher_order#constant#1" }, align 8
-@"trait_higher_order#constant#4" = private unnamed_addr constant {ptr} { ptr @"trait_higher_order#.#closure#1<0>" }, align 8
 
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
 declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
@@ -71,7 +70,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"trait_higher_order#.<0>"() {
   %"tmp#0##0" = ptrtoint ptr @"trait_higher_order#constant#3" to i64
-  %"tmp#1##0" = tail call fastcc i64 @"trait_higher_order#.#closure#1<0>"(ptr @"trait_higher_order#constant#4", i64 %"tmp#0##0")
+  %"tmp#1##0" = tail call fastcc i64 @"trait_higher_order#.describe_box<0>"(i64 %"tmp#0##0")
   tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
   ret void
