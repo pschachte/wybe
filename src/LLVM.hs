@@ -838,10 +838,10 @@ writeWybeCall wybeProc args pos = do
 
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
-writeHOCall closure@(ArgClosure _ _ _) args pos = do
+writeHOCall closure@ArgClosure{} args pos = do
     -- NB:  this case should have been handled earlier
     shouldnt $ "Higher order call with closure should have been handled earlier: " ++ show closure
-writeHOCall closure@(ArgConstRef _ _) args pos = do
+writeHOCall closure@ArgConstRef{} args pos = do
     shouldnt $ "Higher order call with constant should have been handled earlier: " ++ show closure
 writeHOCall closure args pos = do
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs $ closure:args

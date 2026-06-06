@@ -2172,7 +2172,7 @@ primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType
     = return $ max impurity modimpurity
 primImpurity (PrimHigher _ (ArgConstRef structID _) impurity _) = do
     lookupConstInfo structID >>= \case
-        Just (StructInfo _ (FnPointerStructMember pspec:t)) ->
+        Just (StructInfo _ (FnPointerStructMember pspec:_)) ->
             max impurity . procImpurity <$> getProcDef pspec
         _ -> return impurity
 primImpurity (PrimHigher _ fn impurity _) = return impurity
@@ -3587,8 +3587,8 @@ constantValue _ = return Nothing
 -- | Generate a StructId for a closure, if all its arguments are constants.
 closureStructId :: ProcSpec -> [PrimArg] -> Compiler (Maybe StructID)
 closureStructId pspec args = do
-    params <- List.filter ((ClosureEnv/=) . primParamFlowType) <$> getPrimParams pspec
-    let neededArgs = [arg | (arg, param) <- zip args params, paramIsNeeded param]
+    freeParams <- List.filter ((Free==) . primParamFlowType) <$> getPrimParams pspec
+    let neededArgs = [arg | (arg, param) <- zip args freeParams, paramIsNeeded param]
     mapM constantValue neededArgs >>= (\case
         Just args' -> do
           let sz = wordSizeBytes * (length args' + 1)
@@ -3652,7 +3652,7 @@ constValueExp :: ConstValue -> Exp
 constValueExp (IntStructMember i _) = IntValue i
 constValueExp (FloatStructMember f _) = FloatValue f
 constValueExp (PointerStructMember structID) = ConstStruct structID
-constValueExp (FnPointerStructMember pspec) =
+constValueExp (FnPointerStructMember _) =
     shouldnt "constValueExp of FnPointerStructMember"
 constValueExp (UndefStructMember _) =
     shouldnt "constValueExp of UndefStructMember"

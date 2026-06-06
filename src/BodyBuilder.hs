@@ -707,33 +707,34 @@ argExpandedPrim call@(PrimHigher id fn impurity args) = do
     logBuild $ "Expanding Higher call " ++ show call
     fn' <- expandArg True fn
     case fn' of
-        ArgClosure pspec clsd _ -> do
-            (pspec', simple) <- lift (getProcDef pspec <&> procVariant) <&> \case
-              ClosureProc pspec' simple -> (pspec', simple)
-              _ -> shouldnt $ "call to non-closure " ++ show pspec
-            let (finalPspec, finalArgs) = if simple then (pspec', clsd ++ args) else (pspec, fn':clsd ++ args)
-            gFlows <- lift $ getProcGlobalFlows finalPspec
-            logBuild $ "As first-order call to " ++ show finalPspec
-            argExpandedPrim $ PrimCall id finalPspec impurity finalArgs gFlows
+        ArgClosure pspec clsd _ -> trySkipTrampoline pspec id impurity fn' clsd args
         ArgConstRef constId _ -> do
             structInfo <- lift $ lookupConstInfo constId
             case structInfo of
-              Just StructInfo{structData=(FnPointerStructMember pspec:rest)} -> do
-                frees <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
-                let closed = fillClosure rest frees
-                gFlows <- lift $ getProcGlobalFlows pspec
-                argExpandedPrim $ PrimCall id pspec impurity (fn':closed ++ args) gFlows
-              _ -> shouldnt $ "argExpandedPrim HO of " ++ show fn'
+              Just StructInfo{structData=(FnPointerStructMember pspec:fields)} -> do
+                freeParams <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
+                let clsd = fillClosure fields freeParams
+                trySkipTrampoline pspec id impurity fn clsd args
+              st -> shouldnt $ "argExpandedPrim HO of " ++ show fn' ++ " -> " ++ show st
         _ -> do
           logBuild $ "Leaving as higher call to " ++ show fn'
           args' <- mapM (expandArg True) args
           return $ PrimHigher id fn' impurity args'
   where 
     fillClosure [] params = List.map (ArgUndef . primParamType) params
-    fillClosure (free:frees) (param:params) 
-      | paramIsNeeded param = constValuePrimArg free (primParamType param) : fillClosure frees params
-      | otherwise = fillClosure frees params
-    fillClosure _ _ = shouldnt "uh oh"
+    fillClosure (cnst:cnsts) (param:params) 
+      | paramIsNeeded param = constValuePrimArg cnst (primParamType param) : fillClosure cnsts params
+      | otherwise = fillClosure cnsts params
+    fillClosure _ params = shouldnt $ "fillClosure with too many params " ++ show params
+
+    trySkipTrampoline pspec id imp fn clsd args = do
+      (pspec', simple) <- lift (getProcDef pspec <&> procVariant) <&> \case
+        ClosureProc pspec' simple -> (pspec', simple)
+        _ -> shouldnt $ "call to non-closure " ++ show pspec
+      let (pspec'', mbFn) = if simple then (pspec', Nothing) else (pspec, Just fn)
+      gFlows <- lift $ getProcGlobalFlows pspec''
+      logBuild $ "As first-order call to " ++ show pspec''
+      argExpandedPrim $ PrimCall id pspec'' impurity (maybeToList mbFn ++ clsd ++ args) gFlows
 argExpandedPrim (PrimForeign "lpvm" "mutate" flags (arg1:args)) = do
     arg1' <- expandArg False arg1 -- don't expand consts in the first argument
     args' <- mapM (expandArg True) args
