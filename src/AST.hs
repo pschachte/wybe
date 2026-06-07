@@ -3741,7 +3741,7 @@ constsGlobalFlows (FnPointerStructMember pspec:fields) = do
     else do
         gFlows <- getProcGlobalFlows pspec
         globalFlowsUnions . (gFlows:) <$> mapM constGlobalFlows fields
-constsGlobalFlows fields = return emptyGlobalFlows -- XXX need to recurse!
+constsGlobalFlows fields = globalFlowsUnions <$> mapM constGlobalFlows fields
 
 
 -- | Compute the GlobalFlows of a single constant value.
