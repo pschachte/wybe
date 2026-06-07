@@ -72,8 +72,8 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), MergedForkTable, prependToBody, appendToBody, unMergeFork, guardedMergedFork, 
   Ident, VarName, ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
-  argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
-  argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
+  argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType,
+  argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib, mapLPVMBodyM,
@@ -3867,40 +3867,6 @@ setArgFlow _ arg          = arg
 setArgFlowType :: ArgFlowType -> PrimArg -> PrimArg
 setArgFlowType ft arg@ArgVar{} = arg{argVarFlowType=ft}
 setArgFlowType _  arg          = arg
-
-
--- | Get the flow of a prim arg. Returns Nothing for a non-ArgVar value
-maybeArgFlowType :: PrimArg -> Maybe ArgFlowType
-maybeArgFlowType ArgVar{argVarFlowType=ft} = Just ft
-maybeArgFlowType arg                       = Nothing
-
-
-argDescription :: PrimArg -> String
-argDescription (ArgVar var _ flow ftype _) =
-    argFlowDescription flow
-    ++ (case ftype of
-          Ordinary       -> " variable " ++ primVarName var
-          Resource rspec -> " resource " ++ show rspec
-          Free           -> " closure argument "
-          ClosureEnv     -> " closure env ")
-argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
-argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
-argDescription (ArgClosure ms as _)
-    = "closure of '" ++ show ms ++ "' with <"
-    ++ intercalate ", " (argDescription <$> as) ++ "> closed arguments"
-argDescription (ArgGlobal info _) = "global reference to " ++ show info
-argDescription (ArgConstRef info _) = "reference to const struct " ++ show info
-argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
-argDescription (ArgUndef _) = "undefined argument"
-
-
-
--- |A printable description of a primitive flow direction
-argFlowDescription :: PrimFlow -> String
-argFlowDescription FlowIn  = "input"
-argFlowDescription FlowOut = "output"
-argFlowDescription FlowOutByReference = "outByReference"
-argFlowDescription FlowTakeReference = "takeReference"
 
 
 argIntVal :: PrimArg -> Maybe Integer
