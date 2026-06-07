@@ -1200,44 +1200,48 @@ writeAssemblyExports = do
 -- file section.
 declareStringConstant :: LLVMName -> String -> Maybe String -> LLVM ()
 declareStringConstant name str section = do
-    llvmPutStrLn $ llvmGlobalName name
-                    ++ " = private unnamed_addr constant "
-                    ++ showLLVMString str True
-                    ++ maybe "" ((", section "++) . show) section
-                    ++ ", align " ++ show wordSizeBytes
+    declareLLVMConstant name False Private section (Just wordSizeBytes) $ showLLVMString str True
 
 
 -- | Emit an LLVM declaration for a struct constant, optionally specifying a
 -- file section.
 declareStructConstant :: LLVMName -> StructInfo -> Maybe String -> LLVM ()
-declareStructConstant name (StructInfo sz members) section = do
+declareStructConstant name (StructInfo _ (FnPointerStructMember pspec:fields)) section = do
+    freeParams <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
+    let neededFields = snd <$> List.filter (paramIsNeeded . fst) (zip freeParams fields)
+    llvmFields <- llvmConstStruct $ FnPointerStructMember pspec : neededFields
+    declareLLVMConstant name False Private section (Just wordSizeBytes) llvmFields
+declareStructConstant name (StructInfo _ members) section = do
     llvmFields <- llvmConstStruct members
-    llvmPutStrLn $ llvmGlobalName name
-                    ++ " = private unnamed_addr constant " ++ llvmFields
-                    ++ maybe "" ((", section "++) . show) section
-                    ++ ", align " ++ show wordSizeBytes
+    declareLLVMConstant name False Private section (Just wordSizeBytes) llvmFields
 declareStructConstant _ (VTableInfo sz members external index spec mod) section = do
     let llvmType = llvmStructType $ llvmConstValueRep <$> members
     llvmFields <- llvmConstStruct members
     let name = llvmVTableName mod index
-    llvmPutStrLn $ llvmGlobalName name ++ " = "
-                    ++ (if external then "external " else "")
-                    ++ "unnamed_addr constant "
-                    ++ (if external then llvmType else llvmFields)
-                    ++ maybe "" ((", section "++) . show) section
-                    ++ ", align " ++ show wordSizeBytes
+    declareLLVMConstant name external Public section (Just wordSizeBytes) $
+        if external then llvmType else llvmFields
 declareStructConstant name (CStringInfo str) section = do
-    llvmPutStrLn $ llvmGlobalName name
-                    ++ " = private unnamed_addr constant "
-                    ++ showLLVMString str True
-                    ++ maybe "" ((", section "++) . show) section
-                    ++ ", align " ++ show wordSizeBytes
+    declareStringConstant name str section
 declareStructConstant name (ArrayInfo elts) section = do
     let reps = llvmConstValueRep <$> elts
     llvmVals <- zipWithM convertedConstantArg elts reps
-    llvmPutStrLn $ llvmGlobalName name
-                    ++ " = private unnamed_addr constant [ " ++ show (length elts) ++ " x " ++ llvmTypeRep (head reps) ++ " ] "
-                    ++ "[" ++ intercalate ", " llvmVals ++ "]"
+    declareLLVMConstant name False Private section Nothing $
+           "[ " ++ show (length elts) ++ " x " ++ llvmTypeRep (head reps) ++ " ] "
+        ++ "[" ++ intercalate ", " llvmVals ++ "]"
+
+
+-- | Emit an LLVM declaration for a constant, optionally specifying a
+-- file section and allignment. The value should be prepended by its type
+declareLLVMConstant :: LLVMName -> Bool -> Visibility -> Maybe String -> Maybe Int -> String -> LLVM ()
+declareLLVMConstant name external vis mbSection mbAlignment value = 
+    llvmPutStrLn $ llvmGlobalName name ++ " = " 
+                    ++ (if external then "external " else "")
+                    ++ (if vis == Private then "private " else "")
+                    ++ "unnamed_addr constant "
+                    ++ value
+                    ++ maybe "" ((", section " ++) . show) mbSection
+                    ++ maybe "" ((", align " ++) . show) mbAlignment
+
 
 -- | The representation of a constant value as seen by LLVM, as distinguished
 -- from the representation used by Wybe.  Pointer struct members are seen as
