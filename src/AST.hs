@@ -3812,7 +3812,7 @@ data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                                    -- ^An argument to pass a resource
                  | Free            -- ^An argument to be passed in the closure
                                    -- environment
-                 | ClosureEnv
+                 | ClosureEnv      -- ^A closure's environment, used to retrieve closed values
      deriving (Eq,Ord,Generic)
 
 instance Show ArgFlowType where
