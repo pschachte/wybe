@@ -89,8 +89,8 @@ normaliseItem (ImportForeign files _) =
     mapM_ addForeignImport files
 normaliseItem (ImportForeignLib files _) =
     mapM_ addForeignLib files
-normaliseItem (ResourceDecl vis name typ init pos) = do
-  addSimpleResource name (SimpleResource typ init pos) vis
+normaliseItem (ResourceDecl vis name defn pos) =
+  addResource name vis defn pos
 normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
     (Placed (Where body (Placed (Var var ParamOut rflow) _)) _) pos) =
     -- Handle special reverse mode case of def foo(...) = var where ....

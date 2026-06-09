@@ -17,7 +17,7 @@
 --  This also includes the Compiler monad and the Module types.
 module AST (
   -- *Types just for parsing
-  Item(..), Visibility(..), isPublic,
+  Item(..), Visibility(..), ResourceDefn(..), isPublic,
   Determinism(..), determinismLEQ, determinismJoin, determinismMeet,
   disjunctionDeterminism, determinismFail, determinismSucceed,
   determinismSeq, determinismProceding, determinismName, determinismCanFail,
@@ -109,7 +109,7 @@ module AST (
   typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources, initialisedVisibleResources,
-  addSimpleResource, lookupResource,
+  addResource, lookupResource,
   specialResources, specialResourcesSet, isSpecialResource,
   publicResource, resourcefulName,
   ProcModifiers(..), defaultProcModifiers,
@@ -210,7 +210,7 @@ data Item
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ImportForeign [FilePath] OptPos
      | ImportForeignLib [Ident] OptPos
-     | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
+     | ResourceDecl Visibility ResourceName ResourceDefn OptPos
      | FuncDecl Visibility ProcModifiers ProcProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility ProcModifiers ProcProto [Placed Stmt] OptPos
      | ForeignProcDecl Visibility Ident ProcModifiers (Maybe Ident) ProcProto TypeSpec OptPos
@@ -221,6 +221,13 @@ data Item
 -- |The visibility of a file item.  We only support public and private.
 data Visibility = Private | Public
                   deriving (Eq, Ord, Show, Generic)
+
+
+data ResourceDefn =
+    SimpleResourceDefn TypeSpec (Maybe (Placed Exp))
+    | CompoundResourceDefn [ResourceSpec]
+    deriving (Eq, Ord, Show, Generic)
+
 
 
 -- |Determinism describes whether a statement can succeed or fail if execution
@@ -1048,23 +1055,39 @@ typeIsUnique TypeSpec { typeMod = mod, typeName = name } = do
 typeIsUnique _ = return False
 
 
--- |Add the specified resource to the current module.
-addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()
-addSimpleResource name impln@(SimpleResource ty _ pos) vis = do
+-- |Add the specified resource and its definition to the current module.
+-- We first ensure if the named resource is already defined, and report an error
+-- if so.  Otherwise, providing the type is not generic, we record the
+-- definition to process once types have been checked.
+addResource :: ResourceName -> Visibility -> ResourceDefn -> OptPos 
+            -> Compiler ()
+addResource name vis def pos = do
     currMod <- getModuleSpec
     let rspec = ResourceSpec currMod name
-    let rdef = Map.singleton rspec impln
     modRess <- getModuleImplementationField modResources
     if name `Map.member` modRess
     then errmsg pos $ "Duplicate declaration of resource '" ++ name ++ "'"
-    else if genericType ty
-    then errmsg pos $ "Resource type cannot contain type variables: " ++ show ty
-    else do
-        updateImplementation
-            (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
-                           modKnownResources = setMapInsert name rspec
-                                             $ modKnownResources imp })
-        updateInterface vis $ updatePubResources $ Map.insert name rspec
+    else case def of
+        SimpleResourceDefn ty init -> do
+            if genericType ty
+            then errmsg pos $ "Resource type cannot contain type variables: "
+                                ++ show ty
+            else do
+                let impln = SimpleResource ty init pos
+                let rdef = Map.singleton rspec impln
+                updateImplementation
+                    (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
+                                modKnownResources = setMapInsert name rspec
+                                                    $ modKnownResources imp })
+                updateInterface vis $ updatePubResources $ Map.insert name rspec
+        CompoundResourceDefn ress -> do
+            let resSet = Set.fromList ress
+            updateImplementation
+                (\imp -> imp { modCompoundResources = Map.insert name resSet
+                                                $ modCompoundResources imp,
+                            modKnownResources = setMapInsert name rspec
+                                                $ modKnownResources imp })
+            updateInterface vis $ updatePubResources $ Map.insert name rspec
 
 
 -- |Find the definition of the specified resource visible in the current module.
@@ -1712,6 +1735,8 @@ data ModuleImplementation = ModuleImplementation {
                                               -- ^reversed list of data
                                               -- constructors for this
                                               -- type, if it is a type
+    modCompoundResources :: Map Ident (Set ResourceSpec),
+                                              -- ^Defined compound resources 
     modKnownTypes:: Map Ident (Set ModSpec),  -- ^Types visible to this module
     modKnownResources :: Map Ident (Set ResourceSpec),
                                               -- ^Resources visible to this mod
@@ -1724,7 +1749,7 @@ emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Set.empty Map.empty Nothing Map.empty Map.empty
                          Map.empty Nothing Map.empty Map.empty Map.empty
-                         Set.empty Set.empty -- Nothing
+                         Map.empty Set.empty Set.empty -- Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
@@ -2038,7 +2063,8 @@ data ResourceImpln =
         resourceType::TypeSpec,
         resourceInit::Maybe (Placed Exp),
         resourcePos::OptPos
-        } deriving (Generic, Eq)
+        }
+    deriving (Generic, Eq)
 
 
 -- | Return the initialised resources *defined* by the current module.
@@ -4181,9 +4207,13 @@ instance Show Item where
     ++ showOptPos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
-  show (ResourceDecl vis name typ init pos) =
-    visibilityPrefix vis ++ "resource " ++ name ++ ":" ++ show typ
-    ++ maybeShow " = " init " "
+  show (ResourceDecl vis name resdef pos) =
+    visibilityPrefix vis ++ "resource " ++ name ++ 
+        case resdef of
+          SimpleResourceDefn typ init ->
+            ":" ++ show typ ++ maybeShow " = " init " "
+          CompoundResourceDefn rspecs -> 
+            " = " ++ intercalate ", " (List.map show rspecs)
     ++ showOptPos pos
   show (FuncDecl vis modifiers proto typ exp pos) =
     visibilityPrefix vis

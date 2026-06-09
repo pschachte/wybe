@@ -79,6 +79,7 @@ instance Binary StructID
 instance Binary ProcModifiers
 instance Binary Inlining
 instance Binary Impurity
+instance Binary ResourceDefn
 instance Binary Item
 instance Binary TypeProto
 instance Binary TypeModifiers
