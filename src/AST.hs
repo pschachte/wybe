@@ -4073,7 +4073,7 @@ data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | Free            -- ^An argument to be passed in the closure
                                    -- environment
                  | VTable          -- ^An argument to pass a vtable
-                 | ClosureEnv
+                 | ClosureEnv      -- ^A closure's environment, used to retrieve closed values
      deriving (Eq,Ord,Generic)
 
 instance Show ArgFlowType where
