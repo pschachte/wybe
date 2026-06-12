@@ -714,7 +714,7 @@ argExpandedPrim call@(PrimHigher id fn impurity args) = do
             case structInfo of
               Just StructInfo{structData=(FnPointerStructMember pspec:fields)} -> do
                 freeParams <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
-                let clsd = fillClosure fields freeParams
+                let clsd = zipWith constValuePrimArg fields (primParamType <$> freeParams)
                 trySkipTrampoline pspec id impurity fn clsd args
               st -> shouldnt $ "argExpandedPrim HO of " ++ show fn' ++ " -> " ++ show st
         _ -> do
@@ -722,12 +722,6 @@ argExpandedPrim call@(PrimHigher id fn impurity args) = do
           args' <- mapM (expandArg True) args
           return $ PrimHigher id fn' impurity args'
   where 
-    fillClosure [] params = List.map (ArgUndef . primParamType) params
-    fillClosure (cnst:cnsts) (param:params) 
-      | paramIsNeeded param = constValuePrimArg cnst (primParamType param) : fillClosure cnsts params
-      | otherwise = fillClosure cnsts params
-    fillClosure _ params = shouldnt $ "fillClosure with too many params " ++ show params
-
     trySkipTrampoline pspec id imp fn clsd args = do
       (pspec', simple) <- lift (getProcDef pspec <&> procVariant) <&> \case
         ClosureProc pspec' simple -> (pspec', simple)
