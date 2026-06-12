@@ -147,7 +147,7 @@ foo(x##0:T <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc foo2 > (18 calls)
 0: type_generics.foo2<0>
 foo2(x##0:T0 <{}; {}; {0}>, ?y##0:T0 <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasPairs: [(x##0,y##0)]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#7##0:wybe.list(T0)) @type_generics:nn:nn
     foreign lpvm mutate(~tmp#7##0:wybe.list(T0), ?tmp#8##0:wybe.list(T0), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T0) @type_generics:nn:nn
