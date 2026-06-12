@@ -2491,8 +2491,8 @@ isClosureProc pspec = isClosureVariant . procVariant <$> getProcDef pspec
 
 
 isClosureVariant :: ProcVariant -> Bool
-isClosureVariant (ClosureProc _ _) = True
-isClosureVariant _                 = False
+isClosureVariant ClosureProc{} = True
+isClosureVariant _             = False
 
 isConstructorVariant :: ProcVariant -> Bool
 isConstructorVariant (ConstructorProc _) = True
@@ -4353,6 +4353,8 @@ constantValue (ArgClosure pspec args _) =
     (PointerStructMember <$>) <$> closureStructId pspec args
 constantValue (ArgConstRef structID ty) =
     return $ Just $ PointerStructMember structID
+constantValue (ArgUndef ty) =
+    typeSize ty <&> (Just . UndefStructMember)
 constantValue ArgGlobal{} = return Nothing
 constantValue _ = return Nothing
 
@@ -4360,9 +4362,7 @@ constantValue _ = return Nothing
 -- | Generate a StructId for a closure, if all its arguments are constants.
 closureStructId :: ProcSpec -> [PrimArg] -> Compiler (Maybe StructID)
 closureStructId pspec args = do
-    freeParams <- List.filter ((Free==) . primParamFlowType) <$> getPrimParams pspec
-    let neededArgs = [arg | (arg, param) <- zip args freeParams, paramIsNeeded param]
-    mapM constantValue neededArgs >>= (\case
+    mapM constantValue args >>= (\case
         Just args' -> do
           let sz = wordSizeBytes * (length args' + 1)
           Just <$>
@@ -4431,10 +4431,9 @@ constValueExp :: ConstValue -> Exp
 constValueExp (IntStructMember i _) = IntValue i
 constValueExp (FloatStructMember f _) = FloatValue f
 constValueExp (PointerStructMember structID) = ConstStruct structID
+constValueExp (UndefStructMember _) = Var "_" ParamIn Free
 constValueExp (FnPointerStructMember _) =
     shouldnt "constValueExp of FnPointerStructMember"
-constValueExp (UndefStructMember _) =
-    shouldnt "constValueExp of UndefStructMember"
 constValueExp (GenericStructMember cnst) =
     shouldnt "constValueExp of GenericStructMember"
 
