@@ -24,9 +24,8 @@ AFTER EVERYTHING:
 proc append > public (1 calls)
 0: list_this.append<0>
 append(x##0:list_this(T) <{}; {}; {0}>, y##0:list_this(T) <{}; {}; {1}>, outByReference #result##0:list_this(T) <{}; {}; {0, 1}>)<{}; {}; {}>:
-  AliasPairs: [(#result##0,y##0)]
-  InterestingCallProperties: [InterestingUnaliased 0]
-  MultiSpeczDepInfo: [(1,(list_this.append<0>,fromList [NonAliasedParamCond 0 [0]]))]
+  AliasPairs: [(#result##0,x##0),(#result##0,y##0),(x##0,y##0)]
+  InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @list_this:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:

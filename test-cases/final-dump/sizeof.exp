@@ -48,10 +48,9 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(53,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(59,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(61,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(65,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(75,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(77,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(8:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#7##0:wybe.string) #52 @sizeof:nn:nn
     wybe.string.,,<0>("Int bytes: ":wybe.string, ~tmp#7##0:wybe.string, ?tmp#6##0:wybe.string) #2 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #53 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #53 @sizeof:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#59##0:wybe.phantom) @sizeof:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#59##0:wybe.phantom, ?tmp#60##0:wybe.phantom) @sizeof:nn:nn
     foreign lpvm store(~%tmp#60##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
@@ -68,13 +67,13 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#76##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
     wybe.int.fmt<2>(1:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#13##0:wybe.string) #58 @sizeof:nn:nn
     wybe.string.,,<0>("Char bytes: ":wybe.string, ~tmp#13##0:wybe.string, ?tmp#12##0:wybe.string) #14 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#12##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #59 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#12##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #59 @sizeof:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#83##0:wybe.phantom) @sizeof:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#83##0:wybe.phantom, ?tmp#84##0:wybe.phantom) @sizeof:nn:nn
     foreign lpvm store(~%tmp#84##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
     wybe.count.fmt<4>(8:wybe.count, 0:wybe.int, 32:wybe.char, 10:wybe.count, ?tmp#15##0:wybe.string) #60 @sizeof:nn:nn
     wybe.string.,,<0>("Char bits: ":wybe.string, ~tmp#15##0:wybe.string, ?tmp#14##0:wybe.string) #18 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#14##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #61 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#14##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #61 @sizeof:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#91##0:wybe.phantom) @sizeof:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#91##0:wybe.phantom, ?tmp#92##0:wybe.phantom) @sizeof:nn:nn
     foreign lpvm store(~%tmp#92##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
@@ -85,7 +84,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar(10:wybe.char, ~tmp#99##0:wybe.phantom, ?tmp#100##0:wybe.phantom) @sizeof:nn:nn
     foreign lpvm store(~%tmp#100##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
     wybe.string.,,<0>("Narrow bits (unboxed): ":wybe.string, ~tmp#18##0:wybe.string, ?tmp#20##0:wybe.string) #26 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #65 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #65 @sizeof:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#107##0:wybe.phantom) @sizeof:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#107##0:wybe.phantom, ?tmp#108##0:wybe.phantom) @sizeof:nn:nn
     foreign lpvm store(~%tmp#108##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
@@ -111,12 +110,12 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar(10:wybe.char, ~tmp#139##0:wybe.phantom, ?tmp#140##0:wybe.phantom) @sizeof:nn:nn
     foreign lpvm store(~%tmp#140##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
     wybe.string.,,<0>("Wider int bits: ":wybe.string, ~tmp#9##0:wybe.string, ?tmp#35##0:wybe.string) #46 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#35##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #75 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#35##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #75 @sizeof:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#147##0:wybe.phantom) @sizeof:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#147##0:wybe.phantom, ?tmp#148##0:wybe.phantom) @sizeof:nn:nn
     foreign lpvm store(~%tmp#148##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
     wybe.string.,,<0>("Wider int bits (unboxed): ":wybe.string, ~tmp#33##0:wybe.string, ?tmp#38##0:wybe.string) #50 @sizeof:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#38##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #77 @sizeof:nn:nn
+    wybe.string.print<0>(~tmp#38##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #77 @sizeof:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#155##0:wybe.phantom) @sizeof:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#155##0:wybe.phantom, ?tmp#156##0:wybe.phantom) @sizeof:nn:nn
     foreign lpvm store(~%tmp#156##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @sizeof:nn:nn
@@ -160,14 +159,13 @@ declare external fastcc i64 @"wybe#.count#.fmt<4>"(i64, i64, i8, i64)
 declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"sizeof#.<0>"() {
   %"tmp#7##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 8, i64 0, i8 32)
   %"tmp#6##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#13" to i64 ), i64 %"tmp#7##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#6##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#6##0")
   call ccc void @putchar(i8 10)
   %"tmp#9##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 64, i64 0, i8 32)
   %"tmp#8##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#14" to i64 ), i64 %"tmp#9##0")
@@ -178,18 +176,18 @@ define external fastcc void @"sizeof#.<0>"() {
   call ccc void @putchar(i8 10)
   %"tmp#13##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 1, i64 0, i8 32)
   %"tmp#12##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#16" to i64 ), i64 %"tmp#13##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#12##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#12##0")
   call ccc void @putchar(i8 10)
   %"tmp#15##0" = tail call fastcc i64 @"wybe#.count#.fmt<4>"(i64 8, i64 0, i8 32, i64 10)
   %"tmp#14##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#17" to i64 ), i64 %"tmp#15##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#14##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#14##0")
   call ccc void @putchar(i8 10)
   %"tmp#18##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 3, i64 0, i8 32)
   %"tmp#17##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#18" to i64 ), i64 %"tmp#18##0")
   tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#17##0")
   call ccc void @putchar(i8 10)
   %"tmp#20##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#19" to i64 ), i64 %"tmp#18##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#20##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#20##0")
   call ccc void @putchar(i8 10)
   %"tmp#23##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#20" to i64 ), i64 %"tmp#9##0")
   tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#23##0")
@@ -205,10 +203,10 @@ define external fastcc void @"sizeof#.<0>"() {
   tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#32##0")
   call ccc void @putchar(i8 10)
   %"tmp#35##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#24" to i64 ), i64 %"tmp#9##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#35##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#35##0")
   call ccc void @putchar(i8 10)
   %"tmp#38##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"sizeof#constant#25" to i64 ), i64 %"tmp#33##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#38##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#38##0")
   call ccc void @putchar(i8 10)
   ret void
 }

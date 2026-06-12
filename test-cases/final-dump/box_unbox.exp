@@ -35,19 +35,19 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm mutate(~tmp#6##0, ?tmp#6##1, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:box_unbox)
     box_unbox.force_box<0>(~tmp#6##1:box_unbox, ?tmp#7##0:box_unbox) #1 @box_unbox:nn:nn
     box_unbox.force_box<0>(~tmp#7##0:box_unbox, ?tmp#9##0:box_unbox) #2 @box_unbox:nn:nn
-    foreign lpvm access(~tmp#9##0, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:box_unbox)
+    foreign lpvm access(tmp#9##0, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:box_unbox)
     box_unbox.print<0>(~tmp#0##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @box_unbox:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @box_unbox:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @box_unbox:nn:nn
     foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @box_unbox:nn:nn
     box_unbox.force_box<0>(box_unbox#constant#1:box_unbox, ?tmp#11##0:box_unbox) #5 @box_unbox:nn:nn
-    foreign lpvm access(tmp#11##0, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:box_unbox)
+    foreign lpvm access(~tmp#11##0, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:box_unbox)
     box_unbox.print<0>(~tmp#3##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @box_unbox:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @box_unbox:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @box_unbox:nn:nn
     foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @box_unbox:nn:nn
     box_unbox.copy<0>(18446744073709551617:box_unbox, ?tmp#5##0:box_unbox) #8 @box_unbox:nn:nn
-    foreign lpvm mutate(~tmp#11##0, ?tmp#12##1, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:box_unbox)
+    foreign lpvm mutate(~tmp#9##0, ?tmp#12##1, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:box_unbox)
     box_unbox.force_box<0>(~tmp#12##1:box_unbox, ?tmp#13##0:box_unbox) #9 @box_unbox:nn:nn
     foreign lpvm access(~tmp#13##0, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:box_unbox)
     box_unbox.print<0>(~tmp#4##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @box_unbox:nn:nn
@@ -129,7 +129,7 @@ copy(x##0:box_unbox, ?#result##0:box_unbox)<{}; {}; {}>:
 proc force_box > public {noinline} (4 calls)
 0: box_unbox.force_box<0>
 force_box(x##0:X <{}; {}; {0}>, ?#result##0:X <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasPairs: [(#result##0,x##0)]
   InterestingCallProperties: []
     foreign llvm move(~x##0:X, ?#result##0:X) @box_unbox:nn:nn
 
@@ -294,7 +294,7 @@ define external fastcc void @"box_unbox#.<0>"() {
   tail call fastcc void @"box_unbox#.print<0>"(i128 %"tmp#3##0")
   call ccc void @putchar(i8 10)
   %"tmp#5##0" = tail call fastcc i128 @"box_unbox#.copy<0>"(i128 18446744073709551617)
-  %"tmp#32##0" = trunc i128 %"tmp#11##0" to i64
+  %"tmp#32##0" = trunc i128 %"tmp#9##0" to i64
   %"tmp#33##0" = inttoptr i64 %"tmp#32##0" to ptr
   store i128 %"tmp#5##0", ptr %"tmp#33##0"
   %"tmp#35##0" = zext i64 %"tmp#32##0" to i128

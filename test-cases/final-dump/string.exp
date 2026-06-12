@@ -38,7 +38,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(85,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(86,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(88,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(89,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(91,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(93,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(95,(string.print_loop#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
+  MultiSpeczDepInfo: [(85,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(86,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(89,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(91,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(93,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(95,(string.print_loop#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @string:nn:nn
     foreign c print_string(c"TESTING CONSTRUCTION":wybe.c_string, ~%tmp#56##0:wybe.phantom, ?%tmp#57##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#57##0:wybe.phantom, ?tmp#58##0:wybe.phantom) @string:nn:nn
@@ -56,7 +56,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar(10:wybe.char, ~tmp#74##0:wybe.phantom, ?tmp#75##0:wybe.phantom) @string:nn:nn
     foreign lpvm store(~%tmp#75##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
     wybe.string.,,<0>("abc":wybe.string, "abc":wybe.string, ?tmp#0##0:wybe.string) #9 @string:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #88 @string:nn:nn
+    wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #88 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#85##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#85##0:wybe.phantom, ?tmp#86##0:wybe.phantom) @string:nn:nn
     foreign lpvm store(~%tmp#86##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
@@ -243,7 +243,7 @@ define external fastcc void @"string#.<0>"() {
   tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#constant#13" to i64 ))
   call ccc void @putchar(i8 10)
   %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#constant#13" to i64 ), i64 ptrtoint( ptr @"string#constant#13" to i64 ))
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1415)
   call ccc void @putchar(i8 10)

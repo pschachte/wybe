@@ -281,7 +281,7 @@ updateAliasedByPrim aliasMap prim =
             logAlias $ "--- call          " ++ show spec ++" (callee): "
             logAlias $ "" ++ show calleeProto
             logAlias $ "PrimCall args:    " ++ show args
-            let paramArgMap = mapParamToArgVar calleeProto args
+            let paramArgMap = mapParamToArg calleeProto args
             -- calleeArgsAliasMap is the alias map of actual arguments passed
             -- into callee
             logAlias $ "args: " ++ show args
@@ -291,7 +291,12 @@ updateAliasedByPrim aliasMap prim =
                     -- filter out aliases of constant args
                     -- (caused by constant constructor)
                     |> filterDS isJust
-                    |> mapDS (\x -> LiveVar (fromJust x))
+                    |> mapDS fromJust
+                    |> mapDS (\case
+                        ArgVar{argVarName=nm} -> LiveVar nm
+                        ArgConstRef cnst _ -> AliasByConst cnst
+                        ArgGlobal glb _ -> AliasByGlobal glb
+                        arg -> shouldnt $ "calleeArgsAliases: " ++ show arg)
             combined <- aliasedArgsInPrimCall calleeArgsAliases aliasMap args
             logAlias $ "calleeParamAliases: " ++ show calleeParamAliases
             logAlias $ "calleeArgsAliases:  " ++ show calleeArgsAliases
@@ -349,6 +354,8 @@ _maybeAliasPrimArgs args = do
         ArgGlobal global ty -> maybeAddressAlias ty $ AliasByGlobal global
         ArgConstRef ref ty -> maybeAddressAlias ty $ AliasByConst ref
         _ -> return Nothing
+    maybeAddressAlias TypeVariable{} item = return $ Just item
+    maybeAddressAlias AnyType item = return $ Just item
     maybeAddressAlias ty item = do
         rep <- lookupTypeRepresentation ty
         return $ toMaybe (maybe False aliasedRep rep) item
@@ -384,20 +391,24 @@ aliasedArgsInSimplePrim aliasMap maybeAliasedPrimArgs primArgs = do
 
 -- Helper: map arguments in callee proc to its formal parameters so we can get
 -- alias info of the arguments
-mapParamToArgVar :: PrimProto -> [PrimArg] -> Map PrimVarName PrimVarName
-mapParamToArgVar proto args =
+mapParamToArg :: PrimProto -> [PrimArg] -> Map PrimVarName PrimArg
+mapParamToArg proto args =
     let formalParamNames = primProtoParamNames proto
-        paramArgPairs = _zipParamToArgVar formalParamNames args
+        paramArgPairs = _zipParamToArg formalParamNames args
     in Map.fromList paramArgPairs
 
 
--- Helper: zip formal param to PrimArg with ArgVar data constructor
-_zipParamToArgVar :: [PrimVarName] -> [PrimArg] -> [(PrimVarName, PrimVarName)]
-_zipParamToArgVar (p:params) (ArgVar{argVarName=nm}:args) =
-    (p, nm):_zipParamToArgVar params args
-_zipParamToArgVar (_:params) (_:args) = _zipParamToArgVar params args
-_zipParamToArgVar [] _ = []
-_zipParamToArgVar _ [] = []
+-- Helper: zip formal param to PrimArg with PrimArg that could be aliased
+_zipParamToArg :: [PrimVarName] -> [PrimArg] -> [(PrimVarName, PrimArg)]
+_zipParamToArg (p:params) (c@ArgConstRef{}:args) =
+    (p, c):_zipParamToArg params args
+_zipParamToArg (p:params) (g@ArgGlobal{}:args) =
+    (p, g):_zipParamToArg params args
+_zipParamToArg (p:params) (v@ArgVar{argVarName=nm}:args) =
+    (p, v):_zipParamToArg params args
+_zipParamToArg (_:params) (_:args) = _zipParamToArg params args
+_zipParamToArg [] _ = []
+_zipParamToArg _ [] = []
 
 
 removeDeadVar :: AliasMapLocal -> [PrimArg] -> AliasMapLocal
