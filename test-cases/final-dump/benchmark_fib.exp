@@ -116,7 +116,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar(10:wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @benchmark_fib:nn:nn
     foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
     foreign c {impure} benchmark_start(c"benchmark_fib:40:2":wybe.c_string) @benchmark_fib:nn:nn
-    benchmark_fib.#anon#1<1><>:{semipure}() #0 @benchmark_fib:nn:nn
+    benchmark_fib.#anon#1<0> #0 @benchmark_fib:nn:nn
     foreign c {impure} benchmark_end(c"benchmark_fib:40:2":wybe.c_string, ?time##2:wybe.float) @benchmark_fib:nn:nn
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @benchmark_fib:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @benchmark_fib:nn:nn
@@ -133,7 +133,7 @@ proc #anon#1 > {inline,semipure} (1 calls)
     benchmark_fib.naive_fib<0>(42:wybe.int, ?res##0:wybe.int) #0 @benchmark_fib:nn:nn
 proc #anon#1 > {inline,semipure} (1 calls)
 1: benchmark_fib.#anon#1<1>
-#anon#1()<{}; {}; {}>:
+#anon#1(@#env##0:opaque)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     benchmark_fib.naive_fib<0>(42:wybe.int, ?tmp#6##0:wybe.int) #1 @benchmark_fib:nn:nn
@@ -246,7 +246,6 @@ target triple   = ????
 @"benchmark_fib#constant#7" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:37:2\00", align 8
 @"benchmark_fib#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"benchmark_fib:40:2\00", align 8
 @"benchmark_fib#constant#9" = private unnamed_addr constant {i64, ptr} { i64 19, ptr @"benchmark_fib#constant#5" }, align 8
-@"benchmark_fib#constant#10" = private unnamed_addr constant {ptr} { ptr @"benchmark_fib#.#anon#1<1>" }, align 8
 
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc double @benchmark_end(i64)
@@ -270,8 +269,7 @@ define external fastcc void @"benchmark_fib#.<0>"() {
   call ccc void @print_float(double %"time##1")
   call ccc void @putchar(i8 10)
   call ccc void @benchmark_start(ptr @"benchmark_fib#constant#8")
-  %"tmp#36##0" = load ptr, ptr @"benchmark_fib#constant#10"
-  tail call fastcc void %"tmp#36##0"(ptr @"benchmark_fib#constant#10")
+  tail call fastcc void @"benchmark_fib#.#anon#1<0>"()
   %"time##2" = call ccc double @benchmark_end(ptr @"benchmark_fib#constant#8")
   tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"benchmark_fib#constant#9" to i64 ))
   call ccc void @print_float(double %"time##2")

@@ -8,7 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : bug_509.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember bug_509.#anon#1<1>]}
+  constants       : 0:: StructInfo {structSize = 16, structData = [FnPointerStructMember bug_509.#anon#1<1>,IntStructMember 1 8]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -18,7 +18,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    bug_509.call<0>(bug_509.#anon#1<1><>:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool) #0 @bug_509:nn:nn
+    bug_509.call<0>(bug_509.#anon#1<1><1>:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool) #0 @bug_509:nn:nn
     wybe.bool.print<0>(~x##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @bug_509:nn:nn
 
 
@@ -30,7 +30,7 @@ proc #anon#1 > {inline} (1 calls)
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: bug_509.#anon#1<1>
-#anon#1([^t##0:wybe.int], anon#1#1##0 <{}; {}; {1}>, ?anon#1#2##0)<{}; {}; {}>:
+#anon#1(@#env##0:opaque, [^t##0:wybe.int], anon#1#1##0 <{}; {}; {2}>, ?anon#1#2##0)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn

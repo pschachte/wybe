@@ -707,18 +707,28 @@ argExpandedPrim call@(PrimHigher id fn impurity args) = do
     logBuild $ "Expanding Higher call " ++ show call
     fn' <- expandArg True fn
     case fn' of
-        ArgClosure pspec clsd _ -> do
-            (pspec', simple) <- lift (getProcDef pspec <&> procVariant) <&> \case
-              ClosureProc pspec' simple -> (pspec', simple)
-              _ -> shouldnt $ "call to non-closure " ++ show pspec
-            let (finalPspec, finalArgs) = if simple then (pspec', clsd ++ args) else (pspec, fn':args)
-            gFlows <- lift $ getProcGlobalFlows finalPspec
-            logBuild $ "As first-order call to " ++ show finalPspec
-            argExpandedPrim $ PrimCall id finalPspec impurity finalArgs gFlows
+        ArgClosure pspec clsd _ -> trySkipTrampoline pspec id impurity fn' clsd args
+        ArgConstRef constId _ -> do
+            structInfo <- lift $ lookupConstInfo constId
+            case structInfo of
+              Just StructInfo{structData=(FnPointerStructMember pspec:fields)} -> do
+                freeParams <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
+                let clsd = zipWith constValuePrimArg fields (primParamType <$> freeParams)
+                trySkipTrampoline pspec id impurity fn clsd args
+              st -> shouldnt $ "argExpandedPrim HO of " ++ show fn' ++ " -> " ++ show st
         _ -> do
-            logBuild $ "Leaving as higher call to " ++ show fn'
-            args' <- mapM (expandArg True) args
-            return $ PrimHigher id fn' impurity args'
+          logBuild $ "Leaving as higher call to " ++ show fn'
+          args' <- mapM (expandArg True) args
+          return $ PrimHigher id fn' impurity args'
+  where 
+    trySkipTrampoline pspec id imp fn clsd args = do
+      (pspec', simple) <- lift (getProcDef pspec <&> procVariant) <&> \case
+        ClosureProc pspec' simple -> (pspec', simple)
+        _ -> shouldnt $ "call to non-closure " ++ show pspec
+      let (pspec'', mbFn) = if simple then (pspec', Nothing) else (pspec, Just fn)
+      gFlows <- lift $ getProcGlobalFlows pspec''
+      logBuild $ "As first-order call to " ++ show pspec''
+      argExpandedPrim $ PrimCall id pspec'' impurity (maybeToList mbFn ++ clsd ++ args) gFlows
 argExpandedPrim (PrimForeign "lpvm" "mutate" flags (arg1:args)) = do
     arg1' <- expandArg False arg1 -- don't expand consts in the first argument
     args' <- mapM (expandArg True) args
@@ -761,9 +771,6 @@ transformUnneededArg pairs
               _       -> shouldnt $ "Multiple input params match output "
                                     ++ show name
         return $ ArgUnneeded flow typ
-transformUnneededArg _ _ (ArgClosure pspec args ty) = do
-    args' <- transformUnneededArgs pspec args
-    return $ ArgClosure pspec args' ty
 transformUnneededArg _ _ arg = return arg
 
 

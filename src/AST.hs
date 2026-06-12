@@ -72,8 +72,8 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), MergedForkTable, prependToBody, appendToBody, unMergeFork, guardedMergedFork, 
   Ident, VarName, ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
-  argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
-  argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
+  argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType,
+  argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib, mapLPVMBodyM,
@@ -117,7 +117,7 @@ module AST (
   ProcVariant(..), Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   outputVariableName, outputStatusName,
-  envParamName, envPrimParam, makeGlobalResourceName,
+  envParamName, envPrimParam, envParam, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
   showProcIdentifier, showProcName,
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
@@ -2172,7 +2172,7 @@ primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType
     = return $ max impurity modimpurity
 primImpurity (PrimHigher _ (ArgConstRef structID _) impurity _) = do
     lookupConstInfo structID >>= \case
-        Just (StructInfo _ (FnPointerStructMember pspec:t)) ->
+        Just (StructInfo _ (FnPointerStructMember pspec:_)) ->
             max impurity . procImpurity <$> getProcDef pspec
         _ -> return impurity
 primImpurity (PrimHigher _ fn impurity _) = return impurity
@@ -2253,8 +2253,8 @@ isClosureProc pspec = isClosureVariant . procVariant <$> getProcDef pspec
 
 
 isClosureVariant :: ProcVariant -> Bool
-isClosureVariant (ClosureProc _ _) = True
-isClosureVariant _                 = False
+isClosureVariant ClosureProc{} = True
+isClosureVariant _             = False
 
 isConstructorVariant :: ProcVariant -> Bool
 isConstructorVariant (ConstructorProc _) = True
@@ -3580,6 +3580,8 @@ constantValue (ArgClosure pspec args _) =
     (PointerStructMember <$>) <$> closureStructId pspec args
 constantValue (ArgConstRef structID ty) =
     return $ Just $ PointerStructMember structID
+constantValue (ArgUndef ty) =
+    typeSize ty <&> (Just . UndefStructMember)
 constantValue ArgGlobal{} = return Nothing
 constantValue _ = return Nothing
 
@@ -3587,9 +3589,7 @@ constantValue _ = return Nothing
 -- | Generate a StructId for a closure, if all its arguments are constants.
 closureStructId :: ProcSpec -> [PrimArg] -> Compiler (Maybe StructID)
 closureStructId pspec args = do
-    params <- getPrimParams pspec
-    let neededArgs = [arg | (arg, param) <- zip args params, paramIsNeeded param]
-    mapM constantValue neededArgs >>= (\case
+    mapM constantValue args >>= (\case
         Just args' -> do
           let sz = wordSizeBytes * (length args' + 1)
           Just <$>
@@ -3652,10 +3652,9 @@ constValueExp :: ConstValue -> Exp
 constValueExp (IntStructMember i _) = IntValue i
 constValueExp (FloatStructMember f _) = FloatValue f
 constValueExp (PointerStructMember structID) = ConstStruct structID
-constValueExp (FnPointerStructMember pspec) =
+constValueExp (UndefStructMember _) = Var "_" ParamIn Free
+constValueExp (FnPointerStructMember _) =
     shouldnt "constValueExp of FnPointerStructMember"
-constValueExp (UndefStructMember _) =
-    shouldnt "constValueExp of UndefStructMember"
 constValueExp (GenericStructMember cnst) =
     shouldnt "constValueExp of GenericStructMember"
 
@@ -3741,7 +3740,7 @@ constsGlobalFlows (FnPointerStructMember pspec:fields) = do
     else do
         gFlows <- getProcGlobalFlows pspec
         globalFlowsUnions . (gFlows:) <$> mapM constGlobalFlows fields
-constsGlobalFlows fields = return emptyGlobalFlows -- XXX need to recurse!
+constsGlobalFlows fields = globalFlowsUnions <$> mapM constGlobalFlows fields
 
 
 -- | Compute the GlobalFlows of a single constant value.
@@ -3812,12 +3811,14 @@ data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                                    -- ^An argument to pass a resource
                  | Free            -- ^An argument to be passed in the closure
                                    -- environment
+                 | ClosureEnv      -- ^A closure's environment, used to retrieve closed values
      deriving (Eq,Ord,Generic)
 
 instance Show ArgFlowType where
     show Ordinary = ""
     show (Resource _) = "%"
     show Free = "^"
+    show ClosureEnv = "@"
 
 
 -- |The dataflow direction of an actual argument.
@@ -3865,39 +3866,6 @@ setArgFlow _ arg          = arg
 setArgFlowType :: ArgFlowType -> PrimArg -> PrimArg
 setArgFlowType ft arg@ArgVar{} = arg{argVarFlowType=ft}
 setArgFlowType _  arg          = arg
-
-
--- | Get the flow of a prim arg. Returns Nothing for a non-ArgVar value
-maybeArgFlowType :: PrimArg -> Maybe ArgFlowType
-maybeArgFlowType ArgVar{argVarFlowType=ft} = Just ft
-maybeArgFlowType arg                       = Nothing
-
-
-argDescription :: PrimArg -> String
-argDescription (ArgVar var _ flow ftype _) =
-    argFlowDescription flow
-    ++ (case ftype of
-          Ordinary       -> " variable " ++ primVarName var
-          Resource rspec -> " resource " ++ show rspec
-          Free           -> " closure argument ")
-argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
-argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
-argDescription (ArgClosure ms as _)
-    = "closure of '" ++ show ms ++ "' with <"
-    ++ intercalate ", " (argDescription <$> as) ++ "> closed arguments"
-argDescription (ArgGlobal info _) = "global reference to " ++ show info
-argDescription (ArgConstRef info _) = "reference to const struct " ++ show info
-argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
-argDescription (ArgUndef _) = "undefined argument"
-
-
-
--- |A printable description of a primitive flow direction
-argFlowDescription :: PrimFlow -> String
-argFlowDescription FlowIn  = "input"
-argFlowDescription FlowOut = "output"
-argFlowDescription FlowOutByReference = "outByReference"
-argFlowDescription FlowTakeReference = "takeReference"
 
 
 argIntVal :: PrimArg -> Maybe Integer
@@ -4086,12 +4054,16 @@ outputStatusName :: Ident
 outputStatusName = specialName "success"
 
 
-envParamName :: PrimVarName
-envParamName = PrimVarName (specialName "env") 0
+envParamName :: VarName
+envParamName = specialName "env"
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName (Representation CPointer) FlowIn Ordinary (ParamInfo False emptyGlobalFlows)
+envPrimParam = PrimParam (PrimVarName envParamName 0) (Representation CPointer) FlowIn ClosureEnv (ParamInfo False emptyGlobalFlows)
+
+
+envParam :: Param 
+envParam = Param envParamName (Representation CPointer) ParamIn ClosureEnv
 
 
 makeGlobalResourceName :: ResourceSpec -> String

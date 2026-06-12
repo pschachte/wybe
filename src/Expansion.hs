@@ -85,14 +85,14 @@ markParamNeededness isClosure used _ param@PrimParam{primParamName=nm,
                                                      primParamInfo=info} =
     param {primParamInfo=info{
             paramInfoUnneeded=Set.notMember nm used
-                                && (not isClosure || ft /= Ordinary)}}
+                                && (not isClosure || ft == Free)}}
 markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
                                                     primParamFlow=FlowOut,
                                                     primParamFlowType=ft,
                                                     primParamInfo=info} =
     param {primParamInfo=info{
             paramInfoUnneeded=Set.member nm ins
-                                && (not isClosure || ft /= Ordinary)}}
+                                && (not isClosure || ft == Free)}}
 markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowOutByReference } =
     shouldnt "unexpected FlowOutByReference at this stage of compilation"
 markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowTakeReference } =
@@ -203,7 +203,7 @@ addInstr prim pos = do
             Just p@(Just _) -> p
             _ -> pos
     lift $ instr prim' pos'
-
+ 
 
 -- init a expander state based on the given call site count
 initExpanderState :: CallSiteID -> ExpanderState
@@ -289,7 +289,6 @@ expandPrim call@(PrimCall id pspec impurity args gFlows) pos = do
         let (args'', pspec') = case (procVariant def, args') of
                 (ClosureProc pspec' simple, ArgClosure _ closed _:rest) -> 
                     (closed ++ rest, if simple then pspec' else pspec) 
-                (ClosureProc{}, _) -> shouldnt $ "closure call with no closure arg " ++ show call
                 _ -> (args', pspec)
         def' <- if pspec == pspec' then return def else lift2 $ getProcDef pspec'
         case procImpln def' of
