@@ -8,7 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : bug_509.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember bug_509.#anon#1<1>]}
+  constants       : 0:: StructInfo {structSize = 16, structData = [FnPointerStructMember bug_509.#anon#1<1>,IntStructMember 1 8]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -18,7 +18,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    bug_509.call<0>(bug_509.#anon#1<1><>:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool) #0 @bug_509:nn:nn
+    bug_509.call<0>(bug_509.#anon#1<1><1>:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool) #0 @bug_509:nn:nn
     wybe.bool.print<0>(~x##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @bug_509:nn:nn
 
 
