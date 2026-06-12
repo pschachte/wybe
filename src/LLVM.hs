@@ -18,7 +18,7 @@ import           Options
 import           Version
 import           CConfig
 import           Snippets
-import           Util                            ((|||), showArguments, sameLength, thd4)
+import           Util                            ((&&&), (|||), showArguments, sameLength, thd4)
 import           System.IO
 import           Data.Char                       (isAlphaNum)
 import           Data.Set                        as Set
@@ -330,18 +330,14 @@ recordIfConst mod (PointerStructMember structID) = do
     logLLVM $ "Recording const " ++ show structID
                 ++ " ( -> " ++ show constInfo ++ ")"
     recordConst mod structID
-recordIfConst mod (FnPointerStructMember pspec) =
-    getProcArgs pspec >>= recordExternProc mod pspec
+recordIfConst mod (FnPointerStructMember pspec) = do
+    params <- lift $ getPrimParams pspec
+    realParams <- snd <$> partitionClosureParams pspec (primParamToArg <$> params)
+    recordExternProc mod pspec $ List.map primParamToArg realParams
 recordIfConst mod (GenericStructMember member) =
     recordIfConst mod member
 recordIfConst _ _ = return ()
 
-
-getProcArgs :: ProcSpec -> LLVM [PrimArg]
-getProcArgs pspec = do
-    params <- lift $ getPrimParams pspec
-    (neededArgs, realParams) <- partitionClosureParams pspec (primParamToArg <$> params)
-    return $ List.map primParamToArg realParams
 
 
 -- | Record that the specified constant needs to be declared in this LLVM
@@ -786,9 +782,9 @@ writeClosureEnvUnmarshall :: [PrimParam] -> LLVM ()
 writeClosureEnvUnmarshall params = do
     structTy <- llvmStructType . (CPointer:) <$> mapM (typeRep . primParamType) params
     forM_ (zip [1..] params) $ \(idx, param) -> do
-        eltPtr <- getElementPtr True structTy (Just $ primParamToArg envPrimParam)
-                    [intConst 0, ArgInt idx int32Type]
-        llvmLoad eltPtr $ primParamToArg param
+            eltPtr <- getElementPtr True structTy (Just $ primParamToArg envPrimParam)
+                        [intConst 0, ArgInt idx int32Type]
+            llvmLoad eltPtr $ primParamToArg param
 
 
 ----------------------------------------------------------------------------
@@ -881,14 +877,19 @@ writeActualCall wybeProc ins outs tailKind = do
     params <- lift $ getPrimParams wybeProc
     -- must ensure we obey the closure interface
     isClosure <- lift $ isClosureProc wybeProc
-    let params' = if isClosure then List.filter ((/=Free) . primParamFlowType) params else params
+    let (params', ins') =
+          if isClosure
+          then let (free, nonFree) = List.partition ((Free==) . primParamFlowType) params
+               -- head ins must be the closure itself
+               in (nonFree, head ins : List.drop (length free) (tail ins)) 
+          else (params, ins)
     (inPs,outPs,oRefPs,iRefPs) <- partitionParams params'
     unless (List.null iRefPs)
       $ shouldnt $ "take-reference parameter(s) " ++ show iRefPs
     let allInPs = inPs ++ List.map convertOutByRefParam oRefPs
-    unless (sameLength allInPs ins)
+    unless (sameLength allInPs ins')
       $ shouldnt $ "in call to " ++ show wybeProc
-            ++ ", argument count " ++ show (length ins)
+            ++ ", argument count " ++ show (length ins')
             ++ " does not match parameter count " ++ show (length allInPs)
             ++ "\n " ++ show ins
             ++ " vs. " ++ show allInPs
@@ -899,7 +900,7 @@ writeActualCall wybeProc ins outs tailKind = do
             ++ "\n " ++ show outs
             ++ " vs. " ++ show outPs
     paramTypes <- mapM (typeRep . primParamType) allInPs
-    argList <- llvmStringArgList <$> zipWithM typeConvertedArg paramTypes ins
+    argList <- llvmStringArgList <$> zipWithM typeConvertedArg paramTypes ins'
     outReps <- mapM (typeRep . primParamType) outPs
     let outTy = llvmRepReturnType outReps
     let (name,cc) = llvmProcName wybeProc

@@ -172,7 +172,10 @@ testInExp = boolVarGet outputStatusName
 -- | Get the index a test output should be if the given params are from a
 -- SemiDet proc
 testOutIndex :: [Param] -> Int
-testOutIndex = length . takeWhile (((==Free) ||| (==Ordinary)) . paramFlowType)
+testOutIndex = length . takeWhile (beforeTest . paramFlowType)
+  where
+    beforeTest (Resource _) = False
+    beforeTest _ = True 
 
 
 -- | Add a test output param to the list of params, as well as the index of the
@@ -872,14 +875,16 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
 -- This removes params/free variables where the expression is a known constant
 makeFreeParams :: [Placed Param] -> [Placed Exp]
                -> Unbrancher ([Placed Stmt], [Placed Param], [Placed Exp], [Placed Stmt], Map Integer Exp)
-makeFreeParams params exps = makeFreeParams' 1 params $ unPlace <$> exps
+makeFreeParams params exps = makeFreeParams' 0 params $ unPlace <$> exps
 
 
 makeFreeParams' :: Integer -> [Placed Param] -> [(Exp, OptPos)]
                 -> Unbrancher ([Placed Stmt], [Placed Param], [Placed Exp], [Placed Stmt], Map Integer Exp)
 makeFreeParams' _ params [] = do
-    (pres, params', args', posts) <- List.foldr (\(pre, param, arg, post) (pres, params, args, posts) -> (pre ++ pres, param : params, arg : args, post ++ posts)) ([], [], [], []) 
-        <$> mapM (placedApply unbranchClosureParam) params
+    (pres, params', args', posts) <- List.foldr 
+        (\(pre, param, arg, post) (pres, params, args, posts) -> (pre ++ pres, param : params, arg : args, post ++ posts)) 
+        ([], [], [], []) 
+      <$> mapM (placedApply unbranchClosureParam) params
     return (pres, params', args', posts, Map.empty)
 makeFreeParams' _ [] _ = shouldnt "too many exps for params"
 makeFreeParams' idx (param:params) ((Typed exp ty cast,pos):exps)
