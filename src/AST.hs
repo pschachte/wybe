@@ -104,7 +104,8 @@ module AST (
   updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
   getModuleSpec, moduleIsType, option,
   getOrigin, getSource, getDirectory,
-  optionallyPutStr, message, errmsg, (<!>), prettyPos, Message(..), queueMessage,
+  optionallyPutStr, message, errmsg, warnmsg, (<!>), prettyPos,
+  Message(..), queueMessage,
   genProcName, addImport, doImport, importFromSupermodule, lookupType, lookupType',
   typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
@@ -1056,7 +1057,7 @@ typeIsUnique _ = return False
 
 
 -- |Add the specified resource and its definition to the current module.
--- We first ensure if the named resource is already defined, and report an error
+-- We first check if the named resource is already defined, and report an error
 -- if so.  Otherwise, providing the type is not generic, we record the
 -- definition to process once types have been checked.
 addResource :: ResourceName -> Visibility -> ResourceDefn -> OptPos 
@@ -1076,15 +1077,17 @@ addResource name vis def pos = do
                 let impln = SimpleResource ty init pos
                 let rdef = Map.singleton rspec impln
                 updateImplementation
-                    (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
+                    (\imp -> imp { modResources = Map.insert name rdef
+                                                    $ modResources imp,
                                 modKnownResources = setMapInsert name rspec
                                                     $ modKnownResources imp })
                 updateInterface vis $ updatePubResources $ Map.insert name rspec
         CompoundResourceDefn ress -> do
             let resSet = Set.fromList ress
             updateImplementation
-                (\imp -> imp { modCompoundResources = Map.insert name resSet
-                                                $ modCompoundResources imp,
+                (\imp -> imp { modCompoundResources = 
+                                    Map.insert name (resSet, pos)
+                                    $ modCompoundResources imp,
                             modKnownResources = setMapInsert name rspec
                                                 $ modKnownResources imp })
             updateInterface vis $ updatePubResources $ Map.insert name rspec
@@ -1735,7 +1738,7 @@ data ModuleImplementation = ModuleImplementation {
                                               -- ^reversed list of data
                                               -- constructors for this
                                               -- type, if it is a type
-    modCompoundResources :: Map Ident (Set ResourceSpec),
+    modCompoundResources :: Map Ident (Set ResourceSpec,OptPos),
                                               -- ^Defined compound resources 
     modKnownTypes:: Map Ident (Set ModSpec),  -- ^Types visible to this module
     modKnownResources :: Map Ident (Set ResourceSpec),
@@ -2057,6 +2060,7 @@ resourceDefToIFace = Map.map resourceType
 --  possibly an initial value.  There's also an optional source
 -- position.
 type ResourceDef = Map ResourceSpec ResourceImpln
+
 
 data ResourceImpln =
     SimpleResource {
@@ -4778,6 +4782,12 @@ queueMessage msg = do
 --  specified source location to the collected compiler output messages.
 errmsg :: OptPos -> String -> Compiler ()
 errmsg = flip (message Error)
+
+
+-- |Add the specified string as a warning message referring to the optionally
+--  specified source location to the collected compiler output messages.
+warnmsg :: OptPos -> String -> Compiler ()
+warnmsg = flip (message Warning)
 
 
 -- |Pretty helper operator for adding messages to the compiler state.

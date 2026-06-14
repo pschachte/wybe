@@ -7,8 +7,8 @@
 
 {-# LANGUAGE TupleSections #-}
 
-module Resources (resourceCheckMod, canonicaliseProcResources,
-                  canonicaliseResourceSpec,
+module Resources (expandSCCCompoundResources,resourceCheckMod,
+                  canonicaliseProcResources, canonicaliseResourceSpec,
                   transformProcResources) where
 
 import           AST
@@ -58,9 +58,79 @@ import Data.List.Extra (nubOrd, groupOn, groupSortOn)
 
 ------------------------- Checking resource decls -------------------------
 
--- |Check a module's resource declarations.
-resourceCheckMod :: [ModSpec] -> ModSpec -> Compiler (Bool,[(String,OptPos)])
-resourceCheckMod _ thisMod = do
+-- |Expand all the compound resources in a module SCC, giving each their correct
+-- entry in their module's modResources map.  The correct entry for a compound
+-- resource is the union of the entries for all the resources it contains.  All
+-- compound resources in other module dependencies must have already been
+-- expanded, and resource dependencies must be acyclic.  Therefore, we can use a
+-- simple depth-first transitive closure algorithm, invoking
+-- expandCompoundResource for each compound resource in the SCC.
+expandSCCCompoundResources :: [ModSpec] -> Compiler ()
+expandSCCCompoundResources mods = do
+    logResources $ "**** expanding compound resources in module SCC "
+                ++ showModSpecs mods
+    ress <- concatMapM (\mod ->
+                         List.map (mapFst (ResourceSpec mod) . mapSnd snd)
+                         . Map.toList
+                        <$> getModuleImplementationField modCompoundResources
+                            `inModule` mod)
+            mods
+    logResources $ "Compound resources to expand: " ++ show ress
+    mapM_ (\(res, pos) -> expandCompoundResource [] pos res) ress
+
+
+-- |Expand a single compound resource, as follows:
+--   1. If it is in the list (stack) of resources we are currently expanding,
+--      this indicates mutual dependency, so we record an error and return an
+--      empty definition.
+--   2. If there is an entry for the resource in its module's modResources map,
+--      either it is a primitive resource or we have already computed its
+--      dependencies, so we simply return it.
+--   3. Otherwise, we push the current resource onto the list of resources we
+--      are currently expanding, recursively expand all the resources it
+--      comprises, and record the union of all those definitions as the
+--      definition of this resource.
+expandCompoundResource :: [ResourceSpec] -> OptPos -> ResourceSpec
+                       -> Compiler ResourceDef
+expandCompoundResource processing pos res@(ResourceSpec mod name) = do
+    logResources $ "Expanding compound resource " ++ show res
+    if res `elem` processing then do
+        errmsg pos
+               $ "Mutually dependent compound resources: "
+               ++ intercalate ", " (show <$> res:takeWhile (/= res) processing)
+        return Map.empty
+    else do
+        expansion <- Map.lookup name . modResources <$> getLoadedModuleImpln mod
+        case expansion of
+            Just def -> do
+                logResources $ " -> Already expanded to " ++ show def
+                return def
+            Nothing -> do
+                let processing' = res:processing
+                (resSet, defPos) <-
+                    fromMaybe 
+                    (shouldnt $ "In expandCompoundResource, no definition for "
+                                     ++ show res)
+                    . Map.lookup name <$>
+                    getModuleImplementationField modCompoundResources `inModule` mod
+                logResources $ " -> Expanding to union of " ++ show resSet
+                defs <- mapM (expandCompoundResource processing' defPos)
+                                (Set.toList resSet)
+                logResources $ " -> Expanded to " ++ show defs
+                let def = Map.unions defs
+                when (Map.null def) $
+                    warnmsg pos $ "Compound resource " ++ show res
+                               ++ " contains no simple resources"
+                updateLoadedModuleImpln (\modImpln ->
+                    modImpln { modResources = Map.insert name def
+                                            $ modResources modImpln }
+                    ) mod
+                return def
+
+
+-- |Check a module's recorded resource declarations.
+resourceCheckMod :: ModSpec -> Compiler ()
+resourceCheckMod thisMod = do
     logResources $ "**** resource checking module " ++ showModSpec thisMod
     reenterModule thisMod
     resources <- getModuleImplementationField (Map.toAscList . modResources)
@@ -71,7 +141,7 @@ resourceCheckMod _ thisMod = do
     reexitModule
     logResources $ "**** finished resource checking module "
                    ++ showModSpec thisMod
-    return (or chg,concat errs)
+
 
 -- |Check a resource definition
 checkResourceDef :: Ident -> ResourceDef
@@ -116,9 +186,6 @@ checkResourceImpln rspec impln@(SimpleResource ty mbPInit pos) = do
         typedExp (Typed e _ _) = e
         typedExp _ = shouldnt "typedExp on a non-Typed exp"
 
--- checkOneResource rspec Nothing = do
---     -- XXX don't currently handle compound resources
---     nyi "compound resources"
 
 
 ------------- Canonicalising resources in proc definitions ---------
@@ -132,8 +199,8 @@ canonicaliseProcResources pd _ = do
     let proto = procProto pd
     let pos = procPos pd
     let resources = procProtoResources proto
-    resourceFlows <- List.map collapseResourceFlows 
-                   . groupSortOn resourceFlowRes 
+    resourceFlows <- List.map collapseResourceFlows
+                   . groupSortOn resourceFlowRes
                  <$> mapM (canonicaliseResourceFlow pos name) resources
     logResources $ "Available resources: " ++ show resourceFlows
     let proto' = proto {procProtoResources = resourceFlows}
@@ -147,21 +214,21 @@ canonicaliseProcResources pd _ = do
 canonicaliseResourceFlow :: OptPos -> ProcName -> ResourceFlowSpec
                          -> Compiler ResourceFlowSpec
 canonicaliseResourceFlow pos name (ResourceFlowSpec res flow) = do
-    res' <- fst 
-        <$> canonicaliseResourceSpec pos 
-                ("declaration of " ++ showProcName name) 
+    res' <- fst
+        <$> canonicaliseResourceSpec pos
+                ("declaration of " ++ showProcName name)
                 res
     return $ ResourceFlowSpec res' flow
 
 
 collapseResourceFlows :: [ResourceFlowSpec] -> ResourceFlowSpec
 collapseResourceFlows [] = shouldnt "empty resource group"
-collapseResourceFlows ress@(ResourceFlowSpec res flow:_) 
+collapseResourceFlows ress@(ResourceFlowSpec res flow:_)
     = ResourceFlowSpec res
-        $ case nubOrd ress of 
+        $ case nubOrd ress of
             [_] -> flow
             _ -> ParamInOut
-        
+
 
 --------- Transform resources into global variables ---------
 

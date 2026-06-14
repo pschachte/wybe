@@ -218,7 +218,8 @@ import           Options                   (LogSelection (..), Options (..),
 import           Parser                    (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
-                                            canonicaliseProcResources)
+                                            canonicaliseProcResources,
+                                            expandSCCCompoundResources)
 import           Unique                    ( uniquenessCheckProc )
 import           Scanner                   (fileTokens)
 import           System.Directory
@@ -812,9 +813,8 @@ compileModSCC mspecs = do
     mapM_ validateModExportTypes mspecs
     stopOnError $ "checking parameter type declarations in module(s) "
                   ++ showModSpecs mspecs
-    -- Fixed point needed because eventually resources can bundle
-    -- resources from other modules
-    fixpointProcessSCC resourceCheckMod mspecs
+    mapM_ resourceCheckMod mspecs
+    expandSCCCompoundResources mspecs
     mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
     typeCheckModSCC mspecs
