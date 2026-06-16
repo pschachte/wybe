@@ -1,4 +1,4 @@
 Error detected during type checking of module(s) type_change
 final-dump/type_change.wybe:4:2: Type error in call to proc =, argument 1
 final-dump/type_change.wybe:4:2: Type error in call to proc =, argument 2
-final-dump/type_change.wybe:4:2: Type of 1.0 incompatible with ?x
+final-dump/type_change.wybe:4:2: Type of ?x incompatible with 1.0
