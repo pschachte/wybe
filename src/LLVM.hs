@@ -979,17 +979,15 @@ writeLPVMCall "alloc" flags args pos = do
                 -- We record the output variable so tailMarker can check
                 -- per-call whether the stack address actually flows into
                 -- that specific call, allowing tail calls that don't use it.
+                -- alloca returns ptr; ptrtoint to the i64 Wybe expects.
+                -- stackAlloc records the CPointer temp as stack-allocated;
+                -- typeConvert then carries that stack-ness onto `out` (and
+                -- onward through any further aliasing), so tailMarker can
+                -- suppress tail calls that pass this address.
                 Just sizeVal -> do
-                    -- alloca returns ptr; ptrtoint to the i64 Wybe expects
                     (writeTmp, readTmp) <- freshTempArgs $ Representation CPointer
-                    llvmAssignResult writeTmp $ "alloca i8, i64 " ++ show sizeVal
-                        ++ ", align " ++ show wordSizeBytes
+                    stackAlloc writeTmp (fromIntegral sizeVal)
                     typeConvert readTmp out
-                    case out of
-                        ArgVar{argVarName=n} ->
-                            modify $ \s -> s { stackAllocedVars =
-                                Set.insert n (stackAllocedVars s) }
-                        _ -> return ()
                 Nothing -> shouldnt "stack alloc with non-constant size"
             else heapAlloc out sz pos
         _            -> shouldnt $ "lpvm alloc with arguments " ++ show args
@@ -1701,6 +1699,7 @@ typeConvert fromArg toArg = do
               $ typeConvertOp fromTy toTy ++ " "
                 ++ makeLLVMArg (llvmTypeRep fromTy) fromVal
                 ++ " to " ++ llvmTypeRep toTy
+    propagateStackAlloced fromArg toArg
 
 
 -- | Convert the specified PrimArg to a PrimArg with the specified
@@ -2221,11 +2220,29 @@ stackAlloc :: PrimArg -> Int -> LLVM ()
 stackAlloc result size = do
     llvmAssignResult result $ "alloca i8, i64 " ++ show size
         ++ ", align " ++ show wordSizeBytes
-    case result of
-        ArgVar{argVarName=n} ->
-            modify $ \s -> s { stackAllocedVars =
-                Set.insert n (stackAllocedVars s) }
-        _ -> return ()
+    recordStackAlloced result
+
+
+-- | Record that the given argument variable holds a stack-allocated address.
+-- A tail call passing this variable (or an alias of it, see propagateStackAlloced)
+-- must be suppressed, so the frame holding the allocation is not torn down while
+-- a callee still uses the pointer.
+recordStackAlloced :: PrimArg -> LLVM ()
+recordStackAlloced ArgVar{argVarName=n} =
+    modify $ \s -> s { stackAllocedVars = Set.insert n (stackAllocedVars s) }
+recordStackAlloced _ = return ()
+
+
+-- | If fromArg holds a stack-allocated address, then toArg (a copy or cast of
+-- it) holds the same address and is also stack-allocated.  This keeps
+-- stackAllocedVars closed under the moves and pointer conversions that
+-- destructive mutate and ptrtoint lowering introduce, so tailMarker's
+-- name-based check is not defeated by LLVM-level renaming.
+propagateStackAlloced :: PrimArg -> PrimArg -> LLVM ()
+propagateStackAlloced ArgVar{argVarName=fromName} toArg = do
+    isStack <- Set.member fromName <$> gets stackAllocedVars
+    when isStack $ recordStackAlloced toArg
+propagateStackAlloced _ _ = return ()
 
 
 ----------------------------------------------------------------------------

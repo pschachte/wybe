@@ -83,6 +83,24 @@ isAllocOrMutate (PrimForeign "lpvm" "alloc"  _ _) = True
 isAllocOrMutate (PrimForeign "lpvm" "mutate" _ _) = True
 isAllocOrMutate _                                  = False
 
+-- | True for calls whose callee we cannot analyse: user-defined calls
+-- (PrimCall), higher-order calls (PrimHigher), and foreign calls to languages
+-- other than llvm/lpvm (e.g. C).  Any pointer passed as an input to such a call
+-- must be treated as escaping (see computeEscapedVars).
+isConservativeCall :: Prim -> Bool
+isConservativeCall PrimCall{}               = True
+isConservativeCall PrimHigher{}             = True
+isConservativeCall (PrimForeign lang _ _ _) = lang /= "llvm" && lang /= "lpvm"
+
+-- | True for ops that copy an address into a (possibly different-typed) result
+-- without dereferencing it, so escape must propagate from output to input
+-- regardless of type.  lpvm cast changes the type while preserving the
+-- value/address; llvm move copies it unchanged.
+isValuePreserving :: Prim -> Bool
+isValuePreserving (PrimForeign "lpvm" "cast" _ _) = True
+isValuePreserving (PrimForeign "llvm" "move" _ _) = True
+isValuePreserving _                                = False
+
 -- | Compute the set of variables that may escape the procedure body, i.e.,
 -- variables whose values could possibly be referred to after the procedure
 -- returns.  A variable escapes if it is an output parameter, or if its pointer
@@ -93,11 +111,30 @@ isAllocOrMutate _                                  = False
 -- prevent LLVM from using tail-call optimisation on those call sites.
 computeEscapedVars :: PrimProto -> ProcBody -> Set PrimVarName
 computeEscapedVars proto body =
-    let escaped0 = Set.fromList
-                    [ primParamName p
-                    | p <- primProtoParams proto
-                    , isOutputFlow (primParamFlow p) ]
-        prims = collectAllBodyPrims body
+    let prims = collectAllBodyPrims body
+        -- Seed (1): every output parameter escapes by definition.
+        outParamEsc = [ primParamName p
+                      | p <- primProtoParams proto
+                      , isOutputFlow (primParamFlow p) ]
+        -- Seed (2): every pointer passed as an INPUT argument to a call we
+        -- cannot see into (PrimCall / PrimHigher / foreign-C) escapes
+        -- UNCONDITIONALLY, for two reasons:
+        --   • the callee may store the pointer somewhere that outlives this
+        --     proc (a global, the heap, an output it returns); and
+        --   • the call may be tail-call-optimised, in which case this frame
+        --     (and any stack allocation in it) is torn down while the callee
+        --     keeps using the pointer.
+        -- Tail-position is only decided later in the LLVM backend, so we are
+        -- conservative here: a value reaching any such call argument is never
+        -- stack-allocated.  This subsumes the weaker "input escapes if some
+        -- output escapes" rule for these calls.
+        callArgEsc = [ argVarName arg
+                     | prim <- prims
+                     , isConservativeCall prim
+                     , let (allArgs, _) = primArgs prim
+                     , arg@ArgVar{argVarFlow=inFlow} <- allArgs
+                     , not (isOutputFlow inFlow) ]
+        escaped0 = Set.fromList (outParamEsc ++ callArgEsc)
         -- For mutate(fIn, fOut, offset, destr, size, startOff, member, ...),
         -- if fOut escapes then:
         --   (a) fIn escapes (same struct, just a new version).  Note: this
@@ -114,32 +151,24 @@ computeEscapedVars proto body =
                 , argIsVar fIn
                 , argIsVar fOut
                 , vin <- fIn : [ m | m <- List.drop 6 args, argIsVar m ] ]
-        -- For any non-alloc/non-mutate instruction, propagate escape backward:
-        --   • foreign llvm/lpvm ops (e.g. constructor tagging, llvm move,
-        --     lpvm cast): type-match only — an input escapes iff an output of
-        --     the same type escapes.  This is sound because these ops can't
-        --     embed a value into a result of a different type.
-        --   • user-defined calls (PrimCall) and foreign calls to other
-        --     languages (e.g. C): we have no visibility into the callee, so
-        --     conservatively mark ALL inputs as escaping when ANY output
-        --     escapes.  A foreign C call, for instance, may store an input
-        --     into a C struct that another C function reads later.
+        -- For each remaining llvm/lpvm op, propagate escape backward from an
+        -- output to an input.  An input escapes if an output of the SAME type
+        -- escapes, OR if the op is value-preserving (lpvm cast / llvm move),
+        -- which carries the same address into a result of a different type.
+        -- (Conservative calls are handled by the callArgEsc seed above.)
         passEdges = [ (outName, inName)
                     | prim <- prims
                     , not (isAllocOrMutate prim)
+                    , not (isConservativeCall prim)
                     , let (allArgs, _) = primArgs prim
-                    , let isConservativeCall = case prim of
-                                        PrimCall {}    -> True
-                                        PrimHigher {}  -> True
-                                        PrimForeign lang _ _ _ ->
-                                            lang /= "llvm" && lang /= "lpvm"
+                    , let valuePreserving = isValuePreserving prim
                     , ArgVar{argVarName=outName, argVarType=outType,
                              argVarFlow=outFlow} <- allArgs
                     , isOutputFlow outFlow
                     , ArgVar{argVarName=inName, argVarType=inType,
                              argVarFlow=inFlow} <- allArgs
                     , not (isOutputFlow inFlow)
-                    , isConservativeCall || inType == outType ]
+                    , valuePreserving || inType == outType ]
         allEdges = mutateEdges ++ passEdges
         go escaped =
             let newEsc = Set.fromList
