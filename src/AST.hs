@@ -36,7 +36,7 @@ module AST (
   flattenedExpFlow, expIsVar, expIsConstant, expVar, expVar', maybeExpType, innerExp,
   setExpFlowType,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
-  defaultTypeRepresentation, typeRepSize, integerTypeRep, typeSize, 
+  defaultTypeRepresentation, typeRepSize, integerTypeRep, typeSize,
   defaultTypeModifiers, lookupTypeRepresentation, typeRepresentation,
   lookupModuleRepresentation, argIsReal,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
@@ -70,7 +70,7 @@ module AST (
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
-  ProcBody(..), PrimFork(..), MergedForkTable, prependToBody, appendToBody, unMergeFork, guardedMergedFork, 
+  ProcBody(..), PrimFork(..), MergedForkTable, prependToBody, appendToBody, unMergeFork, guardedMergedFork,
   Ident, VarName, ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
@@ -110,7 +110,7 @@ module AST (
   typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources, initialisedVisibleResources,
-  addResource, lookupResource,
+  addResource, lookupResourceSpec, lookupResource,
   specialResources, specialResourcesSet, isSpecialResource,
   publicResource, resourcefulName,
   ProcModifiers(..), defaultProcModifiers,
@@ -627,11 +627,14 @@ updateLoadedModuleM updater modspec = do
 
 
 -- |Return the ModuleImplementation of the specified module.  An error
--- if the module is not loaded or does not have an implementation.
+-- if the module is not already loaded (or currently being loaded), or does not
+-- have an implementation.
 getLoadedModuleImpln :: ModSpec -> Compiler ModuleImplementation
 getLoadedModuleImpln modspec = do
-    mod <- trustFromJustM ("unknown module " ++ showModSpec modspec) $
-           getLoadingModule modspec
+    loadingMod <- getLoadingModule modspec
+    mod <- trustFromJust ("getLoadedModuleImpln " ++ showModSpec modspec)
+            . (`orElse` loadingMod) . find ((== modspec) . modSpec)
+            <$> gets underCompilation
     return $ trustFromJust ("unimplemented module " ++ showModSpec modspec) $
            modImplementation mod
 
@@ -1060,7 +1063,7 @@ typeIsUnique _ = return False
 -- We first check if the named resource is already defined, and report an error
 -- if so.  Otherwise, providing the type is not generic, we record the
 -- definition to process once types have been checked.
-addResource :: ResourceName -> Visibility -> ResourceDefn -> OptPos 
+addResource :: ResourceName -> Visibility -> ResourceDefn -> OptPos
             -> Compiler ()
 addResource name vis def pos = do
     currMod <- getModuleSpec
@@ -1085,7 +1088,7 @@ addResource name vis def pos = do
         CompoundResourceDefn ress -> do
             let resSet = Set.fromList ress
             updateImplementation
-                (\imp -> imp { modCompoundResources = 
+                (\imp -> imp { modCompoundResources =
                                     Map.insert name (resSet, pos)
                                     $ modCompoundResources imp,
                             modKnownResources = setMapInsert name rspec
@@ -1093,27 +1096,35 @@ addResource name vis def pos = do
             updateInterface vis $ updatePubResources $ Map.insert name rspec
 
 
--- |Find the definition of the specified resource visible in the current module.
-lookupResource :: ResourceSpec -> Compiler (Maybe ResourceDef)
-lookupResource res@(ResourceSpec mod name) = do
-    logAST $ "Looking up resource " ++ show res
+-- |Fully qualify the given resource spec, if the resource has been defined.
+lookupResourceSpec :: ResourceSpec -> Compiler (Maybe ResourceSpec)
+lookupResourceSpec res@(ResourceSpec mod name) = do
+    logAST $ "qualifying resource spec " ++ show res
     rspecs <- refersTo mod name modKnownResources resourceMod
     logAST $ "Candidates: " ++ show rspecs
-    case (Set.size rspecs, Map.lookup name specialResources) of
-        (0, Just (_,ty)) | List.null mod ->
-            return $ Just $ Map.singleton res
-                   $ SimpleResource ty Nothing Nothing
-        (0, _) -> return Nothing
-        (1,_) -> do
-            let rspec = Set.findMin rspecs
-            maybeMod <- getLoadingModule $ resourceMod rspec
+    case Set.size rspecs of
+        0 | List.null mod && Map.member name specialResources -> return $ Just res
+        0 -> return Nothing
+        1 -> return $ Just $ Set.findMin rspecs
+        _ -> return Nothing
+
+
+-- |Find the definition of the specified resource visible in the current module.
+lookupResource :: ResourceSpec -> Compiler (Maybe ResourceDef)
+lookupResource res =
+    lookupResourceSpec res >>= \case
+        Nothing -> return Nothing
+        Just res'@(ResourceSpec [] name) -> do
+            let rdef t = Map.singleton res' (SimpleResource t Nothing Nothing)
+            return $ rdef . snd <$> Map.lookup name specialResources
+        Just (ResourceSpec mod name) -> do
+            maybeMod <- getLoadingModule mod
             let maybeDef = maybeMod >>= modImplementation >>=
-                        Map.lookup (resourceName rspec) . modResources
+                        Map.lookup name . modResources
             logAST $ "Found resource:  " ++ show maybeDef
             let rdef = trustFromJust "lookupResource" maybeDef
             logAST $ "  with definition:  " ++ show rdef
             return $ Just rdef
-        _   -> return Nothing
 
 
 -- |All the "special" resources, which Wybe automatically generates where they
@@ -1562,7 +1573,7 @@ lookupConstInfo (StructID mspec n _) = do
 -- The resulting Exp does not use a StringValue constructor.
 cStringExpr :: String -> Compiler Exp
 cStringExpr str = do
-    structID <- recordConstStruct (CStringInfo str) 
+    structID <- recordConstStruct (CStringInfo str)
                         (Just $ StringValue str CString)
     return $ Typed (ConstStruct structID) cStringType Nothing
 
@@ -2610,7 +2621,7 @@ data PrimFork =
       forkVar::PrimVarName,       -- ^The variable that selects branch to take
       forkVarType::TypeSpec,      -- ^The Wybe type of the forkVar
       forkVarLast::Bool,          -- ^Is this the last occurrence of forkVar
-      forkBodies::[(Integer,ProcBody)],   
+      forkBodies::[(Integer,ProcBody)],
                                   -- ^one branch for each value of forkVar
       forkDefault::Maybe ProcBody -- ^branch to take if forkVar is out of range
     } |
@@ -2649,10 +2660,10 @@ prependToBody before (ProcBody prims fork)
 unMergeFork :: PrimFork -> Compiler PrimFork
 unMergeFork (MergedFork var ty final table body dlft) = do
     table' <- mapM (\(var, ty, id, _) -> (var, ty,) . List.map (`constValuePrimArg` ty) . arrayData . trustFromJust "unMergeFork" <$> lookupConstInfo id) table
-    let untabled = List.transpose 
-                    $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ PrimForeign "llvm" "move" [] [p, ArgVar var' ty' FlowOut Ordinary False]) vals) 
+    let untabled = List.transpose
+                    $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ PrimForeign "llvm" "move" [] [p, ArgVar var' ty' FlowOut Ordinary False]) vals)
                     table'
-    return $ if List.null untabled 
+    return $ if List.null untabled
     then NoFork
     else PrimFork var ty final (zip [0..] (List.map (`prependToBody` body) untabled)) dlft
 unMergeFork fork = shouldnt $ "unMergeFork on non-merged " ++ show fork
@@ -2661,7 +2672,7 @@ unMergeFork fork = shouldnt $ "unMergeFork on non-merged " ++ show fork
 -- with the given var used int the fork
 guardedMergedFork :: PrimVarName -> PrimVarName -> TypeSpec -> Integer -> ProcBody -> Maybe ProcBody -> ProcBody
 guardedMergedFork _   _   _  _     body Nothing     = body
-guardedMergedFork tmp var ty limit body (Just dflt) = 
+guardedMergedFork tmp var ty limit body (Just dflt) =
     ProcBody
         [Unplaced $ PrimForeign "llvm" "icmp_ule" []
           [ArgVar var ty FlowIn Ordinary False, ArgInt limit ty, ArgVar tmp bit FlowOut Ordinary False]]
@@ -2860,8 +2871,8 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
         foldAll (foldBodyDistrib primFn common abDisj abConj $ snd body) $ List.map snd bodies ++ maybeToList deflt
       MergedFork{forkBody=body, forkDefault=deflt} ->
         foldAll (foldBodyDistrib primFn common abDisj abConj body) $ maybeToList deflt
-            
-            
+
+
 
 
 -- |Traverse a ProcBody applying a monadic primFn to every Prim and applying a
@@ -3661,7 +3672,7 @@ constValueAtOffset (StructInfo _ fields) offset = go fields offset
           go [] _ = Nothing
 constValueAtOffset (CStringInfo chars) offset =
     (`IntStructMember` 1) . toInteger . ord <$> (chars !? offset)
-constValueAtOffset (ArrayInfo []) _ = Nothing 
+constValueAtOffset (ArrayInfo []) _ = Nothing
 constValueAtOffset (ArrayInfo elts@(elt:_)) offset =
     let eltSize = constValueSize elt
         (idx, eltOffset) = divMod offset eltSize
@@ -4212,11 +4223,11 @@ instance Show Item where
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
   show (ResourceDecl vis name resdef pos) =
-    visibilityPrefix vis ++ "resource " ++ name ++ 
+    visibilityPrefix vis ++ "resource " ++ name ++
         case resdef of
           SimpleResourceDefn typ init ->
             ":" ++ show typ ++ maybeShow " = " init " "
-          CompoundResourceDefn rspecs -> 
+          CompoundResourceDefn rspecs ->
             " = " ++ intercalate ", " (List.map show rspecs)
     ++ showOptPos pos
   show (FuncDecl vis modifiers proto typ exp pos) =
@@ -4234,7 +4245,7 @@ instance Show Item where
     ++ showOptPos pos
     ++ " {"
     ++ showBody 4 stmts
-    ++ "\n  }"  
+    ++ "\n  }"
   show (ForeignProcDecl vis lang modifiers mbAlias proto retType pos) =
     visibilityPrefix vis
     ++ "def foreign "
@@ -4485,9 +4496,9 @@ showFork ind (PrimFork var ty last bodies deflt) =
 showFork ind (MergedFork var ty last table body deflt) =
     startLine ind ++ "factored " ++ (if last then "~" else "") ++ show var ++
                   ":" ++ show ty ++ " of" ++
-    List.concatMap (\(var, ty, struct, vals) -> 
+    List.concatMap (\(var, ty, struct, vals) ->
                         startLine (ind + 2) ++ "?" ++ show var ++ ":" ++ show ty ++
-                        " <- " ++ show struct ++ "" ++ show vals ++ "") 
+                        " <- " ++ show struct ++ "" ++ show vals ++ "")
         table
     ++ showBlock (ind+4) body
     ++ maybe "" (\b -> startLine ind ++ "else:"

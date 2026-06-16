@@ -93,14 +93,15 @@ expandSCCCompoundResources mods = do
 expandCompoundResource :: [ResourceSpec] -> OptPos -> ResourceSpec
                        -> Compiler ResourceDef
 expandCompoundResource processing pos res@(ResourceSpec mod name) = do
-    logResources $ "Expanding compound resource " ++ show res
+    logResources $ "Expanding possibly compound resource " ++ show res
     if res `elem` processing then do
-        errmsg pos
-               $ "Mutually dependent compound resources: "
-               ++ intercalate ", " (show <$> res:takeWhile (/= res) processing)
+        let cycle = intercalate ", " (show <$> res:takeWhile (/= res) processing)
+        logResources $ " -> Mutually dependent compound resources: " ++ cycle
+        errmsg pos $ "Mutually dependent compound resources: " ++ cycle
         return Map.empty
     else do
         expansion <- Map.lookup name . modResources <$> getLoadedModuleImpln mod
+        logResources $ " -> Known definition: " ++ show expansion
         case expansion of
             Just def -> do
                 logResources $ " -> Already expanded to " ++ show def
@@ -108,19 +109,22 @@ expandCompoundResource processing pos res@(ResourceSpec mod name) = do
             Nothing -> do
                 let processing' = res:processing
                 (resSet, defPos) <-
-                    fromMaybe 
+                    fromMaybe
                     (shouldnt $ "In expandCompoundResource, no definition for "
                                      ++ show res)
                     . Map.lookup name <$>
-                    getModuleImplementationField modCompoundResources `inModule` mod
-                logResources $ " -> Expanding to union of " ++ show resSet
-                defs <- mapM (expandCompoundResource processing' defPos)
-                                (Set.toList resSet)
-                logResources $ " -> Expanded to " ++ show defs
+                    getModuleImplementationField modCompoundResources
+                        `inModule` mod
+                let ress = Set.toList resSet
+                logResources $ " -> Expanding to union of resources "
+                     ++ intercalate ", " (show <$> ress)
+                ress' <- catMaybes
+                        <$> mapM lookupResourceSpec ress `inModule` mod
+                logResources $ " -> Module qualified resources "
+                     ++ intercalate ", " (show <$> ress')
+                defs <- mapM (expandCompoundResource processing' defPos) ress'
                 let def = Map.unions defs
-                when (Map.null def) $
-                    warnmsg pos $ "Compound resource " ++ show res
-                               ++ " contains no simple resources"
+                logResources $ " -> Expanded to " ++ show def
                 updateLoadedModuleImpln (\modImpln ->
                     modImpln { modResources = Map.insert name def
                                             $ modResources modImpln }
