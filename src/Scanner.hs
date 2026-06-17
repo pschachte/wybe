@@ -259,7 +259,7 @@ tokenisePart pos c cs
   | isDigit c = scanNumberToken pos (c:cs)
   | isIdentChar c =
     case span isIdentChar (c:cs) of
-      (v@"c", '\"':cs') -> tokeniseString (IdentQuote "c" DoubleQuote) pos cs'
+      (v@"c", '\"':cs') -> tokeniseString (IdentQuote "c" DoubleQuote) False pos cs'
       (name, rest) -> multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
                     ',' -> specialToken ',' cs pos $ TokComma pos
@@ -276,7 +276,8 @@ tokenisePart pos c cs
                     '!' -> singleCharTok c cs pos $ TokSymbol "!" pos
                     '@' -> singleCharTok c cs pos $ TokSymbol "@" pos
                     '\'' -> tokeniseChar pos cs
-                    '\"' -> tokeniseString DoubleQuote pos cs
+                    '\"' -> mapFst3 (([TokLBracket Paren pos] ++) . (++ [TokRBracket Paren pos])) 
+                          $ tokeniseString DoubleQuote True pos cs
                     -- backquote makes anything an identifier
                     '`' -> tokeniseBackquote cs pos
                     '#' -> let  (target,trim,terminate) = case cs of
@@ -373,22 +374,22 @@ tokeniseChar pos chars =
     where (front,back) = splitAt 2 chars
 
 -- |Tokenise a delimited string and tokenize the rest of the input..
-tokeniseString :: StringDelim -> SourcePos -> String -> PartialTokenisation
-tokeniseString delim pos cs =
+tokeniseString :: StringDelim -> Bool -> SourcePos -> String -> PartialTokenisation
+tokeniseString delim interp pos cs =
     case break (`elem` [termchar,'\\','$']) cs of
         (_,[]) -> tokErr
         (front,'\\':cs) ->
             let pos' = updatePosChar (updatePosString pos front) '\\'
             in case scanCharEscape pos' cs of
                 Just (ch,pos'',cs') ->
-                    case tokeniseString delim pos'' cs' of
+                    case tokeniseString delim interp pos'' cs' of
                         (TokString d s p:rest, pos''', cs'') ->
                             (TokString d (front++(ch:s)) p:rest, pos''', cs'')
                         _ -> shouldnt "tokeniseString didn't return a string"
                 Nothing -> tokErr
-        ("",'$':cs) ->
+        ("",'$':cs) | interp ->
             scanInterpolation cs delim $ updatePosChar pos '$'
-        (front,'$':cs) ->
+        (front,'$':cs) | interp ->
             let pos' = updatePosString pos front
             in mapFst3 ([TokString delim front pos, TokSymbol ",," pos']++)
                $ scanInterpolation cs delim (updatePosChar pos' '$')
@@ -406,28 +407,29 @@ scanInterpolation :: String -> StringDelim -> SourcePos -> PartialTokenisation
 scanInterpolation cs delim pos =
     case span isIdentChar cs of
         ("",'(':c:cs') ->
-            mapFst3 ([TokIdent "fmt" pos, TokLBracket Paren pos]++)
+            mapFst3 ([TokLBracket Paren pos, TokLBracket Paren pos, TokIdent "fmt" pos, TokLBracket Paren pos]++)
             $ scanExprInterpolation 1 c cs' delim $ updatePosChar pos '('
         ("",cs) ->
             mapFst3
             (TokError "invalid string interpolation" pos:)
-            $ tokeniseString delim pos cs
+            $ tokeniseString delim True pos cs
         (name,t:cs) | t == termchar ->
             let pos' = updatePosChar (updatePosString pos name) t
-            in ([TokIdent "fmt" pos
-                 , TokLBracket Paren pos
-                 , TokIdent name pos
-                 , TokRBracket Paren pos]
+            in ([ TokLBracket Paren pos
+                , TokIdent "fmt" pos
+                , TokLBracket Paren pos
+                , TokIdent name pos
+                ] ++ constrainWybeString pos
                 , pos', cs)
         (name, rest) ->
             let pos' = updatePosString pos name
             in mapFst3
-               ([TokIdent "fmt" pos
-                , TokLBracket Paren pos
-                , TokIdent name pos
-                , TokRBracket Paren pos
-                , TokSymbol ",," pos']++)
-               $ tokeniseString delim pos' rest
+               (([ TokLBracket Paren pos
+                 , TokIdent "fmt" pos
+                 , TokLBracket Paren pos
+                 , TokIdent name pos
+                 ] ++ constrainWybeString pos ++ [ TokSymbol ",," pos'])++)
+               $ tokeniseString delim True pos' rest
   where termchar = delimChar delim
 
 
@@ -439,9 +441,10 @@ scanInterpolation cs delim pos =
 scanExprInterpolation :: Int -> Char -> String -> StringDelim -> SourcePos
                       -> PartialTokenisation
 scanExprInterpolation 0 c cs delim pos
-  | c == delimChar delim = ([], updatePosChar pos c, cs)
+  | c == delimChar delim = (constrainWybeString pos, updatePosChar pos c, cs)
 scanExprInterpolation 0 c cs delim pos =
-    mapFst3 ([TokSymbol ",," pos]++) $ tokeniseString delim pos (c:cs)
+    mapFst3 ((constrainWybeString pos ++ [TokSymbol ",," pos])++) 
+    $ tokeniseString delim True pos (c:cs)
 scanExprInterpolation depth c cs delim pos =
     let (toks, pos', cs') = tokenisePart pos c cs
         depth' = foldr ((+) . tokenNesting) depth toks
@@ -450,6 +453,17 @@ scanExprInterpolation depth c cs delim pos =
         (c'':cs'') ->
             mapFst3 (toks++)
             $ scanExprInterpolation depth' c'' cs'' delim pos'
+
+-- Equivalent to '):wybe.string)'
+constrainWybeString :: SourcePos -> [Token]
+constrainWybeString pos = 
+    [ TokRBracket Paren pos
+    , TokSymbol ":" pos
+    , TokIdent "wybe" pos
+    , TokPeriod pos
+    , TokIdent "string" pos
+    , TokRBracket Paren pos
+    ]
 
 
 -- |Return the change the token makes to the expression nesting depth.  This
