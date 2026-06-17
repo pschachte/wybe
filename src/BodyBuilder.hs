@@ -10,7 +10,7 @@
 
 module BodyBuilder (
   BodyBuilder, buildBody, freshVarName, freshTmp, instr, buildFork, completeFork,
-  beginBranch, endBranch, definiteVariableValue, argExpandedPrim
+  beginBranch, endBranch, definiteVariableValue, argExpandedPrim, trySkipTrampoline
   ) where
 
 import AST
@@ -707,29 +707,14 @@ argExpandedPrim call@(PrimCall id pspec impurity args gFlows) = do
 argExpandedPrim call@(PrimHigher id fn impurity args) = do
     logBuild $ "Expanding Higher call " ++ show call
     fn' <- expandArg True fn
-    case fn' of
-        ArgClosure pspec clsd _ -> trySkipTrampoline pspec id impurity fn' clsd args
-        ArgConstRef constId _ -> do
-            structInfo <- lift $ lookupConstInfo constId
-            case structInfo of
-              Just StructInfo{structData=(FnPointerStructMember pspec:fields)} -> do
-                freeParams <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
-                let clsd = zipWith constValuePrimArg fields (primParamType <$> freeParams)
-                trySkipTrampoline pspec id impurity fn clsd args
-              st -> shouldnt $ "argExpandedPrim HO of " ++ show fn' ++ " -> " ++ show st
-        _ -> do
+    trySkipTrampoline fn' id impurity args >>= \case 
+      Just call' -> do
+          logBuild "As first order call"
+          argExpandedPrim call'
+      Nothing -> do
           logBuild $ "Leaving as higher call to " ++ show fn'
           args' <- mapM (expandArg True) args
           return $ PrimHigher id fn' impurity args'
-  where 
-    trySkipTrampoline pspec id imp fn clsd args = do
-      (pspec', simple) <- lift (getProcDef pspec <&> procVariant) <&> \case
-        ClosureProc pspec' simple -> (pspec', simple)
-        _ -> shouldnt $ "call to non-closure " ++ show pspec
-      let (pspec'', mbFn) = if simple then (pspec', Nothing) else (pspec, Just fn)
-      gFlows <- lift $ getProcGlobalFlows pspec''
-      logBuild $ "As first-order call to " ++ show pspec''
-      argExpandedPrim $ PrimCall id pspec'' impurity (maybeToList mbFn ++ clsd ++ args) gFlows
 argExpandedPrim call@(PrimVirtualCall id table index impurity args gFlows) = do
     table' <- expandArg True table
     args' <- mapM (expandArg True) args
@@ -743,6 +728,31 @@ argExpandedPrim (PrimForeign lang nm flags args) = do
     return $ simplifyForeign lang nm flags args'
 
 
+-- | Try to skip a call to a trampoline closure, if the trampline is "simple"
+-- as a first-order call, else Nothing
+trySkipTrampoline :: PrimArg -> CallSiteID -> Impurity -> [PrimArg] -> BodyBuilder (Maybe Prim)
+trySkipTrampoline fn@(ArgClosure pspec clsd _) id imp args = 
+  Just <$> trySkipTrampoline' pspec id imp fn clsd args
+trySkipTrampoline fn@(ArgConstRef constId _) id imp args = do
+  structInfo <- lift $ lookupConstInfo constId
+  case structInfo of
+    Just StructInfo{structData=(FnPointerStructMember pspec:fields)} -> do
+      freeParams <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
+      let clsd = zipWith constValuePrimArg fields (primParamType <$> freeParams)
+      Just <$> trySkipTrampoline' pspec id imp fn clsd args
+    st -> shouldnt $ "trySkipTrampoline HO of " ++ show fn ++ " -> " ++ show st
+trySkipTrampoline _ _ _ _ = return Nothing
+
+trySkipTrampoline' :: ProcSpec -> CallSiteID -> Impurity -> PrimArg -> [PrimArg] -> [PrimArg] -> BodyBuilder Prim
+trySkipTrampoline' pspec id imp fn clsd args = do
+  (pspec', simple) <- lift (getProcDef pspec <&> procVariant) <&> \case
+    ClosureProc pspec' simple -> (pspec', simple)
+    _ -> shouldnt $ "trySkipTrampoline' call to non-closure " ++ show pspec
+  let (pspec'', mbFn) = if simple then (pspec', Nothing) else (pspec, Just fn)
+  gFlows <- lift $ getProcGlobalFlows pspec''
+  return $ PrimCall id pspec'' imp (maybeToList mbFn ++ clsd ++ args) gFlows
+
+  
 -- |Replace any unneeded arguments corresponding to unneeded parameters with
 --  ArgUnneeded.  For unneeded *output* parameters, there must be an
 --  input with the same name.  We must set the output argument variable
