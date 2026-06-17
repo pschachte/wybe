@@ -9,6 +9,8 @@ elif [[ `uname` == 'Linux' ]]; then
 fi
 LIBDIR="../wybelibs"
 
+rm -f ../samples/*.o ../benchmarks/*.o
+
 for f in `ls ../samples/*.wybe ../benchmarks/*/*.wybe`
 do
 	targ=`echo -e "$f" | sed 's/.wybe$//'`
