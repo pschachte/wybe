@@ -108,7 +108,7 @@ module AST (
   Message(..), queueMessage,
   genProcName, addImport, doImport, importFromSupermodule, lookupType, lookupType',
   typeIsUnique,
-  ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
+  ResourceName, ResourceSpec(..), ResourceFlowSpec(..), PrimResourceImpln(..),
   initialisedResources, initialisedVisibleResources,
   addResource, lookupResourceSpec, lookupResource,
   specialResources, specialResourcesSet, isSpecialResource,
@@ -120,7 +120,7 @@ module AST (
   outputVariableName, outputStatusName,
   envParamName, envPrimParam, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
-  showProcIdentifier, showProcName,
+  showProcIdentifier, showProcName, showProcOrVarName,
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, should, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   flowPrefix, showProcModifiers, showProcModifiers', showFlags, showFlags',
@@ -1077,7 +1077,7 @@ addResource name vis def pos = do
             then errmsg pos $ "Resource type cannot contain type variables: "
                                 ++ show ty
             else do
-                let impln = SimpleResource ty init pos
+                let impln = PrimResource ty init pos
                 let rdef = Map.singleton rspec impln
                 updateImplementation
                     (\imp -> imp { modResources = Map.insert name rdef
@@ -1115,7 +1115,7 @@ lookupResource res =
     lookupResourceSpec res >>= \case
         Nothing -> return Nothing
         Just res'@(ResourceSpec [] name) -> do
-            let rdef t = Map.singleton res' (SimpleResource t Nothing Nothing)
+            let rdef t = Map.singleton res' (PrimResource t Nothing Nothing)
             return $ rdef . snd <$> Map.lookup name specialResources
         Just (ResourceSpec mod name) -> do
             maybeMod <- getLoadingModule mod
@@ -2067,14 +2067,15 @@ resourceDefToIFace = Map.map resourceType
 
 -- |A resource definition.  Since a resource may be defined as a
 --  collection of other resources, this is a set of resources (for
---  simple resources, this will be a singleton), each with type and
---  possibly an initial value.  There's also an optional source
--- position.
-type ResourceDef = Map ResourceSpec ResourceImpln
+--  simple resources, this will be a singleton), each with type,
+--  possibly an initial value, and an optional source position.
+type ResourceDef = Map ResourceSpec PrimResourceImpln
 
 
-data ResourceImpln =
-    SimpleResource {
+-- | A single primitive (simple) resource implementation.  A compound resource
+-- may be implemented in terms of multiple simple resources.
+data PrimResourceImpln =
+    PrimResource {
         resourceType::TypeSpec,
         resourceInit::Maybe (Placed Exp),
         resourcePos::OptPos
@@ -2327,7 +2328,7 @@ data GlobalFlows
         globalFlowsOut :: UnivSet GlobalInfo,
         -- ^ The set of globals that flow out
         globalFlowsParams :: UnivSet ParameterID
-        -- ^ The set of parameters (by ID) that effect the global flwos
+        -- ^ The set of parameters (by ID) that effect the global flows
     }
     deriving (Eq, Ord, Generic)
 
@@ -4367,9 +4368,9 @@ instance Show TypeDef where
     ++ showOptPos pos
 
 
--- |How to show a resource definition.
-instance Show ResourceImpln where
-  show (SimpleResource typ init pos) =
+-- |How to show a primitive resource definition.
+instance Show PrimResourceImpln where
+  show (PrimResource typ init pos) =
     show typ ++ maybeShow " = " init "" ++ showOptPos pos
 
 
@@ -4409,6 +4410,10 @@ showProcIdentifier kind name = kind ++ " " ++ name
 showProcName :: ProcName -> String
 showProcName = showProcIdentifier "proc"
 
+
+-- | A printable version of a proc name; handles special empty proc name.
+showProcOrVarName :: ProcName -> String
+showProcOrVarName name = "`" ++ name ++ "`"
 
 -- |How to show a type specification.
 instance Show TypeSpec where

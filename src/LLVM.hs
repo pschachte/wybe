@@ -558,7 +558,7 @@ writeAssemblyGlobals = do
     logLLVM "writeAssemblyGlobals"
     resDefs <- modResources . trustFromJust "writeAssemblyGlobals"
                 <$> llvmGetModule modImplementation
-    let ress = concatMap Map.keys (Map.elems resDefs)
+    let ress = Set.toList $ unions $ List.map Map.keysSet (Map.elems resDefs)
     mapM_ defGlobalResource ress
 
 
@@ -653,7 +653,9 @@ writeProcLLVM def@ProcDef{
             let pspec' = pspec{procSpeczVersion=speczVersion}
             writeProcSpeczLLVM pspec' tmpCount params speczBody free
             ) specz'
-writeProcLLVM def _  = shouldnt $ "Generating assembly code for uncompiled proc " ++ showProcName (procName def)
+writeProcLLVM def _  =
+    shouldnt $ "Generating assembly code for uncompiled proc "
+            ++ showProcName (procName def)
 
 
 
@@ -1596,9 +1598,14 @@ llvmResource :: ResourceSpec -> LLVM (LLVMName, TypeRepresentation)
 llvmResource res = do
     (res', ty) <-
         mapSnd (trustFromJust $ "defGlobalResource " ++ show res)
+        . singletonHead
         <$> lift (canonicaliseResourceSpec Nothing "newLLVMModule" res)
     rep <- typeRep ty
     return (llvmGlobalName (makeGlobalResourceName res'), rep)
+    where singletonHead [x] = x
+          singletonHead _ =
+            shouldnt $ "In LLVM generation, resource spec " ++ show res
+                        ++ " has not been canonicalised"
 
 
 -- | The LLVM representation of a Wybe type based on its TypeRepresentation

@@ -156,10 +156,10 @@ checkResourceDef name def = do
     return (or chg, concat errs, (name,Map.fromList m))
 
 -- |Check a resource implementation
-checkResourceImpln :: ResourceSpec -> ResourceImpln
+checkResourceImpln :: ResourceSpec -> PrimResourceImpln
                  -> Compiler (Bool,[(String,OptPos)],
-                              (ResourceSpec,ResourceImpln))
-checkResourceImpln rspec impln@(SimpleResource ty mbPInit pos) = do
+                              (ResourceSpec,PrimResourceImpln))
+checkResourceImpln rspec impln@(PrimResource ty mbPInit pos) = do
     logResources $ "Check resource " ++ show rspec
                  ++ " with implementation " ++ show impln
     ty' <- lookupType "resource declaration" pos ty
@@ -179,7 +179,7 @@ checkResourceImpln rspec impln@(SimpleResource ty mbPInit pos) = do
     logResources $ "Actual initialisation is " ++ show mbPInit'
 
     return (ty' /= ty || initChg, [],
-            (rspec,SimpleResource ty' mbPInit' pos))
+            (rspec,PrimResource ty' mbPInit' pos))
     where
         isTyped Typed{} = True
         isTyped _ = False
@@ -205,7 +205,7 @@ canonicaliseProcResources pd _ = do
     let resources = procProtoResources proto
     resourceFlows <- List.map collapseResourceFlows
                    . groupSortOn resourceFlowRes
-                 <$> mapM (canonicaliseResourceFlow pos name) resources
+                 <$> concatMapM (canonicaliseResourceFlow pos name) resources
     logResources $ "Available resources: " ++ show resourceFlows
     let proto' = proto {procProtoResources = resourceFlows}
     let pd' = pd {procProto = proto'}
@@ -216,14 +216,12 @@ canonicaliseProcResources pd _ = do
 -- |Ensure a resource flow is fully module qualified, canonicalising the resource
 -- spec
 canonicaliseResourceFlow :: OptPos -> ProcName -> ResourceFlowSpec
-                         -> Compiler ResourceFlowSpec
+                         -> Compiler [ResourceFlowSpec]
 canonicaliseResourceFlow pos name (ResourceFlowSpec res flow) = do
-    res' <- fst
+    List.map ((`ResourceFlowSpec` flow). fst)
         <$> canonicaliseResourceSpec pos
                 ("declaration of " ++ showProcName name)
                 res
-    return $ ResourceFlowSpec res' flow
-
 
 collapseResourceFlows :: [ResourceFlowSpec] -> ResourceFlowSpec
 collapseResourceFlows [] = shouldnt "empty resource group"
@@ -478,7 +476,7 @@ transformStmt (UseResources res vars stmts) pos = do
     let (special, res') = List.partition isSpecialResource res
     let vars' = trustFromJust "transform use with no vars" vars
     resTypes <- (mapSnd (trustFromJust "transform use") <$>)
-            <$> lift (mapM (canonicaliseResourceSpec pos "use block") res')
+            <$> lift (concatMapM (canonicaliseResourceSpec pos "use block") res')
     ResourceState{resResources=resources,
                   resMentioned=mentioned,
                   resTmpVars=tmpVars,
@@ -604,23 +602,23 @@ addResourceInOuts fl nm ty = do
 -- unknown resource error in the specified context if resource or its type is
 -- unknown.
 canonicaliseResourceSpec :: OptPos -> String -> ResourceSpec
-                         -> Compiler (ResourceSpec, Maybe TypeSpec)
+                         -> Compiler [(ResourceSpec, Maybe TypeSpec)]
 canonicaliseResourceSpec pos context spec = do
     logResources $ "canonicalising resource " ++ show spec
     resDef <- lookupResource spec
     case resDef of
         Nothing -> do
             errmsg pos $ "Unknown resource " ++ show spec ++ " in " ++ context
-            return (spec,Nothing)
-        Just def ->
-            case Map.assocs def of
-                [(spec,impln)] -> do
+            return [(spec,Nothing)]
+        Just def -> do
+            when (Map.null def) $
+                shouldnt $ "Empty resource " ++ show spec ++ " in " ++ context
+            mapM (\(spec,impln) -> do
                     let resType = resourceType impln
                     logResources $ "    to --> " ++ show spec
                                     ++ ":" ++ show impln
-                    return (spec,Just resType)
-                [] -> shouldnt $ "Empty resource " ++ show spec
-                _ -> nyi $ "compound resource " ++ show spec
+                    return (spec,Just resType))
+                $ Map.assocs def
 
 
 -- |Get a list of all the SimpleResources, and their types, referred
@@ -806,7 +804,7 @@ resourceNameMap = Map.fromList . ((((,) =<< resourceName) . fst) <$>)
 -- |Log a message in the Compiler monad,
 -- if we are logging resource transformation activity.
 logResources :: String -> Compiler ()
-logResources s = logMsg Resources s
+logResources = logMsg Resources
 
 
 -- |Log a message in the Resourcer monad,

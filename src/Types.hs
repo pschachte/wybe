@@ -16,7 +16,7 @@ import           AST
 import           Debug.Trace
 import           Control.Monad
 import           Control.Monad.State
-import           Control.Monad.Extra (ifM)
+import           Control.Monad.Extra (ifM, concatMapM)
 import           Data.Graph
 import           Data.List           as List
 import           Data.Map            as Map
@@ -360,7 +360,7 @@ typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
                 | (v,typs) <- varAmbigs]
 typeErrorMessage (ReasonUndef callFrom callTo pos) =
     Message Error pos $
-        showProcName callTo ++ " unknown in " ++ showProcName callFrom
+        showProcOrVarName callTo ++ " unknown in " ++ showProcName callFrom
 typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
     Message Error pos $
         "Call from " ++ showProcName callFrom
@@ -468,12 +468,13 @@ typeErrorMessage (ReasonForeignArgRep instr argNum wrongRep rightDesc pos) =
 typeErrorMessage (ReasonBadCast caller callee argNum pos) =
     Message Error pos $
         "Type cast (:!) in call from " ++ showProcName caller
-        ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
+        ++ " to non-foreign " ++ showProcOrVarName callee
+        ++ ", argument " ++ show argNum
 typeErrorMessage (ReasonBadConstraint caller callee argNum exp ty pos) =
     Message Error pos $
         "Type constraint (:" ++ show ty ++ ") in call from "
         ++ showProcName caller
-        ++ " to " ++ callee ++ ", argument " ++ show argNum
+        ++ " to " ++ showProcOrVarName callee ++ ", argument " ++ show argNum
         ++ ", is incompatible with expression " ++ show exp
 typeErrorMessage ReasonShouldnt =
     Message Error Nothing "Mysterious typing error"
@@ -846,7 +847,7 @@ expType' :: Exp -> OptPos -> Typed TypeSpec
 expType' IntValue{} _          = return $ TypeSpec ["wybe"] "int" []
 expType' FloatValue{} _        = return $ TypeSpec ["wybe"] "float" []
 expType' CharValue{} _         = return $ TypeSpec ["wybe"] "char" []
-expType' StringValue{} _       = return stringType 
+expType' StringValue{} _       = return stringType
 expType' expr@ConstStruct{} _  = return AnyType -- will be explicitly typed
 expType' (AnonProc mods params pstmts _ _) _ = do
     mapM_ ultimateVarType $ paramName <$> params
@@ -1185,7 +1186,8 @@ typecheckProcDecl' pdef = do
                         outs `Set.union`
                             (expOutputs exp `Set.difference` expInputs exp))
                     inputs def
-        logTyped $ "   with assigned vars: " ++ show assignedVars
+        logTyped $ "   with assigned vars: "
+                    ++ intercalate ", " (Set.toList assignedVars)
         logTyped $ "Recording parameter types: "
                    ++ intercalate ", " (show <$> params)
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
@@ -1203,7 +1205,7 @@ typecheckProcDecl' pdef = do
                 intercalate ", " . (show <$>) . snd)
             overloaded
         mapM_ (uncurry $ addResourceType (ReasonResourceDef name))
-            $ (, pos) <$> concat (snd <$> okResources)
+            $ (, pos) <$> concatMap snd okResources
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name)) calls
             logTyping "*** Before calls "
@@ -1212,7 +1214,8 @@ typecheckProcDecl' pdef = do
             --             (content . fst <$> calls)
             -- mapM_ (uncurry $ unifyExprTypes pos) unifs
             calls' <- mapM (callInfos assignedVars) procCalls
-            logTyping $ "  With calls:\n  " ++ intercalate "\n    " (show <$> calls')
+            logTyping $ "  With calls:\n    "
+                        ++ intercalate "\n    " (show <$> calls')
             let badCalls = List.map typingStmt
                         $ List.filter (List.null . typingInfos) calls'
             mapM_ (\pcall -> case content pcall of
@@ -1407,6 +1410,8 @@ callInfos vars pstmt = do
     let stmt = content pstmt
     case stmt of
         ProcCall (First m name procId) d resful args -> do
+            logTyped $ "getting callInfos for First " ++ showModSpec m ++ " "
+                        ++ showProcName name ++ " procID " ++ show procId
             varTy <- varType name >>= ultimateType
             let couldBeVar = List.null m && isNothing procId
                            && name `Set.member` vars
@@ -1875,7 +1880,7 @@ initBindingState :: ProcDef -> BindingState
 initBindingState pdef =
     BindingState Det impurity resources emptyUnivSet UniversalSet Set.empty proc
     where impurity = expectedImpurity $ procImpurity pdef
-          resources = Set.fromList 
+          resources = Set.fromList
                     $ List.map resourceFlowRes
                         (procProtoResources $ procProto pdef)
           proc = procName pdef
@@ -2090,11 +2095,11 @@ modeCheckProcDecl pdef = do
     let outParams = Set.fromList $ paramName <$>
             List.filter (flowsOut . paramFlow) params
     let inResources =
-            Set.fromList 
+            Set.fromList
             $ List.map (resourceName . resourceFlowRes)
             $ List.filter (flowsIn . resourceFlowFlow) resources
     let outResources =
-            Set.fromList 
+            Set.fromList
             $ List.map (resourceName . resourceFlowRes)
             $ List.filter (flowsIn . resourceFlowFlow) resources
     let inputs = Set.union inParams inResources
@@ -2416,7 +2421,7 @@ modecheckStmt final stmt@(Loop stmts _ res) pos = do
 modecheckStmt final stmt@(UseResources resources _ stmts) pos = do
     initResources <- gets bindingResources
     logModed $ "Mode checking use ... in stmt " ++ show stmt
-    canonRes <- lift2 (mapM (canonicaliseResourceSpec pos "use block") resources)
+    canonRes <- lift2 (concatMapM (canonicaliseResourceSpec pos "use block") resources)
     let resources' = fst <$> canonRes
     let resVars = USet.fromList $ resourceName <$> resources'
     resfulBoundPre <- resfulBoundVars resVars
@@ -2504,7 +2509,7 @@ modeCheckExps (pexp:pexps) = do
     (pexp', stmt) <- placedApply modeCheckExp pexp
     logModed $ "Mode check exp resulted in " ++ show (content pexp')
     (pexps', stmts) <- modeCheckExps pexps
-    return (pexp' : pexps', List.map Unplaced stmt ++ stmts) 
+    return (pexp' : pexps', List.map Unplaced stmt ++ stmts)
 
 
 -- | Mode check an Expression
@@ -2540,10 +2545,10 @@ modeCheckExp (StringValue str WybeString) pos = do
     (name, args) <- case str of
         [] -> return ("empty", [setVar])
         [ch] -> return ("singleton", [Typed (CharValue ch) charType Nothing, setVar])
-        _ -> do 
+        _ -> do
             cStringArg <- lift2 $ cStringExpr str
             return ("unsafe_cstring_to_string", [cStringArg, iVal (length str) `withType` intType, setVar])
-    return (varGetTyped var stringType `maybePlace` pos, 
+    return (varGetTyped var stringType `maybePlace` pos,
             [ProcCall (First ["wybe","string"] name $ Just 0) Det False $ (`maybePlace` pos) <$> args])
 modeCheckExp exp pos =
     return (maybePlace exp pos, [])
@@ -2925,7 +2930,7 @@ checkLPVMArgs "cast" _ [old,new] stmt pos = return ()
 checkLPVMArgs "cast" _ [] stmt pos = return ()
 checkLPVMArgs "cast" _ args stmt pos =
     typeError (ReasonForeignArity "cast" (length args) 2 pos)
-checkLPVMArgs "sizeof" _ [thing,sz] stmt pos = 
+checkLPVMArgs "sizeof" _ [thing,sz] stmt pos =
     reportErrorUnless (ReasonForeignArgRep "sizeof" 1 sz "integer" pos)
                       (integerTypeRep sz)
 checkLPVMArgs "sizeof" _ args stmt pos =
