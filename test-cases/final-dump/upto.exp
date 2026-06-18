@@ -22,7 +22,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     upto.submod.upto<0>(0:wybe.int, 10:wybe.int, outByReference tmp#0##0:wybe.list(wybe.int)) #0 @upto:nn:nn
     wybe.list.[]<0>(~tmp#0##0:wybe.list(wybe.int), 3:wybe.int, ?tmp#1##0:wybe.int, ?tmp#5##0:wybe.bool) #1 @upto:nn:nn
     case ~tmp#5##0:wybe.bool of
@@ -32,7 +31,7 @@ module top-level code > public {semipure} (0 calls)
     1:
         wybe.int.fmt<2>(~tmp#1##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#8##0:wybe.string) #4 @upto:nn:nn
         wybe.string.,,<0>("lst[3] = ":wybe.string, ~tmp#8##0:wybe.string, ?tmp#9##0:wybe.string) #5 @upto:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#9##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @upto:nn:nn
+        wybe.string.print<0>(~tmp#9##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @upto:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @upto:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @upto:nn:nn
         foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @upto:nn:nn
@@ -68,7 +67,6 @@ declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
 declare external fastcc {i64, i1} @"wybe#.list#.[]<0>"(i64, i64)
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @error_exit(i64, i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -84,7 +82,7 @@ define external fastcc void @"upto#.<0>"() {
 if.then.0:
   %"tmp#8##0" = call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"tmp#1##0", i64 0, i8 32)
   %"tmp#9##0" = call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"upto#constant#2" to i64 ), i64 %"tmp#8##0")
-  call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#9##0")
+  call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#9##0")
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:

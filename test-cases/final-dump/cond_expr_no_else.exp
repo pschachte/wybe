@@ -40,10 +40,9 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1(tmp#2##0:wybe.count)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(8,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.count.fmt<4>(~tmp#2##0:wybe.count, 0:wybe.int, 32:wybe.char, 10:wybe.count, ?tmp#1##0:wybe.string) #7 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("5:int -> ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #2 @cond_expr_no_else:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @cond_expr_no_else:nn:nn
+    wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @cond_expr_no_else:nn:nn
@@ -62,10 +61,9 @@ proc #cont#2 > {semipure} (2 calls)
 #cont#2(tmp#6##0:wybe.count)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(8,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.count.fmt<4>(~tmp#6##0:wybe.count, 0:wybe.int, 32:wybe.char, 10:wybe.count, ?tmp#5##0:wybe.string) #7 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("-5:int -> ":wybe.string, ~tmp#5##0:wybe.string, ?tmp#4##0:wybe.string) #2 @cond_expr_no_else:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @cond_expr_no_else:nn:nn
+    wybe.string.print<0>(~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @cond_expr_no_else:nn:nn
@@ -84,10 +82,9 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3(tmp#10##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(8,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(~tmp#10##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#9##0:wybe.string) #7 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("e is vowel number ":wybe.string, ~tmp#9##0:wybe.string, ?tmp#8##0:wybe.string) #2 @cond_expr_no_else:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#8##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @cond_expr_no_else:nn:nn
+    wybe.string.print<0>(~tmp#8##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @cond_expr_no_else:nn:nn
@@ -106,10 +103,9 @@ proc #cont#4 > {semipure} (2 calls)
 #cont#4(tmp#14##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(~tmp#14##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#13##0:wybe.string) #4 @cond_expr_no_else:nn:nn
     wybe.string.,,<0>("f is vowel number ":wybe.string, ~tmp#13##0:wybe.string, ?tmp#12##0:wybe.string) #2 @cond_expr_no_else:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#12##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @cond_expr_no_else:nn:nn
+    wybe.string.print<0>(~tmp#12##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @cond_expr_no_else:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @cond_expr_no_else:nn:nn
     foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @cond_expr_no_else:nn:nn
@@ -183,7 +179,7 @@ target triple   = ????
 declare external fastcc i64 @"wybe#.count#.fmt<4>"(i64, i64, i8, i64)
 declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -203,7 +199,7 @@ if.else.0:
 define external fastcc void @"cond_expr_no_else#.#cont#1<0>"(i64 %"tmp#2##0") {
   %"tmp#1##0" = tail call fastcc i64 @"wybe#.count#.fmt<4>"(i64 %"tmp#2##0", i64 0, i8 32, i64 10)
   %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"cond_expr_no_else#constant#7" to i64 ), i64 %"tmp#1##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   %"tmp#31##0" = tail call fastcc {i64, i1} @"cond_expr_no_else#.to_count<0>"(i64 -5)
   %"tmp#7##0" = extractvalue {i64, i1}%"tmp#31##0", 0
@@ -220,7 +216,7 @@ if.else.0:
 define external fastcc void @"cond_expr_no_else#.#cont#2<0>"(i64 %"tmp#6##0") {
   %"tmp#5##0" = tail call fastcc i64 @"wybe#.count#.fmt<4>"(i64 %"tmp#6##0", i64 0, i8 32, i64 10)
   %"tmp#4##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"cond_expr_no_else#constant#6" to i64 ), i64 %"tmp#5##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#4##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)
   %"tmp#30##0" = tail call fastcc {i64, i1} @"cond_expr_no_else#.vowel_num<0>"(i8 101)
   %"tmp#11##0" = extractvalue {i64, i1}%"tmp#30##0", 0
@@ -237,7 +233,7 @@ if.else.0:
 define external fastcc void @"cond_expr_no_else#.#cont#3<0>"(i64 %"tmp#10##0") {
   %"tmp#9##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"tmp#10##0", i64 0, i8 32)
   %"tmp#8##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"cond_expr_no_else#constant#5" to i64 ), i64 %"tmp#9##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#8##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#8##0")
   call ccc void @putchar(i8 10)
   %"tmp#29##0" = tail call fastcc {i64, i1} @"cond_expr_no_else#.vowel_num<0>"(i8 102)
   %"tmp#15##0" = extractvalue {i64, i1}%"tmp#29##0", 0
@@ -254,7 +250,7 @@ if.else.0:
 define external fastcc void @"cond_expr_no_else#.#cont#4<0>"(i64 %"tmp#14##0") {
   %"tmp#13##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"tmp#14##0", i64 0, i8 32)
   %"tmp#12##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"cond_expr_no_else#constant#4" to i64 ), i64 %"tmp#13##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#12##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#12##0")
   call ccc void @putchar(i8 10)
   ret void
 }

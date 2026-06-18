@@ -134,10 +134,10 @@ if.then.0:
   ret i64 %"p1##0"
 if.else.0:
   %"tmp#2##0" = add i64 %"tmp#0##0", 1
-  %"tmp#14##0" = inttoptr i64 %"p1##0" to ptr
-  %"tmp#15##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#15##0", ptr %"tmp#14##0", i64 16, i1 0)
-  %"tmp#16##0" = ptrtoint ptr %"tmp#15##0" to i64
+  %"tmp#14##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#15##0" = inttoptr i64 %"p1##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#14##0", ptr %"tmp#15##0", i64 8, i1 0)
+  %"tmp#16##0" = ptrtoint ptr %"tmp#14##0" to i64
   %"tmp#17##0" = add i64 %"tmp#16##0", 8
   %"tmp#18##0" = inttoptr i64 %"tmp#17##0" to ptr
   store i64 %"tmp#2##0", ptr %"tmp#18##0"
@@ -253,17 +253,21 @@ if.then.0:
   ret {i64, i64} %"tmp#30##0"
 if.else.0:
   %"tmp#3##0" = add i64 %"tmp#0##0", 1
-  %"tmp#31##0" = inttoptr i64 %"p1##0" to ptr
-  %"tmp#32##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#32##0", ptr %"tmp#31##0", i64 16, i1 0)
-  %"tmp#33##0" = ptrtoint ptr %"tmp#32##0" to i64
+  %"tmp#31##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#32##0" = ptrtoint ptr %"tmp#31##0" to i64
+  %"tmp#33##0" = add i64 %"tmp#32##0", 8
   %"tmp#34##0" = inttoptr i64 %"tmp#33##0" to ptr
-  store i64 %"tmp#3##0", ptr %"tmp#34##0"
-  %"tmp#35##0" = tail call fastcc i64 @"alias_mbar#.bar<0>[410bae77d3]"(i64 %"tmp#33##0")
-  %"tmp#36##0" = ptrtoint ptr @"alias_mfoo#constant#1" to i64
-  %"tmp#37##0" = insertvalue {i64, i64} undef, i64 %"tmp#36##0", 0
-  %"tmp#38##0" = insertvalue {i64, i64} %"tmp#37##0", i64 %"tmp#35##0", 1
-  ret {i64, i64} %"tmp#38##0"
+  %"tmp#35##0" = add i64 %"p1##0", 8
+  %"tmp#36##0" = inttoptr i64 %"tmp#35##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#34##0", ptr %"tmp#36##0", i64 8, i1 0)
+  %"tmp#37##0" = ptrtoint ptr %"tmp#31##0" to i64
+  %"tmp#38##0" = inttoptr i64 %"tmp#37##0" to ptr
+  store i64 %"tmp#3##0", ptr %"tmp#38##0"
+  %"tmp#39##0" = tail call fastcc i64 @"alias_mbar#.bar<0>[410bae77d3]"(i64 %"tmp#37##0")
+  %"tmp#40##0" = ptrtoint ptr @"alias_mfoo#constant#1" to i64
+  %"tmp#41##0" = insertvalue {i64, i64} undef, i64 %"tmp#40##0", 0
+  %"tmp#42##0" = insertvalue {i64, i64} %"tmp#41##0", i64 %"tmp#39##0", 1
+  ret {i64, i64} %"tmp#42##0"
 }
 
 define external fastcc {i64, i64} @"alias_mfoo#.foo<0>[410bae77d3]"(i64 %"p1##0") {
@@ -528,13 +532,17 @@ define external fastcc i64 @"position#.position#.x<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"position#.position#.x<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
-  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#1##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#2##0" = add i64 %"tmp#1##0", 8
   %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#3##0"
-  ret i64 %"tmp#2##0"
+  %"tmp#4##0" = add i64 %"#rec##0", 8
+  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#3##0", ptr %"tmp#5##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#7##0"
+  ret i64 %"tmp#6##0"
 }
 
 define external fastcc i64 @"position#.position#.y<0>"(i64 %"#rec##0") {
@@ -545,10 +553,10 @@ define external fastcc i64 @"position#.position#.y<0>"(i64 %"#rec##0") {
 }
 
 define external fastcc i64 @"position#.position#.y<1>"(i64 %"#rec##0", i64 %"#field##0") {
-  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 16)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#0##0", i64 16, i1 0)
-  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 8, i1 0)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#0##0" to i64
   %"tmp#3##0" = add i64 %"tmp#2##0", 8
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
   store i64 %"#field##0", ptr %"tmp#4##0"

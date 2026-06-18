@@ -14,7 +14,7 @@ module Config (sourceExtension, objectExtension, executableExtension,
                specialChar, specialName, specialName2, initProcName,
                wordSize, wordSizeBytes, byteBits,
                availableTagBits, tagMask, smallestAllocatedAddress,
-               minimumSwitchCases, magicVersion,
+               minimumSwitchCases, maximumSplitStructSize, magicVersion,
                linkerDeadStripArgs, removeLPVMSection,
                llvmToBitcodeCommand, llvmToNativeAssemblerCommand,
                llvmToObjectCommand,
@@ -142,6 +142,15 @@ smallestAllocatedAddress = 65536 -- this is a pretty safe guess
 -- bother to turn into a switch.
 minimumSwitchCases :: Int
 minimumSwitchCases = 3
+
+
+-- |The largest structure size we will copy with two separate copy operations
+-- (the part before the word to be overwritten and the part after).  Because
+-- LLVM turns small memory copies into straight line code to copy the words of
+-- memory, producing two separate memory copy operations, one on either side of
+-- the word we will overwrite, actually produces shorter, faster code.
+maximumSplitStructSize :: Int
+maximumSplitStructSize = 5 * wordSizeBytes
 
 
 -- |Foreign shared library directory name

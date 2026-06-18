@@ -518,20 +518,27 @@ define external fastcc {i64, i1} @"mytree#.tree#.key<1>"(i64 %"#rec##0", i64 %"#
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#2##0" = call ccc ptr @wybe_malloc(i32 24)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#2##0", ptr %"tmp#1##0", i64 24, i1 0)
+  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#2##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#2##0", i64 8, i1 0)
   %"tmp#3##0" = ptrtoint ptr %"tmp#2##0" to i64
-  %"tmp#4##0" = add i64 %"tmp#3##0", 8
+  %"tmp#4##0" = add i64 %"tmp#3##0", 16
   %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#5##0"
-  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
-  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 1, 1
-  ret {i64, i1} %"tmp#7##0"
+  %"tmp#6##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#7##0" = add i64 %"tmp#6##0", 16
+  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#8##0", ptr %"tmp#5##0", i64 8, i1 0)
+  %"tmp#9##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#10##0" = add i64 %"tmp#9##0", 8
+  %"tmp#11##0" = inttoptr i64 %"tmp#10##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#11##0"
+  %"tmp#12##0" = insertvalue {i64, i1} undef, i64 %"tmp#9##0", 0
+  %"tmp#13##0" = insertvalue {i64, i1} %"tmp#12##0", i1 1, 1
+  ret {i64, i1} %"tmp#13##0"
 if.else.0:
-  %"tmp#8##0" = insertvalue {i64, i1} undef, i64 0, 0
-  %"tmp#9##0" = insertvalue {i64, i1} %"tmp#8##0", i1 0, 1
-  ret {i64, i1} %"tmp#9##0"
+  %"tmp#14##0" = insertvalue {i64, i1} undef, i64 0, 0
+  %"tmp#15##0" = insertvalue {i64, i1} %"tmp#14##0", i1 0, 1
+  ret {i64, i1} %"tmp#15##0"
 }
 
 define external fastcc {i64, i1} @"mytree#.tree#.left<0>"(i64 %"#rec##0") {
@@ -553,19 +560,23 @@ define external fastcc {i64, i1} @"mytree#.tree#.left<1>"(i64 %"#rec##0", i64 %"
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#2##0" = call ccc ptr @wybe_malloc(i32 24)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#2##0", ptr %"tmp#1##0", i64 24, i1 0)
-  %"tmp#3##0" = ptrtoint ptr %"tmp#2##0" to i64
+  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#3##0" = add i64 %"tmp#2##0", 8
   %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#4##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#5##0" = add i64 %"#rec##0", 8
+  %"tmp#6##0" = inttoptr i64 %"tmp#5##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#4##0", ptr %"tmp#6##0", i64 16, i1 0)
+  %"tmp#7##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#8##0" = inttoptr i64 %"tmp#7##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#8##0"
+  %"tmp#9##0" = insertvalue {i64, i1} undef, i64 %"tmp#7##0", 0
+  %"tmp#10##0" = insertvalue {i64, i1} %"tmp#9##0", i1 1, 1
+  ret {i64, i1} %"tmp#10##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 0, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#11##0" = insertvalue {i64, i1} undef, i64 0, 0
+  %"tmp#12##0" = insertvalue {i64, i1} %"tmp#11##0", i1 0, 1
+  ret {i64, i1} %"tmp#12##0"
 }
 
 define external fastcc i64 @"mytree#.tree#.node<0>"(i64 %"left##0", i64 %"key##0", i64 %"right##0") {
@@ -627,10 +638,10 @@ define external fastcc {i64, i1} @"mytree#.tree#.right<1>"(i64 %"#rec##0", i64 %
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#2##0" = call ccc ptr @wybe_malloc(i32 24)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#2##0", ptr %"tmp#1##0", i64 24, i1 0)
-  %"tmp#3##0" = ptrtoint ptr %"tmp#2##0" to i64
+  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 24)
+  %"tmp#2##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#1##0", ptr %"tmp#2##0", i64 16, i1 0)
+  %"tmp#3##0" = ptrtoint ptr %"tmp#1##0" to i64
   %"tmp#4##0" = add i64 %"tmp#3##0", 16
   %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
   store i64 %"#field##0", ptr %"tmp#5##0"

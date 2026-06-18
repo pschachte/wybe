@@ -193,19 +193,17 @@ define external fastcc {i64, i1} @"constructors#.value<1>"(i64 %"#rec##0", i64 %
   %"tmp#0##0" = icmp ne i64 %"#rec##0", 0
   br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
 if.then.0:
-  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
-  %"tmp#2##0" = call ccc ptr @wybe_malloc(i32 8)
-  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#2##0", ptr %"tmp#1##0", i64 8, i1 0)
-  %"tmp#3##0" = ptrtoint ptr %"tmp#2##0" to i64
-  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
-  store i64 %"#field##0", ptr %"tmp#4##0"
-  %"tmp#5##0" = insertvalue {i64, i1} undef, i64 %"tmp#3##0", 0
-  %"tmp#6##0" = insertvalue {i64, i1} %"tmp#5##0", i1 1, 1
-  ret {i64, i1} %"tmp#6##0"
+  %"tmp#1##0" = call ccc ptr @wybe_malloc(i32 8)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#1##0" to i64
+  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#3##0"
+  %"tmp#4##0" = insertvalue {i64, i1} undef, i64 %"tmp#2##0", 0
+  %"tmp#5##0" = insertvalue {i64, i1} %"tmp#4##0", i1 1, 1
+  ret {i64, i1} %"tmp#5##0"
 if.else.0:
-  %"tmp#7##0" = insertvalue {i64, i1} undef, i64 0, 0
-  %"tmp#8##0" = insertvalue {i64, i1} %"tmp#7##0", i1 0, 1
-  ret {i64, i1} %"tmp#8##0"
+  %"tmp#6##0" = insertvalue {i64, i1} undef, i64 0, 0
+  %"tmp#7##0" = insertvalue {i64, i1} %"tmp#6##0", i1 0, 1
+  ret {i64, i1} %"tmp#7##0"
 }
 
 define external fastcc i1 @"constructors#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {

@@ -1,0 +1,40 @@
+# Test case for optimality of lpvm mutate instruction.
+# In particular, for non-destructive mutates, how much memory must be copied.
+# See issues #558 and #559 for details.
+
+type position {
+    pub constructor make_position_tagged(int) | position( x:int, y:int, z:int)
+
+    pub def update_x(!pos:_, new_x:int) {
+        !pos^x = new_x | !shouldnt
+    }
+
+    pub def update_y(!pos:_, new_y:int) {
+        !pos^y = new_y | !shouldnt
+    }
+
+    pub def update_z(!pos:_, new_z:int) {
+        !pos^z = new_z | !shouldnt
+    }
+
+    pub def fmt(pos:_):string = case pos in {
+          make_position_tagged(?tag):: "position_tagged($tag)"
+        | position(?x,?y,?z):: "position($x, $y, $z)"
+        | else :: "unknown position"
+    }
+}
+?p = position(1, 2, 3)
+?old_p = p
+update_x(!p, 11)
+!println("old p = $old_p")
+!println("new p = $p")
+
+?old_p = p
+update_y(!p, 12)
+!println("old p = $old_p")
+!println("new p = $p")
+
+?old_p = p
+update_z(!p, 13)
+!println("old p = $old_p")
+!println("new p = $p")
