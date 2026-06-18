@@ -6,12 +6,10 @@ resource bar:int = 42
 resource baz:string = "hello"
 resource qux:float = 3.14
 
-resource meta = foo, qux, io
+resource meta = foo, qux
 
-# def testproc use !meta {
-#     println "bar = $bar, baz = $baz, qux = $qux"
-# }
-
-def testproc use bar, !io {
-    !println "bar = $bar"
+def testproc use meta, !io {
+    !println "bar = $bar, baz = $baz, qux = $qux"
 }
+
+!testproc

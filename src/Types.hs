@@ -52,7 +52,6 @@ validateModExportTypes thisMod = do
     logTypes $ "**** Validating parameter types in module " ++
            showModSpec thisMod
     reenterModule thisMod
-    iface <- getModuleInterface
     procs <- getModuleImplementationField (Map.toAscList . modProcs)
     procs' <- mapM (uncurry validateProcDefsTypes) procs
     updateModImplementation (\imp -> imp { modProcs = Map.fromAscList procs'})
@@ -1413,11 +1412,16 @@ callInfos vars pstmt = do
             logTyped $ "getting callInfos for First " ++ showModSpec m ++ " "
                         ++ showProcName name ++ " procID " ++ show procId
             varTy <- varType name >>= ultimateType
+            -- XXX Shouldn't check for null module in case it's a
+            -- module-qualified resource name
             let couldBeVar = List.null m && isNothing procId
                            && name `Set.member` vars
                 couldBeHigher = isHigherOrder varTy || varTy == AnyType
                 couldBeTest   = (boolType == varTy || varTy == AnyType)
                              && List.null args && not resful
+            logTyped $ "  couldBeVar = " ++ show couldBeVar
+                     ++ "; couldBeHigher = " ++ show couldBeHigher
+                     ++ "; couldBeTest = " ++ show couldBeTest
             if couldBeVar && (couldBeHigher || couldBeTest)
             then let var = varGet name
                  in return $ StmtTypings pstmt $ [HigherInfo var | couldBeHigher]

@@ -194,7 +194,7 @@ checkResourceImpln rspec impln@(PrimResource ty mbPInit pos) = do
 
 ------------- Canonicalising resources in proc definitions ---------
 
--- |Make sure all resource for the specified proc are module qualified,
+-- |Make sure all resources for the specified proc are module qualified,
 --  making them canonical.
 canonicaliseProcResources :: ProcDef -> Int -> Compiler ProcDef
 canonicaliseProcResources pd _ = do
