@@ -28,3 +28,5 @@
 !println "-6*7 = $(-6*7,5)"
 !println "-6*7 = $(-6*7,5,'0')"
 !println "-6*7 = $(-6*7,5,'*')"
+
+!println c"this $shouldnt $interpolate"

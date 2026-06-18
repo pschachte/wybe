@@ -377,7 +377,7 @@ tokeniseChar pos chars =
 --  and tokenize the rest of the input..
 tokeniseString :: StringDelim -> Bool -> SourcePos -> String -> PartialTokenisation
 tokeniseString delim interp pos cs =
-    case break (`elem` [termchar,'\\','$']) cs of
+    case break (`elem` terminators) cs of
         (_,[]) -> tokErr
         (front,'\\':cs) ->
             let pos' = updatePosChar (updatePosString pos front) '\\'
@@ -388,17 +388,18 @@ tokeniseString delim interp pos cs =
                             (TokString d (front++(ch:s)) p:rest, pos''', cs'')
                         _ -> shouldnt "tokeniseString didn't return a string"
                 Nothing -> tokErr
-        ("",'$':cs) | interp ->
-            scanInterpolation cs delim $ updatePosChar pos '$'
         (front,'$':cs) | interp ->
             let pos' = updatePosString pos front
-            in mapFst3 ([TokString delim front pos, TokSymbol ",," pos']++)
-               $ scanInterpolation cs delim (updatePosChar pos' '$')
+                interpolated = scanInterpolation cs delim (updatePosChar pos' '$')
+            in if null front
+               then interpolated
+               else mapFst3 ([TokString delim front pos, TokSymbol ",," pos']++) interpolated
         (front,t:cs) | t == termchar ->
             let pos' = updatePosChar (updatePosString pos front) t
             in ([TokString delim front pos], pos', cs)
         (front,rest) -> shouldnt "break broke in tokeniseString"
   where termchar = delimChar delim
+        terminators = [termchar, '\\'] ++ ['$' | interp]
         tokErr = terminalTokError "unterminated string" pos
 
 
