@@ -1654,6 +1654,20 @@ one another, the order in which their resources are initialised is unspecified.
 A resource may be exported, allowing it to be referred to in other modules, by
 preceding the `resource` declaration with the `pub` keyword.
 
+### <a name="compound-resource-declarations"></a>Declaring a compound resource
+
+Resources can be defined to be the union of other resources.
+Such resources are called *compound* resources.
+The syntax for declaring compound resources is as follows:
+
+> `resource` *name* `=` *resource*, ...
+
+Note the lack of type when specifying a compound resource, which must include at
+least one other resource, but may include many, separated by commas.
+Included resources can include any combination of *simple* resources, as
+described above, and other compound resources.
+Two compound resources, however, cannot depend on each other.
+
 ### Defining a resourceful procedure
 
 Any procedure may declare that it uses any number of resources,
@@ -1671,13 +1685,20 @@ corresponding resource; as for parameters, no flow prefix indicates that the
 resource is only an input, a question mark (`?`) indicates it is only an output,
 and an exclamation point (`!`) indicates that the resource is both input and
 output.
+The set of resources available in the procedure is the union of all the
+resources and flow directions specified.
+In the case of [compound resources](#compound-resource-declarations),
+the specified flow direction is applied to all resources included in that
+resource.
 The order in which the resources are listed is not significant, and any number
 of resources may be specified.
-This allows the resource name to be used as a local variable in the procedure
+This allows the *simple* resource names to be used as a local variable in the procedure
 body, just as if it were an ordinary parameter.
+Compound resource names cannot be used as variables, since they specify,
+directly or indirectly, a set of simple resources.
 
-Importantly, resources available in a procedure become available in any
-procedures it calls that also declare that they `use` that resource.
+Importantly, the simple resources available in a procedure become available in
+any procedures it calls that also declare that they `use` that resource.
 
 ### <a name="calling-resourceful"></a>Calling a resourceful procedure
 
