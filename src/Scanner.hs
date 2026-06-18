@@ -373,7 +373,8 @@ tokeniseChar pos chars =
     , updatePosString pos ('\'':front), back)
     where (front,back) = splitAt 2 chars
 
--- |Tokenise a delimited string and tokenize the rest of the input..
+-- |Tokenise a delimited string, with interpolation if the Bool flag is True,
+--  and tokenize the rest of the input..
 tokeniseString :: StringDelim -> Bool -> SourcePos -> String -> PartialTokenisation
 tokeniseString delim interp pos cs =
     case break (`elem` [termchar,'\\','$']) cs of
