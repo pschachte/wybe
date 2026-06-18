@@ -115,6 +115,7 @@ uniquenessCheckProc def _ = do
       $ mapM_ (placedApply checkNoNestedUnique) $ procProtoParams $ procProto def
     case procImpln def of
         ProcDefSrc body -> do
+            logMsg Uniqueness $ "Uniqueness checking proc definition..."
             state <- uniquenessCheckDef name pos detism body params ress
             logMsg Uniqueness $ "After checking params: " ++ show state
             mapM_ reportUniquenessError $ reverse $ uniquenessErrors state
@@ -284,29 +285,41 @@ uniquenessCheckStmt stmt@(Cond tst thn els _ _ _) pos = do
     (defaultPlacedApply uniquenessCheckStmt pos tst `withDetism` SemiDet
        >> uniquenessCheckStmts thn)
      `joinUniqueness` uniquenessCheckStmts els
-uniquenessCheckStmt (Case exp cases deflt) pos = do
+uniquenessCheckStmt stmt@(Case exp cases deflt) pos = do
+    logUniqueness $ "Uniqueness checking case stmt " ++ show stmt
     defaultPlacedApply uniquenessCheckExp pos exp
     uniquenessCheckCases uniquenessCheckStmts cases deflt
-uniquenessCheckStmt (And stmts) _ = uniquenessCheckStmts stmts
-uniquenessCheckStmt (Or [] _ _) pos = return ()
-uniquenessCheckStmt (Or [stmt] _ _) pos =
+uniquenessCheckStmt stmt@(And stmts) _ = do
+    logUniqueness $ "Uniqueness checking conjunction " ++ show stmt
+    uniquenessCheckStmts stmts
+uniquenessCheckStmt (Or [] _ _) pos = do
+    logUniqueness $ "Uniqueness checking empty disjunction"
+    return ()
+uniquenessCheckStmt (Or [stmt] _ _) pos = do
+    logUniqueness "Uniqueness checking singleton disjunction..."
     defaultPlacedApply uniquenessCheckStmt pos stmt
-uniquenessCheckStmt (Or (stmt:stmts) vars res) pos =
-    (defaultPlacedApply uniquenessCheckStmt pos stmt `withDetism` SemiDet)
+uniquenessCheckStmt disj@(Or (stmt:stmts) vars res) pos = do
+    logUniqueness $ "Uniqueness checking disjunction " ++ show stmt
+    defaultPlacedApply uniquenessCheckStmt pos stmt `withDetism` SemiDet
     `joinUniqueness` uniquenessCheckStmt (Or stmts vars res) pos
-uniquenessCheckStmt (Not negated) pos =
+uniquenessCheckStmt stmt@(Not negated) pos = do
+    logUniqueness $ "Uniqueness checking negation " ++ show stmt
     defaultPlacedApply uniquenessCheckStmt pos negated
 uniquenessCheckStmt (TestBool exp) pos = uniquenessCheckExp exp pos
 uniquenessCheckStmt Nop pos = return ()
 uniquenessCheckStmt Fail pos = return ()
-uniquenessCheckStmt (Loop body _ _) _ = uniquenessCheckStmts body
-uniquenessCheckStmt (UseResources res _ body) pos = do
+uniquenessCheckStmt stmt@(Loop body _ _) _ = do
+    logUniqueness $ "Uniqueness checking loop " ++ show stmt
+    uniquenessCheckStmts body
+uniquenessCheckStmt stmt@(UseResources res _ body) pos = do
+    logUniqueness $ "Uniqueness checking use stmt " ++ show stmt
     -- resource is implicitly stored before block
     mapM_ (uniquenessCheckResourceArg pos . (`ResourceFlowSpec` ParamIn)) res
     uniquenessCheckStmts body
     -- resource is implicitly restored before block
     mapM_ (uniquenessCheckResourceArg pos . (`ResourceFlowSpec` ParamOut)) res
-uniquenessCheckStmt (For generators body) pos = do
+uniquenessCheckStmt stmt@(For generators body) pos = do
+    logUniqueness $ "Uniqueness checking loop " ++ show stmt
     mapM_ ((\gen -> do
             placedApply uniquenessCheckExp $ genExp gen
             placedApply uniquenessCheckExp $ loopVar gen
@@ -451,7 +464,7 @@ uniquenessCheckResourceParam name pos (ResourceFlowSpec res flow) = do
                 ty = trustFromJust "uniquenessCheckResource" mbTy
             uniquenessCheckParam name (Param rName ty flow flowType) pos
         )
-    
+
 
 
 -- | Uniqueness check the type of a parameter. This ensures that type parameters

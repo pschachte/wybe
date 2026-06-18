@@ -1901,9 +1901,8 @@ initBindingState :: ProcDef -> BindingState
 initBindingState pdef =
     BindingState Det impurity resources emptyUnivSet UniversalSet Set.empty proc
     where impurity = expectedImpurity $ procImpurity pdef
-          resources = Set.fromList
-                    $ List.map resourceFlowRes
-                        (procProtoResources $ procProto pdef)
+          resources = Set.map resourceFlowRes
+                        (Set.fromList $ procProtoResources $ procProto pdef)
           proc = procName pdef
 
 
@@ -2108,7 +2107,7 @@ modeCheckProcDecl pdef = do
     let proto = procProto pdef
     let posParams = procProtoParams proto
     let params = content <$> posParams
-    let resources = procProtoResources proto
+    let resources = Set.fromList $ procProtoResources proto
     let (ProcDefSrc def) = procImpln pdef
     let detism = procDetism pdef
     let pos = procPos pdef
@@ -2117,13 +2116,11 @@ modeCheckProcDecl pdef = do
     let outParams = Set.fromList $ paramName <$>
             List.filter (flowsOut . paramFlow) params
     let inResources =
-            Set.fromList
-            $ List.map (resourceName . resourceFlowRes)
-            $ List.filter (flowsIn . resourceFlowFlow) resources
+            Set.map (resourceName . resourceFlowRes)
+            $ Set.filter (flowsIn . resourceFlowFlow) resources
     let outResources =
-            Set.fromList
-            $ List.map (resourceName . resourceFlowRes)
-            $ List.filter (flowsIn . resourceFlowFlow) resources
+            Set.map (resourceName . resourceFlowRes)
+            $ Set.filter (flowsIn . resourceFlowFlow) resources
     let inputs = Set.union inParams inResources
     logTyped $ "Now mode checking proc " ++ name
     let bound = addBindings inputs $ initBindingState pdef

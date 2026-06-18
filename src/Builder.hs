@@ -1141,7 +1141,7 @@ buildMain sccs = do
                   , cmdResource "argv" ParamIn
                   , cmdResource "exit_code" ParamOut]
     initPairs <- mapM sccInits sccs
-    let initRes = concatMap fst initPairs
+    let initRes = Set.unions $ List.map fst initPairs
     let body = concatMap snd initPairs
             ++ [Unplaced
                 $ ForeignCall "c" "exit"
@@ -1151,18 +1151,18 @@ buildMain sccs = do
     let detism = setDetism Terminal $ setImpurity Impure defaultProcModifiers
     -- Program main has argc, argv, and exit_code as resources
     let proto = ProcProto "" [] mainRes
-    let mainBody = [ Unplaced $ UseResources initRes Nothing body]
+    let mainBody = [ Unplaced $ UseResources (Set.toList initRes) Nothing body]
     return $ ProcDecl Private detism proto mainBody Nothing
 
 
 -- |Returns a pair of lists of resource initialisations and initialisation procs
 -- for all the specified modules.
-sccInits :: [ModSpec] -> Compiler ([ResourceSpec],[Placed Stmt])
+sccInits :: [ModSpec] -> Compiler (Set ResourceSpec,[Placed Stmt])
 sccInits mods = do
     logBuild $ "Collecting initialisations for modules:  " ++ showModSpecs mods
     initialisedRes <- mapM (initialisedResources `inModule`) mods
     logBuild $ "Initialised resources:  " ++ show initialisedRes
-    let initRes = concatMap Map.keys initialisedRes
+    let initRes = Set.unions $ List.map Map.keysSet initialisedRes
     let resInits = [maybePlace
                     (ForeignCall "llvm" "move" []
                         [initVal, Unplaced (varSet resName)])
