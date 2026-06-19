@@ -7,7 +7,8 @@
 {-# LANGUAGE LambdaCase #-}
 
 
-module LLVM ( llvmMapBinop, llvmMapUnop, writeLLVM, BinOpInfo(..) ) where
+module LLVM ( llvmMapBinop, llvmMapUnop, validForeignLanguage, writeLLVM,
+                BinOpInfo(..) ) where
 
 import           AST
 import           ASTShow
@@ -228,6 +229,15 @@ llvmMapUnop =
            ]
 
 
+-- Test if the specified name is a supported foreign language name.
+validForeignLanguage :: Ident -> Bool
+validForeignLanguage "c"     = True
+validForeignLanguage "const" = True
+validForeignLanguage "llvm"  = True 
+validForeignLanguage "lpvm"  = True
+validForeignLanguage _       = False
+
+
 ----------------------------------------------------------------------------
 -- Generating LLVM for a module
 ----------------------------------------------------------------------------
@@ -402,8 +412,9 @@ recordExtern _ (PrimForeign "lpvm" "mutate" _ (_:_:destr:_)) =
 recordExtern _ (PrimForeign "lpvm" _ _ _) = return ()
 recordExtern _ (PrimForeign "c" name _ args) =
     recordExternFn "ccc" (llvmForeignName name) args
-recordExtern _ (PrimForeign other name _ args) =
-    shouldnt $ "Unknown foreign language " ++ other
+recordExtern _ (PrimForeign other name _ args)
+    | validForeignLanguage other = return ()
+    | otherwise = shouldnt $ "Unknown foreign language " ++ other
 
 
 recordExternProc :: ModSpec -> ProcSpec -> [PrimArg] -> LLVM ()

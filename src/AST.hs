@@ -2993,13 +2993,6 @@ instance Show ResourceFlowSpec where
         flowPrefix dir ++ show resource
 
 
--- |A manifest constant.
-data Constant = Int Int
-              | Float Double
-              | Char Char
-              | String String
-                deriving (Show,Eq)
-
 -- |A proc or func prototype, including name and formal parameters.
 data ProcProto = ProcProto {
     procProtoName::ProcName,

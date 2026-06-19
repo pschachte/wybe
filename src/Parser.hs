@@ -268,7 +268,7 @@ wybeProcOrFuncItem vis pos = do
 foreignProcOrFuncItem :: Visibility -> SourcePos -> String -> Parser Item
 foreignProcOrFuncItem vis pos lang = do
     mods <- modifierList >>= parseWith (processProcModifiers pos "foreign procedure or function declaration")
-    mbAlias <- optionMaybe (try $ identString <* symbol "=") 
+    mbAlias <- optionMaybe (try $ identString <* symbol "=")
     (proto, returnType) <- limitedTerm prototypePrecedence >>= parseWith termToPrototype
     ress <- if returnType == AnyType then useResourceFlowSpecs else return []
     return $ ForeignProcDecl vis lang mods mbAlias proto { procProtoResources = ress } returnType $ Just pos
@@ -618,7 +618,7 @@ foreignCall = do
     language <- identString
     flags <- modifierList
     fname <- identString
-    Foreign pos language fname flags <$> argumentList Paren
+    Foreign pos language fname flags <$> (argumentList Paren <|> return [])
 
 
 -- |A for loop.

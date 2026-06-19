@@ -34,7 +34,8 @@ import           Resources
 import           Util
 import           Config
 import           Snippets
-import           LLVM                (llvmMapBinop, llvmMapUnop, BinOpInfo(..))
+import           LLVM                (llvmMapBinop, llvmMapUnop,
+                                      validForeignLanguage, BinOpInfo(..))
 import Data.Tuple.HT (mapSnd)
 
 
@@ -846,7 +847,10 @@ expType' :: Exp -> OptPos -> Typed TypeSpec
 expType' IntValue{} _          = return $ TypeSpec ["wybe"] "int" []
 expType' FloatValue{} _        = return $ TypeSpec ["wybe"] "float" []
 expType' CharValue{} _         = return $ TypeSpec ["wybe"] "char" []
-expType' StringValue{} _       = return stringType
+expType' (StringValue _ st) _  =
+    case st of
+      WybeString -> return stringType
+      CString    -> return cStringType
 expType' expr@ConstStruct{} _  = return AnyType -- will be explicitly typed
 expType' (AnonProc mods params pstmts _ _) _ = do
     mapM_ ultimateVarType $ paramName <$> params
@@ -2771,6 +2775,9 @@ reportErrorUnless err True = return ()
 
 -- | Make sure a foreign call is valid; otherwise report an error
 validateForeign :: Stmt -> OptPos -> Typed ()
+-- XXX Fix to report type error for generic output types:  foreign calls should
+-- not produce generic outputs.  Untyped foreign expressions arrive here as
+-- ForeignCall with output variable with type variable for its type.
 validateForeign stmt@(ForeignCall lang name tags args) pos = do
     argTypes <- mapM (expType >=> ultimateType) args
     let argTypes' =
@@ -2799,8 +2806,6 @@ validateForeign stmt _ =
 -- | Make sure a foreign call is valid; otherwise report an error
 validateForeignCall :: String -> ProcName -> [String] -> [TypeRepresentation]
                     -> Stmt -> OptPos -> Typed ()
--- just assume C calls are OK
-validateForeignCall "c" _ _ _ _ _  = return ()
 -- A move with no non-phantom arguments:  all OK
 validateForeignCall "llvm" "move" _ [] stmt pos = return ()
 validateForeignCall "llvm" "move" _ [inRep,outRep] stmt pos
@@ -2840,8 +2845,9 @@ validateForeignCall "llvm" name flags argReps stmt pos =
                 else typeError (ReasonBadForeign "llvm" name pos)
 validateForeignCall "lpvm" name flags argReps stmt pos =
     checkLPVMArgs name flags argReps stmt pos
-validateForeignCall lang name flags argReps stmt pos =
-    typeError (ReasonForeignLanguage lang name pos)
+validateForeignCall lang name flags argReps stmt pos
+    | validForeignLanguage lang = return ()
+    | otherwise = typeError (ReasonForeignLanguage lang name pos)
 
 
 -- | Are two types compatible for use as inputs to a binary LLVM op?
