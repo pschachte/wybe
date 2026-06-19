@@ -134,7 +134,16 @@ computeEscapedVars proto body =
                      , let (allArgs, _) = primArgs prim
                      , arg@ArgVar{argVarFlow=inFlow} <- allArgs
                      , not (isOutputFlow inFlow) ]
-        escaped0 = Set.fromList (outParamEsc ++ callArgEsc)
+        -- Seed (3): every pointer written into a global variable escapes.
+        -- "lpvm store" stores its first argument into a global, which outlives
+        -- this procedure.  This MUST be seeded here rather than relying on the
+        -- alias map: the alias map is accumulated forward as the body is
+        -- traversed, so at an alloc site it cannot see a store that occurs
+        -- LATER in the body (the usual case — you build a value, then store it).
+        storeEsc = [ argVarName val
+                   | PrimForeign "lpvm" "store" _ (val:_) <- prims
+                   , argIsVar val ]
+        escaped0 = Set.fromList (outParamEsc ++ callArgEsc ++ storeEsc)
         -- For mutate(fIn, fOut, offset, destr, size, startOff, member, ...),
         -- if fOut escapes then:
         --   (a) fIn escapes (same struct, just a new version).  Note: this
@@ -211,39 +220,49 @@ transformProcBody procDef speczVersion = do
                     |> Map.fromList
     let tmp = procTmpCount procDef
     (_, tmp', _, _, _, body') <- buildBody tmp outVarSubs params $
-                transformBody proto body (aliasMap, Map.empty) callSiteMap escapedVars
+                transformBody proto body (aliasMap, Map.empty, Set.empty)
+                        callSiteMap escapedVars
     return (body', tmp')
 
 
-transformBody :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
+-- The third component of the state tuple, "stackVars", is the set of variables
+-- that denote stack-allocated memory (the result of a "{stack}" alloc, and
+-- anything that shares that memory through a destructive mutate or a
+-- value-preserving op).  It is used to forbid reusing a stack cell as a dead
+-- cell (see "transformPrim"): handing stack memory to a fresh value is unsound
+-- because that value may escape (or be passed to a tail call), leaving a live
+-- pointer into a torn-down frame.
+transformBody :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells, Set PrimVarName)
         -> Map CallSiteID ProcSpec -> Set PrimVarName -> BodyBuilder ()
-transformBody caller body (aliasMap, deadCells) callSiteMap escapedVars = do
+transformBody caller body (aliasMap, deadCells, stackVars) callSiteMap escapedVars = do
     -- (1) Analysis of current caller's prims
-    (aliaseMap', deadCells') <-
-            transformPrims caller body (aliasMap, deadCells) callSiteMap escapedVars
+    (aliaseMap', deadCells', stackVars') <-
+            transformPrims caller body (aliasMap, deadCells, stackVars)
+                    callSiteMap escapedVars
 
     -- (2) Analysis of caller's bodyFork
     -- Update body while checking alias incurred by bodyfork
-    transformForks caller body (aliaseMap', deadCells') callSiteMap escapedVars
+    transformForks caller body (aliaseMap', deadCells', stackVars')
+            callSiteMap escapedVars
 
 
 -- Check alias created by prims of caller proc
-transformPrims :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
+transformPrims :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells, Set PrimVarName)
         -> Map CallSiteID ProcSpec -> Set PrimVarName
-        -> BodyBuilder (AliasMapLocal, DeadCells)
-transformPrims caller body (aliasMap, deadCells) callSiteMap escapedVars = do
+        -> BodyBuilder (AliasMapLocal, DeadCells, Set PrimVarName)
+transformPrims caller body (aliasMap, deadCells, stackVars) callSiteMap escapedVars = do
     let prims = bodyPrims body
     -- Transform simple prims:
     lift $ logTransform "\nTransform prims (transformPrims):   "
-    foldM (transformPrim callSiteMap escapedVars) (aliasMap, deadCells) prims
+    foldM (transformPrim callSiteMap escapedVars) (aliasMap, deadCells, stackVars) prims
 
 
 -- Recursively transform forked body's prims
 -- PrimFork only appears at the end of a ProcBody
 -- PrimFork = NoFork | PrimFork {}
-transformForks :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
+transformForks :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells, Set PrimVarName)
         -> Map CallSiteID ProcSpec -> Set PrimVarName -> BodyBuilder ()
-transformForks caller body (aliasMap, deadCells) callSiteMap escapedVars = do
+transformForks caller body (aliasMap, deadCells, stackVars) callSiteMap escapedVars = do
     lift $ logTransform "\nTransform forks (transformForks):"
     let fork = bodyFork body
     case fork of
@@ -253,14 +272,14 @@ transformForks caller body (aliasMap, deadCells) callSiteMap escapedVars = do
             mapM_ (\(brNum, currBody) -> do
                     beginBranch brNum
                     transformBody caller currBody
-                                (aliasMap, deadCells) callSiteMap escapedVars
+                                (aliasMap, deadCells, stackVars) callSiteMap escapedVars
                     endBranch
                 ) (List.map (mapFst Just) fBodies ++ maybeToList ((Nothing,) <$> deflt))
             completeFork
         MergedFork{} -> do
             lift $ logTransform "Unmerging fork:"
             fork' <- lift $ unMergeFork fork
-            transformForks caller body{bodyFork=fork'} (aliasMap, deadCells) callSiteMap escapedVars
+            transformForks caller body{bodyFork=fork'} (aliasMap, deadCells, stackVars) callSiteMap escapedVars
         NoFork -> do
             -- NoFork: transform prims done
             lift $ logTransform "No fork."
@@ -268,37 +287,60 @@ transformForks caller body (aliasMap, deadCells) callSiteMap escapedVars = do
 
 -- Build up alias pairs triggerred by proc calls
 transformPrim :: Map CallSiteID ProcSpec -> Set PrimVarName
-        -> (AliasMapLocal, DeadCells) -> Placed Prim
-        -> BodyBuilder (AliasMapLocal, DeadCells)
-transformPrim callSiteMap escapedVars (aliasMap, deadCells) prim = do
+        -> (AliasMapLocal, DeadCells, Set PrimVarName) -> Placed Prim
+        -> BodyBuilder (AliasMapLocal, DeadCells, Set PrimVarName)
+transformPrim callSiteMap escapedVars (aliasMap, deadCells, stackVars) prim = do
     -- XXX Redundent work here. We should change the current design.
     aliasMap' <- lift $ updateAliasedByPrim aliasMap prim
     lift $ logTransform $ "\n--- prim:           " ++ show prim
     let primc = content prim
 
-    (primc', deadCells') <- case primc of
+    (primc', deadCells', stackVars') <- case primc of
             PrimCall id spec impurity args gFlows -> do
                 doMultiSpecz <- lift $ gets (optimisationEnabled MultiSpecz . options)
                 let spec' = if doMultiSpecz
                     then Map.findWithDefault spec id callSiteMap
                     else spec
-                return (PrimCall id spec' impurity args gFlows, deadCells)
+                return (PrimCall id spec' impurity args gFlows, deadCells, stackVars)
             PrimForeign "lpvm" "mutate" flags args -> do
                 let args' = _updateMutateForAlias aliasMap args
-                return (PrimForeign "lpvm" "mutate" flags args', deadCells)
+                -- A destructive mutate writes "fIn" in place, so "fOut" denotes
+                -- the same memory: propagate stack-ness from fIn to fOut.
+                let stackVars'' = propagateStackThroughMutate stackVars args'
+                return (PrimForeign "lpvm" "mutate" flags args', deadCells, stackVars'')
+            -- value-preserving ops carry the same address into their result, so
+            -- stack-ness propagates from input to output (mirrors the
+            -- pass-through edges in computeEscapedVars).
+            PrimForeign "lpvm" "cast" _ args ->
+                return (primc, deadCells, propagateStackThroughCopy stackVars args)
+            PrimForeign "llvm" "move" _ args ->
+                return (primc, deadCells, propagateStackThroughCopy stackVars args)
             -- dead cell transform
             PrimForeign "lpvm" "access" _ args -> do
                 deadCells'
                     <- lift $ updateDeadCellsByAccessArgs (aliasMap, deadCells) args
-                return (primc, deadCells')
+                return (primc, deadCells', stackVars)
             PrimForeign "lpvm" "alloc" flags args  -> do
-                let (result, deadCells') =
+                let (result, deadCellsReused) =
                         assignDeadCellsByAllocArgs deadCells args
                 -- [Stack allocation via escape analysis]
                 -- Check if the alloc result escapes via:
                 --   (a) the incremental alias map (globals, aliased params)
                 --   (b) the pre-computed mutation-chain escape set
                 let [sizeArg, outVar] = args
+                -- NOTE: escapedByAlias is effectively INERT and never fires for
+                -- an alloc's own result.  isArgEscaped queries `aliasMap`, the
+                -- forward-accumulated map as it stands *before* this alloc; but
+                -- outVar is created *by* this alloc, so it cannot yet be
+                -- connected to any global/param in that map.  Empirically it is
+                -- False for every alloc across the whole test suite.  The
+                -- authoritative, sound check is escapedByMutation
+                -- (computeEscapedVars), which scans the whole body and so sees
+                -- escapes that occur after the alloc (the usual case: build a
+                -- value, then store/return it).  escapedByAlias is kept only as
+                -- a cheap, order-dependent early check that can add escapes but
+                -- never remove them, so it cannot affect soundness.  See §4/§9
+                -- of escape_analysis.md.
                 let escapedByAlias = isArgEscaped aliasMap outVar
                 let escapedByMutation = case outVar of
                         ArgVar{argVarName=n} -> Set.member n escapedVars
@@ -314,40 +356,64 @@ transformPrim callSiteMap escapedVars (aliasMap, deadCells) prim = do
                 doStackAlloc <- lift $ gets (optimisationEnabled StackAlloc . options)
                 stackLimit <- lift $ gets (optStackAllocLimit . options)
                 let withinLimit = maybe False (<= stackLimit) (argIntVal sizeArg)
+                -- A dead cell we'd reuse may itself be stack memory (it traces
+                -- back through destructive mutates / casts to a "{stack}"
+                -- alloc).  Reusing stack memory for a fresh value is unsound:
+                -- that value may escape or reach a tail call, leaving a live
+                -- pointer into a torn-down frame (the dead-cell reuse path does
+                -- NOT otherwise consult the escape analysis).  So we refuse to
+                -- reuse a stack cell and fall back to a fresh allocation, which
+                -- the escape check then heap- or stack-allocates correctly.
+                let reuseIsStack = case result of
+                        Just ((selectedCell, _), _) ->
+                            argIsStackVar stackVars selectedCell
+                        Nothing -> False
+                let doReuse = Maybe.isJust result && not reuseIsStack
+                let willStackAlloc = not escaped && constSize && withinLimit
+                                        && not alreadyStack && doStackAlloc
+                                        && not doReuse
                 lift $ logTransform $ "alloc result: " ++ show outVar
                         ++ " | escapedByAlias=" ++ show escapedByAlias
                         ++ " | escapedByMutation=" ++ show escapedByMutation
                         ++ " | constSize=" ++ show constSize
                         ++ " | withinLimit=" ++ show withinLimit
                         ++ " | alreadyStack=" ++ show alreadyStack
-                        ++ (if not escaped && constSize && withinLimit && not alreadyStack && doStackAlloc
-                            then " => stack-allocate"
+                        ++ " | reuseAvailable=" ++ show (Maybe.isJust result)
+                        ++ " | reuseIsStack=" ++ show reuseIsStack
+                        ++ (if doReuse then " => reuse dead cell"
+                            else if willStackAlloc then " => stack-allocate"
                             else " => heap-allocate")
-                let primc' = case result of
-                        Nothing ->
-                            if not escaped && constSize && withinLimit && not alreadyStack && doStackAlloc
-                            then PrimForeign "lpvm" "alloc" ("stack":flags) args
-                            else primc
-                        Just ((selectedCell, startOffset), []) ->
-                            -- avoid "alloc" by reusing the "selectedCell".
-                            let [_, varOut] = args in
-                            -- Be aware that this will make the previous final
-                            -- flag of "selectedCell" outdated.
-                            -- TODO: we should consider using BodyBuilder for
-                            -- the transform.
-                            PrimForeign "llvm" "sub" []
-                                    [selectedCell, startOffset, varOut]
-                        _ -> shouldnt "invalid aliasMap for transform"
-                when (Maybe.isJust result) $
+                let (primc', deadCells', stackVars'') =
+                        if doReuse
+                        then case result of
+                            Just ((selectedCell, startOffset), []) ->
+                                -- avoid "alloc" by reusing the "selectedCell".
+                                let [_, varOut] = args in
+                                -- Be aware that this will make the previous final
+                                -- flag of "selectedCell" outdated.
+                                -- TODO: we should consider using BodyBuilder for
+                                -- the transform.
+                                (PrimForeign "llvm" "sub" []
+                                    [selectedCell, startOffset, varOut],
+                                 deadCellsReused, stackVars)
+                            _ -> shouldnt "invalid aliasMap for transform"
+                        else if willStackAlloc
+                        then ( PrimForeign "lpvm" "alloc" ("stack":flags) args
+                             , deadCells
+                             , case outVar of
+                                 ArgVar{argVarName=n} -> Set.insert n stackVars
+                                 _                    -> stackVars )
+                        else (primc, deadCells, stackVars)
+                when doReuse $
                         lift $ logTransform "avoid using [alloc]."
-                return (primc', deadCells')
+                return (primc', deadCells', stackVars'')
             -- default case
-            _ -> return (primc, deadCells)
+            _ -> return (primc, deadCells, stackVars)
 
     let pos = place prim
     lift $ logTransform $ "--- transformed to: " ++ show (maybePlace primc' pos)
     instr primc' pos
-    return (aliasMap', deadCells')
+    return (aliasMap', deadCells', stackVars')
 
 
 -- Helper: change mutate destructive flag to true if FlowIn variable is not
@@ -360,6 +426,32 @@ _updateMutateForAlias aliasMap
         then [fIn, fOut, offset, ArgInt 1 typ, size, offset2, mem]
         else args
 _updateMutateForAlias _ args = args
+
+
+-- | True if the given arg is a variable denoting stack-allocated memory.
+argIsStackVar :: Set PrimVarName -> PrimArg -> Bool
+argIsStackVar stackVars ArgVar{argVarName=n} = Set.member n stackVars
+argIsStackVar _ _                            = False
+
+
+-- | Propagate stack-ness across a (possibly just-made-destructive) mutate.
+-- A destructive mutate updates "fIn" in place and yields "fOut" as the same
+-- memory, so if "fIn" is stack memory then "fOut" is too.  A non-destructive
+-- mutate allocates a fresh copy for "fOut", so stack-ness does NOT carry over.
+propagateStackThroughMutate :: Set PrimVarName -> [PrimArg] -> Set PrimVarName
+propagateStackThroughMutate stackVars
+    [fIn, ArgVar{argVarName=fOut}, _, ArgInt 1 _, _, _, _]
+    | argIsStackVar stackVars fIn = Set.insert fOut stackVars
+propagateStackThroughMutate stackVars _ = stackVars
+
+
+-- | Propagate stack-ness across a value-preserving op (lpvm cast / llvm move),
+-- whose standard form is [input, ?output]: if the input is stack memory, so is
+-- the output (it holds the same address).
+propagateStackThroughCopy :: Set PrimVarName -> [PrimArg] -> Set PrimVarName
+propagateStackThroughCopy stackVars [inp, ArgVar{argVarName=out, argVarFlow=FlowOut}]
+    | argIsStackVar stackVars inp = Set.insert out stackVars
+propagateStackThroughCopy stackVars _ = stackVars
 
 ----------------------------------------------------------------
 --

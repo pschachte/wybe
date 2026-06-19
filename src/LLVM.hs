@@ -1063,6 +1063,12 @@ writeLPVMCall "mutate" _ args pos = do
                     (writeArg,readArg) <- freshTempArgs $ argType struct2
                     writeLLVMCall "add" []
                         [setArgFlow FlowIn struct2,offset,writeArg] Nothing
+                    -- An interior pointer into a stack struct is a stack address,
+                    -- but "add" skips typeConvert, so carry stack-ness over
+                    -- explicitly (else a non-zero-offset take-reference could
+                    -- defeat tailMarker).  Defensive: take-referenced structs
+                    -- always escape and so are heap-allocated today.
+                    propagateStackAlloced struct2 readArg
                     return readArg
             logLLVM $ "address to store into is held by " ++ show ptrArg
             case (restIns,iRefs) of

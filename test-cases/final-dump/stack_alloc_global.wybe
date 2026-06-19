@@ -1,0 +1,39 @@
+type cell { pub cell(a:int, b:int) }
+type pair { pub pair(p:cell, q:int) }
+
+resource gcell:cell = cell(0, 0)
+resource gpair:pair = pair(cell(0, 0), 0)
+
+# Test 1: store a locally-built struct into a global resource.
+# The struct escapes via the global, so the alloc must NOT be stack-allocated
+# (no {stack} flag).  The escaping `lpvm store` occurs after the alloc, so this
+# relies on computeEscapedVars seeding stored-to-global values rather than on
+# the forward-accumulated alias map.
+def {noinline} store_global(x:int) use !gcell {
+    ?c = cell(x, x)
+    ?gcell = c
+}
+
+# Test 2: build a cell, wrap it in a pair, store the pair into a global.
+# Both allocs escape (the cell is reachable from the escaping pair), so neither
+# may be stack-allocated.
+def {noinline} store_global_nested(x:int) use !gpair {
+    ?c = cell(x, x)
+    ?p = pair(c, x)
+    ?gpair = p
+}
+
+# Test 3: store into a global on only one branch.  computeEscapedVars scans all
+# fork branches, so the alloc must still NOT be stack-allocated.
+def {noinline} store_global_cond(x:int, flag:bool) use !gcell {
+    ?c = cell(x, x)
+    if { flag :: ?gcell = c }
+}
+
+# Test 4 (control): a purely local struct that never escapes SHOULD be
+# stack-allocated ({stack} flag present), confirming the analysis is not simply
+# disabling itself for every proc that touches a global.
+def {noinline} local_only(x:int) use !io {
+    ?c = cell(x, x)
+    !println(c^a)
+}

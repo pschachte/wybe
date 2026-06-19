@@ -15,15 +15,20 @@ def {noinline} test_local(y:int) use !io {
 
 # Test 2: pass-through — the position is passed to another proc which returns
 # it unchanged, and the result is used locally (never returned by this proc).
-# Expected: the alloc should still be stack-allocated, since neither p nor q
-# is an output parameter of test_pass_through.  The escape analysis should
-# see that the conservative edge from pass_back does not fire (q is not
-# escaped), so p also does not escape.
+# Expected: the alloc must NOT be stack-allocated (no {stack} flag).  Passing a
+# pointer as an input argument to a call we cannot see into (pass_back) is
+# treated as an escape: the callee might retain the pointer, and — crucially —
+# the call may be tail-call-optimised, freeing this frame while the pointer is
+# still live.  Recovering stack allocation here soundly would need
+# interprocedural escape summaries plus tail-position analysis (a later, more
+# precise pass); the conservative rule keeps it correct.
 def {noinline} test_pass_through(y:int) use !io {
     ?p = position(1, y)
     pass_back(p, ?q)
     !println(q^x)
 }
+# What if we made this return out from q.
+# Takes input, modifies a field, and returns it (Should in specialized version, can alias make use of destructive-update version)
 
 # Test 3: genuine escape — the position is returned as an output parameter,
 # so it must remain live after the proc returns.
