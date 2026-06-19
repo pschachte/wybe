@@ -1,4 +1,4 @@
 # Test case for `foreign const` calls and functions.  These are to support wybe
 # code using constant structures defined in other languages, such as C.
 
-foreign c fputs(c"Hello, world!\n", foreign const stdout)
+foreign c fputs(c"Hello, world!\n", foreign const stdout:opaque_pointer)
