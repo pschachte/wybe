@@ -24,44 +24,43 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(28,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(29,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(30,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(31,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(32,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(33,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign llvm or(1:wybe.int, mutate#constant#2:mutate.position, ?tmp#0##0:mutate.position) @mutate:nn:nn
     mutate.position.update_x<0>(tmp#0##0:mutate.position, ?p##1:mutate.position, 11:wybe.int) #1 @mutate:nn:nn
     mutate.position.fmt<0>(~tmp#0##0:mutate.position, ?tmp#2##0:wybe.string) #2 @mutate:nn:nn
     wybe.string.,,<0>("old p = ":wybe.string, ~tmp#2##0:wybe.string, ?tmp#1##0:wybe.string) #4 @mutate:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @mutate:nn:nn
+    wybe.string.print<0>(~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @mutate:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom) @mutate:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @mutate:nn:nn
     foreign lpvm store(~%tmp#32##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mutate:nn:nn
     mutate.position.fmt<0>(p##1:mutate.position, ?tmp#4##0:wybe.string) #6 @mutate:nn:nn
     wybe.string.,,<0>("new p = ":wybe.string, ~tmp#4##0:wybe.string, ?tmp#3##0:wybe.string) #8 @mutate:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#3##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #29 @mutate:nn:nn
+    wybe.string.print<0>(~tmp#3##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #29 @mutate:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @mutate:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @mutate:nn:nn
     foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mutate:nn:nn
     mutate.position.update_y<0>(p##1:mutate.position, ?p##2:mutate.position, 12:wybe.int) #10 @mutate:nn:nn
     mutate.position.fmt<0>(~p##1:mutate.position, ?tmp#6##0:wybe.string) #11 @mutate:nn:nn
     wybe.string.,,<0>("old p = ":wybe.string, ~tmp#6##0:wybe.string, ?tmp#5##0:wybe.string) #13 @mutate:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#5##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @mutate:nn:nn
+    wybe.string.print<0>(~tmp#5##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @mutate:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#45##0:wybe.phantom) @mutate:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#45##0:wybe.phantom, ?tmp#46##0:wybe.phantom) @mutate:nn:nn
     foreign lpvm store(~%tmp#46##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mutate:nn:nn
     mutate.position.fmt<0>(p##2:mutate.position, ?tmp#8##0:wybe.string) #15 @mutate:nn:nn
     wybe.string.,,<0>("new p = ":wybe.string, ~tmp#8##0:wybe.string, ?tmp#7##0:wybe.string) #17 @mutate:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#7##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @mutate:nn:nn
+    wybe.string.print<0>(~tmp#7##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @mutate:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#52##0:wybe.phantom) @mutate:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#52##0:wybe.phantom, ?tmp#53##0:wybe.phantom) @mutate:nn:nn
     foreign lpvm store(~%tmp#53##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mutate:nn:nn
     mutate.position.update_z<0>(p##2:mutate.position, ?p##3:mutate.position, 13:wybe.int) #19 @mutate:nn:nn
     mutate.position.fmt<0>(~p##2:mutate.position, ?tmp#10##0:wybe.string) #20 @mutate:nn:nn
     wybe.string.,,<0>("old p = ":wybe.string, ~tmp#10##0:wybe.string, ?tmp#9##0:wybe.string) #22 @mutate:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#9##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @mutate:nn:nn
+    wybe.string.print<0>(~tmp#9##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @mutate:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#59##0:wybe.phantom) @mutate:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#59##0:wybe.phantom, ?tmp#60##0:wybe.phantom) @mutate:nn:nn
     foreign lpvm store(~%tmp#60##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mutate:nn:nn
     mutate.position.fmt<0>(~p##3:mutate.position, ?tmp#12##0:wybe.string) #24 @mutate:nn:nn
     wybe.string.,,<0>("new p = ":wybe.string, ~tmp#12##0:wybe.string, ?tmp#11##0:wybe.string) #26 @mutate:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#11##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @mutate:nn:nn
+    wybe.string.print<0>(~tmp#11##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @mutate:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#66##0:wybe.phantom) @mutate:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#66##0:wybe.phantom, ?tmp#67##0:wybe.phantom) @mutate:nn:nn
     foreign lpvm store(~%tmp#67##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mutate:nn:nn
@@ -81,7 +80,7 @@ target triple   = ????
 @"mutate#constant#4" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"mutate#constant#1" }, align 8
 
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -90,29 +89,29 @@ define external fastcc void @"mutate#.<0>"() {
   %"p##1" = tail call fastcc i64 @"mutate#.position#.update_x<0>"(i64 %"tmp#0##0", i64 11)
   %"tmp#2##0" = tail call fastcc i64 @"mutate#.position#.fmt<0>"(i64 %"tmp#0##0")
   %"tmp#1##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"mutate#constant#3" to i64 ), i64 %"tmp#2##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#1##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
   %"tmp#4##0" = tail call fastcc i64 @"mutate#.position#.fmt<0>"(i64 %"p##1")
   %"tmp#3##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"mutate#constant#4" to i64 ), i64 %"tmp#4##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#3##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#3##0")
   call ccc void @putchar(i8 10)
   %"p##2" = tail call fastcc i64 @"mutate#.position#.update_y<0>"(i64 %"p##1", i64 12)
   %"tmp#6##0" = tail call fastcc i64 @"mutate#.position#.fmt<0>"(i64 %"p##1")
   %"tmp#5##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"mutate#constant#3" to i64 ), i64 %"tmp#6##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#5##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#5##0")
   call ccc void @putchar(i8 10)
   %"tmp#8##0" = tail call fastcc i64 @"mutate#.position#.fmt<0>"(i64 %"p##2")
   %"tmp#7##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"mutate#constant#4" to i64 ), i64 %"tmp#8##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#7##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#7##0")
   call ccc void @putchar(i8 10)
   %"p##3" = tail call fastcc i64 @"mutate#.position#.update_z<0>"(i64 %"p##2", i64 13)
   %"tmp#10##0" = tail call fastcc i64 @"mutate#.position#.fmt<0>"(i64 %"p##2")
   %"tmp#9##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"mutate#constant#3" to i64 ), i64 %"tmp#10##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#9##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#9##0")
   call ccc void @putchar(i8 10)
   %"tmp#12##0" = tail call fastcc i64 @"mutate#.position#.fmt<0>"(i64 %"p##3")
   %"tmp#11##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"mutate#constant#4" to i64 ), i64 %"tmp#12##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#11##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#11##0")
   call ccc void @putchar(i8 10)
   ret void
 }

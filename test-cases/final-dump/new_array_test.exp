@@ -60,7 +60,7 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3(sum##0:wybe.int, tmp#4##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 1]
-  MultiSpeczDepInfo: [(2,(new_array_test.#cont#3<0>,fromList [NonAliasedParamCond 1 [1]])),(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+  MultiSpeczDepInfo: [(2,(new_array_test.#cont#3<0>,fromList [NonAliasedParamCond 1 [1]]))]
     foreign lpvm access(tmp#4##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#14##0:wybe.c_array.raw_array) @new_array_test:nn:nn
     foreign lpvm access(tmp#4##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn
     foreign llvm icmp_slt(tmp#14##0:wybe.c_array.raw_array, ~tmp#15##0:wybe.c_array.raw_array, ?tmp#16##0:wybe.bool) @new_array_test:nn:nn
@@ -68,7 +68,7 @@ proc #cont#3 > {semipure} (2 calls)
     0:
         wybe.int.fmt<2>(~sum##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#19##0:wybe.string) #4 @new_array_test:nn:nn
         wybe.string.,,<0>("Sum   : ":wybe.string, ~tmp#19##0:wybe.string, ?tmp#20##0:wybe.string) #5 @new_array_test:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @new_array_test:nn:nn
+        wybe.string.print<0>(~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @new_array_test:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @new_array_test:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @new_array_test:nn:nn
         foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @new_array_test:nn:nn
@@ -88,7 +88,7 @@ proc #cont#3 > {semipure} (2 calls)
     0:
         wybe.int.fmt<2>(~sum##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#19##0:wybe.string) #4 @new_array_test:nn:nn
         wybe.string.,,<0>("Sum   : ":wybe.string, ~tmp#19##0:wybe.string, ?tmp#20##0:wybe.string) #5 @new_array_test:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @new_array_test:nn:nn
+        wybe.string.print<0>(~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @new_array_test:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @new_array_test:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @new_array_test:nn:nn
         foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @new_array_test:nn:nn
@@ -237,7 +237,6 @@ declare external fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>"(i64)
 declare external fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>[785a827a1b]"(i64)
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @error_exit(i64, i64)
 declare external ccc void @putchar(i8)
 declare external ccc ptr @wybe_malloc(i32)
@@ -305,7 +304,7 @@ if.then.0:
 if.else.0:
   %"tmp#19##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
   %"tmp#20##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"new_array_test#constant#2" to i64 ), i64 %"tmp#19##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#20##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#20##0")
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -330,7 +329,7 @@ if.then.0:
 if.else.0:
   %"tmp#19##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
   %"tmp#20##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"new_array_test#constant#2" to i64 ), i64 %"tmp#19##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#20##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#20##0")
   call ccc void @putchar(i8 10)
   ret void
 }

@@ -1,3 +1,5 @@
 Error detected during type checking of module(s) type_error
 final-dump/type_error.wybe:1:30: Type error in call to proc *, argument 1
 final-dump/type_error.wybe:1:30: Type error in call to proc *, argument 2
+final-dump/type_error.wybe:1:30: Type error in partial application of proc *, argument 1
+final-dump/type_error.wybe:1:30: Type error in partial application of proc *, argument 2

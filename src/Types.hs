@@ -25,6 +25,7 @@ import           Data.Either         as Either
 import           Data.Set            as Set
 import           UnivSet             as USet
 import           Data.Tuple.Select
+import           Data.Tuple.Extra    ((***))
 import           Data.Foldable
 import           Data.Bifunctor
 import           Data.Functor        ((<&>))
@@ -852,9 +853,9 @@ expType' (StringValue _ st) _  =
       WybeString -> return stringType
       CString    -> return cStringType
 expType' expr@ConstStruct{} _  = return AnyType -- will be explicitly typed
-expType' (AnonProc mods params pstmts _ _) _ = do
+expType' (AnonProc mods params pstmts _ _) pos = do
     mapM_ ultimateVarType $ paramName <$> params
-    params' <- updateParamTypes $ Unplaced <$> params
+    params' <- updateParamTypes $ (`maybePlace` pos) <$> params
     return $ HigherOrderType mods $ paramTypeFlow . content <$> params'
 expType' (Closure pspec closed) _ = do
     ProcDef _ (ProcProto _ params res) _ _ _ _ _ _ detism _ impurity _ _ _
@@ -1043,6 +1044,9 @@ data CallInfo
         hiFunc         :: Exp                -- ^variable being called
     } | TestInfo {                           -- A test call
         tiVar          :: Exp                -- ^variable holding test result
+    } | MoveInfo {                           -- A "move" of the form from=?to
+        moveFrom       :: Placed Exp,        -- ^Move from
+        moveTo         :: Placed Exp         -- ^Variable to move to
     }
    deriving (Eq, Ord)
 
@@ -1062,6 +1066,7 @@ instance Show CallInfo where
                      ++ (('?':) . resourceName <$> Set.toList outRes))
     show (HigherInfo fn) = "higher " ++ show fn
     show (TestInfo exp) = "test " ++ show exp
+    show (MoveInfo from to) = show from ++ " = " ++ show to
 
 
 -- |Check if a FirstInfo is for a proc with a single Bool output as last arg,
@@ -1110,7 +1115,7 @@ procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
                                                fiDetism=detism,
                                                fiImpurity=impurity}
     | not hasBang && not (List.null callFlows) && last callFlows == ParamOut
-                  && (length callFlows < length tys
+                  && (length callFlows <= length tys
                      || length callFlows <= length tys + 1 && usesResources)
         = (Just info{fiPartial=True,
                      fiTypes=closedTys ++ [higherTy],
@@ -1421,7 +1426,15 @@ callInfos vars pstmt = do
                     Just pid -> return [ProcSpec m name pid generalVersion]
                 defs <- lift $ mapM getProcDef procs
                 firstInfos <- zipWithM firstInfo defs procs
-                return $ StmtTypings pstmt firstInfos
+                let flows = flattenedExpFlow . content <$> args
+                let partialInfos = List.map (fst . procToPartial flows resful) firstInfos
+                let moveInfo = if List.null m && name == "="
+                        then case (args, flattenedExpFlow . content <$> args) of
+                            ([from, to], [ParamIn, ParamOut]) -> [MoveInfo from to]
+                            ([to, from], [ParamOut, ParamIn]) -> [MoveInfo from to]
+                            _ -> []
+                        else []
+                return $ StmtTypings pstmt $ firstInfos ++ catMaybes partialInfos ++ moveInfo
         ProcCall (Higher fn) _ _ _ ->
             return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
@@ -1484,16 +1497,28 @@ typecheckCalls [] [] _ foreigns =
     mapM_ (placedApply validateForeign) foreigns
 typecheckCalls [] residue True foreigns =
     typecheckCalls residue [] False foreigns
-typecheckCalls [] residue False foreigns = do
+typecheckCalls [] residue@(overloaded:_) False foreigns = do
     let (typings@StmtTypings{typingInfos=infos},rest) = findMinimumTyping residue
     logTyped $ "Recursively checking types with " ++ show typings
-    typings' <- mapM (getTyping . typecheckCallWithInfo typings rest foreigns) infos
-    case List.filter (List.null . typingErrs) $ snd <$> typings' of
-        [typing] -> put typing
-        _ -> do
-            -- 1st equation handles empty residue case
-            typeError $ overloadErr $ head residue
-            typecheckCalls [] [] False foreigns
+    let (moves, nonMoves) = List.partition isMove infos
+    let (partials, realCalls) = List.partition isPartial nonMoves
+    List.foldr (typecheckCalls' typings rest) 
+        (typeError (overloadErr overloaded) >> typecheckCalls [] [] False foreigns)
+        [moves, realCalls, partials]
+  where
+    typecheckCalls' _ _ [] alt = alt 
+    typecheckCalls' typings rest infos alt = do 
+        typings' <- snd <$$> mapM (getTyping . typecheckCallWithInfo typings rest) infos
+        case List.filter (List.null . typingErrs) typings' of
+            [typing] -> do
+                logTyped "Found one valid typing"
+                put typing
+            valid -> do
+                logTyped $ "Still ambiguous: " ++ show (length valid) 
+                alt
+    typecheckCallWithInfo typings rest info = do
+        logTyped $ "-> Trying info " ++ show info
+        typecheckCalls (typings{typingInfos=[info]}:rest) [] False foreigns
 typecheckCalls (stmtTyping@(StmtTypings pstmt typs):calls)
         residue chg foreigns = do
     logTyped $ "Type checking call " ++ show pstmt
@@ -1521,26 +1546,9 @@ typecheckCalls (stmtTyping@(StmtTypings pstmt typs):calls)
     logTyped $ "Valid types = " ++ show (snd <$> validTypes)
     let matchErrs = concatMap errList matches
     case validTypes of
-        [] -> case (mod, callee, content <$> pexps, actualTypes) of
-            -- special case for assigment
-            ([], "=", [arg1, arg2], [ty1, ty2]) -> do
-                logTyped "Trying to check = call as assignment"
-                void $ unifyTypes (ReasonEqual arg1 arg2 stmtPos) ty1 ty2
-                ifM validTyping
-                    (typecheckCalls calls residue True foreigns)
-                    (typeErrors matchErrs)
-            _ -> do
-                nameTy <- varType callee
-                case (mod, pexps) of
-                    -- special case for bool test
-                    ([], []) | not resful && (nameTy == boolType || nameTy == AnyType) -> do
-                        constrainVarType
-                            (ReasonExpType (Var callee ParamIn Ordinary) boolType stmtPos)
-                            callee boolType
-                        typecheckCalls calls residue True foreigns
-                    _ -> do
-                        logTyped "Type error: no valid types for call"
-                        typeErrors matchErrs
+        [] -> do
+            logTyped "Type error: no valid types for call"
+            typeErrors matchErrs
         [(_,typing)] -> do
             put typing
             logTyping "Resulting typing = "
@@ -1556,25 +1564,26 @@ typecheckCalls (stmtTyping@(StmtTypings pstmt typs):calls)
 -- returning the "minimum" StmtTyping and all others
 findMinimumTyping :: [StmtTypings] -> (StmtTypings, [StmtTypings])
 findMinimumTyping [] = shouldnt "findMinimumTyping"
-findMinimumTyping (typing:typings) = findMinimumTyping' typings typing []
+findMinimumTyping (typing:typings) = go typings typing (size typing) []
+  where 
+    go [] typing' _ acc = (typing', acc)
+    go (typing:rest) typing' sizeTyping' acc
+        | sizeTyping < sizeTyping'
+        = go rest typing sizeTyping (typing':acc)
+        | otherwise
+        = go rest typing' sizeTyping' (typing:acc)
+      where sizeTyping = size typing
+    size = (length *** length) . List.partition (not . isPartial) . typingInfos
 
 
-findMinimumTyping' :: [StmtTypings] -> StmtTypings -> [StmtTypings]
-                   -> (StmtTypings, [StmtTypings])
-findMinimumTyping' [] typing' acc = (typing', acc)
-findMinimumTyping' (typing:rest) typing' acc
-    | length (typingInfos typing) < length (typingInfos typing')
-    = findMinimumTyping' rest typing (typing':acc)
-    | otherwise
-    = findMinimumTyping' rest typing' (typing:acc)
+isPartial :: CallInfo -> Bool
+isPartial FirstInfo{fiPartial=p} = p
+isPartial _ = False
 
 
--- | Perform type checks replacing the typingInfos of the supplied StmtTypings
--- with the supplied Info
-typecheckCallWithInfo :: StmtTypings
-                      -> [StmtTypings] -> [Placed Stmt] -> CallInfo -> Typed ()
-typecheckCallWithInfo typings rest fs info = do
-    typecheckCalls (typings{typingInfos=[info]}:rest) [] False fs
+isMove :: CallInfo -> Bool
+isMove MoveInfo{} = True
+isMove _ = False
 
 
 -- |Match up the argument types of a call with the parameter types of the
@@ -1584,10 +1593,6 @@ matchTypes :: Ident -> Ident -> OptPos -> Bool -> [TypeSpec] -> [FlowDirection]
            -> CallInfo -> Typed (MaybeErr (CallInfo,Typing))
 matchTypes caller callee pos hasBang callTypes callFlows
         calleeInfo@FirstInfo{fiTypes=tys}
-    -- Handle case whre call should have a ! but doesnt, and the call
-    -- can be made partial
-    | not hasBang && needsBang && isJust partialCallInfo
-    = matchTypeList callee pos callTypes calleeInfo'''
     -- Handle case where call arity is correct
     | sameLength callTypes tys
     = matchTypeList callee pos callTypes calleeInfo
@@ -1602,9 +1607,6 @@ matchTypes caller callee pos hasBang callTypes callFlows
             OK _ | all flowsOut $ fiFlows calleeInfo ->
                 return $ Err [ReasonBadReification callee pos]
             _ -> return match
-    -- Handle case where the call is partial
-    | isJust partialCallInfo
-    = matchTypeList callee pos callTypes calleeInfo'''
     -- Handle call with one in/out arg to proc with no in/out params, and
     -- one too few args.
     | notElem ParamInOut (fiFlows calleeInfo) && 1 == length extraTypes
@@ -1617,8 +1619,6 @@ matchTypes caller callee pos hasBang callTypes callFlows
           calleeInfo' = fromJust testInfo
           detCallInfo = testToBoolFn calleeInfo
           calleeInfo'' = fromJust detCallInfo
-          (partialCallInfo, needsBang) = procToPartial callFlows hasBang calleeInfo
-          calleeInfo''' = fromJust partialCallInfo
           extraTypes = catMaybes
                        $ zipWith
                          (\t f -> if f==ParamInOut then Just t else Nothing)
@@ -1630,7 +1630,7 @@ matchTypes caller callee pos hasBang callTypes callFlows
 matchTypes caller callee pos _ callTypes callFlows
         calleeInfo@(HigherInfo fn) = do
     let callTFs = zipWith TypeFlow callTypes callFlows
-    fnTy <- expType (Unplaced fn) >>= ultimateType
+    fnTy <- expType (maybePlace fn pos) >>= ultimateType
     logTyped $ "Checking higher call " ++ show fn ++ ":" ++ show fnTy
             ++ " with type " ++ show callTFs
     typing <-
@@ -1661,18 +1661,28 @@ matchTypes caller callee pos _ callTypes callFlows
                 void $ unifyTypes (ReasonHigher caller callee pos)
                         fnTy $ HigherOrderType defaultProcModifiers callTFs
     let typing' = snd typing
-    let errs = typingErrs typing'
-    return $ if List.null errs
-    then OK (calleeInfo, typing')
-    else Err errs
+    checkNoNewErrs typing' calleeInfo
 matchTypes caller calleee pos _ _ _
         calleeInfo@(TestInfo exp) = do
-    ty <- expType $ Unplaced exp
+    ty <- expType $ maybePlace exp pos
+    logTyped $ "Checking test " ++ show exp ++ ":" ++ show ty
     typing <- snd <$> getTyping (unifyTypes (ReasonExpType exp boolType pos)
                                     boolType ty)
-    let errs = typingErrs typing
-    return $ if List.null errs
-    then OK (calleeInfo, typing)
+    checkNoNewErrs typing calleeInfo
+matchTypes caller calleee pos _ _ _
+        calleeInfo@(MoveInfo from to) = do
+    [fromTy, toTy] <- mapM expType [from,to]
+    logTyped $ "Checking move " ++ show from ++ ":" ++ show fromTy ++ " = " ++ show to ++ ":" ++ show toTy
+    typing <- snd <$> getTyping (unifyTypes (ReasonEqual (content from) (content to) pos)
+                                    fromTy toTy)
+    checkNoNewErrs typing calleeInfo
+
+
+checkNoNewErrs :: Typing -> CallInfo -> Typed (MaybeErr (CallInfo,Typing))
+checkNoNewErrs typing@Typing{typingErrs=errs} info = do
+    errsBefore <- gets typingErrs
+    return $ if sameLength errsBefore errs
+    then OK (info, typing)
     else Err errs
 
 
@@ -1699,6 +1709,7 @@ unifyTypeList' :: ProcName -> OptPos -> [TypeSpec] -> [TypeSpec] -> Typed [TypeS
 unifyTypeList' callee pos callerTypes calleeTypes
     = zipWith3M (unifyTypes . flip (ReasonArgType False callee) pos)
                         [1..] callerTypes calleeTypes
+        >>= mapM ultimateType
 
 
 invalidType :: TypeSpec -> Bool
@@ -1761,6 +1772,7 @@ canonicaliseMatch pos callInfo typing = do
     callInfoTypes FirstInfo{fiTypes=tys} = return tys
     callInfoTypes (HigherInfo exp) = (:[]) <$> expType' exp pos
     callInfoTypes (TestInfo exp) = (:[]) <$> expType' exp pos
+    callInfoTypes (MoveInfo from to) = mapM expType [from,to]
 
 
 ----------------------------------------------------------------
@@ -2068,6 +2080,7 @@ exactModeMatch modes info@FirstInfo{fiPartial=True}
     where formalModes = actualFormalModes modes info
 exactModeMatch _ HigherInfo{} = True
 exactModeMatch _ TestInfo{} = True
+exactModeMatch _ MoveInfo{} = True
 
 overloadErr :: StmtTypings -> TypeError
 overloadErr StmtTypings{typingStmt=call,typingInfos=candidates} =
@@ -2235,25 +2248,17 @@ modecheckStmt final
                 = List.filter (exactModeMatch actualModes . fst) typeMatches
         logModed $ "Exact mode matches: " ++ show exactMatches
         let stmt' = ProcCall (First cmod cname pid) d resourceful args'
-        (argStmts ++) <$> case (exactMatches, modeMatches, cmod, cname, actualModes, args) of
-            ((match,typing):rest, _, _, _, _, _) -> do
+        (argStmts ++) <$> case (exactMatches, modeMatches) of
+            ((match,typing):rest, _) -> do
                 lift $ put typing
                 unless (List.null rest) $
                     modeError $ ReasonWarnMultipleMatches match (fst <$> rest) pos
                 finaliseCall resourceful final pos args' match stmt'
-            ([], (match,typing):rest, _, _, _, _) -> do
+            ([], (match,typing):rest) -> do
                 lift $ put typing
                 unless (List.null rest) $
                     modeError $ ReasonWarnMultipleMatches match (fst <$> rest) pos
                 finaliseCall resourceful final pos args' match stmt'
-                    -- Special cases to handle = as assignment when one argument is
-                    -- known to be defined and the other is an output or unknown.
-            ([],[], [], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
-                modecheckStmt final
-                    (ForeignCall "llvm" "move" [] [arg1, arg2]) pos
-            ([],[], [], "=", [(ParamOut,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
-                modecheckStmt final
-                    (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
             _ -> do
                 -- XXX handle case of !var for an input, with missing output arg
                 logModed $ "Checking for !arg in function call"
@@ -2310,8 +2315,8 @@ modecheckStmt final stmt@(ForeignCall lang cname flags args) pos = do
                 then do
                     var <- lift $ genSym
                     let ty = if lang == "llvm" then boolType else intType
-                    return ([Unplaced $ varSetTyped var ty],
-                            [Unplaced $ TestBool (varGetTyped var ty)],
+                    return ([varSetTyped var ty `maybePlace` pos],
+                            [TestBool (varGetTyped var ty) `maybePlace` pos],
                             List.delete "test" flags)
                 else return ([],[],flags)
     logModed $ "Mode checking foreign call " ++ show stmt
@@ -2509,11 +2514,12 @@ splitInOutArgs exp pos = (maybePlace exp pos, Nothing)
 modeCheckExps :: [Placed Exp] -> Moded ([Placed Exp], [Placed Stmt])
 modeCheckExps [] = return ([], [])
 modeCheckExps (pexp:pexps) = do
-    logModed $ "Mode check exp " ++ show (content pexp)
+    logModed $ "Mode check exp " ++ show exp
     (pexp', stmt) <- placedApply modeCheckExp pexp
     logModed $ "Mode check exp resulted in " ++ show (content pexp')
     (pexps', stmts) <- modeCheckExps pexps
-    return (pexp' : pexps', List.map Unplaced stmt ++ stmts)
+    return (pexp' : pexps', List.map (`maybePlace` pos) stmt ++ stmts)
+  where (exp, pos) = unPlace pexp
 
 
 -- | Mode check an Expression
@@ -2535,7 +2541,7 @@ modeCheckExp
     vars <- gets bindingVars
     varDict <- lift $ mapFromUnivSetM ultimateVarType Set.empty vars
     let closed = Map.filterWithKey (const . flip Set.member toClose) varDict
-    params' <- (content <$>) <$> lift (updateParamTypes (Unplaced <$> params))
+    params' <- (content <$>) <$> lift (updateParamTypes ((`maybePlace` pos) <$> params))
     return (maybePlace (AnonProc mods params' ss' (Just closed) res) pos, [])
 modeCheckExp (Typed exp ty cast) pos = do
     ty' <- lift $ ultimateType ty
@@ -2665,7 +2671,7 @@ finaliseCall resourceful final pos args
               [ReasonResourceUnavail ("partial application of " ++ name) res pos
               | res <- Set.toList specials]
         modecheckStmt final
-            (ForeignCall "llvm" "move" [] [Unplaced partial, result]) pos
+            (ForeignCall "llvm" "move" [] [partial `maybePlace` pos, result]) pos
     else do
         let stmt' = ProcCall (First (procSpecMod matchProc) (procSpecName matchProc)
                                     (Just $ procSpecID matchProc))
@@ -2699,6 +2705,8 @@ finaliseCall resourceful final pos args (HigherInfo fn) _ = do
         (ProcCall (Higher $ fn `maybePlace` pos) detism resourceful args) pos
 finaliseCall resourceful final pos args (TestInfo exp) _ =
     modecheckStmt final (TestBool exp) pos
+finaliseCall resourceful final pos args (MoveInfo from to) stmt =
+    modecheckStmt final (ForeignCall "llvm" "move" [] [from, to]) pos
 
 
 -- |Report assorted purity errors in the named proc.  If isHO is true, then
@@ -2739,17 +2747,18 @@ matchArguments (typeflow:typeflows) (arg:args) = do
 -- call, and generating code to match it with the provided input.  Thus also
 -- attaches the correct type to the argument.
 matchArgument :: TypeFlow -> Placed Exp -> Typed (Placed Exp,[Placed Stmt])
-matchArgument typeflow arg
+matchArgument typeflow pArg
     | ParamOut == typeFlowMode typeflow
-      && ParamIn == flattenedExpFlow (content arg) = do
+      && ParamIn == flattenedExpFlow arg = do
           var <- genSym
           let inTypeFlow = typeflow {typeFlowMode = ParamIn}
-              arg' = setPExpTypeFlow inTypeFlow arg
-              setVar = Unplaced $ setExpTypeFlow typeflow (varSet var)
-              getVar = Unplaced $ setExpTypeFlow inTypeFlow (varGet var)
+              arg' = setPExpTypeFlow inTypeFlow pArg
+              setVar = setExpTypeFlow typeflow (varSet var) `maybePlace` pos
+              getVar = setExpTypeFlow inTypeFlow (varGet var) `maybePlace` pos
               call = ProcCall (regularProc "=") SemiDet False [getVar, arg']
-          return (setVar, [maybePlace call $ place arg])
-    | otherwise = return (setPExpTypeFlow typeflow arg,[])
+          return (setVar, [maybePlace call pos])
+    | otherwise = return (setPExpTypeFlow typeflow pArg,[])
+  where (arg, pos) = unPlace pArg
 
 
 -- |Return a list of error messages for too weak a determinism at the end of a
