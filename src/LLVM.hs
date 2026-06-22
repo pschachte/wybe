@@ -412,6 +412,9 @@ recordExtern _ (PrimForeign "lpvm" "mutate" _ (_:_:destr:_)) =
 recordExtern _ (PrimForeign "lpvm" _ _ _) = return ()
 recordExtern _ (PrimForeign "c" name _ args) =
     recordExternFn "ccc" (llvmForeignName name) args
+recordExtern _ (PrimForeign "const" name _ 
+                [ArgVar _ ty FlowOut Ordinary _]) = do
+    recordExternSpec $ ExternConstant name ty
 recordExtern _ (PrimForeign other name _ args)
     | validForeignLanguage other = return ()
     | otherwise = shouldnt $ "Unknown foreign language " ++ other
@@ -585,6 +588,10 @@ declareExtern (ExternVariable glob ty) = do
     unless (repIsPhantom rep) $ do
         name <- llvmGlobalInfoName glob
         llvmPutStrLn $ name ++ " = external global " ++ llvmTypeRep rep
+declareExtern (ExternConstant name ty) = do
+    rep <- typeRep ty
+    unless (repIsPhantom rep) $ do
+        llvmPutStrLn $ name ++ " = external global constant " ++ llvmTypeRep rep
 
 
 ----------------------------------------------------------------------------
@@ -823,6 +830,10 @@ writeAssemblyPrim instr@(PrimForeign "c" cfn flags args) pos = do
     releaseDeferredCall
     logLLVM $ "* Translating C call " ++ show instr
     writeCCall cfn flags args pos
+writeAssemblyPrim instr@(PrimForeign "const" name flags args) pos = do
+    releaseDeferredCall
+    logLLVM $ "* Translating const assignment " ++ show instr
+    writeCConst name flags args pos
 writeAssemblyPrim instr@(PrimForeign lang op flags args) pos = do
     shouldnt $ "unknown foreign language " ++ lang
                 ++ " in instruction " ++ show instr
@@ -1051,6 +1062,13 @@ writeLPVMCall "mutate" _ args pos = do
                             ++ ", and take-ref args " ++ show iRefs
 writeLPVMCall op flags args pos =
     shouldnt $ "unknown lpvm operation:  " ++ op
+
+-- | Generate a reference to a global constant
+writeCConst :: Ident -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
+writeCConst constName flags [out@(ArgVar varName ty FlowIn Ordinary _)] pos = do
+    typeConvert out $
+writeCConst name flags args pos =
+    shouldnt $ "unexpected arguments or flow in foreign constant " ++ name
 
 
 -- | Generate C function call
@@ -1942,13 +1960,18 @@ data ExternSpec =
         extVarName :: GlobalInfo, -- ^ The global variable to declare
         extVarType :: TypeSpec    -- ^ The variable's Wybe type
         }
+    | ExternConstant {
+        extConstName :: String,   -- ^ The global constant to declare
+        extConstType :: TypeSpec  -- ^ The constant's Wybe type
+        }
     deriving (Eq,Ord,Show)
 
 
 -- | Return the name of the thing that the EsternSpec declares
 externID :: ExternSpec -> LLVM LLVMName
-externID ExternFunction{extFnName=name}  = return name
-externID ExternVariable{extVarName=name} = llvmGlobalInfoName name
+externID ExternFunction{extFnName=name}     = return name
+externID ExternVariable{extVarName=name}    = llvmGlobalInfoName name
+externID ExternConstant{extConstName=name}  = return name
 
 
 -- | Information needed to specify one constant value, giving the representation
@@ -2328,6 +2351,7 @@ llvmGlobalInfoName :: GlobalInfo -> LLVM LLVMName
 llvmGlobalInfoName (GlobalResource res) =
      fst <$> llvmResource res
 llvmGlobalInfoName (GlobalVariable var) = return $ llvmGlobalName var
+llvmGlobalInfoName (GlobalConstant name) = return $ llvmForeignName name
 
 
 -- | Make a suitable LLVM name for a foreign (e.g., C) function.

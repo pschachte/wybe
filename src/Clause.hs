@@ -287,6 +287,12 @@ compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
     let sizeInUnit = if "bits" `elem` flags then size else size `ceilDiv` byteBits
     out' <- placedApply compileArg out
     return $ PrimForeign "lpvm" "cast" [] $ ArgInt (fromIntegral sizeInUnit) intType : out'
+compileSimpleStmt' (ForeignCall "constant" name flags [arg]) = do
+    args' <- concat <$> mapM (placedApply compileArg) args
+    return $ PrimForeign lang name flags args'
+compileSimpleStmt' (ForeignCall "constant" name flags args) = do
+    args' <- concat <$> mapM (placedApply compileArg) args
+    return $ PrimForeign lang name flags args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'

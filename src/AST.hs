@@ -3329,6 +3329,7 @@ data StringVariant = WybeString | CString
 -- constant list.
 data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
                 | GlobalVariable { globalVarSpec :: Ident }
+                | GlobalConstant { globalConstName :: Ident }
     deriving (Eq, Ord, Generic)
 
 
@@ -4626,6 +4627,7 @@ instance Show StringVariant where
 instance Show GlobalInfo where
     show (GlobalResource res) = "<<" ++ show res ++ ">>"
     show (GlobalVariable res) = "@" ++ res
+    show (GlobalConstant name) = name
 
 
 showMap :: String -> String -> String -> (k->String) -> (v->String)

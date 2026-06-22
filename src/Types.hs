@@ -311,6 +311,8 @@ data TypeError = ReasonMessage Message
             --        -- ^The proc is terminal but not declared so
                | ReasonUnnreachable ProcName OptPos
                    -- ^Statement following a terminal statement
+               | ReasonNonunaryConst ProcName OptPos
+                   -- ^Foreign constant with arguments
                deriving (Eq, Ord)
 
 
@@ -489,6 +491,9 @@ typeErrorMessage (ReasonActuallyPure kind name impurity pos) =
 typeErrorMessage (ReasonUnnreachable name pos) =
     Message Warning pos $
         "In " ++ showProcName name ++ ", this statement is unreachable"
+typeErrorMessage (ReasonNonunaryConst name pos) =
+    Message Error pos $
+        "Foreign constant " ++ showProcName name ++ " is given arguments"
 
 
 -- | Get the position from a type error
@@ -2854,6 +2859,10 @@ validateForeignCall "llvm" name flags argReps stmt pos =
                 else typeError (ReasonBadForeign "llvm" name pos)
 validateForeignCall "lpvm" name flags argReps stmt pos =
     checkLPVMArgs name flags argReps stmt pos
+validateForeignCall "constant" name flags args stmt pos =
+    case args of
+        [_] -> return ()
+
 validateForeignCall lang name flags argReps stmt pos
     | validForeignLanguage lang = return ()
     | otherwise = typeError (ReasonForeignLanguage lang name pos)
