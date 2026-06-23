@@ -36,7 +36,7 @@ module AST (
   flattenedExpFlow, expIsVar, expIsConstant, expVar, expVar', maybeExpType, innerExp,
   setExpFlowType,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
-  defaultTypeRepresentation, typeRepSize, integerTypeRep, typeSize, 
+  defaultTypeRepresentation, typeRepSize, integerTypeRep, typeSize,
   defaultTypeModifiers, lookupTypeRepresentation, typeRepresentation,
   lookupModuleRepresentation, argIsReal,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
@@ -70,7 +70,7 @@ module AST (
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
-  ProcBody(..), PrimFork(..), MergedForkTable, prependToBody, appendToBody, unMergeFork, guardedMergedFork, 
+  ProcBody(..), PrimFork(..), MergedForkTable, prependToBody, appendToBody, unMergeFork, guardedMergedFork,
   Ident, VarName, ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
@@ -210,7 +210,9 @@ data Item
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ImportForeign [FilePath] OptPos
      | ImportForeignLib [Ident] OptPos
-     | ResourceDecl Visibility ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
+     -- The Maybe Ident below indicates whether this is a foreign resource, and
+     -- if so, what its foreign name is
+     | ResourceDecl Visibility (Maybe Ident) ResourceName TypeSpec (Maybe (Placed Exp)) OptPos
      | FuncDecl Visibility ProcModifiers ProcProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility ProcModifiers ProcProto [Placed Stmt] OptPos
      | ForeignProcDecl Visibility Ident ProcModifiers (Maybe Ident) ProcProto TypeSpec OptPos
@@ -1049,8 +1051,9 @@ typeIsUnique _ = return False
 
 
 -- |Add the specified resource to the current module.
-addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()
-addSimpleResource name impln@(SimpleResource ty _ pos) vis = do
+addSimpleResource :: ResourceName -> ResourceImpln -> Maybe Ident -> Visibility
+                    -> Compiler ()
+addSimpleResource name impln@(SimpleResource ty _ pos) isForeign vis = do
     currMod <- getModuleSpec
     let rspec = ResourceSpec currMod name
     let rdef = Map.singleton rspec impln
@@ -1536,7 +1539,7 @@ lookupConstInfo (StructID mspec n _) = do
 -- The resulting Exp does not use a StringValue constructor.
 cStringExpr :: String -> Compiler Exp
 cStringExpr str = do
-    structID <- recordConstStruct (CStringInfo str) 
+    structID <- recordConstStruct (CStringInfo str)
                         (Just $ StringValue str CString)
     return $ Typed (ConstStruct structID) cStringType Nothing
 
@@ -2580,7 +2583,7 @@ data PrimFork =
       forkVar::PrimVarName,       -- ^The variable that selects branch to take
       forkVarType::TypeSpec,      -- ^The Wybe type of the forkVar
       forkVarLast::Bool,          -- ^Is this the last occurrence of forkVar
-      forkBodies::[(Integer,ProcBody)],   
+      forkBodies::[(Integer,ProcBody)],
                                   -- ^one branch for each value of forkVar
       forkDefault::Maybe ProcBody -- ^branch to take if forkVar is out of range
     } |
@@ -2619,10 +2622,10 @@ prependToBody before (ProcBody prims fork)
 unMergeFork :: PrimFork -> Compiler PrimFork
 unMergeFork (MergedFork var ty final table body dlft) = do
     table' <- mapM (\(var, ty, id, _) -> (var, ty,) . List.map (`constValuePrimArg` ty) . arrayData . trustFromJust "unMergeFork" <$> lookupConstInfo id) table
-    let untabled = List.transpose 
-                    $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ PrimForeign "llvm" "move" [] [p, ArgVar var' ty' FlowOut Ordinary False]) vals) 
+    let untabled = List.transpose
+                    $ List.map (\(var', ty', vals) -> List.map (\p -> Unplaced $ PrimForeign "llvm" "move" [] [p, ArgVar var' ty' FlowOut Ordinary False]) vals)
                     table'
-    return $ if List.null untabled 
+    return $ if List.null untabled
     then NoFork
     else PrimFork var ty final (zip [0..] (List.map (`prependToBody` body) untabled)) dlft
 unMergeFork fork = shouldnt $ "unMergeFork on non-merged " ++ show fork
@@ -2631,7 +2634,7 @@ unMergeFork fork = shouldnt $ "unMergeFork on non-merged " ++ show fork
 -- with the given var used int the fork
 guardedMergedFork :: PrimVarName -> PrimVarName -> TypeSpec -> Integer -> ProcBody -> Maybe ProcBody -> ProcBody
 guardedMergedFork _   _   _  _     body Nothing     = body
-guardedMergedFork tmp var ty limit body (Just dflt) = 
+guardedMergedFork tmp var ty limit body (Just dflt) =
     ProcBody
         [Unplaced $ PrimForeign "llvm" "icmp_ule" []
           [ArgVar var ty FlowIn Ordinary False, ArgInt limit ty, ArgVar tmp bit FlowOut Ordinary False]]
@@ -2830,8 +2833,6 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
         foldAll (foldBodyDistrib primFn common abDisj abConj $ snd body) $ List.map snd bodies ++ maybeToList deflt
       MergedFork{forkBody=body, forkDefault=deflt} ->
         foldAll (foldBodyDistrib primFn common abDisj abConj body) $ maybeToList deflt
-            
-            
 
 
 -- |Traverse a ProcBody applying a monadic primFn to every Prim and applying a
@@ -3631,7 +3632,7 @@ constValueAtOffset (StructInfo _ fields) offset = go fields offset
           go [] _ = Nothing
 constValueAtOffset (CStringInfo chars) offset =
     (`IntStructMember` 1) . toInteger . ord <$> (chars !? offset)
-constValueAtOffset (ArrayInfo []) _ = Nothing 
+constValueAtOffset (ArrayInfo []) _ = Nothing
 constValueAtOffset (ArrayInfo elts@(elt:_)) offset =
     let eltSize = constValueSize elt
         (idx, eltOffset) = divMod offset eltSize
@@ -4181,8 +4182,10 @@ instance Show Item where
     ++ showOptPos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
-  show (ResourceDecl vis name typ init pos) =
-    visibilityPrefix vis ++ "resource " ++ name ++ ":" ++ show typ
+  show (ResourceDecl vis isForeign name typ init pos) =
+    visibilityPrefix vis ++ "resource "
+    ++ maybe "" (("foreign " ++) . (++ " = ")) isForeign
+    ++ name ++ ":" ++ show typ
     ++ maybeShow " = " init " "
     ++ showOptPos pos
   show (FuncDecl vis modifiers proto typ exp pos) =
@@ -4200,7 +4203,7 @@ instance Show Item where
     ++ showOptPos pos
     ++ " {"
     ++ showBody 4 stmts
-    ++ "\n  }"  
+    ++ "\n  }"
   show (ForeignProcDecl vis lang modifiers mbAlias proto retType pos) =
     visibilityPrefix vis
     ++ "def foreign "
@@ -4451,9 +4454,9 @@ showFork ind (PrimFork var ty last bodies deflt) =
 showFork ind (MergedFork var ty last table body deflt) =
     startLine ind ++ "factored " ++ (if last then "~" else "") ++ show var ++
                   ":" ++ show ty ++ " of" ++
-    List.concatMap (\(var, ty, struct, vals) -> 
+    List.concatMap (\(var, ty, struct, vals) ->
                         startLine (ind + 2) ++ "?" ++ show var ++ ":" ++ show ty ++
-                        " <- " ++ show struct ++ "" ++ show vals ++ "") 
+                        " <- " ++ show struct ++ "" ++ show vals ++ "")
         table
     ++ showBlock (ind+4) body
     ++ maybe "" (\b -> startLine ind ++ "else:"

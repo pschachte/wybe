@@ -187,9 +187,14 @@ ctorDecls = (visibility >>= \vis -> (vis,) <$> (term >>= parseWith termToCtorDec
 resourceItem :: Visibility -> Parser Item
 resourceItem v = do
     pos <- tokenPosition <$> ident "resource"
-    let optInit = optionMaybe (symbol "=" *> expr)
-    ResourceDecl v <$> identString <* symbol ":"
-        <*> typeSpec <*> optInit <*> return (Just pos)
+    mbForeign <-
+        optionMaybe (ident "foreign" *> ( Just <$> identString <* symbol "=" 
+                                    <|> return Nothing))
+    name <- identString
+    let optForeign = fromMaybe name <$> mbForeign
+    ty <-  symbol ":" *> typeSpec
+    mbInit <- optionMaybe (symbol "=" *> expr)
+    return $ ResourceDecl v optForeign name ty mbInit $ Just pos
 
 
 -- | Parse a "use" item. Either an import statement or a use-block
@@ -268,7 +273,7 @@ wybeProcOrFuncItem vis pos = do
 foreignProcOrFuncItem :: Visibility -> SourcePos -> String -> Parser Item
 foreignProcOrFuncItem vis pos lang = do
     mods <- modifierList >>= parseWith (processProcModifiers pos "foreign procedure or function declaration")
-    mbAlias <- optionMaybe (try $ identString <* symbol "=") 
+    mbAlias <- optionMaybe (try $ identString <* symbol "=")
     (proto, returnType) <- limitedTerm prototypePrecedence >>= parseWith termToPrototype
     ress <- if returnType == AnyType then useResourceFlowSpecs else return []
     return $ ForeignProcDecl vis lang mods mbAlias proto { procProtoResources = ress } returnType $ Just pos
