@@ -118,7 +118,7 @@ expandCompoundResource processing pos res@(ResourceSpec mod name) = do
                 logResources $ " -> Expanding to union of resources "
                      ++ intercalate ", " (show <$> ress)
                 ress' <- catMaybes
-                        <$> mapM lookupResourceSpec ress `inModule` mod
+                        <$> mapM (validateCompoundMember pos) ress `inModule` mod
                 logResources $ " -> Module qualified resources "
                      ++ intercalate ", " (show <$> ress')
                 defs <- mapM (expandCompoundResource processing' defPos) ress'
@@ -129,6 +129,17 @@ expandCompoundResource processing pos res@(ResourceSpec mod name) = do
                                             $ modResources modImpln }
                     ) mod
                 return def
+
+
+-- | Validate and canonicalise the given rewource spec, reporting an error and
+-- returning Nothing if it is not defined.
+validateCompoundMember :: OptPos -> ResourceSpec 
+                               -> Compiler (Maybe ResourceSpec)
+validateCompoundMember pos constituent = do
+    mbSpec <- lookupResourceSpec constituent
+    when (isNothing mbSpec) $
+        errmsg pos $ "Undefined compound resource member " ++ show constituent
+    return mbSpec
 
 
 -- |Check a module's recorded resource declarations.
