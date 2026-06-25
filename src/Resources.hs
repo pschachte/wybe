@@ -109,9 +109,8 @@ expandCompoundResource processing pos res@(ResourceSpec mod name) = do
             Nothing -> do
                 let processing' = res:processing
                 (resSet, defPos) <-
-                    fromMaybe
-                    (shouldnt $ "In expandCompoundResource, no definition for "
-                                     ++ show res)
+                    trustFromJust
+                    ("In expandCompoundResource, no definition for " ++ show res)
                     . Map.lookup name <$>
                     getModuleImplementationField modCompoundResources
                         `inModule` mod
