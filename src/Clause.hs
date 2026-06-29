@@ -259,7 +259,6 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     callSiteID <- gets nextCallSiteID
     modify (\st -> st {nextCallSiteID = callSiteID + 1})
-    args' <- concat <$> mapM (placedApply compileArg) args
     impurity <- gets clauseImpurity
     case func of
         First mod name procID -> do
@@ -267,12 +266,15 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
                             procID
             let pSpec = ProcSpec mod name procID' generalVersion
             impurity' <- max impurity . procImpurity <$> lift (getProcDef pSpec)
+            flows <- paramFlow <$$> lift (getParams pSpec)
+            args' <- concat <$> zipWithM (placedApply . compileFlowArg) flows args 
             gFlows <- lift $ getProcGlobalFlows pSpec
             return $ PrimCall callSiteID pSpec impurity' args' gFlows
         Higher fn -> do
             let impurity' = max impurity . modifierImpurity . higherTypeModifiers 
                           . trustFromJust ("untyped higher-order term " ++ show fn) . maybeExpType $ content fn
             fn' <- compileHigherFunc fn
+            args' <- concat <$> mapM (placedApply compileArg) args 
             return $ PrimHigher callSiteID fn' impurity' args'
 compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
     let ty = trustFromJust ("untyped in sizeof " ++ show arg)
@@ -300,14 +302,22 @@ compileSimpleStmt' Fail =
 compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 
-
-compileArg :: Exp -> OptPos -> ClauseComp [PrimArg]
-compileArg (Typed exp typ coerce) pos = do
+compileFlowArg :: FlowDirection -> Exp -> OptPos -> ClauseComp [PrimArg]
+compileFlowArg flow (Typed exp typ coerce) pos = do
     logClause $ "Compiling expression " ++ show exp
     args <- compileArg' typ exp pos
-    logClause $ "Expression compiled to " ++ show args
-    return args
-compileArg exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
+    args' <- 
+        if flowsOut flow && not (flowsOut $ flattenedExpFlow exp)
+        then do
+            out <- nextVar "_"
+            return $ args ++ [ArgVar out typ FlowOut Ordinary False]
+        else return args
+    logClause $ "Expression compiled to " ++ show args'
+    return args'
+compileFlowArg _ exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
+
+compileArg :: Exp -> OptPos -> ClauseComp [PrimArg]
+compileArg exp = compileFlowArg (flattenedExpFlow exp) exp
 
 compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp [PrimArg]
 compileArg' typ (IntValue int) _ = return [ArgInt int typ]

@@ -3399,6 +3399,7 @@ flattenedExpFlow (Var _ flow _)        = flow
 flattenedExpFlow (AnonParamVar _ flow) = flow
 flattenedExpFlow FailExpr              = ParamIn
 flattenedExpFlow (Typed exp _ _)       = flattenedExpFlow exp
+flattenedExpFlow (Global _)            = ParamIn
 flattenedExpFlow otherExp =
     shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
 
@@ -4061,7 +4062,7 @@ setExpTypeFlow typeflow (Typed expr _ castInner)
     where Typed expr' ty' _ = setExpTypeFlow typeflow expr
 setExpTypeFlow (TypeFlow ty fl) (Var name _ ftype)
     = Typed (Var name fl ftype) ty Nothing
-setExpTypeFlow (TypeFlow ty ParamIn) expr
+setExpTypeFlow (TypeFlow ty flow) expr | flow /= ParamOut
     = Typed expr ty Nothing
 setExpTypeFlow (TypeFlow ty fl) expr
     = shouldnt $ "Cannot set type/flow of " ++ show expr
