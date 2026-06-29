@@ -1,0 +1,5 @@
+def proc_inout(!p:bool) { pass }
+def proc_in(p:bool) { pass }
+
+proc_in(?p)
+proc_inout(?p)

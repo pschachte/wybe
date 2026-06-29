@@ -93,7 +93,7 @@ def run(instrs:list(instruction), !state:tape) use !io {
           | decr :: decr(!state)
           | left :: left(!state)
           | right :: right(!state)
-          | input :: !read(?state^current)
+          | input :: !read(!state^current)
           | output :: !print(state^current)
           | loop(?body) :: 
             do {

@@ -2065,9 +2065,11 @@ actualFormalModes _ info = shouldnt $ "actualFormalModes on " ++ show info
 matchModeList :: [(FlowDirection,Bool,Maybe VarName)]
               -> CallInfo -> Bool
 matchModeList modes info@FirstInfo{fiPartial=False, fiFlows=flows}
-    -- Check that no param is in where actual is out
     = sameLength modes flows
-      && (ParamIn,ParamOut) `notElem` actualFormalModes modes info
+    -- Check that no param is in/in-out where formal is out,
+    -- ie formal = ParamOut ==> actual = ParamOut
+      && all ((/=ParamOut) . snd ||| (==ParamOut) . fst) 
+            (actualFormalModes modes info)
 matchModeList _ _ = False
 
 
