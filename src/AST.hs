@@ -176,7 +176,7 @@ import           UnivSet as USet
 import           Data.Tuple.HT ( mapSnd, mapFst )
 import           Data.Word (Word8)
 import           Data.Char
-import           Text.Read (readMaybe)
+import           Data.Functor     ((<&>))
 import           Flow             ((|>))
 import           Numeric          (showHex)
 import           Options
@@ -184,16 +184,13 @@ import           System.Exit
 import           System.FilePath
 import           System.IO
 import           System.Directory (makeAbsolute, makeRelativeToCurrentDirectory)
--- import           Text.ParserCombinators.Parsec.Pos
 import           Text.Parsec.Pos
                  ( SourcePos, sourceName, sourceColumn, sourceLine )
 import           Util
 import           System.Console.ANSI
-
+import           Data.Binary (Binary)
 import           GHC.Generics (Generic)
-
-import Data.Binary (Binary)
-import Data.Functor ((<&>))
+import           GHC.Stack (HasCallStack)
 
 
 ----------------------------------------------------------------
@@ -4732,39 +4729,39 @@ maybeShowStr pre (Just something) post =
 ------------------------------ Error Reporting -----------------------
 
 -- |Report an internal error and abort.
-shouldnt :: String -> a
+shouldnt :: HasCallStack => String -> a
 shouldnt what = error $ "Internal error: " ++ what
 
 
 -- |Report an internal error and abort unless the test succeeds.
-should :: String -> Bool -> ()
+should :: HasCallStack => String -> Bool -> ()
 should _    True  = ()
 should what False = shouldnt what
 
 
 -- |Report that some feature is not yet implemented and abort.
-nyi :: String -> a
+nyi :: HasCallStack => String -> a
 nyi what = error $ "Not yet implemented: " ++ what
 
 
 -- |Check that all is well, else abort.
-checkError :: Monad m => String -> Bool -> m ()
+checkError :: HasCallStack => Monad m => String -> Bool -> m ()
 checkError msg bad = when bad $ shouldnt msg
 
 
 -- |Check that a value is OK; if so, return it, else abort.
-checkValue :: (t -> Bool) -> String -> t -> t
+checkValue :: HasCallStack => (t -> Bool) -> String -> t -> t
 checkValue tst msg val = if tst val then val else shouldnt msg
 
 
 -- |Like fromJust, but with its own error message.
-trustFromJust :: String -> Maybe t -> t
+trustFromJust :: HasCallStack => String -> Maybe t -> t
 trustFromJust msg Nothing = shouldnt $ "trustFromJust in " ++ msg
 trustFromJust _ (Just val) = val
 
 
 -- |Monadic version of trustFromJust.
-trustFromJustM :: Monad m => String -> m (Maybe t) -> m t
+trustFromJustM :: HasCallStack => Monad m => String -> m (Maybe t) -> m t
 trustFromJustM msg computation = do
     trustFromJust msg <$> computation
 
