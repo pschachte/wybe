@@ -37,7 +37,6 @@ module AST (
   setExpFlowType,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep, typeSize,
-  defaultTypeRepresentation, typeRepSize, integerTypeRep, typeSize,
   defaultTypeModifiers, lookupTypeRepresentation, typeRepresentation,
   lookupModuleRepresentation, argIsReal,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
@@ -214,7 +213,7 @@ data Item
      | ImportForeignLib [Ident] OptPos
      -- The Maybe Ident below indicates whether this is a foreign resource, and
      -- if so, what its foreign name is
-     | ResourceDecl Visibility (Maybe Ident) ResourceName ResourceDefn OptPos
+     | ResourceDecl Visibility ResourceName ResourceDefn OptPos
      | FuncDecl Visibility ProcModifiers ProcProto TypeSpec (Placed Exp) OptPos
      | ProcDecl Visibility ProcModifiers ProcProto [Placed Stmt] OptPos
      | ForeignProcDecl Visibility Ident ProcModifiers (Maybe Ident) ProcProto TypeSpec OptPos
@@ -226,9 +225,14 @@ data Item
 data Visibility = Private | Public
                   deriving (Eq, Ord, Show, Generic)
 
-
+-- |The definition of a resource.  This may be a single (simple) resource or a
+-- collection (compound) of other resources, which maybe themselves be simple or
+-- compound.  Simple resources must have a type, may have a foreign name if the
+-- resource is a global variable, and may have an initialisation expression (in
+-- which case the resource will initially have this value at the start of
+-- program execution).
 data ResourceDefn =
-    SimpleResourceDefn TypeSpec (Maybe (Placed Exp))
+    SimpleResourceDefn TypeSpec (Maybe Ident) (Maybe (Placed Exp))
     | CompoundResourceDefn [ResourceSpec]
     deriving (Eq, Ord, Show, Generic)
 
@@ -1075,12 +1079,12 @@ addResource name vis def pos = do
     if name `Map.member` modRess
     then errmsg pos $ "Duplicate declaration of resource '" ++ name ++ "'"
     else case def of
-        SimpleResourceDefn ty init -> do
+        SimpleResourceDefn ty optForeign init -> do
             if genericType ty
             then errmsg pos $ "Resource type cannot contain type variables: "
                                 ++ show ty
             else do
-                let impln = PrimResource ty init pos
+                let impln = PrimResource ty optForeign init pos
                 let rdef = Map.singleton rspec impln
                 updateImplementation
                     (\imp -> imp { modResources = Map.insert name rdef
@@ -1118,7 +1122,7 @@ lookupResource res =
     lookupResourceSpec res >>= \case
         Nothing -> return Nothing
         Just res'@(ResourceSpec [] name) -> do
-            let rdef t = Map.singleton res' (PrimResource t Nothing Nothing)
+            let rdef t = Map.singleton res' (PrimResource t Nothing Nothing Nothing)
             return $ rdef . snd <$> Map.lookup name specialResources
         Just (ResourceSpec mod name) -> do
             maybeMod <- getLoadingModule mod
@@ -2080,6 +2084,7 @@ type ResourceDef = Map ResourceSpec PrimResourceImpln
 data PrimResourceImpln =
     PrimResource {
         resourceType::TypeSpec,
+        resourceForeign::Maybe Ident,
         resourceInit::Maybe (Placed Exp),
         resourcePos::OptPos
         }
@@ -4224,13 +4229,13 @@ instance Show Item where
     ++ showOptPos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
-  show (ResourceDecl vis isForeign name resdef pos) =
+  show (ResourceDecl vis name resdef pos) =
     visibilityPrefix vis ++ "resource "
-    ++ maybe "" (("foreign " ++) . (++ " = ")) isForeign
     ++ name ++
         case resdef of
-          SimpleResourceDefn typ init ->
-            ":" ++ show typ ++ maybeShow " = " init " "
+          SimpleResourceDefn typ optForeign init ->
+            maybe "" (("foreign " ++) . (++ " = ")) optForeign
+            ++ ":" ++ show typ ++ maybeShow " = " init " "
           CompoundResourceDefn rspecs ->
             " = " ++ intercalate ", " (List.map show rspecs)
     ++ showOptPos pos
@@ -4362,7 +4367,7 @@ instance Show TypeDef where
     visibilityPrefix vis
     ++ (if List.null params then "" else "(" ++ intercalate "," params ++ ")")
     ++ show typeMods
-    ++ maybe "" (" is " ++) (show <$> rep)
+    ++ maybe "" ((" is " ++) . show) rep
     ++ " { "
     ++ intercalate " | " (show <$> members)
     ++ " "
@@ -4373,8 +4378,9 @@ instance Show TypeDef where
 
 -- |How to show a primitive resource definition.
 instance Show PrimResourceImpln where
-  show (PrimResource typ init pos) =
-    show typ ++ maybeShow " = " init "" ++ showOptPos pos
+  show (PrimResource typ optForeign init pos) =
+    maybe "" (("(foreign " ++) . (++ ") ")) optForeign
+    ++ show typ ++ maybeShow " = " init "" ++ showOptPos pos
 
 
 -- |How to show a list of proc definitions.

@@ -22,7 +22,7 @@ AFTER EVERYTHING:
   resources       : bar: fromList [(compound_resource.bar,wybe.int = 42 @compound_resource:nn:nn @compound_resource:nn:nn)]
                     baz: fromList [(compound_resource.baz,wybe.string @compound_resource:nn:nn)]
                     foo: fromList [(compound_resource.bar,wybe.int = 42 @compound_resource:nn:nn @compound_resource:nn:nn),(compound_resource.baz,wybe.string @compound_resource:nn:nn)]
-                    meta: fromList [(compound_resource.bar,wybe.int = 42 @compound_resource:nn:nn @compound_resource:nn:nn),(compound_resource.baz,wybe.string @compound_resource:nn:nn),(compound_resource.qux,wybe.float @compound_resource:nn:nn),(wybe.io.io,wybe.phantom = 0:wybe.phantom @io:nn:nn @io:nn:nn)]
+                    meta: fromList [(compound_resource.bar,wybe.int = 42 @compound_resource:nn:nn @compound_resource:nn:nn),(compound_resource.baz,wybe.string @compound_resource:nn:nn),(compound_resource.qux,wybe.float @compound_resource:nn:nn),(wybe.io.io,wybe.phantom = phantom @io:nn:nn @io:nn:nn)]
                     qux: fromList [(compound_resource.qux,wybe.float @compound_resource:nn:nn)]
   procs           : 
 

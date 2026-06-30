@@ -2,7 +2,7 @@
 # since  : 0.1
 
 # Random number generator state
-pub resource random:phantom = 0:phantom
+pub resource random:phantom = phantom
 
 # Seed the random number generator
 pub def foreign c set_random_seed=srand(s:int) use ?random

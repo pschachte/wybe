@@ -169,7 +169,7 @@ checkResourceDef name def = do
 checkResourceImpln :: ResourceSpec -> PrimResourceImpln
                  -> Compiler (Bool,[(String,OptPos)],
                               (ResourceSpec,PrimResourceImpln))
-checkResourceImpln rspec impln@(PrimResource ty mbPInit pos) = do
+checkResourceImpln rspec impln@(PrimResource ty optForeign mbPInit pos) = do
     logResources $ "Check resource " ++ show rspec
                  ++ " with implementation " ++ show impln
     ty' <- lookupType "resource declaration" pos ty
@@ -189,7 +189,7 @@ checkResourceImpln rspec impln@(PrimResource ty mbPInit pos) = do
     logResources $ "Actual initialisation is " ++ show mbPInit'
 
     return (ty' /= ty || initChg, [],
-            (rspec,PrimResource ty' mbPInit' pos))
+            (rspec,PrimResource ty' optForeign mbPInit' pos))
     where
         isTyped Typed{} = True
         isTyped _ = False
