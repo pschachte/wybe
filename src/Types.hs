@@ -16,7 +16,7 @@ import           AST
 import           Debug.Trace
 import           Control.Monad
 import           Control.Monad.State
-import           Control.Monad.Extra (ifM)
+import           Control.Monad.Extra (ifM, concatMapM)
 import           Data.Graph
 import           Data.List           as List
 import           Data.Map            as Map
@@ -53,7 +53,6 @@ validateModExportTypes thisMod = do
     logTypes $ "**** Validating parameter types in module " ++
            showModSpec thisMod
     reenterModule thisMod
-    iface <- getModuleInterface
     procs <- getModuleImplementationField (Map.toAscList . modProcs)
     procs' <- mapM (uncurry validateProcDefsTypes) procs
     updateModImplementation (\imp -> imp { modProcs = Map.fromAscList procs'})
@@ -361,7 +360,7 @@ typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
                 | (v,typs) <- varAmbigs]
 typeErrorMessage (ReasonUndef callFrom callTo pos) =
     Message Error pos $
-        "`" ++ callTo ++ "` unknown in " ++ showProcName callFrom
+        showProcOrVarName callTo ++ " unknown in " ++ showProcName callFrom
 typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
     Message Error pos $
         "Call from " ++ showProcName callFrom
@@ -469,12 +468,13 @@ typeErrorMessage (ReasonForeignArgRep instr argNum wrongRep rightDesc pos) =
 typeErrorMessage (ReasonBadCast caller callee argNum pos) =
     Message Error pos $
         "Type cast (:!) in call from " ++ showProcName caller
-        ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
+        ++ " to non-foreign " ++ showProcOrVarName callee
+        ++ ", argument " ++ show argNum
 typeErrorMessage (ReasonBadConstraint caller callee argNum exp ty pos) =
     Message Error pos $
         "Type constraint (:" ++ show ty ++ ") in call from "
         ++ showProcName caller
-        ++ " to " ++ callee ++ ", argument " ++ show argNum
+        ++ " to " ++ showProcOrVarName callee ++ ", argument " ++ show argNum
         ++ ", is incompatible with expression " ++ show exp
 typeErrorMessage ReasonShouldnt =
     Message Error Nothing "Mysterious typing error"
@@ -1184,7 +1184,8 @@ typecheckProcDecl' pdef = do
                         outs `Set.union`
                             (expOutputs exp `Set.difference` expInputs exp))
                     inputs def
-        logTyped $ "   with assigned vars: " ++ show assignedVars
+        logTyped $ "   with assigned vars: "
+                    ++ intercalate ", " (Set.toList assignedVars)
         logTyped $ "Recording parameter types: "
                    ++ intercalate ", " (show <$> params)
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
@@ -1202,7 +1203,7 @@ typecheckProcDecl' pdef = do
                 intercalate ", " . (show <$>) . snd)
             overloaded
         mapM_ (uncurry $ addResourceType (ReasonResourceDef name))
-            $ (, pos) <$> concat (snd <$> okResources)
+            $ (, pos) <$> concatMap snd okResources
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name)) calls
             logTyping "*** Before calls "
@@ -1211,7 +1212,8 @@ typecheckProcDecl' pdef = do
             --             (content . fst <$> calls)
             -- mapM_ (uncurry $ unifyExprTypes pos) unifs
             calls' <- mapM (callInfos assignedVars) procCalls
-            logTyping $ "  With calls:\n  " ++ intercalate "\n    " (show <$> calls')
+            logTyping $ "  With calls:\n    "
+                        ++ intercalate "\n    " (show <$> calls')
             let badCalls = List.map typingStmt
                         $ List.filter (List.null . typingInfos) calls'
             mapM_ (\pcall -> case content pcall of
@@ -1406,12 +1408,19 @@ callInfos vars pstmt = do
     let stmt = content pstmt
     case stmt of
         ProcCall (First m name procId) d resful args -> do
+            logTyped $ "getting callInfos for First " ++ showModSpec m ++ " "
+                        ++ showProcName name ++ " procID " ++ show procId
             varTy <- varType name >>= ultimateType
+            -- XXX Shouldn't check for null module in case it's a
+            -- module-qualified resource name
             let couldBeVar = List.null m && isNothing procId
                            && name `Set.member` vars
                 couldBeHigher = isHigherOrder varTy || varTy == AnyType
                 couldBeTest   = (boolType == varTy || varTy == AnyType)
                              && List.null args && not resful
+            logTyped $ "  couldBeVar = " ++ show couldBeVar
+                     ++ "; couldBeHigher = " ++ show couldBeHigher
+                     ++ "; couldBeTest = " ++ show couldBeTest
             if couldBeVar && (couldBeHigher || couldBeTest)
             then let var = varGet name
                  in return $ StmtTypings pstmt $ [HigherInfo var | couldBeHigher]
@@ -1892,9 +1901,8 @@ initBindingState :: ProcDef -> BindingState
 initBindingState pdef =
     BindingState Det impurity resources emptyUnivSet UniversalSet Set.empty proc
     where impurity = expectedImpurity $ procImpurity pdef
-          resources = Set.fromList
-                    $ List.map resourceFlowRes
-                        (procProtoResources $ procProto pdef)
+          resources = Set.map resourceFlowRes
+                        (Set.fromList $ procProtoResources $ procProto pdef)
           proc = procName pdef
 
 
@@ -2099,7 +2107,7 @@ modeCheckProcDecl pdef = do
     let proto = procProto pdef
     let posParams = procProtoParams proto
     let params = content <$> posParams
-    let resources = procProtoResources proto
+    let resources = Set.fromList $ procProtoResources proto
     let (ProcDefSrc def) = procImpln pdef
     let detism = procDetism pdef
     let pos = procPos pdef
@@ -2108,13 +2116,11 @@ modeCheckProcDecl pdef = do
     let outParams = Set.fromList $ paramName <$>
             List.filter (flowsOut . paramFlow) params
     let inResources =
-            Set.fromList
-            $ List.map (resourceName . resourceFlowRes)
-            $ List.filter (flowsIn . resourceFlowFlow) resources
+            Set.map (resourceName . resourceFlowRes)
+            $ Set.filter (flowsIn . resourceFlowFlow) resources
     let outResources =
-            Set.fromList
-            $ List.map (resourceName . resourceFlowRes)
-            $ List.filter (flowsIn . resourceFlowFlow) resources
+            Set.map (resourceName . resourceFlowRes)
+            $ Set.filter (flowsIn . resourceFlowFlow) resources
     let inputs = Set.union inParams inResources
     logTyped $ "Now mode checking proc " ++ name
     let bound = addBindings inputs $ initBindingState pdef
@@ -2426,7 +2432,7 @@ modecheckStmt final stmt@(Loop stmts _ res) pos = do
 modecheckStmt final stmt@(UseResources resources _ stmts) pos = do
     initResources <- gets bindingResources
     logModed $ "Mode checking use ... in stmt " ++ show stmt
-    canonRes <- lift2 (mapM (canonicaliseResourceSpec pos "use block") resources)
+    canonRes <- lift2 (concatMapM (canonicaliseResourceSpec pos "use block") resources)
     let resources' = fst <$> canonRes
     let resVars = USet.fromList $ resourceName <$> resources'
     resfulBoundPre <- resfulBoundVars resVars

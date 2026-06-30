@@ -1,0 +1,215 @@
+======================================================================
+AFTER EVERYTHING:
+
+
+--------------------------------------------------
+ Module compound_resource
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : compound_resource.<0>
+  constants       : 0:: CStringInfo {cstringChars = ", "}
+                    1:: CStringInfo {cstringChars = ", qux = "}
+                    2:: CStringInfo {cstringChars = ", baz = "}
+                    3:: CStringInfo {cstringChars = "bar = "}
+                    4:: CStringInfo {cstringChars = "hello"}
+                    5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c", "]}
+                    6:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember c", qux = "]}
+                    7:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember c", baz = "]}
+                    8:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember c"bar = "]}
+                    9:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"hello"]}
+  imports         : use wybe
+  resources       : bar: fromList [(compound_resource.bar,wybe.int = 42 @compound_resource:nn:nn @compound_resource:nn:nn)]
+                    baz: fromList [(compound_resource.baz,wybe.string @compound_resource:nn:nn)]
+                    foo: fromList [(compound_resource.bar,wybe.int = 42 @compound_resource:nn:nn @compound_resource:nn:nn),(compound_resource.baz,wybe.string @compound_resource:nn:nn)]
+                    meta: fromList [(compound_resource.bar,wybe.int = 42 @compound_resource:nn:nn @compound_resource:nn:nn),(compound_resource.baz,wybe.string @compound_resource:nn:nn),(compound_resource.qux,wybe.float @compound_resource:nn:nn),(wybe.io.io,wybe.phantom = 0:wybe.phantom @io:nn:nn @io:nn:nn)]
+                    qux: fromList [(compound_resource.qux,wybe.float @compound_resource:nn:nn)]
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: compound_resource.<0>
+()<{<<compound_resource.bar>>, <<wybe.io.io>>}; {<<compound_resource.bar>>, <<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%tmp#4##0:wybe.int) @compound_resource:nn:nn
+    wybe.string.print<0>("hello":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @compound_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @compound_resource:nn:nn
+    foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @compound_resource:nn:nn
+    wybe.int.fmt<2>(~tmp#4##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#19##0:wybe.string) #8 @compound_resource:nn:nn
+    wybe.string.,,<0>(", ":wybe.string, "hello":wybe.string, ?tmp#21##0:wybe.string) #9 @compound_resource:nn:nn
+    wybe.string.,,<0>(~tmp#19##0:wybe.string, ~tmp#21##0:wybe.string, ?tmp#22##0:wybe.string) #10 @compound_resource:nn:nn
+    wybe.string.print<0>(~tmp#22##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @compound_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c print_int(10:wybe.int, ~tmp#24##0:wybe.phantom, ?%tmp#27##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @compound_resource:nn:nn
+    foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @compound_resource:nn:nn
+    wybe.int.fmt<2>(10:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#30##0:wybe.string) #12 @compound_resource:nn:nn
+    wybe.float.fmt<4>(3.141592653589793:wybe.float, 0:wybe.int, 32:wybe.char, 6:wybe.int, 1:wybe.bool, ?tmp#33##0:wybe.string) #13 @compound_resource:nn:nn
+    wybe.string.,,<0>(", qux = ":wybe.string, ~tmp#33##0:wybe.string, ?tmp#34##0:wybe.string) #14 @compound_resource:nn:nn
+    wybe.string.,,<0>("hello":wybe.string, ~tmp#34##0:wybe.string, ?tmp#35##0:wybe.string) #15 @compound_resource:nn:nn
+    wybe.string.,,<0>(", baz = ":wybe.string, ~tmp#35##0:wybe.string, ?tmp#36##0:wybe.string) #16 @compound_resource:nn:nn
+    wybe.string.,,<0>(~tmp#30##0:wybe.string, ~tmp#36##0:wybe.string, ?tmp#37##0:wybe.string) #17 @compound_resource:nn:nn
+    wybe.string.,,<0>("bar = ":wybe.string, ~tmp#37##0:wybe.string, ?tmp#38##0:wybe.string) #18 @compound_resource:nn:nn
+    wybe.string.print<0>(~tmp#38##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @compound_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#39##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#39##0:wybe.phantom, ?tmp#40##0:wybe.phantom) @compound_resource:nn:nn
+    foreign lpvm store(~%tmp#40##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @compound_resource:nn:nn
+
+
+proc testproc > {inline} (1 calls)
+0: compound_resource.testproc<0>
+testproc()<{<<compound_resource.bar>>, <<compound_resource.baz>>, <<compound_resource.qux>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%bar##0:wybe.int) @compound_resource:nn:nn
+    wybe.int.fmt<2>(~bar##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#2##0:wybe.string) #12 @compound_resource:nn:nn
+    foreign lpvm load(<<compound_resource.baz>>:wybe.string, ?%baz##0:wybe.string) @compound_resource:nn:nn
+    foreign lpvm load(<<compound_resource.qux>>:wybe.float, ?%qux##0:wybe.float) @compound_resource:nn:nn
+    wybe.float.fmt<4>(~qux##0:wybe.float, 0:wybe.int, 32:wybe.char, 6:wybe.int, 1:wybe.bool, ?tmp#7##0:wybe.string) #13 @compound_resource:nn:nn
+    wybe.string.,,<0>(", qux = ":wybe.string, ~tmp#7##0:wybe.string, ?tmp#6##0:wybe.string) #4 @compound_resource:nn:nn
+    wybe.string.,,<0>(~baz##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#4##0:wybe.string) #5 @compound_resource:nn:nn
+    wybe.string.,,<0>(", baz = ":wybe.string, ~tmp#4##0:wybe.string, ?tmp#3##0:wybe.string) #7 @compound_resource:nn:nn
+    wybe.string.,,<0>(~tmp#2##0:wybe.string, ~tmp#3##0:wybe.string, ?tmp#1##0:wybe.string) #8 @compound_resource:nn:nn
+    wybe.string.,,<0>("bar = ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #10 @compound_resource:nn:nn
+    wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @compound_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @compound_resource:nn:nn
+    foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @compound_resource:nn:nn
+
+
+proc use_bar > {inline} (1 calls)
+0: compound_resource.use_bar<0>
+use_bar()<{<<compound_resource.bar>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%tmp#0##0:wybe.int) @compound_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @compound_resource:nn:nn
+    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @compound_resource:nn:nn
+
+
+proc use_baz > {inline} (1 calls)
+0: compound_resource.use_baz<0>
+use_baz()<{<<compound_resource.baz>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<compound_resource.baz>>:wybe.string, ?%tmp#0##0:wybe.string) @compound_resource:nn:nn
+    wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @compound_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @compound_resource:nn:nn
+    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @compound_resource:nn:nn
+
+
+proc use_foo > {inline} (1 calls)
+0: compound_resource.use_foo<0>
+use_foo()<{<<compound_resource.bar>>, <<compound_resource.baz>>, <<wybe.io.io>>}; {<<compound_resource.bar>>, <<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%bar##0:wybe.int) @compound_resource:nn:nn
+    wybe.int.fmt<2>(~bar##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #6 @compound_resource:nn:nn
+    foreign lpvm load(<<compound_resource.baz>>:wybe.string, ?%baz##0:wybe.string) @compound_resource:nn:nn
+    wybe.string.,,<0>(", ":wybe.string, ~baz##0:wybe.string, ?tmp#2##0:wybe.string) #3 @compound_resource:nn:nn
+    wybe.string.,,<0>(~tmp#1##0:wybe.string, ~tmp#2##0:wybe.string, ?tmp#0##0:wybe.string) #4 @compound_resource:nn:nn
+    wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @compound_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @compound_resource:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @compound_resource:nn:nn
+    foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @compound_resource:nn:nn
+    foreign lpvm store(10:wybe.int, <<compound_resource.bar>>:wybe.int) @compound_resource:nn:nn
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'compound_resource'
+
+source_filename = "!ROOT!/final-dump/compound_resource.wybe"
+target triple   = ????
+
+@"compound_resource#constant#0" = private unnamed_addr constant [ ?? x i8 ] c", \00", align 8
+@"compound_resource#constant#1" = private unnamed_addr constant [ ?? x i8 ] c", qux = \00", align 8
+@"compound_resource#constant#2" = private unnamed_addr constant [ ?? x i8 ] c", baz = \00", align 8
+@"compound_resource#constant#3" = private unnamed_addr constant [ ?? x i8 ] c"bar = \00", align 8
+@"compound_resource#constant#4" = private unnamed_addr constant [ ?? x i8 ] c"hello\00", align 8
+@"compound_resource#constant#5" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"compound_resource#constant#0" }, align 8
+@"compound_resource#constant#6" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"compound_resource#constant#1" }, align 8
+@"compound_resource#constant#7" = private unnamed_addr constant {i64, ptr} { i64 8, ptr @"compound_resource#constant#2" }, align 8
+@"compound_resource#constant#8" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"compound_resource#constant#3" }, align 8
+@"compound_resource#constant#9" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"compound_resource#constant#4" }, align 8
+
+declare external fastcc i64 @"wybe#.float#.fmt<4>"(double, i64, i8, i64, i1)
+declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
+declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
+declare external ccc void @print_int(i64)
+declare external ccc void @putchar(i8)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#compound_resource.bar" = global i64 undef
+@"resource#compound_resource.baz" = global i64 undef
+@"resource#compound_resource.qux" = global double undef
+
+define external fastcc void @"compound_resource#.<0>"() {
+  %"tmp#4##0" = load i64, ptr @"resource#compound_resource.bar"
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"compound_resource#constant#9" to i64 ))
+  call ccc void @putchar(i8 10)
+  %"tmp#19##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"tmp#4##0", i64 0, i8 32)
+  %"tmp#21##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#5" to i64 ), i64 ptrtoint( ptr @"compound_resource#constant#9" to i64 ))
+  %"tmp#22##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#19##0", i64 %"tmp#21##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#22##0")
+  call ccc void @putchar(i8 10)
+  call ccc void @print_int(i64 10)
+  call ccc void @putchar(i8 10)
+  %"tmp#30##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 10, i64 0, i8 32)
+  %"tmp#33##0" = tail call fastcc i64 @"wybe#.float#.fmt<4>"(double 3.141592653589793, i64 0, i8 32, i64 6, i1 1)
+  %"tmp#34##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#6" to i64 ), i64 %"tmp#33##0")
+  %"tmp#35##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#9" to i64 ), i64 %"tmp#34##0")
+  %"tmp#36##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#7" to i64 ), i64 %"tmp#35##0")
+  %"tmp#37##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#30##0", i64 %"tmp#36##0")
+  %"tmp#38##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#8" to i64 ), i64 %"tmp#37##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#38##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"compound_resource#.testproc<0>"() {
+  %"bar##0" = load i64, ptr @"resource#compound_resource.bar"
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"bar##0", i64 0, i8 32)
+  %"baz##0" = load i64, ptr @"resource#compound_resource.baz"
+  %"qux##0" = load double, ptr @"resource#compound_resource.qux"
+  %"tmp#7##0" = tail call fastcc i64 @"wybe#.float#.fmt<4>"(double %"qux##0", i64 0, i8 32, i64 6, i1 1)
+  %"tmp#6##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#6" to i64 ), i64 %"tmp#7##0")
+  %"tmp#4##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"baz##0", i64 %"tmp#6##0")
+  %"tmp#3##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#7" to i64 ), i64 %"tmp#4##0")
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#2##0", i64 %"tmp#3##0")
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#8" to i64 ), i64 %"tmp#1##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"compound_resource#.use_bar<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#compound_resource.bar"
+  call ccc void @print_int(i64 %"tmp#0##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"compound_resource#.use_baz<0>"() {
+  %"tmp#0##0" = load i64, ptr @"resource#compound_resource.baz"
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"compound_resource#.use_foo<0>"() {
+  %"bar##0" = load i64, ptr @"resource#compound_resource.bar"
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"bar##0", i64 0, i8 32)
+  %"baz##0" = load i64, ptr @"resource#compound_resource.baz"
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#5" to i64 ), i64 %"baz##0")
+  %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#1##0", i64 %"tmp#2##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
+  call ccc void @putchar(i8 10)
+  store i64 10, ptr @"resource#compound_resource.bar"
+  ret void
+}

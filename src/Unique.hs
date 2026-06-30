@@ -17,7 +17,7 @@ import Control.Monad
 import Control.Monad.Trans       (lift)
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
-import Control.Monad.Extra       (whenM)
+import Control.Monad.Extra       (whenM, concatMapM)
 import Data.List                 as List
 import Data.Set                  as Set
 import Data.Map                  as Map
@@ -99,11 +99,11 @@ uniquenessCheckProc def _ = do
                        mapM (((tmUniqueness . typeModifiers . modInterface <$>) <$>)
                              <$> getLoadingModule)
                            (catMaybes $ typeModule . paramType . content <$> params)
-    resTys <- mapM (canonicaliseResourceSpec pos "uniqueness checking" . resourceFlowRes) ress
+    resTys <- concatMapM (canonicaliseResourceSpec pos "uniqueness checking" . resourceFlowRes) ress
     someUniqueRes <- elem (Just True) <$>
                      mapM (((tmUniqueness . typeModifiers . modInterface <$>) <$>)
                            <$> getLoadingModule)
-                         (catMaybes $ typeModule . trustFromJust "unique res ty" . snd 
+                         (catMaybes $ typeModule . trustFromJust "unique res ty" . snd
                             <$> resTys)
     unless (detism `determinismLEQ` Det) $ do
         when someUniqueRes $
@@ -115,6 +115,7 @@ uniquenessCheckProc def _ = do
       $ mapM_ (placedApply checkNoNestedUnique) $ procProtoParams $ procProto def
     case procImpln def of
         ProcDefSrc body -> do
+            logMsg Uniqueness $ "Uniqueness checking proc definition..."
             state <- uniquenessCheckDef name pos detism body params ress
             logMsg Uniqueness $ "After checking params: " ++ show state
             mapM_ reportUniquenessError $ reverse $ uniquenessErrors state
@@ -284,29 +285,41 @@ uniquenessCheckStmt stmt@(Cond tst thn els _ _ _) pos = do
     (defaultPlacedApply uniquenessCheckStmt pos tst `withDetism` SemiDet
        >> uniquenessCheckStmts thn)
      `joinUniqueness` uniquenessCheckStmts els
-uniquenessCheckStmt (Case exp cases deflt) pos = do
+uniquenessCheckStmt stmt@(Case exp cases deflt) pos = do
+    logUniqueness $ "Uniqueness checking case stmt " ++ show stmt
     defaultPlacedApply uniquenessCheckExp pos exp
     uniquenessCheckCases uniquenessCheckStmts cases deflt
-uniquenessCheckStmt (And stmts) _ = uniquenessCheckStmts stmts
-uniquenessCheckStmt (Or [] _ _) pos = return ()
-uniquenessCheckStmt (Or [stmt] _ _) pos =
+uniquenessCheckStmt stmt@(And stmts) _ = do
+    logUniqueness $ "Uniqueness checking conjunction " ++ show stmt
+    uniquenessCheckStmts stmts
+uniquenessCheckStmt (Or [] _ _) pos = do
+    logUniqueness $ "Uniqueness checking empty disjunction"
+    return ()
+uniquenessCheckStmt (Or [stmt] _ _) pos = do
+    logUniqueness "Uniqueness checking singleton disjunction..."
     defaultPlacedApply uniquenessCheckStmt pos stmt
-uniquenessCheckStmt (Or (stmt:stmts) vars res) pos =
-    (defaultPlacedApply uniquenessCheckStmt pos stmt `withDetism` SemiDet)
+uniquenessCheckStmt disj@(Or (stmt:stmts) vars res) pos = do
+    logUniqueness $ "Uniqueness checking disjunction " ++ show stmt
+    defaultPlacedApply uniquenessCheckStmt pos stmt `withDetism` SemiDet
     `joinUniqueness` uniquenessCheckStmt (Or stmts vars res) pos
-uniquenessCheckStmt (Not negated) pos =
+uniquenessCheckStmt stmt@(Not negated) pos = do
+    logUniqueness $ "Uniqueness checking negation " ++ show stmt
     defaultPlacedApply uniquenessCheckStmt pos negated
 uniquenessCheckStmt (TestBool exp) pos = uniquenessCheckExp exp pos
 uniquenessCheckStmt Nop pos = return ()
 uniquenessCheckStmt Fail pos = return ()
-uniquenessCheckStmt (Loop body _ _) _ = uniquenessCheckStmts body
-uniquenessCheckStmt (UseResources res _ body) pos = do
+uniquenessCheckStmt stmt@(Loop body _ _) _ = do
+    logUniqueness $ "Uniqueness checking loop " ++ show stmt
+    uniquenessCheckStmts body
+uniquenessCheckStmt stmt@(UseResources res _ body) pos = do
+    logUniqueness $ "Uniqueness checking use stmt " ++ show stmt
     -- resource is implicitly stored before block
-    mapM_ (uniquenessCheckResourceArg pos . (`ResourceFlowSpec` ParamIn)) res 
+    mapM_ (uniquenessCheckResourceArg pos . (`ResourceFlowSpec` ParamIn)) res
     uniquenessCheckStmts body
     -- resource is implicitly restored before block
-    mapM_ (uniquenessCheckResourceArg pos . (`ResourceFlowSpec` ParamOut)) res 
-uniquenessCheckStmt (For generators body) pos = do
+    mapM_ (uniquenessCheckResourceArg pos . (`ResourceFlowSpec` ParamOut)) res
+uniquenessCheckStmt stmt@(For generators body) pos = do
+    logUniqueness $ "Uniqueness checking loop " ++ show stmt
     mapM_ ((\gen -> do
             placedApply uniquenessCheckExp $ genExp gen
             placedApply uniquenessCheckExp $ loopVar gen
@@ -371,12 +384,12 @@ uniquenessCheckExp var@(AnonParamVar _ _) _ =
     shouldnt $ "AnonParamVar " ++ show var ++ " in uniqueness checking"
 uniquenessCheckExp (AnonProc mods params body clsd _) pos = do
     uniquenessCheckClosedMap clsd pos
-    errs <- uniquenessErrors 
+    errs <- uniquenessErrors
         <$> lift (uniquenessCheckDef "anonymous procedure" pos
-                    (modifierDetism mods) body 
+                    (modifierDetism mods) body
                     ((`maybePlace` pos) <$> params) [])
     mapM_ uniquenessErr errs
-uniquenessCheckExp func@(AnonFunc _) _ = 
+uniquenessCheckExp func@(AnonFunc _) _ =
     shouldnt $ "AnonFunc " ++ show func ++ " in uniqueness checking"
 uniquenessCheckExp (Global _) _ = return ()
 uniquenessCheckExp ref@(Closure _ clsd) _ =
@@ -393,18 +406,20 @@ uniquenessCheckArg _ _ _ _ _ = return ()
 
 uniquenessCheckResourceArg :: OptPos -> ResourceFlowSpec -> Uniqueness ()
 uniquenessCheckResourceArg pos (ResourceFlowSpec res flow) = do
-    let name = resourceName res
-        flowType = Resource res
-    ty <- lift $ trustFromJust "uniquenessCheckResource" . snd 
-        <$> canonicaliseResourceSpec pos "uniqueness checking" res
-    uniquenessCheckExp (Typed (Var name flow flowType) ty Nothing) pos 
-    
+    lift (canonicaliseResourceSpec pos "uniqueness checking" res)
+    >>= mapM_ (\(r,mbTy) -> do
+        let name = resourceName r
+            flowType = Resource r
+            ty = trustFromJust "uniquenessCheckResource" mbTy
+            var = Typed (Var name flow flowType) ty Nothing
+        uniquenessCheckExp var pos)
+
 -- Uniqueness check an argument of a call, ensuring that no argument binds a
 -- unique type to a generic type
 uniquenessCheckClosure :: ProcSpec -> OptPos -> [Placed Exp] -> TypeSpec -> Uniqueness ()
 uniquenessCheckClosure pspec@(ProcSpec mod name _ _) pos clsd (HigherOrderType _ tfs) = do
     params <- lift $ procProtoParams . procProto <$> getProcDef pspec
-    zipWithM_ (uncurry $ uniquenessCheckGeneric True mod name) 
+    zipWithM_ (uncurry $ uniquenessCheckGeneric True mod name)
           (swap . mapFst paramType . unPlace <$> params)
         $ (fromMaybe AnyType . maybeExpType . content <$> clsd) ++ (typeFlowType <$> tfs)
     mapM_ (placedApply uniquenessCheckClosedVariable) clsd
@@ -439,14 +454,17 @@ uniquenessCheckParam name (Param pName ty flow flowType) pos = do
         $ uniquenessErr $ UniquenessError pName ty pos flowType (ErrorReturn name)
     uniquenessCheckParamType name pos pName ty
 
-    
+
 uniquenessCheckResourceParam :: ProcName -> OptPos -> ResourceFlowSpec -> Uniqueness ()
 uniquenessCheckResourceParam name pos (ResourceFlowSpec res flow) = do
-    let rName = resourceName res
-        flowType = Resource res
-    ty <- lift $ trustFromJust "uniquenessCheckResource" . snd 
-        <$> canonicaliseResourceSpec pos "uniqueness checking" res
-    uniquenessCheckParam name (Param rName ty flow flowType) pos
+    lift (canonicaliseResourceSpec pos "uniqueness checking" res)
+    >>= mapM_ (\(r,mbTy) -> do
+            let rName = resourceName r
+                flowType = Resource r
+                ty = trustFromJust "uniquenessCheckResource" mbTy
+            uniquenessCheckParam name (Param rName ty flow flowType) pos
+        )
+
 
 
 -- | Uniqueness check the type of a parameter. This ensures that type parameters

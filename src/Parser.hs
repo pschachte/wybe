@@ -187,6 +187,16 @@ ctorDecls = (visibility >>= \vis -> (vis,) <$> (term >>= parseWith termToCtorDec
 resourceItem :: Visibility -> Parser Item
 resourceItem v = do
     pos <- tokenPosition <$> ident "resource"
+    name <- identString 
+    resdef <- resourceDefn
+    return $ ResourceDecl v name resdef (Just pos)
+
+
+resourceDefn :: Parser ResourceDefn
+resourceDefn = do
+    symbol ":" 
+    typ <- typeSpec
+    init <- optionMaybe (symbol "=" *> expr)
     mbForeign <-
         optionMaybe (ident "foreign" *> ( Just <$> identString <* symbol "=" 
                                     <|> return Nothing))
@@ -195,6 +205,10 @@ resourceItem v = do
     ty <-  symbol ":" *> typeSpec
     mbInit <- optionMaybe (symbol "=" *> expr)
     return $ ResourceDecl v optForeign name ty mbInit $ Just pos
+    <|> do
+        symbol "="
+        rspecs <- resourceSpec `sepBy1` comma
+        return $ CompoundResourceDefn rspecs
 
 
 -- | Parse a "use" item. Either an import statement or a use-block

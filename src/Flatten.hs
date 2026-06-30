@@ -67,15 +67,19 @@ flattenProcBody pd _ = do
                  $ List.map paramName
                  $ List.filter (flowsIn . paramFlow)
                  $ content <$> params
-        resources = List.map (resourceName . resourceFlowRes)
-                  $ procProtoResources proto
-        ProcDefSrc body = procImpln pd
+        resources = List.map resourceFlowRes $ procProtoResources proto
+
+    resources' <- List.map resourceName
+                . List.concatMap keys . catMaybes
+                <$> mapM lookupResource resources
+
+    let ProcDefSrc body = procImpln pd
 
         detism = procDetism pd
         inlining = procInlining pd
         impurity = procImpurity pd
         variant = procVariant pd
-        resourceful = not $ List.null resources
+        resourceful = not $ List.null resources'
         mods = ProcModifiers detism inlining impurity variant resourceful
 
     logMsg Flatten
@@ -83,7 +87,7 @@ flattenProcBody pd _ = do
             ++ " {" ++ showBody 4 body ++ "}"
     mapM_ (placedApply $ flip explicitTypeSpecificationWarning . paramType) params
 
-    (body',tmpCtr) <- flattenBody body (inParams `Set.union` Set.fromList resources) detism
+    (body',tmpCtr) <- flattenBody body (inParams `Set.union` Set.fromList resources') detism
 
     return pd{procTmpCount = tmpCtr, procImpln = ProcDefSrc body'}
 
@@ -93,7 +97,7 @@ flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
             -> Compiler ([Placed Stmt],Int)
 flattenBody stmts varSet detism = do
     logMsg Flatten $ "Flattening body" ++ showBody 4 stmts
-    logMsg Flatten $ "Flattening with parameters = " ++ show varSet
+    logMsg Flatten $ "Flattening with parameters/resources = " ++ show varSet
     let varSet' = foldStmts (const . const) insertOutVar varSet stmts
     logMsg Flatten $ "Flattening with all vars = " ++ show varSet'
     finalState <- execStateT (flattenStmts stmts detism)
@@ -691,7 +695,7 @@ flattenAnon mods clsd res ty castFrom pos inner = do
 flattenSizeofArg :: Exp -> OptPos -> Flattener (Placed Exp)
 flattenSizeofArg exp pos = do
     case innerExp exp of
-        Var var flow _ | var /= "_" && flow /= ParamIn -> 
+        Var var flow _ | var /= "_" && flow /= ParamIn ->
             lift $ message Error "Argument 0 of sizeof cannot be an out variable" pos
         _ -> return ()
     flattenPExp $ exp `maybePlace` pos
