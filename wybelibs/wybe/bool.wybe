@@ -4,8 +4,14 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.c_string, wybe.string, wybe.char, wybe.int, wybe.io, wybe.comparison
+use wybe.eq
+
 
 pub constructors false | true
+
+## Traits
+
+impl eq
 
 ## Constants
 

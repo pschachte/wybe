@@ -1,0 +1,9 @@
+# An equality trait
+
+trait
+
+abstract {test} (a:_ = b:_)
+abstract {test} (a:_ ~= b:_)
+
+# pub def {test} (a:_ = b:_)  { ~(a ~= b) }
+# pub def {test} (a:_ ~= b:_) { ~(a  = b) }
