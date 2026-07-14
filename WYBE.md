@@ -2082,6 +2082,35 @@ file extension.  When an executable is built, the specified library will be
 linked in with a `-l`*librarybasename* switch.
 
 
+#### Using foreign global variables
+
+Global variables from other languages can be accessed from Wybe programs as
+resources.  This ensures that procedures in your Wybe program must document the use of these
+global variables with `using` clauses.
+
+A global variable *var* can be made available to a Wybe program with a
+declaration:
+
+> `resource foreign` *var* `:` *type*
+
+This declares a resource called *var*, which refers to the global variable *var*.
+The resource can be given a different name, such as *res*, with this alternative
+declaration:
+
+> `resource foreign` *var* `=` *res* `:` *type*
+
+You may specify an initial value for this resource by adding
+
+> `=` *type*
+
+at the end of either of these declarations.
+
+These declarations permit the *var* global variable to be accessed as the *var*
+resource (the *res* resource in the second form) to be used in `use` clauses,
+and makes it available at the beginning of the program, whether or not an
+initial value is specified.
+
+
 #### Calling foreign code
 
 To call code written in other languages from Wybe, use the `foreign` construct.

@@ -2083,23 +2083,41 @@ type ResourceDef = Map ResourceSpec PrimResourceImpln
 -- may be implemented in terms of multiple simple resources.
 data PrimResourceImpln =
     PrimResource {
-        resourceType::TypeSpec,
-        resourceForeign::Maybe Ident,
-        resourceInit::Maybe (Placed Exp),
-        resourcePos::OptPos
+        resourceType::TypeSpec,             -- ^ The type of the resource
+        resourceForeign::Maybe Ident,       -- ^ The foreign name if foreign
+        resourceInit::Maybe (Placed Exp),   -- ^ The initialisation, if given
+        resourcePos::OptPos                 -- ^ Where declared
         }
     deriving (Generic, Eq)
 
 
--- | Return the initialised resources *defined* by the current module.
-initialisedResources :: Compiler ResourceDef
+-- | Does the specified resource implementation indicate an initialised
+-- resource?  This is true if it has a specified initialisation, or if it is
+-- foreign (in which case we assume foreign code has initialised it).
+resourceIsInitialised :: PrimResourceImpln -> Bool
+resourceIsInitialised = (isJust . resourceInit) ||| (isJust . resourceForeign)
+
+
+-- | Does the specified resource implementation indicate a foreign resource that
+-- does not have an explicit Wybe initialisation, so it is taken to be
+-- pre-initialised by foreign code?
+resourceIsForeignPreinit :: PrimResourceImpln -> Bool
+resourceIsForeignPreinit =
+    (isJust . resourceForeign) &&& (isNothing . resourceInit)
+
+
+-- | Return the initialised resources *defined* by the current module, paired
+-- with the foreign resources that are not explicitly initialised in Wybe, but
+-- are assumed to be initialised by foreign code.
+initialisedResources :: Compiler (ResourceDef,Set ResourceSpec)
 initialisedResources = do
     currMod <- getModuleSpec
-    localRes <- getModuleImplementationField modResources
-    let localDefs = Map.filter (isJust . resourceInit) $ Map.unions localRes
+    localRes <- Map.unions <$> getModuleImplementationField modResources
+    let localDefs = Map.filter resourceIsInitialised localRes
+    let preInits = List.filter (resourceIsForeignPreinit . snd) $ Map.toList localRes
     logAST $ "      local resources = " ++ show localRes
     logAST $ "    local initialised = " ++ show localDefs
-    return localDefs
+    return (localDefs, Set.fromList (fst <$> preInits))
 
 
 -- | Return the initialised resources *visible* to the current module.
@@ -2107,7 +2125,7 @@ initialisedVisibleResources :: Compiler ResourceDef
 initialisedVisibleResources = do
     visableRes <- Set.toList . Set.unions . Map.elems
                  <$> getModuleImplementationField modKnownResources
-    visibleDefs <- Map.filter (isJust . resourceInit) . Map.unions . catMaybes
+    visibleDefs <- Map.filter resourceIsInitialised . Map.unions . catMaybes
                <$> mapM lookupResource visableRes
     logAST $ "    visible resources = " ++ show visableRes
     logAST $ "  visible initialised = " ++ show visibleDefs

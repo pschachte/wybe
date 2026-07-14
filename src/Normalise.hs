@@ -521,12 +521,6 @@ initResources modSCC = do
     let visibleInitSet = Map.keysSet visibleInitialised
     logNormalise $ "in initResources, initialised resources = "
                    ++ show visibleInitSet
-    -- Direct tie-in to command_line library module:  for the command_line
-    -- module, or any module that imports it, we add argc and argv as resources.
-    -- This is necessary because argc and argv are effectively initialised by
-    -- the fact that they're automatically generated as arguments to the
-    -- top-level main, but we can't declare them with resource initialisations,
-    -- because that would overwrite them.
     let cmdlineResources =
             if cmdLineModSpec == thisMod
             then let cmdline = ResourceSpec cmdLineModSpec

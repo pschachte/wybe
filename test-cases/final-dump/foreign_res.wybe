@@ -1,0 +1,15 @@
+# Test case for access to foreign resources (C global variables)
+
+resource foreign benchmark_in_progress = benching : bool
+
+pub def {test} now_benching use benching {
+    benching
+}
+
+# resource foreign stdin : opaque_pointer
+
+if { !now_benching :: !println("running benchmark")
+   | else          :: !println("not currently benchmarking")
+}
+
+# !println("stdin = $stdin")

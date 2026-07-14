@@ -22,7 +22,7 @@ import           Data.Maybe
 import           Data.Set                  as Set
 import           Data.Either               as Either
 import           Data.Either.Extra         (mapLeft)
-import           Data.Tuple.HT             (mapFst, mapSnd)
+import           Data.Tuple.HT             (mapFst, mapSnd, mapSnd3)
 import           Data.Tuple.Extra          ((***))
 import           Options                   (LogSelection (Resources))
 import           Snippets
@@ -30,6 +30,7 @@ import           Util
 import           Debug.Trace
 import Control.Monad.Extra (unlessM, concatMapM)
 import Data.List.Extra (nubOrd, groupOn, groupSortOn)
+import Data.Tuple.Extra (fst3)
 
 
 
@@ -165,6 +166,7 @@ checkResourceDef name def = do
         unzip3 <$> mapM (uncurry checkResourceImpln) (Map.toList def)
     return (or chg, concat errs, (name,Map.fromList m))
 
+
 -- |Check a resource implementation
 checkResourceImpln :: ResourceSpec -> PrimResourceImpln
                  -> Compiler (Bool,[(String,OptPos)],
@@ -213,6 +215,7 @@ canonicaliseProcResources pd _ = do
     let proto = procProto pd
     let pos = procPos pd
     let resources = procProtoResources proto
+    logResources $ "  ResourceFlowSpecs: " ++ intercalate ", " (show <$> resources)
     resourceFlows <- List.map collapseResourceFlows
                    . groupSortOn resourceFlowRes
                  <$> concatMapM (canonicaliseResourceFlow pos name) resources
@@ -228,7 +231,7 @@ canonicaliseProcResources pd _ = do
 canonicaliseResourceFlow :: OptPos -> ProcName -> ResourceFlowSpec
                          -> Compiler [ResourceFlowSpec]
 canonicaliseResourceFlow pos name (ResourceFlowSpec res flow) = do
-    List.map ((`ResourceFlowSpec` flow). fst)
+    List.map ((`ResourceFlowSpec` flow) . fst3)
         <$> canonicaliseResourceSpec pos
                 ("declaration of " ++ showProcName name)
                 res
@@ -485,7 +488,7 @@ transformStmt (Loop stmts vars _) pos = do
 transformStmt (UseResources res vars stmts) pos = do
     let (special, res') = List.partition isSpecialResource res
     let vars' = trustFromJust "transform use with no vars" vars
-    resTypes <- (mapSnd (trustFromJust "transform use") <$>)
+    resTypes <- List.map (\(r,t,_) -> (r, trustFromJust "transform use" t))
             <$> lift (concatMapM (canonicaliseResourceSpec pos "use block") res')
     ResourceState{resResources=resources,
                   resMentioned=mentioned,
@@ -608,26 +611,28 @@ addResourceInOuts fl nm ty = do
 
 ------------------------- General support code -------------------------
 
--- |Canonicalise a single resource spec, based on visible modules.  Report
--- unknown resource error in the specified context if resource or its type is
--- unknown.
+-- |Canonicalise a single resource spec, based on visible modules, returning the
+-- canonical resource spec, its type (if known), and its foreign name (if it has
+-- one).  Report unknown resource error in the specified context if resource or
+-- its type is unknown.
 canonicaliseResourceSpec :: OptPos -> String -> ResourceSpec
-                         -> Compiler [(ResourceSpec, Maybe TypeSpec)]
+                -> Compiler [(ResourceSpec, Maybe TypeSpec, Maybe Ident)]
 canonicaliseResourceSpec pos context spec = do
     logResources $ "canonicalising resource " ++ show spec
     resDef <- lookupResource spec
     case resDef of
         Nothing -> do
             errmsg pos $ "Unknown resource " ++ show spec ++ " in " ++ context
-            return [(spec,Nothing)]
+            return [(spec,Nothing,Nothing)]
         Just def -> do
             when (Map.null def) $
                 shouldnt $ "Empty resource " ++ show spec ++ " in " ++ context
             mapM (\(spec,impln) -> do
                     let resType = resourceType impln
+                    let optForeign = resourceForeign impln
                     logResources $ "    to --> " ++ show spec
                                     ++ ":" ++ show impln
-                    return (spec,Just resType))
+                    return (spec,Just resType,optForeign))
                 $ Map.assocs def
 
 

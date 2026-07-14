@@ -206,6 +206,7 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
 import           Data.Maybe
+import           Data.Tuple.HT
 import           Data.Foldable
 import           Emit
 import           Flow                      ((|>))
@@ -358,15 +359,15 @@ loadAllNeededModules modspec isTarget isExec possDirs = do
     let possDirs' = if isTarget
         then possDirs ++ ((,True) <$> optLibDirs opts)
         else possDirs
-    mods' <- if isExec
-        then do
-            cmdLineMods <- loadModuleIfNeeded force cmdLineModSpec possDirs'
-            return $ nub $ cmdLineMods ++ mods
-        else return mods
+    -- mods' <- if isExec
+    --     then do
+    --         cmdLineMods <- loadModuleIfNeeded force cmdLineModSpec possDirs'
+    --         return $ nub $ cmdLineMods ++ mods
+    --     else return mods
     logBuild $ "Loading module " ++ showModSpec modspec
-               ++ " ... got " ++ showModSpecs mods'
+               ++ " ... got " ++ showModSpecs mods
 
-    if List.null mods'
+    if List.null mods
     then return []
     else do
         -- handle dependencies of recently loaded modules
@@ -380,7 +381,7 @@ loadAllNeededModules modspec isTarget isExec possDirs = do
                 loadAllNeededModules importMod False False possDirs') imports
 
             return $ (m, imports):depGraph
-            ) mods'
+            ) mods
 
 
 -- | Try to load the given "modspec" and try to use the compiled version from
@@ -1015,7 +1016,7 @@ buildExecutable orderedSCCs targetMod target = do
     possDirs <- gets $ ((,True) <$>) . optLibDirs . options
     loadModuleIfNeeded False cmdLineModSpec possDirs
     let privateImport = importSpec Nothing Private
-    addImport cmdLineModSpec privateImport `inModule` targetMod
+    -- addImport cmdLineModSpec privateImport `inModule` targetMod
     procs <- keys . modProcs <$> getLoadedModuleImpln targetMod
     -- dependsUnsorted <- orderedDependencies targetMod
     -- let topoMap = sccTopoMap orderedSCCs
@@ -1032,7 +1033,7 @@ buildExecutable orderedSCCs targetMod target = do
             let mainMod = []
             enterModule target mainMod Nothing
             addImport ["wybe"] privateImport
-            addImport cmdLineModSpec privateImport
+            -- addImport cmdLineModSpec privateImport
             -- Import all dependencies of the target mod
             mapM_ (\m -> addImport m $ importSpec Nothing Private) depends
             importFromSupermodule targetMod
@@ -1137,31 +1138,41 @@ buildMain :: [[ModSpec]] -> Compiler Item
 buildMain sccs = do
     logBuild "Generating main executable code"
     let cmdResource name = ResourceFlowSpec (ResourceSpec cmdLineModSpec name)
+    inits <- mapM sccInits sccs
+    let initRes = Set.unions $ List.map fst3 inits
+    let preInits = Set.unions $ List.map snd3 inits
+    let wybeInits = initRes Set.\\ preInits
+    let body = concatMap thd3 inits
+            -- ++ [Unplaced
+            --     $ ForeignCall "c" "exit"
+            --         ["semipure","terminal"]
+            --         [Unplaced $ intVarGet "exit_code"]]
+    logBuild $ "All initialised resources:  " ++ show initRes
+    logBuild $ "Resources initialised in Wybe:  " ++ show wybeInits
+    -- let detism = setDetism Terminal $ setImpurity Impure defaultProcModifiers
+    let detism = setImpurity Impure defaultProcModifiers
+    -- Program main has argc, argv, and exit_code as resources
     let mainRes = [ cmdResource "argc" ParamIn
                   , cmdResource "argv" ParamIn
                   , cmdResource "exit_code" ParamOut]
-    initPairs <- mapM sccInits sccs
-    let initRes = Set.unions $ List.map fst initPairs
-    let body = concatMap snd initPairs
-            ++ [Unplaced
-                $ ForeignCall "c" "exit"
-                    ["semipure","terminal"]
-                    [Unplaced $ intVarGet "exit_code"]]
-    logBuild $ "All initialised resources:  " ++ show initRes
-    let detism = setDetism Terminal $ setImpurity Impure defaultProcModifiers
-    -- Program main has argc, argv, and exit_code as resources
-    let proto = ProcProto "" [] mainRes
-    let mainBody = [ Unplaced $ UseResources (Set.toList initRes) Nothing body]
+    let proto = ProcProto "" []
+                $ mainRes ++ List.map (`ResourceFlowSpec` ParamIn)
+                                (Set.toList preInits)
+    let mainBody = [ Unplaced $ UseResources (Set.toList wybeInits) Nothing body]
     return $ ProcDecl Private detism proto mainBody Nothing
 
 
--- |Returns a pair of lists of resource initialisations and initialisation procs
--- for all the specified modules.
-sccInits :: [ModSpec] -> Compiler (Set ResourceSpec,[Placed Stmt])
+-- |Returns a lists of all resource initialisations, all foreign pre-initialised
+-- resources (with no explicit Wybe initialisation), and all initialisation
+-- procs for all the specified modules.
+sccInits :: [ModSpec]
+         -> Compiler (Set ResourceSpec,Set ResourceSpec,[Placed Stmt])
 sccInits mods = do
     logBuild $ "Collecting initialisations for modules:  " ++ showModSpecs mods
-    initialisedRes <- mapM (initialisedResources `inModule`) mods
+    (initialisedRes,preInits) <-
+        mapSnd Set.unions . unzip <$> mapM (initialisedResources `inModule`) mods
     logBuild $ "Initialised resources:  " ++ show initialisedRes
+    logBuild $ "Pre-initialised foreign resources:  " ++ show preInits
     let initRes = Set.unions $ List.map Map.keysSet initialisedRes
     let resInits = [maybePlace
                     (ForeignCall "llvm" "move" []
@@ -1180,7 +1191,7 @@ sccInits mods = do
                             $ ProcCall (First modSpec "" Nothing) Det True []
                         | modSpec <- initMods
                         ]
-    return (initRes, resInits ++ initProcCalls)
+    return (initRes, preInits, resInits ++ initProcCalls)
 
 
 -- | Traverse and collect a depth first dependency list from the given initial

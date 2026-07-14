@@ -254,4 +254,4 @@ testVar name = Unplaced $ TestBool $ boolCast $ varGet name
 
 -- | The module specification of the command line module
 cmdLineModSpec :: ModSpec
-cmdLineModSpec = ["command_line"]
+cmdLineModSpec = ["wybe","raw_cmdline"]

@@ -4,4 +4,15 @@
 
 pragma no_standard_library # Standard library can't depend on itself!
 
+use wybe.count, wybe.int, wybe.char, wybe.string
+
 representation is opaque
+
+pub def foreign lpvm count=cast(x:_):count
+
+pub def fmt(x:_):string = fmt(x, 0)
+
+pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
+
+pub def fmt(x:_, minlength:int, fill:char):string =
+    fmt(count(x), minlength, fill, 16)

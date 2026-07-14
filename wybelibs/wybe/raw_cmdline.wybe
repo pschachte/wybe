@@ -1,0 +1,20 @@
+# purpose: Simple argc, argv, and exit code handler
+# since  : 0.2
+
+# For a slightly higher-level interface to the command line, use the
+# `command_line` library module.
+
+# The number and vector of command line arguments.  These are automatically
+# initialised by the code that builds executables.
+pub resource argc:int
+pub resource argv:raw_array
+
+# The exit code to return to the invoking shell.  This is initialised to
+# zero, so it only needs to be assigned for error cases.
+pub resource exit_code:int = 0
+
+
+# Set the exit code, but don't exit immediately.
+pub def set_exit_code(code:int) use ?exit_code {
+    ?exit_code = code
+}

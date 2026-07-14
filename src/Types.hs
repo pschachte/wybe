@@ -25,7 +25,7 @@ import           Data.Either         as Either
 import           Data.Set            as Set
 import           UnivSet             as USet
 import           Data.Tuple.Select
-import           Data.Tuple.Extra    ((***))
+import           Data.Tuple.Extra    ((***),fst3)
 import           Data.Foldable
 import           Data.Bifunctor
 import           Data.Functor        ((<&>))
@@ -2433,7 +2433,7 @@ modecheckStmt final stmt@(UseResources resources _ stmts) pos = do
     initResources <- gets bindingResources
     logModed $ "Mode checking use ... in stmt " ++ show stmt
     canonRes <- lift2 (concatMapM (canonicaliseResourceSpec pos "use block") resources)
-    let resources' = fst <$> canonRes
+    let resources' = fst3 <$> canonRes
     let resVars = USet.fromList $ resourceName <$> resources'
     resfulBoundPre <- resfulBoundVars resVars
     let innerResources = List.foldr Set.insert initResources resources'
@@ -2679,11 +2679,13 @@ finaliseCall resourceful final pos args
                                     (Just $ procSpecID matchProc))
                     matchDetism resourceful args'
         logModed $ "Finalising call    :  " ++ show stmt'
+        logModed $ "Assigned           :  " ++ simpleShowSet (bindingResources assigned)
         logModed $ "Input resources    :  " ++ simpleShowSet inResources
         logModed $ "Output resources   :  " ++ simpleShowSet outResources
+        logModed $ "Special resources  :  " ++ simpleShowSet specialResourcesSet
+        logModed $ "Out of scope       :  " ++ simpleShowSet outOfScope
         logModed $ "Specials in call   :  " ++ simpleShowSet specials
         logModed $ "Available vars     :  " ++ simpleShowSet avail
-        logModed $ "Available resources:  " ++ simpleShowSet (bindingResources assigned)
         specialInstrs <-
             mapM (\r -> do
                     logModed $ "Checking special resource: " ++ r

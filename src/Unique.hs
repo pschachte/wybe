@@ -21,8 +21,8 @@ import Control.Monad.Extra       (whenM, concatMapM)
 import Data.List                 as List
 import Data.Set                  as Set
 import Data.Map                  as Map
-import Data.Maybe
-import Data.Tuple.HT             (mapFst, swap)
+import Data.Maybe                as Maybe
+import Data.Tuple.HT             (mapFst, swap, snd3)
 import qualified Data.ByteString.Builder.Prim as Set
 
 
@@ -103,8 +103,9 @@ uniquenessCheckProc def _ = do
     someUniqueRes <- elem (Just True) <$>
                      mapM (((tmUniqueness . typeModifiers . modInterface <$>) <$>)
                            <$> getLoadingModule)
-                         (catMaybes $ typeModule . trustFromJust "unique res ty" . snd
-                            <$> resTys)
+                         (Maybe.mapMaybe 
+                            (typeModule . trustFromJust "unique res ty" . snd3)
+                            resTys)
     unless (detism `determinismLEQ` Det) $ do
         when someUniqueRes $
             errmsg pos $ name ++ " with unique parameter(s) can fail"
@@ -407,7 +408,7 @@ uniquenessCheckArg _ _ _ _ _ = return ()
 uniquenessCheckResourceArg :: OptPos -> ResourceFlowSpec -> Uniqueness ()
 uniquenessCheckResourceArg pos (ResourceFlowSpec res flow) = do
     lift (canonicaliseResourceSpec pos "uniqueness checking" res)
-    >>= mapM_ (\(r,mbTy) -> do
+    >>= mapM_ (\(r,mbTy,_) -> do
         let name = resourceName r
             flowType = Resource r
             ty = trustFromJust "uniquenessCheckResource" mbTy
@@ -458,7 +459,7 @@ uniquenessCheckParam name (Param pName ty flow flowType) pos = do
 uniquenessCheckResourceParam :: ProcName -> OptPos -> ResourceFlowSpec -> Uniqueness ()
 uniquenessCheckResourceParam name pos (ResourceFlowSpec res flow) = do
     lift (canonicaliseResourceSpec pos "uniqueness checking" res)
-    >>= mapM_ (\(r,mbTy) -> do
+    >>= mapM_ (\(r,mbTy,_) -> do
             let rName = resourceName r
                 flowType = Resource r
                 ty = trustFromJust "uniquenessCheckResource" mbTy

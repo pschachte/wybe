@@ -188,7 +188,7 @@ resourceItem :: Visibility -> Parser Item
 resourceItem v = do
     pos <- tokenPosition <$> ident "resource"
     mbForeign <-
-        optionMaybe (ident "foreign" *> ( Just <$> identString <* symbol "="
+        optionMaybe (ident "foreign" *> ( Just <$> try (identString <* symbol "=")
                                     <|> return Nothing))
     name <- identString
     let optForeign = fromMaybe name <$> mbForeign

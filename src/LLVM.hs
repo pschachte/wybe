@@ -534,14 +534,18 @@ writeAssemblyGlobals = do
     mapM_ defGlobalResource ress
 
 
--- | Generate a global declaration for a resource, if it's not a phantom.
+-- | Generate a global declaration for a resource, if it's not a phantom and not
+-- a foreign resource (which is declared in foreign code).
 defGlobalResource :: ResourceSpec -> LLVM ()
 defGlobalResource res = do
-    (name, rep) <- llvmResource res
+    (name, rep, optForeign) <- llvmResource res
     if repIsPhantom rep
         then return ()
-        else llvmPutStrLn $ name ++ " = global " ++ llvmTypeRep rep ++ " undef"
-
+        else if isJust optForeign
+        then llvmPutStrLn
+                $ name ++ " = external global ptr"
+        else llvmPutStrLn
+                $ name ++ " = global " ++ llvmTypeRep rep ++ " undef"
 
 ----------------------------------------------------------------------------
 -- Writing extern declarations
@@ -1235,7 +1239,7 @@ duplicateStruct struct hole size startOffset holeSize newStruct = do
             -- hole is at block start and multiple of word size
             return (intConst holeSize, intConst (sz - holeSize), Nothing)
         (ArgInt end _, ArgInt sz _, ArgInt offst _)
-            | (end + offst) `mod` fromIntegral wordSizeBytes == 0 
+            | (end + offst) `mod` fromIntegral wordSizeBytes == 0
               && holeSize `mod` fromIntegral wordSizeBytes == 0
               && sz == end + offst + holeSize -> do
             -- hole is word aligned at block end
@@ -1538,7 +1542,7 @@ llvmOffsetPtr :: PrimArg -> String -> PrimArg -> LLVM PrimArg
 llvmOffsetPtr base _ (ArgInt 0 _) = return base
 llvmOffsetPtr base op offset = do
     logLLVM $ "offsetting pointer " ++ show base ++ " by offset " ++ show offset
-    baseptr <- typeConvertedPrim Pointer base 
+    baseptr <- typeConvertedPrim Pointer base
     (writeStart,readStart) <- freshPtrArgs
     writeLLVMCall op [] [baseptr,offset,writeStart] Nothing
     return readStart
@@ -1667,14 +1671,15 @@ typeRep = lift . typeRepresentation
 
 
 -- | Return the LLMV name and type representation of the specified resource.
-llvmResource :: ResourceSpec -> LLVM (LLVMName, TypeRepresentation)
+llvmResource :: ResourceSpec -> LLVM (LLVMName, TypeRepresentation, Maybe Ident)
 llvmResource res = do
-    (res', ty) <-
-        mapSnd (trustFromJust $ "defGlobalResource " ++ show res)
+    (res', ty, foreignName) <-
+        mapSnd3 (trustFromJust $ "defGlobalResource " ++ show res)
         . singletonHead
         <$> lift (canonicaliseResourceSpec Nothing "newLLVMModule" res)
     rep <- typeRep ty
-    return (llvmGlobalName (makeGlobalResourceName res'), rep)
+    let name = fromMaybe (makeGlobalResourceName res') foreignName
+    return (llvmGlobalName name, rep, foreignName)
     where singletonHead [x] = x
           singletonHead _ =
             shouldnt $ "In LLVM generation, resource spec " ++ show res
@@ -2322,7 +2327,7 @@ llvmQuoteIfNecessary s =
 -- | Produce a suitable LLVM global name based on a GlobalInfo
 llvmGlobalInfoName :: GlobalInfo -> LLVM LLVMName
 llvmGlobalInfoName (GlobalResource res) =
-     fst <$> llvmResource res
+     fst3 <$> llvmResource res
 llvmGlobalInfoName (GlobalVariable var) = return $ llvmGlobalName var
 
 
