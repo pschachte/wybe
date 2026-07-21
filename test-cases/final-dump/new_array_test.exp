@@ -17,19 +17,19 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: new_array_test.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(new_array_test.#cont#4<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 []]))]
     wybe.array.array<0>(0:wybe.int, 1000000:wybe.int, ?tmp#0##0:wybe.array(wybe.int)) #0 @new_array_test:nn:nn
     foreign lpvm access(tmp#0##0:wybe.array(wybe.int), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @new_array_test:nn:nn
     wybe.range...<0>(0:wybe.int, ~tmp#3##0:wybe.int, ?tmp#2##0:wybe.range) #2 @new_array_test:nn:nn
-    new_array_test.#cont#4<0>[7477e50a09](~tmp#0##0:wybe.array(wybe.int), ~tmp#2##0:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @new_array_test:nn:nn
+    new_array_test.#cont#4<0>[7477e50a09](~tmp#0##0:wybe.array(wybe.int), ~tmp#2##0:wybe.range)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #3 @new_array_test:nn:nn
 
 
 proc #cont#1 > {inline,semipure} (1 calls)
 0: new_array_test.#cont#1<0>
-#cont#1(ar##0:wybe.array(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#1(ar##0:wybe.array(wybe.int))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(ar##0:wybe.array(wybe.int), 8:wybe.int, ?tmp#14##0:wybe.c_array.raw_array) @new_array_test:nn:nn
@@ -39,7 +39,7 @@ proc #cont#1 > {inline,semipure} (1 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#18##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
     foreign lpvm mutate(~tmp#18##0:wybe.array.array_iterator(wybe.int), ?tmp#19##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#14##0:wybe.c_array.raw_array) @new_array_test:nn:nn
     foreign lpvm mutate(~tmp#19##0:wybe.array.array_iterator(wybe.int), ?tmp#5##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#17##0:wybe.c_array.raw_array) @new_array_test:nn:nn
-    new_array_test.#cont#3<0>(0:wybe.int, ~tmp#5##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @new_array_test:nn:nn
+    new_array_test.#cont#3<0>(0:wybe.int, ~tmp#5##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #1 @new_array_test:nn:nn
 
 
 proc #cont#2 > {inline,semipure} (1 calls)
@@ -57,7 +57,7 @@ proc #cont#2 > {inline,semipure} (1 calls)
 
 proc #cont#3 > {semipure} (2 calls)
 0: new_array_test.#cont#3<0>
-#cont#3(sum##0:wybe.int, tmp#4##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#3(sum##0:wybe.int, tmp#4##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(2,(new_array_test.#cont#3<0>,fromList [NonAliasedParamCond 1 [1]]))]
@@ -78,7 +78,7 @@ proc #cont#3 > {semipure} (2 calls)
         foreign llvm add(~tmp#14##0:wybe.c_array.raw_array, 8:wybe.int, ?tmp#17##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#4##0:wybe.array.array_iterator(wybe.int), ?tmp#4##1:wybe.array.array_iterator(wybe.int), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#17##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign llvm add(~i##0:wybe.int, ~sum##0:wybe.int, ?sum##1:wybe.int) @new_array_test:nn:nn
-        new_array_test.#cont#3<0>(~sum##1:wybe.int, ~tmp#4##1:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+        new_array_test.#cont#3<0>(~sum##1:wybe.int, ~tmp#4##1:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #2 @new_array_test:nn:nn
 
  [6dacb8fd25] [NonAliasedParam 1] :
     foreign lpvm access(tmp#4##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#14##0:wybe.c_array.raw_array) @new_array_test:nn:nn
@@ -98,13 +98,13 @@ proc #cont#3 > {semipure} (2 calls)
         foreign llvm add(~tmp#14##0:wybe.c_array.raw_array, 8:wybe.int, ?tmp#17##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#4##0:wybe.array.array_iterator(wybe.int), ?tmp#4##1:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#17##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign llvm add(~i##0:wybe.int, ~sum##0:wybe.int, ?sum##1:wybe.int) @new_array_test:nn:nn
-        new_array_test.#cont#3<0>[6dacb8fd25](~sum##1:wybe.int, ~tmp#4##1:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+        new_array_test.#cont#3<0>[6dacb8fd25](~sum##1:wybe.int, ~tmp#4##1:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #2 @new_array_test:nn:nn
 
 
 
 proc #cont#4 > {semipure} (2 calls)
 0: new_array_test.#cont#4<0>
-#cont#4(ar##0:wybe.array(wybe.int), tmp#1##0:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#4(ar##0:wybe.array(wybe.int), tmp#1##0:wybe.range)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1]
   MultiSpeczDepInfo: [(0,(wybe.range.[|]<0>,fromList [NonAliasedParamCond 2 [1]])),(2,(new_array_test.#cont#4<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 []])),(5,(new_array_test.#cont#3<0>,fromList [NonAliasedParamCond 1 []]))]
@@ -118,7 +118,7 @@ proc #cont#4 > {semipure} (2 calls)
         foreign lpvm alloc(16:wybe.int, ?tmp#20##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#20##0:wybe.array.array_iterator(wybe.int), ?tmp#21##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#21##0:wybe.array.array_iterator(wybe.int), ?tmp#22##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#19##0:wybe.c_array.raw_array) @new_array_test:nn:nn
-        new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#22##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @new_array_test:nn:nn
+        new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#22##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #5 @new_array_test:nn:nn
 
     1:
         foreign llvm icmp_sge(i##0:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.bool) @new_array_test:nn:nn
@@ -139,7 +139,7 @@ proc #cont#4 > {semipure} (2 calls)
                 foreign llvm mul(~tmp#27##0:wybe.int, 8:wybe.int, ?tmp#32##0:wybe.int) @new_array_test:nn:nn
                 foreign llvm add(~tmp#32##0:wybe.int, 8:wybe.int, ?tmp#33##0:wybe.int) @new_array_test:nn:nn
                 foreign lpvm mutate(~ar##0:wybe.array(wybe.int), ?ar##1:wybe.array(wybe.int), ~tmp#30##0:wybe.int, 0:wybe.int, ~tmp#33##0:wybe.int, 0:wybe.int, ~i##0:wybe.int) @new_array_test:nn:nn
-                new_array_test.#cont#4<0>[6dacb8fd25](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+                new_array_test.#cont#4<0>[6dacb8fd25](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #2 @new_array_test:nn:nn
 
 
 
@@ -154,7 +154,7 @@ proc #cont#4 > {semipure} (2 calls)
         foreign lpvm alloc(16:wybe.int, ?tmp#20##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#20##0:wybe.array.array_iterator(wybe.int), ?tmp#21##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#21##0:wybe.array.array_iterator(wybe.int), ?tmp#22##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#19##0:wybe.c_array.raw_array) @new_array_test:nn:nn
-        new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#22##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @new_array_test:nn:nn
+        new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#22##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #5 @new_array_test:nn:nn
 
     1:
         foreign llvm icmp_sge(i##0:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.bool) @new_array_test:nn:nn
@@ -175,7 +175,7 @@ proc #cont#4 > {semipure} (2 calls)
                 foreign llvm mul(~tmp#27##0:wybe.int, 8:wybe.int, ?tmp#32##0:wybe.int) @new_array_test:nn:nn
                 foreign llvm add(~tmp#32##0:wybe.int, 8:wybe.int, ?tmp#33##0:wybe.int) @new_array_test:nn:nn
                 foreign lpvm mutate(~ar##0:wybe.array(wybe.int), ?ar##1:wybe.array(wybe.int), ~tmp#30##0:wybe.int, 1:wybe.int, ~tmp#33##0:wybe.int, 0:wybe.int, ~i##0:wybe.int) @new_array_test:nn:nn
-                new_array_test.#cont#4<0>[7477e50a09](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+                new_array_test.#cont#4<0>[7477e50a09](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #2 @new_array_test:nn:nn
 
 
 
@@ -191,7 +191,7 @@ proc #cont#4 > {semipure} (2 calls)
         foreign lpvm alloc(16:wybe.int, ?tmp#20##0:wybe.array.array_iterator(wybe.int)) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#20##0:wybe.array.array_iterator(wybe.int), ?tmp#21##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign lpvm mutate(~tmp#21##0:wybe.array.array_iterator(wybe.int), ?tmp#22##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#19##0:wybe.c_array.raw_array) @new_array_test:nn:nn
-        new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#22##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @new_array_test:nn:nn
+        new_array_test.#cont#3<0>[6dacb8fd25](0:wybe.int, ~tmp#22##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #5 @new_array_test:nn:nn
 
     1:
         foreign llvm icmp_sge(i##0:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.bool) @new_array_test:nn:nn
@@ -212,7 +212,7 @@ proc #cont#4 > {semipure} (2 calls)
                 foreign llvm mul(~tmp#27##0:wybe.int, 8:wybe.int, ?tmp#32##0:wybe.int) @new_array_test:nn:nn
                 foreign llvm add(~tmp#32##0:wybe.int, 8:wybe.int, ?tmp#33##0:wybe.int) @new_array_test:nn:nn
                 foreign lpvm mutate(~ar##0:wybe.array(wybe.int), ?ar##1:wybe.array(wybe.int), ~tmp#30##0:wybe.int, 0:wybe.int, ~tmp#33##0:wybe.int, 0:wybe.int, ~i##0:wybe.int) @new_array_test:nn:nn
-                new_array_test.#cont#4<0>[6dacb8fd25](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
+                new_array_test.#cont#4<0>[6dacb8fd25](~ar##1:wybe.array(wybe.int), ~tmp#1##1:wybe.range)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #2 @new_array_test:nn:nn
 
 
 

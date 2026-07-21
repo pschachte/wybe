@@ -15,15 +15,15 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: backwards_assign.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    backwards_assign.#cont#1<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @backwards_assign:nn:nn
+    backwards_assign.#cont#1<0>(0:wybe.int)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #0 @backwards_assign:nn:nn
 
 
 proc #cont#1 > {semipure} (2 calls)
 0: backwards_assign.#cont#1<0>
-#cont#1(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#1(i##0:wybe.int)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @backwards_assign:nn:nn
@@ -36,7 +36,7 @@ proc #cont#1 > {semipure} (2 calls)
     0:
 
     1:
-        backwards_assign.#cont#1<0>(~i##1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @backwards_assign:nn:nn
+        backwards_assign.#cont#1<0>(~i##1:wybe.int)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #3 @backwards_assign:nn:nn
 
 
 

@@ -15,10 +15,10 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: unbranch_bug.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    unbranch_bug.#cont#3<0>(0:wybe.list(Type7))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @unbranch_bug:nn:nn
+    unbranch_bug.#cont#3<0>(0:wybe.list(Type7))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #1 @unbranch_bug:nn:nn
 
 
 proc #cont#1 > {inline,semipure} (1 calls)
@@ -37,7 +37,7 @@ proc #cont#2 > {inline,semipure} (1 calls)
 
 proc #cont#3 > {semipure} (2 calls)
 0: unbranch_bug.#cont#3<0>
-#cont#3(tmp#0##0:wybe.list(Type7) <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#3(tmp#0##0:wybe.list(Type7) <{}; {}; {0}>)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @unbranch_bug:nn:nn
@@ -46,7 +46,7 @@ proc #cont#3 > {semipure} (2 calls)
 
     1:
         foreign lpvm access(~tmp#0##0:wybe.list(Type7), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(Type8)) @unbranch_bug:nn:nn
-        unbranch_bug.#cont#3<0>(~tmp#0##1:wybe.list(Type7))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @unbranch_bug:nn:nn
+        unbranch_bug.#cont#3<0>(~tmp#0##1:wybe.list(Type7))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #1 @unbranch_bug:nn:nn
 
 
   LLVM code       :

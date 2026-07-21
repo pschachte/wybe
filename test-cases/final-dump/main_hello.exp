@@ -6,21 +6,14 @@ AFTER EVERYTHING:
  Module command_line
   representation  : (not a type)
   public submods  : 
-  public resources: argc: command_line.argc
-                    arguments: command_line.arguments
-                    argv: command_line.argv
+  public resources: arguments: command_line.arguments
                     command: command_line.command
-                    exit_code: command_line.exit_code
   public procs    : command_line.<0>
-                    command_line.set_exit_code<0>
   constants       : 0:: CStringInfo {cstringChars = "Erroneous program argument vector"}
-                    1:: CStringInfo {cstringChars = "command_line:18:15"}
+                    1:: CStringInfo {cstringChars = "command_line:12:15"}
   imports         : use wybe
-  resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
-                    arguments: fromList [(command_line.arguments,wybe.c_array(wybe.c_string) = c_array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
-                    argv: fromList [(command_line.argv,wybe.c_array.raw_array @command_line:nn:nn)]
+  resources       : arguments: fromList [(command_line.arguments,wybe.c_array(wybe.c_string) = c_array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
                     command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
-                    exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
 
 module top-level code > public {semipure} (0 calls)
@@ -29,23 +22,15 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<command_line.arguments>>:wybe.c_array(wybe.c_string), ?%arguments##0:wybe.c_array(wybe.c_string))
-    wybe.c_array.[|]<0>(?command##1:wybe.c_string, ?arguments##2:wybe.c_array(wybe.c_string), ~arguments##0:wybe.c_array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
-    case ~tmp#8##0:wybe.bool of
+    wybe.c_array.[|]<0>(?command##1:wybe.c_string, ?arguments##2:wybe.c_array(wybe.c_string), ~arguments##0:wybe.c_array(wybe.c_string), ?tmp#6##0:wybe.bool) #0 @command_line:nn:nn
+    case ~tmp#6##0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @command_line:nn:nn
+        foreign c {terminal,semipure} error_exit(c"command_line:12:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @command_line:nn:nn
 
     1:
         foreign lpvm store(~%arguments##2:wybe.c_array(wybe.c_string), <<command_line.arguments>>:wybe.c_array(wybe.c_string)) @command_line:nn:nn
         foreign lpvm store(~%command##1:wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
 
-
-
-proc set_exit_code > public {inline} (0 calls)
-0: command_line.set_exit_code<0>
-set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
-  AliasPairs: []
-  InterestingCallProperties: []
-    foreign lpvm store(~code##0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
 
   LLVM code       :
 
@@ -56,35 +41,27 @@ source_filename = "!ROOT!/../wybelibs/command_line.o"
 target triple   = ????
 
 @"command_line#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"Erroneous program argument vector\00", align 8
-@"command_line#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"command_line:18:15\00", align 8
+@"command_line#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"command_line:12:15\00", align 8
 
 declare external fastcc {i64, i64, i1} @"wybe#.c_array#.[|]<0>"(i64)
 declare external ccc void @error_exit(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
-@"resource#command_line.argc" = global i64 undef
 @"resource#command_line.arguments" = global i64 undef
-@"resource#command_line.argv" = global i64 undef
 @"resource#command_line.command" = global i64 undef
-@"resource#command_line.exit_code" = global i64 undef
 
 define external fastcc void @"command_line#.<0>"() {
   %"arguments##0" = load i64, ptr @"resource#command_line.arguments"
-  %"tmp#11##0" = tail call fastcc {i64, i64, i1} @"wybe#.c_array#.[|]<0>"(i64 %"arguments##0")
-  %"command##1" = extractvalue {i64, i64, i1}%"tmp#11##0", 0
-  %"arguments##2" = extractvalue {i64, i64, i1}%"tmp#11##0", 1
-  %"tmp#8##0" = extractvalue {i64, i64, i1}%"tmp#11##0", 2
-  br i1 %"tmp#8##0", label %if.then.0, label %if.else.0
+  %"tmp#9##0" = tail call fastcc {i64, i64, i1} @"wybe#.c_array#.[|]<0>"(i64 %"arguments##0")
+  %"command##1" = extractvalue {i64, i64, i1}%"tmp#9##0", 0
+  %"arguments##2" = extractvalue {i64, i64, i1}%"tmp#9##0", 1
+  %"tmp#6##0" = extractvalue {i64, i64, i1}%"tmp#9##0", 2
+  br i1 %"tmp#6##0", label %if.then.0, label %if.else.0
 if.then.0:
   store i64 %"arguments##2", ptr @"resource#command_line.arguments"
   store i64 %"command##1", ptr @"resource#command_line.command"
   ret void
 if.else.0:
   call ccc void @error_exit(ptr @"command_line#constant#1", ptr @"command_line#constant#0")
-  ret void
-}
-
-define external fastcc void @"command_line#.set_exit_code<0>"(i64 %"code##0") {
-  store i64 %"code##0", ptr @"resource#command_line.exit_code"
   ret void
 }
 
@@ -105,10 +82,10 @@ define external fastcc void @"command_line#.set_exit_code<0>"(i64 %"code##0") {
 
 module top-level code > public {semipure} (0 calls)
 0: main_hello.<0>
-()<{<<command_line.arguments>>, <<wybe.io.io>>}; {<<command_line.exit_code>>, <<wybe.io.io>>}; {}>:
+()<{<<command_line.arguments>>, <<wybe.io.io>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm store(42:wybe.int, <<command_line.exit_code>>:wybe.int) @main_hello:nn:nn
+    foreign lpvm store(42:wybe.int, <<wybe.raw_cmdline.exit_code>>:wybe.int) @main_hello:nn:nn
     wybe.string.print<0>("hello, world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @main_hello:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @main_hello:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @main_hello:nn:nn
@@ -135,14 +112,14 @@ target triple   = ????
 @"main_hello#constant#3" = private unnamed_addr constant {i64, ptr} { i64 25, ptr @"main_hello#constant#1" }, align 8
 
 @"resource#command_line.arguments" = external global i64
-@"resource#command_line.exit_code" = external global i64
+@"resource#wybe.raw_cmdline.exit_code" = external global i64
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"main_hello#.<0>"() {
-  store i64 42, ptr @"resource#command_line.exit_code"
+  store i64 42, ptr @"resource#wybe.raw_cmdline.exit_code"
   tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"main_hello#constant#2" to i64 ))
   call ccc void @putchar(i8 10)
   %"arguments##0" = load i64, ptr @"resource#command_line.arguments"

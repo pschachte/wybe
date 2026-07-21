@@ -20,20 +20,20 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<resource_rollback.res>>:wybe.int, ?%res##0:wybe.int) @resource_rollback:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @resource_rollback:nn:nn
-    foreign c print_int(res##0:wybe.int, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @resource_rollback:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @resource_rollback:nn:nn
-    foreign lpvm store(%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @resource_rollback:nn:nn
-    resource_rollback.foo<0>(?s##0:wybe.c_string, ?tmp#4##0:wybe.bool, c"resource_rollback:15:7":wybe.c_string)<{<<resource_rollback.res>>}; {<<resource_rollback.res>>}; {}> #1 @resource_rollback:nn:nn
-    case ~tmp#4##0:wybe.bool of
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign c print_int(res##0:wybe.int, ~%tmp#7##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign lpvm store(%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @resource_rollback:nn:nn
+    resource_rollback.foo<0>(?s##0:wybe.c_string, ?tmp#5##0:wybe.bool, c"resource_rollback:15:7":wybe.c_string)<{<<resource_rollback.res>>}; {<<resource_rollback.res>>}; {}> #1 @resource_rollback:nn:nn
+    case ~tmp#5##0:wybe.bool of
     0:
         foreign lpvm store(~res##0:wybe.int, <<resource_rollback.res>>:wybe.int) @resource_rollback:nn:nn
         resource_rollback.#cont#1<0><{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
 
     1:
-        foreign c print_string(~s##0:wybe.c_string, ~tmp#8##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @resource_rollback:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @resource_rollback:nn:nn
-        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @resource_rollback:nn:nn
+        foreign c print_string(~s##0:wybe.c_string, ~tmp#9##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @resource_rollback:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @resource_rollback:nn:nn
+        foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @resource_rollback:nn:nn
         resource_rollback.#cont#1<0><{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
 
@@ -44,13 +44,13 @@ proc #cont#1 > {semipure} (2 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<resource_rollback.res>>:wybe.int, ?%res##0:wybe.int) @resource_rollback:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @resource_rollback:nn:nn
-    foreign c print_int(~res##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @resource_rollback:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign c print_int(~res##0:wybe.int, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @resource_rollback:nn:nn
     foreign lpvm load(<<resource_rollback.ser>>:wybe.int, ?%ser##0:wybe.int) @resource_rollback:nn:nn
-    foreign c print_int(~ser##0:wybe.int, ~tmp#7##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @resource_rollback:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @resource_rollback:nn:nn
-    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @resource_rollback:nn:nn
+    foreign c print_int(~ser##0:wybe.int, ~tmp#8##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @resource_rollback:nn:nn
+    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @resource_rollback:nn:nn
 
 
 proc foo > {noinline} (3 calls)
@@ -82,10 +82,10 @@ define external fastcc void @"resource_rollback#.<0>"() {
   %"res##0" = load i64, ptr @"resource#resource_rollback.res"
   call ccc void @print_int(i64 %"res##0")
   call ccc void @putchar(i8 10)
-  %"tmp#13##0" = tail call fastcc {i64, i1} @"resource_rollback#.foo<0>"(i64 ptrtoint( ptr @"resource_rollback#constant#0" to i64 ))
-  %"s##0" = extractvalue {i64, i1}%"tmp#13##0", 0
-  %"tmp#4##0" = extractvalue {i64, i1}%"tmp#13##0", 1
-  br i1 %"tmp#4##0", label %if.then.0, label %if.else.0
+  %"tmp#14##0" = tail call fastcc {i64, i1} @"resource_rollback#.foo<0>"(i64 ptrtoint( ptr @"resource_rollback#constant#0" to i64 ))
+  %"s##0" = extractvalue {i64, i1}%"tmp#14##0", 0
+  %"tmp#5##0" = extractvalue {i64, i1}%"tmp#14##0", 1
+  br i1 %"tmp#5##0", label %if.then.0, label %if.else.0
 if.then.0:
   call ccc void @print_string(i64 %"s##0")
   call ccc void @putchar(i8 10)

@@ -30,15 +30,15 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: list_loop.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    list_loop.#cont#1<0>(list_loop#constant#4:list_loop.intlist, list_loop#constant#4:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @list_loop:nn:nn
+    list_loop.#cont#1<0>(list_loop#constant#4:list_loop.intlist, list_loop#constant#4:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #4 @list_loop:nn:nn
 
 
 proc #cont#1 > {semipure} (2 calls)
 0: list_loop.#cont#1<0>
-#cont#1(l##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#1(l##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(l##0:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.bool) @list_loop:nn:nn
@@ -52,32 +52,32 @@ proc #cont#1 > {semipure} (2 calls)
         foreign c print_int(h##0:wybe.int, ~%tmp#15##0:wybe.phantom, ?%tmp#16##0:wybe.phantom) @list_loop:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @list_loop:nn:nn
         foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_loop:nn:nn
-        list_loop.#cont#3<0>(~h##0:wybe.int, ~l##1:list_loop.intlist, ~x##0:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @list_loop:nn:nn
+        list_loop.#cont#3<0>(~h##0:wybe.int, ~l##1:list_loop.intlist, ~x##0:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #2 @list_loop:nn:nn
 
 
 
 proc #cont#2 > {inline,semipure} (1 calls)
 0: list_loop.#cont#2<0>
-#cont#2(h##0:wybe.int, l##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#2(h##0:wybe.int, l##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @list_loop:nn:nn
     foreign c print_int(h##0:wybe.int, ~%tmp#10##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @list_loop:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @list_loop:nn:nn
     foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_loop:nn:nn
-    list_loop.#cont#3<0>(~h##0:wybe.int, ~l##0:list_loop.intlist, ~x##0:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @list_loop:nn:nn
+    list_loop.#cont#3<0>(~h##0:wybe.int, ~l##0:list_loop.intlist, ~x##0:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #1 @list_loop:nn:nn
 
 
 proc #cont#3 > {semipure} (2 calls)
 0: list_loop.#cont#3<0>
-#cont#3(h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#3(h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign llvm icmp_ne(l2##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @list_loop:nn:nn
     case ~tmp#10##0:wybe.bool of
     0:
-        list_loop.#cont#1<0>(~l##0:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @list_loop:nn:nn
+        list_loop.#cont#1<0>(~l##0:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #2 @list_loop:nn:nn
 
     1:
         foreign lpvm access(l2##0:list_loop.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h2##0:wybe.int) @list_loop:nn:nn
@@ -91,13 +91,13 @@ proc #cont#3 > {semipure} (2 calls)
         foreign c print_int(~h2##0:wybe.int, ~%tmp#18##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @list_loop:nn:nn
         foreign c putchar(10:wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @list_loop:nn:nn
         foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_loop:nn:nn
-        list_loop.#cont#3<0>(~h##0:wybe.int, ~l##0:list_loop.intlist, ~l2##1:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @list_loop:nn:nn
+        list_loop.#cont#3<0>(~h##0:wybe.int, ~l##0:list_loop.intlist, ~l2##1:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #5 @list_loop:nn:nn
 
 
 
 proc #cont#4 > {inline,semipure} (1 calls)
 0: list_loop.#cont#4<0>
-#cont#4(h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#4(h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print<0>("    ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @list_loop:nn:nn
@@ -109,7 +109,7 @@ proc #cont#4 > {inline,semipure} (1 calls)
     foreign c print_int(~h2##0:wybe.int, ~%tmp#20##0:wybe.phantom, ?%tmp#21##0:wybe.phantom) @list_loop:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @list_loop:nn:nn
     foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_loop:nn:nn
-    list_loop.#cont#3<0>(~h##0:wybe.int, ~l##0:list_loop.intlist, ~l2##0:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @list_loop:nn:nn
+    list_loop.#cont#3<0>(~h##0:wybe.int, ~l##0:list_loop.intlist, ~l2##0:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #6 @list_loop:nn:nn
 
   LLVM code       :
 

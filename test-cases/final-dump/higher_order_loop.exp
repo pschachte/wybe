@@ -18,10 +18,10 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: higher_order_loop.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    higher_order_loop.#cont#1<0>(higher_order_loop#constant#3:wybe.list({resource}(wybe.int)))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #3 @higher_order_loop:nn:nn
+    higher_order_loop.#cont#1<0>(higher_order_loop#constant#3:wybe.list({resource}(wybe.int)))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {0}> #3 @higher_order_loop:nn:nn
 
 
 proc #closure#1 > {inline} (1 calls)
@@ -47,7 +47,7 @@ proc #closure#2 > {inline} (1 calls)
 
 proc #cont#1 > {semipure} (2 calls)
 0: higher_order_loop.#cont#1<0>
-#cont#1(tmp#5##0:wybe.list({resource}(wybe.int)) <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}>:
+#cont#1(tmp#5##0:wybe.list({resource}(wybe.int)) <{}; {}; {0}>)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {0}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @higher_order_loop:nn:nn
@@ -58,7 +58,7 @@ proc #cont#1 > {semipure} (2 calls)
         foreign lpvm access(tmp#5##0:wybe.list({resource}(wybe.int)), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?f##0:{resource}(wybe.int)) @higher_order_loop:nn:nn
         foreign lpvm access(~tmp#5##0:wybe.list({resource}(wybe.int)), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list({resource}(wybe.int))) @higher_order_loop:nn:nn
         ~f##0:{resource}(wybe.int)(10:wybe.int) #1 @higher_order_loop:nn:nn
-        higher_order_loop.#cont#1<0>(~tmp#5##1:wybe.list({resource}(wybe.int)))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #2 @higher_order_loop:nn:nn
+        higher_order_loop.#cont#1<0>(~tmp#5##1:wybe.list({resource}(wybe.int)))<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {0}> #2 @higher_order_loop:nn:nn
 
 
   LLVM code       :

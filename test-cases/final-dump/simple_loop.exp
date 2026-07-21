@@ -15,15 +15,15 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: simple_loop.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    simple_loop.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @simple_loop:nn:nn
+    simple_loop.#cont#1<0><{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #0 @simple_loop:nn:nn
 
 
 proc #cont#1 > {semipure} (2 calls)
 0: simple_loop.#cont#1<0>
-#cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#1()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @simple_loop:nn:nn
@@ -36,7 +36,7 @@ proc #cont#1 > {semipure} (2 calls)
     1:
         foreign c putchar(~c##0:wybe.char, ~tmp#2##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @simple_loop:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @simple_loop:nn:nn
-        simple_loop.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @simple_loop:nn:nn
+        simple_loop.#cont#1<0><{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #3 @simple_loop:nn:nn
 
 
   LLVM code       :

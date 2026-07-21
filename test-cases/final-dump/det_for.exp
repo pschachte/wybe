@@ -15,15 +15,19 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: det_for.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    det_for.#cont#1<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @det_for:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @det_for:nn:nn
+    foreign c print_int(0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @det_for:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @det_for:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @det_for:nn:nn
+    det_for.#cont#1<0>(1:wybe.int)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #1 @det_for:nn:nn
 
 
-proc #cont#1 > {semipure} (2 calls)
+proc #cont#1 > {inline,semipure} (2 calls)
 0: det_for.#cont#1<0>
-#cont#1(tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#1(tmp#0##0:wybe.int)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(tmp#0##0:wybe.int, 1:wybe.int, ?tmp#0##1:wybe.int) @det_for:nn:nn
@@ -31,7 +35,7 @@ proc #cont#1 > {semipure} (2 calls)
     foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @det_for:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @det_for:nn:nn
     foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @det_for:nn:nn
-    det_for.#cont#1<0>(~tmp#0##1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @det_for:nn:nn
+    det_for.#cont#1<0>(~tmp#0##1:wybe.int)<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #2 @det_for:nn:nn
 
 
 proc [|] > {inline} (1 calls)
@@ -56,7 +60,9 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"det_for#.<0>"() {
-  tail call fastcc void @"det_for#.#cont#1<0>"(i64 0)
+  call ccc void @print_int(i64 0)
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"det_for#.#cont#1<0>"(i64 1)
   ret void
 }
 

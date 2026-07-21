@@ -18,7 +18,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: nested_loop.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print<0>("Outer":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @nested_loop:nn:nn
@@ -29,12 +29,12 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @nested_loop:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @nested_loop:nn:nn
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
-    nested_loop.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @nested_loop:nn:nn
+    nested_loop.#cont#2<0><{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #3 @nested_loop:nn:nn
 
 
 proc #cont#1 > {inline,semipure} (1 calls)
 0: nested_loop.#cont#1<0>
-#cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#1()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print<0>("Outer":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @nested_loop:nn:nn
@@ -45,19 +45,19 @@ proc #cont#1 > {inline,semipure} (1 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @nested_loop:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @nested_loop:nn:nn
     foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
-    nested_loop.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @nested_loop:nn:nn
+    nested_loop.#cont#2<0><{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #5 @nested_loop:nn:nn
 
 
 proc #cont#2 > {inline,semipure} (2 calls)
 0: nested_loop.#cont#2<0>
-#cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#2()<{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print<0>("Inner":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @nested_loop:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @nested_loop:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @nested_loop:nn:nn
     foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @nested_loop:nn:nn
-    nested_loop.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @nested_loop:nn:nn
+    nested_loop.#cont#2<0><{<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {<<wybe.io.io>>, <<wybe.raw_cmdline.exit_code>>}; {}> #2 @nested_loop:nn:nn
 
   LLVM code       :
 
