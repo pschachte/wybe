@@ -350,7 +350,11 @@ transformPrim callSiteMap escapedVars (aliasMap, deadCells, stackVars) prim = do
                 -- support variable-sized alloca (for C99 VLAs), but it forces a
                 -- frame pointer, blocking tail-call optimisation. It also makes
                 -- --stack-alloc-limit unenforceable at compile time. In practice
-                -- this is not a limitation: Wybe types are always statically sized.
+                -- this is not much of a limitation: types defined through
+                -- constructors are always statically sized, so their allocs have
+                -- constant size. The variable-sized types (array, c_array,
+                -- c_string) allocate a runtime-computed size and are correctly
+                -- excluded here by the constSize check below.
                 let constSize = argIsConst sizeArg
                 let alreadyStack = "stack" `List.elem` flags
                 doStackAlloc <- lift $ gets (optimisationEnabled StackAlloc . options)

@@ -988,7 +988,7 @@ writeLPVMCall "alloc" flags args pos = do
                     (writeTmp, readTmp) <- freshTempArgs $ Representation CPointer
                     stackAlloc writeTmp (fromIntegral sizeVal)
                     typeConvert readTmp out
-                Nothing -> shouldnt "stack alloc with non-constant size"
+                Nothing -> nyi "stack alloc with non-constant size"
             else heapAlloc out sz pos
         _            -> shouldnt $ "lpvm alloc with arguments " ++ show args
 writeLPVMCall "cast" _ args pos = do
