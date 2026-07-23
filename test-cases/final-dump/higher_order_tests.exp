@@ -13,9 +13,9 @@ AFTER EVERYTHING:
                     2:: CStringInfo {cstringChars = "------"}
                     3:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"*2"]}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember c"------"]}
-                    5:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_tests.#anon#2<1>]}
+                    5:: ClosureInfo {closureProcSpec = higher_order_tests.#anon#2<1>, closureArgs = []}
                     6:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"*1"]}
-                    7:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_tests.#anon#1<1>]}
+                    7:: ClosureInfo {closureProcSpec = higher_order_tests.#anon#1<1>, closureArgs = []}
   imports         : use wybe
   resources       : 
   procs           : 

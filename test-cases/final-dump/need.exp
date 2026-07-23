@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   public procs    : need.<0>
                     need.iota<0>
                     need.need<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember need.#anon#1<1>]}
+  constants       : 0:: ClosureInfo {closureProcSpec = need.#anon#1<1>, closureArgs = []}
   imports         : use wybe
   resources       : 
   procs           : 

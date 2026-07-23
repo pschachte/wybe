@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   public procs    : higher_order_resources.<0>
   constants       : 0:: CStringInfo {cstringChars = "*****"}
                     1:: CStringInfo {cstringChars = "> "}
-                    2:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_resources.#anon#2#closure#1<0>]}
+                    2:: ClosureInfo {closureProcSpec = higher_order_resources.#anon#2#closure#1<0>, closureArgs = []}
                     3:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"> "]}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember higher_order_resources#constant#4]}
@@ -19,7 +19,7 @@ AFTER EVERYTHING:
                     8:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_resources#constant#5]}
                     9:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#7,IntStructMember 0 8]}
                     10:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#8,PointerStructMember higher_order_resources#constant#9]}
-                    11:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_resources.#anon#1<1>]}
+                    11:: ClosureInfo {closureProcSpec = higher_order_resources.#anon#1<1>, closureArgs = []}
                     12:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"*****"]}
                     13:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,IntStructMember 0 8]}
                     14:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_resources#constant#13]}
@@ -27,7 +27,7 @@ AFTER EVERYTHING:
                     16:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_resources#constant#15]}
                     17:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#16,PointerStructMember higher_order_resources#constant#9]}
                     18:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#8,PointerStructMember higher_order_resources#constant#17]}
-                    19:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_resources.#anon#2<1>]}
+                    19:: ClosureInfo {closureProcSpec = higher_order_resources.#anon#2<1>, closureArgs = []}
   imports         : use wybe
   resources       : maximum: fromList [(higher_order_resources.maximum,wybe.int @higher_order_resources:nn:nn)]
   procs           : 

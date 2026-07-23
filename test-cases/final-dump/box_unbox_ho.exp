@@ -459,7 +459,7 @@ define external fastcc void @"box_unbox#.print#cont#5<0>"(i64 %"s##0", i128 %"x#
   public submods  : 
   public resources: 
   public procs    : box_unbox_ho.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember box_unbox_ho.#anon#1<1>]}
+  constants       : 0:: ClosureInfo {closureProcSpec = box_unbox_ho.#anon#1<1>, closureArgs = []}
   imports         : use box_unbox
                     use wybe
   resources       : 

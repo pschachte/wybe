@@ -8,7 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : uneeded_closure_args.<0>
-  constants       : 0:: StructInfo {structSize = 16, structData = [FnPointerStructMember uneeded_closure_args.#closure#1<0>,IntStructMember 1 8]}
+  constants       : 0:: ClosureInfo {closureProcSpec = uneeded_closure_args.#closure#1<0>, closureArgs = [IntStructMember 1 8]}
   imports         : use wybe
   resources       : 
   procs           : 
