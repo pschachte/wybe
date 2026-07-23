@@ -1237,10 +1237,22 @@ simplifyOp "mul" _ [_, ArgInt 0 ty, output] =
   primMove (ArgInt 0 ty) output
 simplifyOp "mul" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "mul" flags [arg2, arg1, output]
-simplifyOp "div" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+simplifyOp "udiv" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   primMove (ArgInt (n1 `div` n2) ty) output
-simplifyOp "div" _ [arg, ArgInt 1 _, output] =
+simplifyOp "udiv" _ [arg, ArgInt 1 _, output] =
   primMove arg output
+simplifyOp "sdiv" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  primMove (ArgInt (n1 `quot` n2) ty) output
+simplifyOp "sdiv" _ [arg, ArgInt 1 _, output] =
+  primMove arg output
+simplifyOp "urem" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  primMove (ArgInt (n1 `rem` n2) ty) output
+simplifyOp "urem" _ [arg, ArgInt 1 ty, output] =
+  primMove (ArgInt 0 ty) output
+simplifyOp "srem" _ [ArgInt n1 ty, ArgInt n2 _, output] =
+  primMove (ArgInt (n1 `rem` n2) ty) output
+simplifyOp "srem" _ [arg, ArgInt 1 ty, output] =
+  primMove (ArgInt 0 ty) output
 -- Bitstring ops
 simplifyOp "and" _ [ArgInt n1 ty, ArgInt n2 _, output] =
   primMove (ArgInt (fromIntegral n1 .&. fromIntegral n2) ty) output

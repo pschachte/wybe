@@ -19,31 +19,43 @@ AFTER EVERYTHING:
                     8:: CStringInfo {cstringChars = "8 is a small prime"}
                     9:: CStringInfo {cstringChars = "Wybe is a language"}
                     10:: CStringInfo {cstringChars = "Wybe is a fruit"}
-                    11:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember wybe.int.=#adapter<0>,FnPointerStructMember wybe.int.~=#adapter<0>], vtableExternal = True, vtableSpec = wybe.int <: wybe.eq, vtableMod = ["wybe","int"]}
-                    12:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember wybe.string.=#adapter<0>,FnPointerStructMember wybe.string.~=#adapter<0>], vtableExternal = True, vtableSpec = wybe.string <: wybe.eq, vtableMod = ["wybe","string"]}
-                    13:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"Wybe"]}
-                    14:: StructInfo {structSize = 16, structData = [IntStructMember 15 8,PointerStructMember c"Wybe is a fruit"]}
-                    15:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember c"Wybe is a language"]}
-                    16:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember c"8 is a small prime"]}
-                    17:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,IntStructMember 0 8]}
-                    18:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember list_member#constant#17]}
-                    19:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember list_member#constant#18]}
-                    20:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember list_member#constant#19]}
-                    21:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember list_member#constant#20]}
-                    22:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"Clean"]}
-                    23:: StructInfo {structSize = 16, structData = [PointerStructMember "Clean",IntStructMember 0 8]}
-                    24:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember c"Prolog"]}
-                    25:: StructInfo {structSize = 16, structData = [PointerStructMember "Wybe",PointerStructMember list_member#constant#23]}
-                    26:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember c"Haskell"]}
-                    27:: StructInfo {structSize = 16, structData = [PointerStructMember "Prolog",PointerStructMember list_member#constant#25]}
-                    28:: StructInfo {structSize = 16, structData = [PointerStructMember "Haskell",PointerStructMember list_member#constant#27]}
-                    29:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember c"orange"]}
-                    30:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"apple"]}
-                    31:: StructInfo {structSize = 16, structData = [PointerStructMember "orange",IntStructMember 0 8]}
-                    32:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember c"banana"]}
-                    33:: StructInfo {structSize = 16, structData = [PointerStructMember "apple",PointerStructMember list_member#constant#31]}
-                    34:: StructInfo {structSize = 16, structData = [PointerStructMember "banana",PointerStructMember list_member#constant#33]}
-                    35:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember c"5 is a small prime"]}
+                    11:: CStringInfo {cstringChars = "5 in 1..10"}
+                    12:: CStringInfo {cstringChars = "0 in 1..10"}
+                    13:: CStringInfo {cstringChars = "10 in 1..10"}
+                    14:: CStringInfo {cstringChars = "5 in 9..0"}
+                    15:: CStringInfo {cstringChars = "0 in 9..0"}
+                    16:: CStringInfo {cstringChars = "10 in 9..0"}
+                    17:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember wybe.int.=#adapter<0>,FnPointerStructMember wybe.int.~=#adapter<0>], vtableExternal = True, vtableSpec = wybe.int <: wybe.eq, vtableMod = ["wybe","int"]}
+                    18:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember wybe.string.=#adapter<0>,FnPointerStructMember wybe.string.~=#adapter<0>], vtableExternal = True, vtableSpec = wybe.string <: wybe.eq, vtableMod = ["wybe","string"]}
+                    19:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember c"10 in 9..0"]}
+                    20:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember c"0 in 9..0"]}
+                    21:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember c"5 in 9..0"]}
+                    22:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"10 in 1..10"]}
+                    23:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember c"0 in 1..10"]}
+                    24:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember c"5 in 1..10"]}
+                    25:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"Wybe"]}
+                    26:: StructInfo {structSize = 16, structData = [IntStructMember 15 8,PointerStructMember c"Wybe is a fruit"]}
+                    27:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember c"Wybe is a language"]}
+                    28:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember c"8 is a small prime"]}
+                    29:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,IntStructMember 0 8]}
+                    30:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember list_member#constant#29]}
+                    31:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember list_member#constant#30]}
+                    32:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember list_member#constant#31]}
+                    33:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember list_member#constant#32]}
+                    34:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"Clean"]}
+                    35:: StructInfo {structSize = 16, structData = [PointerStructMember "Clean",IntStructMember 0 8]}
+                    36:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember c"Prolog"]}
+                    37:: StructInfo {structSize = 16, structData = [PointerStructMember "Wybe",PointerStructMember list_member#constant#35]}
+                    38:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember c"Haskell"]}
+                    39:: StructInfo {structSize = 16, structData = [PointerStructMember "Prolog",PointerStructMember list_member#constant#37]}
+                    40:: StructInfo {structSize = 16, structData = [PointerStructMember "Haskell",PointerStructMember list_member#constant#39]}
+                    41:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember c"orange"]}
+                    42:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"apple"]}
+                    43:: StructInfo {structSize = 16, structData = [PointerStructMember "orange",IntStructMember 0 8]}
+                    44:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,PointerStructMember c"banana"]}
+                    45:: StructInfo {structSize = 16, structData = [PointerStructMember "apple",PointerStructMember list_member#constant#43]}
+                    46:: StructInfo {structSize = 16, structData = [PointerStructMember "banana",PointerStructMember list_member#constant#45]}
+                    47:: StructInfo {structSize = 16, structData = [IntStructMember 18 8,PointerStructMember c"5 is a small prime"]}
   imports         : use wybe
   resources       : 
   procs           : 
@@ -53,17 +65,17 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>(5:wybe.int, list_member#constant#21:wybe.list(wybe.int), ?tmp#31##0:wybe.bool, vtable(global,wybe.int <: wybe.eq):opaque) #22 @list_member:nn:nn
-    case ~tmp#31##0:wybe.bool of
+    wybe.list.in<0>(5:wybe.int, list_member#constant#33:wybe.list(wybe.int), ?tmp#49##0:wybe.bool, vtable(global,wybe.int <: wybe.eq):opaque) #22 @list_member:nn:nn
+    case ~tmp#49##0:wybe.bool of
     0:
-        list_member.#cont#1<0>(list_member#constant#34:wybe.list(wybe.string), list_member#constant#28:wybe.list(wybe.string), list_member#constant#21:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26
+        list_member.#cont#1<0>(list_member#constant#46:wybe.list(wybe.string), list_member#constant#40:wybe.list(wybe.string), list_member#constant#33:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26
 
     1:
         wybe.string.print<0>("5 is a small prime":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @list_member:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#113##0:wybe.phantom) @list_member:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#113##0:wybe.phantom, ?tmp#114##0:wybe.phantom) @list_member:nn:nn
-        foreign lpvm store(~%tmp#114##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
-        list_member.#cont#1<0>(list_member#constant#34:wybe.list(wybe.string), list_member#constant#28:wybe.list(wybe.string), list_member#constant#21:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#131##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#131##0:wybe.phantom, ?tmp#132##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#132##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        list_member.#cont#1<0>(list_member#constant#46:wybe.list(wybe.string), list_member#constant#40:wybe.list(wybe.string), list_member#constant#33:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25
 
 
 
@@ -72,16 +84,16 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1(fruit##0:wybe.list(wybe.string), langs##0:wybe.list(wybe.string), lst##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>(8:wybe.int, ~lst##0:wybe.list(wybe.int), ?tmp#30##0:wybe.bool, vtable(global,wybe.int <: wybe.eq):opaque) #0 @list_member:nn:nn
-    case ~tmp#30##0:wybe.bool of
+    wybe.list.in<0>(8:wybe.int, ~lst##0:wybe.list(wybe.int), ?tmp#48##0:wybe.bool, vtable(global,wybe.int <: wybe.eq):opaque) #0 @list_member:nn:nn
+    case ~tmp#48##0:wybe.bool of
     0:
         list_member.#cont#2<0>(~fruit##0:wybe.list(wybe.string), ~langs##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
 
     1:
         wybe.string.print<0>("8 is a small prime":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @list_member:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom) @list_member:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#36##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @list_member:nn:nn
-        foreign lpvm store(~%tmp#37##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#54##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#54##0:wybe.phantom, ?tmp#55##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#55##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
         list_member.#cont#2<0>(~fruit##0:wybe.list(wybe.string), ~langs##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
 
@@ -91,16 +103,16 @@ proc #cont#2 > {semipure} (2 calls)
 #cont#2(fruit##0:wybe.list(wybe.string), langs##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>("Wybe":wybe.string, ~langs##0:wybe.list(wybe.string), ?tmp#29##0:wybe.bool, vtable(global,wybe.string <: wybe.eq):opaque) #1 @list_member:nn:nn
-    case ~tmp#29##0:wybe.bool of
+    wybe.list.in<0>("Wybe":wybe.string, ~langs##0:wybe.list(wybe.string), ?tmp#47##0:wybe.bool, vtable(global,wybe.string <: wybe.eq):opaque) #1 @list_member:nn:nn
+    case ~tmp#47##0:wybe.bool of
     0:
         list_member.#cont#3<0>(~fruit##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
 
     1:
         wybe.string.print<0>("Wybe is a language":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @list_member:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#39##0:wybe.phantom) @list_member:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#39##0:wybe.phantom, ?tmp#40##0:wybe.phantom) @list_member:nn:nn
-        foreign lpvm store(~%tmp#40##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#57##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#57##0:wybe.phantom, ?tmp#58##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#58##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
         list_member.#cont#3<0>(~fruit##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
 
 
@@ -110,15 +122,135 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3(fruit##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>("Wybe":wybe.string, ~fruit##0:wybe.list(wybe.string), ?tmp#28##0:wybe.bool, vtable(global,wybe.string <: wybe.eq):opaque) #1 @list_member:nn:nn
-    case ~tmp#28##0:wybe.bool of
+    wybe.list.in<0>("Wybe":wybe.string, ~fruit##0:wybe.list(wybe.string), ?tmp#46##0:wybe.bool, vtable(global,wybe.string <: wybe.eq):opaque) #1 @list_member:nn:nn
+    case ~tmp#46##0:wybe.bool of
+    0:
+        list_member.#cont#4<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
+
+    1:
+        wybe.string.print<0>("Wybe is a fruit":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @list_member:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        list_member.#cont#4<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
+
+
+
+proc #cont#4 > {semipure} (2 calls)
+0: list_member.#cont#4<0>
+#cont#4()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.range.construct<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#15##0:wybe.range) #6 @list_member:nn:nn
+    wybe.range.in<0>(5:wybe.int, ~tmp#15##0:wybe.range, ?tmp#45##0:wybe.bool) #1 @list_member:nn:nn
+    case ~tmp#45##0:wybe.bool of
+    0:
+        list_member.#cont#5<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
+
+    1:
+        wybe.string.print<0>("5 in 1..10":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @list_member:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#55##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#55##0:wybe.phantom, ?tmp#56##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#56##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        list_member.#cont#5<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
+
+
+
+proc #cont#5 > {semipure} (2 calls)
+0: list_member.#cont#5<0>
+#cont#5()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.range.construct<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#16##0:wybe.range) #6 @list_member:nn:nn
+    wybe.range.in<0>(0:wybe.int, ~tmp#16##0:wybe.range, ?tmp#44##0:wybe.bool) #1 @list_member:nn:nn
+    case ~tmp#44##0:wybe.bool of
+    0:
+        list_member.#cont#6<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
+
+    1:
+        wybe.string.print<0>("0 in 1..10":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @list_member:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#54##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#54##0:wybe.phantom, ?tmp#55##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#55##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        list_member.#cont#6<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
+
+
+
+proc #cont#6 > {semipure} (2 calls)
+0: list_member.#cont#6<0>
+#cont#6()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.range.construct<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#17##0:wybe.range) #6 @list_member:nn:nn
+    wybe.range.in<0>(10:wybe.int, ~tmp#17##0:wybe.range, ?tmp#43##0:wybe.bool) #1 @list_member:nn:nn
+    case ~tmp#43##0:wybe.bool of
+    0:
+        list_member.#cont#7<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
+
+    1:
+        wybe.string.print<0>("10 in 1..10":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @list_member:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        list_member.#cont#7<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
+
+
+
+proc #cont#7 > {semipure} (2 calls)
+0: list_member.#cont#7<0>
+#cont#7()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.range.construct<0>(9:wybe.int, -1:wybe.int, 0:wybe.int, ?tmp#18##0:wybe.range) #6 @list_member:nn:nn
+    wybe.range.in<0>(5:wybe.int, ~tmp#18##0:wybe.range, ?tmp#42##0:wybe.bool) #1 @list_member:nn:nn
+    case ~tmp#42##0:wybe.bool of
+    0:
+        list_member.#cont#8<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
+
+    1:
+        wybe.string.print<0>("5 in 9..0":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @list_member:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#52##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#52##0:wybe.phantom, ?tmp#53##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#53##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        list_member.#cont#8<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
+
+
+
+proc #cont#8 > {semipure} (2 calls)
+0: list_member.#cont#8<0>
+#cont#8()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.range.construct<0>(9:wybe.int, -1:wybe.int, 0:wybe.int, ?tmp#19##0:wybe.range) #6 @list_member:nn:nn
+    wybe.range.in<0>(0:wybe.int, ~tmp#19##0:wybe.range, ?tmp#41##0:wybe.bool) #1 @list_member:nn:nn
+    case ~tmp#41##0:wybe.bool of
+    0:
+        list_member.#cont#9<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
+
+    1:
+        wybe.string.print<0>("0 in 9..0":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @list_member:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#51##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#51##0:wybe.phantom, ?tmp#52##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#52##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        list_member.#cont#9<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
+
+
+
+proc #cont#9 > {semipure} (2 calls)
+0: list_member.#cont#9<0>
+#cont#9()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.range.construct<0>(9:wybe.int, -1:wybe.int, 0:wybe.int, ?tmp#20##0:wybe.range) #4 @list_member:nn:nn
+    wybe.range.in<0>(10:wybe.int, ~tmp#20##0:wybe.range, ?tmp#40##0:wybe.bool) #1 @list_member:nn:nn
+    case ~tmp#40##0:wybe.bool of
     0:
 
     1:
-        wybe.string.print<0>("Wybe is a fruit":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @list_member:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @list_member:nn:nn
-        foreign c putchar(10:wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @list_member:nn:nn
-        foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
+        wybe.string.print<0>("10 in 9..0":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @list_member:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#50##0:wybe.phantom) @list_member:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#50##0:wybe.phantom, ?tmp#51##0:wybe.phantom) @list_member:nn:nn
+        foreign lpvm store(~%tmp#51##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @list_member:nn:nn
 
 
   LLVM code       :
@@ -140,35 +272,49 @@ target triple   = ????
 @"list_member#constant#8" = private unnamed_addr constant [ ?? x i8 ] c"8 is a small prime\00", align 8
 @"list_member#constant#9" = private unnamed_addr constant [ ?? x i8 ] c"Wybe is a language\00", align 8
 @"list_member#constant#10" = private unnamed_addr constant [ ?? x i8 ] c"Wybe is a fruit\00", align 8
+@"list_member#constant#11" = private unnamed_addr constant [ ?? x i8 ] c"5 in 1..10\00", align 8
+@"list_member#constant#12" = private unnamed_addr constant [ ?? x i8 ] c"0 in 1..10\00", align 8
+@"list_member#constant#13" = private unnamed_addr constant [ ?? x i8 ] c"10 in 1..10\00", align 8
+@"list_member#constant#14" = private unnamed_addr constant [ ?? x i8 ] c"5 in 9..0\00", align 8
+@"list_member#constant#15" = private unnamed_addr constant [ ?? x i8 ] c"0 in 9..0\00", align 8
+@"list_member#constant#16" = private unnamed_addr constant [ ?? x i8 ] c"10 in 9..0\00", align 8
 @"#vtable##wybe#.eq##wybe#.int##wybe#.int#" = external unnamed_addr constant {ptr, ptr}, align 8
 @"#vtable##wybe#.eq##wybe#.string##wybe#.string#" = external unnamed_addr constant {ptr, ptr}, align 8
-@"list_member#constant#13" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"list_member#constant#1" }, align 8
-@"list_member#constant#14" = private unnamed_addr constant {i64, ptr} { i64 15, ptr @"list_member#constant#10" }, align 8
-@"list_member#constant#15" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"list_member#constant#9" }, align 8
-@"list_member#constant#16" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"list_member#constant#8" }, align 8
-@"list_member#constant#17" = private unnamed_addr constant {i64, i64} { i64 11, i64 0 }, align 8
-@"list_member#constant#18" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"list_member#constant#17" }, align 8
-@"list_member#constant#19" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"list_member#constant#18" }, align 8
-@"list_member#constant#20" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"list_member#constant#19" }, align 8
-@"list_member#constant#21" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"list_member#constant#20" }, align 8
-@"list_member#constant#22" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"list_member#constant#0" }, align 8
-@"list_member#constant#23" = private unnamed_addr constant {ptr, i64} { ptr @"list_member#constant#22", i64 0 }, align 8
-@"list_member#constant#24" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"list_member#constant#2" }, align 8
-@"list_member#constant#25" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#13", ptr @"list_member#constant#23" }, align 8
-@"list_member#constant#26" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"list_member#constant#3" }, align 8
-@"list_member#constant#27" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#24", ptr @"list_member#constant#25" }, align 8
-@"list_member#constant#28" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#26", ptr @"list_member#constant#27" }, align 8
-@"list_member#constant#29" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"list_member#constant#4" }, align 8
-@"list_member#constant#30" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"list_member#constant#5" }, align 8
-@"list_member#constant#31" = private unnamed_addr constant {ptr, i64} { ptr @"list_member#constant#29", i64 0 }, align 8
-@"list_member#constant#32" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"list_member#constant#6" }, align 8
-@"list_member#constant#33" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#30", ptr @"list_member#constant#31" }, align 8
-@"list_member#constant#34" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#32", ptr @"list_member#constant#33" }, align 8
-@"list_member#constant#35" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"list_member#constant#7" }, align 8
+@"list_member#constant#19" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"list_member#constant#16" }, align 8
+@"list_member#constant#20" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"list_member#constant#15" }, align 8
+@"list_member#constant#21" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"list_member#constant#14" }, align 8
+@"list_member#constant#22" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"list_member#constant#13" }, align 8
+@"list_member#constant#23" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"list_member#constant#12" }, align 8
+@"list_member#constant#24" = private unnamed_addr constant {i64, ptr} { i64 10, ptr @"list_member#constant#11" }, align 8
+@"list_member#constant#25" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"list_member#constant#1" }, align 8
+@"list_member#constant#26" = private unnamed_addr constant {i64, ptr} { i64 15, ptr @"list_member#constant#10" }, align 8
+@"list_member#constant#27" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"list_member#constant#9" }, align 8
+@"list_member#constant#28" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"list_member#constant#8" }, align 8
+@"list_member#constant#29" = private unnamed_addr constant {i64, i64} { i64 11, i64 0 }, align 8
+@"list_member#constant#30" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"list_member#constant#29" }, align 8
+@"list_member#constant#31" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"list_member#constant#30" }, align 8
+@"list_member#constant#32" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"list_member#constant#31" }, align 8
+@"list_member#constant#33" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"list_member#constant#32" }, align 8
+@"list_member#constant#34" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"list_member#constant#0" }, align 8
+@"list_member#constant#35" = private unnamed_addr constant {ptr, i64} { ptr @"list_member#constant#34", i64 0 }, align 8
+@"list_member#constant#36" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"list_member#constant#2" }, align 8
+@"list_member#constant#37" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#25", ptr @"list_member#constant#35" }, align 8
+@"list_member#constant#38" = private unnamed_addr constant {i64, ptr} { i64 7, ptr @"list_member#constant#3" }, align 8
+@"list_member#constant#39" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#36", ptr @"list_member#constant#37" }, align 8
+@"list_member#constant#40" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#38", ptr @"list_member#constant#39" }, align 8
+@"list_member#constant#41" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"list_member#constant#4" }, align 8
+@"list_member#constant#42" = private unnamed_addr constant {i64, ptr} { i64 5, ptr @"list_member#constant#5" }, align 8
+@"list_member#constant#43" = private unnamed_addr constant {ptr, i64} { ptr @"list_member#constant#41", i64 0 }, align 8
+@"list_member#constant#44" = private unnamed_addr constant {i64, ptr} { i64 6, ptr @"list_member#constant#6" }, align 8
+@"list_member#constant#45" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#42", ptr @"list_member#constant#43" }, align 8
+@"list_member#constant#46" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#44", ptr @"list_member#constant#45" }, align 8
+@"list_member#constant#47" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"list_member#constant#7" }, align 8
 
 declare external fastcc i1 @"wybe#.int#.=#adapter<0>"(i64, i64)
 declare external fastcc i1 @"wybe#.int#.~=#adapter<0>"(i64, i64)
 declare external fastcc i1 @"wybe#.list#.in<0>"(i64, i64, ptr)
+declare external fastcc i64 @"wybe#.range#.construct<0>"(i64, i64, i64)
+declare external fastcc i1 @"wybe#.range#.in<0>"(i64, i64)
 declare external fastcc i1 @"wybe#.string#.=#adapter<0>"(i64, i64)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external fastcc i1 @"wybe#.string#.~=#adapter<0>"(i64, i64)
@@ -176,23 +322,23 @@ declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"list_member#.<0>"() {
-  %"tmp#31##0" = tail call fastcc i1 @"wybe#.list#.in<0>"(i64 5, i64 ptrtoint( ptr @"list_member#constant#21" to i64 ), ptr @"#vtable##wybe#.eq##wybe#.int##wybe#.int#")
-  br i1 %"tmp#31##0", label %if.then.0, label %if.else.0
+  %"tmp#49##0" = tail call fastcc i1 @"wybe#.list#.in<0>"(i64 5, i64 ptrtoint( ptr @"list_member#constant#33" to i64 ), ptr @"#vtable##wybe#.eq##wybe#.int##wybe#.int#")
+  br i1 %"tmp#49##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#35" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#47" to i64 ))
   call ccc void @putchar(i8 10)
-  tail call fastcc void @"list_member#.#cont#1<0>"(i64 ptrtoint( ptr @"list_member#constant#34" to i64 ), i64 ptrtoint( ptr @"list_member#constant#28" to i64 ), i64 ptrtoint( ptr @"list_member#constant#21" to i64 ))
+  tail call fastcc void @"list_member#.#cont#1<0>"(i64 ptrtoint( ptr @"list_member#constant#46" to i64 ), i64 ptrtoint( ptr @"list_member#constant#40" to i64 ), i64 ptrtoint( ptr @"list_member#constant#33" to i64 ))
   ret void
 if.else.0:
-  tail call fastcc void @"list_member#.#cont#1<0>"(i64 ptrtoint( ptr @"list_member#constant#34" to i64 ), i64 ptrtoint( ptr @"list_member#constant#28" to i64 ), i64 ptrtoint( ptr @"list_member#constant#21" to i64 ))
+  tail call fastcc void @"list_member#.#cont#1<0>"(i64 ptrtoint( ptr @"list_member#constant#46" to i64 ), i64 ptrtoint( ptr @"list_member#constant#40" to i64 ), i64 ptrtoint( ptr @"list_member#constant#33" to i64 ))
   ret void
 }
 
 define external fastcc void @"list_member#.#cont#1<0>"(i64 %"fruit##0", i64 %"langs##0", i64 %"lst##0") {
-  %"tmp#30##0" = tail call fastcc i1 @"wybe#.list#.in<0>"(i64 8, i64 %"lst##0", ptr @"#vtable##wybe#.eq##wybe#.int##wybe#.int#")
-  br i1 %"tmp#30##0", label %if.then.0, label %if.else.0
+  %"tmp#48##0" = tail call fastcc i1 @"wybe#.list#.in<0>"(i64 8, i64 %"lst##0", ptr @"#vtable##wybe#.eq##wybe#.int##wybe#.int#")
+  br i1 %"tmp#48##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#16" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#28" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"list_member#.#cont#2<0>"(i64 %"fruit##0", i64 %"langs##0")
   ret void
@@ -202,10 +348,10 @@ if.else.0:
 }
 
 define external fastcc void @"list_member#.#cont#2<0>"(i64 %"fruit##0", i64 %"langs##0") {
-  %"tmp#29##0" = tail call fastcc i1 @"wybe#.list#.in<0>"(i64 ptrtoint( ptr @"list_member#constant#13" to i64 ), i64 %"langs##0", ptr @"#vtable##wybe#.eq##wybe#.string##wybe#.string#")
-  br i1 %"tmp#29##0", label %if.then.0, label %if.else.0
+  %"tmp#47##0" = tail call fastcc i1 @"wybe#.list#.in<0>"(i64 ptrtoint( ptr @"list_member#constant#25" to i64 ), i64 %"langs##0", ptr @"#vtable##wybe#.eq##wybe#.string##wybe#.string#")
+  br i1 %"tmp#47##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#15" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#27" to i64 ))
   call ccc void @putchar(i8 10)
   tail call fastcc void @"list_member#.#cont#3<0>"(i64 %"fruit##0")
   ret void
@@ -215,10 +361,94 @@ if.else.0:
 }
 
 define external fastcc void @"list_member#.#cont#3<0>"(i64 %"fruit##0") {
-  %"tmp#28##0" = tail call fastcc i1 @"wybe#.list#.in<0>"(i64 ptrtoint( ptr @"list_member#constant#13" to i64 ), i64 %"fruit##0", ptr @"#vtable##wybe#.eq##wybe#.string##wybe#.string#")
-  br i1 %"tmp#28##0", label %if.then.0, label %if.else.0
+  %"tmp#46##0" = tail call fastcc i1 @"wybe#.list#.in<0>"(i64 ptrtoint( ptr @"list_member#constant#25" to i64 ), i64 %"fruit##0", ptr @"#vtable##wybe#.eq##wybe#.string##wybe#.string#")
+  br i1 %"tmp#46##0", label %if.then.0, label %if.else.0
 if.then.0:
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#14" to i64 ))
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#26" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"list_member#.#cont#4<0>"()
+  ret void
+if.else.0:
+  tail call fastcc void @"list_member#.#cont#4<0>"()
+  ret void
+}
+
+define external fastcc void @"list_member#.#cont#4<0>"() {
+  %"tmp#15##0" = tail call fastcc i64 @"wybe#.range#.construct<0>"(i64 1, i64 1, i64 10)
+  %"tmp#45##0" = tail call fastcc i1 @"wybe#.range#.in<0>"(i64 5, i64 %"tmp#15##0")
+  br i1 %"tmp#45##0", label %if.then.0, label %if.else.0
+if.then.0:
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#24" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"list_member#.#cont#5<0>"()
+  ret void
+if.else.0:
+  tail call fastcc void @"list_member#.#cont#5<0>"()
+  ret void
+}
+
+define external fastcc void @"list_member#.#cont#5<0>"() {
+  %"tmp#16##0" = tail call fastcc i64 @"wybe#.range#.construct<0>"(i64 1, i64 1, i64 10)
+  %"tmp#44##0" = tail call fastcc i1 @"wybe#.range#.in<0>"(i64 0, i64 %"tmp#16##0")
+  br i1 %"tmp#44##0", label %if.then.0, label %if.else.0
+if.then.0:
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#23" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"list_member#.#cont#6<0>"()
+  ret void
+if.else.0:
+  tail call fastcc void @"list_member#.#cont#6<0>"()
+  ret void
+}
+
+define external fastcc void @"list_member#.#cont#6<0>"() {
+  %"tmp#17##0" = tail call fastcc i64 @"wybe#.range#.construct<0>"(i64 1, i64 1, i64 10)
+  %"tmp#43##0" = tail call fastcc i1 @"wybe#.range#.in<0>"(i64 10, i64 %"tmp#17##0")
+  br i1 %"tmp#43##0", label %if.then.0, label %if.else.0
+if.then.0:
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#22" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"list_member#.#cont#7<0>"()
+  ret void
+if.else.0:
+  tail call fastcc void @"list_member#.#cont#7<0>"()
+  ret void
+}
+
+define external fastcc void @"list_member#.#cont#7<0>"() {
+  %"tmp#18##0" = tail call fastcc i64 @"wybe#.range#.construct<0>"(i64 9, i64 -1, i64 0)
+  %"tmp#42##0" = tail call fastcc i1 @"wybe#.range#.in<0>"(i64 5, i64 %"tmp#18##0")
+  br i1 %"tmp#42##0", label %if.then.0, label %if.else.0
+if.then.0:
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#21" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"list_member#.#cont#8<0>"()
+  ret void
+if.else.0:
+  tail call fastcc void @"list_member#.#cont#8<0>"()
+  ret void
+}
+
+define external fastcc void @"list_member#.#cont#8<0>"() {
+  %"tmp#19##0" = tail call fastcc i64 @"wybe#.range#.construct<0>"(i64 9, i64 -1, i64 0)
+  %"tmp#41##0" = tail call fastcc i1 @"wybe#.range#.in<0>"(i64 0, i64 %"tmp#19##0")
+  br i1 %"tmp#41##0", label %if.then.0, label %if.else.0
+if.then.0:
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#20" to i64 ))
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"list_member#.#cont#9<0>"()
+  ret void
+if.else.0:
+  tail call fastcc void @"list_member#.#cont#9<0>"()
+  ret void
+}
+
+define external fastcc void @"list_member#.#cont#9<0>"() {
+  %"tmp#20##0" = tail call fastcc i64 @"wybe#.range#.construct<0>"(i64 9, i64 -1, i64 0)
+  %"tmp#40##0" = tail call fastcc i1 @"wybe#.range#.in<0>"(i64 10, i64 %"tmp#20##0")
+  br i1 %"tmp#40##0", label %if.then.0, label %if.else.0
+if.then.0:
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"list_member#constant#19" to i64 ))
   call ccc void @putchar(i8 10)
   ret void
 if.else.0:

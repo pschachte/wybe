@@ -19,7 +19,7 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(undef_bug.is_true#cont#1<0>,fromList [NonAliasedParamCond 2 []]))]
-    wybe.range...<0>(0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.range) #3 @undef_bug:nn:nn
+    wybe.range.construct<0>(0:wybe.int, 1:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.range) #3 @undef_bug:nn:nn
     undef_bug.is_true#cont#1<0>[785a827a1b](0:wybe.bool, 0:wybe.bool, ~tmp#3##0:wybe.range, ?tmp#0##0:wybe.bool) #4 @undef_bug:nn:nn
     wybe.bool.print<0>(~tmp#0##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @undef_bug:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @undef_bug:nn:nn
@@ -32,7 +32,7 @@ proc is_true > {inline} (1 calls)
 is_true(check##0:wybe.bool, ?res##1:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.range...<0>(0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.range) #1 @undef_bug:nn:nn
+    wybe.range.construct<0>(0:wybe.int, 1:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.range) #3 @undef_bug:nn:nn
     undef_bug.is_true#cont#1<0>(~check##0:wybe.bool, 0:wybe.bool, ~tmp#2##0:wybe.range, ?res##1:wybe.bool) #2 @undef_bug:nn:nn
 
 
@@ -82,14 +82,14 @@ target triple   = ????
 
 
 declare external fastcc void @"wybe#.bool#.print<0>"(i1)
-declare external fastcc i64 @"wybe#.range#...<0>"(i64, i64)
 declare external fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>"(i64)
 declare external fastcc {i64, i64, i1} @"wybe#.range#.[|]<0>[785a827a1b]"(i64)
+declare external fastcc i64 @"wybe#.range#.construct<0>"(i64, i64, i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"undef_bug#.<0>"() {
-  %"tmp#3##0" = tail call fastcc i64 @"wybe#.range#...<0>"(i64 0, i64 1)
+  %"tmp#3##0" = tail call fastcc i64 @"wybe#.range#.construct<0>"(i64 0, i64 1, i64 1)
   %"tmp#0##0" = tail call fastcc i1 @"undef_bug#.is_true#cont#1<0>[785a827a1b]"(i1 0, i1 0, i64 %"tmp#3##0")
   tail call fastcc void @"wybe#.bool#.print<0>"(i1 %"tmp#0##0")
   call ccc void @putchar(i8 10)
@@ -97,9 +97,9 @@ define external fastcc void @"undef_bug#.<0>"() {
 }
 
 define external fastcc i1 @"undef_bug#.is_true<0>"(i1 %"check##0") {
-  %"tmp#2##0" = tail call fastcc i64 @"wybe#.range#...<0>"(i64 0, i64 1)
-  %"tmp#6##0" = tail call fastcc i1 @"undef_bug#.is_true#cont#1<0>"(i1 %"check##0", i1 0, i64 %"tmp#2##0")
-  ret i1 %"tmp#6##0"
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.range#.construct<0>"(i64 0, i64 1, i64 1)
+  %"tmp#10##0" = tail call fastcc i1 @"undef_bug#.is_true#cont#1<0>"(i1 %"check##0", i1 0, i64 %"tmp#2##0")
+  ret i1 %"tmp#10##0"
 }
 
 define external fastcc i1 @"undef_bug#.is_true#cont#1<0>"(i1 %"check##0", i1 %"res##0", i64 %"tmp#1##0") {
