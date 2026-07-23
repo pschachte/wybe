@@ -8,7 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : higher_order_inline.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_inline.#closure#1<0>]}
+  constants       : 0:: ClosureInfo {closureProcSpec = higher_order_inline.#closure#1<0>, closureArgs = []}
   imports         : use wybe
   resources       : 
   procs           : 

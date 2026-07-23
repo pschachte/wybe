@@ -12,7 +12,7 @@ AFTER EVERYTHING:
                     1:: CStringInfo {cstringChars = "Ada"}
                     2:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"box: "]}
                     3:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,PointerStructMember c"Ada"]}
-                    4:: StructInfo {structSize = 8, structData = [FnPointerStructMember trait_higher_order.#closure#1<0>]}
+                    4:: ClosureInfo {closureProcSpec = trait_higher_order.#closure#1<0>, closureArgs = []}
   imports         : use trait_higher_order_box
                     use trait_higher_order_mapper
                     use wybe

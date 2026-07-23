@@ -734,12 +734,12 @@ trySkipTrampoline :: PrimArg -> CallSiteID -> Impurity -> [PrimArg] -> BodyBuild
 trySkipTrampoline fn@(ArgClosure pspec clsd _) id imp args = 
   Just <$> trySkipTrampoline' pspec id imp fn clsd args
 trySkipTrampoline fn@(ArgConstRef constId _) id imp args = do
-  structInfo <- lift $ lookupConstInfo constId
-  case structInfo of
-    Just StructInfo{structData=(FnPointerStructMember pspec:fields)} -> do
+  closureInfo <- lift $ lookupConstInfo constId
+  case closureInfo of
+    Just ClosureInfo{closureProcSpec=pspec, closureArgs=clsd} -> do
       freeParams <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
-      let clsd = zipWith constValuePrimArg fields (primParamType <$> freeParams)
-      Just <$> trySkipTrampoline' pspec id imp fn clsd args
+      let clsd' = zipWith constValuePrimArg clsd (primParamType <$> freeParams)
+      Just <$> trySkipTrampoline' pspec id imp fn clsd' args
     st -> shouldnt $ "trySkipTrampoline HO of " ++ show fn ++ " -> " ++ show st
 trySkipTrampoline _ _ _ _ = return Nothing
 

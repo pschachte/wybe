@@ -2352,7 +2352,7 @@ primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType
     = return $ max impurity modimpurity
 primImpurity (PrimHigher _ (ArgConstRef structID _) impurity _) = do
     lookupConstInfo structID >>= \case
-        Just (StructInfo _ (FnPointerStructMember pspec:_)) ->
+        Just (ClosureInfo pspec _) ->
             max impurity . procImpurity <$> getProcDef pspec
         Just (VTableInfo _ (FnPointerStructMember pspec:t) _ _ _ _) ->
             max impurity . procImpurity <$> getProcDef pspec
@@ -3779,6 +3779,11 @@ data StructInfo
         structSize :: Int,          -- ^ The size of the struct in bytes
         structData :: [ConstValue]  -- ^ Contents of the struct, in memory order
         }
+    -- | A constant closure, with all params (needed or not)
+    | ClosureInfo {
+        closureProcSpec :: ProcSpec, -- ^ The closure proc
+        closureArgs :: [ConstValue]  -- ^ The closed args
+    }
     | VTableInfo {
         vtableSize :: Int,          -- ^ The size of the struct in bytes
         vtableData :: [ConstValue], -- ^ Contents of the struct, in memory order
@@ -3834,12 +3839,10 @@ constantValue _ = return Nothing
 closureStructId :: ProcSpec -> [PrimArg] -> Compiler (Maybe StructID)
 closureStructId pspec args = do
     mapM constantValue args >>= (\case
-        Just args' -> do
-          let sz = wordSizeBytes * (length args' + 1)
+        Just args' ->
           Just <$>
             recordConstStruct
-                (StructInfo sz
-                    $ FnPointerStructMember pspec : args')
+                (ClosureInfo pspec args')
                 (Just $ Closure pspec
                         (List.map (Unplaced . constValueExp) args'))
         _ -> return Nothing) . sequence
@@ -3867,18 +3870,12 @@ constValueRepresentation (GenericStructMember _) = Pointer
 
 -- | Return the ConstValue at the specified offset of the specified struct.
 constValueAtOffset :: StructInfo -> Int -> Maybe ConstValue
-constValueAtOffset (StructInfo _ fields) offset = go fields offset
-    where go (field:fields) off
-            | off == 0 = Just field
-            | off < 0 = Nothing
-            | otherwise = go fields (off - constValueSize field)
-          go [] _ = Nothing
-constValueAtOffset (VTableInfo _ fields _ _ _ _) offset = go fields offset
-    where go (field:fields) off
-            | off == 0 = Just field
-            | off < 0 = Nothing
-            | otherwise = go fields (off - constValueSize field)
-          go [] _ = Nothing
+constValueAtOffset (StructInfo _ fields) offset = constValueAtOffset' fields offset
+constValueAtOffset (ClosureInfo pspec clsds) offset 
+    | offset == 0 = Just $ FnPointerStructMember pspec
+    | offset < wordSizeBytes = Nothing
+    | otherwise = constValueAtOffset' clsds (offset - wordSizeBytes)
+constValueAtOffset (VTableInfo _ fields _ _ _ _) offset = constValueAtOffset' fields offset
 constValueAtOffset (CStringInfo chars) offset =
     (`IntStructMember` 1) . toInteger . ord <$> (chars !? offset)
 constValueAtOffset (ArrayInfo []) _ = Nothing
@@ -3886,6 +3883,15 @@ constValueAtOffset (ArrayInfo elts@(elt:_)) offset =
     let eltSize = constValueSize elt
         (idx, eltOffset) = divMod offset eltSize
     in if eltOffset == 0 then elts !? idx else Nothing
+
+
+constValueAtOffset' :: [ConstValue] -> Int -> Maybe ConstValue
+constValueAtOffset' (field:fields) off
+    | off == 0 = Just field
+    | off < 0 = Nothing
+    | otherwise = constValueAtOffset' fields (off - constValueSize field)
+constValueAtOffset' [] _ = Nothing
+
 
 -- | Turn a ConstValue into the equivalent constant PrimArg
 constValuePrimArg :: ConstValue -> TypeSpec -> PrimArg
@@ -3956,19 +3962,10 @@ argGlobalFlow :: Map PrimVarName GlobalFlows -> PrimArg -> Compiler GlobalFlows
 argGlobalFlow varFlows (ArgVar name ty _ _ _)
     = return $ Map.findWithDefault univGlobalFlows name varFlows
 argGlobalFlow varFlows (ArgClosure pspec args _) = do
-    params <- getPrimParams pspec
-    let nArgs = length args
-        (closedParams, freeParams) = List.splitAt nArgs params
-    if any (\(PrimParam _ ty flow _ _) ->
-            isInputFlow flow && isResourcefulHigherOrder ty) freeParams
-    then return univGlobalFlows
-    else do
-        gFlows <- getProcGlobalFlows pspec
-        argFlows <- argsGlobalFlows varFlows args
-        return $ effectiveGlobalFlows argFlows gFlows
+    closureGlobalFlows (const $ argsGlobalFlows varFlows args) pspec args
 argGlobalFlow varFlows (ArgConstRef structID _) = do
     lookupConstInfo structID >>= (\case
-            StructInfo _ fields -> constsGlobalFlows fields
+            ClosureInfo pspec clsd -> constClosureGlobalFlows pspec clsd
             VTableInfo _ fields _ _ _ _ -> constsGlobalFlows fields
             _ -> return emptyGlobalFlows)
         . trustFromJust "lookupConstStruct"
@@ -3981,27 +3978,15 @@ argsGlobalFlows varFlows
     = mapM (\a -> (, argFlowDirection a) <$> argGlobalFlow varFlows a)
 
 
--- | Get the GlobalFlows of a list of constant values.  Specifically, this looks
--- for constant structures that begin with a FnPointerStructMember, and treats
--- that as if it were an ArgClosure.  It also traverses the structure looking
--- for nested structures beginning with a FnPointerStructMember.  Since this is
--- a completely static input structure, that's the only way to get GlobalFlows.
+-- | Get the GlobalFlows of a list of constant values.  
 constsGlobalFlows :: [ConstValue] -> Compiler GlobalFlows
-constsGlobalFlows (FnPointerStructMember pspec:fields) = do
-    params <- getPrimParams pspec
-    let nArgs = length fields
-        (closedParams, freeParams) = List.splitAt nArgs params
-    if any (\(PrimParam _ ty flow _ _) ->
-            isInputFlow flow && isResourcefulHigherOrder ty) freeParams
-    then return univGlobalFlows
-    else do
-        gFlows <- getProcGlobalFlows pspec
-        globalFlowsUnions . (gFlows:) <$> mapM constGlobalFlows fields
 constsGlobalFlows fields = globalFlowsUnions <$> mapM constGlobalFlows fields
 
 
 -- | Compute the GlobalFlows of a single constant value.
 constGlobalFlows :: ConstValue -> Compiler GlobalFlows
+constGlobalFlows (FnPointerStructMember pspec) = 
+    getProcGlobalFlows pspec
 constGlobalFlows (PointerStructMember structID) = do
     lookupConstInfo structID >>= (\case
             StructInfo _ fields -> constsGlobalFlows fields
@@ -4011,7 +3996,7 @@ constGlobalFlows (PointerStructMember structID) = do
 constGlobalFlows _ = return emptyGlobalFlows
 
 
--- | Gather the effective GlobalFLows of a given set of GlobalGlows, 
+-- | Gather the effective GlobalFLows of a given set of GlobalFlows, 
 -- using the GlobalFlows of the arguments corresponding to each parameter
 effectiveGlobalFlows :: [(GlobalFlows, PrimFlow)] -> GlobalFlows -> GlobalFlows
 effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ UniversalSet)
@@ -4020,6 +4005,29 @@ effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ UniversalSet)
 effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ (FiniteSet ids))
     = globalFlowsUnions $ primFlows{globalFlowsParams=emptyUnivSet}
                         : List.map (fst . (argFlows !!)) (Set.toList ids)
+
+
+-- | Gather the effective global flows of a closure, using some abstract getter to the the flows of 
+-- any closed values with respect to the closure's params
+closureGlobalFlows :: ([PrimParam] -> Compiler [(GlobalFlows, PrimFlow)]) -> ProcSpec -> [a] -> Compiler GlobalFlows
+closureGlobalFlows getArgFlows pspec args = do
+    params <- tail <$> getPrimParams pspec
+    let nArgs = length args
+        (closedParams, regularParams) = List.splitAt nArgs params
+    if any (\(PrimParam _ ty flow _ _) ->
+            isInputFlow flow && isResourcefulHigherOrder ty) regularParams
+    then return univGlobalFlows
+    else do
+        gFlows <- getProcGlobalFlows pspec
+        argFlows <- getArgFlows closedParams
+        return $ effectiveGlobalFlows argFlows gFlows
+
+
+-- | Gather the global flows of some constant closure
+constClosureGlobalFlows :: ProcSpec -> [ConstValue] -> Compiler GlobalFlows
+constClosureGlobalFlows pspec clsd = 
+    closureGlobalFlows (\closedParams -> mapM constGlobalFlows clsd >>= 
+           \clsdFlows -> return (List.zipWith ((. primParamFlow) . (,)) clsdFlows closedParams)) pspec clsd
 
 
 -- | Test if a PrimArg is a variable.

@@ -336,17 +336,11 @@ recordIfConst mod (PointerStructMember structID) = do
     recordConst mod structID
 recordIfConst mod (GenericStructMember member) =
     recordIfConst mod member
-recordIfConst mod (FnPointerStructMember pspec@(ProcSpec pmod _ _ _)) = do
-    isClosure <- lift $ isClosureProc pspec
-    if isClosure
-    then getProcArgs pspec >>= recordExternProc mod pspec
-    else do
-        thisMod <- lift getModuleSpec
-        unless (thisMod == pmod) $ do
-            logLLVM $ "Recording extern proc " ++ show pspec
-            params <- lift $ getPrimParams pspec
-            let args = List.map primParamToArg params
-            recordExternProc mod pspec args
+recordIfConst mod (FnPointerStructMember pspec) = do
+    logLLVM $ "Recording extern proc " ++ show pspec
+    params <- lift $ getPrimParams pspec
+    let args = List.map primParamToArg params
+    recordExternProc mod pspec args
 recordIfConst _ _ = return ()
 
 
@@ -394,6 +388,10 @@ recordConstParts :: ModSpec -> StructInfo -> LLVM ()
 recordConstParts _ CStringInfo{} = return ()
 recordConstParts mod StructInfo{structData=members} = do
     logLLVM $ "Recording parts of constant struct " ++ show members
+    mapM_ (recordIfConst mod) members
+recordConstParts mod ClosureInfo{closureProcSpec=pspec, closureArgs=members} = do
+    logLLVM $ "Recording parts of constant closure " ++ show pspec ++ " of " ++ show members
+    getProcArgs pspec >>= recordExternProc mod pspec
     mapM_ (recordIfConst mod) members
 recordConstParts mod VTableInfo{vtableData=members} = do
     logLLVM $ "Recording parts of vtable " ++ show members
@@ -1211,7 +1209,7 @@ declareStringConstant name str section = do
 -- | Emit an LLVM declaration for a struct constant, optionally specifying a
 -- file section.
 declareStructConstant :: LLVMName -> StructInfo -> Maybe String -> LLVM ()
-declareStructConstant name (StructInfo _ (FnPointerStructMember pspec:fields)) section = do
+declareStructConstant name (ClosureInfo pspec fields) section = do
     freeParams <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
     let neededFields = snd <$> List.filter (paramIsNeeded . fst) (zip freeParams fields)
     llvmFields <- llvmConstStruct $ FnPointerStructMember pspec : neededFields

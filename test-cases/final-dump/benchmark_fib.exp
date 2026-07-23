@@ -88,7 +88,7 @@ define external fastcc double @"benchmark#.time_execution<0>"(ptr %"proc##0", i6
                     7:: CStringInfo {cstringChars = "benchmark_fib:37:2"}
                     8:: CStringInfo {cstringChars = "benchmark_fib:40:2"}
                     9:: StructInfo {structSize = 16, structData = [IntStructMember 19 8,PointerStructMember c"Elapsed time (s):  "]}
-                    10:: StructInfo {structSize = 8, structData = [FnPointerStructMember benchmark_fib.#anon#1<1>]}
+                    10:: ClosureInfo {closureProcSpec = benchmark_fib.#anon#1<1>, closureArgs = []}
   imports         : use benchmark
                     use wybe
   resources       : 

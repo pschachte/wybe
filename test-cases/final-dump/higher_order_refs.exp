@@ -8,12 +8,12 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : higher_order_refs.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#anon#1<1>]}
-                    1:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#anon#2<1>]}
-                    2:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_refs.#anon#3<1>,FloatStructMember 0.5 8]}
-                    3:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#closure#1<0>]}
-                    4:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_refs.#closure#2<0>]}
-                    5:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_refs.#closure#3<0>,IntStructMember 10 8]}
+  constants       : 0:: ClosureInfo {closureProcSpec = higher_order_refs.#anon#1<1>, closureArgs = []}
+                    1:: ClosureInfo {closureProcSpec = higher_order_refs.#anon#2<1>, closureArgs = []}
+                    2:: ClosureInfo {closureProcSpec = higher_order_refs.#anon#3<1>, closureArgs = [FloatStructMember 0.5 8]}
+                    3:: ClosureInfo {closureProcSpec = higher_order_refs.#closure#1<0>, closureArgs = []}
+                    4:: ClosureInfo {closureProcSpec = higher_order_refs.#closure#2<0>, closureArgs = []}
+                    5:: ClosureInfo {closureProcSpec = higher_order_refs.#closure#3<0>, closureArgs = [IntStructMember 10 8]}
   imports         : use logging
                     use wybe
   resources       : 
