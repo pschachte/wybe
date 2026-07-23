@@ -6,7 +6,6 @@ pragma no_standard_library  # Standard library can't depend on itself!
 use wybe.c_string, wybe.string, wybe.char, wybe.int, wybe.io, wybe.comparison, wybe.eq
 
 pub constructors false | true
-impl eq
 
 ## Constants
 
@@ -44,6 +43,7 @@ pub def ~(p:_):_ = foreign llvm xor(p, true)
 ## Comparisons
 
 # Equality and disequality.
+impl eq
 pub def foreign llvm `=` =icmp_eq(x:_, y:_):_
 pub def foreign llvm `~=`=icmp_ne(x:_, y:_):_
 

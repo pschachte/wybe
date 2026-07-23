@@ -4,6 +4,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.string, wybe.c_string, wybe.int, wybe.control
+use wybe.eq
 
 pub constructors lesser | equal | greater
 

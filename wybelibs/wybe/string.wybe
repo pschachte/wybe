@@ -5,6 +5,7 @@ pragma no_standard_library
 
 use wybe.c_string, wybe.range, wybe.int, wybe.char, wybe.bool, wybe.comparison
 use wybe.control, wybe.io 
+use wybe.eq
 
 # Private constructors. This ensures that strings can only be manipulated with
 # public procedures, providing a more typical interface.  The `empty` and
@@ -130,10 +131,17 @@ pub def repetition(c:char, n:int):_ = result where {
     if { n > 0 :: for ?i in 0..n { c ,, !result } }
 }
 
+# Membership
+pub def {test} (x:char in lst:_) {
+    lst = [?h|?t]
+    ( x = h | x in t )
+}
+
 
 ## Comparisons
 
 # Equality and disequality.
+impl eq
 pub def (x:_ =  y:_):bool = (x <=> y) =  equal
 pub def (x:_ ~= y:_):bool = (x <=> y) ~= equal
 

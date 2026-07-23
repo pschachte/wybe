@@ -5,6 +5,7 @@ pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int, wybe.count
 use wybe.control, wybe.comparison, wybe.io, wybe.string, wybe.char
+use wybe.eq
 
 use foreign library m  # for math functions
 
@@ -69,6 +70,7 @@ pub def foreign c abs=`llvm.fabs.f64`(x:_):_
 ## Comparisons
 
 # Equality and disequality.
+impl eq
 pub def foreign llvm {test} `=` =fcmp_oeq(x:_, y:_)
 pub def foreign llvm {test} `~=`=fcmp_one(x:_, y:_)
 

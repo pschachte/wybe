@@ -5,6 +5,7 @@ pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int, wybe.char, wybe.array, wybe.machine_word
 use wybe.io
+use wybe.eq
 
 pub constructors (T) [] | [head:T | tail:_(T)]
 
@@ -31,6 +32,13 @@ pub def reverse(x:_(T)):_(T) = reverse1(x, [])
 pub def {test} `[]`(xs:_(T), idx:int):T = x where {
     idx >= 0 # we don't want to check this every time
     ?x = index1(xs, idx)
+}
+
+
+# Membership
+pub def {test} (x:eq in lst:_(eq)) {
+    lst = [?h|?t]
+    ( x = h | x in t )
 }
 
 

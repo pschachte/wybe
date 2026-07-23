@@ -4,6 +4,9 @@
 pragma no_standard_library # Standard library can't depend on itself!
 
 use wybe.int, wybe.bool
+use wybe.eq
+
+impl eq # type is canonical, so structural equality works
 
 pub constructor range(start:int, stride:int, end:int)
 
