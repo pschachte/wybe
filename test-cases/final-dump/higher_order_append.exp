@@ -8,7 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : higher_order_append.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_append.print_list_of_ints#closure#1<0>]}
+  constants       : 0:: ClosureInfo {closureProcSpec = higher_order_append.print_list_of_ints#closure#1<0>, closureArgs = []}
                     1:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
                     2:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,IntStructMember 0 8]}
                     3:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_append#constant#1,IntStructMember 0 8]}
@@ -17,8 +17,8 @@ AFTER EVERYTHING:
                     6:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_append#constant#4,PointerStructMember higher_order_append#constant#5]}
                     7:: StructInfo {structSize = 16, structData = [IntStructMember 6 8,IntStructMember 0 8]}
                     8:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember higher_order_append#constant#7]}
-                    9:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_append.#anon#1<1>,PointerStructMember higher_order_append#constant#8]}
-                    10:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_append.#closure#1<0>]}
+                    9:: ClosureInfo {closureProcSpec = higher_order_append.#anon#1<1>, closureArgs = [PointerStructMember higher_order_append#constant#8]}
+                    10:: ClosureInfo {closureProcSpec = higher_order_append.#closure#1<0>, closureArgs = []}
   imports         : use wybe
   resources       : 
   procs           : 

@@ -12,7 +12,7 @@ AFTER EVERYTHING:
                     1:: CStringInfo {cstringChars = "The answer is..."}
                     2:: CStringInfo {cstringChars = "The answer is now..."}
                     3:: StructInfo {structSize = 16, structData = [IntStructMember 12 8,PointerStructMember c"Thinking...\n"]}
-                    4:: StructInfo {structSize = 8, structData = [FnPointerStructMember lazy.#anon#1<1>]}
+                    4:: ClosureInfo {closureProcSpec = lazy.#anon#1<1>, closureArgs = []}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember c"The answer is..."]}
                     6:: StructInfo {structSize = 16, structData = [IntStructMember 20 8,PointerStructMember c"The answer is now..."]}
   imports         : use logging
