@@ -85,7 +85,7 @@ define external fastcc void @"extern_anon_params_a#.run#anon#1<1>"(ptr %"#env##0
   public submods  : 
   public resources: 
   public procs    : extern_anon_params_b.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember extern_anon_params_b.#anon#1<1>]}
+  constants       : 0:: ClosureInfo {closureProcSpec = extern_anon_params_b.#anon#1<1>, closureArgs = []}
   imports         : use extern_anon_params_a
                     use wybe
   resources       : 

@@ -8,16 +8,16 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : higher_order_anon.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#7#anon#1<1>]}
-                    1:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#1<1>]}
-                    2:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#2<1>]}
-                    3:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#3<1>]}
-                    4:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#4<1>]}
-                    5:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#5<1>]}
-                    6:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#6<1>]}
-                    7:: StructInfo {structSize = 16, structData = [FnPointerStructMember higher_order_anon.#anon#7<1>,PointerStructMember higher_order_anon.#anon#6<1><>]}
-                    8:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#8<1>]}
-                    9:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_anon.#anon#9<1>]}
+  constants       : 0:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#7#anon#1<1>, closureArgs = []}
+                    1:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#1<1>, closureArgs = []}
+                    2:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#2<1>, closureArgs = []}
+                    3:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#3<1>, closureArgs = []}
+                    4:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#4<1>, closureArgs = []}
+                    5:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#5<1>, closureArgs = []}
+                    6:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#6<1>, closureArgs = []}
+                    7:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#7<1>, closureArgs = [PointerStructMember higher_order_anon.#anon#6<1><>]}
+                    8:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#8<1>, closureArgs = []}
+                    9:: ClosureInfo {closureProcSpec = higher_order_anon.#anon#9<1>, closureArgs = []}
   imports         : use wybe
   resources       : 
   procs           : 
