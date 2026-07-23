@@ -543,7 +543,7 @@ defGlobalResource res = do
         then return ()
         else if isJust optForeign
         then llvmPutStrLn
-                $ name ++ " = external global ptr"
+                $ name ++ " = external global " ++ llvmTypeRep rep
         else llvmPutStrLn
                 $ name ++ " = global " ++ llvmTypeRep rep ++ " undef"
 
