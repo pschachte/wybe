@@ -1,0 +1,17 @@
+# purpose:  Standard trait describing types that support inequality testing
+# since  : 0.2
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.bool, wybe.comparison
+
+trait
+
+# Inequalities.
+abstract {test} (x:_ <  y:_)
+abstract {test} (x:_ <= y:_)
+abstract {test} (x:_ >  y:_)
+abstract {test} (x:_ >= y:_)
+# Three-way comparison.
+abstract (x:_ <=> y:_):comparison
+
