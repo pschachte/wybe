@@ -18,7 +18,7 @@ import           Options
 import           Version
 import           CConfig
 import           Snippets
-import           Util                            ((|||), showArguments, sameLength, thd4)
+import           Util                            ((&&&), (|||), showArguments, sameLength, thd4)
 import           System.IO
 import           Data.Char                       (isAlphaNum)
 import           Data.Set                        as Set
@@ -36,8 +36,6 @@ import           Data.Tuple.HT
 import qualified Data.ByteString                 as B
 import qualified Data.ByteString.Lazy            as BL
 import qualified Data.ByteString.Internal        as BI
-import Distribution.TestSuite (TestInstance(name))
-import Distribution.Simple.Utils (info)
 
 
 -- BEGIN MAJOR DOC
@@ -289,7 +287,7 @@ preScanProcs = do
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
     vTables <- lift $ getModule modVTables
     logLLVM $ "Start recording vTables in module " ++ showModSpec thisMod
-    mapM_ (recordConst . snd) vTables
+    mapM_ (recordConst mod . snd) vTables
     logLLVM "End recording vTables"
     let bodies = concatMap (concatMap allProcBodies) procss
     mapM_ (mapLPVMBodyM (recordExtern mod) (prescanArg mod)) bodies
@@ -304,14 +302,13 @@ preScanProcs = do
 -- the C string, since the Wybe string constant refers to the C string.
 prescanArg :: ModSpec -> PrimArg -> LLVM ()
 prescanArg mod closure@(ArgClosure pspec args _) = do
-    (neededArgs, realParams) <- partitionClosureParams pspec args
-    let externArgs = primParamToArg envPrimParam : List.map primParamToArg realParams
-    recordExternProc mod pspec externArgs
+    realParams <- snd <$> partitionClosureParams pspec args
+    recordExternProc mod pspec $ List.map primParamToArg realParams
     recordExternSpec externAlloc
-    argConstValue closure >>= maybe (return ()) recordIfConst
+    argConstValue closure >>= maybe (return ()) (recordIfConst mod)
     mapM_ (prescanArg mod) args
-prescanArg _ arg =
-    argConstValue arg >>= maybe (return ()) recordIfConst
+prescanArg mod arg =
+    argConstValue arg >>= maybe (return ()) (recordIfConst mod)
 
 
 -- | Scan the forks of a ProcBody, recording any constants
@@ -326,34 +323,38 @@ preScanForks mod PrimFork{forkBodies=bodies, forkDefault=mbDflt} = do
     mapM_ (preScanBodyForks mod . snd) bodies
     forM_ mbDflt $ preScanBodyForks mod
 preScanForks mod MergedFork{forkTable=table, forkBody=body, forkDefault=mbDflt} = do
-    mapM_ (recordConst . thd4) table
+    mapM_ (recordConst mod . thd4) table
     preScanBodyForks mod body
     forM_ mbDflt $ preScanBodyForks mod
 
 
-recordIfConst :: ConstValue -> LLVM ()
-recordIfConst (PointerStructMember structID) = do
+recordIfConst :: ModSpec -> ConstValue -> LLVM ()
+recordIfConst mod (PointerStructMember structID) = do
     constInfo <- lift $ lookupConstInfo structID
     logLLVM $ "Recording const " ++ show structID
                 ++ " ( -> " ++ show constInfo ++ ")"
-    recordConst structID
-recordIfConst (GenericStructMember member) =
-    recordIfConst member
-recordIfConst (FnPointerStructMember pspec@(ProcSpec mod _ _ _)) = do
-    thisMod <- lift getModuleSpec
-    unless (thisMod == mod) $ do
-        logLLVM $ "Recording extern proc " ++ show pspec
-        pdef <- lift $ getProcDef pspec
-        let params = (primProtoParams . procImplnProto . procImpln) pdef
-        let args = List.map primParamToArg params
-        recordExternProc thisMod pspec args
-recordIfConst _ = return ()
+    recordConst mod structID
+recordIfConst mod (GenericStructMember member) =
+    recordIfConst mod member
+recordIfConst mod (FnPointerStructMember pspec) = do
+    logLLVM $ "Recording extern proc " ++ show pspec
+    params <- lift $ getPrimParams pspec
+    let args = List.map primParamToArg params
+    recordExternProc mod pspec args
+recordIfConst _ _ = return ()
+
+
+getProcArgs :: ProcSpec -> LLVM [PrimArg]
+getProcArgs pspec = do
+    params <- lift $ getPrimParams pspec
+    realParams <- snd <$> partitionClosureParams pspec (primParamToArg <$> params)
+    return $ List.map primParamToArg realParams
 
 
 -- | Record that the specified constant needs to be declared in this LLVM
 -- module, as well as any constants it refers to.
-recordConst :: StructID -> LLVM ()
-recordConst spec = do
+recordConst :: ModSpec -> StructID -> LLVM ()
+recordConst mod spec = do
     logLLVM $ "Recording constant " ++ show spec
     new <- gets $ Set.notMember spec . allConsts
     when new $ do
@@ -375,24 +376,29 @@ recordConst spec = do
                         allConsts = Set.insert spec
                             $ maybe id Set.delete previous $ allConsts s,
                         allVTables = Map.insert ispec spec $ allVTables s }
-                    recordConstParts info
+                    recordConstParts mod info
             _ -> do
                 modify $ \s -> s {allConsts=Set.insert spec $ allConsts s}
-                maybe (return ()) recordConstParts info
+                lift (lookupConstInfo spec) >>=
+                    maybe (return ()) (recordConstParts mod)
 
 
 -- | Record the pointer parts of a constant structure.
-recordConstParts :: StructInfo -> LLVM ()
-recordConstParts CStringInfo{} = return ()
-recordConstParts StructInfo{structData=members} = do
+recordConstParts :: ModSpec -> StructInfo -> LLVM ()
+recordConstParts _ CStringInfo{} = return ()
+recordConstParts mod StructInfo{structData=members} = do
     logLLVM $ "Recording parts of constant struct " ++ show members
-    mapM_ recordIfConst members
-recordConstParts VTableInfo{vtableData=members} = do
+    mapM_ (recordIfConst mod) members
+recordConstParts mod ClosureInfo{closureProcSpec=pspec, closureArgs=members} = do
+    logLLVM $ "Recording parts of constant closure " ++ show pspec ++ " of " ++ show members
+    getProcArgs pspec >>= recordExternProc mod pspec
+    mapM_ (recordIfConst mod) members
+recordConstParts mod VTableInfo{vtableData=members} = do
     logLLVM $ "Recording parts of vtable " ++ show members
-    mapM_ recordIfConst members
-recordConstParts ArrayInfo{arrayData=elts} = do
+    mapM_ (recordIfConst mod) members
+recordConstParts mod ArrayInfo{arrayData=elts} = do
     logLLVM $ "Recording elts of constant array " ++ show elts
-    mapM_ recordIfConst elts
+    mapM_ (recordIfConst mod) elts
 
 
 -- | Produce a StructMember from a PrimArg, if it's a constant.  This may record
@@ -423,6 +429,8 @@ argConstValue (ArgUndef ty) = do
 -- | If needed, add an extern declaration for a prim to the set.
 recordExtern :: ModSpec -> Prim -> LLVM ()
 recordExtern mod (PrimCall _ pspec _ args _) = recordExternProc mod pspec args
+recordExtern mod (PrimHigher _ arg@(ArgConstRef cnst _) _ _) = recordConst mod cnst
+recordExtern mod (PrimHigher _ arg@(ArgClosure pspec _ _) _ _) = getProcArgs pspec >>= recordExternProc mod pspec
 recordExtern _ PrimHigher{} = return ()
 recordExtern _ PrimVirtualCall{} = return ()
 recordExtern _ (PrimForeign "llvm" _ _ _) = return ()
@@ -672,7 +680,7 @@ writeProcLLVM def _  =
 -- with a leading "env" param. Also yields the Free params for unmarshalling
 closeClosureParams :: PrimProto -> (PrimProto, [PrimParam])
 closeClosureParams proto@PrimProto{primProtoParams=params} =
-    (proto{primProtoParams=envPrimParam:realParams}, neededFree)
+    (proto{primProtoParams=realParams}, neededFree)
   where
     (free, realParams) = List.partition ((==Free) . primParamFlowType) params
     neededFree = List.filter (not . paramInfoUnneeded . primParamInfo) free
@@ -819,9 +827,9 @@ writeClosureEnvUnmarshall :: [PrimParam] -> LLVM ()
 writeClosureEnvUnmarshall params = do
     structTy <- llvmStructType . (CPointer:) <$> mapM (typeRep . primParamType) params
     forM_ (zip [1..] params) $ \(idx, param) -> do
-        eltPtr <- getElementPtr True structTy (Just $ primParamToArg envPrimParam)
-                    [intConst 0, ArgInt idx int32Type]
-        llvmLoad eltPtr $ primParamToArg param
+            eltPtr <- getElementPtr True structTy (Just $ primParamToArg envPrimParam)
+                        [intConst 0, ArgInt idx int32Type]
+            llvmLoad eltPtr $ primParamToArg param
 
 
 ----------------------------------------------------------------------------
@@ -875,9 +883,11 @@ writeWybeCall wybeProc args pos = do
 
 -- | Generate a Wybe proc call instruction, or defer it if necessary.
 writeHOCall :: PrimArg -> [PrimArg] -> OptPos -> LLVM ()
-writeHOCall closure@(ArgClosure pspec closed _) args pos = do
+writeHOCall closure@ArgClosure{} args pos = do
     -- NB:  this case should have been handled earlier
-    shouldnt $ "Higher order call with constand closure should have been handled earlier: " ++ show closure
+    shouldnt $ "Higher order call with closure should have been handled earlier: " ++ show closure
+writeHOCall closure@ArgConstRef{} args pos = do
+    shouldnt $ "Higher order call with constant should have been handled earlier: " ++ show closure
 writeHOCall closure args pos = do
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs $ closure:args
     unless (List.null oRefs && List.null iRefs)
@@ -930,14 +940,19 @@ writeActualCall wybeProc ins outs tailKind = do
     params <- lift $ getPrimParams wybeProc
     -- must ensure we obey the closure interface
     isClosure <- lift $ isClosureProc wybeProc
-    let params' = if isClosure then envPrimParam : List.filter ((/=Free) . primParamFlowType) params else params
+    let (params', ins') =
+          if isClosure
+          then let (free, nonFree) = List.partition ((Free==) . primParamFlowType) params
+               -- head ins must be the closure itself
+               in (nonFree, head ins : List.drop (length free) (tail ins)) 
+          else (params, ins)
     (inPs,outPs,oRefPs,iRefPs) <- partitionParams params'
     unless (List.null iRefPs)
       $ shouldnt $ "take-reference parameter(s) " ++ show iRefPs
     let allInPs = inPs ++ List.map convertOutByRefParam oRefPs
-    unless (sameLength allInPs ins)
+    unless (sameLength allInPs ins')
       $ shouldnt $ "in call to " ++ show wybeProc
-            ++ ", argument count " ++ show (length ins)
+            ++ ", argument count " ++ show (length ins')
             ++ " does not match parameter count " ++ show (length allInPs)
             ++ "\n " ++ show ins
             ++ " vs. " ++ show allInPs
@@ -948,7 +963,7 @@ writeActualCall wybeProc ins outs tailKind = do
             ++ "\n " ++ show outs
             ++ " vs. " ++ show outPs
     paramTypes <- mapM (typeRep . primParamType) allInPs
-    argList <- llvmStringArgList <$> zipWithM typeConvertedArg paramTypes ins
+    argList <- llvmStringArgList <$> zipWithM typeConvertedArg paramTypes ins'
     outReps <- mapM (typeRep . primParamType) outPs
     let outTy = llvmRepReturnType outReps
     let (name,cc) = llvmProcName wybeProc
@@ -1188,44 +1203,48 @@ writeAssemblyExports = do
 -- file section.
 declareStringConstant :: LLVMName -> String -> Maybe String -> LLVM ()
 declareStringConstant name str section = do
-    llvmPutStrLn $ llvmGlobalName name
-                    ++ " = private unnamed_addr constant "
-                    ++ showLLVMString str True
-                    ++ maybe "" ((", section "++) . show) section
-                    ++ ", align " ++ show wordSizeBytes
+    declareLLVMConstant name False Private section (Just wordSizeBytes) $ showLLVMString str True
 
 
 -- | Emit an LLVM declaration for a struct constant, optionally specifying a
 -- file section.
 declareStructConstant :: LLVMName -> StructInfo -> Maybe String -> LLVM ()
-declareStructConstant name (StructInfo sz members) section = do
+declareStructConstant name (ClosureInfo pspec fields) section = do
+    freeParams <- List.filter ((Free==) . primParamFlowType) <$> lift (getPrimParams pspec)
+    let neededFields = snd <$> List.filter (paramIsNeeded . fst) (zip freeParams fields)
+    llvmFields <- llvmConstStruct $ FnPointerStructMember pspec : neededFields
+    declareLLVMConstant name False Private section (Just wordSizeBytes) llvmFields
+declareStructConstant name (StructInfo _ members) section = do
     llvmFields <- llvmConstStruct members
-    llvmPutStrLn $ llvmGlobalName name
-                    ++ " = private unnamed_addr constant " ++ llvmFields
-                    ++ maybe "" ((", section "++) . show) section
-                    ++ ", align " ++ show wordSizeBytes
+    declareLLVMConstant name False Private section (Just wordSizeBytes) llvmFields
 declareStructConstant _ (VTableInfo sz members external index spec mod) section = do
     let llvmType = llvmStructType $ llvmConstValueRep <$> members
     llvmFields <- llvmConstStruct members
     let name = llvmVTableName mod index
-    llvmPutStrLn $ llvmGlobalName name ++ " = "
-                    ++ (if external then "external " else "")
-                    ++ "unnamed_addr constant "
-                    ++ (if external then llvmType else llvmFields)
-                    ++ maybe "" ((", section "++) . show) section
-                    ++ ", align " ++ show wordSizeBytes
+    declareLLVMConstant name external Public section (Just wordSizeBytes) $
+        if external then llvmType else llvmFields
 declareStructConstant name (CStringInfo str) section = do
-    llvmPutStrLn $ llvmGlobalName name
-                    ++ " = private unnamed_addr constant "
-                    ++ showLLVMString str True
-                    ++ maybe "" ((", section "++) . show) section
-                    ++ ", align " ++ show wordSizeBytes
+    declareStringConstant name str section
 declareStructConstant name (ArrayInfo elts) section = do
     let reps = llvmConstValueRep <$> elts
     llvmVals <- zipWithM convertedConstantArg elts reps
-    llvmPutStrLn $ llvmGlobalName name
-                    ++ " = private unnamed_addr constant [ " ++ show (length elts) ++ " x " ++ llvmTypeRep (head reps) ++ " ] "
-                    ++ "[" ++ intercalate ", " llvmVals ++ "]"
+    declareLLVMConstant name False Private section Nothing $
+           "[ " ++ show (length elts) ++ " x " ++ llvmTypeRep (head reps) ++ " ] "
+        ++ "[" ++ intercalate ", " llvmVals ++ "]"
+
+
+-- | Emit an LLVM declaration for a constant, optionally specifying a
+-- file section and allignment. The value should be prepended by its type
+declareLLVMConstant :: LLVMName -> Bool -> Visibility -> Maybe String -> Maybe Int -> String -> LLVM ()
+declareLLVMConstant name external vis mbSection mbAlignment value = 
+    llvmPutStrLn $ llvmGlobalName name ++ " = " 
+                    ++ (if external then "external " else "")
+                    ++ (if vis == Private then "private " else "")
+                    ++ "unnamed_addr constant "
+                    ++ value
+                    ++ maybe "" ((", section " ++) . show) mbSection
+                    ++ maybe "" ((", align " ++) . show) mbAlignment
+
 
 -- | The representation of a constant value as seen by LLVM, as distinguished
 -- from the representation used by Wybe.  Pointer struct members are seen as
