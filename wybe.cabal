@@ -40,7 +40,7 @@ executable wybemk
   other-modules: AST, BinaryFactory, BodyBuilder, Builder, Callers,
                  CConfig, Clause, LLVM, Config, Emit, Expansion,
                  Flatten, Macho, Parser, Normalise, ObjectInterface, Optimise,
-                 Analysis, AliasAnalysis, Transform,
+                 Analysis, AliasAnalysis, PointsToGraph, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch,
                  UnivSet, Util, Version, ASTShow, Unique, LastCallAnalysis
   extra-libraries: gc
@@ -83,7 +83,7 @@ test-suite wybe-test
   other-modules: AST, BinaryFactory, BodyBuilder, Builder, Callers,
                  CConfig, Clause, LLVM, Config, Emit, Expansion,
                  Flatten, Macho, Parser, Normalise, ObjectInterface, Optimise,
-                 Analysis, AliasAnalysis, Transform,
+                 Analysis, AliasAnalysis, PointsToGraph, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch,
                  UnivSet, Util, Version, ASTShow, Unique, LastCallAnalysis
   extra-libraries: gc
