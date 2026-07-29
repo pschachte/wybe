@@ -1,0 +1,2 @@
+Error detected during checking parameter type declarations in module(s) trait_param_bound_non_trait
+final-dump/trait_param_bound_non_trait.wybe:3:1: Invalid type variable bound: wybe.int is not a trait

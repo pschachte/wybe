@@ -1,0 +1,5 @@
+# Define the printable trait used by the dispatch specificity test.
+
+trait
+
+abstract render(x:_): string

@@ -1,0 +1,36 @@
+# Verify methods can use multiple parameters constrained by trait types.
+
+type person trait {
+    abstract person_name(x:_): string
+}
+
+type student {
+    pub student(name:string)
+}
+
+impl student <: person
+
+def person_name(x:student): string = x^name
+
+type group trait {
+    abstract add_person(!x:_, person: person)
+}
+
+type school {
+    pub school(names:list(string))
+}
+
+impl school <: group
+
+def add_person(!x:school, person: person) {
+    ?n = person^person_name
+    ?x = school([n|x^names])
+}
+
+?student1 = student("John")
+?school1 = school([])
+group.add_person(!school1, student1)
+
+for ?name in school1^names {
+    !println(name)
+}

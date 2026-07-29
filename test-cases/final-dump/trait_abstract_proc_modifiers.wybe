@@ -1,0 +1,17 @@
+# Verify abstract procedures match test determinism and semipure purity.
+
+type matcher trait {
+    abstract {test, semipure} matches(x:_)
+}
+
+impl int <: matcher
+
+def {test, semipure} matches(x:int) {
+    if { x = 42 :: pass
+       | else :: fail
+    }
+}
+
+if { !matcher.matches(42) :: !println("matched")
+   | else :: !println("not matched")
+}

@@ -1,0 +1,7 @@
+# Verify abstract procedures must be defined in trait modules.
+
+module my_trait {
+    trait
+}
+
+abstract not_a_trait(x:T<:my_trait): string

@@ -1,0 +1,24 @@
+# Verify parameter type inference combines multiple trait bounds.
+
+type printable trait {
+    abstract println(x:_) use !io
+}
+
+type comparable trait {
+    abstract {partial} (a:_ < b:_)
+}
+
+impl int <: printable
+impl int <: comparable
+
+impl float <: printable
+impl float <: comparable
+
+def print_larger(a, b) use !io {
+    if { a < b :: !printable.println(b)
+       | else  :: !printable.println(a)
+    }
+}
+
+!print_larger(3, 5)
+!print_larger(3.14, 1.0)

@@ -41,13 +41,13 @@ noteProcCallers mod name defs procs =
 
 noteImplnCallers :: ModSpec -> ProcSpec -> ProcImpln ->
                     Map Ident [ProcDef] -> Map Ident [ProcDef]
-noteImplnCallers _ _ (ProcDefSrc _) _ =
-  shouldnt "scanning unprocessed code for calls"
 noteImplnCallers mod caller ProcDefPrim{procImplnBody = body} procs =
   let callers = foldBodyDistrib (noteCall mod caller)
                 Map.empty mergeCallers mergeCallers
                 body
   in  registerCallers caller callers procs
+noteImplnCallers _ _ _ _ =
+  shouldnt "scanning unprocessed code for calls"
 
 -- |Compute for each proc a total count of calls and determine if it
 -- should be a subproc of another proc, and if so, which one.
@@ -131,6 +131,8 @@ localCallees modspec (PrimCall _ pspec _ args _)
   = pspec{procSpeczVersion=generalVersion}:concatMap (argRefs modspec) args
 localCallees modspec (PrimHigher _ fn _ args)
   = concatMap (argRefs modspec) (fn:args)
+localCallees modspec (PrimVirtualCall _ table _ _ args _)
+  = concatMap (argRefs modspec) (table:args)
 localCallees modspec (PrimForeign _ _ _ args)
   = concatMap (argRefs modspec) args
 

@@ -1,0 +1,4 @@
+Error detected during type checking of module(s) trait_error_abstract_proc_purity, trait_error_abstract_proc_purity.observer
+final-dump/trait_error_abstract_proc_purity.wybe:7:1: Invalid implementation of trait trait_error_abstract_proc_purity.observer for type wybe.int: no matching implementation of proc observe
+    candidate {impure} trait_error_abstract_proc_purity.observe<0>(wybe.int) -> (wybe.int) does not match:
+        purity is impure, expected semipure

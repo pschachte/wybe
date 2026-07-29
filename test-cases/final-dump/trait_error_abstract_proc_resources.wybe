@@ -1,0 +1,11 @@
+# Verify trait implementation resource use must match the abstract procedure.
+
+type printable trait {
+    abstract print_value(x:_) use !io
+}
+
+impl int <: printable
+
+def print_value(x:int) {
+    pass
+}

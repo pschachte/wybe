@@ -1,0 +1,12 @@
+# purpose:  Standard trait describing types that support equality testing
+# since  : 0.2
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.bool
+
+trait
+
+# Equality and disequality.
+abstract {test} (a:_ = b:_)
+abstract {test} (a:_ ~= b:_)

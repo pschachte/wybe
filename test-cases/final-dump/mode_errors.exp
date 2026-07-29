@@ -1,0 +1,3 @@
+Error detected during type checking of module(s) mode_errors
+final-dump/mode_errors.wybe:4:1: No matching mode in call to proc proc_in
+final-dump/mode_errors.wybe:5:1: No matching mode in call to proc proc_inout

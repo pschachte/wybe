@@ -1,4 +1,3 @@
-{-# LANGUAGE TupleSections #-}
 --  File     : Normalise.hs
 --  Author   : Peter Schachte
 --  Purpose  : Framework to optimise a single module
@@ -168,6 +167,7 @@ primCost :: Prim -> Compiler Int
 primCost (PrimForeign "llvm" _ _ _) = return 1
 primCost (PrimCall _ _ _ args _)    = (1+) . sum <$> mapM argCost args
 primCost (PrimHigher _ fn _ args)   = (1+) . sum <$> mapM argCost (fn:args)
+primCost (PrimVirtualCall _ _ _ _ args _)   = (1+) . sum <$> mapM argCost args
 primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
 
 
@@ -202,7 +202,6 @@ inferGlobalFlows procs = do
 
 -- | Helper for inferGlobalFlows, applied to a single ProcBody
 inferGlobalFlows' :: Map PrimVarName GlobalFlows -> ProcImpln -> Compiler GlobalFlows
-inferGlobalFlows' varFlows ProcDefSrc{} = shouldnt "inferGlobalFlows'"
 inferGlobalFlows' varFlows (ProcDefPrim pspec 
                     proto@(PrimProto name _ oldFlows@(GlobalFlows ins outs params)) body _ _) = do
     logOptimise $ "Inferring global flows of " ++ show proto
@@ -212,6 +211,7 @@ inferGlobalFlows' varFlows (ProcDefPrim pspec
     let newFlows = allFlows `globalFlowsIntersection` oldFlows
     logOptimise $ "---> " ++ show newFlows ++ " (" ++ show allFlows ++ ")"
     return newFlows
+inferGlobalFlows' _ _ = shouldnt "inferGlobalFlows'"
 
 
 -- | Get the global flows that occur across a ProcBody, given the procs that appear
@@ -255,8 +255,6 @@ forkGlobalFlows varFlows oldFlows (MergedFork{forkBody=body}) =
 -- | Update the GlobalFlows of Prims of a ProcDef and the prototype with
 -- the given GlobalFlows
 updateProcDefGlobalFlows :: Map ProcSpec GlobalFlows -> ProcDef -> Compiler ProcDef
-updateProcDefGlobalFlows _ ProcDef{procImpln=ProcDefSrc{}} =
-    shouldnt "updateProcDefGlobalFlows on un-compiled code"
 updateProcDefGlobalFlows sccFlows def@ProcDef{procImpln=impln@ProcDefPrim{
                                                 procImplnProcSpec=pspec,
                                                 procImplnBody=body,
@@ -267,6 +265,8 @@ updateProcDefGlobalFlows sccFlows def@ProcDef{procImpln=impln@ProcDefPrim{
     return def{procImpln=impln{
         procImplnBody=body',
         procImplnProto=proto{primProtoGlobalFlows=newFlows}}}
+updateProcDefGlobalFlows _ _ =
+    shouldnt "updateProcDefGlobalFlows on un-compiled code"
 
 
 -- | Update the GlobalFlows of Prims of a ProcBody

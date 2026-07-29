@@ -1,0 +1,4 @@
+Error detected during type checking of module(s) trait_error_abstract_proc_detism, trait_error_abstract_proc_detism.matcher
+final-dump/trait_error_abstract_proc_detism.wybe:7:1: Invalid implementation of trait trait_error_abstract_proc_detism.matcher for type wybe.int: no matching implementation of proc matches
+    candidate trait_error_abstract_proc_detism.matches<0>(wybe.int) -> (wybe.int) does not match:
+        determinism is normal (total), expected test

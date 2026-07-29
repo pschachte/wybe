@@ -1,0 +1,34 @@
+# Test case for compound resources
+
+resource foo = bar, baz
+
+resource bar:int = 42
+resource baz:string
+resource qux:float
+
+resource meta = foo, qux, io
+
+def testproc use !meta {
+    !println "bar = $bar, baz = $baz, qux = $qux"
+}
+
+use foo, qux in {
+    ?baz = "hello"
+    !use_baz
+    !use_foo
+    !use_bar
+    ?qux = pi
+    !testproc
+}
+
+def use_foo use !foo, !io {
+    !println("$bar, $baz")
+    ?bar = 10
+}
+def use_bar use bar, !io {
+    !println(bar)
+}
+def use_baz use baz, !io {
+    !println(baz)
+}
+

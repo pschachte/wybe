@@ -1,0 +1,11 @@
+# Verify trait implementation determinism must match the abstract procedure.
+
+type matcher trait {
+    abstract {test} matches(x:_)
+}
+
+impl int <: matcher
+
+def matches(x:int) {
+    pass
+}

@@ -1,0 +1,5 @@
+# Verify dispatch selects the concrete procedure candidate when the concrete type is known.
+
+use trait_specificity_printable, trait_specificity_scalar
+
+!println(render(trait_specificity_scalar(42)))

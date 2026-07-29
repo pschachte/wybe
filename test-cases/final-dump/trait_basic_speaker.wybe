@@ -1,0 +1,5 @@
+# Define the speaker trait used by the basic trait dispatch test.
+
+trait
+
+abstract speak(x:_): string

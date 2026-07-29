@@ -326,8 +326,8 @@ genProc proto detism stmts = do
     impurity <- gets brImpurity
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
-                  Map.empty Private detism MayInline impurity GeneratedProc
-                  NoSuperproc Map.empty
+                  Map.empty Private Nothing detism MayInline impurity GeneratedProc
+                  NoSuperproc Map.empty [] 0
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
@@ -777,8 +777,8 @@ unbranchExp callerTy calleeTy exp@(AnonProc mods params pstmts clsd res) pos = d
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (freeParams ++ (params <&> (`maybePlace` pos))) res'
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                    Map.empty Private detism inlining impurity AnonymousProc
-                    NoSuperproc Map.empty
+                    Map.empty Private Nothing detism inlining impurity AnonymousProc
+                    NoSuperproc Map.empty [] 0
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
     procSpec <- lift $ addProcDef procDef'
@@ -801,13 +801,6 @@ unbranchExp callerTy calleeTy exp pos = do
         when (flowsIn flow) $ defVar box AnyType
         return $ boxUnbox pos box callerSize exp callerTy flow
     else return ([], maybePlace exp pos, [])
-
-
--- | Test if a type needs to be boxed for large types
-typeNeedsBoxing :: TypeSpec -> Bool
-typeNeedsBoxing AnyType        = True -- conservative 
-typeNeedsBoxing TypeVariable{} = True
-typeNeedsBoxing _              = False 
 
 
 -- | Stmts to box and unbox an expression of a given size, with the boxed variable.
@@ -849,8 +842,8 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
             let body = pres ++ [ProcCall (First mod nm $ Just pID) detism False args `maybePlace` pos] ++ posts
                 closureDef =
                     ProcDef name (ProcProto name params' res) (ProcDefSrc body)
-                    Nothing tmpCtr 0 Map.empty Private detism Inline impurity
-                    (ClosureProc regularProcSpec $ List.null pres && List.null posts) NoSuperproc Map.empty
+                    Nothing tmpCtr 0 Map.empty Private Nothing detism Inline impurity
+                    (ClosureProc regularProcSpec $ List.null pres && List.null posts) NoSuperproc Map.empty [] 0
             logUnbranch $ "Creating closure for " ++ show regularProcSpec
             logUnbranch $ "  with params: " ++ show params'
             logUnbranch $ "  with args  : " ++ show args

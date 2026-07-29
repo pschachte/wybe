@@ -1,0 +1,5 @@
+Error detected during type checking of module(s) trait_error_abstract_proc_resources, trait_error_abstract_proc_resources.printable
+final-dump/trait_error_abstract_proc_resources.wybe:7:1: Invalid implementation of trait trait_error_abstract_proc_resources.printable for type wybe.int: no matching implementation of proc print_value
+    candidate trait_error_abstract_proc_resources.print_value<0>(wybe.int) -> (wybe.int) does not match:
+        resources are inputs {}, outputs {}, expected inputs {wybe.io.io}, outputs {wybe.io.io}
+        resourcefulness is not marked with !, but it is expected

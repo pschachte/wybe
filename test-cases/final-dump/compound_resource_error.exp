@@ -1,0 +1,2 @@
+Error detected during final normalisation of module(s) compound_resource_error
+final-dump/compound_resource_error.wybe:1:1: Undefined compound resource member bar

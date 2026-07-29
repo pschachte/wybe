@@ -1,0 +1,12 @@
+# Verify trait dispatch and combined bounds across imported trait modules.
+
+use trait_basic_speaker, trait_basic_named, trait_basic_dog
+
+def speak_through_trait(x:trait_basic_speaker): string = speak(x)
+
+def speak_and_describe(x:T<:{trait_basic_speaker, trait_basic_named}): string = describe(x)
+
+# The bound on y also constrains x because both use T.
+def type_var_bound_union(x:T<:trait_basic_speaker, y:T<:trait_basic_named): string = describe(x)
+
+!println(speak_through_trait(trait_basic_dog("Rex")))

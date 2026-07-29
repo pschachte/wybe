@@ -1,0 +1,3 @@
+# Verify type parameter bounds reject types that are not traits.
+
+def bad_bound(x:T<:int): T = x

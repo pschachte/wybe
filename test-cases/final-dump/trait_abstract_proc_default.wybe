@@ -1,0 +1,13 @@
+# Verify a trait can provide a default implementation for an abstract procedure.
+
+type printable trait {
+    abstract print_value(x:T<:_) use !io
+
+    pub def print_value(x:T<:_) use !io {
+        !println("default value")
+    }
+}
+
+impl int <: printable
+
+!printable.print_value(42)

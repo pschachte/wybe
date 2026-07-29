@@ -1,0 +1,2 @@
+Error detected during type checking of module(s) trait_error_not_a_trait, trait_error_not_a_trait.my_trait
+final-dump/trait_error_not_a_trait.wybe:7:1: Abstract procedure not_a_trait defined in a non-trait module

@@ -13,7 +13,7 @@ EXTRAINCLUDES=-I /usr/local/include -I /opt/homebrew/include
 
 
 # You shouldn't need to edit anything below here
-VERSION = 0.2
+VERSION := $(shell sed -n 's/^version *: *\([0-9]*\.[0-9]*\).*/\1/p' wybe.cabal)
 SRCDIR = src
 LIBDIR = wybelibs
 WYBELIBS = wybe.o command_line.o logging.o random.o benchmark.o
@@ -125,4 +125,6 @@ test:	wybemk
 
 clean:
 	stack clean
-	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi $(SRCDIR)/Version.lhs $(SRCDIR)/CConfig.hs documentation/*.pdf publications/*.pdf $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o test-cases/*.o
+	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi $(SRCDIR)/Version.lhs $(SRCDIR)/CConfig.hs \
+		$(LIBDIR)/*.o $(LIBDIR)/wybe/*.o test-cases/*.o samples/*.o benchmarks/*/*.o \
+		documentation/*.pdf publications/*.pdf

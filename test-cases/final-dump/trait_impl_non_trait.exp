@@ -1,0 +1,2 @@
+Error detected during final normalisation of module(s) trait_impl_non_trait
+final-dump/trait_impl_non_trait.wybe:5:1: Invalid trait implementation: wybe.int is not a trait

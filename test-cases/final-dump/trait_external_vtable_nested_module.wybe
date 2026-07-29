@@ -1,0 +1,10 @@
+# Verify that an imported trait implementation is declared only once when a
+# source file contains a submodule.
+
+use trait_basic_dog, trait_basic_speaker
+
+pub type wrapper {
+    constructor pub wrapper
+}
+
+!println(speak(trait_basic_dog("Rex")))

@@ -1,0 +1,20 @@
+# Verify a nested module retains ownership of its own trait implementation when
+# that implementation is published through and then inherited from its parent.
+
+type my_eq trait {
+    abstract {test} my_equal(a:_, b:_)
+}
+
+module sub {
+    impl int <: my_eq
+
+    def {test} my_equal(a:int, b:int) {
+        a = b
+    }
+}
+
+def {test} requires_eq(x:my_eq, y:my_eq) {
+    my_equal(x, y)
+}
+
+!println(requires_eq(1, 2))

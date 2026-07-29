@@ -1,0 +1,17 @@
+# Ensure one impl declaration can register a type for multiple traits.
+
+type printable trait {
+    abstract render(x:_): string
+}
+
+type equivalent trait {
+    abstract same(x:_, y:_): bool
+}
+
+impl int <: {printable, equivalent}
+
+def render(x:int): string = "integer $x"
+def same(x:int, y:int): bool = x = y
+
+!println(render(42))
+!println(same(1, 1))

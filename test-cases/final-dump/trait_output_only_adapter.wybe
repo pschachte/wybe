@@ -1,0 +1,12 @@
+# Verify trait adapters support methods whose implementing type is output-only.
+
+type from_string trait {
+    abstract from_string(x:string): _
+}
+
+impl int <: from_string
+
+pub def from_string(x:string): int = 123
+
+?x:int = from_string.from_string("123")
+!println(x)

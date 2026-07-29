@@ -1,0 +1,217 @@
+======================================================================
+AFTER EVERYTHING:
+
+
+--------------------------------------------------
+ Module trait_inferred_union_bounds
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : trait_inferred_union_bounds.<0>
+  constants       : 0:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_inferred_union_bounds.<#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = wybe.float <: trait_inferred_union_bounds.comparable, vtableMod = ["trait_inferred_union_bounds"]}
+                    1:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_inferred_union_bounds.<#adapter<1>], vtableExternal = False, vtableIndex = 1, vtableSpec = wybe.int <: trait_inferred_union_bounds.comparable, vtableMod = ["trait_inferred_union_bounds"]}
+                    2:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_inferred_union_bounds.println#adapter<0>], vtableExternal = False, vtableIndex = 2, vtableSpec = wybe.float <: trait_inferred_union_bounds.printable, vtableMod = ["trait_inferred_union_bounds"]}
+                    3:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_inferred_union_bounds.println#adapter<1>], vtableExternal = False, vtableIndex = 3, vtableSpec = wybe.int <: trait_inferred_union_bounds.printable, vtableMod = ["trait_inferred_union_bounds"]}
+  imports         : use trait_inferred_union_bounds.comparable
+                    use trait_inferred_union_bounds.printable
+                    use wybe
+  resources       : 
+  submodules      : trait_inferred_union_bounds.comparable, trait_inferred_union_bounds.printable
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: trait_inferred_union_bounds.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    trait_inferred_union_bounds.print_larger<0>(3:wybe.int, 5:wybe.int, vtable(global,wybe.int <: trait_inferred_union_bounds.comparable):opaque, vtable(global,wybe.int <: trait_inferred_union_bounds.printable):opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @trait_inferred_union_bounds:nn:nn
+    trait_inferred_union_bounds.print_larger<0>(3.14:wybe.float, 1.0:wybe.float, vtable(global,wybe.float <: trait_inferred_union_bounds.comparable):opaque, vtable(global,wybe.float <: trait_inferred_union_bounds.printable):opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @trait_inferred_union_bounds:nn:nn
+
+
+proc <#adapter > {noinline} (0 calls)
+0: trait_inferred_union_bounds.<#adapter<0>
+<#adapter(a##0:Type0<:trait_inferred_union_bounds.comparable, b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~a##0:Type0<:trait_inferred_union_bounds.comparable, ?x#adapter0##0:wybe.float)
+    foreign lpvm cast(~b##0:Type0<:trait_inferred_union_bounds.comparable, ?y#adapter1##0:wybe.float)
+    foreign llvm fcmp_olt(~x#adapter0##0:wybe.float, ~y#adapter1##0:wybe.float, ?#success##0:wybe.bool) @float:nn:nn
+proc <#adapter > {noinline} (0 calls)
+1: trait_inferred_union_bounds.<#adapter<1>
+<#adapter(a##0:Type0<:trait_inferred_union_bounds.comparable, b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~a##0:Type0<:trait_inferred_union_bounds.comparable, ?x#adapter0##0:wybe.int)
+    foreign lpvm cast(~b##0:Type0<:trait_inferred_union_bounds.comparable, ?y#adapter1##0:wybe.int)
+    foreign llvm icmp_slt(~x#adapter0##0:wybe.int, ~y#adapter1##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
+
+
+proc print_larger > (2 calls)
+0: trait_inferred_union_bounds.print_larger<0>
+print_larger(a##0:Type0<:{trait_inferred_union_bounds.comparable, trait_inferred_union_bounds.printable} <{}; {}; {0}>, b##0:Type0<:{trait_inferred_union_bounds.comparable, trait_inferred_union_bounds.printable} <{}; {}; {1}>, #vtable##0:opaque, #vtable##1:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    trait_inferred_union_bounds.comparable.<<0>(a##0:Type0, b##0:Type0, ?tmp#0##0:wybe.bool, ~#vtable##0:opaque)<{}; {}; {0, 1}> #0 @trait_inferred_union_bounds:nn:nn
+    case ~tmp#0##0:wybe.bool of
+    0:
+        trait_inferred_union_bounds.printable.println<0>(~a##0:Type0, ~#vtable##1:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #2 @trait_inferred_union_bounds:nn:nn
+
+    1:
+        trait_inferred_union_bounds.printable.println<0>(~b##0:Type0, ~#vtable##1:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #1 @trait_inferred_union_bounds:nn:nn
+
+
+
+proc println#adapter > {noinline} (0 calls)
+0: trait_inferred_union_bounds.println#adapter<0>
+println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~x##0:Type0<:trait_inferred_union_bounds.printable, ?x#adapter0##0:wybe.float)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @float:nn:nn
+    foreign c print_float(~x#adapter0##0:wybe.float, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @float:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @float:nn:nn
+    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @float:nn:nn
+proc println#adapter > {noinline} (0 calls)
+1: trait_inferred_union_bounds.println#adapter<1>
+println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~x##0:Type0<:trait_inferred_union_bounds.printable, ?x#adapter0##0:wybe.int)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~x#adapter0##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @int:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @int:nn:nn
+    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_inferred_union_bounds'
+
+source_filename = "!ROOT!/final-dump/trait_inferred_union_bounds.wybe"
+target triple   = ????
+
+@"trait_inferred_union_bounds##vtable#0" = unnamed_addr constant {ptr} { ptr @"trait_inferred_union_bounds#.<#adapter<0>" }, align 8
+@"trait_inferred_union_bounds##vtable#1" = unnamed_addr constant {ptr} { ptr @"trait_inferred_union_bounds#.<#adapter<1>" }, align 8
+@"trait_inferred_union_bounds##vtable#2" = unnamed_addr constant {ptr} { ptr @"trait_inferred_union_bounds#.println#adapter<0>" }, align 8
+@"trait_inferred_union_bounds##vtable#3" = unnamed_addr constant {ptr} { ptr @"trait_inferred_union_bounds#.println#adapter<1>" }, align 8
+
+declare external ccc void @print_float(double)
+declare external ccc void @print_int(i64)
+declare external ccc void @putchar(i8)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc void @"trait_inferred_union_bounds#.<0>"() {
+  tail call fastcc void @"trait_inferred_union_bounds#.print_larger<0>"(i64 3, i64 5, ptr @"trait_inferred_union_bounds##vtable#1", ptr @"trait_inferred_union_bounds##vtable#3")
+  tail call fastcc void @"trait_inferred_union_bounds#.print_larger<0>"(i64 bitcast( double 3.14 to i64 ), i64 bitcast( double 1.0 to i64 ), ptr @"trait_inferred_union_bounds##vtable#0", ptr @"trait_inferred_union_bounds##vtable#2")
+  ret void
+}
+
+define external fastcc i1 @"trait_inferred_union_bounds#.<#adapter<0>"(i64 %"a##0", i64 %"b##0") {
+  %"x#adapter0##0" = bitcast i64 %"a##0" to double
+  %"y#adapter1##0" = bitcast i64 %"b##0" to double
+  %"tmp#2##0" = fcmp olt double %"x#adapter0##0", %"y#adapter1##0"
+  ret i1 %"tmp#2##0"
+}
+
+define external fastcc i1 @"trait_inferred_union_bounds#.<#adapter<1>"(i64 %"a##0", i64 %"b##0") {
+  %"tmp#2##0" = icmp slt i64 %"a##0", %"b##0"
+  ret i1 %"tmp#2##0"
+}
+
+define external fastcc void @"trait_inferred_union_bounds#.print_larger<0>"(i64 %"a##0", i64 %"b##0", ptr %"#vtable##0", ptr %"#vtable##1") {
+  %"tmp#0##0" = tail call fastcc i1 @"trait_inferred_union_bounds#.comparable#.<<0>"(i64 %"a##0", i64 %"b##0", ptr %"#vtable##0")
+  br i1 %"tmp#0##0", label %if.then.0, label %if.else.0
+if.then.0:
+  tail call fastcc void @"trait_inferred_union_bounds#.printable#.println<0>"(i64 %"b##0", ptr %"#vtable##1")
+  ret void
+if.else.0:
+  tail call fastcc void @"trait_inferred_union_bounds#.printable#.println<0>"(i64 %"a##0", ptr %"#vtable##1")
+  ret void
+}
+
+define external fastcc void @"trait_inferred_union_bounds#.println#adapter<0>"(i64 %"x##0") {
+  %"x#adapter0##0" = bitcast i64 %"x##0" to double
+  call ccc void @print_float(double %"x#adapter0##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"trait_inferred_union_bounds#.println#adapter<1>"(i64 %"x##0") {
+  call ccc void @print_int(i64 %"x##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+--------------------------------------------------
+ Module trait_inferred_union_bounds.comparable
+  representation  : (not yet known)
+  public submods  : 
+  public resources: 
+  public procs    : trait_inferred_union_bounds.comparable.<<0>
+  constants       : 
+  imports         : use trait_inferred_union_bounds
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc < > public abstract {inline} (0 calls)
+0: trait_inferred_union_bounds.comparable.<<0>
+<(a##0:Type0<:trait_inferred_union_bounds.comparable <{}; {}; {0}>, b##0:Type0<:trait_inferred_union_bounds.comparable <{}; {}; {1}>, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~#vtable##0:opaque@0(~a##0:Type0<:trait_inferred_union_bounds.comparable, ~b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool) #0
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_inferred_union_bounds.comparable'
+
+source_filename = "!ROOT!/final-dump/trait_inferred_union_bounds.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i1 @"trait_inferred_union_bounds#.comparable#.<<0>"(i64 %"a##0", i64 %"b##0", ptr %"#vtable##0") {
+  %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
+  %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
+  %"tmp#2##0" = tail call fastcc i1 %"tmp#1##0"(i64 %"a##0", i64 %"b##0")
+  ret i1 %"tmp#2##0"
+}
+
+--------------------------------------------------
+ Module trait_inferred_union_bounds.printable
+  representation  : (not yet known)
+  public submods  : 
+  public resources: 
+  public procs    : trait_inferred_union_bounds.printable.println<0>
+  constants       : 
+  imports         : use trait_inferred_union_bounds
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc println > public abstract {inline} (0 calls)
+0: trait_inferred_union_bounds.printable.println<0>
+println(x##0:Type0<:trait_inferred_union_bounds.printable <{}; {}; {0}>, #vtable##0:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~#vtable##0:opaque@0(~x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_inferred_union_bounds.printable'
+
+source_filename = "!ROOT!/final-dump/trait_inferred_union_bounds.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc void @"trait_inferred_union_bounds#.printable#.println<0>"(i64 %"x##0", ptr %"#vtable##0") {
+  %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
+  %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
+  tail call fastcc void %"tmp#1##0"(i64 %"x##0")
+  ret void
+}

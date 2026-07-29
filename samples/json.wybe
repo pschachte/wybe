@@ -309,7 +309,7 @@ def print_list(ind:int, start:char, printer:{resource}(int, X), end:char, xs:lis
     pair(false, "{} {}")
 ]
 
-for pair(?should_parse:bool, ?document) in tests {
+for pair(?should_parse, ?document) in tests {
     !print("Attempting to parse ")
     !escape(document)
     !nl

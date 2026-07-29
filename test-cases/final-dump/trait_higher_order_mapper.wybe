@@ -1,0 +1,5 @@
+# Define a trait whose method accepts a function over its implementing type.
+
+trait
+
+abstract apply_to_self(x:T<:_, f:(T, ?string)): string

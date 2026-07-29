@@ -1,0 +1,5 @@
+# Define the named trait used by the basic combined-bounds test.
+
+trait
+
+abstract describe(x:_): string

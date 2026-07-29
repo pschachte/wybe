@@ -1,0 +1,6 @@
+# Verify an abstract function cannot introduce multiple type variables
+# that bounded by the current trait.
+
+trait
+
+abstract wrong_param(x:T<:_, y:U<:_): string

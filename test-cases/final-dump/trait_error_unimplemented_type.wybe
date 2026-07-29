@@ -1,0 +1,13 @@
+# Verify trait dispatch rejects a type without the required implementation.
+# The error message is wrong for now; the right error message shouldn't
+# include the partial application.
+
+module greeter {
+    trait
+
+    abstract greet(x:T<:_): string
+}
+
+def greet_through_trait(x:greeter): string = greet(x)
+
+!println(greet_through_trait(42))

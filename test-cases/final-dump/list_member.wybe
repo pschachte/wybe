@@ -1,0 +1,20 @@
+# Test that list membership works (test of eq trait)
+
+?lst = [2,3,5,7,11]
+?langs = ["Haskell","Prolog","Wybe","Clean"]
+?fruit = ["banana","apple","orange"]
+
+if { 5 in lst :: !println("5 is a small prime")}
+
+if { 8 in lst :: !println("8 is a small prime")}
+
+if {"Wybe" in langs :: !println("Wybe is a language")}
+
+if {"Wybe" in fruit :: !println("Wybe is a fruit")}
+
+if { 5 in 1..10 :: !println("5 in 1..10") }
+if { 0 in 1..10 :: !println("0 in 1..10") }
+if { 10 in 1..10 :: !println("10 in 1..10") }
+if { 5 in 9..0 :: !println("5 in 9..0") }
+if { 0 in 9..0 :: !println("0 in 9..0") }
+if { 10 in 9..0 :: !println("10 in 9..0") }

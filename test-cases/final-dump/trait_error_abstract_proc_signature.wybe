@@ -1,0 +1,19 @@
+# Verify all same-named procedures explain why their signatures do not match.
+
+type processor trait {
+    abstract process(x:_)
+}
+
+impl int <: processor
+
+def process(x:float) {
+    pass
+}
+
+def process(?x:int) {
+    ?x = 1
+}
+
+def process(x:int, y:int) {
+    pass
+}

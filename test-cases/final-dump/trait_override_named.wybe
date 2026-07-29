@@ -1,0 +1,7 @@
+# Define a `named` trait with a default description method.
+
+trait
+
+abstract describe(x:_): string
+
+pub def describe(x:_): string = "unnamed"

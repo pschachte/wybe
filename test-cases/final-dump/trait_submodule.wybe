@@ -1,0 +1,11 @@
+# Verify a locally declared trait submodule.
+
+type printable trait {
+    abstract render(x:T<:_): string
+}
+
+impl int <: printable
+
+def render(x:int): string = "integer $x"
+
+!println(render(42))

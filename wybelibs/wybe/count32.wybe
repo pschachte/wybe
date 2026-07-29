@@ -7,6 +7,7 @@ pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.comparison, wybe.int, wybe.io, wybe.string, wybe.char
 use wybe.control, wybe.c_string, wybe.count
+use wybe.eq
 
 representation is 32 bit unsigned
 
@@ -61,6 +62,7 @@ pub def {inline}     bitwise_not(x:_):_ = bitwise_xor(x, bound_maximum)
 ## Comparisons
 
 # Equality and disequality.
+impl eq
 pub def foreign llvm {test} `=` =icmp_eq(x:_, y:_)
 pub def foreign llvm {test} `~=`=icmp_ne(x:_, y:_)
 

@@ -1,0 +1,5 @@
+# Verify an impl declaration rejects a target that is not a trait.
+
+constructor my_type
+
+impl int

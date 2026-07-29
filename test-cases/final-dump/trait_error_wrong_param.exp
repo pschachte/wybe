@@ -1,0 +1,2 @@
+Error detected during type checking of module(s) trait_error_wrong_param
+final-dump/trait_error_wrong_param.wybe:6:1: In abstract proc wrong_param, there is not exactly one type parameter that is bounded to the current trait

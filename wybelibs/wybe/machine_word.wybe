@@ -5,7 +5,8 @@ pragma no_standard_library # Standard library can't depend on itself!
 
 representation is address
 
-use wybe.int, wybe.count
+use wybe.int, wybe.count, wybe.bool
+use wybe.eq
 
 pub def {inline} word_size_bytes:int = foreign lpvm sizeof(_:_)
 
@@ -17,3 +18,13 @@ pub def endianness:endianness =
     if { foreign c is_little_endian():count ~= 0:count :: little_endian
        | else :: big_endian 
     }
+
+# Conversion to/from unsigned integer type
+pub def foreign lpvm count=cast(x:_):count
+pub def foreign lpvm machine_word=cast(x:count):_
+
+# # Equality and disequality.
+impl eq
+pub def {test} (x:_  = y:_) { count(x) = count(y) }
+pub def {test} (x:_ ~= y:_) { count(x) ~= count(y) }
+

@@ -66,7 +66,7 @@ instance Binary Param
 instance Binary ResourceFlowSpec
 -- Module implementation
 instance Binary ModuleImplementation
-instance Binary ResourceImpln
+instance Binary PrimResourceImpln
 instance Binary TypeRepresentation
 instance Binary ImportSpec
 -- Module
@@ -75,10 +75,12 @@ instance Binary PubProcInfo
 instance Binary ModuleInterface
 instance Binary Pragma
 instance Binary StructID
+instance Binary TraitImplSpec
 
 instance Binary ProcModifiers
 instance Binary Inlining
 instance Binary Impurity
+instance Binary ResourceDefn
 instance Binary Item
 instance Binary TypeProto
 instance Binary TypeModifiers

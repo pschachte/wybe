@@ -1,0 +1,17 @@
+# Verify private procedures infer the trait bounds of untyped parameters.
+
+type my_trait trait {
+    abstract my_method(x:_): _
+}
+
+impl int <: my_trait
+impl float <: my_trait
+
+def my_method(x:int): int = x
+
+def my_method(x:float): float = x
+
+def inferred_trait_type(x) = my_method(x)
+
+!println(inferred_trait_type(1))
+!println(inferred_trait_type(3.14))

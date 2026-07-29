@@ -1,0 +1,11 @@
+# Verify a trait implementation reports a missing abstract procedure.
+
+module printable {
+    trait
+
+    abstract print_value(x:T<:_) use !io
+}
+
+impl int <: printable
+
+!printable.print_value(42)

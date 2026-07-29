@@ -1,0 +1,9 @@
+# Provide a person type that overrides the `named` trait's default method.
+
+use trait_override_named
+
+impl trait_override_named
+
+pub constructor trait_override_person(name:string)
+
+pub def describe(x:_): string = x^name

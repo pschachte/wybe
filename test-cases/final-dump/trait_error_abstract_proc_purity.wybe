@@ -1,0 +1,11 @@
+# Verify trait implementation purity must match the abstract procedure.
+
+type observer trait {
+    abstract {semipure} observe(x:_)
+}
+
+impl int <: observer
+
+def {impure} observe(x:int) {
+    pass
+}

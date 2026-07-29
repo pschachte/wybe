@@ -1,0 +1,2 @@
+Error detected during type checking of module(s) trait_error_multiple_impl, trait_error_multiple_impl.required_method
+final-dump/trait_error_multiple_impl.wybe:9:1: Invalid implementation of trait trait_error_multiple_impl.required_method for type wybe.int: multiple implementations of proc render

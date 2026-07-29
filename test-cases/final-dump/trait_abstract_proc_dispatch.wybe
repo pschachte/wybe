@@ -1,0 +1,13 @@
+# Verify trait dispatch calls a concrete abstract procedure implementation.
+
+type printable trait {
+    abstract print_value(x:_) use !io
+}
+
+impl int <: printable
+
+def print_value(x:int) use !io {
+    !println("value $x")
+}
+
+!printable.print_value(42)

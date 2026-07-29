@@ -1,0 +1,3 @@
+Error detected during type checking of module(s) trait_error_unimplemented_type, trait_error_unimplemented_type.greeter
+final-dump/trait_error_unimplemented_type.wybe:13:10: Type error in call to proc greet_through_trait, argument 1
+final-dump/trait_error_unimplemented_type.wybe:13:10: Type error in partial application of proc greet_through_trait, argument 1

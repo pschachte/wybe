@@ -1,0 +1,9 @@
+# Verify a concrete trait method overrides the trait's default implementation.
+
+use trait_override_named, trait_override_person
+
+def describe_through_trait(x:trait_override_named): string = describe(x)
+
+?p = trait_override_person("Ada")
+!println(describe(p))
+!println(describe_through_trait(p))

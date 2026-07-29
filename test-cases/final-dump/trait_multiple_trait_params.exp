@@ -1,0 +1,439 @@
+======================================================================
+AFTER EVERYTHING:
+
+
+--------------------------------------------------
+ Module trait_multiple_trait_params
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : trait_multiple_trait_params.<0>
+  constants       : 0:: CStringInfo {cstringChars = "John"}
+                    1:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_multiple_trait_params.add_person#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = trait_multiple_trait_params.school <: trait_multiple_trait_params.group, vtableMod = ["trait_multiple_trait_params"]}
+                    2:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_multiple_trait_params.person_name#adapter<0>], vtableExternal = False, vtableIndex = 1, vtableSpec = trait_multiple_trait_params.student <: trait_multiple_trait_params.person, vtableMod = ["trait_multiple_trait_params"]}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 4 8,PointerStructMember c"John"]}
+  imports         : use trait_multiple_trait_params.group
+                    use trait_multiple_trait_params.person
+                    use trait_multiple_trait_params.school
+                    use trait_multiple_trait_params.student
+                    use wybe
+  resources       : 
+  submodules      : trait_multiple_trait_params.group, trait_multiple_trait_params.person, trait_multiple_trait_params.school, trait_multiple_trait_params.student
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: trait_multiple_trait_params.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast("John":wybe.string, ?tmp#14##0:trait_multiple_trait_params.student) @trait_multiple_trait_params:nn:nn
+    trait_multiple_trait_params.group.add_person<0>(0:trait_multiple_trait_params.school, ?school1##1:trait_multiple_trait_params.school, ~tmp#14##0:trait_multiple_trait_params.student, vtable(global,trait_multiple_trait_params.school <: trait_multiple_trait_params.group):opaque, vtable(global,trait_multiple_trait_params.student <: trait_multiple_trait_params.person):opaque)<{}; {}; {0, 2}> #4 @trait_multiple_trait_params:nn:nn
+    foreign lpvm cast(~school1##1:trait_multiple_trait_params.school, ?tmp#4##0:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
+    trait_multiple_trait_params.#cont#1<0>(~tmp#4##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @trait_multiple_trait_params:nn:nn
+
+
+proc #cont#1 > {semipure} (2 calls)
+0: trait_multiple_trait_params.#cont#1<0>
+#cont#1(tmp#3##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(tmp#3##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @trait_multiple_trait_params:nn:nn
+    case ~tmp#9##0:wybe.bool of
+    0:
+
+    1:
+        foreign lpvm access(tmp#3##0:wybe.list(wybe.string), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?name##0:wybe.string) @trait_multiple_trait_params:nn:nn
+        foreign lpvm access(~tmp#3##0:wybe.list(wybe.string), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##1:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
+        wybe.string.print<0>(~name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @trait_multiple_trait_params:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @trait_multiple_trait_params:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @trait_multiple_trait_params:nn:nn
+        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_multiple_trait_params:nn:nn
+        trait_multiple_trait_params.#cont#1<0>(~tmp#3##1:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @trait_multiple_trait_params:nn:nn
+
+
+
+proc add_person > {inline} (1 calls)
+0: trait_multiple_trait_params.add_person<0>
+add_person(x##0:trait_multiple_trait_params.school, ?x##1:trait_multiple_trait_params.school, person##0:Type0<:trait_multiple_trait_params.person <{}; {}; {2}>, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    trait_multiple_trait_params.person.person_name<0>(~person##0:Type0<:trait_multiple_trait_params.person, ?tmp#0##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #0 @trait_multiple_trait_params:nn:nn
+    foreign lpvm cast(~x##0:trait_multiple_trait_params.school, ?tmp#3##0:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.list(wybe.string), ?tmp#10##0:wybe.list(wybe.string), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#0##0:wybe.string) @trait_multiple_trait_params:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.list(wybe.string), ?tmp#2##0:wybe.list(wybe.string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
+    foreign lpvm cast(~tmp#2##0:wybe.list(wybe.string), ?x##1:trait_multiple_trait_params.school) @trait_multiple_trait_params:nn:nn
+
+
+proc add_person#adapter > {noinline} (0 calls)
+0: trait_multiple_trait_params.add_person#adapter<0>
+add_person#adapter(x##0:Type0<:trait_multiple_trait_params.group, ?x##1:Type0<:trait_multiple_trait_params.group, person##0:Type1<:trait_multiple_trait_params.person, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: [(x##0,x##1)]
+  InterestingCallProperties: []
+    foreign lpvm cast(~person##0:Type1<:trait_multiple_trait_params.person, ?person#adapter2##0:Type0<:trait_multiple_trait_params.person)
+    trait_multiple_trait_params.person.person_name<0>(~person#adapter2##0:Type0<:trait_multiple_trait_params.person, ?tmp#3##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #1 @trait_multiple_trait_params:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#5##0:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
+    foreign lpvm mutate(~tmp#5##0:wybe.list(wybe.string), ?tmp#6##0:wybe.list(wybe.string), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.string) @trait_multiple_trait_params:nn:nn
+    foreign lpvm mutate(~tmp#6##0:wybe.list(wybe.string), ?x##1:wybe.list(wybe.string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
+
+
+proc person_name > {inline} (1 calls)
+0: trait_multiple_trait_params.person_name<0>
+person_name(x##0:trait_multiple_trait_params.student, ?#result##0:wybe.string)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~x##0:trait_multiple_trait_params.student, ?#result##0:wybe.string) @trait_multiple_trait_params:nn:nn
+
+
+proc person_name#adapter > {noinline} (0 calls)
+0: trait_multiple_trait_params.person_name#adapter<0>
+person_name#adapter(x##0:Type0<:trait_multiple_trait_params.person, ?#result##0:wybe.string)<{}; {}; {}>:
+  AliasPairs: [(#result##0,x##0)]
+  InterestingCallProperties: []
+    foreign llvm move(~x##0:Type0<:trait_multiple_trait_params.person, ?#result##0:wybe.string) @trait_multiple_trait_params:nn:nn
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_multiple_trait_params'
+
+source_filename = "!ROOT!/final-dump/trait_multiple_trait_params.wybe"
+target triple   = ????
+
+@"trait_multiple_trait_params#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"John\00", align 8
+@"trait_multiple_trait_params##vtable#0" = unnamed_addr constant {ptr} { ptr @"trait_multiple_trait_params#.add_person#adapter<0>" }, align 8
+@"trait_multiple_trait_params##vtable#1" = unnamed_addr constant {ptr} { ptr @"trait_multiple_trait_params#.person_name#adapter<0>" }, align 8
+@"trait_multiple_trait_params#constant#3" = private unnamed_addr constant {i64, ptr} { i64 4, ptr @"trait_multiple_trait_params#constant#0" }, align 8
+
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
+declare external ccc void @putchar(i8)
+declare external ccc ptr @wybe_malloc(i32)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc void @"trait_multiple_trait_params#.<0>"() {
+  %"tmp#14##0" = ptrtoint ptr @"trait_multiple_trait_params#constant#3" to i64
+  %"school1##1" = tail call fastcc i64 @"trait_multiple_trait_params#.group#.add_person<0>"(i64 0, i64 %"tmp#14##0", ptr @"trait_multiple_trait_params##vtable#0", ptr @"trait_multiple_trait_params##vtable#1")
+  tail call fastcc void @"trait_multiple_trait_params#.#cont#1<0>"(i64 %"school1##1")
+  ret void
+}
+
+define external fastcc void @"trait_multiple_trait_params#.#cont#1<0>"(i64 %"tmp#3##0") {
+  %"tmp#9##0" = icmp ne i64 %"tmp#3##0", 0
+  br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#13##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"name##0" = load i64, ptr %"tmp#13##0"
+  %"tmp#14##0" = add i64 %"tmp#3##0", 8
+  %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
+  %"tmp#3##1" = load i64, ptr %"tmp#15##0"
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"name##0")
+  call ccc void @putchar(i8 10)
+  tail call fastcc void @"trait_multiple_trait_params#.#cont#1<0>"(i64 %"tmp#3##1")
+  ret void
+if.else.0:
+  ret void
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.add_person<0>"(i64 %"x##0", i64 %"person##0", ptr %"#vtable##0") {
+  %"tmp#0##0" = tail call fastcc i64 @"trait_multiple_trait_params#.person#.person_name<0>"(i64 %"person##0", ptr %"#vtable##0")
+  %"tmp#16##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#9##0" = ptrtoint ptr %"tmp#16##0" to i64
+  %"tmp#17##0" = inttoptr i64 %"tmp#9##0" to ptr
+  store i64 %"tmp#0##0", ptr %"tmp#17##0"
+  %"tmp#18##0" = add i64 %"tmp#9##0", 8
+  %"tmp#19##0" = inttoptr i64 %"tmp#18##0" to ptr
+  store i64 %"x##0", ptr %"tmp#19##0"
+  ret i64 %"tmp#9##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.add_person#adapter<0>"(i64 %"x##0", i64 %"person##0", ptr %"#vtable##0") {
+  %"tmp#3##0" = tail call fastcc i64 @"trait_multiple_trait_params#.person#.person_name<0>"(i64 %"person##0", ptr %"#vtable##0")
+  %"tmp#8##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#5##0" = ptrtoint ptr %"tmp#8##0" to i64
+  %"tmp#9##0" = inttoptr i64 %"tmp#5##0" to ptr
+  store i64 %"tmp#3##0", ptr %"tmp#9##0"
+  %"tmp#10##0" = add i64 %"tmp#5##0", 8
+  %"tmp#11##0" = inttoptr i64 %"tmp#10##0" to ptr
+  store i64 %"x##0", ptr %"tmp#11##0"
+  ret i64 %"tmp#5##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.person_name<0>"(i64 %"x##0") {
+  ret i64 %"x##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.person_name#adapter<0>"(i64 %"x##0") {
+  ret i64 %"x##0"
+}
+
+--------------------------------------------------
+ Module trait_multiple_trait_params.group
+  representation  : (not yet known)
+  public submods  : 
+  public resources: 
+  public procs    : trait_multiple_trait_params.group.add_person<0>
+  constants       : 
+  imports         : use trait_multiple_trait_params
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc add_person > public abstract {inline} (0 calls)
+0: trait_multiple_trait_params.group.add_person<0>
+add_person(x##0:Type0<:trait_multiple_trait_params.group <{}; {}; {0}>, ?x##1:Type0<:trait_multiple_trait_params.group <{}; {}; {0, 2}>, person##0:Type1<:trait_multiple_trait_params.person <{}; {}; {2}>, #vtable##0:opaque, #vtable##1:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~#vtable##0:opaque@0(~x##0:Type0<:trait_multiple_trait_params.group, ?x##1:Type0<:trait_multiple_trait_params.group, ~person##0:Type1<:trait_multiple_trait_params.person, ~#vtable##1:opaque) #0
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_multiple_trait_params.group'
+
+source_filename = "!ROOT!/final-dump/trait_multiple_trait_params.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i64 @"trait_multiple_trait_params#.group#.add_person<0>"(i64 %"x##0", i64 %"person##0", ptr %"#vtable##0", ptr %"#vtable##1") {
+  %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
+  %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
+  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0", i64 %"person##0", ptr %"#vtable##1")
+  ret i64 %"tmp#2##0"
+}
+
+--------------------------------------------------
+ Module trait_multiple_trait_params.person
+  representation  : (not yet known)
+  public submods  : 
+  public resources: 
+  public procs    : trait_multiple_trait_params.person.person_name<0>
+  constants       : 
+  imports         : use trait_multiple_trait_params
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc person_name > public abstract {inline} (0 calls)
+0: trait_multiple_trait_params.person.person_name<0>
+person_name(x##0:Type0<:trait_multiple_trait_params.person <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~#vtable##0:opaque@0(~x##0:Type0<:trait_multiple_trait_params.person, ?#result##0:wybe.string) #0
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_multiple_trait_params.person'
+
+source_filename = "!ROOT!/final-dump/trait_multiple_trait_params.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i64 @"trait_multiple_trait_params#.person#.person_name<0>"(i64 %"x##0", ptr %"#vtable##0") {
+  %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
+  %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
+  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0")
+  ret i64 %"tmp#2##0"
+}
+
+--------------------------------------------------
+ Module trait_multiple_trait_params.school
+  representation  : 64 bit unsigned
+  public submods  : 
+  public resources: 
+  public procs    : trait_multiple_trait_params.school.=<0>
+                    trait_multiple_trait_params.school.names<0>
+                    trait_multiple_trait_params.school.names<1>
+                    trait_multiple_trait_params.school.school<0>
+                    trait_multiple_trait_params.school.school<1>
+                    trait_multiple_trait_params.school.~=<0>
+  constants       : 
+  imports         : use trait_multiple_trait_params
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc = > public {inline} (1 calls)
+0: trait_multiple_trait_params.school.=<0>
+=(#left##0:trait_multiple_trait_params.school, #right##0:trait_multiple_trait_params.school, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_eq(~#left##0:trait_multiple_trait_params.school, ~#right##0:trait_multiple_trait_params.school, ?#success##0:wybe.bool)
+
+
+proc names > public {inline} (0 calls)
+0: trait_multiple_trait_params.school.names<0>
+names(#rec##0:trait_multiple_trait_params.school, ?#result##0:wybe.list(wybe.string))<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#rec##0:trait_multiple_trait_params.school, ?#result##0:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
+proc names > public {inline} (0 calls)
+1: trait_multiple_trait_params.school.names<1>
+names([#rec##0:trait_multiple_trait_params.school], ?#rec##2:trait_multiple_trait_params.school, #field##0:wybe.list(wybe.string))<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#field##0:wybe.list(wybe.string), ?#rec##2:trait_multiple_trait_params.school) @trait_multiple_trait_params:nn:nn
+
+
+proc school > public {inline} (0 calls)
+0: trait_multiple_trait_params.school.school<0>
+school(names##0:wybe.list(wybe.string), ?#result##2:trait_multiple_trait_params.school)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~names##0:wybe.list(wybe.string), ?#result##2:trait_multiple_trait_params.school) @trait_multiple_trait_params:nn:nn
+proc school > public {inline} (0 calls)
+1: trait_multiple_trait_params.school.school<1>
+school(?names##0:wybe.list(wybe.string), #result##0:trait_multiple_trait_params.school)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#result##0:trait_multiple_trait_params.school, ?names##0:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
+
+
+proc ~= > public {inline} (0 calls)
+0: trait_multiple_trait_params.school.~=<0>
+~=(#left##0:trait_multiple_trait_params.school, #right##0:trait_multiple_trait_params.school, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_eq(~#left##0:trait_multiple_trait_params.school, ~#right##0:trait_multiple_trait_params.school, ?tmp#0##0:wybe.bool)
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_multiple_trait_params.school'
+
+source_filename = "!ROOT!/final-dump/trait_multiple_trait_params.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i1 @"trait_multiple_trait_params#.school#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#1##0" = icmp eq i64 %"#left##0", %"#right##0"
+  ret i1 %"tmp#1##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.school#.names<0>"(i64 %"#rec##0") {
+  ret i64 %"#rec##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.school#.names<1>"(i64 %"#field##0") {
+  ret i64 %"#field##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.school#.school<0>"(i64 %"names##0") {
+  ret i64 %"names##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.school#.school<1>"(i64 %"#result##0") {
+  ret i64 %"#result##0"
+}
+
+define external fastcc i1 @"trait_multiple_trait_params#.school#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = icmp eq i64 %"#left##0", %"#right##0"
+  %"tmp#3##0" = xor i1 %"tmp#0##0", 1
+  ret i1 %"tmp#3##0"
+}
+
+--------------------------------------------------
+ Module trait_multiple_trait_params.student
+  representation  : 64 bit unsigned
+  public submods  : 
+  public resources: 
+  public procs    : trait_multiple_trait_params.student.=<0>
+                    trait_multiple_trait_params.student.name<0>
+                    trait_multiple_trait_params.student.name<1>
+                    trait_multiple_trait_params.student.student<0>
+                    trait_multiple_trait_params.student.student<1>
+                    trait_multiple_trait_params.student.~=<0>
+  constants       : 
+  imports         : use trait_multiple_trait_params
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc = > public {inline} (1 calls)
+0: trait_multiple_trait_params.student.=<0>
+=(#left##0:trait_multiple_trait_params.student, #right##0:trait_multiple_trait_params.student, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_eq(~#left##0:trait_multiple_trait_params.student, ~#right##0:trait_multiple_trait_params.student, ?#success##0:wybe.bool)
+
+
+proc name > public {inline} (0 calls)
+0: trait_multiple_trait_params.student.name<0>
+name(#rec##0:trait_multiple_trait_params.student, ?#result##0:wybe.string)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#rec##0:trait_multiple_trait_params.student, ?#result##0:wybe.string) @trait_multiple_trait_params:nn:nn
+proc name > public {inline} (0 calls)
+1: trait_multiple_trait_params.student.name<1>
+name([#rec##0:trait_multiple_trait_params.student], ?#rec##2:trait_multiple_trait_params.student, #field##0:wybe.string)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#field##0:wybe.string, ?#rec##2:trait_multiple_trait_params.student) @trait_multiple_trait_params:nn:nn
+
+
+proc student > public {inline} (0 calls)
+0: trait_multiple_trait_params.student.student<0>
+student(name##0:wybe.string, ?#result##2:trait_multiple_trait_params.student)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~name##0:wybe.string, ?#result##2:trait_multiple_trait_params.student) @trait_multiple_trait_params:nn:nn
+proc student > public {inline} (0 calls)
+1: trait_multiple_trait_params.student.student<1>
+student(?name##0:wybe.string, #result##0:trait_multiple_trait_params.student)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#result##0:trait_multiple_trait_params.student, ?name##0:wybe.string) @trait_multiple_trait_params:nn:nn
+
+
+proc ~= > public {inline} (0 calls)
+0: trait_multiple_trait_params.student.~=<0>
+~=(#left##0:trait_multiple_trait_params.student, #right##0:trait_multiple_trait_params.student, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_eq(~#left##0:trait_multiple_trait_params.student, ~#right##0:trait_multiple_trait_params.student, ?tmp#0##0:wybe.bool)
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_multiple_trait_params.student'
+
+source_filename = "!ROOT!/final-dump/trait_multiple_trait_params.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i1 @"trait_multiple_trait_params#.student#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#1##0" = icmp eq i64 %"#left##0", %"#right##0"
+  ret i1 %"tmp#1##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.student#.name<0>"(i64 %"#rec##0") {
+  ret i64 %"#rec##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.student#.name<1>"(i64 %"#field##0") {
+  ret i64 %"#field##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.student#.student<0>"(i64 %"name##0") {
+  ret i64 %"name##0"
+}
+
+define external fastcc i64 @"trait_multiple_trait_params#.student#.student<1>"(i64 %"#result##0") {
+  ret i64 %"#result##0"
+}
+
+define external fastcc i1 @"trait_multiple_trait_params#.student#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#0##0" = icmp eq i64 %"#left##0", %"#right##0"
+  %"tmp#3##0" = xor i1 %"tmp#0##0", 1
+  ret i1 %"tmp#3##0"
+}

@@ -1,0 +1,11 @@
+# Verify a local trait submodule can provide a default method.
+
+type greeter trait {
+    abstract greet(x:T<:_): string
+
+    pub def greet(x:T<:_): string = "default greeting"
+}
+
+impl int <: greeter
+
+!println(greet(42))

@@ -1,0 +1,9 @@
+# Provide the scalar implementation used by the dispatch specificity test.
+
+use trait_specificity_printable
+
+impl trait_specificity_printable
+
+pub constructor trait_specificity_scalar(value:int)
+
+pub def render(x:_): string = "scalar $(x^value)"

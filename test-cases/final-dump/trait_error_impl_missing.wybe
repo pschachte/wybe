@@ -1,0 +1,11 @@
+# Verify a trait implementation reports a missing required method.
+
+module required_method {
+    trait
+
+    abstract render(x:T<:_): string
+}
+
+impl int <: required_method
+
+!println(required_method.render(42))
