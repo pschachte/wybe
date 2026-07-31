@@ -1,0 +1,70 @@
+# Do POSIX-style I/O
+
+def foreign c read_buffer=read(fd:int32, buffer:io_buffer, size:int, ?bytes_read:int) use !io
+
+pub def buffer_size:int = 4096
+pub def stdin:int32 = 0:int32
+
+# !io_buffer(buffer_size, stdin, ?buffer)
+# # foreign lpvm alloc(buffer_size:int, ?buffer:raw_array)
+# !read_buffer(stdin, buffer, buffer_size, ?bytes_read)
+# !println("$bytes_read bytes read")
+# for ?i in 0..bytes_read {
+#     foreign lpvm access(buffer, i, 1, 0, ?ch:char)
+#     !print(ch)
+# }
+
+type io_buffer is address {
+    # Layout of io_buffer:
+    # offset  byte size  contents
+    #    0       8       pointer to next byte to read/write
+    #    8       8       pointer to first byte beyond readable/writeable memory
+    #   16       4       total size of buffer, excluding this header
+    #   20       4       POSIX file descriptor
+    #   24     size      actual buffer bytes
+
+    pub def io_buffer(size:int, fd:int, ?buf:_) {
+        ?ptr_size      = foreign lpvm sizeof(_:opaque_pointer)
+        ?fd_size       = foreign lpvm sizeof(_:int32) # also size of buffer size
+        ?buffer_offset = 2*ptr_size+2*fd_size
+        ?full_size     = size+buffer_offset
+        foreign lpvm alloc(full_size, ?buf:_)
+        ?start_ptr = foreign llvm add(buf, buffer_offset)
+        foreign lpvm mutate(buf, ?buf,             0, 1, ptr_size, 0, start_ptr)
+        foreign lpvm mutate(buf, ?buf,      ptr_size, 1, ptr_size, 0, start_ptr)
+        foreign lpvm mutate(buf, ?buf,      ptr_size*2, 1, fd_size, 0, size)
+        foreign lpvm mutate(buf, ?buf, ptr_size*2+fd_size, 1, size, 0, fd)
+    }
+
+    pub def next(!buf:_, ?ch:char, ?done:bool) use !io {
+        ?ptr_size  = foreign lpvm sizeof(_:opaque_pointer)
+        ?fd_size   = foreign lpvm sizeof(_:int32) # also size of buffer size
+        ?start     = foreign lpvm access(buf,        0, ptr_size, 0)
+        ?end       = foreign lpvm access(buf, ptr_size, ptr_size, 0)
+        ?done      = false
+        foreign llvm icmp_ule(end, start, ?buffer_empty:bool)
+        if {  buffer_empty ::
+            ?fd:int32   = foreign lpvm access(buf, ptr_size*2, ptr_size, 0)
+            ?size:int32 = foreign lpvm access(buf, ptr_size*2+fd_size, ptr_size, 0)
+            ?start:_ = foreign llvm add(buf, ptr_size*2+fd_size*2)
+            !read_buffer(fd, start, int(size), ?bytes_read)
+            if { bytes_read < 0 :: !error("Read error")
+               | bytes_read = 0 :: ?done = true
+            }
+            ?end = foreign llvm add(start, bytes_read)
+            foreign lpvm mutate(buf, ?buf, 0, 1, ptr_size, 0, start)
+            foreign lpvm mutate(buf, ?buf, ptr_size, 1, ptr_size, 0, start)
+        }
+        foreign lpvm access(start, 0, 1, 0, ?ch:char)
+        ?start = foreign llvm add(start, 1)
+        foreign lpvm mutate(buf, ?buf, 0, 1, ptr_size, 0, start)
+    }
+}
+
+!io_buffer(4096, 0, ?stdin)
+
+do {
+    !next(!stdin, ?ch, ?done)
+    until done
+    !print(ch)
+}
