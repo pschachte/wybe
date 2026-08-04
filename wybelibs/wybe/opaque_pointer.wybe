@@ -1,7 +1,26 @@
 # purpose: Standard opaque pointer type, mostly used for interfacing to other
-#          programming languages.
+#          programming languages.  Note that you can't do much with an opaque
+#          pointer; it's just useful for passing pointer values to and from
+#          foreign procedures.  Use the `address` type for low level memory
+#          access and pointer arithmetic.
 # since  : 0.2
 
 pragma no_standard_library # Standard library can't depend on itself!
 
+use wybe.string, wybe.int, wybe.char, wybe.count
+
 representation is opaque
+
+# Default format shows pointer as 8 hex characters, preceded by "0x".  If width
+# is specified, format it in that width, filled with '0's by default, in
+# hexadecimal by default, but without "0x" prefix.  All those defaults can be
+# overridden in the above order.
+pub def {inline} fmt(ptr:_):string = "0x" ,, fmt(ptr, 8)
+
+pub def {inline} fmt(ptr:_, width:int):string = fmt(ptr, width, '0')
+
+pub def {inline} fmt(ptr:_, width:int, fill:char):string =
+    fmt(ptr, width, fill, 16)
+
+pub def {inline} fmt(ptr:_, width:int, fill:char, radix:int):string =
+    fmt(foreign lpvm cast(ptr):count, width-2, fill, radix)

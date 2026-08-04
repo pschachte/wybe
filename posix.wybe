@@ -1,8 +1,8 @@
 # Do POSIX-style I/O
 
-def foreign c read_buffer=read(fd:int32, buffer:io_buffer, size:int, ?bytes_read:int) use !io
+# XXX int32 is the size of a C int on this architecture
+def foreign c {impure} read_buffer=read(fd:int32, buffer:address, size:int, ?bytes_read:int)
 
-pub def buffer_size:int = 4096
 pub def stdin:int32 = 0:int32
 
 # !io_buffer(buffer_size, stdin, ?buffer)
@@ -19,52 +19,67 @@ type io_buffer is address {
     # offset  byte size  contents
     #    0       8       pointer to next byte to read/write
     #    8       8       pointer to first byte beyond readable/writeable memory
-    #   16       4       total size of buffer, excluding this header
-    #   20       4       POSIX file descriptor
-    #   24     size      actual buffer bytes
+    #   16       8       POSIX file descriptor
+    #   24  buffer_size  actual buffer bytes
 
-    pub def io_buffer(size:int, fd:int, ?buf:_) {
-        ?ptr_size      = foreign lpvm sizeof(_:opaque_pointer)
-        ?fd_size       = foreign lpvm sizeof(_:int32) # also size of buffer size
-        ?buffer_offset = 2*ptr_size+2*fd_size
-        ?full_size     = size+buffer_offset
-        foreign lpvm alloc(full_size, ?buf:_)
-        ?start_ptr = foreign llvm add(buf, buffer_offset)
-        foreign lpvm mutate(buf, ?buf,             0, 1, ptr_size, 0, start_ptr)
-        foreign lpvm mutate(buf, ?buf,      ptr_size, 1, ptr_size, 0, start_ptr)
-        foreign lpvm mutate(buf, ?buf,      ptr_size*2, 1, fd_size, 0, size)
-        foreign lpvm mutate(buf, ?buf, ptr_size*2+fd_size, 1, size, 0, fd)
+pub def buffer_size : int = 4096 # fixed buffer size in bytes
+    def ptr_size : int = foreign lpvm sizeof(_:address)
+    def fd_size  : int = foreign lpvm sizeof(_:int)
+    def raw_data_offset : int = 2*ptr_size + fd_size
+    def io_buffer_size : int = buffer_size + raw_data_offset
+
+    def {inline} next_pointer(buf:_):address =
+        foreign lpvm cast(foreign lpvm access(buf, 0, io_buffer_size, 0))
+
+    def {inline,impure} next_pointer(!buf:_, start_ptr:address) {
+        foreign lpvm mutate(buf, ?buf, 0, 1, io_buffer_size, 0, start_ptr)
     }
 
-    pub def next(!buf:_, ?ch:char, ?done:bool) use !io {
-        ?ptr_size  = foreign lpvm sizeof(_:opaque_pointer)
-        ?fd_size   = foreign lpvm sizeof(_:int32) # also size of buffer size
-        ?start     = foreign lpvm access(buf,        0, ptr_size, 0)
-        ?end       = foreign lpvm access(buf, ptr_size, ptr_size, 0)
-        ?done      = false
-        foreign llvm icmp_ule(end, start, ?buffer_empty:bool)
-        if {  buffer_empty ::
-            ?fd:int32   = foreign lpvm access(buf, ptr_size*2, ptr_size, 0)
-            ?size:int32 = foreign lpvm access(buf, ptr_size*2+fd_size, ptr_size, 0)
-            ?start:_ = foreign llvm add(buf, ptr_size*2+fd_size*2)
-            !read_buffer(fd, start, int(size), ?bytes_read)
-            if { bytes_read < 0 :: !error("Read error")
-               | bytes_read = 0 :: ?done = true
-            }
-            ?end = foreign llvm add(start, bytes_read)
-            foreign lpvm mutate(buf, ?buf, 0, 1, ptr_size, 0, start)
-            foreign lpvm mutate(buf, ?buf, ptr_size, 1, ptr_size, 0, start)
+    def {inline} end_pointer(buf:_):address = # actually, one byte past the end
+        foreign lpvm access(buf, ptr_size, io_buffer_size, 0)
+
+    def {inline,impure} end_pointer(!buf:_, end_ptr:address) {
+        foreign lpvm mutate(buf, ?buf, ptr_size, 1, io_buffer_size, 0, end_ptr)
+    }
+
+    def {inline} fd(buf:_):int =
+        foreign lpvm access(buf, ptr_size*2, io_buffer_size, 0)
+
+    def {inline,impure} fd(!buf:_, fd:int) {
+        foreign lpvm mutate(buf, ?buf, ptr_size*2, 1, io_buffer_size, 0, fd)
+    }
+
+    def {inline} start_pointer(buf:_):address =
+        foreign lpvm cast(foreign llvm add(buf, raw_data_offset:int))
+
+
+    pub def {impure} io_buffer(fd:int, ?buf:_) {
+        foreign lpvm alloc(io_buffer_size, ?buf:_)
+        ?start_ptr = start_pointer(buf)
+        !next_pointer(!buf, start_ptr)
+        !end_pointer(!buf, start_ptr) # buffer starts empty
+        !fd(!buf, fd)
+    }
+
+    use logging
+
+    # This should not be impure, it should use !io, but we can't have a test
+    # that uses !io, because it's unique.
+    pub def {impure, test} next(!buf:_, ?ch:char) { ?ch = ' '
+        if {  buf^end_pointer <= buf^next_pointer ::
+            !read_buffer(foreign lpvm cast(buf^fd):int32, buf^start_pointer, buffer_size, ?bytes_read)
+            bytes_read ~= 0 # fail on EOF
+            if { bytes_read < 0 :: !error("Read error") }
+            !end_pointer(!buf, buf^start_pointer + bytes_read)
         }
-        foreign lpvm access(start, 0, 1, 0, ?ch:char)
-        ?start = foreign llvm add(start, 1)
-        foreign lpvm mutate(buf, ?buf, 0, 1, ptr_size, 0, start)
+        foreign lpvm access(buf^next_pointer, 0, 1, 0, ?ch:char)
+        !next_pointer(!buf, buf^next_pointer + 1)
     }
 }
 
-!io_buffer(4096, 0, ?stdin)
+!io_buffer(0, ?stdin)
 
 do {
-    !next(!stdin, ?ch, ?done)
-    until done
+    while (!next(!stdin, ?ch))
     !print(ch)
 }

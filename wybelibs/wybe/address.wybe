@@ -1,0 +1,51 @@
+# purpose: Standard low-level pointer type, allowing indexing and pointer
+# arithmetic.
+# since  : 0.2
+
+pragma no_standard_library # Standard library can't depend on itself!
+
+use wybe.string, wybe.int, wybe.char, wybe.bool, wybe.count, wybe.comparison
+use wybe.eq
+
+representation is address
+
+# Address arithmetic.  Address must be first argument or + or -
+pub def (ptr:_ + offset:int):_ =
+    foreign lpvm cast(foreign lpvm cast(ptr):int + offset):_
+
+pub def (ptr:_ - offset:int):_ =
+    foreign lpvm cast(foreign lpvm cast(ptr):int - offset):_
+
+# Equality and disequality.
+impl eq
+pub def foreign llvm {test} `=` =icmp_eq(x:_, y:_)
+pub def foreign llvm {test} `~=`=icmp_ne(x:_, y:_)
+
+# Inequalities.
+pub def foreign llvm {test} `<` =icmp_ult(x:_, y:_)
+pub def foreign llvm {test} `<=`=icmp_ule(x:_, y:_)
+pub def foreign llvm {test} `>` =icmp_ugt(x:_, y:_)
+pub def foreign llvm {test} `>=`=icmp_uge(x:_, y:_)
+
+# Three-way comparison.
+pub def (x:_ <=> y:_):comparison = 
+    if { x < y :: lesser | x = y :: equal | else :: greater }
+
+# Minimum and maximum of two counts.
+pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
+pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
+
+
+# Default format shows pointer as 8 hex characters, preceded by "0x".  If width
+# is specified, format it in that width, filled with '0's by default, in
+# hexadecimal by default, but without "0x" prefix.  All those defaults can be
+# overridden in the above order.
+pub def {inline} fmt(ptr:_):string = "0x" ,, fmt(ptr, 8)
+
+pub def {inline} fmt(ptr:_, width:int):string = fmt(ptr, width, '0')
+
+pub def {inline} fmt(ptr:_, width:int, fill:char):string =
+    fmt(ptr, width, fill, 16)
+
+pub def {inline} fmt(ptr:_, width:int, fill:char, radix:int):string =
+    fmt(foreign lpvm cast(ptr):count, width-2, fill, radix)
