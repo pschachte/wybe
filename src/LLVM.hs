@@ -906,7 +906,7 @@ writeVirtualCall table index args pos = do
     fnVar <- llvmValue readFnPtr
     argList <- llvmArgumentList ins
     outTy <- llvmReturnType $ List.map argType outs
-    prefix <- tailMarker False
+    prefix <- tailMarker False ins
     llvmAssignResults outs $
         prefix ++ "call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
 
