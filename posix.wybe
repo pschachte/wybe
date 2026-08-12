@@ -3,17 +3,6 @@
 # XXX int32 is the size of a C int on this architecture
 def foreign c {impure} read_buffer=read(fd:int32, buffer:address, size:int, ?bytes_read:int)
 
-pub def stdin:int32 = 0:int32
-
-# !io_buffer(buffer_size, stdin, ?buffer)
-# # foreign lpvm alloc(buffer_size:int, ?buffer:raw_array)
-# !read_buffer(stdin, buffer, buffer_size, ?bytes_read)
-# !println("$bytes_read bytes read")
-# for ?i in 0..bytes_read {
-#     foreign lpvm access(buffer, i, 1, 0, ?ch:char)
-#     !print(ch)
-# }
-
 type io_buffer is address {
     # Layout of io_buffer:
     # offset  byte size  contents
@@ -53,7 +42,7 @@ pub def buffer_size : int = 4096 # fixed buffer size in bytes
         foreign lpvm cast(foreign llvm add(buf, raw_data_offset:int))
 
 
-    pub def {impure} io_buffer(fd:int, ?buf:_) {
+    pub def {impure} io_buffer(fd:int, ?buf:_) use !io {
         foreign lpvm alloc(io_buffer_size, ?buf:_)
         ?start_ptr = start_pointer(buf)
         !next_pointer(!buf, start_ptr)
@@ -78,6 +67,8 @@ pub def buffer_size : int = 4096 # fixed buffer size in bytes
 }
 
 !io_buffer(0, ?stdin)
+!io_buffer(1, ?stdout)
+!io_buffer(2, ?stderr)
 
 do {
     while (!next(!stdin, ?ch))
