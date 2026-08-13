@@ -61,13 +61,12 @@ pub def buffer_size : int = 4096 # fixed buffer size in bytes
         !fd(!buf, fd)
     }
 
-    use logging
-
     # This should not be impure, it should use !io, but we can't have a test
     # that uses !io, because it's unique.
-    pub def {impure, test} next(!buf:_, ?ch:char) { ?ch = ' '
+    pub def {impure, test} next(!buf:_, ?ch:char) {
         if {  buf^end_pointer <= buf^next_pointer ::
-            !read_buffer(foreign lpvm cast(buf^fd):int32, buf^start_pointer, buffer_size, ?bytes_read)
+            !read_buffer(foreign lpvm cast(buf^fd):int32,
+                         buf^start_pointer, buffer_size, ?bytes_read)
             bytes_read ~= 0 # fail on EOF
             if { bytes_read < 0 :: !error("Read error") }
             !end_pointer(!buf, buf^start_pointer + bytes_read)
