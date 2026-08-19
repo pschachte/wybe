@@ -1,0 +1,6 @@
+# Demonstrate bug using [|] to deconstruct a concat'ed string
+
+for ?ch in "first" ,, "second" {
+    !print(ch)
+}
+!nl
