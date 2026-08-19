@@ -91,7 +91,10 @@ pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
             [?head | ?str] = str
             ?tail = if { len = 1 :: empty | else :: buffer(len - 1, str) }
       | concat(?left, ?right) :: 
-            if { [?head | ?t] = left :: ?tail = concat(t, right)
+            if { [?head | ?t] = left ::
+                if { t = empty :: ?tail = right
+                   | else :: ?tail = concat(t, right)
+                }
                | else :: [?head | ?tail] = right
             }
       | slice(?base, ?range) :: 
