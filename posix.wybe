@@ -1,7 +1,13 @@
 # Do POSIX-style I/O
 
+pub def buffer_size : int = 8*1024 # fixed buffer size in bytes
+
+
 # XXX int32 is the size of a C int on this architecture
-def foreign c {impure} read_buffer=read(fd:int32, buffer:address, size:int, ?bytes_read:int)
+def foreign c read_buffer =
+    read(fd:int32, buffer:address, size:int, ?bytes_read:int) use !io
+def foreign c write_buffer =
+    write(fd:int32, buffer:address, size:int, ?bytes_written:int) use !io
 
 type io_buffer is address {
     # Layout of io_buffer:
@@ -11,38 +17,36 @@ type io_buffer is address {
     #   16       8       POSIX file descriptor
     #   24  buffer_size  actual buffer bytes
 
-pub def buffer_size : int = 4096 # fixed buffer size in bytes
     def ptr_size : int = foreign lpvm sizeof(_:address)
     def fd_size  : int = foreign lpvm sizeof(_:int)
     def raw_data_offset : int = 2*ptr_size + fd_size
     def io_buffer_size : int = buffer_size + raw_data_offset
+    def address(buf:_):address = foreign lpvm cast(buf)
+    def buffer_end(buf:_):address = buf^address + io_buffer_size
+    def start_pointer(buf:_):address = buf^address + raw_data_offset
 
     def {inline} next_pointer(buf:_):address =
         foreign lpvm cast(foreign lpvm access(buf, 0, io_buffer_size, 0))
 
-    def {inline,impure} next_pointer(!buf:_, start_ptr:address) {
+    def {inline} next_pointer(!buf:_, start_ptr:address) use !io {
         foreign lpvm mutate(buf, ?buf, 0, 1, io_buffer_size, 0, start_ptr)
     }
 
     def {inline} end_pointer(buf:_):address = # actually, one byte past the end
         foreign lpvm access(buf, ptr_size, io_buffer_size, 0)
 
-    def {inline,impure} end_pointer(!buf:_, end_ptr:address) {
+    def {inline} end_pointer(!buf:_, end_ptr:address) use !io {
         foreign lpvm mutate(buf, ?buf, ptr_size, 1, io_buffer_size, 0, end_ptr)
     }
 
     def {inline} fd(buf:_):int =
         foreign lpvm access(buf, ptr_size*2, io_buffer_size, 0)
 
-    def {inline,impure} fd(!buf:_, fd:int) {
+    def {inline} fd(!buf:_, fd:int) use !io {
         foreign lpvm mutate(buf, ?buf, ptr_size*2, 1, io_buffer_size, 0, fd)
     }
 
-    def {inline} start_pointer(buf:_):address =
-        foreign lpvm cast(foreign llvm add(buf, raw_data_offset:int))
-
-
-    pub def {impure} io_buffer(fd:int, ?buf:_) use !io {
+    pub def input_buffer(fd:int, ?buf:_) use !io {
         foreign lpvm alloc(io_buffer_size, ?buf:_)
         ?start_ptr = start_pointer(buf)
         !next_pointer(!buf, start_ptr)
@@ -50,26 +54,92 @@ pub def buffer_size : int = 4096 # fixed buffer size in bytes
         !fd(!buf, fd)
     }
 
-    # This should not be impure, it should use !io, but we can't have a test
+    pub def output_buffer(fd:int, ?buf:_) use !io {
+        foreign lpvm alloc(io_buffer_size, ?buf:_)
+        ?start_ptr = start_pointer(buf)
+        !next_pointer(!buf, start_ptr)
+        !fd(!buf, fd)
+    }
+
+    # This should be a test, but we currently can't have a test
     # that uses !io, because it's unique.
-    pub def {impure, test} next(!buf:_, ?ch:char) {
+    pub def read(!buf:_, ?ch:char) use !io {
         if {  buf^end_pointer <= buf^next_pointer ::
             !read_buffer(foreign lpvm cast(buf^fd):int32,
                          buf^start_pointer, buffer_size, ?bytes_read)
-            bytes_read ~= 0 # fail on EOF
-            if { bytes_read < 0 :: !error("Read error") }
-            !end_pointer(!buf, buf^start_pointer + bytes_read)
+            # bytes_read ~= 0 # XXX should fail on EOF
+            if { bytes_read > 0 ::
+                !next_pointer(!buf, buf^start_pointer)
+                !end_pointer(!buf, buf^start_pointer + bytes_read)
+                foreign lpvm access(buf^next_pointer, 0, 1, 0, ?ch:char)
+                !next_pointer(!buf, buf^next_pointer + 1)
+            | bytes_read = 0 ::
+                ?ch = eof
+            | else ::
+                !error("Read error")
+             }
+        | else ::
+            foreign lpvm access(buf^next_pointer, 0, 1, 0, ?ch:char)
+            !next_pointer(!buf, buf^next_pointer + 1)
         }
-        foreign lpvm access(buf^next_pointer, 0, 1, 0, ?ch:char)
-        !next_pointer(!buf, buf^next_pointer + 1)
+    }
+
+    # We assume there is space in the buffer for at least one character.
+    pub def print(!buf:_, ch:char) use !io {
+        ?ptr = buf^next_pointer
+        foreign lpvm mutate(ptr, ?ptr, 0, 1, io_buffer_size, 0, ch)
+        !next_pointer(!buf, ptr + 1)
+        if {  buf^next_pointer > buf^buffer_end :: !flush_output(!buf) }
+    }
+
+    pub def print(!buf:_, str:string) use !io {
+        # !map(print(!buf), str)
+        for ?i in 0..length(str) {
+            if { ?ch = str[i] ::  !print(!buf, ch) }
+        }
+    }
+
+    pub def println(!buf:_, str:string) use !io {
+        !print(!buf, str)
+        !print(!buf, '\n')
+    }
+
+    pub def flush_output(!buf:_) use !io {
+        ?byte_count = buf^next_pointer - buf^start_pointer
+        if { byte_count > 0 ::
+            !write_buffer(foreign lpvm cast(buf^fd):int32,
+                            buf^start_pointer, byte_count, ?bytes_written)
+            if { bytes_written ~= byte_count :: !error("Write error") }
+            !next_pointer(!buf, buf^start_pointer)
+        }
     }
 }
 
-!io_buffer(0, ?stdin)
-!io_buffer(1, ?stdout)
-!io_buffer(2, ?stderr)
+!input_buffer(0, ?stdin)
+!output_buffer(1, ?stdout)
+!output_buffer(2, ?stderr)
+
+?char_count = 0
+?word_count = 0
+?line_count = 0
+?before_word = true
 
 do {
-    while (!next(!stdin, ?ch))
-    !print(ch)
+    !read(!stdin, ?ch)
+    until ch = eof
+    incr(!char_count)
+    if { ch = '\n' ::
+        incr(!line_count)
+        ?before_word = true
+    | is_whitespace(ch) ::
+        ?before_word = true
+    | before_word ::
+        incr(!word_count)
+        ?before_word = false
+    }
 }
+
+!println(!stdout, "$line_count lines, $word_count words, $char_count characters")
+
+!flush_output(!stdout)
+!flush_output(!stderr)

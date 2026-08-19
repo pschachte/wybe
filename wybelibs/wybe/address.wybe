@@ -9,12 +9,16 @@ use wybe.eq
 
 representation is address
 
-# Address arithmetic.  Address must be first argument or + or -
+# Address arithmetic.  Address must be first argument of + or -
+# - can subtract an offset from an address or compute the difference between two addresses.
 pub def (ptr:_ + offset:int):_ =
     foreign lpvm cast(foreign lpvm cast(ptr):int + offset):_
 
 pub def (ptr:_ - offset:int):_ =
     foreign lpvm cast(foreign lpvm cast(ptr):int - offset):_
+
+pub def (ptr:_ - ptr2:_):int =
+    foreign lpvm cast(ptr):int - foreign lpvm cast(ptr2)
 
 # Equality and disequality.
 impl eq
