@@ -1,8 +1,8 @@
 # Provide a concrete dog implementation for the basic trait dispatch test.
 
-use trait_basic_speaker
+use trait_import_support.basic_speaker
 
-impl trait_basic_speaker
+impl trait_import_support.basic_speaker
 
 pub constructor trait_basic_dog(name:string)
 

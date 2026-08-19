@@ -1,8 +1,8 @@
 # Provide the scalar implementation used by the dispatch specificity test.
 
-use trait_specificity_printable
+use trait_import_support.specificity_printable
 
-impl trait_specificity_printable
+impl trait_import_support.specificity_printable
 
 pub constructor trait_specificity_scalar(value:int)
 

@@ -177,10 +177,39 @@ normaliseItem (PragmaDecl prag) =
 normaliseTraitImpls :: Compiler ()
 normaliseTraitImpls = do
     knownTraitImpls <- getModuleImplementationField modKnownTraitImpls
-    knownTraitImpls' <- Map.fromList <$>
-        traverse (uncurry normaliseTraitImpl) (Map.toList knownTraitImpls)
+    normalised <- traverse (uncurry normaliseTraitImpl)
+        $ Map.toList knownTraitImpls
+    knownTraitImpls' <- foldM insertNormalisedTraitImpl Map.empty normalised
     updateImplementation (\impl -> impl{ modKnownTraitImpls=knownTraitImpls' })
     publishTraitImpls
+
+
+-- |Insert a normalised trait implementation.  Distinct raw declarations can
+-- resolve to the same specification through qualification, aliases, or
+-- generic-variable canonicalisation.  Keep the earliest local declaration and
+-- warn at the later one.
+insertNormalisedTraitImpl :: Map TraitImplSpec (Placed (Maybe ModSpec))
+    -> (TraitImplSpec, Placed (Maybe ModSpec))
+    -> Compiler (Map TraitImplSpec (Placed (Maybe ModSpec)))
+insertNormalisedTraitImpl impls candidate@(spec, owner) =
+    case Map.lookup spec impls of
+        Nothing -> return $ uncurry Map.insert candidate impls
+        Just previous
+          | isNothing (content owner) && isNothing (content previous) -> do
+                let (kept, duplicate)
+                        | owner `isEarlierThan` previous = (owner, previous)
+                        | otherwise = (previous, owner)
+                warnmsg (place duplicate) $
+                    "Duplicate trait implementation declaration: " ++ show spec
+                return $ Map.insert spec kept impls
+          | isNothing (content owner) ->
+                return $ Map.insert spec owner impls
+          | otherwise -> return impls
+  where
+    isEarlierThan first second = case (place first, place second) of
+        (Just firstPos, Just secondPos) -> firstPos < secondPos
+        (Just _, Nothing) -> True
+        _ -> False
 
 
 -- |Resolve an unqualified trait impl specification once its defining module is known.

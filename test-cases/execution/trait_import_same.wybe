@@ -1,0 +1,7 @@
+# Identical procedure sets make duplicate imported trait impls unambiguous.
+
+use trait_import_support.printable,
+    trait_import_support.same_a,
+    trait_import_support.same_b
+
+!println(trait_import_support.printable.render(1))

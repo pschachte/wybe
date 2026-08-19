@@ -1,8 +1,8 @@
 # Provide the concrete box implementation for higher-order trait dispatch.
 
-use trait_higher_order_mapper
+use trait_import_support.higher_order_mapper
 
-impl trait_higher_order_mapper
+impl trait_import_support.higher_order_mapper
 
 pub constructor trait_higher_order_box(name:string)
 

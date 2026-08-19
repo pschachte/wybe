@@ -571,16 +571,17 @@ compileVTable :: Int -> TraitImplSpec -> Maybe ModSpec -> Compiler (Int, StructI
 compileVTable index ispec opmod = do
     logMsg Clause $ "Compiling vtable for trait impl " ++ show ispec ++ " defined in " ++ show opmod
     thisMod <- getModuleSpec
-    traitImplProcSpecs <- getModuleImplementationField modTraitImplProcs
+    traitImplProcSpecs <- getModuleImplementationField
+        (if isNothing opmod then modTraitImplProcs else modVTableProcs)
         `inModule` fromMaybe thisMod opmod
     let procSpecs = trustFromJust "compileVTable" $ Map.lookup ispec traitImplProcSpecs
     procSpecs' <- case opmod of
         Nothing -> adaptTraitImplProcs ispec procSpecs
         Just _  -> return procSpecs
-    when (isNothing opmod && procSpecs' /= procSpecs) $
+    when (isNothing opmod) $
         updateModImplementation $ \imp -> imp {
-            modTraitImplProcs = Map.insert ispec procSpecs'
-                (modTraitImplProcs imp) }
+            modVTableProcs = Map.insert ispec procSpecs'
+                (modVTableProcs imp) }
     let sz = wordSizeBytes * length procSpecs
         values = List.map FnPointerStructMember procSpecs'
     structId <- recordConstStruct

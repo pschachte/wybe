@@ -1,0 +1,3 @@
+use trait_import_support.printable, trait_import_support.common
+
+impl int <: trait_import_support.printable

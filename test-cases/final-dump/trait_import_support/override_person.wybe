@@ -1,8 +1,8 @@
 # Provide a person type that overrides the `named` trait's default method.
 
-use trait_override_named
+use trait_import_support.override_named
 
-impl trait_override_named
+impl trait_import_support.override_named
 
 pub constructor trait_override_person(name:string)
 

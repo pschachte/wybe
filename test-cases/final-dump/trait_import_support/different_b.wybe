@@ -1,0 +1,5 @@
+use trait_import_support.printable
+
+impl int <: trait_import_support.printable
+
+def render(x:int): string = "different"

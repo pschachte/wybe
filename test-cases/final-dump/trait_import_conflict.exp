@@ -1,0 +1,5 @@
+Error detected during type checking of module(s) trait_import_conflict
+Module trait_import_conflict imports conflicting implementations of trait trait_import_support.printable for type wybe.int:
+    trait_import_support.different_b uses {trait_import_support.different_b.render<0>}
+    trait_import_support.same_a uses {trait_import_support.common.render<0>}
+Declare a local implementation in module trait_import_conflict to override the imported implementations

@@ -1,0 +1,11 @@
+# Verify duplicate trait implementation declarations produce a warning.
+
+module printable {
+    trait
+
+    abstract render(x:T<:_): string
+}
+
+impl int <: printable
+impl int <: printable
+impl wybe.int <: printable
