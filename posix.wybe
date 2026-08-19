@@ -9,6 +9,14 @@ def foreign c read_buffer =
 def foreign c write_buffer =
     write(fd:int32, buffer:address, size:int, ?bytes_written:int) use !io
 
+# Note:  this type is not marked unique, but updates to this is structure are
+# forced to be destructive.  To make this valid, it's essential that operations
+# that mutate this structure are declared to `use !io`.  Operations that access
+# this structure *should* be declared to `use io`, so they are only allowed
+# where `io` is available, but currently Wybe's uniqueness system does not allow
+# unique values or resources to be passed as input-only, and making operations
+# that access parts of an io_buffer `use !io` would be annoying and also
+# misleading, since they don't modify it.
 type io_buffer is address {
     # Layout of io_buffer:
     # offset  byte size  contents
@@ -94,9 +102,7 @@ type io_buffer is address {
 
     pub def print(!buf:_, str:string) use !io {
         # !map(print(!buf), str)
-        for ?i in 0..length(str) {
-            if { ?ch = str[i] ::  !print(!buf, ch) }
-        }
+        for ?ch in str { !print(!buf, ch) }
     }
 
     pub def println(!buf:_, str:string) use !io {
