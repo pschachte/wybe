@@ -1,0 +1,39 @@
+# Regression test for stack-allocation escape analysis via GLOBAL resources.
+#
+# A structure that is built locally but then stored into a global resource
+# escapes the procedure: the global keeps pointing at it after the proc
+# returns.  Such an alloc must NOT be stack-allocated, or the global would be
+# left pointing into a torn-down stack frame (use-after-free).
+#
+# The escape via the global happens through an `lpvm store` that occurs AFTER
+# the alloc in the body, so the forward-accumulated alias map at the alloc site
+# cannot see it; computeEscapedVars must seed it explicitly.
+#
+# This is an *execution* test on purpose: with the bug, the dumped IR merely
+# carries a stray {stack} flag, but the miscompilation only shows up at runtime
+# as garbage once another frame overwrites the freed stack slot.
+
+type cell { pub cell(a:int, b:int) }
+
+resource saved:cell = cell(0, 0)
+
+# Build a cell locally and store it into the global resource.  Escapes.
+def {noinline} stash(x:int) use !saved {
+    ?c = cell(x, x)
+    ?saved = c
+}
+
+# Overwrite the previously-used stack region with unrelated data.
+def {noinline} clobber(n:int, ?out:int) {
+    ?acc = 0
+    for ?i in 1..n { ?acc = acc + i }
+    ?out = acc
+}
+
+!stash(42)
+clobber(1000, ?junk)
+use saved in {
+    !println(saved^a)   # must print 42 (not stack garbage)
+    !println(saved^b)   # must print 42
+}
+!println(junk)

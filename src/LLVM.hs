@@ -866,7 +866,7 @@ writeWybeCall wybeProc args pos = do
     (ins,outs,oRefs,iRefs) <- partitionArgsWithRefs args
     unless (List.null iRefs)
      $ shouldnt $ "Wybe call " ++ show wybeProc ++ " with take-reference arg"
-    tailKind <- tailMarker False
+    tailKind <- tailMarker False ins
     if List.null oRefs then
         writeActualCall wybeProc ins outs tailKind
     else
@@ -892,7 +892,7 @@ writeHOCall closure args pos = do
         llvmLoad closure writeFnPtr
         fnVar <- llvmValue readFnPtr
         argList <- llvmArgumentList ins
-        prefix <- tailMarker False
+        prefix <- tailMarker False ins
         llvmAssignResults outs $
             prefix ++ "call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
 
@@ -906,18 +906,27 @@ writeVirtualCall table index args pos = do
     fnVar <- llvmValue readFnPtr
     argList <- llvmArgumentList ins
     outTy <- llvmReturnType $ List.map argType outs
-    prefix <- tailMarker False
+    prefix <- tailMarker False ins
     llvmAssignResults outs $
         prefix ++ "call fastcc " ++ outTy ++ " " ++ fnVar ++ argList
 
 
 -- | Work out the appropriate prefix for a call:  tail, musttail, or nothing.
--- The input specifies whether this call is has had out-by-ref arguments
--- converted to input pointers.
-tailMarker :: Bool -> LLVM String
-tailMarker must = do
-    didAlloca <- gets doesAlloca
-    return $ case (didAlloca, must) of
+-- The first argument specifies whether this call has had out-by-ref arguments
+-- converted to input pointers.  The second argument is the list of input args
+-- being passed to the call; if any directly reference a stack-allocated
+-- variable, we cannot emit a tail marker (the callee would dereference a
+-- pointer into a stack frame that tail-call optimisation would have freed).
+-- If no input arg references a stack-allocated variable, TCO is safe even when
+-- the current body contains alloca instructions, because the escape analysis
+-- guarantees those allocations do not reach the callee.
+tailMarker :: Bool -> [PrimArg] -> LLVM String
+tailMarker must ins = do
+    stackVars <- gets stackAllocedVars
+    let passesStackVar = any (\arg -> case arg of
+            ArgVar{argVarName=n} -> Set.member n stackVars
+            _                   -> False) ins
+    return $ case (passesStackVar, must) of
         (True,_)      -> ""
         (False,True)  -> "musttail "
         (False,False) -> "tail "
@@ -985,11 +994,32 @@ writeLLVMCall op flags args pos = do
 
 -- | Generate LPVM (memory management) instruction
 writeLPVMCall :: ProcName -> [Ident] -> [PrimArg] -> OptPos -> LLVM ()
-writeLPVMCall "alloc" _ args pos = do
+writeLPVMCall "alloc" flags args pos = do
     releaseDeferredCall
     args' <- partitionArgs "lpvm alloc instruction" args
     case args' of
-        ([sz],[out]) -> heapAlloc out sz pos
+        ([sz],[out]) ->
+            if "stack" `elem` flags
+            then case argIntVal sz of
+                -- Stack-allocate: emit alloca and cast the pointer to i64.
+                -- Requires a constant size (guaranteed by escape analysis).
+                -- Side-effect: any call that receives this address as an i64
+                -- argument cannot be a tail call (the callee would dereference
+                -- a pointer into a stack frame that tail-call would have freed).
+                -- We record the output variable so tailMarker can check
+                -- per-call whether the stack address actually flows into
+                -- that specific call, allowing tail calls that don't use it.
+                -- alloca returns ptr; ptrtoint to the i64 Wybe expects.
+                -- stackAlloc records the CPointer temp as stack-allocated;
+                -- typeConvert then carries that stack-ness onto `out` (and
+                -- onward through any further aliasing), so tailMarker can
+                -- suppress tail calls that pass this address.
+                Just sizeVal -> do
+                    (writeTmp, readTmp) <- freshTempArgs $ Representation CPointer
+                    stackAlloc writeTmp (fromIntegral sizeVal)
+                    typeConvert readTmp out
+                Nothing -> nyi "stack alloc with non-constant size"
+            else heapAlloc out sz pos
         _            -> shouldnt $ "lpvm alloc with arguments " ++ show args
 writeLPVMCall "cast" _ args pos = do
     releaseDeferredCall
@@ -1068,6 +1098,12 @@ writeLPVMCall "mutate" _ args pos = do
                     (writeArg,readArg) <- freshTempArgs $ argType struct2
                     writeLLVMCall "add" []
                         [setArgFlow FlowIn struct2,offset,writeArg] Nothing
+                    -- An interior pointer into a stack struct is a stack address,
+                    -- but "add" skips typeConvert, so carry stack-ness over
+                    -- explicitly (else a non-zero-offset take-reference could
+                    -- defeat tailMarker).  Defensive: take-referenced structs
+                    -- always escape and so are heap-allocated today.
+                    propagateStackAlloced struct2 readArg
                     return readArg
             logLLVM $ "address to store into is held by " ++ show ptrArg
             case (restIns,iRefs) of
@@ -1833,6 +1869,7 @@ typeConvert fromArg toArg = do
               $ typeConvertOp fromTy toTy ++ " "
                 ++ makeLLVMArg (llvmTypeRep fromTy) fromVal
                 ++ " to " ++ llvmTypeRep toTy
+    propagateStackAlloced fromArg toArg
 
 
 -- | Convert the specified PrimArg to a PrimArg with the specified
@@ -2061,14 +2098,19 @@ data LLVMState = LLVMState {
                                     -- ^ ptr to write each out-by-reference var
                                     -- to, when the var is written, plus the
                                     -- type of the var
-        doesAlloca :: Bool          -- Does current body do alloca?
+        stackAllocedVars :: Set PrimVarName
+                                    -- ^ Variables that hold stack-allocated
+                                    -- addresses (outputs of alloca instructions).
+                                    -- A tail call is only blocked if one of its
+                                    -- input args directly references one of these
+                                    -- variables; otherwise TCO is still safe.
 }
 
 
 -- | Set up LLVM monad to translate a module into the given file handle
 initLLVMState :: Handle -> LLVMState
 initLLVMState h = LLVMState Set.empty Map.empty Map.empty h 0 0 Set.empty
-                     Map.empty Map.empty Nothing Map.empty Map.empty False
+                     Map.empty Map.empty Nothing Map.empty Map.empty Set.empty
 
 
 -- | Reset the LLVM monad in preparation for translating a proc definition with
@@ -2083,7 +2125,7 @@ initialiseLLVMForProc tmpCount = do
                      , deferredCall = Nothing
                      , takeRefVars = Map.empty
                      , outByRefVars = Map.empty
-                     , doesAlloca = False
+                     , stackAllocedVars = Set.empty
                      }
 
 
@@ -2300,7 +2342,7 @@ releaseDeferredCall = do
             logLLVM $ "take-ref pointers = " ++ show takeRefs
             logLLVM $ "new ref args: " ++ show refIns ++ "; old = " ++ show old
             let allOld = and old
-            tailKind <- tailMarker allOld
+            tailKind <- tailMarker allOld (ins++refIns)
             writeActualCall wybeProc (ins++refIns) outs tailKind
             unless allOld $ zipWithM_ (\refIn oRef -> do
                 let byRefArg = setArgFlow FlowOut oRef
@@ -2362,7 +2404,29 @@ stackAlloc :: PrimArg -> Int -> LLVM ()
 stackAlloc result size = do
     llvmAssignResult result $ "alloca i8, i64 " ++ show size
         ++ ", align " ++ show wordSizeBytes
-    modify $ \s -> s { doesAlloca = True }
+    recordStackAlloced result
+
+
+-- | Record that the given argument variable holds a stack-allocated address.
+-- A tail call passing this variable (or an alias of it, see propagateStackAlloced)
+-- must be suppressed, so the frame holding the allocation is not torn down while
+-- a callee still uses the pointer.
+recordStackAlloced :: PrimArg -> LLVM ()
+recordStackAlloced ArgVar{argVarName=n} =
+    modify $ \s -> s { stackAllocedVars = Set.insert n (stackAllocedVars s) }
+recordStackAlloced _ = return ()
+
+
+-- | If fromArg holds a stack-allocated address, then toArg (a copy or cast of
+-- it) holds the same address and is also stack-allocated.  This keeps
+-- stackAllocedVars closed under the moves and pointer conversions that
+-- destructive mutate and ptrtoint lowering introduce, so tailMarker's
+-- name-based check is not defeated by LLVM-level renaming.
+propagateStackAlloced :: PrimArg -> PrimArg -> LLVM ()
+propagateStackAlloced ArgVar{argVarName=fromName} toArg = do
+    isStack <- Set.member fromName <$> gets stackAllocedVars
+    when isStack $ recordStackAlloced toArg
+propagateStackAlloced _ _ = return ()
 
 
 ----------------------------------------------------------------------------
