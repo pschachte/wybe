@@ -26,22 +26,32 @@ module PointsToGraph (
     NodeOrigin(..), Node(..), FieldKey(..), EscapeState(..), PointsToGraph(..),
     -- * Construction / lookup
     emptyPTG, varNodes, setVarNodes, addVarNodes, dropVars,
-    freshLocalNode, nodeOrigin,
+    freshLocalNode, nodeOrigin, seedParam, addMaybeAliasParam,
+    seedAliasedParam, seedOwnedParam,
     -- * Directional copy (Andersen inclusion)
     copyVar,
     -- * Field edges (field-sensitive, with FieldAny fallback)
-    keyOfOffset, readField, writeField,
+    keyOfOffset, readField, writeField, readFieldMat,
     -- * Escape
     joinEscape, escapeOf, raiseEscape, raiseEscapeReachable,
+    -- * Origins / classification
+    isExternalOrigin, rootParamOfOrigin, allNodes, externalNodes,
     -- * Reachability / queries support
     reachableNodes, originsOf, varsReferencing,
+    -- * Queries (reachability-based, replacing the DisjointSet queries)
+    queryUnaliased, queryEscaped,
+    -- * Summary projection
+    paramAliasPairs,
     -- * Merge (fork / call combine)
     joinPTG
     ) where
 
-import           AST         (PrimVarName, GlobalInfo, StructID, ParameterID)
+import           AST         (PrimVarName, GlobalInfo, StructID)
+import qualified Data.List    as List
 import           Data.Map    (Map)
 import qualified Data.Map    as Map
+import           Data.Maybe   (isNothing)
+import qualified Data.Maybe   as Maybe
 import           Data.Set    (Set)
 import qualified Data.Set    as Set
 import           Flow        ((|>))
@@ -51,12 +61,22 @@ import           GHC.Generics (Generic)
 -- | Origin and identity of an abstract memory node.  The origin drives escape
 -- classification: LocalNode is a candidate to be captured (stack-allocatable),
 -- while ParamNode/ReturnNode/GlobalNode are visible outside the procedure.
+-- Note (Phase A): ParamNode/ReturnNode and ptgMaybeAliasParams are keyed by the
+-- param's SSA variable name, not its ParameterID.  Phase A keeps the serialized
+-- summary as the name-based @AliasMap@ (@DisjointSet PrimVarName@), so the queries
+-- return names directly and need no proto.  Phase C (deferred) migrates node
+-- identity to ParameterID for the portable @ProcPTGSummary@.
 data NodeOrigin
     = LocalNode  PrimVarName   -- ^ born at an `lpvm alloc`, keyed by its SSA out-var
-    | ParamNode  ParameterID   -- ^ external node reachable from a formal parameter
-    | ReturnNode ParameterID   -- ^ external node written to an output parameter
+    | ParamNode  PrimVarName   -- ^ external node reachable from a formal parameter
+    | ReturnNode PrimVarName   -- ^ external node written to an output parameter
     | GlobalNode GlobalInfo    -- ^ a resource / global sink (always escaping)
     | ConstNode  StructID      -- ^ a constant memory block (ArgConstRef)
+    | PhantomNode NodeOrigin FieldKey
+        -- ^ a materialized successor of an external node's pointer field: the
+        -- unknown external memory that (external-origin).f may point to.  Keyed
+        -- canonically by its base origin and the field, so re-reading the same
+        -- (node, field) yields the same phantom (bounded per proc).  See TODO 8.
     deriving (Eq, Ord, Show, Generic)
 
 
@@ -101,7 +121,7 @@ data PointsToGraph = PointsToGraph
     { ptgEnv              :: Map PrimVarName (Set Node)
     , ptgEdges            :: Map Node (Map FieldKey (Set Node))
     , ptgEscape           :: Map Node EscapeState
-    , ptgMaybeAliasParams :: Set ParameterID
+    , ptgMaybeAliasParams :: Set PrimVarName
     } deriving (Eq, Ord, Show, Generic)
 
 
@@ -156,6 +176,41 @@ freshLocalNode out ptg =
 -- | Unwrap a node to its origin.
 nodeOrigin :: Node -> NodeOrigin
 nodeOrigin (Node o) = o
+
+
+-- | Seed a formal parameter at proc entry: bind its variable to its 'ParamNode'
+-- and record the parameter as "maybe aliased" (its external aliasing is unknown
+-- until proven otherwise -- the source of the `requiredParams` that
+-- 'queryUnaliased' reports).  Mirrors the old
+-- @unionTwoInDS (LiveVar p) (MaybeAliasByParam p)@ seeding.
+seedParam :: PrimVarName -> PointsToGraph -> PointsToGraph
+seedParam name ptg =
+    setVarNodes name (Set.singleton (Node (ParamNode name)))
+        (addMaybeAliasParam name ptg)
+
+
+-- | Record a parameter as still "maybe aliased".
+addMaybeAliasParam :: PrimVarName -> PointsToGraph -> PointsToGraph
+addMaybeAliasParam name ptg =
+    ptg { ptgMaybeAliasParams = Set.insert name (ptgMaybeAliasParams ptg) }
+
+
+-- | Seed a *definitely* aliased parameter (used at transform time, once the
+-- specialization has fixed which params are aliased): a 'ParamNode' that is NOT
+-- a maybe-alias param, so the queries report it unconditionally aliased -- the
+-- analogue of the old @AliasByParam@.
+seedAliasedParam :: PrimVarName -> PointsToGraph -> PointsToGraph
+seedAliasedParam name =
+    setVarNodes name (Set.singleton (Node (ParamNode name)))
+
+
+-- | Seed a proven-unaliased ("owned") parameter (transform time): a fresh local
+-- node, so the parameter root is unaliased (destructively updatable) while reads
+-- of its unknown fields stay conservatively aliased to it (the 'readFieldMat'
+-- local fallback).  This mirrors the old transform seeding, which added nothing
+-- for a non-aliased param.
+seedOwnedParam :: PrimVarName -> PointsToGraph -> PointsToGraph
+seedOwnedParam name = snd . freshLocalNode name
 
 
 ----------------------------------------------------------------
@@ -213,6 +268,40 @@ writeField n key ns ptg
         in ptg { ptgEdges = Map.insert n fields' (ptgEdges ptg) }
 
 
+-- | Read a *pointer* field, supplying a conservative result when the field has
+-- no recorded contents.  A field with no edge is *unknown*, not empty, and must
+-- not read as "points nowhere" -- that would make a sub-cell of a live structure
+-- look unaliased and get updated in place (silent corruption).  The old
+-- union-find got this for free by merging the read result into the struct's
+-- equivalence class; the field-sensitive graph records an edge instead, so this
+-- must re-derive the same conservatism:
+--
+--   * base is external (param/return/global/const/phantom): materialize a
+--     canonical 'PhantomNode' for @(origin, key)@ (TODO 8), record the edge, and
+--     return it -- the read result is external / maybe-aliased.
+--   * base is external (param/return/global/const/phantom): materialize a
+--     canonical 'PhantomNode' for @(origin, key)@ (TODO 8), record the edge, and
+--     return it -- the read result is external / maybe-aliased.
+--   * base is a local node with an unknown field: fall back to the base node
+--     itself, so the read result stays aliased to the structure it came from
+--     (and becomes unaliased only once that structure dies) -- exactly the old
+--     union-find member~struct connection.
+--
+-- When the field *is* recorded (e.g. a structure we built with `mutate`), the
+-- precise contents are returned -- the field-sensitivity gain.  Callers must
+-- only use this for pointer-typed fields; non-pointer reads carry no edges.
+readFieldMat :: Node -> FieldKey -> PointsToGraph -> (Set Node, PointsToGraph)
+readFieldMat n@(Node o) key ptg =
+    let existing = readField ptg n key
+    in if not (Set.null existing)
+        then (existing, ptg)
+        else if isExternalOrigin o
+            then let ph  = Node (PhantomNode o key)
+                     phs = Set.singleton ph
+                 in (phs, writeField n key phs ptg)
+            else (Set.singleton n, ptg)
+
+
 ----------------------------------------------------------------
 -- Escape
 ----------------------------------------------------------------
@@ -239,6 +328,138 @@ raiseEscape st ns ptg =
 -- argument does: the escape taints everything reachable.
 raiseEscapeReachable :: EscapeState -> Set Node -> PointsToGraph -> PointsToGraph
 raiseEscapeReachable st ns ptg = raiseEscape st (reachableNodes ptg ns) ptg
+
+
+----------------------------------------------------------------
+-- Origins / classification
+----------------------------------------------------------------
+
+-- | Is this origin visible outside the procedure?  Every origin except a
+-- 'LocalNode' is external: params/returns cross the call boundary, globals and
+-- consts are shared sinks, and a 'PhantomNode' stands in for unknown external
+-- memory.  External nodes drive the conservative side of the queries.
+isExternalOrigin :: NodeOrigin -> Bool
+isExternalOrigin LocalNode{}   = False
+isExternalOrigin _             = True
+
+
+-- | If this origin ultimately roots at a formal parameter (directly, or as a
+-- phantom successor of one), return that parameter's id.  A phantom rooted at a
+-- global/const/return has no such param.  Used to attribute a maybe-aliased
+-- external contact to the parameter that must be non-aliased for a destructive
+-- update (the `requiredParams` of 'queryUnaliased').
+rootParamOfOrigin :: NodeOrigin -> Maybe PrimVarName
+rootParamOfOrigin (ParamNode p)      = Just p
+rootParamOfOrigin (PhantomNode o _)  = rootParamOfOrigin o
+rootParamOfOrigin _                  = Nothing
+
+
+-- | Every node mentioned anywhere in the graph (env targets, edge sources, edge
+-- targets, escape keys).
+allNodes :: PointsToGraph -> Set Node
+allNodes ptg = Set.unions
+    [ Set.unions (Map.elems (ptgEnv ptg))
+    , Map.keysSet (ptgEdges ptg)
+    , Set.unions (concatMap Map.elems (Map.elems (ptgEdges ptg)))
+    , Map.keysSet (ptgEscape ptg) ]
+
+
+-- | Every external node present in the graph, regardless of whether a variable
+-- currently binds it.  These are always potential co-reference roots (a value
+-- stored into a global may be reachable only through the global's edges, not
+-- through any live variable -- see TODO 1).
+externalNodes :: PointsToGraph -> Set Node
+externalNodes = Set.filter (isExternalOrigin . nodeOrigin) . allNodes
+
+
+----------------------------------------------------------------
+-- Queries (reachability-based -- replacing the DisjointSet queries)
+----------------------------------------------------------------
+
+-- | Reachability-based aliasing query (TODO 1), the correctness fulcrum for
+-- destructive mutate and dead-cell reuse.  This re-derives what the old
+-- union-find had implicitly: its class was the *undirected* connected component,
+-- so a value was aliased both by what points into it AND by what it transitively
+-- contains.  The field-sensitive graph records directed edges, so both
+-- directions must be walked:
+--
+--   * Forward (what @v@ contains): every node forward-reachable from @v@.  A
+--     contained constant/global/return node, an already-aliased param, or a
+--     phantom rooted at any of those means @v@'s structure embeds shared/external
+--     memory -> aliased.  Contained *owned* local nodes are fine (they are @v@'s
+--     own cells).  A contained maybe-alias param contributes a `requiredParam`.
+--     (Missing this direction let a freshly-built structure that embeds a shared
+--     constant read as unaliased, so a destructive spec clobbered the constant.)
+--   * Co-reference (what points into @v@): @v@'s own nodes that are also
+--     reachable from another live variable or an external sink are shared -> a
+--     shared local means aliased; a maybe-alias param that reaches them
+--     contributes a `requiredParam`.
+--
+-- @'Just' ps@ means unaliased provided the params @ps@ are non-aliased (feeds
+-- multi-spec); @'Nothing'@ means unconditionally aliased.
+queryUnaliased :: PointsToGraph -> PrimVarName -> Maybe [PrimVarName]
+queryUnaliased ptg v =
+    let vNodes     = varNodes ptg v
+        otherRoots = Map.foldrWithKey
+                        (\u ns acc -> if u == v then acc else Set.union ns acc)
+                        Set.empty (ptgEnv ptg)
+        roots      = Set.union otherRoots (externalNodes ptg)
+        contam     = reachableNodes ptg roots
+        touched    = Set.intersection vNodes contam
+        classify (Node o) = case rootParamOfOrigin o of
+            Just p | p `Set.member` ptgMaybeAliasParams ptg -> Just p
+            _                                               -> Nothing
+    in if Set.null touched
+        then Just []
+        else let classified = List.map classify (Set.toList touched)
+             in if any isNothing classified
+                    then Nothing
+                    else Just (List.nub (Maybe.catMaybes classified))
+
+
+-- | Escape query (the alloc-site @escapedByAlias@ check).  @v@ escapes if any
+-- node reachable from it is external (crosses the proc boundary or is a shared
+-- sink) or has been tainted to escape (global store / opaque call).  Constants
+-- and non-variables are conservatively escaped, matching the old contract.
+--
+-- This may only *add* escapes relative to reality (it sits in an @||@ with the
+-- authoritative mutation-chain check in Transform.hs), so it cannot make an
+-- alloc unsoundly stack-allocatable.
+queryEscaped :: PointsToGraph -> PrimVarName -> Bool
+queryEscaped ptg v =
+    let reach = reachableNodes ptg (varNodes ptg v)
+    in any (isExternalOrigin . nodeOrigin) reach
+        || any (\n -> escapeOf ptg n >= ArgEscape) (Set.toList reach)
+
+
+----------------------------------------------------------------
+-- Summary projection
+----------------------------------------------------------------
+
+-- | Project the final graph onto parameter aliasing: the pairs of maybe-aliased
+-- parameters whose reachable node sets intersect.  Two params alias iff the
+-- body linked them (embedded one in the other's field, or aliased them to a
+-- common node); merely reading both never links them (distinct param nodes and
+-- distinct phantom subtrees).  This is the coarse, field-insensitive summary
+-- the old union-find recorded (@AliasMap@), so keeping it preserves the callee
+-- interface while the *local* analysis gains field/direction sensitivity.
+paramAliasPairs :: PointsToGraph -> Set (PrimVarName, PrimVarName)
+paramAliasPairs ptg =
+    let params = Set.toList (ptgMaybeAliasParams ptg)
+        -- A param's memory is what its variable currently points to (which
+        -- captures copies/moves recorded in the environment, e.g. `?out = in`
+        -- gives out's binding the input's node) together with its own param
+        -- node (in case the variable was dropped as dead).  Two params alias
+        -- iff the memory reachable from their bindings overlaps -- catching both
+        -- environment-level aliasing (copy) and edge-level aliasing (embedding).
+        rootsOf p = Set.insert (Node (ParamNode p)) (varNodes ptg p)
+        reachOf p = reachableNodes ptg (rootsOf p)
+        reaches   = [ (p, reachOf p) | p <- params ]
+    in Set.fromList
+        [ (p, q)
+        | ((p, rp) : rest) <- List.tails reaches
+        , (q, rq) <- rest
+        , not (Set.null (Set.intersection rp rq)) ]
 
 
 ----------------------------------------------------------------

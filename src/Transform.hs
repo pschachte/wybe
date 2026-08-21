@@ -13,6 +13,7 @@ module Transform (transformProc,
 
 import           AliasAnalysis
 import           AST
+import           PointsToGraph (emptyPTG, seedAliasedParam, seedOwnedParam)
 import           BodyBuilder
 import           Callers       (getSccProcs)
 import           Control.Monad
@@ -176,12 +177,15 @@ initAliasMap proto speczVersion = do
     inputParams <- protoInputParamNames proto
     logTransform $ "inputParams:      " ++ show inputParams
     logTransform $ "nonAliasedParams: " ++ show nonAliasedParams
+    -- A non-aliased param is proven owned (seedOwnedParam: destructively
+    -- updatable root, conservative field reads); every other param is
+    -- definitely aliased (seedAliasedParam).
     return $
-        List.foldl (\aliasMap param ->
+        List.foldl (\ptg param ->
             if List.notElem param nonAliasedParams
-                then unionTwoInDS (LiveVar param) (AliasByParam param) aliasMap
-                else aliasMap
-            ) emptyDS inputParams
+                then seedAliasedParam param ptg
+                else seedOwnedParam param ptg
+            ) emptyPTG inputParams
 
 
 -- | Collect all prims from a body, including all fork branches (conservative).
