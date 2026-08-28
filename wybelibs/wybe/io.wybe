@@ -30,7 +30,8 @@ pub def {inline} eof:char = foreign lpvm cast(-1)
 pub def buffer_size : int = 8*1024 # fixed buffer size in bytes
 
 
-# XXX int32 is the size of a C int on this architecture
+# XXX int32 is the size of a C int on this architecture.  We should have a Wybe
+# type or type synonym that specifies C's int type (and other C types).
 def foreign c read_buffer =
     read(fd:int32, buffer:address, size:int, ?bytes_read:int) use !io
 def foreign c write_buffer =
