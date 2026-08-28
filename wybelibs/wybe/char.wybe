@@ -95,9 +95,4 @@ pub def fmt(x:_, minlength:int, fill:_):string =
     fmt(string(x), minlength, fill)
 
 ## I/O
-
-pub def foreign c print=putchar(x:_) use !io
-
-pub def println(x:_) use !io { !print(x); !nl }
-
-pub def foreign c read=read_char(?x:_) use !io
+# Character I/O is in the io module.

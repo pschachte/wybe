@@ -7,21 +7,22 @@ use foreign object cbits
 use foreign library gc
 
 pub use wybe.phantom
-use wybe.char, wybe.address, wybe.int, wybe.int32
+use wybe.char, wybe.address, wybe.int, wybe.int32, wybe.bool
+
+pub resource io = io_state, stdin, stdout, stderr,
+                    current_in, current_out, current_err
 
 # XXX We shouldn't need to initialise a resource (or variable) of a 0-bit type
-pub resource io:phantom = phantom
-# pub resource io_state:phantom = phantom
+pub resource io_state:phantom = phantom
 
 pub resource stdin :io_stream = !input_buffer(0)
 pub resource stdout:io_stream = !input_buffer(1)
 pub resource stderr:io_stream = !input_buffer(2)
 
-# pub resource io = io_state, stdin, stdout, stderr
+pub resource current_in :io_stream = stdin
+pub resource current_out:io_stream = stdout
+pub resource current_err:io_stream = stderr
 
-# XXX This module depends on wybe.char, and as such inline marking is delayed
-# before other modules
-pub def {inline} nl use !io { foreign c putchar('\n', !io) }
 
 # XXX see nl for inline note
 pub def {inline} eof:char = foreign lpvm cast(-1)
@@ -33,18 +34,18 @@ pub def buffer_size : int = 8*1024 # fixed buffer size in bytes
 # XXX int32 is the size of a C int on this architecture.  We should have a Wybe
 # type or type synonym that specifies C's int type (and other C types).
 def foreign c read_buffer =
-    read(fd:int32, buffer:address, size:int, ?bytes_read:int) use !io
+    read(fd:int32, buffer:address, size:int, ?bytes_read:int) use !io_state
 def foreign c write_buffer =
-    write(fd:int32, buffer:address, size:int, ?bytes_written:int) use !io
+    write(fd:int32, buffer:address, size:int, ?bytes_written:int) use !io_state
 
 # Note:  this type is not marked unique, but updates to this is structure are
 # forced to be destructive.  To make this valid, it's essential that operations
-# that mutate this structure are declared to `use !io`.  Operations that access
-# this structure *should* be declared to `use io`, so they are only allowed
-# where `io` is available, but currently Wybe's uniqueness system does not allow
-# unique values or resources to be passed as input-only, and making operations
-# that access parts of an io_stream `use !io` would be annoying and also
-# misleading, since they don't modify it.
+# that mutate this structure are declared to `use !io_state`.  Operations that
+# access this structure *should* be declared to `use io_state`, so they are only
+# allowed where `io_state` is available, but currently Wybe's uniqueness system
+# does not allow unique values or resources to be passed as input-only, and
+# making operations that access parts of an io_stream `use !io_state` would be
+# annoying and also misleading, since they don't modify it.
 pub type io_stream is address {
     # Layout of io_stream:
     # offset  byte size  contents
@@ -61,28 +62,27 @@ pub type io_stream is address {
     def buffer_end(buf:_):address = buf^address + io_buffer_size
     def start_pointer(buf:_):address = buf^address + raw_data_offset
 
+    # Accessors and mutators for io_stream type.  XXX These are manually
+    # generated because Wybe does not allow inlining of structure members, and,
+    # as mentioned above, mutations must be declared to `use !io_state`.
     def {inline} next_pointer(buf:_):address =
         foreign lpvm cast(foreign lpvm access(buf, 0, io_buffer_size, 0))
-
-    def {inline} next_pointer(!buf:_, start_ptr:address) use !io {
+    def {inline} next_pointer(!buf:_, start_ptr:address) use !io_state {
         foreign lpvm mutate(buf, ?buf, 0, 1, io_buffer_size, 0, start_ptr)
     }
-
     def {inline} end_pointer(buf:_):address = # actually, one byte past the end
         foreign lpvm access(buf, ptr_size, io_buffer_size, 0)
-
-    def {inline} end_pointer(!buf:_, end_ptr:address) use !io {
+    def {inline} end_pointer(!buf:_, end_ptr:address) use !io_state {
         foreign lpvm mutate(buf, ?buf, ptr_size, 1, io_buffer_size, 0, end_ptr)
     }
-
     def {inline} fd(buf:_):int =
         foreign lpvm access(buf, ptr_size*2, io_buffer_size, 0)
-
-    def {inline} fd(!buf:_, fd:int) use !io {
+    def {inline} fd(!buf:_, fd:int) use !io_state {
         foreign lpvm mutate(buf, ?buf, ptr_size*2, 1, io_buffer_size, 0, fd)
     }
 
-    pub def input_buffer(fd:int, ?buf:_) use !io {
+    # Construct an input buffer for the specified fd
+    pub def input_buffer(fd:int, ?buf:_) use !io_state {
         foreign lpvm alloc(io_buffer_size, ?buf:_)
         ?start_ptr = start_pointer(buf)
         !next_pointer(!buf, start_ptr)
@@ -90,16 +90,18 @@ pub type io_stream is address {
         !fd(!buf, fd)
     }
 
-    pub def output_buffer(fd:int, ?buf:_) use !io {
+    # Construct an output buffer for the specified fd
+    pub def output_buffer(fd:int, ?buf:_) use !io_state {
         foreign lpvm alloc(io_buffer_size, ?buf:_)
         ?start_ptr = start_pointer(buf)
         !next_pointer(!buf, start_ptr)
         !fd(!buf, fd)
     }
 
-    # This should be a test, but we currently can't have a test
-    # that uses !io, because it's unique.
-    pub def read(!buf:_, ?ch:char) use !io {
+    # Read a single character from an io_stream.
+    # XXX This should be a test, but we currently can't have a test
+    # that uses !io_state, because it's unique.
+    pub def read(?ch:char, !buf:_) use !io_state {
         if {  buf^end_pointer <= buf^next_pointer ::
             !read_buffer(foreign lpvm cast(buf^fd):int32,
                          buf^start_pointer, buffer_size, ?bytes_read)
@@ -120,25 +122,46 @@ pub type io_stream is address {
         }
     }
 
+    pub def read(?ch:char) use current_in, !io_state { !read(?ch, current_in) }
+
+    # Write a single character to an io_stream.
     # We assume there is space in the buffer for at least one character.
-    pub def print(!buf:_, ch:char) use !io {
+    pub def print(ch:char, buf:_) use !io_state {
         ?ptr = buf^next_pointer
         foreign lpvm mutate(ptr, ?ptr, 0, 1, io_buffer_size, 0, ch)
         !next_pointer(!buf, ptr + 1)
         if {  buf^next_pointer > buf^buffer_end :: !flush_output(!buf) }
     }
 
-    pub def print(!buf:_, str:string) use !io {
-        # !map(print(!buf), str)
-        for ?ch in str { !print(!buf, ch) }
+    # Write a single character to the default output stream.
+    pub def print(x:char) use current_in, !io_state { !print(x, current_in) }
+
+    # Write a block of `size` bytes from `src` to the specified io_stream.
+    # This does no checking that the specified range is actually valid, but 
+    # does handle the output buffer correctly, flushing and refilling the buffer
+    # as needed, and does nothing if size <= 0.
+    pub def unsafe_print_block(src:address, size:int, buf:_) use !io_state {
+        if {size > 0 ::
+            ?end = buf^buffer_end
+            do {
+                ?ptr = buf^next_pointer
+                ?to_copy = max(size, end-ptr+1)
+                foreign c `memcpy.p0.p0.i64`(ptr,src,to_copy,false:bool)
+                !next_pointer(!buf, ptr + to_copy)
+            while buf^next_pointer > end
+                !flush_output(!buf)
+                ?size = size - to_copy  # should be !size - to_copy
+                !src + to_copy
+            }
+        }
     }
 
-    pub def println(!buf:_, str:string) use !io {
-        !print(!buf, str)
-        !print(!buf, '\n')
-    }
+    # Write a single character to the default output stream.
+    pub def print(x:char) use current_in, !io_state { !print(x, current_in) }
 
-    pub def flush_output(!buf:_) use !io {
+    # Flush an output buffer, forcing buffered characters to be written to disk
+    # or the operating system.
+    pub def flush_output(!buf:_) use !io_state {
         ?byte_count = buf^next_pointer - buf^start_pointer
         if { byte_count > 0 ::
             !write_buffer(foreign lpvm cast(buf^fd):int32,
@@ -147,9 +170,19 @@ pub type io_stream is address {
             !next_pointer(!buf, buf^start_pointer)
         }
     }
+
+    # Flush the current output buffer.  current_out is an in-only resource
+    # because flushing doesn't reassign the stream, and the change to the stream
+    # is accounted for because the io_state is in-out.
+    pub def flush_output use current_out, !io_state {
+        !flush_output(current_out)
+    }
 }
 
-!input_buffer(0, ?stdin)
-!output_buffer(1, ?stdout)
-!output_buffer(2, ?stderr)
+pub def nl(buf:io_stream) use !io_state { !print('\n', !buf) }
+pub def nl use current_out, !io_state { !nl(current_out) }
 
+pub def println(x:char, buf:io_stream) use !io_state {
+    !print(x, buf); !nl(buf)
+}
+pub def println(x:char) use current_out, !io_state { !println(x, current_out) }
