@@ -126,10 +126,36 @@ def fmtnz(n:_, minlength:int, fill:char, base:_):string =
     })
 
 
+## Parsing
+
+pub def {partial} parse(!str:string, ?n:_, radix:int) {
+    [?ch|?str] = str
+    radix_digit(ch, radix, ?n)
+    do {while [?ch|?rest] = str
+        while radix_digit(ch, radix, ?digit)
+        ?str = rest
+        ?n = n * radix + digit
+    }
+}
+
+pub def {partial} parse(!str:string, ?n:_) {
+    if {[?ch|?str] = str & ch = '0' ::
+            if {[?ch|?str] = str & to_upper(ch) = 'X' ::
+                parse(!str, ?n, 16)
+            | else ::
+                parse(!str, ?n, 8)
+            }
+    | else ::
+        parse(!str, ?n, 10)
+    }
+}
+
+
 ## I/O
 
-pub def foreign c print=print_count(x:_) use !io 
+pub def print(x:_) use !io { !print(fmt(x)) }
 
 pub def println(x:_) use !io { !print(x); !nl }
 
-pub def foreign c read=read_count(?x:_) use !io 
+# XXX This won't work with the new io library stdin
+pub def read(x:_) use !io 

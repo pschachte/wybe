@@ -79,6 +79,14 @@ pub def {test,inline} is_alpha(x:_) { is_upper(bitwise_and(x, '\xDF')) }
 
 pub def {test,inline} is_alphanumeric(x:_) { is_digit(x) | is_alpha(x) }
 
+pub def {test} radix_digit(x:_, radix:int, ?value:int) {
+    x >= '0'
+    to_upper(!x)
+    ?value = x - '0'
+    ( x <= '9' | ?value = value - ('A'-'9'-1) )
+    value < radix
+}
+
 # Maps letters to upper case, leaving non-letters unchanged.
 pub def {inline} to_upper(x:_):_ =
     if { is_lower(x) :: bitwise_and(x, '\xDF') | else :: x }

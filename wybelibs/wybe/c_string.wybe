@@ -31,7 +31,7 @@ pub def {test} [](str:_, idx:int):char = c where {
 pub def unsafe_c_string_index(str:_, idx:int):char 
     = foreign lpvm access(str, idx, foreign lpvm sizeof(_:char):int, 0)
 
-pub def print(x:_, !buf:io_stream) use current_out, !io_state {
+pub def print(x:_, !buf:output_stream) use current_out, !io_state {
     !unsafe_print_block(foreign lpvm cast(x):address, length(x), buf)
 }
 pub def print(x:_) use current_out, !io_state { !print(x, current_out) }

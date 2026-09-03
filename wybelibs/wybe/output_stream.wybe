@@ -1,0 +1,123 @@
+# purpose: Standard posix buffered output stream
+# since  : 0.2
+
+# Note:  this type is not marked unique, but updates to this is structure are
+# forced to be destructive.  To make this valid, it's essential that operations
+# that mutate this structure are declared to `use !io_state`.  Operations that
+# access this structure *should* be declared to `use io_state`, so they are only
+# allowed where `io_state` is available, but currently Wybe's uniqueness system
+# does not allow unique values or resources to be passed as input-only, and
+# making operations that access parts of an output_stream `use !io_state` would be
+# annoying and also misleading, since they don't modify it.
+
+representation is address
+
+# The size of an output buffer.
+pub def output_buffer_size : int = 8*1024 # fixed buffer size in bytes
+
+
+
+# Layout of output_stream:
+# offset  byte size  contents
+#    0       8       pointer to next byte to write
+#    8       8       pointer to first byte beyond writeable memory
+#   16       8       POSIX file descriptor
+#   24  output_buffer_size  actual buffer bytes
+
+def ptr_size : int = foreign lpvm sizeof(_:address)
+def fd_size  : int = foreign lpvm sizeof(_:int)
+def raw_data_offset : int = 2*ptr_size + fd_size
+def output_stream_size : int = output_buffer_size + raw_data_offset
+def address(buf:_):address = foreign lpvm cast(buf)
+def buffer_end(buf:_):address = buf^address + output_stream_size
+def start_pointer(buf:_):address = buf^address + raw_data_offset
+
+# Accessors and mutators for output_stream type.
+
+# XXX These are manually generated because Wybe does not support inlining of
+# structure members.
+
+def {inline} next_pointer(buf:_):address =
+    foreign lpvm cast(foreign lpvm access(buf, 0, output_stream_size, 0))
+def {inline} next_pointer(!buf:_, start_ptr:address) use !io_state {
+    foreign lpvm mutate(buf, ?buf, 0, 1, output_stream_size, 0, start_ptr)
+}
+def {inline} end_pointer(buf:_):address = # actually, one byte past the end
+    foreign lpvm access(buf, ptr_size, output_stream_size, 0)
+def {inline} end_pointer(!buf:_, end_ptr:address) use !io_state {
+    foreign lpvm mutate(buf, ?buf, ptr_size, 1, output_stream_size, 0, end_ptr)
+}
+def {inline} fd(buf:_):int =
+    foreign lpvm access(buf, ptr_size*2, output_stream_size, 0)
+def {inline} fd(!buf:_, fd:int) use !io_state {
+    foreign lpvm mutate(buf, ?buf, ptr_size*2, 1, output_stream_size, 0, fd)
+}
+
+# Construct an output buffer for the specified fd
+pub def output_buffer(fd:int, ?buf:_) use !io_state {
+    foreign lpvm alloc(output_stream_size, ?buf:_)
+    ?start_ptr = start_pointer(buf)
+    !next_pointer(!buf, start_ptr)
+    !fd(!buf, fd)
+}
+
+
+# Write a single character to an output_stream.
+# We assume there is space in the buffer for at least one character.
+pub def print(ch:char, buf:_) use !io_state {
+    ?ptr = buf^next_pointer
+    foreign lpvm mutate(ptr, ?ptr, 0, 1, output_stream_size, 0, ch)
+    !next_pointer(!buf, ptr + 1)
+    if {  buf^next_pointer > buf^buffer_end :: !flush_output(!buf) }
+}
+
+# Write a single character to the default output stream.
+pub def print(x:char) use current_in, !io_state { !print(x, current_in) }
+
+# Write a block of `size` bytes from `src` to the specified output_stream.
+# This does no checking that the specified range is actually valid, but 
+# does handle the output buffer correctly, flushing and refilling the buffer
+# as needed, and does nothing if size <= 0.
+pub def unsafe_print_block(src:address, size:int, buf:_) use !io_state {
+    if {size > 0 ::
+        ?end = buf^buffer_end
+        do {
+            ?ptr = buf^next_pointer
+            ?to_copy = max(size, end-ptr+1)
+            foreign c `memcpy.p0.p0.i64`(ptr,src,to_copy,false:bool)
+            !next_pointer(!buf, ptr + to_copy)
+        while buf^next_pointer > end
+            !flush_output(!buf)
+            ?size = size - to_copy  # should be !size - to_copy
+            !src + to_copy
+        }
+    }
+}
+
+# Write a single character to the default output stream.
+pub def print(x:char) use current_in, !io_state { !print(x, current_in) }
+
+# Flush an output buffer, forcing buffered characters to be written to disk
+# or the operating system.
+pub def flush_output(!buf:_) use !io_state {
+    ?byte_count = buf^next_pointer - buf^start_pointer
+    if { byte_count > 0 ::
+        !write_buffer(foreign lpvm cast(buf^fd):int32,
+                        buf^start_pointer, byte_count, ?bytes_written)
+        if { bytes_written ~= byte_count :: !error("Write error") }
+        !next_pointer(!buf, buf^start_pointer)
+    }
+}
+
+# Flush the current output buffer.  current_out is an in-only resource
+# because flushing doesn't reassign the stream, and the change to the stream
+# is accounted for because the io_state is in-out.
+pub def flush_output use current_out, !io_state {
+    !flush_output(current_out)
+}
+
+## Interface to POSIX IO primitives
+# XXX int32 is the size of a C int on this architecture.  We should have a Wybe
+# type or type synonym that specifies C's int type (and other C types).
+def foreign c write_buffer =
+    write(fd:int32, buffer:address, size:int, ?bytes_written:int) use !io_state
