@@ -38,7 +38,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(85,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(86,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(89,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+  MultiSpeczDepInfo: [(85,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(86,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(88,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(89,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(93,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(95,(string.print_loop#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @string:nn:nn
     foreign c print_string(c"TESTING CONSTRUCTION":wybe.c_string, ~%tmp#56##0:wybe.phantom, ?%tmp#57##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#57##0:wybe.phantom, ?tmp#58##0:wybe.phantom) @string:nn:nn
@@ -56,7 +56,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c putchar(10:wybe.char, ~tmp#74##0:wybe.phantom, ?tmp#75##0:wybe.phantom) @string:nn:nn
     foreign lpvm store(~%tmp#75##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
     wybe.string.,,<0>("abc":wybe.string, "abc":wybe.string, ?tmp#0##0:wybe.string) #9 @string:nn:nn
-    wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #88 @string:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #88 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#85##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#85##0:wybe.phantom, ?tmp#86##0:wybe.phantom) @string:nn:nn
     foreign lpvm store(~%tmp#86##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
@@ -73,7 +73,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.[]<1>("abcdefghi":wybe.string, ~tmp#3##0:wybe.range, ?tmp#5##0:wybe.string) #19 @string:nn:nn
     wybe.range...<0>(1:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.range) #20 @string:nn:nn
     wybe.string.[]<1>(~tmp#5##0:wybe.string, ~tmp#7##0:wybe.range, ?tmp#4##0:wybe.string) #21 @string:nn:nn
-    wybe.string.print<0>(~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #93 @string:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #93 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#112##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#112##0:wybe.phantom, ?tmp#113##0:wybe.phantom) @string:nn:nn
     foreign c print_string(c"\nTESTING CONVERSION TO c_string":wybe.c_string, ~tmp#113##0:wybe.phantom, ?%tmp#116##0:wybe.phantom) @string:nn:nn
@@ -95,7 +95,7 @@ module top-level code > public {semipure} (0 calls)
     string.print_loop#cont#1<0>("abc":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #94 @string:nn:nn
     wybe.range.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.range) #38 @string:nn:nn
     wybe.string.[]<1>("abcdefghijkl":wybe.string, ~tmp#14##0:wybe.range, ?tmp#13##0:wybe.string) #40 @string:nn:nn
-    string.print_loop#cont#1<0>(~tmp#13##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #95 @string:nn:nn
+    string.print_loop#cont#1<0>[410bae77d3](~tmp#13##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #95 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#152##0:wybe.phantom) @string:nn:nn
     foreign c print_string(c"\nTESTING INDEXING":wybe.c_string, ~%tmp#152##0:wybe.phantom, ?%tmp#153##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#153##0:wybe.phantom, ?tmp#154##0:wybe.phantom) @string:nn:nn
@@ -151,6 +151,20 @@ print_loop#cont#1(tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
         foreign c putchar(~c##0:wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @string:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
         string.print_loop#cont#1<0>(~tmp#0##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @string:nn:nn
+
+ [410bae77d3] [NonAliasedParam 0] :
+    wybe.string.[|]<0>[785a827a1b](?c##0:wybe.char, ?tmp#0##1:wybe.string, ~tmp#0##0:wybe.string, ?tmp#2##0:wybe.bool) #0 @string:nn:nn
+    case ~tmp#2##0:wybe.bool of
+    0:
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @string:nn:nn
+        foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @string:nn:nn
+        foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
+
+    1:
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @string:nn:nn
+        foreign c putchar(~c##0:wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @string:nn:nn
+        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string:nn:nn
+        string.print_loop#cont#1<0>[410bae77d3](~tmp#0##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @string:nn:nn
 
 
 
@@ -211,6 +225,7 @@ declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
 declare external fastcc {i8, i1} @"wybe#.string#.[]<0>"(i64, i64)
 declare external fastcc i64 @"wybe#.string#.[]<1>"(i64, i64)
 declare external fastcc {i8, i64, i1} @"wybe#.string#.[|]<0>"(i64)
+declare external fastcc {i8, i64, i1} @"wybe#.string#.[|]<0>[785a827a1b]"(i64)
 declare external fastcc i64 @"wybe#.string#.c_string<0>"(i64)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
@@ -228,7 +243,7 @@ define external fastcc void @"string#.<0>"() {
   tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"string#constant#13" to i64 ))
   call ccc void @putchar(i8 10)
   %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#constant#13" to i64 ), i64 ptrtoint( ptr @"string#constant#13" to i64 ))
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 1415)
   call ccc void @putchar(i8 10)
@@ -239,7 +254,7 @@ define external fastcc void @"string#.<0>"() {
   %"tmp#5##0" = tail call fastcc i64 @"wybe#.string#.[]<1>"(i64 ptrtoint( ptr @"string#constant#14" to i64 ), i64 %"tmp#3##0")
   %"tmp#7##0" = tail call fastcc i64 @"wybe#.range#...<0>"(i64 1, i64 3)
   %"tmp#4##0" = tail call fastcc i64 @"wybe#.string#.[]<1>"(i64 %"tmp#5##0", i64 %"tmp#7##0")
-  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#4##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#4##0")
   call ccc void @putchar(i8 10)
   call ccc void @print_string(ptr @"string#constant#1")
   call ccc void @putchar(i8 10)
@@ -257,7 +272,7 @@ define external fastcc void @"string#.<0>"() {
   tail call fastcc void @"string#.print_loop#cont#1<0>"(i64 ptrtoint( ptr @"string#constant#13" to i64 ))
   %"tmp#14##0" = tail call fastcc i64 @"wybe#.range#.irange<0>"(i64 10, i64 -1, i64 1)
   %"tmp#13##0" = tail call fastcc i64 @"wybe#.string#.[]<1>"(i64 ptrtoint( ptr @"string#constant#16" to i64 ), i64 %"tmp#14##0")
-  tail call fastcc void @"string#.print_loop#cont#1<0>"(i64 %"tmp#13##0")
+  tail call fastcc void @"string#.print_loop#cont#1<0>[410bae77d3]"(i64 %"tmp#13##0")
   call ccc void @print_string(ptr @"string#constant#3")
   call ccc void @putchar(i8 10)
   tail call fastcc void @"string#.test_index<0>"(i64 ptrtoint( ptr @"string#constant#13" to i64 ), i64 0)
@@ -300,6 +315,21 @@ define external fastcc void @"string#.print_loop#cont#1<0>"(i64 %"tmp#0##0") {
 if.then.0:
   call ccc void @putchar(i8 %"c##0")
   tail call fastcc void @"string#.print_loop#cont#1<0>"(i64 %"tmp#0##1")
+  ret void
+if.else.0:
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"string#.print_loop#cont#1<0>[410bae77d3]"(i64 %"tmp#0##0") {
+  %"tmp#8##0" = tail call fastcc {i8, i64, i1} @"wybe#.string#.[|]<0>[785a827a1b]"(i64 %"tmp#0##0")
+  %"c##0" = extractvalue {i8, i64, i1}%"tmp#8##0", 0
+  %"tmp#0##1" = extractvalue {i8, i64, i1}%"tmp#8##0", 1
+  %"tmp#2##0" = extractvalue {i8, i64, i1}%"tmp#8##0", 2
+  br i1 %"tmp#2##0", label %if.then.0, label %if.else.0
+if.then.0:
+  call ccc void @putchar(i8 %"c##0")
+  tail call fastcc void @"string#.print_loop#cont#1<0>[410bae77d3]"(i64 %"tmp#0##1")
   ret void
 if.else.0:
   call ccc void @putchar(i8 10)

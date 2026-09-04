@@ -296,38 +296,60 @@ transferPrim ptg prim = case prim of
 
 
 -- | Wybe call: instantiate the callee's stored summary (still the coarse
--- name-based 'AliasMap') onto the caller's graph.  For every pair of callee
--- parameters that may alias, alias the corresponding actual arguments so they
--- share memory (§5.2.4 alias merge, field-insensitive as the coarse summary
--- requires).  Crucially this must handle *non-variable* args (constant refs and
--- globals): if a returned/output arg aliases a constant argument (e.g. a slice
--- result embedding a constant range), the var arg must learn it references that
--- constant -- otherwise a later destructive spec could clobber the shared
--- constant (silent corruption).
+-- name-based 'AliasMap') onto the caller's graph.  The summary is a set of
+-- equivalence classes of callee parameters; each class denotes one piece of
+-- memory that the caller's matching argument variables all share.  For each
+-- class we make those argument vars point to a common set of nodes.
+--
+-- The subtle case is a class whose args are all *nodeless* -- e.g. the class
+-- @{result, r}@ of the slice constructor, called as @slice(s, r, ?out)@ where
+-- @r@ came from a constructor call (@construct(..., ?r)@) whose summary is empty,
+-- so @r@ points to nothing known.  A pair-based union that only propagates
+-- existing nodes would link nothing, so @out@ would look unaliased and a later
+-- destructive spec could clobber memory @r@ still refers to (silent corruption).
+-- The old union-find never had this problem: it unioned the *variables*
+-- themselves (@out ~ r@), giving them a shared identity even when neither points
+-- anywhere known.  We re-derive that here: when a class has no existing node, we
+-- MINT one fresh node so its vars share identity.
+--
+-- Non-variable args (constant refs, globals) are dropped at the boundary, exactly
+-- as the old @_zipParamToArgVar@ kept only 'ArgVar' args; the summary records
+-- only param<->param aliasing, and propagating a shared constant across the
+-- boundary would spuriously block reuse of dead constants (the nbody regression).
+-- Pointer-ness gates non-pointer args (an int/float carries no aliasing).
 transferCall :: PointsToGraph -> ProcSpec -> [PrimArg] -> Compiler PointsToGraph
 transferCall ptg spec args = do
     calleeDef <- getProcDef spec
     let ProcDefPrim _ calleeProto _ analysis _ = procImpln calleeDef
     let calleeSummary = procArgAliasMap analysis
-    -- map each callee param name to the caller arg's (source nodes, maybe var).
-    -- Gate on pointer-ness: a non-pointer arg (e.g. a constant int/float, or a
-    -- non-address global) carries no aliasing, matching the old analysis's
-    -- aliasedRep filter.  Without this, a non-pointer constant/global argument
-    -- would spuriously alias the output and block destructive reuse.
+    -- Map each callee param name to the caller arg's (pointer nodes, maybe var).
     paramInfo <- Map.fromList <$> mapM
             (\(pn, arg) -> do
                 ptr <- argIsPointer arg
-                let ns = if ptr then rawSourceNodes ptg arg else Set.empty
+                let ns = if ptr then maybe Set.empty (varNodes ptg)
+                                        (argVarNameMaybe arg)
+                                else Set.empty
                 return (pn, (ns, argVarNameMaybe arg)))
             (List.zip (primProtoParamNames calleeProto) args)
-    let pairs = Set.toList (dsToTransitivePairs calleeSummary)
-    return $ List.foldl' (\g (p, q) ->
-        case (Map.lookup p paramInfo, Map.lookup q paramInfo) of
-            (Just (na, va), Just (nb, vb)) ->
-                let both = Set.union na nb
-                    bind v = maybe id (`addVarNodes` both) v
-                in bind va (bind vb g)
-            _ -> g) ptg pairs
+    let classes = Set.toList calleeSummary
+    return $ List.foldl' (instantiateSummaryClass paramInfo) ptg classes
+
+
+-- | Instantiate one callee-summary equivalence class onto the caller graph: the
+-- class's caller arg vars all come to share a common node set.  If the class has
+-- no node yet (all args nodeless), mint a fresh 'LocalNode' (keyed by the class's
+-- least var, so it is stable across fixpoint iterations) so the vars still share
+-- identity -- the union-find variable-identity semantics (see 'transferCall').
+instantiateSummaryClass :: Map PrimVarName (Set Node, Maybe PrimVarName)
+        -> PointsToGraph -> Set PrimVarName -> PointsToGraph
+instantiateSummaryClass paramInfo g cls =
+    let infos     = Maybe.mapMaybe (`Map.lookup` paramInfo) (Set.toList cls)
+        classVars = Maybe.mapMaybe snd infos
+        existing  = Set.unions (List.map fst infos)
+        shared    = case (Set.null existing, classVars) of
+                        (True, v:_) -> Set.singleton (Node (LocalNode (minimum classVars)))
+                        _           -> existing
+    in List.foldl' (\g' v -> addVarNodes v shared g') g classVars
 
 
 -- | The variable name of an 'ArgVar', if the arg is one.
