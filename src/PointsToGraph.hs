@@ -403,18 +403,33 @@ queryUnaliased ptg v =
         otherRoots = Map.foldrWithKey
                         (\u ns acc -> if u == v then acc else Set.union ns acc)
                         Set.empty (ptgEnv ptg)
-        roots      = Set.union otherRoots (externalNodes ptg)
-        contam     = reachableNodes ptg roots
-        touched    = Set.intersection vNodes contam
+        -- Two kinds of co-reference must be told apart (the old union-find
+        -- conflated them, and so did an earlier version of this query):
+        --   * Internal: one of @v@'s nodes is reachable from ANOTHER live
+        --     variable.  That variable is a concrete, live co-referent (e.g.
+        --     `?out = param` binds @out@ to the param's own node), so a
+        --     destructive reuse of @v@ would clobber it.  This is unconditional
+        --     aliasing -- it must NOT be attributed to a parameter just because
+        --     the shared node happens to be that param's node, since the sharer's
+        --     liveness, not the param's entry-aliasing, is what blocks reuse.
+        --     Mirrors the old analysis blocking on any `LiveVar` in @v@'s class.
+        --   * External: one of @v@'s nodes is reachable from an external sink
+        --     (param/return/global/const seeding).  This is conditional on the
+        --     maybe-alias param(s) it roots at -> a `requiredParam`.
+        internalContam = Set.intersection vNodes (reachableNodes ptg otherRoots)
+        externalContam = Set.intersection vNodes
+                            (reachableNodes ptg (externalNodes ptg))
         classify (Node o) = case rootParamOfOrigin o of
             Just p | p `Set.member` ptgMaybeAliasParams ptg -> Just p
             _                                               -> Nothing
-    in if Set.null touched
-        then Just []
-        else let classified = List.map classify (Set.toList touched)
-             in if any isNothing classified
-                    then Nothing
-                    else Just (List.nub (Maybe.catMaybes classified))
+    in if not (Set.null internalContam)
+        then Nothing
+        else if Set.null externalContam
+            then Just []
+            else let classified = List.map classify (Set.toList externalContam)
+                 in if any isNothing classified
+                        then Nothing
+                        else Just (List.nub (Maybe.catMaybes classified))
 
 
 -- | Escape query (the alloc-site @escapedByAlias@ check).  @v@ escapes if any
