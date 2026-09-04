@@ -277,9 +277,9 @@ transferPrim ptg prim = case prim of
     PrimForeign "lpvm" "mutate" flags args ->
         transferMutate ptg flags args
     PrimForeign "lpvm" "cast" _ [inp, outp] ->
-        transferCopy ptg inp outp
+        transferCopy False ptg inp outp
     PrimForeign "llvm" "move" _ [inp, outp] ->
-        transferCopy ptg inp outp
+        transferCopy True ptg inp outp
     PrimForeign "lpvm" "load" _ [ArgGlobal glob _, ArgVar{argVarName=out}] ->
         -- Anything read from a global is treated as the (escaping) global node.
         return $ addVarNodes out (Set.singleton (Node (GlobalNode glob))) ptg
@@ -380,13 +380,21 @@ transferMutate ptg flags [fIn, fOut, offset, _, _, _, member] = do
 transferMutate ptg _ _ = return ptg
 
 
--- | Value-preserving copy (`lpvm cast` / `llvm move`): @pts(out) ⊇ pts(in)@.
--- Ungated by representation: a cast may move an address through an int-typed
--- intermediate and must still carry the points-to set (TODO 12).
-transferCopy :: PointsToGraph -> PrimArg -> PrimArg -> Compiler PointsToGraph
-transferCopy ptg inp outp = return $ case outp of
-    ArgVar{argVarName=out} -> addVarNodes out (rawSourceNodes ptg inp) ptg
-    _                      -> ptg
+-- | Value-preserving copy: @pts(out) ⊇ pts(in)@.  When @gated@ is set (an
+-- `llvm move`), the copy only carries points-to information if the source is
+-- pointer-represented: copying a non-pointer scalar (e.g. an int) must not
+-- create an alias between two values that merely share a numeric value, matching
+-- the old analysis's `aliasedRep` filter.  When @gated@ is unset (an `lpvm
+-- cast`), the copy is ungated because a cast may move an address through an
+-- int-typed intermediate and must still carry the points-to set (TODO 12).
+transferCopy :: Bool -> PointsToGraph -> PrimArg -> PrimArg
+        -> Compiler PointsToGraph
+transferCopy gated ptg inp outp = do
+    carry <- if gated then argIsPointer inp else return True
+    return $ case outp of
+        ArgVar{argVarName=out} | carry ->
+            addVarNodes out (rawSourceNodes ptg inp) ptg
+        _ -> ptg
 
 
 -- | Global store: @writeField(GlobalNode, FieldAny) ⊇ pts(val)@ and taint the
