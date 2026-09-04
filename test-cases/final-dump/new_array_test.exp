@@ -100,7 +100,7 @@ proc #cont#3 > {semipure} (2 calls)
     1:
         foreign lpvm access(tmp#14##0:wybe.c_array.raw_array, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?i##0:wybe.int) @new_array_test:nn:nn
         foreign llvm add(~tmp#14##0:wybe.c_array.raw_array, 8:wybe.int, ?tmp#17##0:wybe.c_array.raw_array) @new_array_test:nn:nn
-        foreign lpvm mutate(~tmp#4##0:wybe.array.array_iterator(wybe.int), ?tmp#4##1:wybe.array.array_iterator(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#17##0:wybe.c_array.raw_array) @new_array_test:nn:nn
+        foreign lpvm mutate(~tmp#4##0:wybe.array.array_iterator(wybe.int), ?tmp#4##1:wybe.array.array_iterator(wybe.int), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#17##0:wybe.c_array.raw_array) @new_array_test:nn:nn
         foreign llvm add(~i##0:wybe.int, ~sum##0:wybe.int, ?sum##1:wybe.int) @new_array_test:nn:nn
         new_array_test.#cont#3<0>[6dacb8fd25](~sum##1:wybe.int, ~tmp#4##1:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @new_array_test:nn:nn
 
@@ -331,9 +331,13 @@ if.then.0:
   %"i##0" = load i64, ptr %"tmp#28##0"
   %"tmp#17##0" = add i64 %"tmp#14##0", 8
   %"tmp#29##0" = inttoptr i64 %"tmp#4##0" to ptr
-  store i64 %"tmp#17##0", ptr %"tmp#29##0"
+  %"tmp#30##0" = call ccc ptr @wybe_malloc(i32 16)
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#30##0", ptr %"tmp#29##0", i64 16, i1 0)
+  %"tmp#31##0" = ptrtoint ptr %"tmp#30##0" to i64
+  %"tmp#32##0" = inttoptr i64 %"tmp#31##0" to ptr
+  store i64 %"tmp#17##0", ptr %"tmp#32##0"
   %"sum##1" = add i64 %"i##0", %"sum##0"
-  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 %"sum##1", i64 %"tmp#4##0")
+  tail call fastcc void @"new_array_test#.#cont#3<0>[6dacb8fd25]"(i64 %"sum##1", i64 %"tmp#31##0")
   ret void
 if.else.0:
   %"tmp#19##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"sum##0", i64 0, i8 32)
