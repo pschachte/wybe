@@ -583,7 +583,9 @@ instr' prim@(PrimForeign "llvm" "move" []
 -- with impurity because if we forgot the impurity modifier on any alloc,
 -- disaster would ensue, and an impure alloc wouldn't be removed if the
 -- structure weren't needed, which we want.
-instr' prim@(PrimForeign "lpvm" "alloc" [] [sz,argvar]) pos = do
+-- Wildcard for flags so that escape-analysis-tagged allocs (e.g. {stack})
+-- are also handled here rather than falling through to the generic case.
+instr' prim@(PrimForeign "lpvm" "alloc" _ [sz,argvar]) pos = do
     logBuild "  Leaving alloc alone"
     rawInstr prim pos
     case sz of

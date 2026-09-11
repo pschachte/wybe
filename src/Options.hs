@@ -61,6 +61,7 @@ data Options = Options
     , optErrors        :: Set String 
                                    -- ^Erroneous flag error messages
     , optNoEnv         :: Bool     -- ^Don't read WYBEARGS
+    , optStackAllocLimit :: Integer -- ^Max bytes for a single stack allocation
     } deriving Show
 
 
@@ -85,6 +86,7 @@ defaultOptions = Options
   , optNoVerifyLLVM  = False
   , optErrors        = Set.empty
   , optNoEnv         = False
+  , optStackAllocLimit = 4096
   }
 
 
@@ -172,7 +174,7 @@ logSelectionDescription LastCallAnalysis
 
 
 -- | Enumeration of compiler optimisations
-data OptFlag = LLVMOpt | MultiSpecz | TailCallModCons
+data OptFlag = LLVMOpt | MultiSpecz | TailCallModCons | StackAlloc
     deriving (Eq, Ord, Enum, Bounded, Show)
 
 -- | Default optimisations enabled:  all of them
@@ -203,15 +205,16 @@ optimisationEnabled flag Options{optOptimisations=opts} = flag `Set.member` opts
 
 -- | Description of an OptFlag
 optimisationFlagDesc :: OptFlag -> String
-optimisationFlagDesc flag 
-    = desc' ++ 
+optimisationFlagDesc flag
+    = desc' ++
         " (default: " ++ if optimisationEnabled flag defaultOptions
                          then "enabled)" else "disabled)"
-  where 
-    desc' = case flag of 
+  where
+    desc' = case flag of
         LLVMOpt         -> "run the LLVM optimisations on the emitted LLVM"
         MultiSpecz      -> "run the multiple specialisation optimisation"
         TailCallModCons -> "run the tail-call-modulo-construction optimisation "
+        StackAlloc      -> "stack-allocate structures that do not escape their procedure"
 
 
 -- | Command line flag for a given OptFlag
@@ -219,6 +222,7 @@ optimisationFlag :: OptFlag -> String
 optimisationFlag LLVMOpt = "llvm-opt"
 optimisationFlag MultiSpecz = "multi-specz"
 optimisationFlag TailCallModCons = "tcmc"
+optimisationFlag StackAlloc = "stack-alloc"
 
 
 -- |Command line option parser and help text
@@ -254,6 +258,9 @@ options =
     , Option ['x'] ["opt"]
         (ReqArg addOptFlags "FLAGS")
         "add comma-separated optimisation flags"
+    , Option [] ["stack-alloc-limit"]
+        (ReqArg setStackAllocLimit "BYTES")
+        "max bytes for a single stack allocation [default 4096]"
     , Option [] ["llc-path"]
         (ReqArg (\ llc opts -> opts { optLlcBin = llc }) "PATH")
         "specify the path of the 'llc' used"
@@ -414,6 +421,16 @@ setLLVMOptLevel str opts=
     case readMaybe str of
         Nothing -> addOptError opts $ "LLVM opt level should be a number: " ++ str 
         Just lvl -> opts{optLLVMOptLevel=lvl}
+
+-- Set the stack allocation size limit specified by the string.
+-- Add an error message if the string is not a positive number.
+setStackAllocLimit :: String -> Options -> Options
+setStackAllocLimit str opts =
+    case readMaybe str of
+        Nothing  -> addOptError opts $ "stack-alloc-limit should be a positive integer: " ++ str
+        Just lim
+            | lim <= 0  -> addOptError opts $ "stack-alloc-limit must be positive: " ++ str
+            | otherwise -> opts{optStackAllocLimit=lim}
 
 -- | Adds an error to the set of errors
 addOptError :: Options -> String -> Options

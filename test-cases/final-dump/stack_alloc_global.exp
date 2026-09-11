@@ -1,0 +1,639 @@
+======================================================================
+AFTER EVERYTHING:
+
+
+--------------------------------------------------
+ Module stack_alloc_global
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  constants       : 
+  imports         : use stack_alloc_global.cell
+                    use stack_alloc_global.pair
+                    use wybe
+  resources       : gcell: fromList [(stack_alloc_global.gcell,stack_alloc_global.cell = cell(0 @stack_alloc_global:nn:nn, 0 @stack_alloc_global:nn:nn) @stack_alloc_global:nn:nn @stack_alloc_global:nn:nn)]
+                    gpair: fromList [(stack_alloc_global.gpair,stack_alloc_global.pair = pair(cell(0 @stack_alloc_global:nn:nn, 0 @stack_alloc_global:nn:nn) @stack_alloc_global:nn:nn, 0 @stack_alloc_global:nn:nn) @stack_alloc_global:nn:nn @stack_alloc_global:nn:nn)]
+  submodules      : stack_alloc_global.cell, stack_alloc_global.pair
+  procs           : 
+
+proc local_only > {noinline} (0 calls)
+0: stack_alloc_global.local_only<0>
+local_only(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm {stack} alloc(16:wybe.int, ?tmp#4##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#4##0:stack_alloc_global.cell, ?tmp#5##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#5##0:stack_alloc_global.cell, ?tmp#6##0:stack_alloc_global.cell, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~tmp#6##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @stack_alloc_global:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#9##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @stack_alloc_global:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @stack_alloc_global:nn:nn
+    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stack_alloc_global:nn:nn
+
+
+proc store_global > {noinline} (0 calls)
+0: stack_alloc_global.store_global<0>
+store_global(x##0:wybe.int)<{}; {<<stack_alloc_global.gcell>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#3##0:stack_alloc_global.cell, ?tmp#4##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#4##0:stack_alloc_global.cell, ?tmp#5##0:stack_alloc_global.cell, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm store(~tmp#5##0:stack_alloc_global.cell, <<stack_alloc_global.gcell>>:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+
+
+proc store_global_cond > {noinline} (0 calls)
+0: stack_alloc_global.store_global_cond<0>
+store_global_cond(x##0:wybe.int, flag##0:wybe.bool)<{<<stack_alloc_global.gcell>>}; {<<stack_alloc_global.gcell>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#3##0:stack_alloc_global.cell, ?tmp#4##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#4##0:stack_alloc_global.cell, ?tmp#5##0:stack_alloc_global.cell, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int) @stack_alloc_global:nn:nn
+    case ~flag##0:wybe.bool of
+    0:
+
+    1:
+        foreign lpvm store(~tmp#5##0:stack_alloc_global.cell, <<stack_alloc_global.gcell>>:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+
+
+
+proc store_global_nested > {noinline} (0 calls)
+0: stack_alloc_global.store_global_nested<0>
+store_global_nested(x##0:wybe.int)<{}; {<<stack_alloc_global.gpair>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#4##0:stack_alloc_global.cell, ?tmp#5##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#5##0:stack_alloc_global.cell, ?tmp#6##0:stack_alloc_global.cell, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:stack_alloc_global.pair) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#9##0:stack_alloc_global.pair, ?tmp#10##0:stack_alloc_global.pair, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~tmp#10##0:stack_alloc_global.pair, ?tmp#11##0:stack_alloc_global.pair, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm store(~tmp#11##0:stack_alloc_global.pair, <<stack_alloc_global.gpair>>:stack_alloc_global.pair) @stack_alloc_global:nn:nn
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'stack_alloc_global'
+
+source_filename = "!ROOT!/final-dump/stack_alloc_global.wybe"
+target triple   = ????
+
+
+declare external ccc void @print_int(i64)
+declare external ccc void @putchar(i8)
+declare external ccc ptr @wybe_malloc(i32)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+@"resource#stack_alloc_global.gcell" = global i64 undef
+@"resource#stack_alloc_global.gpair" = global i64 undef
+
+define external fastcc void @"stack_alloc_global#.local_only<0>"(i64 %"x##0") {
+  %"tmp#12##0" = alloca i8, i64 16, align 8
+  %"tmp#4##0" = ptrtoint ptr %"tmp#12##0" to i64
+  %"tmp#13##0" = inttoptr i64 %"tmp#4##0" to ptr
+  store i64 %"x##0", ptr %"tmp#13##0"
+  %"tmp#14##0" = add i64 %"tmp#4##0", 8
+  %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
+  store i64 %"x##0", ptr %"tmp#15##0"
+  %"tmp#16##0" = inttoptr i64 %"tmp#4##0" to ptr
+  %"tmp#1##0" = load i64, ptr %"tmp#16##0"
+  call ccc void @print_int(i64 %"tmp#1##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc void @"stack_alloc_global#.store_global<0>"(i64 %"x##0") {
+  %"tmp#6##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#3##0" = ptrtoint ptr %"tmp#6##0" to i64
+  %"tmp#7##0" = inttoptr i64 %"tmp#3##0" to ptr
+  store i64 %"x##0", ptr %"tmp#7##0"
+  %"tmp#8##0" = add i64 %"tmp#3##0", 8
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"x##0", ptr %"tmp#9##0"
+  store i64 %"tmp#3##0", ptr @"resource#stack_alloc_global.gcell"
+  ret void
+}
+
+define external fastcc void @"stack_alloc_global#.store_global_cond<0>"(i64 %"x##0", i1 %"flag##0") {
+  %"tmp#6##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#3##0" = ptrtoint ptr %"tmp#6##0" to i64
+  %"tmp#7##0" = inttoptr i64 %"tmp#3##0" to ptr
+  store i64 %"x##0", ptr %"tmp#7##0"
+  %"tmp#8##0" = add i64 %"tmp#3##0", 8
+  %"tmp#9##0" = inttoptr i64 %"tmp#8##0" to ptr
+  store i64 %"x##0", ptr %"tmp#9##0"
+  br i1 %"flag##0", label %if.then.0, label %if.else.0
+if.then.0:
+  store i64 %"tmp#3##0", ptr @"resource#stack_alloc_global.gcell"
+  ret void
+if.else.0:
+  ret void
+}
+
+define external fastcc void @"stack_alloc_global#.store_global_nested<0>"(i64 %"x##0") {
+  %"tmp#12##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#4##0" = ptrtoint ptr %"tmp#12##0" to i64
+  %"tmp#13##0" = inttoptr i64 %"tmp#4##0" to ptr
+  store i64 %"x##0", ptr %"tmp#13##0"
+  %"tmp#14##0" = add i64 %"tmp#4##0", 8
+  %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
+  store i64 %"x##0", ptr %"tmp#15##0"
+  %"tmp#16##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#9##0" = ptrtoint ptr %"tmp#16##0" to i64
+  %"tmp#17##0" = inttoptr i64 %"tmp#9##0" to ptr
+  store i64 %"tmp#4##0", ptr %"tmp#17##0"
+  %"tmp#18##0" = add i64 %"tmp#9##0", 8
+  %"tmp#19##0" = inttoptr i64 %"tmp#18##0" to ptr
+  store i64 %"x##0", ptr %"tmp#19##0"
+  store i64 %"tmp#9##0", ptr @"resource#stack_alloc_global.gpair"
+  ret void
+}
+
+--------------------------------------------------
+ Module stack_alloc_global.cell
+  representation  : pointer
+  public submods  : 
+  public resources: 
+  public procs    : stack_alloc_global.cell.=<0>
+                    stack_alloc_global.cell.a<0>
+                    stack_alloc_global.cell.a<1>
+                    stack_alloc_global.cell.b<0>
+                    stack_alloc_global.cell.b<1>
+                    stack_alloc_global.cell.cell<0>
+                    stack_alloc_global.cell.cell<1>
+                    stack_alloc_global.cell.~=<0>
+  constants       : 
+  imports         : use stack_alloc_global
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc = > public {inline} (1 calls)
+0: stack_alloc_global.cell.=<0>
+=(#left##0:stack_alloc_global.cell, #right##0:stack_alloc_global.cell, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(#left##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#a##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#left##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#b##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(#right##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#a##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#right##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#b##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign llvm icmp_eq(~#left#a##0:wybe.int, ~#right#a##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+    1:
+        foreign llvm icmp_eq(~#left#b##0:wybe.int, ~#right#b##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
+
+
+
+proc a > public {inline} (0 calls)
+0: stack_alloc_global.cell.a<0>
+a(#rec##0:stack_alloc_global.cell, ?#result##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(~#rec##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stack_alloc_global:nn:nn
+proc a > public {inline} (0 calls)
+1: stack_alloc_global.cell.a<1>
+a(#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, #field##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stack_alloc_global:nn:nn
+
+
+proc b > public {inline} (0 calls)
+0: stack_alloc_global.cell.b<0>
+b(#rec##0:stack_alloc_global.cell, ?#result##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(~#rec##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stack_alloc_global:nn:nn
+proc b > public {inline} (0 calls)
+1: stack_alloc_global.cell.b<1>
+b(#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, #field##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stack_alloc_global:nn:nn
+
+
+proc cell > public {inline} (0 calls)
+0: stack_alloc_global.cell.cell<0>
+cell(a##0:wybe.int, b##0:wybe.int, ?#result##0:stack_alloc_global.cell)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~#rec##1:stack_alloc_global.cell, ?#result##0:stack_alloc_global.cell, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~b##0:wybe.int) @stack_alloc_global:nn:nn
+proc cell > public {inline} (6 calls)
+1: stack_alloc_global.cell.cell<1>
+cell(?a##0:wybe.int, ?b##0:wybe.int, #result##0:stack_alloc_global.cell)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(#result##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?a##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#result##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?b##0:wybe.int) @stack_alloc_global:nn:nn
+
+
+proc ~= > public {inline} (0 calls)
+0: stack_alloc_global.cell.~=<0>
+~=(#left##0:stack_alloc_global.cell, #right##0:stack_alloc_global.cell, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(#left##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#left##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(#right##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#right##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign llvm icmp_eq(~tmp#3##0:wybe.int, ~tmp#5##0:wybe.int, ?tmp#7##0:wybe.bool) @int:nn:nn
+    case ~tmp#7##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+    1:
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'stack_alloc_global.cell'
+
+source_filename = "!ROOT!/final-dump/stack_alloc_global.wybe"
+target triple   = ????
+
+
+declare external ccc ptr @wybe_malloc(i32)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i1 @"stack_alloc_global#.cell#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#9##0" = inttoptr i64 %"#left##0" to ptr
+  %"#left#a##0" = load i64, ptr %"tmp#9##0"
+  %"tmp#10##0" = add i64 %"#left##0", 8
+  %"tmp#11##0" = inttoptr i64 %"tmp#10##0" to ptr
+  %"#left#b##0" = load i64, ptr %"tmp#11##0"
+  %"tmp#12##0" = inttoptr i64 %"#right##0" to ptr
+  %"#right#a##0" = load i64, ptr %"tmp#12##0"
+  %"tmp#13##0" = add i64 %"#right##0", 8
+  %"tmp#14##0" = inttoptr i64 %"tmp#13##0" to ptr
+  %"#right#b##0" = load i64, ptr %"tmp#14##0"
+  %"tmp#1##0" = icmp eq i64 %"#left#a##0", %"#right#a##0"
+  br i1 %"tmp#1##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#15##0" = icmp eq i64 %"#left#b##0", %"#right#b##0"
+  ret i1 %"tmp#15##0"
+if.else.0:
+  ret i1 0
+}
+
+define external fastcc i64 @"stack_alloc_global#.cell#.a<0>"(i64 %"#rec##0") {
+  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
+  %"tmp#1##0" = load i64, ptr %"tmp#0##0"
+  ret i64 %"tmp#1##0"
+}
+
+define external fastcc i64 @"stack_alloc_global#.cell#.a<1>"(i64 %"#rec##0", i64 %"#field##0") {
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#1##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#2##0" = add i64 %"tmp#1##0", 8
+  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  %"tmp#4##0" = add i64 %"#rec##0", 8
+  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#3##0", ptr %"tmp#5##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#7##0"
+  ret i64 %"tmp#6##0"
+}
+
+define external fastcc i64 @"stack_alloc_global#.cell#.b<0>"(i64 %"#rec##0") {
+  %"tmp#0##0" = add i64 %"#rec##0", 8
+  %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
+  %"tmp#2##0" = load i64, ptr %"tmp#1##0"
+  ret i64 %"tmp#2##0"
+}
+
+define external fastcc i64 @"stack_alloc_global#.cell#.b<1>"(i64 %"#rec##0", i64 %"#field##0") {
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 8, i1 0)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#3##0" = add i64 %"tmp#2##0", 8
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#4##0"
+  ret i64 %"tmp#2##0"
+}
+
+define external fastcc i64 @"stack_alloc_global#.cell#.cell<0>"(i64 %"a##0", i64 %"b##0") {
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  store i64 %"a##0", ptr %"tmp#1##0"
+  %"tmp#2##0" = add i64 %"#rec##0", 8
+  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  store i64 %"b##0", ptr %"tmp#3##0"
+  ret i64 %"#rec##0"
+}
+
+define external fastcc {i64, i64} @"stack_alloc_global#.cell#.cell<1>"(i64 %"#result##0") {
+  %"tmp#0##0" = inttoptr i64 %"#result##0" to ptr
+  %"tmp#1##0" = load i64, ptr %"tmp#0##0"
+  %"tmp#2##0" = add i64 %"#result##0", 8
+  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
+  %"tmp#5##0" = insertvalue {i64, i64} undef, i64 %"tmp#1##0", 0
+  %"tmp#6##0" = insertvalue {i64, i64} %"tmp#5##0", i64 %"tmp#4##0", 1
+  ret {i64, i64} %"tmp#6##0"
+}
+
+define external fastcc i1 @"stack_alloc_global#.cell#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#8##0" = inttoptr i64 %"#left##0" to ptr
+  %"tmp#3##0" = load i64, ptr %"tmp#8##0"
+  %"tmp#9##0" = add i64 %"#left##0", 8
+  %"tmp#10##0" = inttoptr i64 %"tmp#9##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#10##0"
+  %"tmp#11##0" = inttoptr i64 %"#right##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#11##0"
+  %"tmp#12##0" = add i64 %"#right##0", 8
+  %"tmp#13##0" = inttoptr i64 %"tmp#12##0" to ptr
+  %"tmp#6##0" = load i64, ptr %"tmp#13##0"
+  %"tmp#7##0" = icmp eq i64 %"tmp#3##0", %"tmp#5##0"
+  br i1 %"tmp#7##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#0##0" = icmp eq i64 %"tmp#4##0", %"tmp#6##0"
+  %"tmp#14##0" = xor i1 %"tmp#0##0", 1
+  ret i1 %"tmp#14##0"
+if.else.0:
+  %"tmp#15##0" = xor i1 0, 1
+  ret i1 %"tmp#15##0"
+}
+
+--------------------------------------------------
+ Module stack_alloc_global.pair
+  representation  : pointer
+  public submods  : 
+  public resources: 
+  public procs    : stack_alloc_global.pair.=<0>
+                    stack_alloc_global.pair.p<0>
+                    stack_alloc_global.pair.p<1>
+                    stack_alloc_global.pair.pair<0>
+                    stack_alloc_global.pair.pair<1>
+                    stack_alloc_global.pair.q<0>
+                    stack_alloc_global.pair.q<1>
+                    stack_alloc_global.pair.~=<0>
+  constants       : 
+  imports         : use stack_alloc_global
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc = > public {inline} (1 calls)
+0: stack_alloc_global.pair.=<0>
+=(#left##0:stack_alloc_global.pair, #right##0:stack_alloc_global.pair, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(#left##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#left##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#q##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(#right##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#right##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#q##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(#left#p##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#left#p##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(#right#p##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#right#p##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign llvm icmp_eq(~tmp#7##0:wybe.int, ~tmp#9##0:wybe.int, ?tmp#11##0:wybe.bool) @int:nn:nn
+    case ~tmp#11##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+    1:
+        foreign llvm icmp_eq(~tmp#10##0:wybe.int, ~tmp#8##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+        case ~tmp#1##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+        1:
+            foreign llvm icmp_eq(~#left#q##0:wybe.int, ~#right#q##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
+
+
+
+
+proc p > public {inline} (0 calls)
+0: stack_alloc_global.pair.p<0>
+p(#rec##0:stack_alloc_global.pair, ?#result##0:stack_alloc_global.cell)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(~#rec##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+proc p > public {inline} (0 calls)
+1: stack_alloc_global.pair.p<1>
+p(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:stack_alloc_global.cell)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+
+
+proc pair > public {inline} (0 calls)
+0: stack_alloc_global.pair.pair<0>
+pair(p##0:stack_alloc_global.cell, q##0:wybe.int, ?#result##0:stack_alloc_global.pair)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:stack_alloc_global.pair) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm mutate(~#rec##1:stack_alloc_global.pair, ?#result##0:stack_alloc_global.pair, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~q##0:wybe.int) @stack_alloc_global:nn:nn
+proc pair > public {inline} (6 calls)
+1: stack_alloc_global.pair.pair<1>
+pair(?p##0:stack_alloc_global.cell, ?q##0:wybe.int, #result##0:stack_alloc_global.pair)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(#result##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#result##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?q##0:wybe.int) @stack_alloc_global:nn:nn
+
+
+proc q > public {inline} (0 calls)
+0: stack_alloc_global.pair.q<0>
+q(#rec##0:stack_alloc_global.pair, ?#result##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(~#rec##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stack_alloc_global:nn:nn
+proc q > public {inline} (0 calls)
+1: stack_alloc_global.pair.q<1>
+q(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm mutate(~#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stack_alloc_global:nn:nn
+
+
+proc ~= > public {inline} (0 calls)
+0: stack_alloc_global.pair.~=<0>
+~=(#left##0:stack_alloc_global.pair, #right##0:stack_alloc_global.pair, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(#left##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#left##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(#right##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm access(~#right##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(tmp#3##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~tmp#3##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(tmp#5##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign lpvm access(~tmp#5##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int) @stack_alloc_global:nn:nn
+    foreign llvm icmp_eq(~tmp#7##0:wybe.int, ~tmp#9##0:wybe.int, ?tmp#11##0:wybe.bool) @int:nn:nn
+    case ~tmp#11##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+    1:
+        foreign llvm icmp_eq(~tmp#10##0:wybe.int, ~tmp#8##0:wybe.int, ?tmp#12##0:wybe.bool) @int:nn:nn
+        case ~tmp#12##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+        1:
+            foreign llvm icmp_eq(~tmp#4##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'stack_alloc_global.pair'
+
+source_filename = "!ROOT!/final-dump/stack_alloc_global.wybe"
+target triple   = ????
+
+
+declare external ccc ptr @wybe_malloc(i32)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i1 @"stack_alloc_global#.pair#.=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#14##0" = inttoptr i64 %"#left##0" to ptr
+  %"#left#p##0" = load i64, ptr %"tmp#14##0"
+  %"tmp#15##0" = add i64 %"#left##0", 8
+  %"tmp#16##0" = inttoptr i64 %"tmp#15##0" to ptr
+  %"#left#q##0" = load i64, ptr %"tmp#16##0"
+  %"tmp#17##0" = inttoptr i64 %"#right##0" to ptr
+  %"#right#p##0" = load i64, ptr %"tmp#17##0"
+  %"tmp#18##0" = add i64 %"#right##0", 8
+  %"tmp#19##0" = inttoptr i64 %"tmp#18##0" to ptr
+  %"#right#q##0" = load i64, ptr %"tmp#19##0"
+  %"tmp#20##0" = inttoptr i64 %"#left#p##0" to ptr
+  %"tmp#7##0" = load i64, ptr %"tmp#20##0"
+  %"tmp#21##0" = add i64 %"#left#p##0", 8
+  %"tmp#22##0" = inttoptr i64 %"tmp#21##0" to ptr
+  %"tmp#8##0" = load i64, ptr %"tmp#22##0"
+  %"tmp#23##0" = inttoptr i64 %"#right#p##0" to ptr
+  %"tmp#9##0" = load i64, ptr %"tmp#23##0"
+  %"tmp#24##0" = add i64 %"#right#p##0", 8
+  %"tmp#25##0" = inttoptr i64 %"tmp#24##0" to ptr
+  %"tmp#10##0" = load i64, ptr %"tmp#25##0"
+  %"tmp#11##0" = icmp eq i64 %"tmp#7##0", %"tmp#9##0"
+  br i1 %"tmp#11##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#1##0" = icmp eq i64 %"tmp#10##0", %"tmp#8##0"
+  br i1 %"tmp#1##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"tmp#26##0" = icmp eq i64 %"#left#q##0", %"#right#q##0"
+  ret i1 %"tmp#26##0"
+if.else.1:
+  ret i1 0
+if.else.0:
+  ret i1 0
+}
+
+define external fastcc i64 @"stack_alloc_global#.pair#.p<0>"(i64 %"#rec##0") {
+  %"tmp#0##0" = inttoptr i64 %"#rec##0" to ptr
+  %"tmp#1##0" = load i64, ptr %"tmp#0##0"
+  ret i64 %"tmp#1##0"
+}
+
+define external fastcc i64 @"stack_alloc_global#.pair#.p<1>"(i64 %"#rec##0", i64 %"#field##0") {
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#1##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#2##0" = add i64 %"tmp#1##0", 8
+  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  %"tmp#4##0" = add i64 %"#rec##0", 8
+  %"tmp#5##0" = inttoptr i64 %"tmp#4##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#3##0", ptr %"tmp#5##0", i64 8, i1 0)
+  %"tmp#6##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#7##0" = inttoptr i64 %"tmp#6##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#7##0"
+  ret i64 %"tmp#6##0"
+}
+
+define external fastcc i64 @"stack_alloc_global#.pair#.pair<0>"(i64 %"p##0", i64 %"q##0") {
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"#rec##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  store i64 %"p##0", ptr %"tmp#1##0"
+  %"tmp#2##0" = add i64 %"#rec##0", 8
+  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  store i64 %"q##0", ptr %"tmp#3##0"
+  ret i64 %"#rec##0"
+}
+
+define external fastcc {i64, i64} @"stack_alloc_global#.pair#.pair<1>"(i64 %"#result##0") {
+  %"tmp#0##0" = inttoptr i64 %"#result##0" to ptr
+  %"tmp#1##0" = load i64, ptr %"tmp#0##0"
+  %"tmp#2##0" = add i64 %"#result##0", 8
+  %"tmp#3##0" = inttoptr i64 %"tmp#2##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#3##0"
+  %"tmp#5##0" = insertvalue {i64, i64} undef, i64 %"tmp#1##0", 0
+  %"tmp#6##0" = insertvalue {i64, i64} %"tmp#5##0", i64 %"tmp#4##0", 1
+  ret {i64, i64} %"tmp#6##0"
+}
+
+define external fastcc i64 @"stack_alloc_global#.pair#.q<0>"(i64 %"#rec##0") {
+  %"tmp#0##0" = add i64 %"#rec##0", 8
+  %"tmp#1##0" = inttoptr i64 %"tmp#0##0" to ptr
+  %"tmp#2##0" = load i64, ptr %"tmp#1##0"
+  ret i64 %"tmp#2##0"
+}
+
+define external fastcc i64 @"stack_alloc_global#.pair#.q<1>"(i64 %"#rec##0", i64 %"#field##0") {
+  %"tmp#0##0" = call ccc ptr @wybe_malloc(i32 16)
+  %"tmp#1##0" = inttoptr i64 %"#rec##0" to ptr
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"tmp#0##0", ptr %"tmp#1##0", i64 8, i1 0)
+  %"tmp#2##0" = ptrtoint ptr %"tmp#0##0" to i64
+  %"tmp#3##0" = add i64 %"tmp#2##0", 8
+  %"tmp#4##0" = inttoptr i64 %"tmp#3##0" to ptr
+  store i64 %"#field##0", ptr %"tmp#4##0"
+  ret i64 %"tmp#2##0"
+}
+
+define external fastcc i1 @"stack_alloc_global#.pair#.~=<0>"(i64 %"#left##0", i64 %"#right##0") {
+  %"tmp#13##0" = inttoptr i64 %"#left##0" to ptr
+  %"tmp#3##0" = load i64, ptr %"tmp#13##0"
+  %"tmp#14##0" = add i64 %"#left##0", 8
+  %"tmp#15##0" = inttoptr i64 %"tmp#14##0" to ptr
+  %"tmp#4##0" = load i64, ptr %"tmp#15##0"
+  %"tmp#16##0" = inttoptr i64 %"#right##0" to ptr
+  %"tmp#5##0" = load i64, ptr %"tmp#16##0"
+  %"tmp#17##0" = add i64 %"#right##0", 8
+  %"tmp#18##0" = inttoptr i64 %"tmp#17##0" to ptr
+  %"tmp#6##0" = load i64, ptr %"tmp#18##0"
+  %"tmp#19##0" = inttoptr i64 %"tmp#3##0" to ptr
+  %"tmp#7##0" = load i64, ptr %"tmp#19##0"
+  %"tmp#20##0" = add i64 %"tmp#3##0", 8
+  %"tmp#21##0" = inttoptr i64 %"tmp#20##0" to ptr
+  %"tmp#8##0" = load i64, ptr %"tmp#21##0"
+  %"tmp#22##0" = inttoptr i64 %"tmp#5##0" to ptr
+  %"tmp#9##0" = load i64, ptr %"tmp#22##0"
+  %"tmp#23##0" = add i64 %"tmp#5##0", 8
+  %"tmp#24##0" = inttoptr i64 %"tmp#23##0" to ptr
+  %"tmp#10##0" = load i64, ptr %"tmp#24##0"
+  %"tmp#11##0" = icmp eq i64 %"tmp#7##0", %"tmp#9##0"
+  br i1 %"tmp#11##0", label %if.then.0, label %if.else.0
+if.then.0:
+  %"tmp#12##0" = icmp eq i64 %"tmp#10##0", %"tmp#8##0"
+  br i1 %"tmp#12##0", label %if.then.1, label %if.else.1
+if.then.1:
+  %"tmp#0##0" = icmp eq i64 %"tmp#4##0", %"tmp#6##0"
+  %"tmp#25##0" = xor i1 %"tmp#0##0", 1
+  ret i1 %"tmp#25##0"
+if.else.1:
+  %"tmp#26##0" = xor i1 0, 1
+  ret i1 %"tmp#26##0"
+if.else.0:
+  %"tmp#27##0" = xor i1 0, 1
+  ret i1 %"tmp#27##0"
+}

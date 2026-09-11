@@ -1,0 +1,21 @@
+# Regression test for stack-allocation escape analysis.
+#
+# Build a list locally in a loop, then consume it locally.  After unbranching,
+# the cons cells are allocated across tail-recursive continuation frames and
+# only read by a later continuation (the for-loop), so they outlive the frame
+# that built them.  They must therefore NOT be stack-allocated: stack
+# allocation here, combined with tail-call optimisation of the continuations,
+# would free the cells while they are still in use (a use-after-free).
+#
+# This is an *execution* test on purpose: the miscompilation only shows up at
+# runtime (garbage output), not in the dumped IR.
+
+def show(n:int) use !io {
+    ?xs = []
+    ?i = n
+    do { while i > 0; ?xs = [i | xs]; ?i = i - 1 }   # build list locally
+    for ?x in xs { !print(x); !print(' ') }          # consume it locally
+    !nl
+}
+
+!show(5)

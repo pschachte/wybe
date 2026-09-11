@@ -521,6 +521,620 @@ ensures that resources, where applicable are in scope.
 ## Snippets <a id=Snippets></a>
 
 ## Transform <a id=Transform></a>
+# Escape Analysis & Stack Allocation in the Wybe Compiler
+
+This document explains how the Wybe compiler decides that some heap allocations
+can safely become *stack* allocations, and how that decision is carried through
+to the LLVM backend. It starts with the intuition and builds up to the precise
+algorithm, the soundness argument, and the known limitations.
+
+The relevant code lives in:
+
+- [`src/Transform.hs`](/src/Transform.hs) — the analysis and the alloc-site decision.
+- [`src/AliasAnalysis.hs`](/src/AliasAnalysis.hs) — the supporting alias check (`isArgEscaped`).
+- [`src/LLVM.hs`](/src/LLVM.hs) — lowering a `{stack}` alloc to an `alloca`, and the tail-call interaction.
+- [`src/Options.hs`](/src/Options.hs) — the `stack-alloc` optimisation flag and `--stack-alloc-limit`.
+
+---
+
+## 1. The intuition
+
+When a Wybe program builds a structure — a tuple, a record, a list cell — the
+compiler emits an `lpvm alloc` instruction that, by default, calls
+`wybe_malloc` and gets memory from the **heap**. Heap memory is managed by the
+Boehm garbage collector: it lives until nothing references it any more, and
+reclaiming it costs CPU time.
+
+But a great many allocations don't need to live that long. Consider:
+
+```wybe
+def {noinline} distance(x1:int, y1:int, x2:int, y2:int):int use !io {
+   ?p = point(x1, y1)        # allocate a point
+   ?q = point(x2, y2)        # allocate another
+   (p^x - q^x) + (p^y - q^y) # read both, then we're done with them
+}
+```
+
+Here `p` and `q` are created, read a few times, and then forgotten. Nothing
+outside `distance` ever sees them. Their lifetime is exactly the lifetime of
+the call. That is *precisely* what the machine stack is for: memory that is
+born when a function is entered and dies when it returns, reclaimed for free by
+popping the stack frame.
+
+So the optimisation is: **if a structure cannot outlive the procedure call that
+created it, allocate it on the stack instead of the heap.** This removes GC
+pressure and is usually faster.
+
+The catch is the word *cannot*. If we put a structure on the stack and the
+program keeps a pointer to it after the procedure returns, that pointer now
+points into a stack frame that has been torn down and reused — a classic
+**use-after-free**. Getting this wrong does not produce a compile error or a
+clean crash; it produces silent garbage. So the analysis must be **sound**: it
+may keep something on the heap that could have gone on the stack (a missed
+optimisation), but it must **never** put something on the stack that escapes.
+
+The analysis that answers "can this structure outlive its procedure?" is called
+**escape analysis**. A structure *escapes* if a reference to it can survive past
+the procedure's return.
+
+---
+
+## 2. How a value can escape
+
+A pointer created inside a procedure can outlive that procedure in only a few
+ways. The analysis must catch every one of them:
+
+1. **It is returned.** The pointer is written to an output parameter, so the
+  caller receives it.
+
+2. **It is passed to a call we can't see into.** Once a pointer is handed to
+  another procedure (a Wybe `PrimCall`), a higher-order call (`PrimHigher`), or
+  a foreign C function, that callee might stash it in a global, the heap, or
+  one of its own outputs. From this procedure's point of view, the pointer has
+  left the building.
+
+3. **It is stored into a global.** Wybe has no raw globals, but it has
+  *resources*, which lower to global variables. Writing a pointer into a
+  resource (`lpvm store` to a global) lets it outlive any single call.
+
+4. **It is embedded in another structure that escapes.** If we store pointer
+  `a` into structure `b` (via `lpvm mutate`), and `b` later escapes by any of
+  the routes above, then `a` escapes too — the escaping `b` carries `a` out
+  with it.
+
+If none of these apply, the pointer is *captured* — confined to the procedure —
+and is a candidate for stack allocation.
+
+---
+
+## 3. Where the analysis runs in the pipeline
+
+Escape analysis is part of the **Transform** pass
+([`transformProcBody`](/src/Transform.hs)), which runs after alias analysis has
+reached its fixed point. Transform already walks every procedure body to set
+the *destructive* flag on `mutate` instructions (the in-place-update
+optimisation). Stack allocation piggy-backs on that same walk.
+
+For each (non-inline) procedure, Transform:
+
+1. Computes `escapedVars`, the set of variables that may escape — see
+  [`computeEscapedVars`](/src/Transform.hs) (§5). This is computed **once**,
+  up front, over the whole body.
+2. Walks the body instruction by instruction
+  ([`transformPrim`](/src/Transform.hs)), maintaining an incremental alias map.
+3. At each `lpvm alloc`, decides heap vs stack (§6).
+
+One ordering fact matters a great deal and is the source of a subtle bug class
+(see §9): the alias map in step 2 is built **forward** — at the point we reach
+an alloc, it reflects only the parameters and the instructions *before* the
+alloc. An escape caused by an instruction *after* the alloc is invisible to the
+alias map. That is exactly why the up-front, whole-body `computeEscapedVars`
+exists, and why it must be complete on its own.
+---
+
+## 4. The two escape checks
+
+At an alloc site the analysis combines two independent checks
+([`transformPrim`, the `lpvm alloc` case](/src/Transform.hs)):
+
+```haskell
+let escapedByAlias    = isArgEscaped aliasMap outVar
+let escapedByMutation = Set.member n escapedVars
+let escaped           = escapedByAlias || escapedByMutation
+```
+
+- **`escapedByAlias`** ([`isArgEscaped` in `AliasAnalysis.hs`](/src/AliasAnalysis.hs)):
+ consults the *incremental* alias map. It returns `True` if the alloc result
+ is aliased to a global (`AliasByGlobal`), a parameter (`AliasByParam`), or a
+ maybe-aliased parameter (`MaybeAliasByParam`). Because the map is built
+ forward (§3), this check only catches aliasing established *before* the
+ alloc. It is therefore best understood as an *opportunistic early* check, not
+ the authoritative one.
+
+ **In practice this check is inert — it is always `False` for an alloc's own
+ result.** `isArgEscaped` queries the alias map *as it stands before this
+ alloc*, but `outVar` is created *by* this alloc, so it cannot yet be connected
+ to any global or parameter in that map. A sweep of the whole final-dump suite
+ confirms it: `escapedByAlias=True` appears in **zero** of the 57 alloc
+ decisions, while genuinely-escaping allocs are all caught by
+ `escapedByMutation`. The stored whole-body `procArgAliasMap` would not help
+ either — it is *parameter-level* and does not track local alloc temporaries.
+
+ It is kept (rather than deleted) because it is harmless: being part of an
+ `||`, it can only *add* escapes, never remove them, so it cannot make the
+ analysis unsound. But it must **not** be mistaken for a safety net covering
+ the global/parameter routes — it provides no such coverage. Treating it as
+ one is precisely the misconception that produced the original global-store
+ bug (§9): the authoritative, complete check is `escapedByMutation` alone.
+
+- **`escapedByMutation`** ([`computeEscapedVars`](/src/Transform.hs)): the
+ whole-body, order-independent analysis. This is the authoritative check and
+ carries the soundness guarantee.
+
+An alloc is stack-allocated only if **neither** check fires (and the size
+constraints in §6 hold).
+
+---
+
+## 5. `computeEscapedVars` in detail
+
+This function answers, for one procedure body, "which variables may escape?".
+It works in two parts: **seeds** (variables that definitely escape) and
+**edges** (a may-point-to graph along which escape propagates backward). It then
+takes the least fixed point.
+
+### 5.1 Collecting the instructions
+
+```haskell
+prims = collectAllBodyPrims body
+```
+
+[`collectAllBodyPrims`](/src/Transform.hs) flattens every instruction in the
+body, **including all branches of every fork**. This is deliberately
+conservative: the analysis ignores control flow entirely and treats the body as
+one flat bag of instructions. If a value escapes on *any* path, it is treated
+as escaping on *all* paths. (Recall LPVM is roughly SSA — variables are uniquely
+named — so merging branches into one set does not conflate distinct values.)
+
+### 5.2 The seeds — variables that definitely escape
+
+```haskell
+escaped0 = Set.fromList (outParamEsc ++ callArgEsc ++ storeEsc)
+```
+
+**Seed 1 — output parameters** (`outParamEsc`). Every output parameter escapes
+by definition: the caller receives its value.
+
+**Seed 2 — arguments to opaque calls** (`callArgEsc`). Every pointer passed as a
+non-output argument to a call we cannot analyse escapes *unconditionally*. The
+predicate is [`isConservativeCall`](/src/Transform.hs):
+
+```haskell
+isConservativeCall PrimCall{}               = True   -- user-defined Wybe call
+isConservativeCall PrimHigher{}             = True   -- higher-order call
+isConservativeCall (PrimForeign lang _ _ _) = lang /= "llvm" && lang /= "lpvm"  -- e.g. C
+```
+
+There are two reasons this is unconditional, not "escapes only if the call's
+output escapes":
+
+- The callee may retain the pointer (store it in a global, the heap, or an
+ output).
+- The call may be **tail-call optimised**. TCO reuses the current stack frame
+ for the callee. If a stack-allocated pointer from this frame were passed to a
+ tail call, the frame — and the allocation — would be torn down while the
+ callee still uses it. Tail position is only decided much later, in the LLVM
+ backend, so we cannot know here which calls will be tail calls. Treating every
+ pointer reaching such a call as escaping side-steps the question entirely.
+
+**Seed 3 — values stored into globals** (`storeEsc`). Every pointer that is the
+value argument of an `lpvm store` escapes. `lpvm store` writes into a global
+variable (a Wybe resource), which outlives any single call:
+
+```haskell
+storeEsc = [ argVarName val
+          | PrimForeign "lpvm" "store" _ (val:_) <- prims
+          , argIsVar val ]
+```
+
+This seed *must* live here rather than relying on the alias map. The store that
+makes a value escape almost always comes *after* the value is built (`?c =
+cell(...)` then `?global = c`), so the forward alias map at the alloc site
+cannot see it. `computeEscapedVars` scans the whole body, so it does.
+
+### 5.3 The edges — how escape propagates
+
+Escape flows *backward*: if a value escapes, the values that flow *into* it also
+escape. There are two kinds of edge.
+
+**Mutate edges.** For `mutate(fIn, fOut, offset, destr, size, startOff,
+member)` — which produces `fOut`, a copy of `fIn` with one field set to
+`member`:
+
+```haskell
+mutateEdges = [ (argVarName fOut, argVarName vin)
+       | PrimForeign "lpvm" "mutate" _ args@(fIn:fOut:_) <- prims
+       , argIsVar fIn, argIsVar fOut
+       , vin <- fIn : [ m | m <- List.drop 6 args, argIsVar m ] ]
+```
+
+The edge `(fOut, vin)` means "if `fOut` escapes, then `vin` escapes." Two things
+flow in:
+
+- `fIn` — the struct being updated. `fOut` is just a new version of it, so if
+ the new version escapes, so does the old. (This is conservative for
+ *non-destructive* mutates, where `fOut` is genuinely a fresh copy and `fIn`
+ need not escape — but escape analysis runs *before* the destructive-update
+ transformation sets the `destr` flag, so it cannot yet tell the two apart.
+ See §9.)
+- `member` — the field value being stored *into* the struct. If the struct
+ escapes, the embedded pointer escapes with it. This is route 4 from §2.
+
+Because mutates form a chain (`s0 = alloc; s1 = mutate s0; s2 = mutate s1; …`),
+these edges chain too: if the final version `sN` escapes, escape propagates back
+through every intermediate version and every member stored along the way.
+
+**Pass-through edges.** For any other `llvm`/`lpvm` instruction that is not an
+alloc, mutate, or opaque call:
+
+```haskell
+passEdges = [ (outName, inName)
+           | prim <- prims
+           , not (isAllocOrMutate prim)
+           , not (isConservativeCall prim)
+           , ...
+           , ArgVar{...outName, outType, outFlow} <- allArgs, isOutputFlow outFlow
+           , ArgVar{...inName,  inType,  inFlow}  <- allArgs, not (isOutputFlow inFlow)
+           , valuePreserving || inType == outType ]
+```
+
+This adds an edge from each output to each input when either:
+
+- the instruction is **value-preserving** ([`isValuePreserving`](/src/Transform.hs)
+ — `lpvm cast` or `llvm move`), which carries the *same address* into a result
+ of a possibly different type; or
+- the input and output have the **same type**, a conservative proxy for "the
+ address might be passed through."
+
+### 5.4 The fixed point
+
+```haskell
+go escaped =
+   let newEsc = Set.fromList [ vin | (vout, vin) <- allEdges, Set.member vout escaped ]
+       escaped' = Set.union escaped newEsc
+   in if Set.size escaped' == Set.size escaped then escaped else go escaped'
+```
+
+Starting from the seeds, repeatedly add any `vin` whose `vout` is already known
+to escape, until nothing new is added. The result is every variable from which
+an escaping value is reachable backward through the graph. Allocs whose result
+is **not** in this set are escape-free.
+
+---
+
+## 6. The alloc-site decision
+
+Back in [`transformPrim`](/src/Transform.hs), for `lpvm alloc(size, ?out)`:
+
+```haskell
+let escaped      = escapedByAlias || escapedByMutation
+let constSize    = argIsConst sizeArg               -- size known at compile time?
+let alreadyStack = "stack" `elem` flags
+let withinLimit  = maybe False (<= stackLimit) (argIntVal sizeArg)
+-- (stackLimit and doStackAlloc are read from the compiler options)
+```
+
+The alloc becomes a stack alloc — tagged with a `{stack}` flag — only when **all**
+of:
+
+- `not escaped` — the escape analysis cleared it;
+- `constSize` — the size is a compile-time constant;
+- `withinLimit` — the size is at or below `--stack-alloc-limit` (default 4096
+ bytes, see [`Options.hs`](/src/Options.hs));
+- `not alreadyStack` — idempotence;
+- `doStackAlloc` — the `stack-alloc` optimisation is enabled.
+
+Otherwise it stays a heap alloc.
+
+**Why require a constant size?** LLVM can do variable-sized `alloca` (C99 VLAs),
+but a dynamic `alloca` forces a frame pointer, which blocks tail-call
+optimisation, and makes `--stack-alloc-limit` impossible to enforce at compile
+time. In practice this costs nothing: Wybe types are always statically sized.
+
+**Why a size limit?** Stack space is finite and a single oversized `alloca` (or
+one inside a deep recursion) can blow the stack. The limit keeps stack usage
+bounded; anything larger falls back to the heap.
+
+---
+
+## 7. Lowering to LLVM
+
+A `{stack}`-tagged alloc reaches the backend in
+[`writeLPVMCall "alloc"`](/src/LLVM.hs):
+
+```haskell
+if "stack" `elem` flags
+then case argIntVal sz of
+   Just sizeVal -> do
+       (writeTmp, readTmp) <- freshTempArgs $ Representation CPointer
+       stackAlloc writeTmp (fromIntegral sizeVal)   -- emit `alloca i8, i64 N`
+       typeConvert readTmp out                      -- ptrtoint to the i64 Wybe uses
+   Nothing -> shouldnt "stack alloc with non-constant size"
+else heapAlloc out sz pos                            -- the normal wybe_malloc path
+```
+
+[`stackAlloc`](/src/LLVM.hs) emits the `alloca` and records the result in
+`stackAllocedVars`. Wybe represents pointers as `i64`, so the raw `ptr` from
+`alloca` is immediately `ptrtoint`-converted to the variable the rest of the
+code expects.
+
+### Keeping track of stack-allocated addresses
+
+The backend maintains a set, `stackAllocedVars`, of variables that hold a
+stack address:
+
+- [`recordStackAlloced`](/src/LLVM.hs) adds the `alloca` result.
+- [`propagateStackAlloced`](/src/LLVM.hs), called from `typeConvert`, follows the
+ address through moves and pointer conversions (`ptrtoint`, casts) so that
+ LLVM-level renaming doesn't lose track of which `i64` values are really stack
+ addresses. It is also called explicitly across the `llvm add` that forms a
+ non-zero-offset *interior* pointer in the `mutate` lowering (which does not go
+ through `typeConvert`), so that the address of a field of a stack struct is
+ tracked as a stack address too — see §9, point 5.
+
+This set powers the tail-call check (§8).
+
+---
+
+## 8. Interaction with tail calls
+
+Tail-call optimisation reuses the current frame for the callee. That is fatal if
+the callee receives a pointer into the current frame's `alloca` space — the
+frame is gone but the pointer is still used.
+
+Earlier the backend used a single boolean `doesAlloca`: *any* `alloca` in a body
+blocked *all* tail calls in it. The current design is more precise. At each call,
+[`tailMarker`](/src/LLVM.hs) checks whether any input argument *actually*
+references a stack-allocated variable:
+
+```haskell
+tailMarker must ins = do
+   stackVars <- gets stackAllocedVars
+   let passesStackVar = any (\arg -> case arg of
+           ArgVar{argVarName=n} -> Set.member n stackVars
+           _                    -> False) ins
+   return $ case (passesStackVar, must) of
+       (True,_)      -> ""            -- stack address flows in: no tail marker
+       (False,True)  -> "musttail "
+       (False,False) -> "tail "
+```
+
+If no input references a stack address, TCO is still safe even when the body
+contains other `alloca`s, because escape analysis has already guaranteed those
+allocations do not reach this callee.
+
+(Note the two layers reinforce each other: escape analysis already refuses to
+stack-allocate anything passed to a Wybe/foreign call — seed 2 — so in practice
+a stack address rarely reaches a call argument at all. The `tailMarker` check is
+the backend's belt-and-suspenders guarantee for the addresses that legitimately
+flow into inlined `llvm`/`lpvm` operations.)
+
+---
+
+## 9. Known conservative limitations
+
+These are *imprecisions*, not *unsoundness* — they cause missed optimisations,
+never use-after-free.
+
+1. **Non-destructive mutate treats `fIn` as escaping.** Because escape analysis
+  runs before the destructive-update transformation, it cannot tell a
+  destructive mutate (writes `fIn` in place) from a non-destructive one
+  (produces a fresh `fOut`). For a truly non-destructive mutate, `fIn` need not
+  escape when `fOut` does. Recovering this would need either a preliminary
+  sub-pass to annotate `destr` flags before escape analysis, or marking
+  stack-friendly mutates directly (`{stack}` on the mutate).
+
+2. **Pass-through to opaque calls is always an escape.** A value passed to a
+  `pass_back(p, ?q)`-style call that merely returns its argument is treated as
+  escaping, even when the result is used purely locally. Recovering this
+  soundly requires interprocedural escape *summaries* plus tail-position
+  analysis (a later, more precise pass).
+
+3. **Branch-insensitivity.** Escaping on any path marks a value as escaping on
+  all paths (§5.1).
+
+### Bugs this design originally had (now fixed)
+
+**Bug 1 — stores into a global were missed.** `computeEscapedVars` did not have
+seed 3, and so missed pointers stored into a global *after* their alloc — the
+forward alias map couldn't see the later store either, so such a value was
+wrongly stack-allocated. The symptom was a global resource pointing into a
+freed stack frame:
+
+```wybe
+resource saved:cell = cell(0, 0)
+def {noinline} stash(x:int) use !saved {
+   ?c = cell(x, x)    # built locally...
+   ?saved = c         # ...then stored into a global: it ESCAPES
+}
+```
+
+Adding seed 3 (`storeEsc`) closed the hole. The regression tests are
+[`test-cases/execution/stack_alloc_global_escape.wybe`](/test-cases/execution/stack_alloc_global_escape.wybe)
+(catches the miscompilation at runtime) and
+[`test-cases/final-dump/stack_alloc_global.wybe`](/test-cases/final-dump/stack_alloc_global.wybe)
+(asserts no stray `{stack}` flag in the IR).
+
+**Bug 2 — dead-cell reuse handed stack memory to an escaping value.** This one
+is the most subtle, and it is a three-way interaction between stack allocation,
+the *destructive-update* transformation, and *dead-cell reuse* (CTGC) — all of
+which happen in the same Transform pass, in that order, **after**
+`computeEscapedVars`.
+
+Wybe already has a compile-time-garbage-collection optimisation: when a
+structure is provably dead (read by an `lpvm access` while unaliased and final),
+its memory is recorded as a *dead cell* and the next same-sized `alloc` is
+rewritten to **reuse** it (an `llvm sub` off the dead cell's address) instead of
+allocating fresh. Crucially, that reuse path in
+[`transformPrim`](/src/Transform.hs) does **not** consult the escape analysis.
+
+Now consider:
+
+```wybe
+resource saved:cell = cell(0, 0)
+def {noinline} stash(x:int) use !saved {
+   ?c = cell(x, x)    # c is local -> escape analysis STACK-allocates it
+   ?tmp = c^a         # read c -> c is now a dead cell
+   ?d = cell(tmp, x)  # same size as c -> reuses c's memory
+   ?saved = d         # d ESCAPES via the global
+}
+```
+
+The two field writes that build `c` become *destructive* mutates (set after
+escape analysis), so the dead cell's memory *is* `c`'s stack slot. Dead-cell
+reuse then gives that stack memory to `d` — which escapes into `saved`. The
+global ends up pointing into a torn-down frame: a use-after-free that prints
+silent garbage (and only with `stack-alloc` enabled).
+
+The fix threads a set of **stack variables** through the transform: the result
+of every `{stack}` alloc, plus anything that comes to share that memory through
+a destructive mutate or a value-preserving op (`lpvm cast` / `llvm move`). At a
+reuse site, if the dead cell is a stack variable the reuse is **refused** and a
+fresh allocation is emitted instead — which the escape check then heap-allocates
+(because the new value escapes) or stack-allocates afresh (if it is local).
+Reuse of *heap* dead cells — the common and valuable CTGC case, e.g. a
+functional update that returns the updated record — is unaffected, because such
+dead cells never enter the stack-variable set.
+
+The regression test is
+[`test-cases/execution/stack_alloc_reuse_escape.wybe`](/test-cases/execution/stack_alloc_reuse_escape.wybe)
+(catches the miscompilation at runtime; the bug is invisible in the dumped IR
+beyond the presence of an `llvm sub` reuse).
+
+### Audit of every transformation that runs *after* the escape decision
+
+Both bugs above were *later passes re-routing memory the escape analysis had
+already judged*. To be confident there are no more, here is every transformation
+that touches a proc body after `computeEscapedVars` has fixed the `{stack}` flag,
+with the reason each is sound. (Pass order, from
+[`Builder.hs`](/src/Builder.hs): OPTIMISE/inlining → ANALYSIS → TRANSFORM/escape
+analysis → LAST CALL ANALYSIS, then later the top-down multi-specialisation pass
+re-runs TRANSFORM.)
+
+1. **Inlining** runs *before* escape analysis, so an inlined alloc is judged in
+  the caller's context. Inline procs are themselves never transformed
+  (`transformProcBody` rejects them). Nothing to break.
+2. **Destructive-update transformation** (same pass, after the escape set is
+  computed). `computeEscapedVars` already treats a mutate's input as escaping
+  whenever its output does, *regardless of the destr flag*, so turning a mutate
+  destructive never enlarges the set of reachable-after-return values.
+3. **Dead-cell reuse (CTGC)** — Bug 2. Fixed by the stack-variable set.
+4. **Last-call analysis: `FlowOut` → `FlowOutByReference` on the proc's output
+  param.** When the specz pass re-runs `computeEscapedVars` on the rewritten
+  body, `isOutputFlow FlowOutByReference` is `True`, so the param is still seed 1
+  — the escaped set cannot shrink.
+5. **Last-call analysis: `FlowTakeReference` on a mutate member + a resulting
+  tail call.** This hands the *address of a struct field* to the callee. It is
+  sound because **every struct LCA take-references is connected to the proc's
+  output** (that connection is precisely why the deferral is valid), so escape
+  analysis always heap-allocates it — verified empirically: the canonical
+  "build a struct, fill its non-first field with the last call's result, return
+  it" pattern emits `wybe_malloc`, never `{stack}`. The only way to get a *local*
+  (non-escaping) struct in that position is for its post-call write to be dead,
+  and a dead mutate is eliminated by the backward pass *before* LCA sees it
+  (also verified: the body collapses to just the tail call). A latent
+  fragility remains — `propagateStackAlloced` (§8) was not applied across the
+  `llvm add` that computes a non-zero-offset interior pointer, so the LLVM-level
+  tail-call guard had an asymmetry (offset 0 protected, offset ≠ 0 not). It is
+  unreachable today for the reason just given, but a one-line defensive
+  propagation now closes it so the guard does not silently depend on the
+  escape-analysis ⟺ LCA invariant holding forever.
+6. **`convertOutByRefArg` allocating a fresh slot** for an out-by-reference arg
+  at a *non*-tail call site stack-allocates a temporary, records it, and
+  suppresses the call's tail marker (it must load the result afterward). Sound.
+7. **The multi-specialisation top-down re-run of TRANSFORM.** It re-runs the same
+  conservative `computeEscapedVars` on the LCA-rewritten body. A specialised
+  alias map can only make *more* mutates destructive or enable *more* reuse —
+  neither of which shrinks the escaped set (point 2) and the latter is guarded
+  (point 3). It cannot newly stack-allocate something an earlier pass kept on the
+  heap and LCA then relied on.
+8. **LLVM tail-call optimisation** itself is the headline interaction, handled by
+  `tailMarker`/`stackAllocedVars` — see §8.
+
+The thread common to all of these: a later pass is only dangerous if it lets a
+stack address reach a point the escape analysis did not model. Each one either
+runs before the analysis, preserves the conservative escaped set when the
+analysis is re-run, or is caught by a dedicated guard (the stack-variable set in
+TRANSFORM, and `stackAllocedVars` in LLVM lowering).
+
+---
+
+## 10. Soundness, informally
+
+Stack allocation of an alloc `A` is sound iff `A`'s address cannot be referenced
+after the procedure returns. The analysis guarantees this by ensuring that if
+`A` could be referenced afterward, `A`'s result variable lands in `escaped`:
+
+- **Returned** → the variable flows to an output parameter; output params are
+ seed 1, and mutate/pass-through edges propagate escape backward to `A`.
+- **Passed to an opaque call** → seed 2 marks it directly.
+- **Stored to a global** → seed 3 marks the stored value; mutate edges propagate
+ to anything embedded in it.
+- **Embedded in an escaping struct** → mutate edges propagate from the struct to
+ the member.
+
+Every escape route from §2 maps onto a seed or an edge, and the seeds are all
+computed over the *whole* body (order-independent), so an escape anywhere in the
+procedure is caught regardless of where the alloc sits relative to it. The
+soundness guarantee therefore rests entirely on `escapedByMutation`
+(`computeEscapedVars`); the order-dependent `escapedByAlias` check is inert for
+alloc results (§4) and contributes nothing, but since it sits in an `||` it can
+only ever *add* escapes, so its presence cannot break soundness.
+
+One caveat completes the argument: a *later* transform must not re-route a
+stack address to a value the escape analysis never saw. Dead-cell reuse (CTGC)
+can do exactly that — it rewrites a fresh alloc to reuse dead memory without
+re-checking escape — so soundness additionally requires that **a stack-allocated
+dead cell is never reused** (§9, Bug 2). With that rule in place, every value
+that reuses memory either reuses heap memory (which outlives the frame) or is
+allocated afresh and re-judged by the escape check.
+
+---
+
+## 11. Trying it yourself
+
+Dump the analysis decisions for a file:
+
+```sh
+cd test-cases
+../wybemk --log=Transform --force-all -n -L ../wybelibs final-dump/stack_alloc.o 2>&1 \
+   | grep -E "escapedVars:|alloc result:"
+```
+
+Each alloc prints a line like:
+
+```
+alloc result: ?tmp#3##0:... | escapedByAlias=False | escapedByMutation=False
+   | constSize=True | withinLimit=True | alreadyStack=False
+   | reuseAvailable=False | reuseIsStack=False => stack-allocate
+```
+
+The decision suffix is one of `=> reuse dead cell`, `=> stack-allocate`, or
+`=> heap-allocate`. `reuseIsStack=True` is the Bug 2 guard firing: a dead cell
+that traces back to a `{stack}` alloc is refused for reuse (so `reuseAvailable`
+is `True` but the alloc still stack- or heap-allocates afresh).
+
+Toggle the optimisation off to compare behaviour:
+
+```sh
+../wybemk --force-all -x no-stack-alloc -L ../wybelibs execution/<name>
+```
+
+Adjust the size threshold:
+
+```sh
+../wybemk --force-all --stack-alloc-limit 256 -L ../wybelibs <target>
+```
 
 ## Types <a id=Types></a>
 ###                 Type Checking Module SCCs

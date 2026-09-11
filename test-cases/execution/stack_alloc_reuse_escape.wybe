@@ -1,0 +1,43 @@
+# Regression test for the interaction between stack allocation, destructive
+# mutate, and dead-cell reuse (CTGC).
+#
+# `stash` builds a cell `c` that never escapes, so escape analysis stack-
+# allocates it.  The destructive-mutate transformation (which runs *after*
+# escape analysis) makes the two field writes update `c` in place, so the
+# final version of `c` *is* the stack memory.  After `c^a` is read, `c` is
+# dead, and dead-cell reuse offers its memory to the next alloc — the cell
+# `d`, which is then stored into the global `saved` and therefore ESCAPES.
+#
+# Reusing `c`'s stack memory for the escaping `d` would leave the global
+# pointing into a torn-down stack frame (use-after-free).  The fix forbids
+# reusing a stack-allocated dead cell: `d` must be heap-allocated instead.
+#
+# This is an *execution* test on purpose: with the bug the dumped IR merely
+# reuses the cell (an `llvm sub`), and the miscompilation only shows up at
+# runtime as garbage once another frame overwrites the freed stack slot.
+
+type cell { pub cell(a:int, b:int) }
+
+resource saved:cell = cell(0, 0)
+
+def {noinline} stash(x:int) use !saved {
+    ?c = cell(x, x)     # local, stack-allocated; dies after the read below
+    ?tmp = c^a          # read c -> c is now a dead cell
+    ?d = cell(tmp, x)   # same size as c -> reuse candidate; escapes below
+    ?saved = d          # d escapes via the global
+}
+
+# Overwrite the previously-used stack region with unrelated data.
+def {noinline} clobber(n:int, ?out:int) {
+    ?acc = 0
+    for ?i in 1..n { ?acc = acc + i }
+    ?out = acc
+}
+
+!stash(42)
+clobber(1000, ?junk)
+use saved in {
+    !println(saved^a)   # must print 42 (not stack garbage)
+    !println(saved^b)   # must print 42
+}
+!println(junk)
