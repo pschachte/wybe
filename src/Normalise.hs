@@ -188,42 +188,44 @@ normaliseTraitImpls = do
 -- resolve to the same specification through qualification, aliases, or
 -- generic-variable canonicalisation.  Keep the earliest local declaration and
 -- warn at the later one.
-insertNormalisedTraitImpl :: Map TraitImplSpec (Placed (Maybe ModSpec))
-    -> (TraitImplSpec, Placed (Maybe ModSpec))
-    -> Compiler (Map TraitImplSpec (Placed (Maybe ModSpec)))
+insertNormalisedTraitImpl :: Map TraitImplSpec KnownTraitImpl
+    -> (TraitImplSpec, KnownTraitImpl)
+    -> Compiler (Map TraitImplSpec KnownTraitImpl)
 insertNormalisedTraitImpl impls candidate@(spec, owner) =
     case Map.lookup spec impls of
         Nothing -> return $ uncurry Map.insert candidate impls
         Just previous
-          | isNothing (content owner) && isNothing (content previous) -> do
+          | isNothing (traitImplMod owner)
+                && isNothing (traitImplMod previous) -> do
                 let (kept, duplicate)
                         | owner `isEarlierThan` previous = (owner, previous)
                         | otherwise = (previous, owner)
-                warnmsg (place duplicate) $
+                warnmsg (traitImplPos duplicate) $
                     "Duplicate trait implementation declaration: " ++ show spec
                 return $ Map.insert spec kept impls
-          | isNothing (content owner) ->
+          | isNothing (traitImplMod owner) ->
                 return $ Map.insert spec owner impls
           | otherwise -> return impls
   where
-    isEarlierThan first second = case (place first, place second) of
-        (Just firstPos, Just secondPos) -> firstPos < secondPos
-        (Just _, Nothing) -> True
-        _ -> False
+    isEarlierThan first second =
+        case (traitImplPos first, traitImplPos second) of
+            (Just firstPos, Just secondPos) -> firstPos < secondPos
+            (Just _, Nothing) -> True
+            _ -> False
 
 
 -- |Resolve an unqualified trait impl specification once its defining module is known.
-normaliseTraitImpl :: TraitImplSpec -> Placed (Maybe ModSpec) -> Compiler (TraitImplSpec, Placed (Maybe ModSpec))
-normaliseTraitImpl ispec@(TraitImplSpec trait typ) mod =
-    case content mod of
-        Just _ -> return (ispec, mod)
+normaliseTraitImpl :: TraitImplSpec -> KnownTraitImpl -> Compiler (TraitImplSpec, KnownTraitImpl)
+normaliseTraitImpl ispec@(TraitImplSpec trait typ) impl =
+    case traitImplMod impl of
+        Just _ -> return (ispec, impl)
         Nothing -> do
             typ' <- lookupType "trait impl" Nothing typ
             trait' <- lookupType "trait impl" Nothing trait
             validTrait <- isTraitType trait'
-            unless validTrait $ errmsg (place mod) $
+            unless validTrait $ errmsg (traitImplPos impl) $
                 "Invalid trait implementation: " ++ show trait' ++ " is not a trait"
-            return (TraitImplSpec trait' typ', mod)
+            return (TraitImplSpec trait' typ', impl)
 
 
 -- |Normalise a nested submodule containing the specified items.

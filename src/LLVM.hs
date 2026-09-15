@@ -1682,9 +1682,9 @@ llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
 llvmValue (ArgVTable info ty) = case info of
     Left ispec -> do
         knownTraitImpls <- lift $ getModuleImplementationField modKnownTraitImpls
-        let opmod = content . trustFromJust ("llvmValue " ++ show info) $ Map.lookup ispec knownTraitImpls
+        let traitImpl = trustFromJust ("llvmValue " ++ show info) $ Map.lookup ispec knownTraitImpls
         thisMod <- lift getModuleSpec
-        let mod = fromMaybe thisMod opmod
+        let mod = traitImplModule thisMod traitImpl
         vTables <- lift $ getModule modVTables `inModule` mod
         let (index, _) = trustFromJust
                 ("llvmValue: missing vtable " ++ show ispec ++ " in "

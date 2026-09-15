@@ -1262,7 +1262,7 @@ typecheckLocalTraitImpls thisMod = do
     logMsg Types "Checking local trait impls:"
     traitImpls <- getModuleImplementationField modKnownTraitImpls
     traitImplProcs <- mapM (uncurry typecheckLocalTraitImpl)
-            $ Map.toList $ Map.filter (isNothing . content) traitImpls
+            $ Map.toList $ Map.filter (isNothing . traitImplMod) traitImpls
     logMsg Types $ "Local trait impls: " ++ show traitImplProcs
     updateModImplementation $ \imp -> imp { modTraitImplProcs = Map.fromList $ catOKs traitImplProcs }
     reexitModule
@@ -1281,7 +1281,7 @@ checkImportedTraitImpls thisMod = do
         $ modNestedIn impl
     let owners = Map.unionWith Set.union directOwners inheritedOwners
         localSpecs = Map.keysSet
-            $ Map.filter (isNothing . content) $ modKnownTraitImpls impl
+            $ Map.filter (isNothing . traitImplMod) $ modKnownTraitImpls impl
         importedOnly = Map.withoutKeys owners localSpecs
     errs <- concat <$> mapM (uncurry (checkImportedTraitImpl thisMod))
         (Map.toAscList importedOnly)
@@ -1305,7 +1305,7 @@ importedTraitImplOwners mods = Map.unionsWith Set.union <$> mapM owners mods
 inheritedTraitImplOwners :: ModSpec -> Compiler (Map TraitImplSpec (Set ModSpec))
 inheritedTraitImplOwners parent = do
     impl <- getLoadedModuleImpln parent
-    return $ Map.map (Set.singleton . fromMaybe parent . content)
+    return $ Map.map (Set.singleton . traitImplModule parent)
         $ modKnownTraitImpls impl
 
 
@@ -1330,11 +1330,11 @@ checkImportedTraitImpl thisMod ispec owners
         return $ (owner,) . Set.fromList <$> procs
 
 
-typecheckLocalTraitImpl :: TraitImplSpec -> Placed (Maybe ModSpec)
+typecheckLocalTraitImpl :: TraitImplSpec -> KnownTraitImpl
                         -> Compiler (MaybeErr (TraitImplSpec, [ProcSpec]))
 typecheckLocalTraitImpl ispec@(TraitImplSpec trait _) traitImpl = do
     let traitMod = trustFromJust "typecheckLocalTraitImpl" (typeModule trait)
-    let pos = place traitImpl
+    let pos = traitImplPos traitImpl
     absProcs <- abstractProcs trait
     matched <- mapM (uncurry (typecheckTraitImplProc pos ispec)) absProcs
     let errs = concatMap errList matched
@@ -2788,7 +2788,7 @@ matchProcSignatures left right =
 
 
 -- |Return true if the first type accepts every value accepted by the second
-moreGeneral :: Map TraitImplSpec (Placed (Maybe ModSpec))
+moreGeneral :: Map TraitImplSpec KnownTraitImpl
                 -> TypeVarDict -> TypeVarDict -> TypeSpec -> TypeSpec -> Bool
 moreGeneral _ _ _ general specific
     | general == specific = True
@@ -2825,7 +2825,7 @@ moreGeneral _ _ _ _ _ = False
 
 -- |Return true if every param type in the first @CallInfo@ is strictly more general
 -- than that in the second @CallInfo@
-paramsMoreGeneral :: Map TraitImplSpec (Placed (Maybe ModSpec))
+paramsMoreGeneral :: Map TraitImplSpec KnownTraitImpl
                        -> (CallInfo, Typing) -> (CallInfo, Typing) -> Bool
 paramsMoreGeneral traitImpls general specific =
     let generalTypes = callInfoTypes $ fst general

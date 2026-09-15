@@ -525,7 +525,7 @@ vtableParamsFor bounds =
 compileLocalVTables :: ModSpec -> Compiler ()
 compileLocalVTables thisMod = do
     reenterModule thisMod
-    traitImpls <- Map.map content <$> getModuleImplementationField modKnownTraitImpls
+    traitImpls <- Map.map traitImplMod <$> getModuleImplementationField modKnownTraitImpls
     let localImpls = Map.toAscList $ Map.filter isNothing traitImpls
     vTables <- Map.fromAscList <$> mapM
         (\(index, (ispec, _)) -> do
@@ -548,7 +548,7 @@ compileExternalVTables thisMod = do
             Set.empty
         collectVTable (ArgVTable (Left ispec) _) = modify $ Set.insert ispec
         collectVTable _ = return ()
-    traitImpls <- Map.map content <$> getModuleImplementationField modKnownTraitImpls
+    traitImpls <- Map.map traitImplMod <$> getModuleImplementationField modKnownTraitImpls
     let addReferenced impls ispec = case Map.lookup ispec traitImpls of
             Nothing -> shouldnt $ "unknown referenced vtable " ++ show ispec
             Just Nothing -> impls
