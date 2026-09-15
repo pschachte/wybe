@@ -641,7 +641,7 @@ typeErrorMessage (ReasonConflictingTraitImpls importingMod
         ++ showModSpec importingMod ++ " to override the imported implementations"
   where
     showImplementation (mod, procs) =
-        "\n    " ++ showModSpec mod ++ " uses {"
+        "\n    " ++ showModSpec mod ++ " provides {"
         ++ intercalate ", " (show <$> Set.toAscList procs) ++ "}"
 
 
