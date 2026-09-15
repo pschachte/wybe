@@ -168,7 +168,7 @@ normaliseItem item@(TraitImpl typ traits pos) = do
     let typ' = fromMaybe (TypeSpec [] currentModuleAlias []) typ
     when (genericType typ') $
         nyi "generic trait implementations"
-    mapM_ (\trait -> addTraitImpl pos (TraitImplSpec trait typ') Nothing) traits
+    mapM_ (\trait -> addTraitImpl pos (TraitImplSpec trait typ')) traits
 normaliseItem (PragmaDecl prag) =
     addPragma prag
 

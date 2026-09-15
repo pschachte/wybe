@@ -1404,15 +1404,15 @@ addProcDef procDef = do
     return spec
 
 
-addTraitImpl :: OptPos -> TraitImplSpec -> Maybe ModSpec -> Compiler ()
-addTraitImpl pos spec mod = do
+addTraitImpl :: OptPos -> TraitImplSpec -> Compiler ()
+addTraitImpl pos spec = do
     knownTraitImpls <- getModuleImplementationField modKnownTraitImpls
     case Map.lookup spec knownTraitImpls of
-        Just _ | isNothing mod ->
+        Just _ ->
             warnmsg pos $
                 "Duplicate trait implementation declaration: " ++ show spec
         _ -> updateImplementation (\imp -> imp {
-            modKnownTraitImpls = Map.insert spec (maybePlace mod pos) $
+            modKnownTraitImpls = Map.insert spec (maybePlace Nothing pos) $
                 modKnownTraitImpls imp })
 
 
