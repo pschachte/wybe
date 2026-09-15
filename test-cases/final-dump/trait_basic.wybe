@@ -10,7 +10,6 @@ def speak_and_describe(x:T<:{trait_import_support.basic_speaker,
                              trait_import_support.basic_named}): string = describe(x)
 
 # The bound on y also constrains x because both use T.
-def type_var_bound_union(x:T<:trait_import_support.basic_speaker,
-                         y:T<:trait_import_support.basic_named): string = describe(x)
+def type_var_bound_union(x:T<:basic_speaker, y:T<:basic_named): string = describe(x)
 
 !println(speak_through_trait(trait_basic_dog("Rex")))

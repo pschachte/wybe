@@ -2,7 +2,7 @@
 
 use trait_import_support.override_named
 
-impl trait_import_support.override_named
+impl override_named
 
 pub constructor trait_override_person(name:string)
 

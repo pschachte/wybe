@@ -3,6 +3,6 @@
 use trait_import_support.default_greeter,
     trait_import_support.default_silent
 
-def greet_through_trait(x:trait_import_support.default_greeter): string = greet(x)
+def greet_through_trait(x:default_greeter): string = greet(x)
 
 !println(greet_through_trait(trait_default_silent))

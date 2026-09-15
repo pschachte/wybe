@@ -2,7 +2,7 @@
 
 use trait_import_support.specificity_printable
 
-impl trait_import_support.specificity_printable
+impl specificity_printable
 
 pub constructor trait_specificity_scalar(value:int)
 
