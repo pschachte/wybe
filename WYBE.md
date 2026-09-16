@@ -1820,6 +1820,55 @@ The implementation procedures are resolved in the module containing the
 matching procedures exist, one is defined locally and others are imported from
 elsewhere, then the local matching procedure is preferred.
 
+The implementation type in an `impl` declaration may itself be generic, so
+that a single declaration covers every instantiation of the type.  Here
+`list(T)` implements the `collection(T)` trait defined earlier, for every
+element type:
+
+```
+impl list(T) <: collection(T)
+
+def insert(!lst:list(T), item:T) { ... }
+def contains(lst:list(T), item:T): bool = ...
+```
+
+Thus `list(int)` implements `collection(int)`, `list(string)` implements
+`collection(string)`, and so on, with a single generic vtable shared by all
+instantiations.
+
+The implementation type may also be a bare type variable, giving a generic
+implementation that applies to any type.  With the `named` trait defined
+earlier, this gives every type a default name:
+
+```
+impl T <: named
+
+def name(x:T): string = "<unknown>"
+```
+
+Every type variable appearing in the trait must also appear in the
+implementation type.  A generic implementation is used only when no
+implementation with an exactly matching type is known.  Thus, with the
+generic implementation of `named` above, the following causes
+`named.name(42)` to use the `int` implementation and return `"int"`, while
+other types continue to use the generic implementation and return
+`"<unknown>"`, regardless of the order in which the two implementations are
+declared:
+
+```
+impl int <: named
+
+def name(x:int): string = "int"
+```
+
+The implementing procedures and functions must match the signatures of the
+specialised abstract procedures and functions.  In particular, a generic
+procedure does not implement a trait for a concrete type: `def name(x:T):
+string` does not satisfy `impl int <: named`.
+
+Trait bounds on type variables, such as `T<:formattable`, are not yet
+supported in generic trait implementations.
+
 ### Default trait implementations
 
 A trait may give an abstract procedure or function a default implementation by

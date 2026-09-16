@@ -1,0 +1,4 @@
+Error detected during type checking of module(s) trait_error_impl_generic_proc, trait_error_impl_generic_proc.maybe_int
+final-dump/trait_error_impl_generic_proc.wybe:8:1: Invalid implementation of trait trait_error_impl_generic_proc.maybe_int for type wybe.int: no matching implementation of proc is_int
+    candidate {test} trait_error_impl_generic_proc.is_int<0>(Type1) -> (Type1) does not match:
+        parameter 1 has type Type1, expected wybe.int

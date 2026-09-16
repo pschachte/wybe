@@ -396,7 +396,12 @@ compileVTableArg typeVarMap (paramVarName,paramVarBound) = do
             return $ ArgVTable (Right $ primParamName param)
                 (Representation CPointer)
         _ -> do
-            let ispec = TraitImplSpec paramVarBound argType
+            knownTraitImpls <- lift $
+                getModuleImplementationField modKnownTraitImpls
+            let requested = TraitImplSpec paramVarBound argType
+                ispec = fst $ trustFromJust
+                    ("compileVTableArg for " ++ show requested) $
+                    lookupTraitImpl requested knownTraitImpls
             return $ ArgVTable (Left ispec) (Representation CPointer)
 
 compileFlowArg :: FlowDirection -> Exp -> OptPos -> ClauseComp [PrimArg]

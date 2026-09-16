@@ -1,0 +1,20 @@
+# A generic trait implementation applies to every instantiation and shares a
+# single generic vtable.
+
+type sequence(T) trait {
+    abstract first(x:_(T)): T
+}
+
+type box(T) {
+    pub box(value:T)
+}
+
+impl box(T) <: sequence(T)
+
+def first(x:box(T)): T = x^value
+
+def int_box(x:int): box(int) = box(x)
+
+?b:box(int) = int_box(42)
+?x:int = sequence.first(b)
+!println(x)

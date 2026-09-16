@@ -24,7 +24,7 @@ module AST (
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TraitSpec, TraitImplSpec(..), KnownTraitImpl(..), traitImplModule,
-  TypeVarBound,
+  TypeVarBound, lookupTraitImpl, specialiseTraitImpl,
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
   genericType, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, isTraitType, typeModule,
@@ -3833,6 +3833,71 @@ data KnownTraitImpl =
 -- given module for a locally declared implementation.
 traitImplModule :: ModSpec -> KnownTraitImpl -> ModSpec
 traitImplModule thisMod = fromMaybe thisMod . traitImplMod
+
+
+
+-- |Look up the declaration that implements the requested trait for the
+-- requested type.  An exact implementation takes precedence over a generic
+-- implementation.
+lookupTraitImpl :: TraitImplSpec -> Map TraitImplSpec a
+                -> Maybe (TraitImplSpec, a)
+lookupTraitImpl requested impls =
+    case Map.lookup requested impls of
+        Just impl -> Just (requested, impl)
+        Nothing -> List.find (matches . fst) $ Map.toList impls
+  where
+    matches declared = isJust $ do
+        bindings <- bindTypeVars Map.empty
+            (implType declared) (implType requested)
+        bindTypeVars bindings (implTrait declared) (implTrait requested)
+
+
+-- |Match a possibly-generic declared type against a requested type, extending
+-- the supplied type-variable bindings.
+bindTypeVars :: Map TypeVarName TypeSpec -> TypeSpec -> TypeSpec
+                 -> Maybe (Map TypeVarName TypeSpec)
+bindTypeVars bindings TypeVariable{typeVariableName=name} requested =
+    case Map.lookup name bindings of
+        Nothing -> Just $ Map.insert name requested bindings
+        Just previous
+            | previous == requested -> Just bindings
+            | TypeVariable{} <- requested -> Just bindings
+            | otherwise -> Nothing
+bindTypeVars bindings (TypeSpec dmod dname dparams)
+                          (TypeSpec rmod rname rparams)
+    | dmod == rmod && dname == rname && sameLength dparams rparams =
+        foldM (uncurry . bindTypeVars) bindings $ zip dparams rparams
+bindTypeVars bindings (HigherOrderType dmods dparams)
+                          (HigherOrderType rmods rparams)
+    | dmods == rmods && sameLength dparams rparams =
+        foldM matchFlow bindings $ zip dparams rparams
+  where
+    matchFlow current (TypeFlow dty dflow, TypeFlow rty rflow)
+        | dflow == rflow = bindTypeVars current dty rty
+        | otherwise = Nothing
+bindTypeVars bindings declared requested
+    | declared == requested = Just bindings
+    | otherwise = Nothing
+
+
+-- |Instantiate a generic implementation declaration for a requested
+-- implementation type.
+specialiseTraitImpl :: TraitImplSpec -> TypeSpec -> Maybe TraitImplSpec
+specialiseTraitImpl declared requestedType = do
+    bindings <- bindTypeVars Map.empty (implType declared) requestedType
+    return $ TraitImplSpec
+        (substTy bindings $ implTrait declared)
+        (substTy bindings $ implType declared)
+  where
+    substTy bindings ty@TypeVariable{typeVariableName=name} =
+        Map.findWithDefault ty name bindings
+    substTy bindings ty@TypeSpec{typeParams=params} =
+        ty { typeParams = substTy bindings <$> params }
+    substTy bindings ty@HigherOrderType{higherTypeParams=flows} =
+        ty { higherTypeParams = substFlow bindings <$> flows }
+    substTy _ ty = ty
+    substFlow bindings flow =
+        flow { typeFlowType = substTy bindings $ typeFlowType flow }
 
 
 -- |A type variable together with the trait it is required to implement.

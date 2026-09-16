@@ -1,0 +1,14 @@
+# Specificity is independent of declaration order.
+
+type maybe_bool trait {
+    abstract is_bool(x:_): bool
+}
+
+impl bool <: maybe_bool
+impl T <: maybe_bool
+
+def is_bool(x:bool): bool = true
+def is_bool(x:T): bool = false
+
+!println(maybe_bool.is_bool(true))
+!println(maybe_bool.is_bool(42))
