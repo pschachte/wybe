@@ -4,7 +4,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int, wybe.char, wybe.array, wybe.machine_word
-use wybe.io
+use wybe.io, wybe.input_stream, wybe.output_stream
 use wybe.eq
 
 pub constructors (T) [] | [head:T | tail:_(T)]

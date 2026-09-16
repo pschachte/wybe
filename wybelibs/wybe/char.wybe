@@ -4,6 +4,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.count, wybe.int, wybe.comparison, wybe.string, wybe.io
+use wybe.input_stream, wybe.output_stream
 use wybe.eq
 
 representation is 8 bit unsigned
@@ -16,6 +17,14 @@ pub def bound_maximum:_ = 255:_
 # Overloaded versions based on an argument
 pub def bound_minimum(x:_):_ = bound_minimum
 pub def bound_maximum(x:_):_ = bound_maximum
+
+
+# Character arithmetic.
+pub def (c:_ + i:int):_ =
+    foreign lpvm cast(foreign llvm add(foreign lpvm cast(c):int,i))
+
+pub def (c1:_ - c2:_):int =
+    foreign lpvm cast(foreign llvm sub(c1, c2))
 
 
 # Bit-shift left and right, shifting zero bits from the end.
@@ -79,11 +88,18 @@ pub def {test,inline} is_alpha(x:_) { is_upper(bitwise_and(x, '\xDF')) }
 
 pub def {test,inline} is_alphanumeric(x:_) { is_digit(x) | is_alpha(x) }
 
-pub def {test} radix_digit(x:_, radix:int, ?value:int) {
+# Return the digit value of character `x` for radix `radix`, or fail if `x` is
+# not a valid digit character for that radix.  `radix` must be between 2 and 36
+# inclusive.  For radix 10, `x` must be <= character `9`; for smaller radix, `x`
+# must be < the digit character for that radix.  For radix > 10, `x` must be a
+# digit character or a letter (upper or lower case) <= the radix-10th letter of
+# the alphabet.
+pub def {partial} radix_digit(x:_, radix:count, ?value:count) {
+    radix >= 2:count & radix <= 36:count
     x >= '0'
     to_upper(!x)
-    ?value = x - '0'
-    ( x <= '9' | ?value = value - ('A'-'9'-1) )
+    ?value = count(x - '0')
+    ( x <= '9' | ?value = value - count('A'-'9'-1) )
     value < radix
 }
 

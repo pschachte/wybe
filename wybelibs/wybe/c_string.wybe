@@ -4,6 +4,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int, wybe.char, wybe.io, wybe.address
+use wybe.input_stream, wybe.output_stream
 
 representation is address
 

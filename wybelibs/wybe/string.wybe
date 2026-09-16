@@ -5,6 +5,7 @@ pragma no_standard_library
 
 use wybe.c_string, wybe.range, wybe.int, wybe.char, wybe.bool, wybe.comparison
 use wybe.control, wybe.io 
+use wybe.input_stream, wybe.output_stream
 use wybe.eq
 
 # Private constructors. This ensures that strings can only be manipulated with

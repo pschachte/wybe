@@ -5,6 +5,7 @@ pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.comparison, wybe.int, wybe.io, wybe.string, wybe.char
 use wybe.control, wybe.c_string, wybe.count
+use wybe.input_stream, wybe.output_stream
 use wybe.eq
 
 representation is 16 bit unsigned
