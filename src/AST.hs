@@ -23,7 +23,8 @@ module AST (
   determinismSeq, determinismProceding, determinismName, determinismCanFail,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TraitSpec, TraitImplSpec(..), TypeVarBound,
+  TraitSpec, TraitImplSpec(..), KnownTraitImpl(..), traitImplModule,
+  TypeVarBound,
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
   genericType, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, isTraitType, typeModule,
@@ -1404,10 +1405,16 @@ addProcDef procDef = do
     return spec
 
 
-addTraitImpl :: OptPos -> TraitImplSpec -> Maybe ModSpec -> Compiler ()
-addTraitImpl pos spec mod = do
-    updateImplementation (\imp -> imp {
-        modKnownTraitImpls = Map.insert spec (maybePlace mod pos) $ modKnownTraitImpls imp })
+addTraitImpl :: OptPos -> TraitImplSpec -> Compiler ()
+addTraitImpl pos spec = do
+    knownTraitImpls <- getModuleImplementationField modKnownTraitImpls
+    case Map.lookup spec knownTraitImpls of
+        Just _ ->
+            warnmsg pos $
+                "Duplicate trait implementation declaration: " ++ show spec
+        _ -> updateImplementation (\imp -> imp {
+            modKnownTraitImpls = Map.insert spec (KnownTraitImpl Nothing pos) $
+                modKnownTraitImpls imp })
 
 
 getParams :: ProcSpec -> Compiler [Param]
@@ -1883,14 +1890,13 @@ data ModuleImplementation = ModuleImplementation {
     modKnownResources :: Map Ident (Set ResourceSpec),
                                               -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec), -- ^Procs visible to this module
-    modKnownTraitImpls :: Map TraitImplSpec (Placed (Maybe ModSpec)),
-      -- ^Trait impls visible to this module.  The `Placed` value always records
-      -- where the impl declaration was defined for error reporting.
-      -- `Maybe ModSpec` indicates whether the trait impl is external:
-      --   `Nothing` means the impl is defined in the current module (local)
-      --   `Just mod` means it is defined in another module (external)
+    modKnownTraitImpls :: Map TraitImplSpec KnownTraitImpl,
+                                              -- ^Trait impls visible to this mod
     modTraitImplProcs :: Map TraitImplSpec [ProcSpec],
-                                              -- Procs that satisfie trait impls
+                                              -- Original procs satisfying impls
+    modVTableProcs :: Map TraitImplSpec [ProcSpec],
+                                              -- Final procs stored in vtables,
+                                              -- including generated adapters
     modForeignObjects:: Set FilePath,         -- ^Foreign object files used
     modForeignLibs:: Set String               -- ^Foreign libraries used
     } deriving (Generic)
@@ -1899,7 +1905,7 @@ emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Set.empty Map.empty Nothing Map.empty Map.empty
                          Map.empty Nothing Map.empty Map.empty Map.empty
-                         Map.empty Map.empty Map.empty Set.empty Set.empty -- Nothing
+                         Map.empty Map.empty Map.empty Map.empty Set.empty Set.empty -- Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
@@ -2087,7 +2093,8 @@ doImport phase mod (imports, _) = do
                             $ importsSelected allImports $ pubProcs fromIFace
     let importedTraitImpls
           | phase == AfterCompleteNormalisation =
-              Map.map (Unplaced . Just) $ traitImpls fromIFace
+              Map.map (\owner -> KnownTraitImpl (Just owner) Nothing)
+              $ traitImpls fromIFace
           | otherwise = Map.empty
     logAST $ "    importing types    : "
              ++ showModSpecs (snd <$> importedTypesAssoc)
@@ -2141,7 +2148,9 @@ importFromSupermodule phase modspec = do
     let knownResources =
             Map.unionWith Set.union (modKnownResources impl) kResources
     let knownProcs = Map.unionWith Set.union (modKnownProcs impl) kProcs
-    let importedTraitImpls = Map.map (fmap (Just . fromMaybe modspec))
+    let importedTraitImpls = Map.map
+            (\timpl -> timpl{ traitImplMod =
+                Just $ traitImplModule modspec timpl })
             (modKnownTraitImpls impl)
         knownTraitImpls
           | phase == AfterCompleteNormalisation =
@@ -2158,7 +2167,7 @@ publishTraitImpls :: Compiler ()
 publishTraitImpls = do
     thisMod <- getModuleSpec
     knownTraitImpls <- getModuleImplementationField modKnownTraitImpls
-    let traitImpls = Map.map (fromMaybe thisMod . content) knownTraitImpls
+    let traitImpls = Map.map (traitImplModule thisMod) knownTraitImpls
     updateModInterface (\int -> int{ traitImpls=traitImpls })
 
 
@@ -3807,6 +3816,24 @@ data TraitImplSpec =
         implType  :: TypeSpec                  -- ^The implmentation type spec
     }
     deriving (Eq,Ord,Generic)
+
+
+-- |A trait implementation known to a module.
+data KnownTraitImpl =
+    KnownTraitImpl {
+        traitImplMod :: Maybe ModSpec,
+            -- ^'Nothing' if the implementation is declared in the current
+            -- module, otherwise the module that provides it
+        traitImplPos :: OptPos
+            -- ^Where the implementation was declared
+    }
+    deriving (Eq,Ord,Generic)
+
+-- |The module providing the given trait implementation, defaulting to the
+-- given module for a locally declared implementation.
+traitImplModule :: ModSpec -> KnownTraitImpl -> ModSpec
+traitImplModule thisMod = fromMaybe thisMod . traitImplMod
+
 
 -- |A type variable together with the trait it is required to implement.
 type TypeVarBound = (TypeVarName, TraitSpec)

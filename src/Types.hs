@@ -256,9 +256,11 @@ typeCheckModSCC scc = do
       intercalate "\n"
        (List.map (("    " ++) . intercalate ", " . List.map show . sccElts)
        ordered)
-    errs <- concat <$> mapM typecheckProcSCC ordered
+    procErrs <- concat <$> mapM typecheckProcSCC ordered
     traitErrs <- concat <$> mapM typecheckLocalTraitImpls scc
-    mapM_ (queueMessage . typeErrorMessage) (errs ++ traitErrs)
+    importedTraitErrs <- concat <$> mapM checkImportedTraitImpls scc
+    mapM_ (queueMessage . typeErrorMessage)
+        (procErrs ++ traitErrs ++ importedTraitErrs)
 
 
 -- |Return the module, name, and defn of all procs in the specified module
@@ -424,6 +426,9 @@ data TypeError = ReasonMessage Message
                    -- ^Trait implementation lacks a matching concrete proc
                | ReasonMultipleTraitImpl TraitImplSpec ProcName OptPos
                    -- ^Multiple concrete procs exist for a trait implementation
+               | ReasonConflictingTraitImpls ModSpec TraitImplSpec
+                   [(ModSpec, Set ProcSpec)] OptPos
+                   -- ^Imported trait implementations resolve to different procs
                deriving (Eq, Ord)
 
 
@@ -625,6 +630,19 @@ typeErrorMessage (ReasonMultipleTraitImpl (TraitImplSpec trait typ) name pos) =
         ++ " for type " ++ show typ
         ++ ": multiple implementations of "
         ++ showProcName name
+typeErrorMessage (ReasonConflictingTraitImpls importingMod
+                  (TraitImplSpec trait typ) implementations pos) =
+    Message Error pos $
+        "Module " ++ showModSpec importingMod
+        ++ " imports conflicting implementations of trait " ++ show trait
+        ++ " for type " ++ show typ ++ ":"
+        ++ concatMap showImplementation implementations
+        ++ "\nDeclare a local implementation in module "
+        ++ showModSpec importingMod ++ " to override the imported implementations"
+  where
+    showImplementation (mod, procs) =
+        "\n    " ++ showModSpec mod ++ " provides {"
+        ++ intercalate ", " (show <$> Set.toAscList procs) ++ "}"
 
 
 -- |Explain why a same-named concrete procedure cannot implement an abstract
@@ -735,6 +753,7 @@ typeErrorPos (ReasonWrongTraitParam _ pos) = pos
 typeErrorPos (ReasonNotATrait _ pos) = pos
 typeErrorPos (ReasonTraitImplMissing _ _ _ pos) = pos
 typeErrorPos (ReasonMultipleTraitImpl _ _ pos) = pos
+typeErrorPos (ReasonConflictingTraitImpls _ _ _ pos) = pos
 
 
 ----------------------------------------------------------------
@@ -1243,18 +1262,79 @@ typecheckLocalTraitImpls thisMod = do
     logMsg Types "Checking local trait impls:"
     traitImpls <- getModuleImplementationField modKnownTraitImpls
     traitImplProcs <- mapM (uncurry typecheckLocalTraitImpl)
-            $ Map.toList $ Map.filter (isNothing . content) traitImpls
+            $ Map.toList $ Map.filter (isNothing . traitImplMod) traitImpls
     logMsg Types $ "Local trait impls: " ++ show traitImplProcs
     updateModImplementation $ \imp -> imp { modTraitImplProcs = Map.fromList $ catOKs traitImplProcs }
     reexitModule
     return $ concatMap errList traitImplProcs
 
 
-typecheckLocalTraitImpl :: TraitImplSpec -> Placed (Maybe ModSpec)
+-- |Check that all independently imported implementations of each trait/type
+-- pair resolve to the same concrete procedures. 
+checkImportedTraitImpls :: ModSpec -> Compiler [TypeError]
+checkImportedTraitImpls [] = return []
+checkImportedTraitImpls thisMod = do
+    reenterModule thisMod
+    impl <- getModuleImplementationField id
+    directOwners <- importedTraitImplOwners $ Map.keys $ modImports impl
+    inheritedOwners <- maybe (return Map.empty) inheritedTraitImplOwners
+        $ modNestedIn impl
+    let owners = Map.unionWith Set.union directOwners inheritedOwners
+        localSpecs = Map.keysSet
+            $ Map.filter (isNothing . traitImplMod) $ modKnownTraitImpls impl
+        importedOnly = Map.withoutKeys owners localSpecs
+    errs <- concat <$> mapM (uncurry (checkImportedTraitImpl thisMod))
+        (Map.toAscList importedOnly)
+    reexitModule
+    return errs
+
+
+-- |Collect the original defining modules advertised by direct imports.
+importedTraitImplOwners :: [ModSpec]
+                        -> Compiler (Map TraitImplSpec (Set ModSpec))
+importedTraitImplOwners mods = Map.unionsWith Set.union <$> mapM owners mods
+  where
+    owners mod = do
+        iface <- modInterface . trustFromJust "importedTraitImplOwners"
+            <$> getLoadingModule mod
+        return $ Map.map Set.singleton $ traitImpls iface
+
+
+-- |A nested module inherits the effective implementations visible in its
+-- parent.  Convert a parent-local marker back to the parent's module spec.
+inheritedTraitImplOwners :: ModSpec -> Compiler (Map TraitImplSpec (Set ModSpec))
+inheritedTraitImplOwners parent = do
+    impl <- getLoadedModuleImpln parent
+    return $ Map.map (Set.singleton . traitImplModule parent)
+        $ modKnownTraitImpls impl
+
+
+-- |Compare the resolved procedure sets for all owners of one imported impl.
+checkImportedTraitImpl :: ModSpec -> TraitImplSpec -> Set ModSpec -> Compiler [TypeError]
+checkImportedTraitImpl thisMod ispec owners
+  | Set.size owners < 2 = return []
+  | otherwise = do
+        implementations <- mapM implementation $ Set.toAscList owners
+        return $ case sequence implementations of
+            Nothing -> []
+            Just impls@((_, firstProcs):rest)
+                | all ((== firstProcs) . snd) rest -> []
+                | otherwise ->
+                    [ReasonConflictingTraitImpls
+                        thisMod ispec impls Nothing]
+            Just [] -> shouldnt "checkImportedTraitImpl: no implementation owners"
+  where
+    implementation owner = do
+        procs <- Map.lookup ispec . modTraitImplProcs
+            <$> getLoadedModuleImpln owner
+        return $ (owner,) . Set.fromList <$> procs
+
+
+typecheckLocalTraitImpl :: TraitImplSpec -> KnownTraitImpl
                         -> Compiler (MaybeErr (TraitImplSpec, [ProcSpec]))
 typecheckLocalTraitImpl ispec@(TraitImplSpec trait _) traitImpl = do
     let traitMod = trustFromJust "typecheckLocalTraitImpl" (typeModule trait)
-    let pos = place traitImpl
+    let pos = traitImplPos traitImpl
     absProcs <- abstractProcs trait
     matched <- mapM (uncurry (typecheckTraitImplProc pos ispec)) absProcs
     let errs = concatMap errList matched
@@ -2708,7 +2788,7 @@ matchProcSignatures left right =
 
 
 -- |Return true if the first type accepts every value accepted by the second
-moreGeneral :: Map TraitImplSpec (Placed (Maybe ModSpec))
+moreGeneral :: Map TraitImplSpec KnownTraitImpl
                 -> TypeVarDict -> TypeVarDict -> TypeSpec -> TypeSpec -> Bool
 moreGeneral _ _ _ general specific
     | general == specific = True
@@ -2745,7 +2825,7 @@ moreGeneral _ _ _ _ _ = False
 
 -- |Return true if every param type in the first @CallInfo@ is strictly more general
 -- than that in the second @CallInfo@
-paramsMoreGeneral :: Map TraitImplSpec (Placed (Maybe ModSpec))
+paramsMoreGeneral :: Map TraitImplSpec KnownTraitImpl
                        -> (CallInfo, Typing) -> (CallInfo, Typing) -> Bool
 paramsMoreGeneral traitImpls general specific =
     let generalTypes = callInfoTypes $ fst general

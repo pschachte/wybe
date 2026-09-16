@@ -1,0 +1,3 @@
+trait
+
+abstract render(x:_): string

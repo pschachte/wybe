@@ -168,7 +168,7 @@ normaliseItem item@(TraitImpl typ traits pos) = do
     let typ' = fromMaybe (TypeSpec [] currentModuleAlias []) typ
     when (genericType typ') $
         nyi "generic trait implementations"
-    mapM_ (\trait -> addTraitImpl pos (TraitImplSpec trait typ') Nothing) traits
+    mapM_ (\trait -> addTraitImpl pos (TraitImplSpec trait typ')) traits
 normaliseItem (PragmaDecl prag) =
     addPragma prag
 
@@ -177,24 +177,55 @@ normaliseItem (PragmaDecl prag) =
 normaliseTraitImpls :: Compiler ()
 normaliseTraitImpls = do
     knownTraitImpls <- getModuleImplementationField modKnownTraitImpls
-    knownTraitImpls' <- Map.fromList <$>
-        traverse (uncurry normaliseTraitImpl) (Map.toList knownTraitImpls)
+    normalised <- traverse (uncurry normaliseTraitImpl)
+        $ Map.toList knownTraitImpls
+    knownTraitImpls' <- foldM insertNormalisedTraitImpl Map.empty normalised
     updateImplementation (\impl -> impl{ modKnownTraitImpls=knownTraitImpls' })
     publishTraitImpls
 
 
+-- |Insert a normalised trait implementation.  Distinct raw declarations can
+-- resolve to the same specification through qualification, aliases, or
+-- generic-variable canonicalisation.  Keep the earliest local declaration and
+-- warn at the later one.
+insertNormalisedTraitImpl :: Map TraitImplSpec KnownTraitImpl
+    -> (TraitImplSpec, KnownTraitImpl)
+    -> Compiler (Map TraitImplSpec KnownTraitImpl)
+insertNormalisedTraitImpl impls candidate@(spec, owner) =
+    case Map.lookup spec impls of
+        Nothing -> return $ uncurry Map.insert candidate impls
+        Just previous
+          | isNothing (traitImplMod owner)
+                && isNothing (traitImplMod previous) -> do
+                let (kept, duplicate)
+                        | owner `isEarlierThan` previous = (owner, previous)
+                        | otherwise = (previous, owner)
+                warnmsg (traitImplPos duplicate) $
+                    "Duplicate trait implementation declaration: " ++ show spec
+                return $ Map.insert spec kept impls
+          | isNothing (traitImplMod owner) ->
+                return $ Map.insert spec owner impls
+          | otherwise -> return impls
+  where
+    isEarlierThan first second =
+        case (traitImplPos first, traitImplPos second) of
+            (Just firstPos, Just secondPos) -> firstPos < secondPos
+            (Just _, Nothing) -> True
+            _ -> False
+
+
 -- |Resolve an unqualified trait impl specification once its defining module is known.
-normaliseTraitImpl :: TraitImplSpec -> Placed (Maybe ModSpec) -> Compiler (TraitImplSpec, Placed (Maybe ModSpec))
-normaliseTraitImpl ispec@(TraitImplSpec trait typ) mod =
-    case content mod of
-        Just _ -> return (ispec, mod)
+normaliseTraitImpl :: TraitImplSpec -> KnownTraitImpl -> Compiler (TraitImplSpec, KnownTraitImpl)
+normaliseTraitImpl ispec@(TraitImplSpec trait typ) impl =
+    case traitImplMod impl of
+        Just _ -> return (ispec, impl)
         Nothing -> do
             typ' <- lookupType "trait impl" Nothing typ
             trait' <- lookupType "trait impl" Nothing trait
             validTrait <- isTraitType trait'
-            unless validTrait $ errmsg (place mod) $
+            unless validTrait $ errmsg (traitImplPos impl) $
                 "Invalid trait implementation: " ++ show trait' ++ " is not a trait"
-            return (TraitImplSpec trait' typ', mod)
+            return (TraitImplSpec trait' typ', impl)
 
 
 -- |Normalise a nested submodule containing the specified items.

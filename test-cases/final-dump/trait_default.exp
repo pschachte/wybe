@@ -8,9 +8,9 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : trait_default.<0>
-  constants       : 0:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_default_silent.greet#adapter<0>], vtableExternal = True, vtableIndex = 0, vtableSpec = trait_default_silent <: trait_default_greeter, vtableMod = ["trait_default_silent"]}
-  imports         : use trait_default_greeter
-                    use trait_default_silent
+  constants       : 0:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_import_support.default_silent.greet#adapter<0>], vtableExternal = True, vtableIndex = 0, vtableSpec = trait_import_support.default_silent <: trait_import_support.default_greeter, vtableMod = ["trait_import_support","default_silent"]}
+  imports         : use trait_import_support.default_greeter
+                    use trait_import_support.default_silent
                     use wybe
   resources       : 
   procs           : 
@@ -21,7 +21,7 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    vtable(global,trait_default_silent <: trait_default_greeter):opaque@0(0:trait_default_silent, ?tmp#0##0:wybe.string) #0 @trait_default:nn:nn
+    vtable(global,trait_import_support.default_silent <: trait_import_support.default_greeter):opaque@0(0:trait_import_support.default_silent, ?tmp#0##0:wybe.string) #0 @trait_default:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @trait_default:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @trait_default:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @trait_default:nn:nn
@@ -30,10 +30,10 @@ module top-level code > public {semipure} (0 calls)
 
 proc greet_through_trait > {inline} (1 calls)
 0: trait_default.greet_through_trait<0>
-greet_through_trait(x##0:Type0<:trait_default_greeter <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+greet_through_trait(x##0:Type0<:trait_import_support.default_greeter <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    ~#vtable##0:opaque@0(~x##0:Type0<:trait_default_greeter, ?#result##0:wybe.string) #0 @trait_default:nn:nn
+    ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.default_greeter, ?#result##0:wybe.string) #0 @trait_default:nn:nn
 
   LLVM code       :
 
@@ -43,15 +43,15 @@ greet_through_trait(x##0:Type0<:trait_default_greeter <{}; {}; {0}>, ?#result##0
 source_filename = "!ROOT!/final-dump/trait_default.wybe"
 target triple   = ????
 
-@"trait_default_silent##vtable#0" = external unnamed_addr constant {ptr}, align 8
+@"trait_import_support#.default_silent##vtable#0" = external unnamed_addr constant {ptr}, align 8
 
-declare external fastcc i64 @"trait_default_silent#.greet#adapter<0>"(i64)
+declare external fastcc i64 @"trait_import_support#.default_silent#.greet#adapter<0>"(i64)
 declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"trait_default#.<0>"() {
-  %"tmp#7##0" = getelementptr inbounds ptr, ptr @"trait_default_silent##vtable#0", i64 0
+  %"tmp#7##0" = getelementptr inbounds ptr, ptr @"trait_import_support#.default_silent##vtable#0", i64 0
   %"tmp#8##0" = load ptr, ptr %"tmp#7##0"
   %"tmp#0##0" = tail call fastcc i64 %"tmp#8##0"()
   tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
@@ -67,12 +67,12 @@ define external fastcc i64 @"trait_default#.greet_through_trait<0>"(i64 %"x##0",
 }
 
 --------------------------------------------------
- Module trait_default_greeter
+ Module trait_import_support.default_greeter
   representation  : (not yet known)
   public submods  : 
   public resources: 
-  public procs    : trait_default_greeter.greet<0>
-                    trait_default_greeter.greet<1>
+  public procs    : trait_import_support.default_greeter.greet<0>
+                    trait_import_support.default_greeter.greet<1>
   constants       : 0:: CStringInfo {cstringChars = "default greeting"}
                     1:: StructInfo {structSize = 16, structData = [IntStructMember 16 8,PointerStructMember c"default greeting"]}
   imports         : use wybe
@@ -80,84 +80,84 @@ define external fastcc i64 @"trait_default#.greet_through_trait<0>"(i64 %"x##0",
   procs           : 
 
 proc greet > public abstract {inline} (0 calls)
-0: trait_default_greeter.greet<0>
-greet(x##0:T<:trait_default_greeter <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+0: trait_import_support.default_greeter.greet<0>
+greet(x##0:T<:trait_import_support.default_greeter <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    ~#vtable##0:opaque@0(~x##0:T<:trait_default_greeter, ?#result##0:wybe.string) #0
+    ~#vtable##0:opaque@0(~x##0:T<:trait_import_support.default_greeter, ?#result##0:wybe.string) #0
 proc greet > public {inline} (0 calls)
-1: trait_default_greeter.greet<1>
-greet([x##0:Type0<:trait_default_greeter <{}; {}; {0}>], ?#result##0:wybe.string, [#vtable##0:opaque])<{}; {}; {}>:
+1: trait_import_support.default_greeter.greet<1>
+greet([x##0:Type0<:trait_import_support.default_greeter <{}; {}; {0}>], ?#result##0:wybe.string, [#vtable##0:opaque])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @trait_default_greeter:nn:nn
+    foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @default_greeter:nn:nn
 
   LLVM code       :
 
 ;; FILE GENERATED BY wybemk XXX
-; ModuleID = 'trait_default_greeter'
+; ModuleID = 'trait_import_support.default_greeter'
 
-source_filename = "!ROOT!/final-dump/trait_default_greeter.wybe"
+source_filename = "!ROOT!/final-dump/trait_import_support/default_greeter.wybe"
 target triple   = ????
 
-@"trait_default_greeter#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"default greeting\00", align 8
-@"trait_default_greeter#constant#1" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"trait_default_greeter#constant#0" }, align 8
+@"trait_import_support.default_greeter#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"default greeting\00", align 8
+@"trait_import_support.default_greeter#constant#1" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"trait_import_support.default_greeter#constant#0" }, align 8
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i64 @"trait_default_greeter#.greet<0>"(i64 %"x##0", ptr %"#vtable##0") {
+define external fastcc i64 @"trait_import_support#.default_greeter#.greet<0>"(i64 %"x##0", ptr %"#vtable##0") {
   %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
   %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
   %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0")
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc i64 @"trait_default_greeter#.greet<1>"() {
-  %"tmp#5##0" = ptrtoint ptr @"trait_default_greeter#constant#1" to i64
+define external fastcc i64 @"trait_import_support#.default_greeter#.greet<1>"() {
+  %"tmp#5##0" = ptrtoint ptr @"trait_import_support.default_greeter#constant#1" to i64
   ret i64 %"tmp#5##0"
 }
 
 --------------------------------------------------
- Module trait_default_silent
+ Module trait_import_support.default_silent
   representation  : 0 bit unsigned
   public submods  : 
   public resources: 
-  public procs    : trait_default_silent.=<0>
-                    trait_default_silent.trait_default_silent<0>
-                    trait_default_silent.~=<0>
-  constants       : 0:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_default_silent.greet#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = trait_default_silent <: trait_default_greeter, vtableMod = ["trait_default_silent"]}
-  imports         : use trait_default_greeter
+  public procs    : trait_import_support.default_silent.=<0>
+                    trait_import_support.default_silent.trait_default_silent<0>
+                    trait_import_support.default_silent.~=<0>
+  constants       : 0:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_import_support.default_silent.greet#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = trait_import_support.default_silent <: trait_import_support.default_greeter, vtableMod = ["trait_import_support","default_silent"]}
+  imports         : use trait_import_support.default_greeter
                     use wybe
   resources       : 
   procs           : 
 
 proc = > public {inline} (1 calls)
-0: trait_default_silent.=<0>
-=([#left##0:trait_default_silent], [#right##0:trait_default_silent], ?#success##0:wybe.bool)<{}; {}; {}>:
+0: trait_import_support.default_silent.=<0>
+=([#left##0:trait_import_support.default_silent], [#right##0:trait_import_support.default_silent], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 proc greet#adapter > {noinline} (0 calls)
-0: trait_default_silent.greet#adapter<0>
-greet#adapter(x##0:T<:trait_default_greeter, ?#result##0:wybe.string)<{}; {}; {}>:
+0: trait_import_support.default_silent.greet#adapter<0>
+greet#adapter(x##0:T<:trait_import_support.default_greeter, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @trait_default_greeter:nn:nn
+    foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @default_greeter:nn:nn
 
 
 proc trait_default_silent > public {inline} (0 calls)
-0: trait_default_silent.trait_default_silent<0>
-trait_default_silent(?#result##0:trait_default_silent)<{}; {}; {}>:
+0: trait_import_support.default_silent.trait_default_silent<0>
+trait_default_silent(?#result##0:trait_import_support.default_silent)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm move(0:trait_default_silent, ?#result##0:trait_default_silent)
+    foreign llvm move(0:trait_import_support.default_silent, ?#result##0:trait_import_support.default_silent)
 
 
 proc ~= > public {inline} (0 calls)
-0: trait_default_silent.~=<0>
-~=([#left##0:trait_default_silent], [#right##0:trait_default_silent], ?#success##0:wybe.bool)<{}; {}; {}>:
+0: trait_import_support.default_silent.~=<0>
+~=([#left##0:trait_import_support.default_silent], [#right##0:trait_import_support.default_silent], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -165,30 +165,30 @@ proc ~= > public {inline} (0 calls)
   LLVM code       :
 
 ;; FILE GENERATED BY wybemk XXX
-; ModuleID = 'trait_default_silent'
+; ModuleID = 'trait_import_support.default_silent'
 
-source_filename = "!ROOT!/final-dump/trait_default_silent.wybe"
+source_filename = "!ROOT!/final-dump/trait_import_support/default_silent.wybe"
 target triple   = ????
 
-@"trait_default_greeter#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"default greeting\00", align 8
-@"trait_default_greeter#constant#1" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"trait_default_greeter#constant#0" }, align 8
-@"trait_default_silent##vtable#0" = unnamed_addr constant {ptr} { ptr @"trait_default_silent#.greet#adapter<0>" }, align 8
+@"trait_import_support.default_greeter#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"default greeting\00", align 8
+@"trait_import_support.default_greeter#constant#1" = private unnamed_addr constant {i64, ptr} { i64 16, ptr @"trait_import_support.default_greeter#constant#0" }, align 8
+@"trait_import_support#.default_silent##vtable#0" = unnamed_addr constant {ptr} { ptr @"trait_import_support#.default_silent#.greet#adapter<0>" }, align 8
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
-define external fastcc i1 @"trait_default_silent#.=<0>"() {
+define external fastcc i1 @"trait_import_support#.default_silent#.=<0>"() {
   ret i1 1
 }
 
-define external fastcc i64 @"trait_default_silent#.greet#adapter<0>"(i64 %"x##0") {
-  %"tmp#2##0" = ptrtoint ptr @"trait_default_greeter#constant#1" to i64
+define external fastcc i64 @"trait_import_support#.default_silent#.greet#adapter<0>"(i64 %"x##0") {
+  %"tmp#2##0" = ptrtoint ptr @"trait_import_support.default_greeter#constant#1" to i64
   ret i64 %"tmp#2##0"
 }
 
-define external fastcc void @"trait_default_silent#.trait_default_silent<0>"() {
+define external fastcc void @"trait_import_support#.default_silent#.trait_default_silent<0>"() {
   ret void
 }
 
-define external fastcc i1 @"trait_default_silent#.~=<0>"() {
+define external fastcc i1 @"trait_import_support#.default_silent#.~=<0>"() {
   ret i1 0
 }

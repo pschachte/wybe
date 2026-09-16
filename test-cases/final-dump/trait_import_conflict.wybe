@@ -1,0 +1,3 @@
+# Different procedure sets make duplicate imported trait impls an error.
+
+use trait_import_support.same_a, trait_import_support.different_b

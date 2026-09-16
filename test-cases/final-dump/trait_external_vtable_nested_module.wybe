@@ -1,7 +1,8 @@
 # Verify that an imported trait implementation is declared only once when a
 # source file contains a submodule.
 
-use trait_basic_dog, trait_basic_speaker
+use trait_import_support.basic_dog,
+    trait_import_support.basic_speaker
 
 pub type wrapper {
     constructor pub wrapper

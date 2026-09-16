@@ -1,0 +1,4 @@
+Error detected during type checking of module(s) trait_impl_duplicate_declaration, trait_impl_duplicate_declaration.printable
+final-dump/trait_impl_duplicate_declaration.wybe:9:1: Invalid implementation of trait trait_impl_duplicate_declaration.printable for type wybe.int: missing required proc render
+final-dump/trait_impl_duplicate_declaration.wybe:10:1: Duplicate trait implementation declaration: int <: printable
+final-dump/trait_impl_duplicate_declaration.wybe:11:1: Duplicate trait implementation declaration: wybe.int <: trait_impl_duplicate_declaration.printable
