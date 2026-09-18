@@ -129,27 +129,27 @@ def fmtnz(n:_, minlength:int, fill:char, base:_):string =
 
 ## Parsing
 
-pub def {partial} parse(!str:string, ?n:_, radix:_) {
-    [?ch|?str] = str
-    radix_digit(ch, radix, ?n)
-    do {while [?ch|?rest] = str
-        while (?digit = radix_digit(ch, radix))
-        ?str = rest
-        ?n = n * radix + digit
-    }
-}
+# pub def {partial} parse(!str:string, ?n:_, radix:_) {
+#     [?ch|?str] = str
+#     radix_digit(ch, radix, ?n)
+#     do {while [?ch|?rest] = str
+#         while (?digit = radix_digit(ch, radix))
+#         ?str = rest
+#         ?n = n * radix + digit
+#     }
+# }
 
-pub def {partial} parse(!str:string, ?n:_) {
-    if {[?ch|?str] = str & ch = '0' ::
-            if {[?ch|?str] = str & to_upper(ch) = 'X' ::
-                parse(!str, ?n, 16:_)
-            | else ::
-                parse(!str, ?n, 8:_)
-            }
-    | else ::
-        parse(!str, ?n, 10:_)
-    }
-}
+# pub def {partial} parse(!str:string, ?n:_) {
+#     if {[?ch|?str] = str & ch = '0' ::
+#             if {[?ch|?str] = str & to_upper(ch) = 'X' ::
+#                 parse(!str, ?n, 16:_)
+#             | else ::
+#                 parse(!str, ?n, 8:_)
+#             }
+#     | else ::
+#         parse(!str, ?n, 10:_)
+#     }
+# }
 
 
 ## I/O
