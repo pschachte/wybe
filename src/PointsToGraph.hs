@@ -46,7 +46,8 @@ module PointsToGraph (
     joinPTG
     ) where
 
-import           AST         (PrimVarName, GlobalInfo, StructID)
+import           AST         (PrimVarName, GlobalInfo, StructID,
+                              FieldKey(..), EscapeState(..))
 import qualified Data.List    as List
 import           Data.Map    (Map)
 import qualified Data.Map    as Map
@@ -87,24 +88,9 @@ newtype Node = Node NodeOrigin
     deriving (Eq, Ord, Show, Generic)
 
 
--- | A field selector.  LPVM addresses fields by byte offset, almost always a
--- compile-time constant (`Field k`).  A non-constant offset (e.g. a dynamic
--- array index) collapses to `FieldAny`, the sound field-insensitive fallback
--- (see readField / writeField for its fan-out / gather semantics).
-data FieldKey
-    = Field !Int   -- ^ a constant byte offset
-    | FieldAny     -- ^ unknown offset: the catch-all, a supertype of every Field
-    deriving (Eq, Ord, Show, Generic)
-
-
--- | Escape lattice (Choi et al.).  The derived Ord gives the lattice order
--- NoEscape < ArgEscape < GlobalEscape, so the join (least upper bound) is `max`
--- and escape can only ever grow.  NoEscape is the optimistic starting point.
-data EscapeState
-    = NoEscape      -- ^ provably local; safe to stack-allocate
-    | ArgEscape     -- ^ escapes only to the caller's frame (via return/out-param)
-    | GlobalEscape  -- ^ globally reachable
-    deriving (Eq, Ord, Show, Generic)
+-- 'FieldKey' and 'EscapeState' now live in "AST" (so the serialized
+-- 'ProcPTGSummary' can reference them without an import cycle) and are
+-- re-exported here for the intraprocedural code that used to find them local.
 
 
 -- | The intraprocedural Points-To Graph.
@@ -245,8 +231,11 @@ readField ptg n key =
     let fields  = Map.findWithDefault Map.empty n (ptgEdges ptg)
         anyBkt  = Map.findWithDefault Set.empty FieldAny fields
     in case key of
-        FieldAny -> Map.foldr Set.union Set.empty fields
-        Field _  -> Set.union (Map.findWithDefault Set.empty key fields) anyBkt
+        FieldAny   -> Map.foldr Set.union Set.empty fields
+        Field _    -> Set.union (Map.findWithDefault Set.empty key fields) anyBkt
+        -- 'FieldIdent' is a summary-only identity edge; a local graph never holds
+        -- one, so a read just returns its (empty) bucket.
+        FieldIdent -> Map.findWithDefault Set.empty key fields
 
 
 -- | Write into a field of a node: @writeField n key S@ adds @S@ to the field's
@@ -264,6 +253,10 @@ writeField n key ns ptg
                     Map.insertWith Set.union FieldAny ns
                         (Map.map (Set.union ns) fields)
                 Field _  ->
+                    Map.insertWith Set.union key ns fields
+                -- 'FieldIdent' is a summary-only identity edge, never written into
+                -- a local graph; store it in its own bucket for totality.
+                FieldIdent ->
                     Map.insertWith Set.union key ns fields
         in ptg { ptgEdges = Map.insert n fields' (ptgEdges ptg) }
 
@@ -416,9 +409,26 @@ queryUnaliased ptg v =
         --   * External: one of @v@'s nodes is reachable from an external sink
         --     (param/return/global/const seeding).  This is conditional on the
         --     maybe-alias param(s) it roots at -> a `requiredParam`.
-        internalContam = Set.intersection vNodes (reachableNodes ptg otherRoots)
-        externalContam = Set.intersection vNodes
-                            (reachableNodes ptg (externalNodes ptg))
+        exts       = externalNodes ptg
+        -- What @v@ forward-reaches (embeds): its own cells plus everything they
+        -- transitively contain.  A destructive operation on @v@ may recurse into
+        -- this embedded memory (e.g. printing a `slice(base,range)` string
+        -- iterates -- and destructively consumes -- the embedded range), so it
+        -- must be treated as aliasing exactly as the co-reference direction is.
+        -- The old union-find got this for free (embedding was a union); the
+        -- field-sensitive graph records a directed edge, so BOTH directions must
+        -- be walked (points_to_graph.md TODO 1, the query's own doc comment).
+        fReach     = reachableNodes ptg vNodes
+        -- Co-reference (something points INTO v) + forward (v embeds something):
+        --   * internal: shared with another *live* variable -> unconditional.
+        --   * external: reaches / reached-from an external sink -> conditional
+        --     on the maybe-alias param(s) it roots at.
+        internalContam = Set.union
+            (Set.intersection vNodes (reachableNodes ptg otherRoots))
+            (Set.intersection fReach otherRoots)
+        externalContam = Set.union
+            (Set.intersection vNodes (reachableNodes ptg exts))
+            (Set.intersection fReach exts)
         classify (Node o) = case rootParamOfOrigin o of
             Just p | p `Set.member` ptgMaybeAliasParams ptg -> Just p
             _                                               -> Nothing
