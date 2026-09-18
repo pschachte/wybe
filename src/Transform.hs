@@ -196,13 +196,15 @@ isAllocOrMutate (PrimForeign "lpvm" "mutate" _ _) = True
 isAllocOrMutate _                                  = False
 
 -- | True for calls whose callee we cannot analyse: user-defined calls
--- (PrimCall), higher-order calls (PrimHigher), and foreign calls to languages
--- other than llvm/lpvm (e.g. C).  Any pointer passed as an input to such a call
--- must be treated as escaping (see computeEscapedVars).
+-- (PrimCall), higher-order calls (PrimHigher), trait method calls
+-- (PrimVirtualCall), and foreign calls to languages other than llvm/lpvm (e.g.
+-- C).  Any pointer passed as an input to such a call must be treated as
+-- escaping (see computeEscapedVars).
 isConservativeCall :: Prim -> Bool
 isConservativeCall PrimCall{}               = True
 isConservativeCall PrimHigher{}             = True
 isConservativeCall (PrimForeign lang _ _ _) = lang /= "llvm" && lang /= "lpvm"
+isConservativeCall PrimVirtualCall{}        = True
 
 -- | True for ops that copy an address into a (possibly different-typed) result
 -- without dereferencing it, so escape must propagate from output to input
