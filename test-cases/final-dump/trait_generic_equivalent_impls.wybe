@@ -1,0 +1,5 @@
+type sequence(T) trait {
+}
+
+impl list(T) <: sequence(T)
+impl list(U) <: sequence(U)

@@ -9,7 +9,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 -- |Support for type checking/inference.
-module Types (validateModExportTypes, typeCheckModSCC) where
+module Types (validateModExportTypes, typeCheckModSCC, canonicalise) where
 
 
 import           AST
@@ -1092,10 +1092,18 @@ mergeTypeVarBounds name ty1 ty2 = do
 unifyTypeVarBounds :: TypeError -> Set TraitSpec -> TypeSpec -> Typed TypeSpec
 unifyTypeVarBounds reason bounds ty = do
     knownTraitImpls <- lift $ getModuleImplementationField modKnownTraitImpls
-    if all (\bound -> Map.member (TraitImplSpec bound ty) knownTraitImpls)
-            (Set.toList bounds)
-        then return ty
-        else invalidTypeError reason
+    let resolve bound = do
+            (declared, _) <- lookupTraitImpl
+                (TraitImplSpec bound ty) knownTraitImpls
+            specialised <- specialiseTraitImpl declared ty
+            return (bound, specialised)
+    case mapM resolve $ Set.toList bounds of
+        Nothing -> invalidTypeError reason
+        Just resolved -> do
+            forM_ resolved $ \(bound, specialised) -> do
+                void $ unifyTypes reason ty $ implType specialised
+                void $ unifyTypes reason bound $ implTrait specialised
+            return ty
 
 invalidTypeError :: TypeError -> Typed TypeSpec
 invalidTypeError reason = typeError reason >> return InvalidType
@@ -1302,15 +1310,17 @@ importedTraitImplOwners mods = Map.unionsWith Set.union <$> mapM owners mods
 
 -- |A nested module inherits the effective implementations visible in its
 -- parent.  Convert a parent-local marker back to the parent's module spec.
-inheritedTraitImplOwners :: ModSpec -> Compiler (Map TraitImplSpec (Set ModSpec))
+inheritedTraitImplOwners :: ModSpec
+                         -> Compiler (Map TraitImplSpec (Set ModSpec))
 inheritedTraitImplOwners parent = do
     impl <- getLoadedModuleImpln parent
-    return $ Map.map (Set.singleton . traitImplModule parent)
+    return $ Map.map (Set.singleton . fromMaybe parent . traitImplMod)
         $ modKnownTraitImpls impl
 
 
 -- |Compare the resolved procedure sets for all owners of one imported impl.
-checkImportedTraitImpl :: ModSpec -> TraitImplSpec -> Set ModSpec -> Compiler [TypeError]
+checkImportedTraitImpl :: ModSpec -> TraitImplSpec -> Set ModSpec
+                       -> Compiler [TypeError]
 checkImportedTraitImpl thisMod ispec owners
   | Set.size owners < 2 = return []
   | otherwise = do
@@ -1367,13 +1377,13 @@ matchTraitImplProc ispec@(TraitImplSpec trait _) absProcSpec absProcDef implProc
     let traitMod = trustFromJust "typecheckLocalTraitImpl" (typeModule trait)
     absProto <- traitImplProcProto ispec absProcDef
     let absProcDef' = absProcDef { procProto = absProto }
-    ((absInfo, implInfo, result), _) <- runStateT
+    ((absInfo, displayImplInfo, result), _) <- runStateT
         (matchTraitImplProc' absProcSpec absProcDef' implProcSpec implProcDef)
         $ initTyping absProcDef' traitMod
 
     return $ case result of
         OK _ -> Right implProcSpec
-        Err errs -> Left $ TraitImplMismatch absInfo implInfo errs
+        Err errs -> Left $ TraitImplMismatch absInfo displayImplInfo errs
 
 
 matchTraitImplProc' :: ProcSpec -> ProcDef -> ProcSpec -> ProcDef
@@ -1382,17 +1392,45 @@ matchTraitImplProc' :: ProcSpec -> ProcDef -> ProcSpec -> ProcDef
 matchTraitImplProc' absProcSpec absProcDef implProcSpec implProcDef = do
     absInfo <- firstInfo absProcDef absProcSpec
     implInfo <- firstInfo implProcDef implProcSpec
+    let displayImplInfo = callInfoWithDeclaredTypes implProcDef implInfo
     let absInfo' = fromMaybe absInfo $ boolFnToTest absInfo
         implInfo' = fromMaybe implInfo $ boolFnToTest implInfo
+        displayImplInfo' = fromMaybe displayImplInfo
+            $ boolFnToTest displayImplInfo
     let pos = procPos absProcDef
         hasBang = fiNeedsResBang absInfo
+    typesMatch <- matchTraitImplTypes absInfo' implInfo'
+    -- A default method is declared against the unspecialised trait type and
+    -- is intentionally instantiated separately for each implementation.
+    defaultImpl <- lift $ isDefaultTraitImpl implInfo
     result <- if matchTraitImplHeaders absInfo' implInfo'
+                    && (typesMatch || defaultImpl)
         then matchTypes (procName absProcDef) (procName implProcDef) pos hasBang
             (fiTypes absInfo) (fiFlows absInfo) implInfo
         else do
             logTyped $ "proc headers mismatched: \n" ++ show absInfo ++ "\n" ++ show implInfo
             return $ Err []
-    return (absInfo', implInfo', result)
+    return (absInfo', displayImplInfo', result)
+
+
+-- |Restore a procedure's declared types for diagnostics.
+callInfoWithDeclaredTypes :: ProcDef -> CallInfo -> CallInfo
+callInfoWithDeclaredTypes def info@FirstInfo{} = do
+    let params = content <$> procProtoParams (procProto def)
+        types = paramType <$> List.filter ((== Ordinary) . paramFlowType) params
+    info { fiTypes = types, fiMatchedTypes = types }
+callInfoWithDeclaredTypes _ info = info
+
+
+-- |A concrete procedure implementing a trait method must have the expected
+-- types, modulo renaming its type variables.
+matchTraitImplTypes :: CallInfo -> CallInfo -> Typed Bool
+matchTraitImplTypes expected actual = do
+    bounds <- gets tvarDict
+    let canonicalTypes info =
+            let ((types, _), _) = canonicalise 0 bounds $ fiTypes info
+            in types
+    return $ canonicalTypes expected == canonicalTypes actual
 
 
 matchTraitImplHeaders :: CallInfo -> CallInfo -> Bool
@@ -2387,12 +2425,17 @@ canonicaliseSingle tvarDict state@(tyMap, canonicalDict) ctr ty@TypeVariable{typ
     case Map.lookup name tyMap of
         Just ty' -> (ty', ctr, state)
         Nothing ->
-            let ty' = TypeVariable (FauxTypeVar ctr) Set.empty
-                bounds = typeVarBoundsIn tvarDict ty
-                canonicalDict' = if Set.null bounds
-                    then canonicalDict
-                    else Map.insert (FauxTypeVar ctr) (Right bounds) canonicalDict
-            in (ty', ctr + 1, (Map.insert name ty' tyMap, canonicalDict'))
+            let canonicalName = FauxTypeVar ctr
+                ty' = TypeVariable canonicalName Set.empty
+                stateWithVar = (Map.insert name ty' tyMap, canonicalDict)
+                bounds = Set.toAscList $ typeVarBoundsIn tvarDict ty
+                (bounds', ctr', (tyMap', canonicalDict')) =
+                    canonicaliseList tvarDict stateWithVar (ctr + 1) bounds
+                canonicalDict'' = if List.null bounds'
+                    then canonicalDict'
+                    else Map.insert canonicalName (Right $ Set.fromList bounds')
+                            canonicalDict'
+            in (ty', ctr', (tyMap', canonicalDict''))
 canonicaliseSingle tvarDict state ctr ty@TypeSpec{typeParams=tys} =
     let (tys', ctr', state') = canonicaliseList tvarDict state ctr tys
     in (ty{typeParams=tys'}, ctr', state')
@@ -2799,7 +2842,8 @@ moreGeneral traitImpls generalDict specificDict general@TypeVariable{} specific 
         specificVar@TypeVariable{} ->
             generalBounds `Set.isSubsetOf`
                 typeVarBoundsIn specificDict specificVar
-        _ -> all (\bound -> Map.member (TraitImplSpec bound specific) traitImpls)
+        _ -> all (\bound -> isJust $
+                    lookupTraitImpl (TraitImplSpec bound specific) traitImpls)
             (Set.toList generalBounds)
 moreGeneral traitImpls generalDict specificDict
         (TypeSpec generalMod generalName generalParams)

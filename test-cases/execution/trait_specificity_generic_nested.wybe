@@ -1,0 +1,21 @@
+# A concrete nested instantiation wins while other instantiations continue to
+# use the generic implementation.
+
+type box(T) {
+    pub box(value:T)
+}
+
+type maybe_box trait {
+    abstract is_box(x:_): bool
+}
+
+impl box(T) <: maybe_box
+impl box(int) <: maybe_box
+
+def is_box(x:box(T)): bool = false
+def is_box(x:box(int)): bool = true
+
+?bool_box:box(bool) = box(true)
+?int_box:box(int) = box(42)
+!println(maybe_box.is_box(bool_box))
+!println(maybe_box.is_box(int_box))

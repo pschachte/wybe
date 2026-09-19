@@ -29,6 +29,7 @@ import Data.Tuple.Select
 import Flatten (flattenProcBody)
 import Options (LogSelection(Normalise))
 import Snippets
+import Types (canonicalise)
 import Util
 import Distribution.Parsec.FieldLineStream (fieldLineStreamEnd)
 import UnivSet (UnivSet(FiniteSet, UniversalSet))
@@ -162,13 +163,25 @@ normaliseItem item@ProcDecl{} = do
 normaliseItem (StmtDecl stmt pos) = do
     logNormalise $ "Normalising statement decl " ++ show stmt
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
-normaliseItem item@(TraitImpl typ traits pos) = do
-    mspec <- getModuleSpec
-    params <- getModule modParams
+normaliseItem (TraitImpl typ traits pos) = do
     let typ' = fromMaybe (TypeSpec [] currentModuleAlias []) typ
-    when (genericType typ') $
-        nyi "generic trait implementations"
+        implVars = typeVarSet typ'
+        traitVars = Set.unions $ typeVarSet <$> traits
+        undeclaredVars = traitVars `Set.difference` implVars
+    unless (Set.null undeclaredVars) $
+        errmsg pos $ "Invalid generic trait implementation: type variable(s) "
+            ++ intercalate ", " (show <$> Set.toAscList undeclaredVars)
+            ++ " not defined in the implementation type"
+    when (hasTypeVarBounds typ' || any hasTypeVarBounds traits) $
+        nyi "type variable bounds in generic trait implementations"
     mapM_ (\trait -> addTraitImpl pos (TraitImplSpec trait typ')) traits
+  where
+    hasTypeVarBounds TypeVariable{typeVariableBounds=bounds} =
+        not $ Set.null bounds
+    hasTypeVarBounds TypeSpec{typeParams=params} = any hasTypeVarBounds params
+    hasTypeVarBounds HigherOrderType{higherTypeParams=flows} =
+        any (hasTypeVarBounds . typeFlowType) flows
+    hasTypeVarBounds _ = False
 normaliseItem (PragmaDecl prag) =
     addPragma prag
 
@@ -218,14 +231,18 @@ insertNormalisedTraitImpl impls candidate@(spec, owner) =
 normaliseTraitImpl :: TraitImplSpec -> KnownTraitImpl -> Compiler (TraitImplSpec, KnownTraitImpl)
 normaliseTraitImpl ispec@(TraitImplSpec trait typ) impl =
     case traitImplMod impl of
-        Just _ -> return (ispec, impl)
+        Just _ -> return (canonicaliseTraitImplSpec ispec, impl)
         Nothing -> do
             typ' <- lookupType "trait impl" Nothing typ
             trait' <- lookupType "trait impl" Nothing trait
             validTrait <- isTraitType trait'
             unless validTrait $ errmsg (traitImplPos impl) $
                 "Invalid trait implementation: " ++ show trait' ++ " is not a trait"
-            return (TraitImplSpec trait' typ', impl)
+            return (canonicaliseTraitImplSpec $ TraitImplSpec trait' typ', impl)
+  where
+    canonicaliseTraitImplSpec (TraitImplSpec trait typ) =
+        let (([typ', trait'], _), _) = canonicalise 0 Map.empty [typ, trait]
+        in TraitImplSpec trait' typ'
 
 
 -- |Normalise a nested submodule containing the specified items.

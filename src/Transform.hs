@@ -203,6 +203,7 @@ isAllocOrMutate _                                  = False
 isConservativeCall :: Prim -> Bool
 isConservativeCall PrimCall{}               = True
 isConservativeCall PrimHigher{}             = True
+isConservativeCall PrimVirtualCall{}        = True
 isConservativeCall (PrimForeign lang _ _ _) = lang /= "llvm" && lang /= "lpvm"
 isConservativeCall PrimVirtualCall{}        = True
 
