@@ -1377,13 +1377,13 @@ matchTraitImplProc ispec@(TraitImplSpec trait _) absProcSpec absProcDef implProc
     let traitMod = trustFromJust "typecheckLocalTraitImpl" (typeModule trait)
     absProto <- traitImplProcProto ispec absProcDef
     let absProcDef' = absProcDef { procProto = absProto }
-    ((absInfo, implInfo, result), _) <- runStateT
+    ((absInfo, displayImplInfo, result), _) <- runStateT
         (matchTraitImplProc' absProcSpec absProcDef' implProcSpec implProcDef)
         $ initTyping absProcDef' traitMod
 
     return $ case result of
         OK _ -> Right implProcSpec
-        Err errs -> Left $ TraitImplMismatch absInfo implInfo errs
+        Err errs -> Left $ TraitImplMismatch absInfo displayImplInfo errs
 
 
 matchTraitImplProc' :: ProcSpec -> ProcDef -> ProcSpec -> ProcDef
@@ -1392,8 +1392,11 @@ matchTraitImplProc' :: ProcSpec -> ProcDef -> ProcSpec -> ProcDef
 matchTraitImplProc' absProcSpec absProcDef implProcSpec implProcDef = do
     absInfo <- firstInfo absProcDef absProcSpec
     implInfo <- firstInfo implProcDef implProcSpec
+    let displayImplInfo = callInfoWithDeclaredTypes implProcDef implInfo
     let absInfo' = fromMaybe absInfo $ boolFnToTest absInfo
         implInfo' = fromMaybe implInfo $ boolFnToTest implInfo
+        displayImplInfo' = fromMaybe displayImplInfo
+            $ boolFnToTest displayImplInfo
     let pos = procPos absProcDef
         hasBang = fiNeedsResBang absInfo
     typesMatch <- matchTraitImplTypes absInfo' implInfo'
@@ -1407,7 +1410,16 @@ matchTraitImplProc' absProcSpec absProcDef implProcSpec implProcDef = do
         else do
             logTyped $ "proc headers mismatched: \n" ++ show absInfo ++ "\n" ++ show implInfo
             return $ Err []
-    return (absInfo', implInfo', result)
+    return (absInfo', displayImplInfo', result)
+
+
+-- |Restore a procedure's declared types for diagnostics.
+callInfoWithDeclaredTypes :: ProcDef -> CallInfo -> CallInfo
+callInfoWithDeclaredTypes def info@FirstInfo{} = do
+    let params = content <$> procProtoParams (procProto def)
+        types = paramType <$> List.filter ((== Ordinary) . paramFlowType) params
+    info { fiTypes = types, fiMatchedTypes = types }
+callInfoWithDeclaredTypes _ info = info
 
 
 -- |A concrete procedure implementing a trait method must have the expected
