@@ -2742,7 +2742,7 @@ matchModeList modes info@FirstInfo{fiPartial=False, fiFlows=flows}
     = sameLength modes flows
     -- Check that no param is in/in-out where formal is out,
     -- ie formal = ParamOut ==> actual = ParamOut
-      && all ((/=ParamOut) . snd ||| (==ParamOut) . fst) 
+      && all ((/=ParamOut) . snd ||| (==ParamOut) . fst)
             (actualFormalModes modes info)
 matchModeList _ _ = False
 
@@ -2812,18 +2812,15 @@ paramsMoreGeneral traitImpls general specific =
         specificTypes = callInfoTypes $ fst specific
         generalDict = tvarDict $ snd general
         specificDict = tvarDict $ snd specific
-        accepts gd sd generalPatterns specificPatterns =
-            typePatternsMoreGeneral gd sd satisfiesBound
-                generalPatterns specificPatterns
         satisfiesBound bound ty = case resolveTraitImpl
                 (TraitImplSpec bound ty) traitImpls of
             TraitImplResolved{} -> True
             _ -> False
+        callInfoTypes FirstInfo{fiTypes=types} = types
+        callInfoTypes _ = []
+        accepts gd sd = typePatternsMoreGeneral gd sd satisfiesBound
     in accepts generalDict specificDict generalTypes specificTypes
         && not (accepts specificDict generalDict specificTypes generalTypes)
-  where
-    callInfoTypes FirstInfo{fiTypes=types} = types
-    callInfoTypes _ = []
 
 
 -- |Choose a unique candidate whose parameter types are strictly less general
