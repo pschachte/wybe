@@ -388,48 +388,64 @@ compileVTableArg :: Map TypeVarName TypeSpec -> TypeVarBound
                  -> ClauseComp ([Prim], PrimArg)
 compileVTableArg typeVarMap (paramVarName,paramVarBound) = do
     let argType = trustFromJust "compileVTableArg" $ Map.lookup paramVarName typeVarMap
-    case argType of
-        TypeVariable argVarName _ -> do
-            vTableParamDict <- gets vTableParamDict
-            let boundedVarInProc = (argVarName, paramVarBound)
-                sameTraitParams =
-                    [ param
-                    | ((name, bound), param) <- Map.toList vTableParamDict
-                    , name == argVarName
-                    , typeModule bound == typeModule paramVarBound
-                    ]
-                param = fromMaybe
-                    (case sameTraitParams of
-                        [matching] -> matching
-                        _ -> shouldnt $ "compileVTableArg for vtable: "
-                            ++ show boundedVarInProc)
-                    (Map.lookup boundedVarInProc vTableParamDict)
-            return ([], primParamToArg param)
-        _ -> compileConcreteVTableArg $ TraitImplSpec paramVarBound argType
+    compileRequirementVTable $ TraitImplSpec paramVarBound argType
 
 
--- |Compile the vtable for a concrete trait requirement. Ordinary impls use
--- their global table directly; partial impls recursively construct a complete
--- call-local table from their global method template and constraint tables.
-compileConcreteVTableArg :: TraitImplSpec -> ClauseComp ([Prim], PrimArg)
-compileConcreteVTableArg requested = do
+-- |Compile the vtable for a trait requirement. A requirement on one of this
+-- proc's type variables uses the vtable passed in for that bound, if there is
+-- one; any other requirement is resolved to a trait implementation.
+compileRequirementVTable :: TraitImplSpec -> ClauseComp ([Prim], PrimArg)
+compileRequirementVTable
+        requested@(TraitImplSpec bound TypeVariable{typeVariableName=name}) = do
+    param <- localVTableParam name bound
+    case param of
+        Just param' -> return ([], primParamToArg param')
+        Nothing -> compileImplVTableArg requested
+compileRequirementVTable requested = compileImplVTableArg requested
+
+
+-- |The vtable param of this proc for the specified bound on one of its type
+-- variables.  A bound with the same trait but different trait arguments is
+-- accepted if it is the only such param.
+localVTableParam :: TypeVarName -> TraitSpec -> ClauseComp (Maybe PrimParam)
+localVTableParam name bound = do
+    vTableParamDict <- gets vTableParamDict
+    let sameTraitParams =
+            [ param
+            | ((name', bound'), param) <- Map.toList vTableParamDict
+            , name' == name
+            , typeModule bound' == typeModule bound
+            ]
+    return $ case Map.lookup (name, bound) vTableParamDict of
+        Just param -> Just param
+        Nothing -> case sameTraitParams of
+            [matching] -> Just matching
+            _ -> Nothing
+
+
+-- |Compile the vtable for a trait requirement by resolving it to a trait
+-- implementation. Ordinary impls use their global table directly; partial
+-- impls construct a complete call-local table from their global method
+-- template and the vtables of their constraints.
+compileImplVTableArg :: TraitImplSpec -> ClauseComp ([Prim], PrimArg)
+compileImplVTableArg requested = do
     knownTraitImpls <- lift $ getModuleImplementationField modKnownTraitImpls
     let (declared, impl) = case resolveTraitImpl requested knownTraitImpls of
             TraitImplResolved spec value -> (spec, value)
             TraitImplNotFound -> shouldnt $
-                "compileConcreteVTableArg: no implementation for "
+                "compileImplVTableArg: no implementation for "
                     ++ show requested
             TraitImplAmbiguous ambiguousReq candidates -> shouldnt $
-                "compileConcreteVTableArg: ambiguous implementation for "
+                "compileImplVTableArg: ambiguous implementation for "
                     ++ show ambiguousReq ++ ": " ++ show candidates
     thisMod <- lift getModuleSpec
     let definingMod = fromMaybe thisMod $ traitImplMod impl
     vtables <- lift $ getModule modVTables `inModule` definingMod
     let (_, structID) = trustFromJust
-            ("compileConcreteVTableArg vtable for " ++ show declared) $
+            ("compileImplVTableArg vtable for " ++ show declared) $
             Map.lookup declared vtables
     info <- lift $ trustFromJustM
-        ("compileConcreteVTableArg metadata for " ++ show declared) $
+        ("compileImplVTableArg metadata for " ++ show declared) $
         lookupConstInfo structID
     let (methodCount, constraints) = case info of
             VTableInfo{vtableData=methods,
@@ -440,7 +456,7 @@ compileConcreteVTableArg requested = do
             constraints declared requested
         template = ArgGlobal (GlobalVTable declared) (Representation CPointer)
     if List.null requiredConstraints then return ([], template) else do
-        compiledConstraints <- mapM compileConcreteVTableArg requiredConstraints
+        compiledConstraints <- mapM compileRequirementVTable requiredConstraints
         resultName <- nextVar $ vtableNamePrefix ++ "runtime"
         let resultOut = ArgVar resultName (Representation CPointer)
                 FlowOut VTable False
