@@ -24,7 +24,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm make_vtable(global vtable trait_partial_impl.hashmap(Type0<:trait_partial_impl.hash, Type1) <: trait_partial_impl.mapping(Type0, Type1):opaque, 1:wybe.int, global vtable wybe.int <: trait_partial_impl.hash:opaque, ?#vtableruntime##0:opaque) @trait_partial_impl:nn:nn
+    foreign lpvm make_vtable(vtable trait_partial_impl.hashmap(Type0<:trait_partial_impl.hash, Type1) <: trait_partial_impl.mapping(Type0, Type1):opaque, 1:wybe.int, vtable wybe.int <: trait_partial_impl.hash:opaque, ?#vtableruntime##0:opaque) @trait_partial_impl:nn:nn
     trait_partial_impl.mapping.key_hash<0>(trait_partial_impl#constant#2:trait_partial_impl.hashmap(wybe.int, wybe.float), 42:wybe.int, ?tmp#1##0:wybe.int, ~#vtableruntime##0:opaque)<{}; {}; {0, 1}> #1 @trait_partial_impl:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @trait_partial_impl:nn:nn
     foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @trait_partial_impl:nn:nn

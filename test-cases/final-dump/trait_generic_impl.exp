@@ -21,7 +21,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    trait_generic_impl.sequence.first<0>(42:trait_generic_impl.box(wybe.int), ?tmp#1##0:wybe.int, global vtable trait_generic_impl.box(Type0) <: trait_generic_impl.sequence(Type0):opaque)<{}; {}; {0}> #1 @trait_generic_impl:nn:nn
+    trait_generic_impl.sequence.first<0>(42:trait_generic_impl.box(wybe.int), ?tmp#1##0:wybe.int, vtable trait_generic_impl.box(Type0) <: trait_generic_impl.sequence(Type0):opaque)<{}; {}; {0}> #1 @trait_generic_impl:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @trait_generic_impl:nn:nn
     foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @trait_generic_impl:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @trait_generic_impl:nn:nn

@@ -5394,7 +5394,7 @@ instance Show StringVariant where
 instance Show GlobalInfo where
     show (GlobalResource res) = "<<" ++ show res ++ ">>"
     show (GlobalVariable res) = "@" ++ res
-    show (GlobalVTable res) = "global vtable " ++ show res
+    show (GlobalVTable res) = "vtable " ++ show res
 
 
 showMap :: String -> String -> String -> (k->String) -> (v->String)

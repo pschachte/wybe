@@ -21,7 +21,7 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    global vtable trait_import_support.default_silent <: trait_import_support.default_greeter:opaque@0(0:trait_import_support.default_silent, ?tmp#0##0:wybe.string, global vtable trait_import_support.default_silent <: trait_import_support.default_greeter:opaque) #0 @trait_default:nn:nn
+    vtable trait_import_support.default_silent <: trait_import_support.default_greeter:opaque@0(0:trait_import_support.default_silent, ?tmp#0##0:wybe.string, vtable trait_import_support.default_silent <: trait_import_support.default_greeter:opaque) #0 @trait_default:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @trait_default:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @trait_default:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @trait_default:nn:nn

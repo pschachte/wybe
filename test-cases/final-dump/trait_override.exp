@@ -204,7 +204,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @trait_override:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @trait_override:nn:nn
     foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_override:nn:nn
-    global vtable trait_import_support.override_person <: trait_import_support.override_named:opaque@0(~tmp#0##0:trait_import_support.override_person, ?tmp#2##0:wybe.string, global vtable trait_import_support.override_person <: trait_import_support.override_named:opaque) #0 @trait_override:nn:nn
+    vtable trait_import_support.override_person <: trait_import_support.override_named:opaque@0(~tmp#0##0:trait_import_support.override_person, ?tmp#2##0:wybe.string, vtable trait_import_support.override_person <: trait_import_support.override_named:opaque) #0 @trait_override:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @trait_override:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @trait_override:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @trait_override:nn:nn

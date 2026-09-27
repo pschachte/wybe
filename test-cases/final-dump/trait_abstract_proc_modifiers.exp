@@ -25,7 +25,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    trait_abstract_proc_modifiers.matcher.matches<0>(42:wybe.int, ?tmp#2##0:wybe.bool, global vtable wybe.int <: trait_abstract_proc_modifiers.matcher:opaque)<{}; {}; {0}> #0 @trait_abstract_proc_modifiers:nn:nn
+    trait_abstract_proc_modifiers.matcher.matches<0>(42:wybe.int, ?tmp#2##0:wybe.bool, vtable wybe.int <: trait_abstract_proc_modifiers.matcher:opaque)<{}; {}; {0}> #0 @trait_abstract_proc_modifiers:nn:nn
     factored ~tmp#2##0:wybe.bool of
       ?tmp#18##0:wybe.string <- trait_abstract_proc_modifiers#constant#5[PointerStructMember "not matched",PointerStructMember "matched"]
         wybe.string.print<0>(~tmp#18##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @trait_abstract_proc_modifiers:nn:nn

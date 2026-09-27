@@ -27,7 +27,7 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm cast("John":wybe.string, ?tmp#14##0:trait_multiple_trait_params.student) @trait_multiple_trait_params:nn:nn
-    trait_multiple_trait_params.group.add_person<0>(0:trait_multiple_trait_params.school, ?school1##1:trait_multiple_trait_params.school, ~tmp#14##0:trait_multiple_trait_params.student, global vtable trait_multiple_trait_params.school <: trait_multiple_trait_params.group:opaque, global vtable trait_multiple_trait_params.student <: trait_multiple_trait_params.person:opaque)<{}; {}; {0, 2}> #4 @trait_multiple_trait_params:nn:nn
+    trait_multiple_trait_params.group.add_person<0>(0:trait_multiple_trait_params.school, ?school1##1:trait_multiple_trait_params.school, ~tmp#14##0:trait_multiple_trait_params.student, vtable trait_multiple_trait_params.school <: trait_multiple_trait_params.group:opaque, vtable trait_multiple_trait_params.student <: trait_multiple_trait_params.person:opaque)<{}; {}; {0, 2}> #4 @trait_multiple_trait_params:nn:nn
     foreign lpvm cast(~school1##1:trait_multiple_trait_params.school, ?tmp#4##0:wybe.list(wybe.string)) @trait_multiple_trait_params:nn:nn
     trait_multiple_trait_params.#cont#1<0>(~tmp#4##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @trait_multiple_trait_params:nn:nn
 

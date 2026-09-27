@@ -20,7 +20,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    trait_abstract_proc_default.printable.print_value<0>(42:wybe.int, global vtable wybe.int <: trait_abstract_proc_default.printable:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #0 @trait_abstract_proc_default:nn:nn
+    trait_abstract_proc_default.printable.print_value<0>(42:wybe.int, vtable wybe.int <: trait_abstract_proc_default.printable:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #0 @trait_abstract_proc_default:nn:nn
 
 
 proc print_value#adapter > {noinline} (0 calls)

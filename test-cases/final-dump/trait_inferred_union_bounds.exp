@@ -24,8 +24,8 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    trait_inferred_union_bounds.print_larger<0>(3:wybe.int, 5:wybe.int, global vtable wybe.int <: trait_inferred_union_bounds.comparable:opaque, global vtable wybe.int <: trait_inferred_union_bounds.printable:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @trait_inferred_union_bounds:nn:nn
-    trait_inferred_union_bounds.print_larger<0>(3.14:wybe.float, 1.0:wybe.float, global vtable wybe.float <: trait_inferred_union_bounds.comparable:opaque, global vtable wybe.float <: trait_inferred_union_bounds.printable:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @trait_inferred_union_bounds:nn:nn
+    trait_inferred_union_bounds.print_larger<0>(3:wybe.int, 5:wybe.int, vtable wybe.int <: trait_inferred_union_bounds.comparable:opaque, vtable wybe.int <: trait_inferred_union_bounds.printable:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @trait_inferred_union_bounds:nn:nn
+    trait_inferred_union_bounds.print_larger<0>(3.14:wybe.float, 1.0:wybe.float, vtable wybe.float <: trait_inferred_union_bounds.comparable:opaque, vtable wybe.float <: trait_inferred_union_bounds.printable:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @trait_inferred_union_bounds:nn:nn
 
 
 proc <#adapter > {noinline} (0 calls)

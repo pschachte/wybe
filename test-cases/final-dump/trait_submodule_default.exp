@@ -21,7 +21,7 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    trait_submodule_default.greeter.greet<0>(42:wybe.int, ?tmp#0##0:wybe.string, global vtable wybe.int <: trait_submodule_default.greeter:opaque)<{}; {}; {0}> #0 @trait_submodule_default:nn:nn
+    trait_submodule_default.greeter.greet<0>(42:wybe.int, ?tmp#0##0:wybe.string, vtable wybe.int <: trait_submodule_default.greeter:opaque)<{}; {}; {0}> #0 @trait_submodule_default:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @trait_submodule_default:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @trait_submodule_default:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @trait_submodule_default:nn:nn

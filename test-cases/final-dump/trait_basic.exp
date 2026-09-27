@@ -25,7 +25,7 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast("Rex":wybe.string, ?tmp#1##0:trait_import_support.basic_dog) @trait_basic:nn:nn
-    global vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker:opaque@0(~tmp#1##0:trait_import_support.basic_dog, ?tmp#0##0:wybe.string, global vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker:opaque) #0 @trait_basic:nn:nn
+    vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker:opaque@0(~tmp#1##0:trait_import_support.basic_dog, ?tmp#0##0:wybe.string, vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker:opaque) #0 @trait_basic:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @trait_basic:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @trait_basic:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @trait_basic:nn:nn

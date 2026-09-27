@@ -21,7 +21,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    trait_submodule_impl_vtable.my_eq.my_equal<0>(1:wybe.int, 2:wybe.int, ?tmp#0##0:wybe.bool, global vtable wybe.int <: trait_submodule_impl_vtable.my_eq:opaque)<{}; {}; {0, 1}> #2 @trait_submodule_impl_vtable:nn:nn
+    trait_submodule_impl_vtable.my_eq.my_equal<0>(1:wybe.int, 2:wybe.int, ?tmp#0##0:wybe.bool, vtable wybe.int <: trait_submodule_impl_vtable.my_eq:opaque)<{}; {}; {0, 1}> #2 @trait_submodule_impl_vtable:nn:nn
     wybe.bool.print<0>(~tmp#0##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @trait_submodule_impl_vtable:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @trait_submodule_impl_vtable:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @trait_submodule_impl_vtable:nn:nn

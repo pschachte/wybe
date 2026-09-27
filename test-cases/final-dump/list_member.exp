@@ -65,7 +65,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>(5:wybe.int, list_member#constant#33:wybe.list(wybe.int), ?tmp#49##0:wybe.bool, global vtable wybe.int <: wybe.eq:opaque) #22 @list_member:nn:nn
+    wybe.list.in<0>(5:wybe.int, list_member#constant#33:wybe.list(wybe.int), ?tmp#49##0:wybe.bool, vtable wybe.int <: wybe.eq:opaque) #22 @list_member:nn:nn
     case ~tmp#49##0:wybe.bool of
     0:
         list_member.#cont#1<0>(list_member#constant#46:wybe.list(wybe.string), list_member#constant#40:wybe.list(wybe.string), list_member#constant#33:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26
@@ -84,7 +84,7 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1(fruit##0:wybe.list(wybe.string), langs##0:wybe.list(wybe.string), lst##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>(8:wybe.int, ~lst##0:wybe.list(wybe.int), ?tmp#48##0:wybe.bool, global vtable wybe.int <: wybe.eq:opaque) #0 @list_member:nn:nn
+    wybe.list.in<0>(8:wybe.int, ~lst##0:wybe.list(wybe.int), ?tmp#48##0:wybe.bool, vtable wybe.int <: wybe.eq:opaque) #0 @list_member:nn:nn
     case ~tmp#48##0:wybe.bool of
     0:
         list_member.#cont#2<0>(~fruit##0:wybe.list(wybe.string), ~langs##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
@@ -103,7 +103,7 @@ proc #cont#2 > {semipure} (2 calls)
 #cont#2(fruit##0:wybe.list(wybe.string), langs##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>("Wybe":wybe.string, ~langs##0:wybe.list(wybe.string), ?tmp#47##0:wybe.bool, global vtable wybe.string <: wybe.eq:opaque) #1 @list_member:nn:nn
+    wybe.list.in<0>("Wybe":wybe.string, ~langs##0:wybe.list(wybe.string), ?tmp#47##0:wybe.bool, vtable wybe.string <: wybe.eq:opaque) #1 @list_member:nn:nn
     case ~tmp#47##0:wybe.bool of
     0:
         list_member.#cont#3<0>(~fruit##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
@@ -122,7 +122,7 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3(fruit##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>("Wybe":wybe.string, ~fruit##0:wybe.list(wybe.string), ?tmp#46##0:wybe.bool, global vtable wybe.string <: wybe.eq:opaque) #1 @list_member:nn:nn
+    wybe.list.in<0>("Wybe":wybe.string, ~fruit##0:wybe.list(wybe.string), ?tmp#46##0:wybe.bool, vtable wybe.string <: wybe.eq:opaque) #1 @list_member:nn:nn
     case ~tmp#46##0:wybe.bool of
     0:
         list_member.#cont#4<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
