@@ -1875,10 +1875,12 @@ type box(T) {
     pub box(value:T)
 }
 
-impl box(T<:formattable) <: named
+impl box(formattable) <: named
 
-def name(x:box(T<:formattable)): string = fmt(x^value)
+def name(x:box(formattable)): string = fmt(x^value)
 ```
+
+where `box(formattable)` is an abbreviation for `box(T<:formattable)`.
 
 This implementation of `named` applies to `box(int)` if `int` implements
 `formattable`, but not to `box(U)` when `U` does not.  The same bounds must be
@@ -1896,9 +1898,9 @@ the intersection can resolve the ambiguity.  For example, given generic
 `pair(A,B)` and trait `named`:
 
 ```
-impl pair(A<:formattable,B) <: named
-impl pair(A,B<:formattable) <: named
-impl pair(A<:formattable,B<:formattable) <: named
+impl pair(formattable, B) <: named
+impl pair(A, formattable) <: named
+impl pair(A<:formattable, B<:formattable) <: named
 ```
 
 The third declaration is selected when both type arguments implement
