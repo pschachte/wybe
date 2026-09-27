@@ -1888,6 +1888,43 @@ written on the type variables in the implementing procedures and functions.
 Bounds constrain variables in the implementation type; type variables in the
 implemented trait cannot introduce additional bounds.
 
+The implementation type may also be a trait, so that every type implementing
+one trait also implements another:
+
+```
+impl formattable <: named
+
+def name(x:formattable): string = "value " ,, fmt(x)
+```
+
+As with parameter types, a trait used as the implementation type abbreviates a
+type variable bounded by that trait, so the declaration above is equivalent to:
+
+```
+impl T<:formattable <: named
+
+def name(x:T<:formattable): string = "value " ,, fmt(x)
+```
+
+The explicit form allows the type variable to have several bounds, so that the
+implementation applies only to types implementing all of them.  For example,
+any type that has both a name and a price can be listed in a shop:
+
+```
+type priced trait {
+    abstract price(x:_): int
+}
+
+type listable trait {
+    abstract listing(x:_): string
+}
+
+impl T<:{named, priced} <: listable
+
+def listing(x:T<:{named, priced}): string =
+    named.name(x) ,, " costs $(priced.price(x))"
+```
+
 When more than one implementation applies, Wybe selects the unique most
 specific one.  A concrete implementation is more specific than a bounded
 generic implementation, which is more specific than the corresponding

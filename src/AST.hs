@@ -32,6 +32,7 @@ module AST (
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
   genericType, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, isTraitType, typeModule,
+  TraitTypeVars(..), traitTypesToTypeVars,
   VarDict, TypeVarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
   paramTypeFlow, primParamTypeFlow, setParamArgFlowType,
@@ -3217,6 +3218,42 @@ isTraitType typ =
             trait <- getModule modTrait `inModule` mod
             return $ isJust trait
         Nothing -> return False
+
+
+-- |The type variables introduced for trait types used as types, and the
+-- number of the next faux type variable to introduce.
+data TraitTypeVars = TraitTypeVars {
+    traitTypeVarDict :: Map TraitSpec TypeSpec,
+                            -- ^ Generated type variables that look like
+                            -- `Type0<:comparable` for trait types like
+                            -- `comparable`.
+    traitTypeVarCounter :: Int
+                            -- ^ For numbering type variables.
+}
+
+
+-- |Replace each trait type within a type with a type variable bounded by that
+-- trait, so `comparable` means `T<:comparable`.  Type arguments are replaced
+-- before the type containing them.  Every occurrence of the same trait,
+-- across all types converted with the same state, shares one type variable.
+traitTypesToTypeVars :: TypeSpec -> StateT TraitTypeVars Compiler TypeSpec
+traitTypesToTypeVars ty@TypeSpec{typeParams=params} = do
+    params' <- mapM traitTypesToTypeVars params
+    let ty' = ty { typeParams = params' }
+    isTrait <- lift $ isTraitType ty'
+    if not isTrait then return ty' else do
+        dict <- gets traitTypeVarDict
+        case Map.lookup ty' dict of
+            Just var -> return var
+            Nothing -> do
+                next <- gets traitTypeVarCounter
+                let var = TypeVariable (FauxTypeVar next) (Set.singleton ty')
+                put $ TraitTypeVars (Map.insert ty' var dict) (next + 1)
+                return var
+traitTypesToTypeVars ty@HigherOrderType{higherTypeParams=flows} = do
+    tys <- mapM (traitTypesToTypeVars . typeFlowType) flows
+    return ty { higherTypeParams = zipWith setTypeFlowType tys flows }
+traitTypesToTypeVars ty = return ty
 
 
 -- | Return the module of the specified type, if it has one.

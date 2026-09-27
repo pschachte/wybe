@@ -15,7 +15,7 @@ import AST
 import Config (wordSize, wordSizeBytes, availableTagBits,
                tagMask, smallestAllocatedAddress, currentModuleAlias, specialName2, specialName, initProcName, byteBits)
 import Control.Monad
-import Control.Monad.State (gets)
+import Control.Monad.State (gets, evalStateT)
 import Control.Monad.Trans (lift,liftIO)
 import Control.Monad.Extra (concatMapM)
 import Data.List as List
@@ -235,6 +235,8 @@ normaliseTraitImpl ispec@(TraitImplSpec trait typ) impl =
         Just _ -> return (canonicaliseTraitImplSpec ispec, impl)
         Nothing -> do
             typ' <- lookupType "trait impl" Nothing typ
+                >>= flip evalStateT (TraitTypeVars Map.empty 0)
+                    . traitTypesToTypeVars
             trait' <- lookupType "trait impl" Nothing trait
             forM_ (traitImplTypeBounds $ TraitImplSpec trait' typ') $ \(_, bound) -> do
                 validBound <- isTraitType bound

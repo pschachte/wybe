@@ -1,0 +1,4 @@
+# A bounded type variable implementation type must be bounded by a trait.
+type printable trait { abstract show(x:_): string }
+
+impl T<:int <: printable
