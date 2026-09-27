@@ -18,5 +18,3 @@ impl hashmap(K,V<:hash) <: mapping(K,V)
 
 def selection(x:hashmap(K<:hash,V)): int = 1
 def selection(x:hashmap(K,V<:hash)): int = 2
-
-!println("ok")
