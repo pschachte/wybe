@@ -1875,15 +1875,15 @@ type box(T) {
     pub box(value:T)
 }
 
-impl box(formattable) <: named
+impl box(named) <: formattable
 
-def name(x:box(formattable)): string = fmt(x^value)
+def fmt(x:box(named)): string = "box of " ,, name(x^value)
 ```
 
-where `box(formattable)` is an abbreviation for `box(T<:formattable)`.
+where `box(named)` is an abbreviation for `box(T<:named)`.
 
-This implementation of `named` applies to `box(int)` if `int` implements
-`formattable`, but not to `box(U)` when `U` does not.  The same bounds must be
+This implementation of `formattable` applies to `box(int)` if `int` implements
+`named`, but not to `box(U)` when `U` does not.  The same bounds must be
 written on the type variables in the implementing procedures and functions.
 Bounds constrain variables in the implementation type; type variables in the
 implemented trait cannot introduce additional bounds.
@@ -1892,18 +1892,18 @@ The implementation type may also be a trait, so that every type implementing
 one trait also implements another:
 
 ```
-impl formattable <: named
+impl named <: formattable
 
-def name(x:formattable): string = "value " ,, fmt(x)
+def fmt(x:named): string = "<" ,, name(x) ,, ">"
 ```
 
 As with parameter types, a trait used as the implementation type abbreviates a
 type variable bounded by that trait, so the declaration above is equivalent to:
 
 ```
-impl T<:formattable <: named
+impl T<:named <: formattable
 
-def name(x:T<:formattable): string = "value " ,, fmt(x)
+def fmt(x:T<:named): string = "<" ,, name(x) ,, ">"
 ```
 
 The explicit form allows the type variable to have several bounds, so that the
@@ -1932,16 +1932,16 @@ unbounded generic implementation.  Implementations with independent bounds
 may overlap without error, but using a type in their overlap is ambiguous if
 neither implementation is more specific.  A further implementation covering
 the intersection can resolve the ambiguity.  For example, given generic
-`pair(A,B)` and trait `named`:
+`pair(A,B)` and trait `formattable`:
 
 ```
-impl pair(formattable, B) <: named
-impl pair(A, formattable) <: named
-impl pair(A<:formattable, B<:formattable) <: named
+impl pair(named, B) <: formattable
+impl pair(A, named) <: formattable
+impl pair(A<:named, B<:named) <: formattable
 ```
 
 The third declaration is selected when both type arguments implement
-`formattable`; without it, selecting a `named` implementation for such a pair
+`named`; without it, selecting a `formattable` implementation for such a pair
 would be ambiguous.
 
 ### Default trait implementations
