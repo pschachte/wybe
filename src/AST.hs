@@ -32,7 +32,8 @@ module AST (
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
   genericType, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, isTraitType, typeModule,
-  TraitTypeVars(..), traitTypesToTypeVars,
+  TraitTypeVars(..), traitTypesToTypeVars, rejectTraitBounds,
+  traitBoundNotAllowedMsg,
   VarDict, TypeVarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
   paramTypeFlow, primParamTypeFlow, setParamArgFlowType,
@@ -3254,6 +3255,41 @@ traitTypesToTypeVars ty@HigherOrderType{higherTypeParams=flows} = do
     tys <- mapM (traitTypesToTypeVars . typeFlowType) flows
     return ty { higherTypeParams = zipWith setTypeFlowType tys flows }
 traitTypesToTypeVars ty = return ty
+
+
+-- |Report every trait bound within a type declared in a context that does not
+-- allow them, such as "a constructor parameter", and return the type with
+-- those bounds removed.  A trait used as a type is replaced by InvalidType, so
+-- later passes do not report further errors for it.
+rejectTraitBounds :: String -> OptPos -> TypeSpec -> Compiler TypeSpec
+rejectTraitBounds context pos ty@TypeSpec{typeParams=params} = do
+    isTrait <- isTraitType ty
+    if isTrait
+        then do
+            errmsg pos $ traitBoundNotAllowedMsg
+                ("Trait type " ++ show ty) context
+            return InvalidType
+        else do
+            params' <- mapM (rejectTraitBounds context pos) params
+            return ty { typeParams = params' }
+rejectTraitBounds context pos ty@TypeVariable{typeVariableBounds=bounds}
+    | Set.null bounds = return ty
+    | otherwise = do
+        errmsg pos $ traitBoundNotAllowedMsg ("Trait bound " ++ show ty) context
+        return ty { typeVariableBounds = Set.empty }
+rejectTraitBounds context pos ty@HigherOrderType{higherTypeParams=flows} = do
+    tys <- mapM (rejectTraitBounds context pos . typeFlowType) flows
+    return ty { higherTypeParams = zipWith setTypeFlowType tys flows }
+rejectTraitBounds _ _ ty = return ty
+
+
+-- |The message for a trait bound, described by the first argument, written
+-- in a context that does not allow them, such as "a constructor parameter".
+traitBoundNotAllowedMsg :: String -> String -> String
+traitBoundNotAllowedMsg what context =
+    what ++ " is not allowed in " ++ context
+    ++ "; trait bounds are only allowed in procedure and function parameter "
+    ++ "types and trait implementation types"
 
 
 -- | Return the module of the specified type, if it has one.

@@ -911,7 +911,19 @@ typeVarName = takeToken test
 
 -- | Parse a list of comma-separated TypeVarNames, between parentheses
 typeVarNames :: Parser [Ident]
-typeVarNames = option [] (betweenB Paren $ typeVarName `sepBy` comma)
+typeVarNames = option [] (betweenB Paren $ typeParamName `sepBy` comma)
+
+
+-- | Parse a TypeVarName declared as a type parameter, reporting a trait bound
+-- on it, which is not allowed.
+typeParamName :: Parser Ident
+typeParamName = do
+    name <- typeVarName
+    optional $ do
+        pos <- tokenPosition <$> symbol "<:"
+        reportFailure (pos, traitBoundNotAllowedMsg
+            ("Trait bound on type parameter " ++ name) "a type parameter list")
+    return name
 
 
 -- | Parse a module name, any ident that is not a TypeVarName
