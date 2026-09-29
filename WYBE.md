@@ -1775,9 +1775,10 @@ pub def fmt(x:_): string = "Dog($(x^name))"
 
 Each abstract procedure or function in the trait module must have exactly one
 concrete (non-abstract) procedure or function that matches the signature of the
-abstract procedure/function, except that it has a parameter of the concrete type
-wherever the abstract procedure/function has the trait type (or type variable
-with the trait as type bound).  The parameter flows, argument and
+abstract procedure/function, except that every occurrence of the trait type (or
+of a type variable with the trait as type bound) is replaced by the
+implementation type.  The implementation type may be generic, and the trait type
+may occur in any number of parameters.  The parameter flows, argument and
 result types, determinism, purity, and resource use of the concrete
 procedure/function must match the abstract declaration.
 
