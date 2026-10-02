@@ -1,0 +1,11 @@
+# Calling a partial trait implementation with a type argument that doesn't
+# satisfy the implementation's bound is a type error.
+type hash trait { abstract hash(x:_): int }
+type mapping(K) trait { abstract get(x:_(K)): K }
+type hashmap(K) { pub hashmap(value:K) }
+
+impl hashmap(K<:hash) <: mapping(K)
+def get(x:hashmap(K<:hash)): K = x^value
+
+?h:hashmap(float) = hashmap(3.14)
+?x:float = mapping.get(h)

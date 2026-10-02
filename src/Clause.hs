@@ -161,7 +161,7 @@ compileProc proc procID =
         let procName = procProtoName proto
         let params = content <$> procProtoParams proto
         let boundedTypeParams = procBoundedTypeParams proc
-        let vTableParams = vtableParamsFor boundedTypeParams
+        let vTableParams = vtableParamsFor 0 boundedTypeParams
         let vTableParamDict = Map.fromList (zip boundedTypeParams vTableParams)
         modify (\st -> st {nextCallSiteID=procCallSiteCount proc
                           ,vTableParamDict=vTableParamDict})
@@ -214,7 +214,7 @@ compileBody stmts params detism = do
         Cond tst thn els _ _ _ ->
           case content tst of
               TestBool var -> do
-                front <- mapM compileSimpleStmt $ init stmts
+                front <- concat <$> mapM compileSimpleStmt (init stmts)
                 compileCond front (place final) var thn els params detism
               tstStmt ->
                 shouldnt $ "CompileBody of Cond with non-simple test:\n"
@@ -223,7 +223,7 @@ compileBody stmts params detism = do
         call@(ProcCall _ SemiDet _ _) ->
             shouldnt "compileBody of SemiDet call"
         _ -> do
-          prims <- mapM compileSimpleStmt stmts
+          prims <- concat <$> mapM compileSimpleStmt stmts
           end <- closingStmts detism params
           return $ ProcBody (prims++end) NoFork
 
@@ -236,18 +236,14 @@ compileAbstractBody :: ProcSpec -> Int -> [Param] -> Determinism -> ClauseComp P
 compileAbstractBody pSpec index params detism = do
     thisMod <- lift getModuleSpec
     vTableParamDict <- gets vTableParamDict
-    -- Type checking guarantees that exactly one bounded type parameter belongs
-    -- to this trait, so it identifies the vtable used for dispatch.
-    let typeVarBound = trustFromJust "compileAbstractBody" $
-            find (\(_,trait) -> typeModule trait == Just thisMod) (Map.keys vTableParamDict)
-    let vTableParam = trustFromJust "compileAbstractBody" $ Map.lookup typeVarBound vTableParamDict
-    let vTableArg = primParamToArg vTableParam
     procDef <- lift $ getProcDef pSpec
+    let (dispatchBound, forwardedBounds) = methodVTableLayout thisMod procDef
+    let vTableParam = trustFromJust "compileAbstractBody" $ Map.lookup dispatchBound vTableParamDict
+    let vTableArg = primParamToArg vTableParam
     let forwardedVTableArgs =
             [ primParamToArg $ trustFromJust "compileAbstractBody" $
                   Map.lookup boundedTypeParam vTableParamDict
-            | boundedTypeParam <- procBoundedTypeParams procDef
-            , boundedTypeParam /= typeVarBound
+            | boundedTypeParam <- forwardedBounds
             ]
     callSiteID <- gets nextCallSiteID
     impurity <- gets clauseImpurity
@@ -257,7 +253,7 @@ compileAbstractBody pSpec index params detism = do
     args' <- concat <$> mapM (placedApply compileArg) args
     gFlows <- lift $ getProcGlobalFlows pSpec
     let prim = Unplaced $ PrimVirtualCall callSiteID vTableArg index impurity
-                    (args' ++ forwardedVTableArgs) gFlows
+                    (args' ++ [vTableArg] ++ forwardedVTableArgs) gFlows
     finishStmt
     end <- closingStmts detism params
     return $ ProcBody (prim:end) NoFork
@@ -298,15 +294,15 @@ compileCond front pos expr thn els params detism = do
         _ ->
             shouldnt $ "TestBool with invalid argument " ++ show expr
 
-compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
+compileSimpleStmt :: Placed Stmt -> ClauseComp [Placed Prim]
 compileSimpleStmt stmt = do
     logClause $ "Compiling " ++ showStmt 4 (content stmt)
     stmt' <- compileSimpleStmt' (content stmt)
     finishStmt
     logClause $ "Compiled to " ++ show stmt'
-    return $ maybePlace stmt' (place stmt)
+    return $ (`maybePlace` place stmt) <$> stmt'
 
-compileSimpleStmt' :: Stmt -> ClauseComp Prim
+compileSimpleStmt' :: Stmt -> ClauseComp [Prim]
 compileSimpleStmt' call@(ProcCall func _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     callSiteID <- gets nextCallSiteID
@@ -322,18 +318,21 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
             let params = procProtoParams $ procProto procDef
             let boundedTypeParams = procBoundedTypeParams procDef
             let typeVarMap = getTypeVarMap params args
-            vTableArgs <- mapM (compileVTableArg typeVarMap) boundedTypeParams
+            vTables <- mapM (compileVTableArg typeVarMap) boundedTypeParams
+            let (vTablePrims, vTableArgs) =
+                    (concatMap fst vTables, snd <$> vTables)
             logClause $ "vTableArgs for " ++ name ++ ": " ++ show vTableArgs
             flows <- paramFlow <$$> lift (getParams pSpec)
             args' <- concat <$> zipWithM (placedApply . compileFlowArg) flows args 
             gFlows <- lift $ getProcGlobalFlows pSpec
-            return $ PrimCall callSiteID pSpec impurity' (args' ++ vTableArgs) gFlows
+            return $ vTablePrims
+                ++ [PrimCall callSiteID pSpec impurity' (args' ++ vTableArgs) gFlows]
         Higher fn -> do
             let impurity' = max impurity . modifierImpurity . higherTypeModifiers 
                           . trustFromJust ("untyped higher-order term " ++ show fn) . maybeExpType $ content fn
             fn' <- compileHigherFunc fn
             args' <- concat <$> mapM (placedApply compileArg) args 
-            return $ PrimHigher callSiteID fn' impurity' args'
+            return [PrimHigher callSiteID fn' impurity' args']
 compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
     let ty = trustFromJust ("untyped in sizeof " ++ show arg)
            $ maybeExpType $ content arg
@@ -346,10 +345,11 @@ compileSimpleStmt' (ForeignCall "lpvm" "sizeof" flags [arg, out]) = do
     let size = if "unboxed" `elem` flags then unboxedSize else min unboxedSize wordSize
     let sizeInUnit = if "bits" `elem` flags then size else size `ceilDiv` byteBits
     out' <- placedApply compileArg out
-    return $ PrimForeign "lpvm" "cast" [] $ ArgInt (fromIntegral sizeInUnit) intType : out'
+    return [PrimForeign "lpvm" "cast" [] $
+        ArgInt (fromIntegral sizeInUnit) intType : out']
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
-    return $ PrimForeign lang name flags args'
+    return [PrimForeign lang name flags args']
 compileSimpleStmt' (TestBool expr) =
     -- Only for handling a TestBool other than as the condition of a Cond:
     compileSimpleStmt' $ content $ move (boolCast expr) (boolVarSet outputStatusName)
@@ -384,25 +384,88 @@ getTypeVarMap' HigherOrderType{higherTypeParams=formals}
 getTypeVarMap' _ _ = Map.empty
 
 
-compileVTableArg :: Map TypeVarName TypeSpec -> TypeVarBound -> ClauseComp PrimArg
+compileVTableArg :: Map TypeVarName TypeSpec -> TypeVarBound
+                 -> ClauseComp ([Prim], PrimArg)
 compileVTableArg typeVarMap (paramVarName,paramVarBound) = do
     let argType = trustFromJust "compileVTableArg" $ Map.lookup paramVarName typeVarMap
-    case argType of
-        TypeVariable argVarName _ -> do
-            vTableParamDict <- gets vTableParamDict
-            let boundedVarInProc = (argVarName, paramVarBound)
-            let param = trustFromJust ("compileVTableArg for vtable: " ++ show boundedVarInProc) $
-                    Map.lookup boundedVarInProc vTableParamDict
-            return $ ArgVTable (Right $ primParamName param)
-                (Representation CPointer)
-        _ -> do
-            knownTraitImpls <- lift $
-                getModuleImplementationField modKnownTraitImpls
-            let requested = TraitImplSpec paramVarBound argType
-                ispec = fst $ trustFromJust
-                    ("compileVTableArg for " ++ show requested) $
-                    lookupTraitImpl requested knownTraitImpls
-            return $ ArgVTable (Left ispec) (Representation CPointer)
+    compileRequirementVTable $ TraitImplSpec paramVarBound argType
+
+
+-- |Compile the vtable for a trait requirement. A requirement on one of this
+-- proc's type variables uses the vtable passed in for that bound, if there is
+-- one; any other requirement is resolved to a trait implementation.
+compileRequirementVTable :: TraitImplSpec -> ClauseComp ([Prim], PrimArg)
+compileRequirementVTable
+        requested@(TraitImplSpec bound TypeVariable{typeVariableName=name}) = do
+    param <- localVTableParam name bound
+    case param of
+        Just param' -> return ([], primParamToArg param')
+        Nothing -> compileImplVTableArg requested
+compileRequirementVTable requested = compileImplVTableArg requested
+
+
+-- |The vtable param of this proc for the specified bound on one of its type
+-- variables.  A bound with the same trait but different trait arguments is
+-- accepted if it is the only such param.
+localVTableParam :: TypeVarName -> TraitSpec -> ClauseComp (Maybe PrimParam)
+localVTableParam name bound = do
+    vTableParamDict <- gets vTableParamDict
+    let sameTraitParams =
+            [ param
+            | ((name', bound'), param) <- Map.toList vTableParamDict
+            , name' == name
+            , typeModule bound' == typeModule bound
+            ]
+    return $ case Map.lookup (name, bound) vTableParamDict of
+        Just param -> Just param
+        Nothing -> case sameTraitParams of
+            [matching] -> Just matching
+            _ -> Nothing
+
+
+-- |Compile the vtable for a trait requirement by resolving it to a trait
+-- implementation. Ordinary impls use their global table directly; partial
+-- impls construct a complete call-local table from their global method
+-- template and the vtables of their constraints.
+compileImplVTableArg :: TraitImplSpec -> ClauseComp ([Prim], PrimArg)
+compileImplVTableArg requested = do
+    knownTraitImpls <- lift $ getModuleImplementationField modKnownTraitImpls
+    let (declared, impl) = case resolveTraitImpl requested knownTraitImpls of
+            TraitImplResolved spec value -> (spec, value)
+            TraitImplNotFound -> shouldnt $
+                "compileImplVTableArg: no implementation for "
+                    ++ show requested
+            TraitImplAmbiguous ambiguousReq candidates -> shouldnt $
+                "compileImplVTableArg: ambiguous implementation for "
+                    ++ show ambiguousReq ++ ": " ++ show candidates
+    thisMod <- lift getModuleSpec
+    let definingMod = fromMaybe thisMod $ traitImplMod impl
+    vtables <- lift $ getModule modVTables `inModule` definingMod
+    let (_, structID) = trustFromJust
+            ("compileImplVTableArg vtable for " ++ show declared) $
+            Map.lookup declared vtables
+    info <- lift $ trustFromJustM
+        ("compileImplVTableArg metadata for " ++ show declared) $
+        lookupConstInfo structID
+    let (methodCount, constraints) = case info of
+            VTableInfo{vtableData=methods,
+                       vtableConstraints=bounds} ->
+                (length methods, bounds)
+            _ -> shouldnt $ "non-vtable metadata for " ++ show declared
+        requiredConstraints = traitImplConstraintsFor
+            constraints declared requested
+        template = ArgGlobal (GlobalVTable declared) (Representation CPointer)
+    if List.null requiredConstraints then return ([], template) else do
+        compiledConstraints <- mapM compileRequirementVTable requiredConstraints
+        resultName <- nextVar $ vtableNamePrefix ++ "runtime"
+        let resultOut = ArgVar resultName (Representation CPointer)
+                FlowOut VTable False
+            resultIn = resultOut { argVarFlow = FlowIn }
+            prim = PrimForeign "lpvm" "make_vtable" [] $
+                [template, ArgInt (fromIntegral methodCount) intType]
+                ++ (snd <$> compiledConstraints) ++ [resultOut]
+        return (concatMap fst compiledConstraints ++ [prim], resultIn)
+
 
 compileFlowArg :: FlowDirection -> Exp -> OptPos -> ClauseComp [PrimArg]
 compileFlowArg flow (Typed exp typ coerce) pos = do
@@ -519,9 +582,9 @@ vtableParam index =
             FlowIn VTable (ParamInfo False emptyGlobalFlows)
 
 
-vtableParamsFor :: [TypeVarBound] -> [PrimParam]
-vtableParamsFor bounds =
-    [vtableParam i | (i, _) <- zip [0..] bounds]
+vtableParamsFor :: Int -> [TypeVarBound] -> [PrimParam]
+vtableParamsFor idx bounds =
+    [vtableParam i | (i, _) <- zip [idx..] bounds]
 
 
 -- |Compile all locally-defined trait vtables.  This must happen before clause
@@ -551,7 +614,7 @@ compileExternalVTables thisMod = do
         referenced = execState
             (mapM_ (mapLPVMBodyM (const $ return ()) collectVTable) bodies)
             Set.empty
-        collectVTable (ArgVTable (Left ispec) _) = modify $ Set.insert ispec
+        collectVTable (ArgGlobal (GlobalVTable ispec) _) = modify $ Set.insert ispec
         collectVTable _ = return ()
     traitImpls <- Map.map traitImplMod <$> getModuleImplementationField modKnownTraitImpls
     let addReferenced impls ispec = case Map.lookup ispec traitImpls of
@@ -580,8 +643,9 @@ compileVTable index ispec opmod = do
         (if isNothing opmod then modTraitImplProcs else modVTableProcs)
         `inModule` fromMaybe thisMod opmod
     let procSpecs = trustFromJust "compileVTable" $ Map.lookup ispec traitImplProcSpecs
+    let constraints = traitImplTypeBounds ispec
     procSpecs' <- case opmod of
-        Nothing -> adaptTraitImplProcs ispec procSpecs
+        Nothing -> adaptTraitImplProcs ispec constraints procSpecs
         Just _  -> return procSpecs
     when (isNothing opmod) $
         updateModImplementation $ \imp -> imp {
@@ -590,7 +654,8 @@ compileVTable index ispec opmod = do
     let sz = wordSizeBytes * length procSpecs
         values = List.map FnPointerStructMember procSpecs'
     structId <- recordConstStruct
-            (VTableInfo sz values (isJust opmod) index ispec (fromMaybe thisMod opmod)) Nothing
+            (VTableInfo sz values (isJust opmod) index ispec
+                (fromMaybe thisMod opmod) constraints) Nothing
     return (index, structId)
 
 
@@ -598,39 +663,63 @@ compileVTable index ispec opmod = do
 -- implementation can have a different ABI from the corresponding abstract
 -- method because abstract type variables use defaultTypeRepresentation.  When
 -- that happens, store a generated adapter in the vtable instead.
-adaptTraitImplProcs :: TraitImplSpec -> [ProcSpec] -> Compiler [ProcSpec]
-adaptTraitImplProcs ispec@(TraitImplSpec trait typ) procSpecs = do
+adaptTraitImplProcs :: TraitImplSpec -> [TypeVarBound] -> [ProcSpec]
+                    -> Compiler [ProcSpec]
+adaptTraitImplProcs ispec@(TraitImplSpec trait typ) constraints procSpecs = do
     absProcs <- List.map fst <$> abstractProcs trait
     unless (sameLength absProcs procSpecs) $
         shouldnt $ "vtable proc count mismatch for " ++ show ispec
             ++ ": abstract procs " ++ show absProcs
             ++ ", implementation procs " ++ show procSpecs
-    zipWithM (adaptTraitImplProc ispec) absProcs procSpecs
+    zipWithM (adaptTraitImplProc ispec constraints) absProcs procSpecs
 
 
-adaptTraitImplProc :: TraitImplSpec -> ProcSpec -> ProcSpec -> Compiler ProcSpec
-adaptTraitImplProc ispec absProcSpec implProcSpec = do
+adaptTraitImplProc :: TraitImplSpec -> [TypeVarBound] -> ProcSpec -> ProcSpec
+                   -> Compiler ProcSpec
+adaptTraitImplProc ispec constraints absProcSpec implProcSpec = do
     absProcDef <- getProcDef absProcSpec
     implProcDef <- getProcDef implProcSpec
     let adapterParams = vtableSlotParams ispec absProcDef
-    generateAdapter ispec absProcDef adapterParams implProcSpec implProcDef
+    generateAdapter ispec constraints absProcDef adapterParams
+        implProcSpec implProcDef
 
 
--- |The ABI used by a virtual call through a vtable slot.  This is the abstract
--- method's primitive parameters, except that the dispatching vtable parameter
--- itself is supplied by the loaded vtable and is not passed to the target proc.
+-- |The ABI used by a virtual call through a vtable slot: ordinary parameters,
+-- followed by the dispatch vtable and then the method's other vtables.
 vtableSlotParams :: TraitImplSpec -> ProcDef -> [PrimParam]
 vtableSlotParams (TraitImplSpec trait _) absProcDef =
-    procOrdinaryABIParams absProcDef
-        ++ vtableParamsFor (forwardedVTableBounds trait absProcDef)
+    procOrdinaryABIParams absProcDef ++ methodVTableParams layout
+  where
+    traitMod = trustFromJust "vtableSlotParams trait module" $ typeModule trait
+    layout = methodVTableLayout traitMod absProcDef
 
 
-forwardedVTableBounds :: TraitSpec -> ProcDef -> [TypeVarBound]
-forwardedVTableBounds dispatchTrait absProcDef =
-    [ bounded
-    | bounded@(_, bound) <- procBoundedTypeParams absProcDef
-    , typeModule bound /= typeModule dispatchTrait
-    ]
+-- |Split an abstract method's vtables into the single dispatch vtable and the
+-- vtables that the method forwards independently. Type checking establishes
+-- the singleton invariant; checking it here keeps the ABI layout explicit.
+methodVTableLayout :: ModSpec -> ProcDef -> (TypeVarBound, [TypeVarBound])
+methodVTableLayout dispatchTraitMod procDef =
+    case List.partition (isDispatchVTableBound dispatchTraitMod)
+            (procBoundedTypeParams procDef) of
+        ([dispatch], forwarded) -> (dispatch, forwarded)
+        (dispatches, _) -> shouldnt $
+            "methodVTableLayout: expected one dispatch bound for trait module "
+                ++ showModSpec dispatchTraitMod ++ ", got " ++ show dispatches
+
+
+-- |Test whether a bounded type parameter uses the trait whose method is being
+-- dispatched. Trait types are defined by their dedicated trait modules.
+isDispatchVTableBound :: ModSpec -> TypeVarBound -> Bool
+isDispatchVTableBound dispatchTraitMod (_, bound) =
+    typeModule bound == Just dispatchTraitMod
+
+
+-- |Construct the vtable parameters for a method slot. Slot zero after the
+-- ordinary parameters is always the dispatch vtable; forwarded vtables follow
+-- in their declaration order.
+methodVTableParams :: (TypeVarBound, [TypeVarBound]) -> [PrimParam]
+methodVTableParams (_, forwardedBounds) =
+    vtableParam 0 : vtableParamsFor 1 forwardedBounds
 
 
 -- |Return the canonical primitive ABI parameters for the source-level ordinary
@@ -654,9 +743,9 @@ compileABIParams = concatMap compileABIParam
     outNum flow = if flowsIn flow then 1 else 0
 
 
-generateAdapter :: TraitImplSpec -> ProcDef -> [PrimParam] -> ProcSpec -> ProcDef
-                  -> Compiler ProcSpec
-generateAdapter ispec absProcDef adapterParams implProcSpec implProcDef = do
+generateAdapter :: TraitImplSpec -> [TypeVarBound] -> ProcDef -> [PrimParam]
+                -> ProcSpec -> ProcDef -> Compiler ProcSpec
+generateAdapter ispec constraints absProcDef adapterParams implProcSpec implProcDef = do
     adapterMod <- getModuleSpec
     gFlows <- getProcGlobalFlows implProcSpec
     let adapterOrdinaryParams = procOrdinaryABIParams absProcDef
@@ -669,14 +758,16 @@ generateAdapter ispec absProcDef adapterParams implProcSpec implProcDef = do
     bridges <- zipWith3M adapterArgBridge [0..]
         adapterOrdinaryParams implOrdinaryParams
     let (preCasts, implOrdinaryArgs, postCasts) = unzip3 bridges
-        implCallArgs = implOrdinaryArgs
-            ++ adapterVTableArgs ispec absProcDef implProcDef adapterParams
+    (vtablePrims, implVTableArgs) <-
+        resolveImplVTableArgs ispec constraints absProcDef implProcDef adapterParams
+    let implCallArgs = implOrdinaryArgs ++ implVTableArgs
     let adapterName = procName absProcDef ++ adapterNamePostfix
         proto = PrimProto adapterName adapterParams
             $ makeGlobalFlows (zip [0..] adapterParams)
                 (procProtoResources $ procProto absProcDef)
         body = ProcBody
             (concat preCasts
+                ++ (Unplaced <$> vtablePrims)
                 ++ [Unplaced $ PrimCall 0 implProcSpec (procImpurity implProcDef)
                     implCallArgs gFlows]
                 ++ concat postCasts)
@@ -752,24 +843,55 @@ adapterArgBridge idx adapterParam implParam
     adapterBoxOut = ArgVar boxName AnyType FlowOut Ordinary False
 
 
-adapterVTableArgs :: TraitImplSpec -> ProcDef -> ProcDef -> [PrimParam] -> [PrimArg]
-adapterVTableArgs ispec@(TraitImplSpec trait _) absProcDef implProcDef adapterParams =
-    snd $ List.mapAccumL vtableArg forwardedParams (procBoundedTypeParams implProcDef)
+-- |Build the vtable arguments passed from an adapter to its concrete
+-- implementation. 
+resolveImplVTableArgs :: TraitImplSpec -> [TypeVarBound] -> ProcDef -> ProcDef
+                  -> [PrimParam] -> Compiler ([Prim], [PrimArg])
+resolveImplVTableArgs (TraitImplSpec trait _) constraints absProcDef implProcDef adapterParams = do
+    methodCount <- length <$> abstractProcs trait
+    let (_, prims, args) = List.foldl'
+            (vtableArg methodCount) ([], [], [])
+            (procBoundedTypeParams implProcDef)
+    return (prims, args)
   where
-    dispatchTraitMod = typeModule trait
-    forwardedParams =
-        [ param
-        | (_, param) <- zip forwardedBounds
-            (List.filter ((== VTable) . primParamFlowType) adapterParams)
-        ]
-    forwardedBounds = forwardedVTableBounds trait absProcDef
-    vtableArg params (_, bound)
-        | typeModule bound == dispatchTraitMod =
-            (params, ArgVTable (Left ispec) (Representation CPointer))
-        | otherwise = case params of
-            param:rest -> (rest, ArgVTable (Right $ primParamName param)
-                (Representation CPointer))
-            [] -> shouldnt $ "missing forwarded vtable parameter for bound " ++ show bound
+    dispatchTraitMod = trustFromJust "resolveImplVTableArgs trait module" $
+        typeModule trait
+    (_, forwardedBounds) = methodVTableLayout dispatchTraitMod absProcDef
+    vtableParams = List.filter ((== VTable) . primParamFlowType) adapterParams
+    (dispatchParam, forwardedParams) = case vtableParams of
+        dispatch:forwarded
+            | sameLength forwarded forwardedBounds ->
+                (dispatch, zip forwardedBounds forwarded)
+        _ -> shouldnt "resolveImplVTableArgs: vtable parameter layout mismatch"
+    dispatchArg = primParamToArg dispatchParam
+    vtableArg methodCount (used, prims, args) bounded@(_, bound)
+        | Just constraintIndex <- List.findIndex
+            (\(index, constraint) -> index `notElem` used
+                && matchesConstraint bounded constraint)
+            (zip [0..] constraints) =
+            let name = PrimVarName
+                    (vtableNamePrefix ++ adapterNamePostfix ++ show constraintIndex) 0
+                out = ArgVar name (Representation CPointer) FlowOut VTable False
+                input = out { argVarFlow = FlowIn }
+                offset = ArgInt (fromIntegral $
+                    (methodCount + constraintIndex) * wordSizeBytes) intType
+                size = ArgInt (fromIntegral wordSizeBytes) intType
+                zero = ArgInt 0 intType
+                access = PrimForeign "lpvm" "access" []
+                    [setArgType (Representation Pointer) dispatchArg,
+                     offset, size, zero, out]
+            in (constraintIndex:used, prims ++ [access], args ++ [input])
+        | isDispatchVTableBound dispatchTraitMod bounded =
+            (used, prims, args ++ [dispatchArg])
+        | otherwise = case List.find
+                (\((_, forwardedBound), _) ->
+                    sameTraitConstraint bound forwardedBound)
+                forwardedParams of
+            Just (_, param) -> (used, prims, args ++ [primParamToArg param])
+            Nothing -> shouldnt $
+                "missing forwarded vtable parameter for bound " ++ show bounded
+    matchesConstraint (_, bound) (_, constraintBound) =
+        sameTraitConstraint bound constraintBound
 
 
 -- |A synthetic output parameter carrying the test result

@@ -8,7 +8,7 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : 
-  constants       : 0:: VTableInfo {vtableSize = 0, vtableData = [], vtableExternal = False, vtableIndex = 0, vtableSpec = wybe.list(Type0) <: trait_generic_equivalent_impls.sequence(Type0), vtableMod = ["trait_generic_equivalent_impls"]}
+  constants       : 0:: VTableInfo {vtableSize = 0, vtableData = [], vtableExternal = False, vtableIndex = 0, vtableSpec = wybe.list(Type0) <: trait_generic_equivalent_impls.sequence(Type0), vtableMod = ["trait_generic_equivalent_impls"], vtableConstraints = []}
   imports         : use trait_generic_equivalent_impls.sequence
                     use wybe
   resources       : 

@@ -205,7 +205,6 @@ isConservativeCall PrimCall{}               = True
 isConservativeCall PrimHigher{}             = True
 isConservativeCall PrimVirtualCall{}        = True
 isConservativeCall (PrimForeign lang _ _ _) = lang /= "llvm" && lang /= "lpvm"
-isConservativeCall PrimVirtualCall{}        = True
 
 -- | True for ops that copy an address into a (possibly different-typed) result
 -- without dereferencing it, so escape must propagate from output to input

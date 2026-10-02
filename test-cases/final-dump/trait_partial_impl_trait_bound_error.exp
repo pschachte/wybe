@@ -1,0 +1,2 @@
+Error detected during preliminary processing of module trait_partial_impl_trait_bound_error
+final-dump/trait_partial_impl_trait_bound_error.wybe:7:1: Invalid partial trait implementation: type variable bounds are only permitted in the implementation type

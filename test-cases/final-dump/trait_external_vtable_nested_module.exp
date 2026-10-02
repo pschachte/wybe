@@ -130,7 +130,7 @@ define external fastcc i1 @"trait_external_vtable_nested_module#.wrapper#.~=<0>"
                     trait_import_support.basic_dog.trait_basic_dog<1>
                     trait_import_support.basic_dog.~=<0>
   constants       : 0:: CStringInfo {cstringChars = " says woof"}
-                    1:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_import_support.basic_dog.speak#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = trait_import_support.basic_dog <: trait_import_support.basic_speaker, vtableMod = ["trait_import_support","basic_dog"]}
+                    1:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_import_support.basic_dog.speak#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = trait_import_support.basic_dog <: trait_import_support.basic_speaker, vtableMod = ["trait_import_support","basic_dog"], vtableConstraints = []}
                     2:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember c" says woof"]}
   imports         : use trait_import_support.basic_speaker
                     use wybe
@@ -170,7 +170,7 @@ speak(x##0:trait_import_support.basic_dog, ?#result##0:wybe.string)<{}; {}; {}>:
 
 proc speak#adapter > {noinline} (0 calls)
 0: trait_import_support.basic_dog.speak#adapter<0>
-speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string)<{}; {}; {}>:
+speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasPairs: [(#result##0,x##0)]
   InterestingCallProperties: []
     wybe.string.,,<0>(~x##0:wybe.string, " says woof":wybe.string, ?#result##0:wybe.string) #1 @basic_dog:nn:nn
@@ -231,7 +231,7 @@ define external fastcc i64 @"trait_import_support#.basic_dog#.speak<0>"(i64 %"x#
   ret i64 %"tmp#10##0"
 }
 
-define external fastcc i64 @"trait_import_support#.basic_dog#.speak#adapter<0>"(i64 %"x##0") {
+define external fastcc i64 @"trait_import_support#.basic_dog#.speak#adapter<0>"(i64 %"x##0", ptr %"#vtable##0") {
   %"tmp#2##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"x##0", i64 ptrtoint( ptr @"trait_import_support.basic_dog#constant#2" to i64 ))
   ret i64 %"tmp#2##0"
 }
@@ -266,7 +266,7 @@ proc speak > public abstract {inline} (0 calls)
 speak(x##0:Type0<:trait_import_support.basic_speaker <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string) #0
+    ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
   LLVM code       :
 
@@ -282,6 +282,6 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 define external fastcc i64 @"trait_import_support#.basic_speaker#.speak<0>"(i64 %"x##0", ptr %"#vtable##0") {
   %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
   %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
-  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0")
+  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0", ptr %"#vtable##0")
   ret i64 %"tmp#2##0"
 }

@@ -410,8 +410,6 @@ argConstValue (ArgGlobal info _) = do
     -- XXX ArgGlobal is a constant pointer to a global resource or global value,
     -- but for now we don't support them in constant structures
     return Nothing
-argConstValue (ArgVTable _ _) = do
-    return Nothing
 argConstValue (ArgConstRef structID _) = do
     return $ Just $ PointerStructMember structID
 argConstValue ArgUnneeded{} = return Nothing
@@ -1050,6 +1048,27 @@ writeLPVMCall "store" _ args pos = do
         (ins, outs) ->
             shouldnt $ "lpvm store with inputs " ++ show ins ++ " and outputs "
                 ++ show outs
+writeLPVMCall "make_vtable" _ args pos = do
+    releaseDeferredCall
+    args' <- partitionArgs "lpvm make_vtable instruction" args
+    case args' of
+        (template:ArgInt methodCount _:constraintVTables, [result]) -> do
+            let methodSlots = fromIntegral methodCount
+                totalSlots = methodSlots + length constraintVTables
+            stackAlloc result (totalSlots * wordSizeBytes)
+            let table = setArgFlow FlowIn result
+            when (methodSlots > 0) $ do
+                copyfn <- llvmMemcpyFn
+                let nonvolatile = ArgInt 0 $ Representation $ Bits 1
+                    copyBytes = intConst (fromIntegral $ methodSlots * wordSizeBytes)
+                writeCCall copyfn [] [table, template, copyBytes, nonvolatile] Nothing
+            forM_ (zip [methodSlots..] constraintVTables) $ \(index, constraint) -> do
+                destination <- getElementPtr True (llvmTypeRep CPointer)
+                    (Just table) [ArgInt (fromIntegral index) intType]
+                llvmStore destination constraint
+        (ins, outs) ->
+            shouldnt $ "lpvm make_vtable with inputs " ++ show ins
+                ++ " and outputs " ++ show outs
 writeLPVMCall "access" _ args pos = do
     releaseDeferredCall
     args' <- partitionArgs "lpvm access instruction" args
@@ -1240,7 +1259,7 @@ declareStructConstant name (StructInfo sz members) section = do
                     ++ " = private unnamed_addr constant " ++ llvmFields
                     ++ maybe "" ((", section "++) . show) section
                     ++ ", align " ++ show wordSizeBytes
-declareStructConstant _ (VTableInfo sz members external index spec mod) section = do
+declareStructConstant _ (VTableInfo sz members external index _ mod _) section = do
     let llvmType = llvmStructType $ llvmConstValueRep <$> members
     llvmFields <- llvmConstStruct members
     let name = llvmVTableName mod index
@@ -1715,19 +1734,6 @@ llvmValue arg@(ArgClosure pspec args ty) = do
             logLLVM $ "Converting to representation " ++ show rep
             llvmValue readPtr
 llvmValue (ArgGlobal val _) = llvmGlobalInfoName val
-llvmValue (ArgVTable info ty) = case info of
-    Left ispec -> do
-        knownTraitImpls <- lift $ getModuleImplementationField modKnownTraitImpls
-        let traitImpl = trustFromJust ("llvmValue " ++ show info) $ Map.lookup ispec knownTraitImpls
-        thisMod <- lift getModuleSpec
-        let mod = traitImplModule thisMod traitImpl
-        vTables <- lift $ getModule modVTables `inModule` mod
-        let (index, _) = trustFromJust
-                ("llvmValue: missing vtable " ++ show ispec ++ " in "
-                    ++ showModSpec mod)
-                (Map.lookup ispec vTables)
-        return $ llvmGlobalName $ llvmVTableName mod index
-    Right var -> llvmValue $ ArgVar var ty FlowIn VTable False
 llvmValue (ArgConstRef structID ty) = do
     rep <- typeRep ty
     logLLVM $ "llvmValue of constant " ++ show structID
@@ -2489,6 +2495,17 @@ llvmGlobalInfoName :: GlobalInfo -> LLVM LLVMName
 llvmGlobalInfoName (GlobalResource res) =
      fst <$> llvmResource res
 llvmGlobalInfoName (GlobalVariable var) = return $ llvmGlobalName var
+llvmGlobalInfoName (GlobalVTable ispec) = do
+    knownTraitImpls <- lift $ getModuleImplementationField modKnownTraitImpls
+    let opmod = traitImplMod . trustFromJust ("llvmGlobalInfoName " ++ show ispec) $ Map.lookup ispec knownTraitImpls
+    thisMod <- lift getModuleSpec
+    let mod = fromMaybe thisMod opmod
+    vTables <- lift $ getModule modVTables `inModule` mod
+    let (index, _) = trustFromJust
+            ("llvmGlobalInfoName: missing vtable " ++ show ispec ++ " in "
+                ++ showModSpec mod)
+            (Map.lookup ispec vTables)
+    return $ llvmGlobalName $ llvmVTableName mod index
 
 
 -- | Make a suitable LLVM name for a foreign (e.g., C) function.

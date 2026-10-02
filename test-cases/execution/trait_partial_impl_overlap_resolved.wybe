@@ -1,0 +1,29 @@
+# A bound in both dimensions resolves the intersection of two incomparable
+# partial implementations.
+
+type hash trait {
+    abstract hash(x:_): int
+}
+
+impl int <: hash
+def hash(x:int): int = x
+
+type hashmap(K,V) {
+    pub hashmap(key:K, value:V)
+}
+
+type mapping(K,V) trait {
+    abstract selection(x:_(K,V)): int
+}
+
+impl hashmap(K<:hash,V) <: mapping(K,V)
+impl hashmap(K,V<:hash) <: mapping(K,V)
+impl hashmap(K<:hash,V<:hash) <: mapping(K,V)
+
+def selection(x:hashmap(K<:hash,V)): int = 1
+def selection(x:hashmap(K,V<:hash)): int = 2
+def selection(x:hashmap(K<:hash,V<:hash)): int = 3
+
+!println(mapping.selection(hashmap(1, "value")))
+!println(mapping.selection(hashmap("key", 2)))
+!println(mapping.selection(hashmap(1, 2)))

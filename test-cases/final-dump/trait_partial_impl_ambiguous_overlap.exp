@@ -1,0 +1,6 @@
+Error detected during type checking of module(s) trait_partial_impl_ambiguous_overlap, trait_partial_impl_ambiguous_overlap.hash, trait_partial_impl_ambiguous_overlap.hashmap, trait_partial_impl_ambiguous_overlap.mapping
+final-dump/trait_partial_impl_ambiguous_overlap.wybe:26:10: Type error in call to proc selection, argument 1
+final-dump/trait_partial_impl_ambiguous_overlap.wybe:26:10: Ambiguous trait implementation for trait_partial_impl_ambiguous_overlap.hashmap(wybe.int, wybe.int) <: trait_partial_impl_ambiguous_overlap.mapping(wybe.int, wybe.int); most-specific candidates are tied:
+    trait_partial_impl_ambiguous_overlap.hashmap(Type0, Type1<:trait_partial_impl_ambiguous_overlap.hash) <: trait_partial_impl_ambiguous_overlap.mapping(Type0, Type1)
+    trait_partial_impl_ambiguous_overlap.hashmap(Type0<:trait_partial_impl_ambiguous_overlap.hash, Type1) <: trait_partial_impl_ambiguous_overlap.mapping(Type0, Type1)
+final-dump/trait_partial_impl_ambiguous_overlap.wybe:26:10: Type error in partial application of proc selection, argument 1

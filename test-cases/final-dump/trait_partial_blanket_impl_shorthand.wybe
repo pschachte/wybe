@@ -1,0 +1,20 @@
+# Using a trait as the implementation type is shorthand for a type variable
+# bounded by that trait.
+
+type debug trait {
+    abstract dbg(x:_): string
+}
+
+type printable trait {
+    abstract show(x:_): string
+}
+
+impl int <: debug
+
+def dbg(x:int): string = "int"
+
+impl debug <: printable
+
+def show(x:debug): string = debug.dbg(x)
+
+!println(printable.show(1))

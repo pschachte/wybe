@@ -1,0 +1,4 @@
+# A type parameter of a trait cannot have a trait bound.
+# XXX: We might want to support this in the future.
+type debug trait { abstract dbg(x:_): string }
+type wrap(T<:debug) trait { abstract unwrap(x:_(T)): T }

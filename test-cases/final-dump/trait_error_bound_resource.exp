@@ -1,0 +1,2 @@
+Error detected during processing resources for module(s) trait_error_bound_resource, trait_error_bound_resource.debug
+final-dump/trait_error_bound_resource.wybe:5:1: Trait type trait_error_bound_resource.debug is not allowed in a resource declaration; trait bounds are only allowed in procedure and function parameter types and trait implementation types

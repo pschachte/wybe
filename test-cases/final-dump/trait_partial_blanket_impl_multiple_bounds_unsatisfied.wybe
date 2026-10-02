@@ -1,0 +1,16 @@
+# A blanket trait implementation with several bounds does not apply to a type
+# that implements only some of them.
+
+type named trait { abstract name(x:_): string }
+type priced trait { abstract price(x:_): int }
+type listable trait { abstract listing(x:_): string }
+
+impl T<:{named, priced} <: listable
+
+def listing(x:T<:{named, priced}): string = named.name(x)
+
+impl string <: named
+
+def name(x:string): string = x
+
+?s:string = listable.listing("unpriced")

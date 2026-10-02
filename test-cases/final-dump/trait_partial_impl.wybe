@@ -1,0 +1,24 @@
+# A partial trait implementation constructs a concrete vtable at the call site
+# and supplies its constraint vtables to the implementation adapter.
+
+type hash trait {
+    abstract hash(x:_): int
+}
+
+impl int <: hash
+def hash(x:int): int = x
+
+type mapping(K,V) trait {
+    abstract key_hash(x:_(K,V), key:K): int
+}
+
+type hashmap(K,V) {
+    pub hashmap(key:K, value:V)
+}
+
+impl hashmap(K<:hash,V) <: mapping(K,V)
+
+def key_hash(x:hashmap(K<:hash,V), key:K<:hash): int = hash.hash(key)
+
+?m:hashmap(int,float) = hashmap(42, 3.14)
+!println(mapping.key_hash(m, 42))

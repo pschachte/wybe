@@ -1775,9 +1775,10 @@ pub def fmt(x:_): string = "Dog($(x^name))"
 
 Each abstract procedure or function in the trait module must have exactly one
 concrete (non-abstract) procedure or function that matches the signature of the
-abstract procedure/function, except that it has a parameter of the concrete type
-wherever the abstract procedure/function has the trait type (or type variable
-with the trait as type bound).  The parameter flows, argument and
+abstract procedure/function, except that every occurrence of the trait type (or
+of a type variable with the trait as type bound) is replaced by the
+implementation type.  The implementation type may be generic, and the trait type
+may occur in any number of parameters.  The parameter flows, argument and
 result types, determinism, purity, and resource use of the concrete
 procedure/function must match the abstract declaration.
 
@@ -1866,8 +1867,83 @@ specialised abstract procedures and functions.  In particular, a generic
 procedure does not implement a trait for a concrete type: `def name(x:T):
 string` does not satisfy `impl int <: named`.
 
-Trait bounds on type variables, such as `T<:formattable`, are not yet
-supported in generic trait implementations.
+Type variables in the implementation type may have trait bounds.  Such a
+bounded generic implementation applies only when the corresponding concrete
+type implements every bound.  For example:
+
+```
+type box(T) {
+    pub box(value:T)
+}
+
+impl box(named) <: formattable
+
+def fmt(x:box(named)): string = "box of " ,, name(x^value)
+```
+
+where `box(named)` is an abbreviation for `box(T<:named)`.
+
+This implementation of `formattable` applies to `box(int)` if `int` implements
+`named`, but not to `box(U)` when `U` does not.  The same bounds must be
+written on the type variables in the implementing procedures and functions.
+Bounds constrain variables in the implementation type; type variables in the
+implemented trait cannot introduce additional bounds.
+
+The implementation type may also be a trait, so that every type implementing
+one trait also implements another:
+
+```
+impl named <: formattable
+
+def fmt(x:named): string = "<" ,, name(x) ,, ">"
+```
+
+As with parameter types, a trait used as the implementation type abbreviates a
+type variable bounded by that trait, so the declaration above is equivalent to:
+
+```
+impl T<:named <: formattable
+
+def fmt(x:T<:named): string = "<" ,, name(x) ,, ">"
+```
+
+The explicit form allows the type variable to have several bounds, so that the
+implementation applies only to types implementing all of them.  For example,
+any type that has both a name and a price can be listed in a shop:
+
+```
+type priced trait {
+    abstract price(x:_): int
+}
+
+type listable trait {
+    abstract listing(x:_): string
+}
+
+impl T<:{named, priced} <: listable
+
+def listing(x:T<:{named, priced}): string =
+    named.name(x) ,, " costs $(priced.price(x))"
+```
+
+When more than one implementation applies, Wybe selects the unique most
+specific one.  A concrete implementation is more specific than a bounded
+generic implementation, which is more specific than the corresponding
+unbounded generic implementation.  Implementations with independent bounds
+may overlap without error, but using a type in their overlap is ambiguous if
+neither implementation is more specific.  A further implementation covering
+the intersection can resolve the ambiguity.  For example, given generic
+`pair(A,B)` and trait `formattable`:
+
+```
+impl pair(named, B) <: formattable
+impl pair(A, named) <: formattable
+impl pair(A<:named, B<:named) <: formattable
+```
+
+The third declaration is selected when both type arguments implement
+`named`; without it, selecting a `formattable` implementation for such a pair
+would be ambiguous.
 
 ### Default trait implementations
 

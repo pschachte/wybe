@@ -113,13 +113,8 @@ abstractProcOrFuncItem = do
 implItem :: Parser Item
 implItem = do
     keypos <- tokenPosition <$> ident "impl"
-    typ <- optionMaybe (try $ do
-            typ' <- limitedTerm implTypePrecedence >>= parseWith termToTypeSpec
-            symbol "<:"
-            pure typ'
-        )
-    traits <- betweenB Brace (typeSpec `sepBy1` comma)
-        <|> pure <$> typeSpec
+    (typ, traits) <- limitedTerm prototypePrecedence
+        >>= parseWith termToImplSpec
     return $ TraitImpl typ traits $ Just keypos
 
 
@@ -759,12 +754,6 @@ prototypePrecedence :: Int
 prototypePrecedence = 10
 
 
--- |Lowest operator precedence for the implementation type in a trait impl.
--- This excludes the following '<:' marker while still allowing type arguments.
-implTypePrecedence :: Int
-implTypePrecedence = 12
-
-
 -- |Prefix operator symbols; these all bind very tightly
 prefixOp :: Parser Token
 prefixOp = choice $ List.map symbol ["-", "~", "?", "!"]
@@ -922,7 +911,19 @@ typeVarName = takeToken test
 
 -- | Parse a list of comma-separated TypeVarNames, between parentheses
 typeVarNames :: Parser [Ident]
-typeVarNames = option [] (betweenB Paren $ typeVarName `sepBy` comma)
+typeVarNames = option [] (betweenB Paren $ typeParamName `sepBy` comma)
+
+
+-- | Parse a TypeVarName declared as a type parameter, reporting a trait bound
+-- on it, which is not allowed.
+typeParamName :: Parser Ident
+typeParamName = do
+    name <- typeVarName
+    optional $ do
+        pos <- tokenPosition <$> symbol "<:"
+        reportFailure (pos, traitBoundNotAllowedMsg
+            ("Trait bound on type parameter " ++ name) "a type parameter list")
+    return name
 
 
 -- | Parse a module name, any ident that is not a TypeVarName
@@ -1370,6 +1371,35 @@ termToTypeSpec (Call _ mod name ParamIn params)
     TypeSpec mod name <$> mapM termToTypeSpec params
 termToTypeSpec other =
     syntaxError (termPos other) $ "invalid type specification " ++ show other
+
+
+-- |Convert the body of a trait 'impl' item to its optional implementation
+-- type and implemented traits.  The rightmost '<:' separates the traits, so
+-- the implementation type may itself be a bounded type variable.
+termToImplSpec :: TranslateTo (Maybe TypeSpec, [TraitSpec])
+termToImplSpec (Call pos [] "<:" ParamIn [lhs, rhs]) = do
+    let (tyTerm, traitsTerm) = splitImplTraits pos lhs rhs
+    ty <- termToTypeSpec tyTerm
+    (Just ty,) <$> termToImplTraits traitsTerm
+termToImplSpec other = (Nothing,) <$> termToImplTraits other
+
+
+-- |Split the right-nested '<:' chain of an impl item into the implementation
+-- type term and the traits term.
+splitImplTraits :: SourcePos -> Term -> Term -> (Term, Term)
+splitImplTraits pos lhs (Call pos' [] "<:" ParamIn [lhs', rhs']) =
+    let (tyTerm, traitsTerm) = splitImplTraits pos' lhs' rhs'
+    in (Call pos [] "<:" ParamIn [lhs, tyTerm], traitsTerm)
+splitImplTraits _ lhs rhs = (lhs, rhs)
+
+
+-- |Convert the traits of an impl item, either a single trait or a braced,
+-- comma-separated list of traits.
+termToImplTraits :: TranslateTo [TraitSpec]
+termToImplTraits (Embraced pos Brace traits Nothing)
+  | List.null traits = syntaxError pos "implemented traits cannot be empty"
+  | otherwise = mapM termToTypeSpec traits
+termToImplTraits trait = (:[]) <$> termToTypeSpec trait
 
 
 termToTypeVarBounds :: TranslateTo (Set TraitSpec)

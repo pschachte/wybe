@@ -25,8 +25,8 @@ AFTER EVERYTHING:
                     14:: CStringInfo {cstringChars = "5 in 9..0"}
                     15:: CStringInfo {cstringChars = "0 in 9..0"}
                     16:: CStringInfo {cstringChars = "10 in 9..0"}
-                    17:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember wybe.int.=#adapter<0>,FnPointerStructMember wybe.int.~=#adapter<0>], vtableExternal = True, vtableIndex = 0, vtableSpec = wybe.int <: wybe.eq, vtableMod = ["wybe","int"]}
-                    18:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember wybe.string.=#adapter<0>,FnPointerStructMember wybe.string.~=#adapter<0>], vtableExternal = True, vtableIndex = 0, vtableSpec = wybe.string <: wybe.eq, vtableMod = ["wybe","string"]}
+                    17:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember wybe.int.=#adapter<0>,FnPointerStructMember wybe.int.~=#adapter<0>], vtableExternal = True, vtableIndex = 0, vtableSpec = wybe.int <: wybe.eq, vtableMod = ["wybe","int"], vtableConstraints = []}
+                    18:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember wybe.string.=#adapter<0>,FnPointerStructMember wybe.string.~=#adapter<0>], vtableExternal = True, vtableIndex = 0, vtableSpec = wybe.string <: wybe.eq, vtableMod = ["wybe","string"], vtableConstraints = []}
                     19:: StructInfo {structSize = 16, structData = [IntStructMember 10 8,PointerStructMember c"10 in 9..0"]}
                     20:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember c"0 in 9..0"]}
                     21:: StructInfo {structSize = 16, structData = [IntStructMember 9 8,PointerStructMember c"5 in 9..0"]}
@@ -65,7 +65,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>(5:wybe.int, list_member#constant#33:wybe.list(wybe.int), ?tmp#49##0:wybe.bool, vtable(global,wybe.int <: wybe.eq):opaque) #22 @list_member:nn:nn
+    wybe.list.in<0>(5:wybe.int, list_member#constant#33:wybe.list(wybe.int), ?tmp#49##0:wybe.bool, vtable wybe.int <: wybe.eq:opaque) #22 @list_member:nn:nn
     case ~tmp#49##0:wybe.bool of
     0:
         list_member.#cont#1<0>(list_member#constant#46:wybe.list(wybe.string), list_member#constant#40:wybe.list(wybe.string), list_member#constant#33:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26
@@ -84,7 +84,7 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1(fruit##0:wybe.list(wybe.string), langs##0:wybe.list(wybe.string), lst##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>(8:wybe.int, ~lst##0:wybe.list(wybe.int), ?tmp#48##0:wybe.bool, vtable(global,wybe.int <: wybe.eq):opaque) #0 @list_member:nn:nn
+    wybe.list.in<0>(8:wybe.int, ~lst##0:wybe.list(wybe.int), ?tmp#48##0:wybe.bool, vtable wybe.int <: wybe.eq:opaque) #0 @list_member:nn:nn
     case ~tmp#48##0:wybe.bool of
     0:
         list_member.#cont#2<0>(~fruit##0:wybe.list(wybe.string), ~langs##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
@@ -103,7 +103,7 @@ proc #cont#2 > {semipure} (2 calls)
 #cont#2(fruit##0:wybe.list(wybe.string), langs##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>("Wybe":wybe.string, ~langs##0:wybe.list(wybe.string), ?tmp#47##0:wybe.bool, vtable(global,wybe.string <: wybe.eq):opaque) #1 @list_member:nn:nn
+    wybe.list.in<0>("Wybe":wybe.string, ~langs##0:wybe.list(wybe.string), ?tmp#47##0:wybe.bool, vtable wybe.string <: wybe.eq:opaque) #1 @list_member:nn:nn
     case ~tmp#47##0:wybe.bool of
     0:
         list_member.#cont#3<0>(~fruit##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
@@ -122,7 +122,7 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3(fruit##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.in<0>("Wybe":wybe.string, ~fruit##0:wybe.list(wybe.string), ?tmp#46##0:wybe.bool, vtable(global,wybe.string <: wybe.eq):opaque) #1 @list_member:nn:nn
+    wybe.list.in<0>("Wybe":wybe.string, ~fruit##0:wybe.list(wybe.string), ?tmp#46##0:wybe.bool, vtable wybe.string <: wybe.eq:opaque) #1 @list_member:nn:nn
     case ~tmp#46##0:wybe.bool of
     0:
         list_member.#cont#4<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
@@ -310,14 +310,14 @@ target triple   = ????
 @"list_member#constant#46" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#44", ptr @"list_member#constant#45" }, align 8
 @"list_member#constant#47" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"list_member#constant#7" }, align 8
 
-declare external fastcc i1 @"wybe#.int#.=#adapter<0>"(i64, i64)
-declare external fastcc i1 @"wybe#.int#.~=#adapter<0>"(i64, i64)
+declare external fastcc i1 @"wybe#.int#.=#adapter<0>"(i64, i64, ptr)
+declare external fastcc i1 @"wybe#.int#.~=#adapter<0>"(i64, i64, ptr)
 declare external fastcc i1 @"wybe#.list#.in<0>"(i64, i64, ptr)
 declare external fastcc i64 @"wybe#.range#.construct<0>"(i64, i64, i64)
 declare external fastcc i1 @"wybe#.range#.in<0>"(i64, i64)
-declare external fastcc i1 @"wybe#.string#.=#adapter<0>"(i64, i64)
+declare external fastcc i1 @"wybe#.string#.=#adapter<0>"(i64, i64, ptr)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
-declare external fastcc i1 @"wybe#.string#.~=#adapter<0>"(i64, i64)
+declare external fastcc i1 @"wybe#.string#.~=#adapter<0>"(i64, i64, ptr)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 

@@ -1,0 +1,20 @@
+# A trait implementation for a bounded type variable records its bound as a
+# vtable constraint.
+
+type debug trait {
+    abstract dbg(x:_): string
+}
+
+type printable trait {
+    abstract show(x:_): string
+}
+
+impl int <: debug
+
+def dbg(x:int): string = "int"
+
+impl T<:debug <: printable
+
+def show(x:T<:debug): string = debug.dbg(x)
+
+!println(printable.show(1))

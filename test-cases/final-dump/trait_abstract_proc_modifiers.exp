@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   public procs    : trait_abstract_proc_modifiers.<0>
   constants       : 0:: CStringInfo {cstringChars = "matched"}
                     1:: CStringInfo {cstringChars = "not matched"}
-                    2:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_abstract_proc_modifiers.matches#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = wybe.int <: trait_abstract_proc_modifiers.matcher, vtableMod = ["trait_abstract_proc_modifiers"]}
+                    2:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_abstract_proc_modifiers.matches#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = wybe.int <: trait_abstract_proc_modifiers.matcher, vtableMod = ["trait_abstract_proc_modifiers"], vtableConstraints = []}
                     3:: StructInfo {structSize = 16, structData = [IntStructMember 11 8,PointerStructMember c"not matched"]}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 7 8,PointerStructMember c"matched"]}
                     5:: ArrayInfo {arrayData = [PointerStructMember "not matched",PointerStructMember "matched"]}
@@ -25,7 +25,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    trait_abstract_proc_modifiers.matcher.matches<0>(42:wybe.int, ?tmp#2##0:wybe.bool, vtable(global,wybe.int <: trait_abstract_proc_modifiers.matcher):opaque)<{}; {}; {0}> #0 @trait_abstract_proc_modifiers:nn:nn
+    trait_abstract_proc_modifiers.matcher.matches<0>(42:wybe.int, ?tmp#2##0:wybe.bool, vtable wybe.int <: trait_abstract_proc_modifiers.matcher:opaque)<{}; {}; {0}> #0 @trait_abstract_proc_modifiers:nn:nn
     factored ~tmp#2##0:wybe.bool of
       ?tmp#18##0:wybe.string <- trait_abstract_proc_modifiers#constant#5[PointerStructMember "not matched",PointerStructMember "matched"]
         wybe.string.print<0>(~tmp#18##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @trait_abstract_proc_modifiers:nn:nn
@@ -44,7 +44,7 @@ matches(x##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 
 proc matches#adapter > {noinline,semipure} (0 calls)
 0: trait_abstract_proc_modifiers.matches#adapter<0>
-matches#adapter(x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?#success##0:wybe.bool)<{}; {}; {}>:
+matches#adapter(x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?x#adapter0##0:wybe.int)
@@ -84,7 +84,7 @@ define external fastcc i1 @"trait_abstract_proc_modifiers#.matches<0>"(i64 %"x##
   ret i1 %"tmp#3##0"
 }
 
-define external fastcc i1 @"trait_abstract_proc_modifiers#.matches#adapter<0>"(i64 %"x##0") {
+define external fastcc i1 @"trait_abstract_proc_modifiers#.matches#adapter<0>"(i64 %"x##0", ptr %"#vtable##0") {
   %"tmp#1##0" = icmp eq i64 %"x##0", 42
   ret i1 %"tmp#1##0"
 }
@@ -106,7 +106,7 @@ proc matches > public abstract {inline,semipure} (0 calls)
 matches(x##0:Type0<:trait_abstract_proc_modifiers.matcher <{}; {}; {0}>, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    ~#vtable##0:opaque@0(~x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?#success##0:wybe.bool) #0
+    ~#vtable##0:opaque@0(~x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?#success##0:wybe.bool, ~#vtable##0:opaque) #0
 
   LLVM code       :
 
@@ -122,6 +122,6 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 define external fastcc i1 @"trait_abstract_proc_modifiers#.matcher#.matches<0>"(i64 %"x##0", ptr %"#vtable##0") {
   %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
   %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
-  %"tmp#2##0" = tail call fastcc i1 %"tmp#1##0"(i64 %"x##0")
+  %"tmp#2##0" = tail call fastcc i1 %"tmp#1##0"(i64 %"x##0", ptr %"#vtable##0")
   ret i1 %"tmp#2##0"
 }
