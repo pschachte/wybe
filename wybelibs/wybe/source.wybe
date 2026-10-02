@@ -1,0 +1,10 @@
+# purpose: Trait describing things from which data can be read
+# since  : 0.2
+
+trait # (T) XXX No trait type parameters yet
+    # T is the type of data that can be read from the sink
+
+use wybe.char, wybe.io
+
+# Read one value of type T from the sink
+abstract read(?datum:char, sink:_) use !io_state

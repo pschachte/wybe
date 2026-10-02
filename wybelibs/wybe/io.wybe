@@ -8,7 +8,8 @@ use foreign library gc
 
 pub use wybe.phantom
 use wybe.char, wybe.address, wybe.int, wybe.int32, wybe.bool
-use wybe.input_stream, wybe.output_stream
+use wybe.input_stream, wybe.output_stream, wybe.source, wybe.sink
+use wybe.printable
 
 pub resource io = io_state, stdin, stdout, stderr,
                     current_in, current_out, current_err
@@ -24,12 +25,18 @@ pub resource current_in :input_stream = stdin
 pub resource current_out:output_stream = stdout
 pub resource current_err:output_stream = stderr
 
+## Printing
 
+# Print a printable thing to the current output stream
+pub def print(datum:printable) use !io { !print(datum, current_out) }
 
-pub def nl(buf:output_stream) use !io_state { !print('\n', !buf) }
-pub def nl use current_out, !io_state { !nl(current_out) }
-
-pub def println(x:char, buf:output_stream) use !io_state {
-    !print(x, buf); !nl(buf)
+# Print a printable thing to the current output stream, follwed by a newline
+pub def println(datum:printable, sink:sink) use !io_state {
+    !print(datum, sink)
+    !nl(sink)
 }
-pub def println(x:char) use current_out, !io_state { !println(x, current_out) }
+
+pub def println(datum:printable) use !io { !println(datum, current_out) }
+
+pub def nl(buf:sink) use !io_state { !write('\n', !buf) }
+pub def nl use current_out, !io_state { !nl(current_out) }

@@ -154,9 +154,9 @@ def fmtnz(n:_, minlength:int, fill:char, base:_):string =
 
 ## I/O
 
-pub def print(x:_) use !io { !print(fmt(x)) }
+# pub def print(x:_) use !io { !print(fmt(x)) }
 
-pub def println(x:_) use !io { !print(x); !nl }
+# pub def println(x:_) use !io { !print(x); !nl }
 
-# # XXX This won't work with the new io library stdin
-# pub def read(x:_) use !io 
+# # # XXX This won't work with the new io library stdin
+# # pub def read(x:_) use !io 

@@ -111,23 +111,23 @@ pub def filter(p:{test}(T), !xs:_(T)) {
 
 ## I/O
 
-# Print a list, using `printer` to print each element
-# XXX: refactor when we have typeclasses
-pub def print(printer:{resource}(T), xs:_(T)) use !io {
-    !print('[')
-    if { [?x | ?xs] = xs :: 
-        !printer(x)
-        !print1(printer, xs)
-    }
-    !print(']')
-}
+# # Print a list, using `printer` to print each element
+# # XXX: refactor when we have typeclasses
+# pub def print(printer:{resource}(T), xs:_(T)) use !io {
+#     !print('[')
+#     if { [?x | ?xs] = xs :: 
+#         !printer(x)
+#         !print1(printer, xs)
+#     }
+#     !print(']')
+# }
 
-# Print a list followed by a newline, using `printer` to print each element
-# XXX: refactor when we have typeclasses
-pub def println(printer:{resource}(T), xs:_(T)) use !io { 
-    !print(printer, xs)
-    !nl
-}
+# # Print a list followed by a newline, using `printer` to print each element
+# # XXX: refactor when we have typeclasses
+# pub def println(printer:{resource}(T), xs:_(T)) use !io { 
+#     !print(printer, xs)
+#     !nl
+# }
 
 
 ## Conversion procedures
@@ -158,11 +158,11 @@ def {test} index1(xs:_(T), idx:int):T = x where {
     (idx = 0 | index1(xs, idx - 1, ?x))
 }
 
-# Helper for print
-def print1(printer:{resource}(T), xs:_(T)) use !io {
-    if { [?x | ?xs] = xs ::
-        !print(',')
-        !printer(x)
-        !print1(printer, xs)
-    }
-}
+# # Helper for print
+# def print1(printer:{resource}(T), xs:_(T)) use !io {
+#     if { [?x | ?xs] = xs ::
+#         !print(',')
+#         !printer(x)
+#         !print1(printer, xs)
+#     }
+# }

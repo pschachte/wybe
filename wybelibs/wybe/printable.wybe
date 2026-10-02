@@ -1,0 +1,20 @@
+# purpose: Trait describing data that can be written to a sink
+# since  : 0.2
+
+trait
+
+use wybe.char, wybe.io
+
+# Print one printable value to the specified sink
+abstract print(datum:_, sink:sink) use !io_state
+
+# Format printable values as strings.
+pub def fmt(val:_, str:string) 
+
+pub def {inline} fmt(ptr:_, width:int):string = fmt(ptr, width, '0')
+
+pub def {inline} fmt(ptr:_, width:int, fill:char):string =
+    fmt(ptr, width, fill, 16)
+
+pub def {inline} fmt(ptr:_, width:int, fill:char, radix:int):string =
+    fmt(foreign lpvm cast(ptr):count, width-2, fill, radix)

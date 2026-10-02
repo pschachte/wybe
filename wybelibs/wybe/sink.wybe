@@ -1,0 +1,17 @@
+# purpose: Trait describing things to which data can be written
+# since  : 0.2
+
+trait # (T) XXX No trait type parameters yet
+    # T is the type of data that can be written to the sink.
+
+use wybe.char, wybe.io
+
+# Write one value of type T to the sink(T)
+abstract write(datum:char, sink:_) use !io_state
+
+# Write `size` values of type T from the `src` address to the sink(T).
+# The values at `src` must be aligned on a *n* byte boundary, where *n* is the
+# smaller of the size of T and word size.
+abstract unsafe_write_block(src:address, size:int, sink:_) use !io_state
+# XXX When default methods are supported, we should have a default
+# implementation the just loops through memory calling `write`.

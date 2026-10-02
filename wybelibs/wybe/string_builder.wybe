@@ -1,0 +1,117 @@
+# purpose: Standard output stream to build up a string
+# since  : 0.2
+
+use wybe.char, wybe.c_string, wybe.string, wybe.address, wybe.int
+
+representation is address
+
+impl sink # (char) XXX No trait type parameters yet
+# an output stream of characters
+
+
+# The size of an output buffer.
+pub def string_buffer_size : int = 256 # fixed buffer size in bytes
+
+# Layout of output_stream:
+# offset  byte size  field          contents
+#    0       8       next_pointer   pointer to next byte to write
+#    8       8       earlier_string string coming before this buffer full
+#   16       8K      buffer         actual buffer bytes
+
+def ptr_size : int = foreign lpvm sizeof(_:address)
+def str_size : int = foreign lpvm sizeof(_:string)
+def raw_data_offset : int = ptr_size + str_size
+# Allow one extra byte for a zero terminator byte
+def string_stream_size : int = raw_data_offset + string_buffer_size + 1
+def address(buf:_):address = foreign lpvm cast(buf)
+def buffer(buf:_):address  = buf^address + raw_data_offset
+def buffer_end(buf:_):address = buf^address + string_stream_size
+
+# Accessors and mutators for output_stream type.
+
+# XXX These are manually generated because Wybe does not support inlining of
+# structure members.
+
+def {inline} next_pointer(buf:_):address =
+    foreign lpvm cast(foreign lpvm access(buf, 0, string_stream_size, 0))
+def {inline} next_pointer(!buf:_, start_ptr:address) use !io_state {
+    foreign lpvm mutate(buf, ?buf, 0, 1, string_stream_size, 0, start_ptr)
+}
+def {inline} earlier_string(buf:_):string =
+    foreign lpvm access(buf, ptr_size, string_stream_size, 0)
+def {inline} earlier_string(!buf:_, earlier_string:string) use !io_state {
+    foreign lpvm mutate(buf, ?buf, ptr_size, 1, string_stream_size, 0, earlier_string)
+}
+
+# Construct a fresh string output buffer
+pub def string_builder(?buf:_) use !io_state {
+    foreign lpvm alloc(string_stream_size, ?buf:_)
+    ?start_ptr = buffer(buf)
+    !next_pointer(!buf, start_ptr)
+    !earlier_string(!buf, empty:string)
+}
+
+
+# Close the string_output_stream, extracting the string written to it.
+pub def builder_string(!buf:_, ?str:string) use !io_state {
+    !flush_output(!buf)
+    ?str = buf^earlier_string
+    !earlier_string(!buf, empty:string)
+}
+
+
+# Write a single character to an output_stream.
+# We assume there is space in the buffer for at least one character.
+pub def write(ch:char, buf:_) use !io_state {
+    ?ptr = buf^next_pointer
+    foreign lpvm mutate(ptr, ?ptr, 0, 1, string_stream_size, 0, ch)
+    !next_pointer(!buf, ptr + 1)
+    if {  buf^next_pointer > buf^buffer_end :: !flush_output(!buf) }
+}
+
+# Write a block of `size` bytes from `src` to the specified output_stream.  This
+# does no checking that the specified range is actually valid, but does handle
+# the output buffer correctly, flushing the buffer as needed, and does nothing
+# if size <= 0.
+pub def unsafe_write_block(src:address, size:int, buf:_) use !io_state {
+    if {size > 0 ::
+        ?end = buf^buffer_end
+        do {
+            ?ptr = buf^next_pointer
+            ?to_copy = max(size, end-ptr+1)
+            foreign c `memcpy.p0.p0.i64`(ptr,src,to_copy,false:bool)
+            !next_pointer(!buf, ptr + to_copy)
+        while buf^next_pointer > end
+            !flush_output(!buf)
+        }
+    }
+}
+
+# Flush an output buffer, forcing buffered characters to be added to the
+# earlier_string.
+pub def flush_output(!buf:_) use !io_state {
+    ?ptr = buf^next_pointer
+    ?byte_count = ptr - buf^buffer
+    if {byte_count = 1 ::
+        ?ch:char = foreign lpvm cast(
+            foreign lpvm access(ptr, -1, string_stream_size, 0))
+    |   byte_count > 1 ::
+        foreign lpvm mutate(ptr, ?ptr, 0, 1, string_stream_size, 0, '\0')
+        ?str = string(foreign lpvm cast(buf^buffer):c_string)
+        !earlier_string(!buf, (buf^earlier_string ,, str))
+    }
+    !next_pointer(!buf, buf^buffer)
+}
+
+# Flush the current output buffer.  current_out is an in-only resource
+# because flushing doesn't reassign the stream, and the change to the stream
+# is accounted for because the io_state is in-out.
+pub def flush_output use current_out, !io_state {
+    !flush_output(current_out)
+}
+
+## Interface to POSIX IO primitives
+# XXX int32 is the size of a C int on this architecture.  We should have a Wybe
+# type or type synonym that specifies C's int type (and other C types).
+def foreign c write_buffer =
+    write(fd:int32, buffer:address, size:int, ?bytes_written:int) use !io_state

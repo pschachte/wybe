@@ -12,10 +12,12 @@
 
 representation is address
 
+impl sink # (char) XXX No trait type parameters yet
+# an output stream of characters
+
+
 # The size of an output buffer.
 pub def output_buffer_size : int = 8*1024 # fixed buffer size in bytes
-
-
 
 # Layout of output_stream:
 # offset  byte size  contents
@@ -58,7 +60,7 @@ pub def output_buffer(fd:int, ?buf:_) use !io_state {
 
 # Write a single character to an output_stream.
 # We assume there is space in the buffer for at least one character.
-pub def print(ch:char, buf:_) use !io_state {
+pub def write(ch:char, buf:_) use !io_state {
     ?ptr = buf^next_pointer
     foreign lpvm mutate(ptr, ?ptr, 0, 1, output_stream_size, 0, ch)
     !next_pointer(!buf, ptr + 1)
@@ -66,13 +68,13 @@ pub def print(ch:char, buf:_) use !io_state {
 }
 
 # Write a single character to the default output stream.
-pub def print(ch:char) use current_out, !io_state { !print(ch, current_out) }
+pub def write(ch:char) use current_out, !io_state { !write(ch, current_out) }
 
-# Write a block of `size` bytes from `src` to the specified output_stream.
-# This does no checking that the specified range is actually valid, but 
-# does handle the output buffer correctly, flushing and refilling the buffer
-# as needed, and does nothing if size <= 0.
-pub def unsafe_print_block(src:address, size:int, buf:_) use !io_state {
+# Write a block of `size` bytes from `src` to the specified output_stream.  This
+# does no checking that the specified range is actually valid, but does handle
+# the output buffer correctly, flushing the buffer as needed, and does nothing
+# if size <= 0.
+pub def unsafe_write_block(src:address, size:int, buf:_) use !io_state {
     if {size > 0 ::
         ?end = buf^buffer_end
         do {
@@ -107,7 +109,7 @@ pub def flush_output use current_out, !io_state {
     !flush_output(current_out)
 }
 
-## Interface to POSIX IO primitives
+## Interface to POSIX IO primitive
 # XXX int32 is the size of a C int on this architecture.  We should have a Wybe
 # type or type synonym that specifies C's int type (and other C types).
 def foreign c write_buffer =

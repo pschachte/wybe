@@ -178,20 +178,20 @@ pub def fmt(x:_, minlength:int, fill:char):_ =
 
 ## I/O
 
-pub def print(x:_) use !io {
-    case x in { 
-        buffer(_, ?str) :: !print(str)
-      | concat(?left, ?right) :: !print(left); !print(right)
-      | slice(_, _) :: for ?c in x { !print(c) }
-      | singleton(?c) :: !print(c)
-      | empty :: pass
-      | else :: !shouldnt
-    }
-}
+# pub def print(x:_) use !io {
+#     case x in { 
+#         buffer(_, ?str) :: !print(str)
+#       | concat(?left, ?right) :: !print(left); !print(right)
+#       | slice(_, _) :: for ?c in x { !print(c) }
+#       | singleton(?c) :: !print(c)
+#       | empty :: pass
+#       | else :: !shouldnt
+#     }
+# }
 
-pub def println(x:_) use !io { !print(x); !nl }
+# pub def println(x:_) use !io { !print(x); !nl }
 
-pub def read(?x:_) use !io { !read(?str:c_string); ?x = string(str) }
+# pub def read(?x:_) use !io { !read(?str:c_string); ?x = string(str) }
 
 
 ## Private helper procedures
