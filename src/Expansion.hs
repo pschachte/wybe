@@ -12,6 +12,7 @@
 --  This code is used bottom-up, ie, callees are expanded before
 --  their callers, so it does not need to recursively expand calls.
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Expansion (procExpansion) where
 
@@ -32,6 +33,7 @@ import           Data.Tuple.HT             (mapFst)
 import           Data.Function             (on)
 import           Options                   (LogSelection (Expansion))
 import           Snippets
+import Data.Functor ((<&>))
 
 
 -- | Expand the supplied ProcDef, inlining as desired.
@@ -86,14 +88,14 @@ markParamNeededness isClosure used _ param@PrimParam{primParamName=nm,
                                                      primParamInfo=info} =
     param {primParamInfo=info{
             paramInfoUnneeded=Set.notMember nm used
-                                && (not isClosure || ft /= Ordinary)}}
+                                && (not isClosure || ft == Free)}}
 markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
                                                     primParamFlow=FlowOut,
                                                     primParamFlowType=ft,
                                                     primParamInfo=info} =
     param {primParamInfo=info{
             paramInfoUnneeded=Set.member nm ins
-                                && (not isClosure || ft /= Ordinary)}}
+                                && (not isClosure || ft == Free)}}
 markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowOutByReference } =
     shouldnt "unexpected FlowOutByReference at this stage of compilation"
 markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowTakeReference } =
@@ -204,7 +206,7 @@ addInstr prim pos = do
             Just p@(Just _) -> p
             _ -> pos
     lift $ instr prim' pos'
-
+ 
 
 -- init a expander state based on the given call site count
 initExpanderState :: CallSiteID -> ExpanderState
@@ -290,7 +292,6 @@ expandPrim call@(PrimCall id pspec impurity args gFlows) pos = do
         let (args'', pspec') = case (procVariant def, args') of
                 (ClosureProc pspec' simple, ArgClosure _ closed _:rest) -> 
                     (closed ++ rest, if simple then pspec' else pspec) 
-                (ClosureProc{}, _) -> shouldnt $ "closure call with no closure arg " ++ show call
                 _ -> (args', pspec)
         def' <- if pspec == pspec' then return def else lift2 $ getProcDef pspec'
         case procImpln def' of
@@ -301,14 +302,21 @@ expandPrim call@(PrimCall id pspec impurity args gFlows) pos = do
                     logExpansion "  Not inlinable"
                     addInstr call' pos
             _ -> shouldnt $ "uncompiled proc: " ++ show pspec
-expandPrim prim@(PrimHigher id fn impurity args) pos = do
+expandPrim prim@PrimHigher{} pos = do
     logExpansion $ "  Checking inlining for higher order call " ++ show prim
-    inliningNow <- isJust <$> gets inlining
-    if inliningNow
-    then expandHigherOrder prim pos
-    else do
-        (fn':args') <- mapM expandArg $ fn:args
-        expandHigherOrder (PrimHigher id fn' impurity args') pos
+    prim' <- lift $ argExpandedPrim prim
+    case prim' of
+        PrimHigher id fn imp args -> do
+            inliningNow <- isJust <$> gets inlining
+            (fn':args') <- (if inliningNow then mapM expandArg else return) (fn:args)  
+            lift (trySkipTrampoline fn' id imp args') >>= \case 
+                Just prim'' -> do
+                    logExpansion $ "  As first order call " ++ show prim''
+                    expandPrim prim'' pos
+                Nothing -> do
+                    logExpansion $ "  As higher call to " ++ show fn'
+                    addInstr (PrimHigher id fn' imp args') pos
+        _ -> expandPrim prim' pos
 expandPrim prim@(PrimVirtualCall id table index impurity args gFlows) pos = do
     logExpansion $ "  Expand virtual call " ++ show prim
     (table':args') <- mapM expandArg $ table:args
@@ -322,25 +330,6 @@ expandPrim (PrimForeign lang nm flags args) pos = do
     addInstr (PrimForeign lang nm flags args')  pos
     st' <- get
     logExpansion $ "    renaming = " ++ show (renaming st')
-
-
-expandHigherOrder :: Prim -> OptPos -> Expander ()
-expandHigherOrder prim pos = do
-    logExpansion $ "  Expanding higher call " ++ show prim
-    prim' <- lift $ argExpandedPrim prim
-    case prim' of
-        PrimHigher id fn impurity args -> do
-            fn' <- expandArg fn
-            case fn' of
-                ArgClosure pspec closed _ -> do
-                    gFlows <- lift2 $ getProcGlobalFlows pspec
-                    expandPrim (PrimCall id pspec impurity (fn':args) gFlows) pos
-                _ -> do
-                    args' <- mapM expandArg args
-                    logExpansion $ "  As higher call to " ++ show fn'
-                    addInstr (PrimHigher id fn' impurity args') pos
-        _ -> expandPrim prim' pos
-
 
 
 inlineCall :: PrimProto -> [PrimArg] -> ProcBody -> OptPos -> Expander ()
