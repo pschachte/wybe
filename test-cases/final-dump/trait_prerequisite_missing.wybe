@@ -1,0 +1,12 @@
+# Implementing a trait without its required prerequisite is rejected.
+type equal trait {
+    abstract same(left:_, right:_): bool
+}
+
+type ordered trait <: equal {
+    abstract before(left:_, right:_): bool
+}
+
+impl int <: ordered
+
+def before(left:int, right:int): bool = true

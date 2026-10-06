@@ -87,7 +87,7 @@ validateProcDefTypes name def = do
     logTypes $ "Validating def of " ++ showProcName name
     (params', finalState) <- runStateT (traverse (updatePlacedM $ validateParam name pos public) params)
                              $ TraitTypeVars Map.empty tvarCount
-    let boundedTypeParams = getBoundedTypeParams params'
+    boundedTypeParams <- minimiseTypeVarBounds $ getBoundedTypeParams params'
     return $ def { procProto = proto { procProtoParams = params' }
                  , procFauxTypeVarCount = traitTypeVarCounter finalState
                  , procBoundedTypeParams = boundedTypeParams }
@@ -108,7 +108,23 @@ validateParamType :: OptPos -> TypeSpec -> Validator TypeSpec
 validateParamType ppos ty = do
     ty' <- lift $ lookupType "proc declaration" ppos ty
     validateTypeVarBoundsIn ppos ty'
-    traitTypesToTypeVars ty'
+    ty'' <- traitTypesToTypeVars ty'
+    lift $ addImpliedBounds ty''
+
+
+-- |Add the prerequisites of every type variable bound within a type to the
+-- bounds of that type variable.
+addImpliedBounds :: TypeSpec -> Compiler TypeSpec
+addImpliedBounds ty@TypeSpec{typeParams=params} = do
+    params' <- mapM addImpliedBounds params
+    return ty{typeParams=params'}
+addImpliedBounds ty@(TypeVariable _ bounds) = do
+    implied <- concat <$> mapM allTraitPrerequisites (Set.toAscList bounds)
+    return ty{typeVariableBounds = bounds `Set.union` Set.fromList implied}
+addImpliedBounds ty@HigherOrderType{higherTypeParams=tfs} = do
+    types' <- mapM (addImpliedBounds . typeFlowType) tfs
+    return ty{higherTypeParams=zipWith setTypeFlowType types' tfs}
+addImpliedBounds ty = return ty
 
 
 -- |Check the bounds of every type variable within a type.
@@ -150,6 +166,18 @@ getBoundedTypeParams params = concatMap boundedParams typeVarNames
     boundedParams name =
         [(name, bound) | bound <- Set.toAscList $
             Map.findWithDefault Set.empty name allBounds]
+
+
+-- |Drop a bound when another bound on the same variable implies it.  This is
+-- what lets a derived-trait vtable parameter stand in for all prerequisites.
+minimiseTypeVarBounds :: [TypeVarBound] -> Compiler [TypeVarBound]
+minimiseTypeVarBounds bounds = filterM keep bounds
+  where
+    keep (name, bound) = not . or <$> mapM (implies bound)
+        [other | (otherName, other) <- bounds,
+            otherName == name, not $ sameTraitConstraint other bound]
+    implies required other = any (sameTraitConstraint required) <$>
+        allTraitPrerequisites other
 
 
 -- |Return the type variable names in a type, preserving their occurrence order.
@@ -405,6 +433,11 @@ data TypeError = ReasonMessage Message
                    -- ^Multiple concrete procs exist for a trait implementation
                | ReasonAmbiguousTraitImpl TraitImplSpec [TraitImplSpec] OptPos
                    -- ^Several equally-specific trait implementations apply
+               | ReasonTraitPrerequisiteMissing TraitImplSpec TraitImplSpec OptPos
+                   -- ^Trait implementation lacks a required prerequisite
+               | ReasonTraitPrerequisiteAmbiguous TraitImplSpec TraitImplSpec
+                   [TraitImplSpec] OptPos
+                   -- ^Trait implementation has an ambiguous prerequisite
                | ReasonConflictingTraitImpls ModSpec TraitImplSpec
                    [(ModSpec, Set ProcSpec)] OptPos
                    -- ^Imported trait implementations resolve to different procs
@@ -614,6 +647,13 @@ typeErrorMessage (ReasonAmbiguousTraitImpl requested candidates pos) =
         "Ambiguous trait implementation for " ++ show requested
         ++ "; most-specific candidates are tied:"
         ++ concatMap (("\n    " ++) . show) candidates
+typeErrorMessage (ReasonTraitPrerequisiteMissing implementation required pos) =
+    Message Error pos $ "Invalid implementation " ++ show implementation
+        ++ ": missing prerequisite implementation " ++ show required
+typeErrorMessage (ReasonTraitPrerequisiteAmbiguous implementation required candidates pos) =
+    Message Error pos $ "Invalid implementation " ++ show implementation
+        ++ ": prerequisite " ++ show required ++ " is ambiguous:"
+        ++ concatMap (("\n    " ++) . show) candidates
 typeErrorMessage (ReasonConflictingTraitImpls importingMod
                   (TraitImplSpec trait typ) implementations pos) =
     Message Error pos $
@@ -738,6 +778,8 @@ typeErrorPos (ReasonNotATrait _ pos) = pos
 typeErrorPos (ReasonTraitImplMissing _ _ _ pos) = pos
 typeErrorPos (ReasonMultipleTraitImpl _ _ pos) = pos
 typeErrorPos (ReasonAmbiguousTraitImpl _ _ pos) = pos
+typeErrorPos (ReasonTraitPrerequisiteMissing _ _ pos) = pos
+typeErrorPos (ReasonTraitPrerequisiteAmbiguous _ _ _ pos) = pos
 typeErrorPos (ReasonConflictingTraitImpls _ _ _ pos) = pos
 
 
@@ -1338,7 +1380,17 @@ typecheckLocalTraitImpl ispec@(TraitImplSpec trait _) traitImpl = do
     let pos = traitImplPos traitImpl
     absProcs <- abstractProcs trait
     matched <- mapM (uncurry (typecheckTraitImplProc pos ispec)) absProcs
-    let errs = concatMap errList matched
+    prerequisites <- allTraitPrerequisites trait
+    known <- getModuleImplementationField modKnownTraitImpls
+    let prerequisiteErrors = concatMap (checkPrerequisite known) prerequisites
+        checkPrerequisite implementations prerequisite =
+            let required = TraitImplSpec prerequisite (implType ispec)
+            in case resolveTraitImpl required implementations of
+                TraitImplNotFound -> [ReasonTraitPrerequisiteMissing ispec required pos]
+                TraitImplAmbiguous req candidates ->
+                    [ReasonTraitPrerequisiteAmbiguous ispec req candidates pos]
+                TraitImplResolved{} -> []
+        errs = prerequisiteErrors ++ concatMap errList matched
     return $ if List.null errs
         then OK (ispec, catOKs matched)
         else Err errs
@@ -2881,7 +2933,7 @@ modeCheckProcDecl pdef = do
     typeErrors modeErrs
     params' <- updateParamTypes posParams
     let proto' = proto { procProtoParams = params' }
-    let boundedTypeParams' = getBoundedTypeParams params'
+    boundedTypeParams' <- lift $ minimiseTypeVarBounds $ getBoundedTypeParams params'
     let pdef' = pdef { procProto = proto',
                         procTmpCount = tmpCount',
                         procBoundedTypeParams = boundedTypeParams',

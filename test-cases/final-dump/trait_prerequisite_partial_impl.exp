@@ -1,0 +1,364 @@
+======================================================================
+AFTER EVERYTHING:
+
+
+--------------------------------------------------
+ Module trait_prerequisite_partial_impl
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : trait_prerequisite_partial_impl.<0>
+  constants       : 0:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember trait_prerequisite_partial_impl.before_label#adapter<0>,FnPointerStructMember trait_prerequisite_partial_impl.equivalent_label#adapter<0>], vtableExternal = False, vtableIndex = 1, vtableSpec = trait_prerequisite_partial_impl.box(Type0<:trait_prerequisite_partial_impl.printable) <: trait_prerequisite_partial_impl.ordered, vtableMod = ["trait_prerequisite_partial_impl"], vtableConstraints = [(Type0,trait_prerequisite_partial_impl.printable),(Type0,trait_prerequisite_partial_impl.printable)]}
+                    1:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_prerequisite_partial_impl.label#adapter<0>], vtableExternal = False, vtableIndex = 2, vtableSpec = wybe.int <: trait_prerequisite_partial_impl.printable, vtableMod = ["trait_prerequisite_partial_impl"], vtableConstraints = []}
+  imports         : use trait_prerequisite_partial_impl.box
+                    use trait_prerequisite_partial_impl.equivalent
+                    use trait_prerequisite_partial_impl.ordered
+                    use trait_prerequisite_partial_impl.printable
+                    use wybe
+  resources       : 
+  submodules      : trait_prerequisite_partial_impl.box, trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered, trait_prerequisite_partial_impl.printable
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: trait_prerequisite_partial_impl.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(8,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    foreign lpvm make_vtable(vtable trait_prerequisite_partial_impl.box(Type0<:trait_prerequisite_partial_impl.printable) <: trait_prerequisite_partial_impl.ordered:opaque, 2:wybe.int, vtable wybe.int <: trait_prerequisite_partial_impl.printable:opaque, vtable wybe.int <: trait_prerequisite_partial_impl.printable:opaque, ?#vtableruntime##0:opaque) @trait_prerequisite_partial_impl:nn:nn
+    trait_prerequisite_partial_impl.ordered.before_label<0>(1:trait_prerequisite_partial_impl.box(wybe.int), 2:trait_prerequisite_partial_impl.box(wybe.int), ?tmp#2##0:wybe.string, #vtableruntime##0:opaque)<{}; {}; {0, 1}> #2 @trait_prerequisite_partial_impl:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @trait_prerequisite_partial_impl:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @trait_prerequisite_partial_impl:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @trait_prerequisite_partial_impl:nn:nn
+    foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_prerequisite_partial_impl:nn:nn
+    foreign lpvm cast(~#vtableruntime##0:opaque, ?tmp#20##0:pointer) @trait_prerequisite_partial_impl:nn:nn
+    foreign llvm add(~tmp#20##0:pointer, 8:wybe.int, ?tmp#21##0:pointer) @trait_prerequisite_partial_impl:nn:nn
+    trait_prerequisite_partial_impl.equivalent.equivalent_label<0>(1:trait_prerequisite_partial_impl.box(wybe.int), 2:trait_prerequisite_partial_impl.box(wybe.int), ?tmp#3##0:wybe.string, ~tmp#21##0:opaque)<{}; {}; {0, 1}> #7 @trait_prerequisite_partial_impl:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#3##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @trait_prerequisite_partial_impl:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @trait_prerequisite_partial_impl:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @trait_prerequisite_partial_impl:nn:nn
+    foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_prerequisite_partial_impl:nn:nn
+
+
+proc before_label > {inline} (1 calls)
+0: trait_prerequisite_partial_impl.before_label<0>
+before_label([left##0:trait_prerequisite_partial_impl.box(T<:trait_prerequisite_partial_impl.printable) <{}; {}; {0}>], right##0:trait_prerequisite_partial_impl.box(T<:trait_prerequisite_partial_impl.printable) <{}; {}; {1}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~right##0:trait_prerequisite_partial_impl.box(T), ?tmp#1##0:T) @trait_prerequisite_partial_impl:nn:nn
+    trait_prerequisite_partial_impl.printable.label<0>(~tmp#1##0:T, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_partial_impl:nn:nn
+
+
+proc before_label#adapter > {noinline} (0 calls)
+0: trait_prerequisite_partial_impl.before_label#adapter<0>
+before_label#adapter(left##0:Type0<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered}, right##0:Type0<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(~#vtable##0:pointer, 16:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
+    trait_prerequisite_partial_impl.printable.label<0>(~right##0:T<:trait_prerequisite_partial_impl.printable, ?#result##0:wybe.string, ~#vtable#adapter0##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_partial_impl:nn:nn
+
+
+proc equivalent_from_ordered > {inline} (1 calls)
+0: trait_prerequisite_partial_impl.equivalent_from_ordered<0>
+equivalent_from_ordered(left##0:T<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered} <{}; {}; {0}>, right##0:T<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered} <{}; {}; {1}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#vtable##0:opaque, ?#vtableviewbase##0:pointer) @trait_prerequisite_partial_impl:nn:nn
+    foreign llvm add(~#vtableviewbase##0:pointer, 8:wybe.int, ?#vtableview##0:pointer) @trait_prerequisite_partial_impl:nn:nn
+    trait_prerequisite_partial_impl.equivalent.equivalent_label<0>(~left##0:T<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered}, ~right##0:T, ?#result##0:wybe.string, ~#vtableview##0:opaque)<{}; {}; {0, 1}> #0 @trait_prerequisite_partial_impl:nn:nn
+
+
+proc equivalent_label > {inline} (1 calls)
+0: trait_prerequisite_partial_impl.equivalent_label<0>
+equivalent_label(left##0:trait_prerequisite_partial_impl.box(T<:trait_prerequisite_partial_impl.printable) <{}; {}; {0}>, [right##0:trait_prerequisite_partial_impl.box(T<:trait_prerequisite_partial_impl.printable) <{}; {}; {1}>], ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~left##0:trait_prerequisite_partial_impl.box(T<:trait_prerequisite_partial_impl.printable), ?tmp#1##0:T<:trait_prerequisite_partial_impl.printable) @trait_prerequisite_partial_impl:nn:nn
+    trait_prerequisite_partial_impl.printable.label<0>(~tmp#1##0:T<:trait_prerequisite_partial_impl.printable, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_partial_impl:nn:nn
+
+
+proc equivalent_label#adapter > {noinline} (0 calls)
+0: trait_prerequisite_partial_impl.equivalent_label#adapter<0>
+equivalent_label#adapter(left##0:Type0<:trait_prerequisite_partial_impl.equivalent, right##0:Type0<:trait_prerequisite_partial_impl.equivalent, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm access(~#vtable##0:pointer, 8:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
+    trait_prerequisite_partial_impl.printable.label<0>(~left##0:T<:trait_prerequisite_partial_impl.printable, ?#result##0:wybe.string, ~#vtable#adapter0##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_partial_impl:nn:nn
+
+
+proc label > {inline} (1 calls)
+0: trait_prerequisite_partial_impl.label<0>
+label(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?#result##0:wybe.string) #1 @trait_prerequisite_partial_impl:nn:nn
+
+
+proc label#adapter > {noinline} (0 calls)
+0: trait_prerequisite_partial_impl.label#adapter<0>
+label#adapter(x##0:Type0<:trait_prerequisite_partial_impl.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~x##0:Type0<:trait_prerequisite_partial_impl.printable, ?x#adapter0##0:wybe.int)
+    wybe.int.fmt<2>(~x#adapter0##0:wybe.int, 0:wybe.int, 32:wybe.char, ?#result##0:wybe.string) #1 @trait_prerequisite_partial_impl:nn:nn
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_prerequisite_partial_impl'
+
+source_filename = "!ROOT!/final-dump/trait_prerequisite_partial_impl.wybe"
+target triple   = ????
+
+@"trait_prerequisite_partial_impl##vtable#1" = unnamed_addr constant {ptr, ptr} { ptr @"trait_prerequisite_partial_impl#.before_label#adapter<0>", ptr @"trait_prerequisite_partial_impl#.equivalent_label#adapter<0>" }, align 8
+@"trait_prerequisite_partial_impl##vtable#2" = unnamed_addr constant {ptr} { ptr @"trait_prerequisite_partial_impl#.label#adapter<0>" }, align 8
+
+declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
+declare external ccc void @putchar(i8)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc void @"trait_prerequisite_partial_impl#.<0>"() {
+  %"#vtableruntime##0" = alloca i8, i64 32, align 8
+  call ccc void @llvm.memcpy.p0.p0.i64(ptr %"#vtableruntime##0", ptr @"trait_prerequisite_partial_impl##vtable#1", i64 16, i1 0)
+  %"tmp#25##0" = getelementptr inbounds ptr, ptr %"#vtableruntime##0", i64 2
+  store ptr @"trait_prerequisite_partial_impl##vtable#2", ptr %"tmp#25##0"
+  %"tmp#26##0" = getelementptr inbounds ptr, ptr %"#vtableruntime##0", i64 3
+  store ptr @"trait_prerequisite_partial_impl##vtable#2", ptr %"tmp#26##0"
+  %"tmp#2##0" = call fastcc i64 @"trait_prerequisite_partial_impl#.ordered#.before_label<0>"(i64 1, i64 2, ptr %"#vtableruntime##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#2##0")
+  call ccc void @putchar(i8 10)
+  %"tmp#20##0" = ptrtoint ptr %"#vtableruntime##0" to i64
+  %"tmp#21##0" = add i64 %"tmp#20##0", 8
+  %"tmp#27##0" = inttoptr i64 %"tmp#21##0" to ptr
+  %"tmp#3##0" = tail call fastcc i64 @"trait_prerequisite_partial_impl#.equivalent#.equivalent_label<0>"(i64 1, i64 2, ptr %"tmp#27##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#3##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.before_label<0>"(i64 %"right##0", ptr %"#vtable##0") {
+  %"tmp#5##0" = tail call fastcc i64 @"trait_prerequisite_partial_impl#.printable#.label<0>"(i64 %"right##0", ptr %"#vtable##0")
+  ret i64 %"tmp#5##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.before_label#adapter<0>"(i64 %"left##0", i64 %"right##0", ptr %"#vtable##0") {
+  %"tmp#5##0" = ptrtoint ptr %"#vtable##0" to i64
+  %"tmp#4##0" = add i64 %"tmp#5##0", 16
+  %"tmp#6##0" = inttoptr i64 %"tmp#4##0" to ptr
+  %"#vtable#adapter0##0" = load ptr, ptr %"tmp#6##0"
+  %"tmp#7##0" = tail call fastcc i64 @"trait_prerequisite_partial_impl#.printable#.label<0>"(i64 %"right##0", ptr %"#vtable#adapter0##0")
+  ret i64 %"tmp#7##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.equivalent_from_ordered<0>"(i64 %"left##0", i64 %"right##0", ptr %"#vtable##0") {
+  %"#vtableviewbase##0" = ptrtoint ptr %"#vtable##0" to i64
+  %"#vtableview##0" = add i64 %"#vtableviewbase##0", 8
+  %"tmp#1##0" = inttoptr i64 %"#vtableview##0" to ptr
+  %"tmp#2##0" = tail call fastcc i64 @"trait_prerequisite_partial_impl#.equivalent#.equivalent_label<0>"(i64 %"left##0", i64 %"right##0", ptr %"tmp#1##0")
+  ret i64 %"tmp#2##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.equivalent_label<0>"(i64 %"left##0", ptr %"#vtable##0") {
+  %"tmp#5##0" = tail call fastcc i64 @"trait_prerequisite_partial_impl#.printable#.label<0>"(i64 %"left##0", ptr %"#vtable##0")
+  ret i64 %"tmp#5##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.equivalent_label#adapter<0>"(i64 %"left##0", i64 %"right##0", ptr %"#vtable##0") {
+  %"tmp#5##0" = ptrtoint ptr %"#vtable##0" to i64
+  %"tmp#4##0" = add i64 %"tmp#5##0", 8
+  %"tmp#6##0" = inttoptr i64 %"tmp#4##0" to ptr
+  %"#vtable#adapter0##0" = load ptr, ptr %"tmp#6##0"
+  %"tmp#7##0" = tail call fastcc i64 @"trait_prerequisite_partial_impl#.printable#.label<0>"(i64 %"left##0", ptr %"#vtable#adapter0##0")
+  ret i64 %"tmp#7##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.label<0>"(i64 %"x##0") {
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"x##0", i64 0, i8 32)
+  ret i64 %"tmp#2##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.label#adapter<0>"(i64 %"x##0", ptr %"#vtable##0") {
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"x##0", i64 0, i8 32)
+  ret i64 %"tmp#1##0"
+}
+
+--------------------------------------------------
+ Module trait_prerequisite_partial_impl.box(T)
+  representation  : 64 bit unsigned
+  public submods  : 
+  public resources: 
+  public procs    : trait_prerequisite_partial_impl.box.box<0>
+                    trait_prerequisite_partial_impl.box.box<1>
+                    trait_prerequisite_partial_impl.box.value<0>
+                    trait_prerequisite_partial_impl.box.value<1>
+  constants       : 
+  imports         : use trait_prerequisite_partial_impl
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc box > public {inline} (0 calls)
+0: trait_prerequisite_partial_impl.box.box<0>
+box(value##0:T <{}; {}; {0}>, ?#result##2:trait_prerequisite_partial_impl.box(T) <{}; {}; {0}>)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~value##0:T, ?#result##2:trait_prerequisite_partial_impl.box(T)) @trait_prerequisite_partial_impl:nn:nn
+proc box > public {inline} (0 calls)
+1: trait_prerequisite_partial_impl.box.box<1>
+box(?value##0:T <{}; {}; {1}>, #result##0:trait_prerequisite_partial_impl.box(T) <{}; {}; {1}>)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#result##0:trait_prerequisite_partial_impl.box(T), ?value##0:T) @trait_prerequisite_partial_impl:nn:nn
+
+
+proc value > public {inline} (0 calls)
+0: trait_prerequisite_partial_impl.box.value<0>
+value(#rec##0:trait_prerequisite_partial_impl.box(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#rec##0:trait_prerequisite_partial_impl.box(T), ?#result##0:T) @trait_prerequisite_partial_impl:nn:nn
+proc value > public {inline} (0 calls)
+1: trait_prerequisite_partial_impl.box.value<1>
+value([#rec##0:trait_prerequisite_partial_impl.box(T) <{}; {}; {0}>], ?#rec##2:trait_prerequisite_partial_impl.box(T) <{}; {}; {2}>, #field##0:T <{}; {}; {2}>)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~#field##0:T, ?#rec##2:trait_prerequisite_partial_impl.box(T)) @trait_prerequisite_partial_impl:nn:nn
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_prerequisite_partial_impl.box'
+
+source_filename = "!ROOT!/final-dump/trait_prerequisite_partial_impl.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.box#.box<0>"(i64 %"value##0") {
+  ret i64 %"value##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.box#.box<1>"(i64 %"#result##0") {
+  ret i64 %"#result##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.box#.value<0>"(i64 %"#rec##0") {
+  ret i64 %"#rec##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.box#.value<1>"(i64 %"#field##0") {
+  ret i64 %"#field##0"
+}
+
+--------------------------------------------------
+ Module trait_prerequisite_partial_impl.equivalent
+  representation  : (not yet known)
+  public submods  : 
+  public resources: 
+  public procs    : trait_prerequisite_partial_impl.equivalent.equivalent_label<0>
+  constants       : 
+  imports         : use trait_prerequisite_partial_impl
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc equivalent_label > public abstract {inline} (0 calls)
+0: trait_prerequisite_partial_impl.equivalent.equivalent_label<0>
+equivalent_label(left##0:Type0<:trait_prerequisite_partial_impl.equivalent <{}; {}; {0}>, right##0:Type0<:trait_prerequisite_partial_impl.equivalent <{}; {}; {1}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~#vtable##0:opaque@0(~left##0:Type0<:trait_prerequisite_partial_impl.equivalent, ~right##0:Type0<:trait_prerequisite_partial_impl.equivalent, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_prerequisite_partial_impl.equivalent'
+
+source_filename = "!ROOT!/final-dump/trait_prerequisite_partial_impl.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.equivalent#.equivalent_label<0>"(i64 %"left##0", i64 %"right##0", ptr %"#vtable##0") {
+  %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
+  %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
+  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"left##0", i64 %"right##0", ptr %"#vtable##0")
+  ret i64 %"tmp#2##0"
+}
+
+--------------------------------------------------
+ Module trait_prerequisite_partial_impl.ordered
+  representation  : (not yet known)
+  public submods  : 
+  public resources: 
+  public procs    : trait_prerequisite_partial_impl.ordered.before_label<0>
+  constants       : 
+  imports         : use trait_prerequisite_partial_impl
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc before_label > public abstract {inline} (0 calls)
+0: trait_prerequisite_partial_impl.ordered.before_label<0>
+before_label(left##0:Type0<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered} <{}; {}; {0}>, right##0:Type0<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered} <{}; {}; {1}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~#vtable##0:opaque@0(~left##0:Type0<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered}, ~right##0:Type0<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered}, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_prerequisite_partial_impl.ordered'
+
+source_filename = "!ROOT!/final-dump/trait_prerequisite_partial_impl.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.ordered#.before_label<0>"(i64 %"left##0", i64 %"right##0", ptr %"#vtable##0") {
+  %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
+  %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
+  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"left##0", i64 %"right##0", ptr %"#vtable##0")
+  ret i64 %"tmp#2##0"
+}
+
+--------------------------------------------------
+ Module trait_prerequisite_partial_impl.printable
+  representation  : (not yet known)
+  public submods  : 
+  public resources: 
+  public procs    : trait_prerequisite_partial_impl.printable.label<0>
+  constants       : 
+  imports         : use trait_prerequisite_partial_impl
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc label > public abstract {inline} (0 calls)
+0: trait_prerequisite_partial_impl.printable.label<0>
+label(x##0:Type0<:trait_prerequisite_partial_impl.printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~#vtable##0:opaque@0(~x##0:Type0<:trait_prerequisite_partial_impl.printable, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_prerequisite_partial_impl.printable'
+
+source_filename = "!ROOT!/final-dump/trait_prerequisite_partial_impl.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i64 @"trait_prerequisite_partial_impl#.printable#.label<0>"(i64 %"x##0", ptr %"#vtable##0") {
+  %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
+  %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
+  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0", ptr %"#vtable##0")
+  ret i64 %"tmp#2##0"
+}

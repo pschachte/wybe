@@ -1945,6 +1945,61 @@ The third declaration is selected when both type arguments implement
 `named`; without it, selecting a `formattable` implementation for such a pair
 would be ambiguous.
 
+### Trait prerequisites
+
+A trait may require its implementing types to implement other traits.  Declare
+these *prerequisites* with `<:` after `trait`, using braces for multiple traits.
+In a top-level trait module, write `trait <: named` for a single prerequisite.
+For example, a top-level version of the earlier `listable` trait can require
+the existing `named` and `priced` traits:
+
+```
+# listable.wybe
+use named
+use priced
+
+trait <: {named, priced}
+
+abstract listing(x:_): string
+```
+
+For a submodule trait, place the prerequisites after `trait` in the `type`
+declaration.  The earlier `listable` declaration can be replaced with:
+
+```
+type listable trait <: {named, priced} {
+    abstract listing(x:_): string
+}
+```
+
+For a single prerequisite, write `type listable trait <: named { ... }`.
+
+A procedure constrained by `listable` can also use its prerequisites without
+listing them separately in the type bound:
+
+```
+def shop_label(x:listable): string =
+    "$(named.name(x)): $(priced.price(x)) - $(listable.listing(x))"
+```
+
+An `impl` declaration for `listable` requires a unique applicable implementation
+of each prerequisite for the same type.  It does not declare those
+implementations automatically.  Reusing the earlier `named` implementation for
+`int`, we can add:
+
+```
+impl int <: {priced, listable}
+
+def price(x:int): int = x
+
+def listing(x:int): string = "special offer"
+```
+
+Now `shop_label(7)` returns `"int: 7 - special offer"`.  Prerequisites are
+transitive: if a prerequisite itself requires another trait, that trait is also
+available through the original bound and must have an applicable implementation.
+Missing or ambiguous prerequisite implementations are compile-time errors.
+
 ### Default trait implementations
 
 A trait may give an abstract procedure or function a default implementation by
