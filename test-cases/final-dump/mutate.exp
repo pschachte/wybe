@@ -22,8 +22,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: mutate.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(28,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(29,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(30,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(31,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(32,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(33,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign llvm or(1:wybe.int, mutate#constant#2:mutate.position, ?tmp#0##0:mutate.position) @mutate:nn:nn
@@ -158,8 +157,7 @@ define external fastcc void @"mutate#.<0>"() {
 proc = > public (1 calls)
 0: mutate.position.=<0>
 =(#left##0:mutate.position, #right##0:mutate.position, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#left##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#10##0:1 bit unsigned)
     foreign llvm icmp_eq(tmp#10##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#11##0:wybe.bool)
@@ -219,13 +217,12 @@ proc fmt > public (0 calls)
 0: mutate.position.fmt<0>
 fmt(pos##0:mutate.position, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtReturn 1.Field (-2) -> [ExtReturn 1]
-      ExtReturn 1.Field (-1) -> [ExtReturn 1]
-      ExtReturn 1.Field 0 -> [ExtReturn 1]
-      ExtReturn 1.Field 6 -> [ExtReturn 1]
-      ExtReturn 1.Field 7 -> [ExtReturn 1]
-      ExtReturn 1.Field 8 -> [ExtReturn 1]
+    ExtReturn 1.Field (-2) -> [ExtReturn 1]
+    ExtReturn 1.Field (-1) -> [ExtReturn 1]
+    ExtReturn 1.Field 0 -> [ExtReturn 1]
+    ExtReturn 1.Field 6 -> [ExtReturn 1]
+    ExtReturn 1.Field 7 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1]
   InterestingCallProperties: []
     foreign llvm and(pos##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#23##0:1 bit unsigned) @mutate:nn:nn
     foreign llvm icmp_eq(tmp#23##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#24##0:wybe.bool) @mutate:nn:nn
@@ -261,16 +258,14 @@ fmt(pos##0:mutate.position, ?#result##0:wybe.string)<{}; {}; {}>:
 proc make_position_tagged > public {inline} (0 calls)
 0: mutate.position.make_position_tagged<0>
 make_position_tagged(make_position_tagged#1##0:wybe.int, ?#result##0:mutate.position)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:mutate.position) @mutate:nn:nn
     foreign lpvm mutate(~#rec##0:mutate.position, ?#result##0:mutate.position, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~make_position_tagged#1##0:wybe.int) @mutate:nn:nn
 proc make_position_tagged > public {inline} (21 calls)
 1: mutate.position.make_position_tagged<1>
 make_position_tagged(?make_position_tagged#1##0:wybe.int, #result##0:mutate.position, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -288,8 +283,7 @@ make_position_tagged(?make_position_tagged#1##0:wybe.int, #result##0:mutate.posi
 proc position > public {inline} (0 calls)
 0: mutate.position.position<0>
 position(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, ?#result##0:mutate.position)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:mutate.position) @mutate:nn:nn
     foreign lpvm mutate(~#rec##0:mutate.position, ?#rec##1:mutate.position, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~x##0:wybe.int) @mutate:nn:nn
@@ -299,8 +293,7 @@ position(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, ?#result##0:mutate.positio
 proc position > public {inline} (19 calls)
 1: mutate.position.position<1>
 position(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, #result##0:mutate.position, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -322,8 +315,7 @@ proc update_x > public (0 calls)
 0: mutate.position.update_x<0>
 update_x(pos##0:mutate.position, ?pos##2:mutate.position, new_x##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(pos##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#4##0:1 bit unsigned) @mutate:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -340,8 +332,7 @@ proc update_y > public (0 calls)
 0: mutate.position.update_y<0>
 update_y(pos##0:mutate.position, ?pos##2:mutate.position, new_y##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(pos##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#4##0:1 bit unsigned) @mutate:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -358,8 +349,7 @@ proc update_z > public (0 calls)
 0: mutate.position.update_z<0>
 update_z(pos##0:mutate.position, ?pos##2:mutate.position, new_z##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(pos##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#4##0:1 bit unsigned) @mutate:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -375,8 +365,7 @@ update_z(pos##0:mutate.position, ?pos##2:mutate.position, new_z##0:wybe.int)<{};
 proc x > public {inline} (0 calls)
 0: mutate.position.x<0>
 x(#rec##0:mutate.position, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -391,8 +380,7 @@ x(#rec##0:mutate.position, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {};
 proc x > public {inline} (3 calls)
 1: mutate.position.x<1>
 x(#rec##0:mutate.position, ?#rec##1:mutate.position, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -409,8 +397,7 @@ x(#rec##0:mutate.position, ?#rec##1:mutate.position, #field##0:wybe.int, ?#succe
 proc y > public {inline} (0 calls)
 0: mutate.position.y<0>
 y(#rec##0:mutate.position, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -425,8 +412,7 @@ y(#rec##0:mutate.position, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {};
 proc y > public {inline} (3 calls)
 1: mutate.position.y<1>
 y(#rec##0:mutate.position, ?#rec##1:mutate.position, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -443,8 +429,7 @@ y(#rec##0:mutate.position, ?#rec##1:mutate.position, #field##0:wybe.int, ?#succe
 proc z > public {inline} (0 calls)
 0: mutate.position.z<0>
 z(#rec##0:mutate.position, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -459,8 +444,7 @@ z(#rec##0:mutate.position, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {};
 proc z > public {inline} (3 calls)
 1: mutate.position.z<1>
 z(#rec##0:mutate.position, ?#rec##1:mutate.position, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -477,8 +461,7 @@ z(#rec##0:mutate.position, ?#rec##1:mutate.position, #field##0:wybe.int, ?#succe
 proc ~= > public {inline} (0 calls)
 0: mutate.position.~=<0>
 ~=(#left##0:mutate.position, #right##0:mutate.position, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     mutate.position.=<0>(~#left##0:mutate.position, ~#right##0:mutate.position, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

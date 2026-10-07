@@ -23,8 +23,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_abstract_proc_modifiers.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     trait_abstract_proc_modifiers.matcher.matches<0>(42:wybe.int, ?tmp#2##0:wybe.bool, vtable(global,wybe.int <: trait_abstract_proc_modifiers.matcher):opaque)<{}; {}; {0}> #0 @trait_abstract_proc_modifiers:nn:nn
     factored ~tmp#2##0:wybe.bool of
@@ -38,8 +37,7 @@ module top-level code > public {semipure} (0 calls)
 proc matches > {inline,semipure} (1 calls)
 0: trait_abstract_proc_modifiers.matches<0>
 matches(x##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~x##0:wybe.int, 42:wybe.int, ?#success##0:wybe.bool) @trait_abstract_proc_modifiers:nn:nn
 
@@ -47,8 +45,7 @@ matches(x##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 proc matches#adapter > {noinline,semipure} (0 calls)
 0: trait_abstract_proc_modifiers.matches#adapter<0>
 matches#adapter(x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?x#adapter0##0:wybe.int)
     foreign llvm icmp_eq(~x#adapter0##0:wybe.int, 42:wybe.int, ?#success##0:wybe.bool) @trait_abstract_proc_modifiers:nn:nn
@@ -107,8 +104,7 @@ define external fastcc i1 @"trait_abstract_proc_modifiers#.matches#adapter<0>"(i
 proc matches > public abstract {inline,semipure} (0 calls)
 0: trait_abstract_proc_modifiers.matcher.matches<0>
 matches(x##0:Type0<:trait_abstract_proc_modifiers.matcher <{}; {}; {0}>, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?#success##0:wybe.bool) #0
 

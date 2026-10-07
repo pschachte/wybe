@@ -17,8 +17,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: exp_simple.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @exp_simple:nn:nn
     foreign c print_int(3:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @exp_simple:nn:nn
@@ -41,8 +40,7 @@ module top-level code > public {semipure} (0 calls)
 proc foreign_add > {inline} (1 calls)
 0: exp_simple.foreign_add<0>
 foreign_add(?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(3:wybe.int, ?#result##0:wybe.int) @exp_simple:nn:nn
 

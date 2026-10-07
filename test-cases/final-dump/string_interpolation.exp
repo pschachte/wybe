@@ -25,8 +25,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: string_interpolation.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(24,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(26,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(29,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.string.,,<0>("Wybe":wybe.string, 1159:wybe.string, ?tmp#1##0:wybe.string) #4 @string_interpolation:nn:nn

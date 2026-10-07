@@ -16,8 +16,7 @@ AFTER EVERYTHING:
 proc nothing_interesting > public {inline} (0 calls)
 0: mainless.nothing_interesting<0>
 nothing_interesting(?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(7:wybe.int, ?#result##0:wybe.int) @mainless:nn:nn
 

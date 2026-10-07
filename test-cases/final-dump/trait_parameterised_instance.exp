@@ -21,8 +21,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_parameterised_instance.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.c_string<0>("123":wybe.string, ?tmp#8##0:wybe.c_string) #5 @trait_parameterised_instance:nn:nn
     foreign c atoi(~tmp#8##0:wybe.c_string, ?tmp#0##0:wybe.int) @trait_parameterised_instance:nn:nn
@@ -39,16 +38,14 @@ module top-level code > public {semipure} (0 calls)
 proc from > {inline} (2 calls)
 0: trait_parameterised_instance.from<0>
 from(s##0:wybe.string, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.c_string<0>(~s##0:wybe.string, ?tmp#1##0:wybe.c_string) #0 @trait_parameterised_instance:nn:nn
     foreign c atoi(~tmp#1##0:wybe.c_string, ?#result##0:wybe.int) @trait_parameterised_instance:nn:nn
 proc from > {inline} (2 calls)
 1: trait_parameterised_instance.from<1>
 from(f##0:wybe.float, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign c llvm.round.f64(~f##0:wybe.float, ?tmp#2##0:wybe.float) @trait_parameterised_instance:nn:nn
     foreign llvm fptosi(~tmp#2##0:wybe.float, ?#result##0:wybe.int) @trait_parameterised_instance:nn:nn
@@ -57,8 +54,7 @@ from(f##0:wybe.float, ?#result##0:wybe.int)<{}; {}; {}>:
 proc from#adapter > {noinline} (0 calls)
 0: trait_parameterised_instance.from#adapter<0>
 from#adapter(x##0:U, ?#result##0:Type0<:trait_parameterised_instance.from(U))<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:U, ?f#adapter0##0:wybe.float)
     foreign c llvm.round.f64(~f#adapter0##0:wybe.float, ?tmp#1##0:wybe.float) @trait_parameterised_instance:nn:nn
@@ -68,27 +64,26 @@ proc from#adapter > {noinline} (0 calls)
 1: trait_parameterised_instance.from#adapter<1>
 from#adapter(x##0:U, ?#result##0:Type0<:trait_parameterised_instance.from(U))<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
-      ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(wybe.string.c_string<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign lpvm cast(~x##0:U, ?s#adapter0##0:wybe.string)
@@ -168,8 +163,7 @@ define external fastcc i64 @"trait_parameterised_instance#.from#adapter<1>"(i64 
 proc from > public abstract {inline} (0 calls)
 0: trait_parameterised_instance.from.from<0>
 from(x##0:U <{}; {}; {0}>, ?#result##0:Type0<:trait_parameterised_instance.from(U) <{}; {}; {0}>, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:U, ?#result##0:Type0<:trait_parameterised_instance.from(U)) #0
 

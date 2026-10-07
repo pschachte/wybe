@@ -16,8 +16,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: stmt_while.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     stmt_while.#cont#1<0>(10:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @stmt_while:nn:nn
 
@@ -25,8 +24,7 @@ module top-level code > public {inline,semipure} (0 calls)
 proc #cont#1 > {semipure} (2 calls)
 0: stmt_while.#cont#1<0>
 #cont#1(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @stmt_while:nn:nn
     case ~tmp#1##0:wybe.bool of
@@ -45,8 +43,7 @@ proc #cont#1 > {semipure} (2 calls)
 proc #cont#2 > {inline,semipure} (1 calls)
 0: stmt_while.#cont#2<0>
 #cont#2(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @stmt_while:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @stmt_while:nn:nn

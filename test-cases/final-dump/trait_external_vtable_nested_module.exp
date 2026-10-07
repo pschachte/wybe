@@ -24,8 +24,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_external_vtable_nested_module.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.string.,,<0>("Rex":wybe.string, " says woof":wybe.string, ?tmp#0##0:wybe.string) #4 @trait_external_vtable_nested_module:nn:nn
@@ -76,8 +75,7 @@ define external fastcc void @"trait_external_vtable_nested_module#.<0>"() {
 proc = > public {inline} (1 calls)
 0: trait_external_vtable_nested_module.wrapper.=<0>
 =([#left##0:trait_external_vtable_nested_module.wrapper], [#right##0:trait_external_vtable_nested_module.wrapper], ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -85,8 +83,7 @@ proc = > public {inline} (1 calls)
 proc wrapper > public {inline} (0 calls)
 0: trait_external_vtable_nested_module.wrapper.wrapper<0>
 wrapper(?#result##0:trait_external_vtable_nested_module.wrapper)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(0:trait_external_vtable_nested_module.wrapper, ?#result##0:trait_external_vtable_nested_module.wrapper)
 
@@ -94,8 +91,7 @@ wrapper(?#result##0:trait_external_vtable_nested_module.wrapper)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: trait_external_vtable_nested_module.wrapper.~=<0>
 ~=([#left##0:trait_external_vtable_nested_module.wrapper], [#right##0:trait_external_vtable_nested_module.wrapper], ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
@@ -145,8 +141,7 @@ define external fastcc i1 @"trait_external_vtable_nested_module#.wrapper#.~=<0>"
 proc = > public {inline} (1 calls)
 0: trait_import_support.basic_dog.=<0>
 =(#left##0:trait_import_support.basic_dog, #right##0:trait_import_support.basic_dog, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.basic_dog, ~#right##0:trait_import_support.basic_dog, ?#success##0:wybe.bool)
 
@@ -154,15 +149,13 @@ proc = > public {inline} (1 calls)
 proc name > public {inline} (1 calls)
 0: trait_import_support.basic_dog.name<0>
 name(#rec##0:trait_import_support.basic_dog, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_import_support.basic_dog, ?#result##0:wybe.string) @basic_dog:nn:nn
 proc name > public {inline} (0 calls)
 1: trait_import_support.basic_dog.name<1>
 name([#rec##0:trait_import_support.basic_dog], ?#rec##2:trait_import_support.basic_dog, #field##0:wybe.string)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:wybe.string, ?#rec##2:trait_import_support.basic_dog) @basic_dog:nn:nn
 
@@ -170,8 +163,7 @@ name([#rec##0:trait_import_support.basic_dog], ?#rec##2:trait_import_support.bas
 proc speak > public {inline} (1 calls)
 0: trait_import_support.basic_dog.speak<0>
 speak(x##0:trait_import_support.basic_dog, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_import_support.basic_dog, ?tmp#2##0:wybe.string) @basic_dog:nn:nn
     wybe.string.,,<0>(~tmp#2##0:wybe.string, " says woof":wybe.string, ?#result##0:wybe.string) #3 @basic_dog:nn:nn
@@ -181,29 +173,28 @@ proc speak#adapter > {noinline} (0 calls)
 0: trait_import_support.basic_dog.speak#adapter<0>
 speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtParam 0.Field 0 -> [ExtParam 0]
-      ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
-      ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtReturn 1.FieldIdent -> [ExtParam 0]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
-      ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtParam 0.Field 0 -> [ExtParam 0]
+    ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
   InterestingCallProperties: []
     wybe.string.,,<0>(~x##0:wybe.string, " says woof":wybe.string, ?#result##0:wybe.string) #1 @basic_dog:nn:nn
 
@@ -211,15 +202,13 @@ speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.s
 proc trait_basic_dog > public {inline} (0 calls)
 0: trait_import_support.basic_dog.trait_basic_dog<0>
 trait_basic_dog(name##0:wybe.string, ?#result##2:trait_import_support.basic_dog)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~name##0:wybe.string, ?#result##2:trait_import_support.basic_dog) @basic_dog:nn:nn
 proc trait_basic_dog > public {inline} (0 calls)
 1: trait_import_support.basic_dog.trait_basic_dog<1>
 trait_basic_dog(?name##0:wybe.string, #result##0:trait_import_support.basic_dog)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_import_support.basic_dog, ?name##0:wybe.string) @basic_dog:nn:nn
 
@@ -227,8 +216,7 @@ trait_basic_dog(?name##0:wybe.string, #result##0:trait_import_support.basic_dog)
 proc ~= > public {inline} (0 calls)
 0: trait_import_support.basic_dog.~=<0>
 ~=(#left##0:trait_import_support.basic_dog, #right##0:trait_import_support.basic_dog, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.basic_dog, ~#right##0:trait_import_support.basic_dog, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -299,8 +287,7 @@ define external fastcc i1 @"trait_import_support#.basic_dog#.~=<0>"(i64 %"#left#
 proc speak > public abstract {inline} (0 calls)
 0: trait_import_support.basic_speaker.speak<0>
 speak(x##0:Type0<:trait_import_support.basic_speaker <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string) #0
 

@@ -2725,12 +2725,12 @@ instance Show ProcPTGSummary where
         let edgeStrs = [ show src ++ "." ++ show f ++ " -> " ++ showNodeList tgts
                        | (src, fm) <- Map.toAscList edges
                        , (f, tgts) <- Map.toAscList fm ]
-        in "\n    edges:" ++ showBlock edgeStrs
+        in showBlock edgeStrs
       where
         showNodeList ns =
             "[" ++ intercalate ", " (List.map show (Set.toAscList ns)) ++ "]"
         showBlock [] = " []"
-        showBlock xs = concatMap ("\n      " ++) xs
+        showBlock xs = concatMap ("\n    " ++) xs
 
 
 -- |Infomation about specialization versions the current proc directly uses.

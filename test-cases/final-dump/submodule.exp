@@ -46,8 +46,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 proc hidden > {inline} (0 calls)
 0: submodule.privatetest.hidden<0>
 hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.print<0>("private proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
@@ -55,8 +54,7 @@ hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc semi_hidden > public {inline} (0 calls)
 0: submodule.privatetest.semi_hidden<0>
 semi_hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.print<0>("public proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
@@ -104,8 +102,7 @@ define external fastcc void @"submodule#.privatetest#.semi_hidden<0>"() {
 proc semi_visible > {inline} (0 calls)
 0: submodule.publictest.semi_visible<0>
 semi_visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.print<0>("private proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
@@ -113,8 +110,7 @@ semi_visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc visible > public {inline} (0 calls)
 0: submodule.publictest.visible<0>
 visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.print<0>("public proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 

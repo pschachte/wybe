@@ -16,8 +16,7 @@ AFTER EVERYTHING:
 proc foo > public {inline} (0 calls)
 0: import_in_sub_mod_lib.foo<0>
 foo(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @import_in_sub_mod_lib:nn:nn
     foreign c print_int(~v##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @import_in_sub_mod_lib:nn:nn
@@ -59,8 +58,7 @@ define external fastcc void @"import_in_sub_mod_lib#.foo<0>"(i64 %"v##0") {
 module top-level code > public {inline,semipure} (0 calls)
 0: import_in_sub_mod_main.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @import_in_sub_mod_main:nn:nn
     foreign c print_int(10:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @import_in_sub_mod_main:nn:nn
@@ -102,8 +100,7 @@ define external fastcc void @"import_in_sub_mod_main#.<0>"() {
 proc bar > public {inline} (0 calls)
 0: import_in_sub_mod_main.sub.bar<0>
 bar(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @import_in_sub_mod_main:nn:nn
     foreign c print_int(~v##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @import_in_sub_mod_main:nn:nn

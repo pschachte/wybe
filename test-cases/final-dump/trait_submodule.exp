@@ -20,8 +20,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_submodule.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     trait_submodule.render<0>(42:wybe.int, ?tmp#0##0:wybe.string) #0 @trait_submodule:nn:nn
@@ -35,13 +34,12 @@ proc render > (2 calls)
 0: trait_submodule.render<0>
 render(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtReturn 1.Field (-2) -> [ExtReturn 1]
-      ExtReturn 1.Field (-1) -> [ExtReturn 1]
-      ExtReturn 1.Field 0 -> [ExtReturn 1]
-      ExtReturn 1.Field 6 -> [ExtReturn 1]
-      ExtReturn 1.Field 7 -> [ExtReturn 1]
-      ExtReturn 1.Field 8 -> [ExtReturn 1]
+    ExtReturn 1.Field (-2) -> [ExtReturn 1]
+    ExtReturn 1.Field (-1) -> [ExtReturn 1]
+    ExtReturn 1.Field 0 -> [ExtReturn 1]
+    ExtReturn 1.Field 6 -> [ExtReturn 1]
+    ExtReturn 1.Field 7 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1]
   InterestingCallProperties: []
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #3 @trait_submodule:nn:nn
     wybe.string.,,<0>("integer ":wybe.string, ~tmp#1##0:wybe.string, ?#result##0:wybe.string) #2 @trait_submodule:nn:nn
@@ -51,13 +49,12 @@ proc render#adapter > {noinline} (0 calls)
 0: trait_submodule.render#adapter<0>
 render#adapter(x##0:T<:trait_submodule.printable, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtReturn 1.Field (-2) -> [ExtReturn 1]
-      ExtReturn 1.Field (-1) -> [ExtReturn 1]
-      ExtReturn 1.Field 0 -> [ExtReturn 1]
-      ExtReturn 1.Field 6 -> [ExtReturn 1]
-      ExtReturn 1.Field 7 -> [ExtReturn 1]
-      ExtReturn 1.Field 8 -> [ExtReturn 1]
+    ExtReturn 1.Field (-2) -> [ExtReturn 1]
+    ExtReturn 1.Field (-1) -> [ExtReturn 1]
+    ExtReturn 1.Field 0 -> [ExtReturn 1]
+    ExtReturn 1.Field 6 -> [ExtReturn 1]
+    ExtReturn 1.Field 7 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:T<:trait_submodule.printable, ?x#adapter0##0:wybe.int)
     trait_submodule.render<0>(~x#adapter0##0:wybe.int, ?#result##0:wybe.string) #0
@@ -113,8 +110,7 @@ define external fastcc i64 @"trait_submodule#.render#adapter<0>"(i64 %"x##0") {
 proc render > public abstract {inline} (0 calls)
 0: trait_submodule.printable.render<0>
 render(x##0:T<:trait_submodule.printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:trait_submodule.printable, ?#result##0:wybe.string) #0
 

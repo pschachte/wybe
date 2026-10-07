@@ -24,8 +24,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_concrete_type_args.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     trait_concrete_type_args.printable.render<0>(1:trait_concrete_type_args.box(wybe.int), ?tmp#0##0:wybe.string, vtable(global,trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable):opaque)<{}; {}; {0}> #1 @trait_concrete_type_args:nn:nn
@@ -43,15 +42,13 @@ module top-level code > public {semipure} (0 calls)
 proc render > {inline} (1 calls)
 0: trait_concrete_type_args.render<0>
 render([x##0:trait_concrete_type_args.box(wybe.int)], ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move("boxed int":wybe.string, ?#result##0:wybe.string) @trait_concrete_type_args:nn:nn
 proc render > {inline} (1 calls)
 1: trait_concrete_type_args.render<1>
 render([x##0:trait_concrete_type_args.box(wybe.float)], ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move("boxed float":wybe.string, ?#result##0:wybe.string) @trait_concrete_type_args:nn:nn
 
@@ -59,15 +56,13 @@ render([x##0:trait_concrete_type_args.box(wybe.float)], ?#result##0:wybe.string)
 proc render#adapter > {noinline} (0 calls)
 0: trait_concrete_type_args.render#adapter<0>
 render#adapter(x##0:Type0<:trait_concrete_type_args.printable, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move("boxed float":wybe.string, ?#result##0:wybe.string) @trait_concrete_type_args:nn:nn
 proc render#adapter > {noinline} (0 calls)
 1: trait_concrete_type_args.render#adapter<1>
 render#adapter(x##0:Type0<:trait_concrete_type_args.printable, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move("boxed int":wybe.string, ?#result##0:wybe.string) @trait_concrete_type_args:nn:nn
 
@@ -138,15 +133,13 @@ define external fastcc i64 @"trait_concrete_type_args#.render#adapter<1>"(i64 %"
 proc box > public {inline} (0 calls)
 0: trait_concrete_type_args.box.box<0>
 box(value##0:T <{}; {}; {0}>, ?#result##2:trait_concrete_type_args.box(T) <{}; {}; {0}>)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~value##0:T, ?#result##2:trait_concrete_type_args.box(T)) @trait_concrete_type_args:nn:nn
 proc box > public {inline} (0 calls)
 1: trait_concrete_type_args.box.box<1>
 box(?value##0:T <{}; {}; {1}>, #result##0:trait_concrete_type_args.box(T) <{}; {}; {1}>)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_concrete_type_args.box(T), ?value##0:T) @trait_concrete_type_args:nn:nn
 
@@ -154,15 +147,13 @@ box(?value##0:T <{}; {}; {1}>, #result##0:trait_concrete_type_args.box(T) <{}; {
 proc value > public {inline} (0 calls)
 0: trait_concrete_type_args.box.value<0>
 value(#rec##0:trait_concrete_type_args.box(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_concrete_type_args.box(T), ?#result##0:T) @trait_concrete_type_args:nn:nn
 proc value > public {inline} (0 calls)
 1: trait_concrete_type_args.box.value<1>
 value([#rec##0:trait_concrete_type_args.box(T) <{}; {}; {0}>], ?#rec##2:trait_concrete_type_args.box(T) <{}; {}; {2}>, #field##0:T <{}; {}; {2}>)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:T, ?#rec##2:trait_concrete_type_args.box(T)) @trait_concrete_type_args:nn:nn
 
@@ -208,8 +199,7 @@ define external fastcc i64 @"trait_concrete_type_args#.box#.value<1>"(i64 %"#fie
 proc render > public abstract {inline} (0 calls)
 0: trait_concrete_type_args.printable.render<0>
 render(x##0:Type0<:trait_concrete_type_args.printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_concrete_type_args.printable, ?#result##0:wybe.string) #0
 

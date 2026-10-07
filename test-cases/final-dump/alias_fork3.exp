@@ -22,8 +22,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: alias_fork3.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(12,(mytree.printTree1<0>,fromList [NonAliasedParamCond 1 []])),(13,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(14,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     alias_fork3.simpleSlice<0>(alias_fork3#constant#3:mytree.tree, ?tmp#5##0:mytree.tree) #5 @alias_fork3:nn:nn
@@ -43,8 +42,7 @@ proc simpleSlice > public (1 calls)
 0: alias_fork3.simpleSlice<0>
 simpleSlice(tr##0:mytree.tree, ?#result##0:mytree.tree)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(tr##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @alias_fork3:nn:nn
     case ~tmp#6##0:wybe.bool of
@@ -127,8 +125,7 @@ if.else.0:
 proc printTree > public {inline} (0 calls)
 0: mytree.printTree<0>
 printTree(t##0:mytree.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     mytree.printTree1<0>(~t##0:mytree.tree, 1519:wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @mytree:nn:nn
     wybe.string.print<0>(1527:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @mytree:nn:nn
@@ -138,34 +135,33 @@ proc printTree1 > public (3 calls)
 0: mytree.printTree1<0>[6dacb8fd25]
 printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtParam 1.Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtParam 1.Field 6 -> [ExtPhantom (ExtParam 1) (Field 6)]
-      ExtParam 1.Field 7 -> [ExtPhantom (ExtParam 1) (Field 7)]
-      ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-      ExtReturn 2.FieldIdent -> [ExtParam 1]
-      ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 0).Field 16 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 16).Field 0 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtPhantom (ExtParam 0) (Field 16).Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 7)]
-      ExtPhantom (ExtParam 1) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 7)]
-      ExtPhantom (ExtParam 1) (Field 7).Field 6 -> [ExtPhantom (ExtParam 1) (Field 7)]
-      ExtPhantom (ExtParam 1) (Field 7).Field 7 -> [ExtPhantom (ExtParam 1) (Field 7)]
-      ExtPhantom (ExtParam 1) (Field 7).Field 8 -> [ExtPhantom (ExtParam 1) (Field 7)]
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtParam 1.Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtParam 1.Field 6 -> [ExtPhantom (ExtParam 1) (Field 6)]
+    ExtParam 1.Field 7 -> [ExtPhantom (ExtParam 1) (Field 7)]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
+    ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 16 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 16).Field 0 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtPhantom (ExtParam 0) (Field 16).Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 7)]
+    ExtPhantom (ExtParam 1) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 7)]
+    ExtPhantom (ExtParam 1) (Field 7).Field 6 -> [ExtPhantom (ExtParam 1) (Field 7)]
+    ExtPhantom (ExtParam 1) (Field 7).Field 7 -> [ExtPhantom (ExtParam 1) (Field 7)]
+    ExtPhantom (ExtParam 1) (Field 7).Field 8 -> [ExtPhantom (ExtParam 1) (Field 7)]
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(1,(mytree.printTree1<0>,fromList [NonAliasedParamCond 1 [1]])),(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [1]]))]
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @mytree:nn:nn
@@ -292,19 +288,18 @@ proc = > public (7 calls)
 0: mytree.tree.=<0>
 =(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
-      ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 0).Field 16 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 16).Field 0 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtPhantom (ExtParam 0) (Field 16).Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 0).Field 16 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 16).Field 0 -> [ExtPhantom (ExtParam 1) (Field 16)]
-      ExtPhantom (ExtParam 1) (Field 16).Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 16 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 16).Field 0 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtPhantom (ExtParam 0) (Field 16).Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 16 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 16).Field 0 -> [ExtPhantom (ExtParam 1) (Field 16)]
+    ExtPhantom (ExtParam 1) (Field 16).Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -346,8 +341,7 @@ proc = > public (7 calls)
 proc empty > public {inline} (0 calls)
 0: mytree.tree.empty<0>
 empty(?#result##0:mytree.tree)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(0:mytree.tree, ?#result##0:mytree.tree)
 
@@ -355,8 +349,7 @@ empty(?#result##0:mytree.tree)<{}; {}; {}>:
 proc key > public {inline} (0 calls)
 0: mytree.tree.key<0>
 key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -371,8 +364,7 @@ key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {
 proc key > public {inline} (0 calls)
 1: mytree.tree.key<1>
 key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -389,8 +381,7 @@ key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?#success##0:
 proc left > public {inline} (0 calls)
 0: mytree.tree.left<0>
 left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -405,8 +396,7 @@ left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {
 proc left > public {inline} (0 calls)
 1: mytree.tree.left<1>
 left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -423,8 +413,7 @@ left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success
 proc node > public {inline} (0 calls)
 0: mytree.tree.node<0>
 node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?#result##0:mytree.tree)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:mytree.tree) @mytree:nn:nn
     foreign lpvm mutate(~#rec##0:mytree.tree, ?#rec##1:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left##0:mytree.tree) @mytree:nn:nn
@@ -433,8 +422,7 @@ node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?#result##0:myt
 proc node > public {inline} (16 calls)
 1: mytree.tree.node<1>
 node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -455,8 +443,7 @@ node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:m
 proc right > public {inline} (0 calls)
 0: mytree.tree.right<0>
 right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -471,8 +458,7 @@ right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; 
 proc right > public {inline} (0 calls)
 1: mytree.tree.right<1>
 right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -489,8 +475,7 @@ right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#succes
 proc ~= > public {inline} (0 calls)
 0: mytree.tree.~=<0>
 ~=(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     mytree.tree.=<0>(~#left##0:mytree.tree, ~#right##0:mytree.tree, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

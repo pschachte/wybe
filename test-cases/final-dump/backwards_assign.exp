@@ -16,8 +16,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: backwards_assign.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     backwards_assign.#cont#1<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @backwards_assign:nn:nn
 
@@ -25,8 +24,7 @@ module top-level code > public {inline,semipure} (0 calls)
 proc #cont#1 > {semipure} (2 calls)
 0: backwards_assign.#cont#1<0>
 #cont#1(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @backwards_assign:nn:nn
     foreign c print_int(i##0:wybe.int, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @backwards_assign:nn:nn
@@ -45,8 +43,7 @@ proc #cont#1 > {semipure} (2 calls)
 proc backwards_assign > {inline} (3 calls)
 0: backwards_assign.backwards_assign<0>
 backwards_assign(?output##0:wybe.int, input##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm add(~input##0:wybe.int, 1:wybe.int, ?output##0:wybe.int) @backwards_assign:nn:nn
 

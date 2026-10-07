@@ -16,8 +16,7 @@ AFTER EVERYTHING:
 proc quad > public {inline} (0 calls)
 0: func_where.quad<0>
 quad(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, ~x##0:wybe.int, ?tmp#0##0:wybe.int) @func_where:nn:nn
     foreign llvm add(~tmp#0##0:wybe.int, ~tmp#0##0:wybe.int, ?#result##0:wybe.int) @func_where:nn:nn

@@ -17,8 +17,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: resource_rollback.<0>
 ()<{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; {<<resource_rollback.res>>, <<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<resource_rollback.res>>:wybe.int, ?%res##0:wybe.int) @resource_rollback:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @resource_rollback:nn:nn
@@ -42,8 +41,7 @@ module top-level code > public {semipure} (0 calls)
 proc #cont#1 > {semipure} (2 calls)
 0: resource_rollback.#cont#1<0>
 #cont#1()<{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<resource_rollback.res>>:wybe.int, ?%res##0:wybe.int) @resource_rollback:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @resource_rollback:nn:nn
@@ -59,8 +57,7 @@ proc foo > {noinline} (3 calls)
 0: resource_rollback.foo<0>
 foo(?s##0:wybe.c_string, ?#success##0:wybe.bool, %call_source_location##0:wybe.c_string)<{<<resource_rollback.res>>}; {<<resource_rollback.res>>}; {}>:
   AliasSummary:
-    edges:
-      ExtReturn 0.FieldIdent -> [ExtParam 2]
+    ExtReturn 0.FieldIdent -> [ExtParam 2]
   InterestingCallProperties: []
     foreign llvm move(~call_source_location##0:wybe.c_string, ?s##0:wybe.c_string) @resource_rollback:nn:nn
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)

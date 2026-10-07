@@ -16,16 +16,14 @@ AFTER EVERYTHING:
 proc impure > {noinline,impure} (2 calls)
 0: bug_523.impure<0>
 impure()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
 
 proc pure > {inline,pure} (0 calls)
 0: bug_523.pure<0>
 pure()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     bug_523.semipure<0> #0 @bug_523:nn:nn
     bug_523.impure<0> #1 @bug_523:nn:nn
@@ -34,8 +32,7 @@ pure()<{}; {}; {}>:
 proc semipure > {noinline,semipure} (1 calls)
 0: bug_523.semipure<0>
 semipure()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     bug_523.impure<0> #0 @bug_523:nn:nn
 
