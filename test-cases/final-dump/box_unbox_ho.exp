@@ -28,8 +28,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: box_unbox.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     box_unbox.copy<0>(18446744073709551617:box_unbox, ?tmp#2##0:box_unbox) #0 @box_unbox:nn:nn
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0)
@@ -60,8 +59,7 @@ module top-level code > public {semipure} (0 calls)
 proc % > public {inline} (1 calls)
 0: box_unbox.%<0>
 %(x##0:box_unbox, y##0:box_unbox, ?#result##0:box_unbox)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm srem(~x##0:box_unbox, ~y##0:box_unbox, ?#result##0:box_unbox) @box_unbox:nn:nn
 
@@ -69,8 +67,7 @@ proc % > public {inline} (1 calls)
 proc + > public {inline} (0 calls)
 0: box_unbox.+<0>
 +(x##0:box_unbox, y##0:box_unbox, ?#result##0:box_unbox)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:box_unbox, ~y##0:box_unbox, ?#result##0:box_unbox) @box_unbox:nn:nn
 
@@ -78,15 +75,13 @@ proc + > public {inline} (0 calls)
 proc - > public {inline} (1 calls)
 0: box_unbox.-<0>
 -(x##0:box_unbox, y##0:box_unbox, ?#result##0:box_unbox)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm sub(~x##0:box_unbox, ~y##0:box_unbox, ?#result##0:box_unbox) @box_unbox:nn:nn
 proc - > public {inline} (1 calls)
 1: box_unbox.-<1>
 -(x##0:box_unbox, ?#result##0:box_unbox)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm sub(0:box_unbox, ~x##0:box_unbox, ?#result##0:box_unbox) @box_unbox:nn:nn
 
@@ -94,8 +89,7 @@ proc - > public {inline} (1 calls)
 proc / > public {inline} (1 calls)
 0: box_unbox./<0>
 /(x##0:box_unbox, y##0:box_unbox, ?#result##0:box_unbox)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm sdiv(~x##0:box_unbox, ~y##0:box_unbox, ?#result##0:box_unbox) @box_unbox:nn:nn
 
@@ -103,8 +97,7 @@ proc / > public {inline} (1 calls)
 proc < > public {inline} (3 calls)
 0: box_unbox.<<0>
 <(x##0:box_unbox, y##0:box_unbox, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(~x##0:box_unbox, ~y##0:box_unbox, ?#success##0:wybe.bool) @box_unbox:nn:nn
 
@@ -112,8 +105,7 @@ proc < > public {inline} (3 calls)
 proc = > public {inline} (5 calls)
 0: box_unbox.=<0>
 =(x##0:box_unbox, y##0:box_unbox, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~x##0:box_unbox, ~y##0:box_unbox, ?#success##0:wybe.bool) @box_unbox:nn:nn
 
@@ -121,8 +113,7 @@ proc = > public {inline} (5 calls)
 proc > > public {inline} (3 calls)
 0: box_unbox.><0>
 >(x##0:box_unbox, y##0:box_unbox, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(~x##0:box_unbox, ~y##0:box_unbox, ?#success##0:wybe.bool) @box_unbox:nn:nn
 
@@ -130,8 +121,7 @@ proc > > public {inline} (3 calls)
 proc copy > public {noinline} (2 calls)
 0: box_unbox.copy<0>
 copy(x##0:box_unbox, ?#result##0:box_unbox)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:box_unbox, ?#result##0:box_unbox) @box_unbox:nn:nn
 
@@ -139,8 +129,7 @@ copy(x##0:box_unbox, ?#result##0:box_unbox)<{}; {}; {}>:
 proc force_box > public {noinline} (4 calls)
 0: box_unbox.force_box<0>
 force_box(x##0:X <{}; {}; {0}>, ?#result##0:X <{}; {}; {0}>)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:X, ?#result##0:X) @box_unbox:nn:nn
 
@@ -148,8 +137,7 @@ force_box(x##0:X <{}; {}; {0}>, ?#result##0:X <{}; {}; {0}>)<{}; {}; {}>:
 proc numeral > (1 calls)
 0: box_unbox.numeral<0>
 numeral(x##0:wybe.int, ?#result##0:wybe.char)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, 48:wybe.int, ?tmp#1##0:wybe.int) @box_unbox:nn:nn
     wybe.char.chr<0>(~tmp#1##0:wybe.int, ?tmp#0##0:wybe.char, ?tmp#3##0:wybe.bool) #2 @box_unbox:nn:nn
@@ -166,8 +154,7 @@ numeral(x##0:wybe.int, ?#result##0:wybe.char)<{}; {}; {}>:
 proc print > public (3 calls)
 0: box_unbox.print<0>
 print(x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(x##0:box_unbox, 0:box_unbox, ?tmp#10##0:wybe.bool) @box_unbox:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -195,8 +182,7 @@ print(x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc print#cont#1 > {inline} (2 calls)
 0: box_unbox.print#cont#1<0>
 print#cont#1(x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     box_unbox.print#cont#4<0>(0:wybe.list(wybe.char), ~x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @box_unbox:nn:nn
 
@@ -204,8 +190,7 @@ print#cont#1(x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc print#cont#2 > {inline} (1 calls)
 0: box_unbox.print#cont#2<0>
 print#cont#2(s##0:wybe.list(wybe.char))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     box_unbox.print#cont#3<0>(~s##0:wybe.list(wybe.char))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @box_unbox:nn:nn
 
@@ -214,9 +199,8 @@ proc print#cont#3 > (2 calls)
 0: box_unbox.print#cont#3<0>
 print#cont#3(tmp#5##0:wybe.list(wybe.char))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @box_unbox:nn:nn
     case ~tmp#9##0:wybe.bool of
@@ -236,9 +220,8 @@ proc print#cont#4 > (2 calls)
 0: box_unbox.print#cont#4<0>
 print#cont#4(s##0:wybe.list(wybe.char), x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field 8 -> [ExtParam 0, ExtPhantom (ExtParam 0) (Field 8)]
-      ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 0.Field 8 -> [ExtParam 0, ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_sgt(x##0:box_unbox, 0:box_unbox, ?tmp#8##0:wybe.bool) @box_unbox:nn:nn
     case ~tmp#8##0:wybe.bool of
@@ -260,8 +243,7 @@ print#cont#4(s##0:wybe.list(wybe.char), x##0:box_unbox)<{<<wybe.io.io>>}; {<<wyb
 proc print#cont#5 > {inline} (1 calls)
 0: box_unbox.print#cont#5<0>
 print#cont#5(s##0:wybe.list(wybe.char), x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm srem(x##0:box_unbox, 10:box_unbox, ?tmp#4##0:box_unbox) @box_unbox:nn:nn
     foreign lpvm cast(~tmp#4##0:box_unbox, ?tmp#3##0:wybe.int) @box_unbox:nn:nn
@@ -490,8 +472,7 @@ define external fastcc void @"box_unbox#.print#cont#5<0>"(i64 %"s##0", i128 %"x#
 module top-level code > public {semipure} (0 calls)
 0: box_unbox_ho.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     box_unbox.copy<0>(18446744073709551617:box_unbox, ?tmp#0##0:box_unbox) #0 @box_unbox_ho:nn:nn
     box_unbox.print<0>(tmp#0##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @box_unbox_ho:nn:nn
@@ -531,8 +512,7 @@ module top-level code > public {semipure} (0 calls)
 proc #anon#1 > {inline} (1 calls)
 0: box_unbox_ho.#anon#1<0>
 #anon#1(anon#1#1##0:box_unbox, ?anon#1#2##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     box_unbox.print<0>(anon#1#1##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @box_unbox_ho:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @box_unbox_ho:nn:nn
@@ -542,8 +522,7 @@ proc #anon#1 > {inline} (1 calls)
 proc #anon#1 > {inline} (1 calls)
 1: box_unbox_ho.#anon#1<1>
 #anon#1(anon#1#1##0 <{}; {}; {0}>, ?anon#1#2##1)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~anon#1#1##0, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:box_unbox)
     box_unbox.print<0>(tmp#3##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @box_unbox_ho:nn:nn
@@ -558,8 +537,7 @@ proc #anon#1 > {inline} (1 calls)
 proc #closure#1 > {inline} (2 calls)
 0: box_unbox_ho.#closure#1<0>
 #closure#1(^x##0:box_unbox, y##0 <{}; {}; {1}>, ?z##1)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~y##0, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#7##0:box_unbox) @box_unbox_ho:nn:nn
     box_unbox.print<0>(^x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @box_unbox_ho:nn:nn
@@ -574,8 +552,7 @@ proc #closure#1 > {inline} (2 calls)
 proc do_something > {noinline} (2 calls)
 0: box_unbox_ho.do_something<0>
 do_something(f##0:{resource}(X, ?X) <{}; {}; {0}>, a##0:X <{}; {}; {1}>, ?b##0:X <{}; {}; {0, 1}>)<{}; {}; {0}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~f##0:{resource}(X, ?X)(~a##0:X, ?b##0:X) #0 @box_unbox_ho:nn:nn
 
@@ -583,8 +560,7 @@ do_something(f##0:{resource}(X, ?X) <{}; {}; {0}>, a##0:X <{}; {}; {1}>, ?b##0:X
 proc print_add > {inline} (3 calls)
 0: box_unbox_ho.print_add<0>
 print_add(x##0:box_unbox, y##0:box_unbox, ?z##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     box_unbox.print<0>(x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @box_unbox_ho:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @box_unbox_ho:nn:nn

@@ -29,8 +29,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: compound_resource.<0>
 ()<{<<compound_resource.bar>>, <<wybe.io.io>>}; {<<compound_resource.bar>>, <<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(11,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(19,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%tmp#4##0:wybe.int) @compound_resource:nn:nn
@@ -63,8 +62,7 @@ module top-level code > public {semipure} (0 calls)
 proc testproc > {inline} (1 calls)
 0: compound_resource.testproc<0>
 testproc()<{<<compound_resource.bar>>, <<compound_resource.baz>>, <<compound_resource.qux>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%bar##0:wybe.int) @compound_resource:nn:nn
     wybe.int.fmt<2>(~bar##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#2##0:wybe.string) #12 @compound_resource:nn:nn
@@ -85,8 +83,7 @@ testproc()<{<<compound_resource.bar>>, <<compound_resource.baz>>, <<compound_res
 proc use_bar > {inline} (1 calls)
 0: compound_resource.use_bar<0>
 use_bar()<{<<compound_resource.bar>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%tmp#0##0:wybe.int) @compound_resource:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @compound_resource:nn:nn
@@ -98,8 +95,7 @@ use_bar()<{<<compound_resource.bar>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc use_baz > {inline} (1 calls)
 0: compound_resource.use_baz<0>
 use_baz()<{<<compound_resource.baz>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<compound_resource.baz>>:wybe.string, ?%tmp#0##0:wybe.string) @compound_resource:nn:nn
     wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @compound_resource:nn:nn
@@ -111,8 +107,7 @@ use_baz()<{<<compound_resource.baz>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc use_foo > {inline} (1 calls)
 0: compound_resource.use_foo<0>
 use_foo()<{<<compound_resource.bar>>, <<compound_resource.baz>>, <<wybe.io.io>>}; {<<compound_resource.bar>>, <<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%bar##0:wybe.int) @compound_resource:nn:nn
     wybe.int.fmt<2>(~bar##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #6 @compound_resource:nn:nn

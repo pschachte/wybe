@@ -17,8 +17,7 @@ AFTER EVERYTHING:
 proc fn > public {inline} (0 calls)
 0: exporter.fn<0>
 fn(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign c ipow(2:wybe.int, ~i##0:wybe.int, ?#result##0:wybe.int) @exporter:nn:nn
 
@@ -26,8 +25,7 @@ fn(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 proc three > public {inline} (0 calls)
 0: exporter.three<0>
 three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<exporter.res>>:wybe.int, ?%n##0:wybe.int) @exporter:nn:nn
 

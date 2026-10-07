@@ -27,8 +27,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: ancestor_alias.<0>
 ()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ancestor_alias.b.a.foo<0> #0 @ancestor_alias:nn:nn
     ancestor_alias.b.a.foo<0> #1 @ancestor_alias:nn:nn
@@ -68,8 +67,7 @@ define external fastcc void @"ancestor_alias#.<0>"() {
 module top-level code > public {inline,semipure} (0 calls)
 0: ancestor_alias.a.<0>
 ()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ancestor_alias.b.c.foo<0> #0 @ancestor_alias:nn:nn
     ancestor_alias.a.foo<0> #1 @ancestor_alias:nn:nn
@@ -78,8 +76,7 @@ module top-level code > public {inline,semipure} (0 calls)
 proc foo > public {noinline,impure} (1 calls)
 0: ancestor_alias.a.foo<0>
 foo()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
   LLVM code       :
@@ -125,8 +122,7 @@ define external fastcc void @"ancestor_alias#.a#.foo<0>"() {
 module top-level code > public {inline,semipure} (0 calls)
 0: ancestor_alias.b.<0>
 ()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ancestor_alias.b.a.foo<0> #0 @ancestor_alias:nn:nn
     ancestor_alias.a.foo<0> #1 @ancestor_alias:nn:nn
@@ -163,8 +159,7 @@ define external fastcc void @"ancestor_alias#.b#.<0>"() {
 proc foo > public {noinline,impure} (0 calls)
 0: ancestor_alias.b.a.foo<0>
 foo()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
   LLVM code       :
@@ -198,8 +193,7 @@ define external fastcc void @"ancestor_alias#.b#.a#.foo<0>"() {
 module top-level code > public {inline,semipure} (0 calls)
 0: ancestor_alias.b.c.<0>
 ()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ancestor_alias.b.c.foo<0> #0 @ancestor_alias:nn:nn
     ancestor_alias.b.a.foo<0> #1 @ancestor_alias:nn:nn
@@ -209,8 +203,7 @@ module top-level code > public {inline,semipure} (0 calls)
 proc foo > public {noinline,impure} (1 calls)
 0: ancestor_alias.b.c.foo<0>
 foo()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
   LLVM code       :

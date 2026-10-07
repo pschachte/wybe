@@ -45,8 +45,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: common_fields.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(19,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(20,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(21,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign llvm or(1:wybe.int, common_fields#constant#4:common_fields, ?tmp#1##0:common_fields) @common_fields:nn:nn
@@ -94,103 +93,102 @@ proc = > public (1 calls)
 0: common_fields.=<0>
 =(#left##0:common_fields, #right##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field (-3) -> [ExtPhantom (ExtParam 0) (Field (-3))]
-      ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
-      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtParam 0.Field 14 -> [ExtPhantom (ExtParam 0) (Field 14)]
-      ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtParam 1.Field (-3) -> [ExtPhantom (ExtParam 1) (Field (-3))]
-      ExtParam 1.Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtParam 1.Field 6 -> [ExtPhantom (ExtParam 1) (Field 6)]
-      ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-      ExtParam 1.Field 14 -> [ExtPhantom (ExtParam 1) (Field 14)]
-      ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
-      ExtPhantom (ExtParam 0) (Field (-3)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-3))]
-      ExtPhantom (ExtParam 0) (Field (-3)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-3))]
-      ExtPhantom (ExtParam 0) (Field (-3)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-3))]
-      ExtPhantom (ExtParam 0) (Field (-3)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-3))]
-      ExtPhantom (ExtParam 0) (Field (-3)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-3))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field 0).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 0).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 0).Field 6 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 0).Field 7 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 0).Field 8 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 6).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 6)]
-      ExtPhantom (ExtParam 0) (Field 6).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 6)]
-      ExtPhantom (ExtParam 0) (Field 6).Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
-      ExtPhantom (ExtParam 0) (Field 6).Field 7 -> [ExtPhantom (ExtParam 0) (Field 6)]
-      ExtPhantom (ExtParam 0) (Field 6).Field 8 -> [ExtPhantom (ExtParam 0) (Field 6)]
-      ExtPhantom (ExtParam 0) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtPhantom (ExtParam 0) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtPhantom (ExtParam 0) (Field 8).Field 6 -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtPhantom (ExtParam 0) (Field 8).Field 7 -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtPhantom (ExtParam 0) (Field 14).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 14)]
-      ExtPhantom (ExtParam 0) (Field 14).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 14)]
-      ExtPhantom (ExtParam 0) (Field 14).Field 6 -> [ExtPhantom (ExtParam 0) (Field 14)]
-      ExtPhantom (ExtParam 0) (Field 14).Field 7 -> [ExtPhantom (ExtParam 0) (Field 14)]
-      ExtPhantom (ExtParam 0) (Field 14).Field 8 -> [ExtPhantom (ExtParam 0) (Field 14)]
-      ExtPhantom (ExtParam 0) (Field 16).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtPhantom (ExtParam 0) (Field 16).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtPhantom (ExtParam 0) (Field 16).Field 6 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtPhantom (ExtParam 0) (Field 16).Field 7 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtPhantom (ExtParam 0) (Field 16).Field 8 -> [ExtPhantom (ExtParam 0) (Field 16)]
-      ExtPhantom (ExtParam 1) (Field (-3)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-3))]
-      ExtPhantom (ExtParam 1) (Field (-3)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-3))]
-      ExtPhantom (ExtParam 1) (Field (-3)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-3))]
-      ExtPhantom (ExtParam 1) (Field (-3)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-3))]
-      ExtPhantom (ExtParam 1) (Field (-3)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-3))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field 0).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 0).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 0).Field 6 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 0).Field 7 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 0).Field 8 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 6).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 6)]
-      ExtPhantom (ExtParam 1) (Field 6).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 6)]
-      ExtPhantom (ExtParam 1) (Field 6).Field 6 -> [ExtPhantom (ExtParam 1) (Field 6)]
-      ExtPhantom (ExtParam 1) (Field 6).Field 7 -> [ExtPhantom (ExtParam 1) (Field 6)]
-      ExtPhantom (ExtParam 1) (Field 6).Field 8 -> [ExtPhantom (ExtParam 1) (Field 6)]
-      ExtPhantom (ExtParam 1) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 8)]
-      ExtPhantom (ExtParam 1) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 8)]
-      ExtPhantom (ExtParam 1) (Field 8).Field 6 -> [ExtPhantom (ExtParam 1) (Field 8)]
-      ExtPhantom (ExtParam 1) (Field 8).Field 7 -> [ExtPhantom (ExtParam 1) (Field 8)]
-      ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-      ExtPhantom (ExtParam 1) (Field 14).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 14)]
-      ExtPhantom (ExtParam 1) (Field 14).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 14)]
-      ExtPhantom (ExtParam 1) (Field 14).Field 6 -> [ExtPhantom (ExtParam 1) (Field 14)]
-      ExtPhantom (ExtParam 1) (Field 14).Field 7 -> [ExtPhantom (ExtParam 1) (Field 14)]
-      ExtPhantom (ExtParam 1) (Field 14).Field 8 -> [ExtPhantom (ExtParam 1) (Field 14)]
-      ExtPhantom (ExtParam 1) (Field 16).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 16)]
-      ExtPhantom (ExtParam 1) (Field 16).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 16)]
-      ExtPhantom (ExtParam 1) (Field 16).Field 6 -> [ExtPhantom (ExtParam 1) (Field 16)]
-      ExtPhantom (ExtParam 1) (Field 16).Field 7 -> [ExtPhantom (ExtParam 1) (Field 16)]
-      ExtPhantom (ExtParam 1) (Field 16).Field 8 -> [ExtPhantom (ExtParam 1) (Field 16)]
+    ExtParam 0.Field (-3) -> [ExtPhantom (ExtParam 0) (Field (-3))]
+    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 0.Field 14 -> [ExtPhantom (ExtParam 0) (Field 14)]
+    ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtParam 1.Field (-3) -> [ExtPhantom (ExtParam 1) (Field (-3))]
+    ExtParam 1.Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtParam 1.Field 6 -> [ExtPhantom (ExtParam 1) (Field 6)]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtParam 1.Field 14 -> [ExtPhantom (ExtParam 1) (Field 14)]
+    ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+    ExtPhantom (ExtParam 0) (Field (-3)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-3))]
+    ExtPhantom (ExtParam 0) (Field (-3)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-3))]
+    ExtPhantom (ExtParam 0) (Field (-3)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-3))]
+    ExtPhantom (ExtParam 0) (Field (-3)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-3))]
+    ExtPhantom (ExtParam 0) (Field (-3)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-3))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field 0).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 6 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 7 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 8 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 6).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtPhantom (ExtParam 0) (Field 6).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtPhantom (ExtParam 0) (Field 6).Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtPhantom (ExtParam 0) (Field 6).Field 7 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtPhantom (ExtParam 0) (Field 6).Field 8 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 6 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 7 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 14).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 14)]
+    ExtPhantom (ExtParam 0) (Field 14).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 14)]
+    ExtPhantom (ExtParam 0) (Field 14).Field 6 -> [ExtPhantom (ExtParam 0) (Field 14)]
+    ExtPhantom (ExtParam 0) (Field 14).Field 7 -> [ExtPhantom (ExtParam 0) (Field 14)]
+    ExtPhantom (ExtParam 0) (Field 14).Field 8 -> [ExtPhantom (ExtParam 0) (Field 14)]
+    ExtPhantom (ExtParam 0) (Field 16).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtPhantom (ExtParam 0) (Field 16).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtPhantom (ExtParam 0) (Field 16).Field 6 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtPhantom (ExtParam 0) (Field 16).Field 7 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtPhantom (ExtParam 0) (Field 16).Field 8 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtPhantom (ExtParam 1) (Field (-3)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-3))]
+    ExtPhantom (ExtParam 1) (Field (-3)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-3))]
+    ExtPhantom (ExtParam 1) (Field (-3)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-3))]
+    ExtPhantom (ExtParam 1) (Field (-3)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-3))]
+    ExtPhantom (ExtParam 1) (Field (-3)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-3))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field 0).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 6 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 7 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 8 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 6).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 6)]
+    ExtPhantom (ExtParam 1) (Field 6).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 6)]
+    ExtPhantom (ExtParam 1) (Field 6).Field 6 -> [ExtPhantom (ExtParam 1) (Field 6)]
+    ExtPhantom (ExtParam 1) (Field 6).Field 7 -> [ExtPhantom (ExtParam 1) (Field 6)]
+    ExtPhantom (ExtParam 1) (Field 6).Field 8 -> [ExtPhantom (ExtParam 1) (Field 6)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 6 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 7 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 14).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 14)]
+    ExtPhantom (ExtParam 1) (Field 14).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 14)]
+    ExtPhantom (ExtParam 1) (Field 14).Field 6 -> [ExtPhantom (ExtParam 1) (Field 14)]
+    ExtPhantom (ExtParam 1) (Field 14).Field 7 -> [ExtPhantom (ExtParam 1) (Field 14)]
+    ExtPhantom (ExtParam 1) (Field 14).Field 8 -> [ExtPhantom (ExtParam 1) (Field 14)]
+    ExtPhantom (ExtParam 1) (Field 16).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 16)]
+    ExtPhantom (ExtParam 1) (Field 16).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 16)]
+    ExtPhantom (ExtParam 1) (Field 16).Field 6 -> [ExtPhantom (ExtParam 1) (Field 16)]
+    ExtPhantom (ExtParam 1) (Field 16).Field 7 -> [ExtPhantom (ExtParam 1) (Field 16)]
+    ExtPhantom (ExtParam 1) (Field 16).Field 8 -> [ExtPhantom (ExtParam 1) (Field 16)]
   InterestingCallProperties: []
     foreign llvm and(#left##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#23##0:2 bit unsigned)
     case ~tmp#23##0:2 bit unsigned of
@@ -340,8 +338,7 @@ proc = > public (1 calls)
 proc DVD > public {inline} (0 calls)
 0: common_fields.DVD<0>
 DVD(title##0:wybe.string, director##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~title##0:wybe.string) @common_fields:nn:nn
@@ -352,8 +349,7 @@ DVD(title##0:wybe.string, director##0:wybe.string, genre##0:wybe.string, id##0:w
 proc DVD > public {inline} (26 calls)
 1: common_fields.DVD<1>
 DVD(?title##0:wybe.string, ?director##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -377,8 +373,7 @@ DVD(?title##0:wybe.string, ?director##0:wybe.string, ?genre##0:wybe.string, ?id#
 proc author > public {inline} (0 calls)
 0: common_fields.author<0>
 author(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -394,8 +389,7 @@ author(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{
 proc author > public {inline} (0 calls)
 1: common_fields.author<1>
 author(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -413,8 +407,7 @@ author(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#s
 proc book > public {inline} (7 calls)
 0: common_fields.book<0>
 book(title##0:wybe.string, author##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~title##0:wybe.string) @common_fields:nn:nn
@@ -424,8 +417,7 @@ book(title##0:wybe.string, author##0:wybe.string, genre##0:wybe.string, id##0:wy
 proc book > public {inline} (44 calls)
 1: common_fields.book<1>
 book(?title##0:wybe.string, ?author##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -449,8 +441,7 @@ book(?title##0:wybe.string, ?author##0:wybe.string, ?genre##0:wybe.string, ?id##
 proc director > public {inline} (0 calls)
 0: common_fields.director<0>
 director(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -466,8 +457,7 @@ director(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)
 proc director > public {inline} (0 calls)
 1: common_fields.director<1>
 director(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -485,8 +475,7 @@ director(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?
 proc frequency > public {inline} (0 calls)
 0: common_fields.frequency<0>
 frequency(#rec##0:common_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 1:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -502,8 +491,7 @@ frequency(#rec##0:common_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{
 proc frequency > public {inline} (0 calls)
 1: common_fields.frequency<1>
 frequency(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 1:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -522,9 +510,8 @@ proc genre > public (10 calls)
 0: common_fields.genre<0>
 genre(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field 14 -> [ExtPhantom (ExtParam 0) (Field 14)]
-      ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
+    ExtParam 0.Field 14 -> [ExtPhantom (ExtParam 0) (Field 14)]
+    ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -549,12 +536,11 @@ proc genre > public (5 calls)
 1: common_fields.genre<1>
 genre(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field 14 -> [ExtParam 2]
-      ExtParam 0.Field 16 -> [ExtParam 2]
-      ExtReturn 1.Field 14 -> [ExtParam 2]
-      ExtReturn 1.Field 16 -> [ExtParam 2]
-      ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtParam 0.Field 14 -> [ExtParam 2]
+    ExtParam 0.Field 16 -> [ExtParam 2]
+    ExtReturn 1.Field 14 -> [ExtParam 2]
+    ExtReturn 1.Field 16 -> [ExtParam 2]
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -580,8 +566,7 @@ genre(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#su
 proc id > public (14 calls)
 0: common_fields.id<0>
 id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
@@ -593,8 +578,7 @@ proc id > public (7 calls)
 1: common_fields.id<1>
 id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
@@ -607,8 +591,7 @@ id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}; {}
 proc magazine > public {inline} (7 calls)
 0: common_fields.magazine<0>
 magazine(title##0:wybe.string, frequency##0:wybe.int, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~title##0:wybe.string) @common_fields:nn:nn
@@ -618,8 +601,7 @@ magazine(title##0:wybe.string, frequency##0:wybe.int, id##0:wybe.int, ?#result##
 proc magazine > public {inline} (32 calls)
 1: common_fields.magazine<1>
 magazine(?title##0:wybe.string, ?frequency##0:wybe.int, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 1:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -641,8 +623,7 @@ magazine(?title##0:wybe.string, ?frequency##0:wybe.int, ?id##0:wybe.int, #result
 proc other > public {inline} (0 calls)
 0: common_fields.other<0>
 other(title##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~title##0:wybe.string) @common_fields:nn:nn
@@ -651,8 +632,7 @@ other(title##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {
 proc other > public {inline} (12 calls)
 1: common_fields.other<1>
 other(?title##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -673,9 +653,8 @@ proc title > public (7 calls)
 0: common_fields.title<0>
 title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field (-3) -> [ExtPhantom (ExtParam 0) (Field (-3))]
-      ExtParam 0.FieldAny -> [ExtPhantom (ExtParam 0) FieldAny]
+    ExtParam 0.Field (-3) -> [ExtPhantom (ExtParam 0) (Field (-3))]
+    ExtParam 0.FieldAny -> [ExtPhantom (ExtParam 0) FieldAny]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
@@ -687,14 +666,13 @@ proc title > public (0 calls)
 1: common_fields.title<1>
 title(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field (-2) -> [ExtParam 2]
-      ExtParam 0.Field 0 -> [ExtParam 2]
-      ExtReturn 1.Field (-3) -> [ExtParam 2]
-      ExtReturn 1.Field (-2) -> [ExtParam 2]
-      ExtReturn 1.Field (-1) -> [ExtParam 2]
-      ExtReturn 1.Field 0 -> [ExtParam 2]
-      ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtParam 0.Field (-2) -> [ExtParam 2]
+    ExtParam 0.Field 0 -> [ExtParam 2]
+    ExtReturn 1.Field (-3) -> [ExtParam 2]
+    ExtReturn 1.Field (-2) -> [ExtParam 2]
+    ExtReturn 1.Field (-1) -> [ExtParam 2]
+    ExtReturn 1.Field 0 -> [ExtParam 2]
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     case ~tmp#1##0:2 bit unsigned of
@@ -715,8 +693,7 @@ title(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string)<{}; 
 proc ~= > public {inline} (0 calls)
 0: common_fields.~=<0>
 ~=(#left##0:common_fields, #right##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     common_fields.=<0>(~#left##0:common_fields, ~#right##0:common_fields, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

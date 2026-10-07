@@ -20,8 +20,7 @@ AFTER EVERYTHING:
 proc local_only > {noinline} (0 calls)
 0: stack_alloc_global.local_only<0>
 local_only(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm {stack} alloc(16:wybe.int, ?tmp#4##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~tmp#4##0:stack_alloc_global.cell, ?tmp#5##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
@@ -36,8 +35,7 @@ local_only(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc store_global > {noinline} (0 calls)
 0: stack_alloc_global.store_global<0>
 store_global(x##0:wybe.int)<{}; {<<stack_alloc_global.gcell>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~tmp#3##0:stack_alloc_global.cell, ?tmp#4##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
@@ -48,8 +46,7 @@ store_global(x##0:wybe.int)<{}; {<<stack_alloc_global.gcell>>}; {}>:
 proc store_global_cond > {noinline} (0 calls)
 0: stack_alloc_global.store_global_cond<0>
 store_global_cond(x##0:wybe.int, flag##0:wybe.bool)<{<<stack_alloc_global.gcell>>}; {<<stack_alloc_global.gcell>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~tmp#3##0:stack_alloc_global.cell, ?tmp#4##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
@@ -65,8 +62,7 @@ store_global_cond(x##0:wybe.int, flag##0:wybe.bool)<{<<stack_alloc_global.gcell>
 proc store_global_nested > {noinline} (0 calls)
 0: stack_alloc_global.store_global_nested<0>
 store_global_nested(x##0:wybe.int)<{}; {<<stack_alloc_global.gpair>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~tmp#4##0:stack_alloc_global.cell, ?tmp#5##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
@@ -176,8 +172,7 @@ define external fastcc void @"stack_alloc_global#.store_global_nested<0>"(i64 %"
 proc = > public {inline} (1 calls)
 0: stack_alloc_global.cell.=<0>
 =(#left##0:stack_alloc_global.cell, #right##0:stack_alloc_global.cell, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#a##0:wybe.int) @stack_alloc_global:nn:nn
     foreign lpvm access(~#left##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#b##0:wybe.int) @stack_alloc_global:nn:nn
@@ -196,15 +191,13 @@ proc = > public {inline} (1 calls)
 proc a > public {inline} (0 calls)
 0: stack_alloc_global.cell.a<0>
 a(#rec##0:stack_alloc_global.cell, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stack_alloc_global:nn:nn
 proc a > public {inline} (0 calls)
 1: stack_alloc_global.cell.a<1>
 a(#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, #field##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stack_alloc_global:nn:nn
 
@@ -212,15 +205,13 @@ a(#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, #field##0:w
 proc b > public {inline} (0 calls)
 0: stack_alloc_global.cell.b<0>
 b(#rec##0:stack_alloc_global.cell, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stack_alloc_global:nn:nn
 proc b > public {inline} (0 calls)
 1: stack_alloc_global.cell.b<1>
 b(#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, #field##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stack_alloc_global:nn:nn
 
@@ -228,8 +219,7 @@ b(#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, #field##0:w
 proc cell > public {inline} (0 calls)
 0: stack_alloc_global.cell.cell<0>
 cell(a##0:wybe.int, b##0:wybe.int, ?#result##0:stack_alloc_global.cell)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~#rec##0:stack_alloc_global.cell, ?#rec##1:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int) @stack_alloc_global:nn:nn
@@ -237,8 +227,7 @@ cell(a##0:wybe.int, b##0:wybe.int, ?#result##0:stack_alloc_global.cell)<{}; {}; 
 proc cell > public {inline} (6 calls)
 1: stack_alloc_global.cell.cell<1>
 cell(?a##0:wybe.int, ?b##0:wybe.int, #result##0:stack_alloc_global.cell)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?a##0:wybe.int) @stack_alloc_global:nn:nn
     foreign lpvm access(~#result##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?b##0:wybe.int) @stack_alloc_global:nn:nn
@@ -247,8 +236,7 @@ cell(?a##0:wybe.int, ?b##0:wybe.int, #result##0:stack_alloc_global.cell)<{}; {};
 proc ~= > public {inline} (0 calls)
 0: stack_alloc_global.cell.~=<0>
 ~=(#left##0:stack_alloc_global.cell, #right##0:stack_alloc_global.cell, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stack_alloc_global.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @stack_alloc_global:nn:nn
     foreign lpvm access(~#left##0:stack_alloc_global.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @stack_alloc_global:nn:nn
@@ -401,8 +389,7 @@ if.else.0:
 proc = > public {inline} (1 calls)
 0: stack_alloc_global.pair.=<0>
 =(#left##0:stack_alloc_global.pair, #right##0:stack_alloc_global.pair, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm access(~#left##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#q##0:wybe.int) @stack_alloc_global:nn:nn
@@ -432,15 +419,13 @@ proc = > public {inline} (1 calls)
 proc p > public {inline} (0 calls)
 0: stack_alloc_global.pair.p<0>
 p(#rec##0:stack_alloc_global.pair, ?#result##0:stack_alloc_global.cell)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
 proc p > public {inline} (0 calls)
 1: stack_alloc_global.pair.p<1>
 p(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:stack_alloc_global.cell)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
 
@@ -448,8 +433,7 @@ p(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:s
 proc pair > public {inline} (0 calls)
 0: stack_alloc_global.pair.pair<0>
 pair(p##0:stack_alloc_global.cell, q##0:wybe.int, ?#result##0:stack_alloc_global.pair)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:stack_alloc_global.pair) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
@@ -457,8 +441,7 @@ pair(p##0:stack_alloc_global.cell, q##0:wybe.int, ?#result##0:stack_alloc_global
 proc pair > public {inline} (6 calls)
 1: stack_alloc_global.pair.pair<1>
 pair(?p##0:stack_alloc_global.cell, ?q##0:wybe.int, #result##0:stack_alloc_global.pair)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm access(~#result##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?q##0:wybe.int) @stack_alloc_global:nn:nn
@@ -467,15 +450,13 @@ pair(?p##0:stack_alloc_global.cell, ?q##0:wybe.int, #result##0:stack_alloc_globa
 proc q > public {inline} (0 calls)
 0: stack_alloc_global.pair.q<0>
 q(#rec##0:stack_alloc_global.pair, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stack_alloc_global:nn:nn
 proc q > public {inline} (0 calls)
 1: stack_alloc_global.pair.q<1>
 q(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stack_alloc_global:nn:nn
 
@@ -483,8 +464,7 @@ q(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:w
 proc ~= > public {inline} (0 calls)
 0: stack_alloc_global.pair.~=<0>
 ~=(#left##0:stack_alloc_global.pair, #right##0:stack_alloc_global.pair, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm access(~#left##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @stack_alloc_global:nn:nn

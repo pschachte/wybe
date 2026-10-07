@@ -18,8 +18,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: anon_field_variable.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(1:1 bit unsigned, anon_field_variable#constant#1:1 bit unsigned, ?tmp#8##0:1 bit unsigned) @anon_field_variable:nn:nn
     foreign llvm icmp_eq(~tmp#8##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#9##0:wybe.bool) @anon_field_variable:nn:nn
@@ -37,8 +36,7 @@ module top-level code > public {semipure} (0 calls)
 proc bar > {inline} (0 calls)
 0: anon_field_variable.bar<0>
 bar(bar#1##0:wybe.int, field##0:T <{}; {}; {1}>, bar#3##0:T <{}; {}; {2}>, ?#result##0:anon_field_variable(T) <{}; {}; {1, 2}>)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:anon_field_variable(T)) @anon_field_variable:nn:nn
     foreign lpvm mutate(~#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~bar#1##0:wybe.int) @anon_field_variable:nn:nn
@@ -48,8 +46,7 @@ bar(bar#1##0:wybe.int, field##0:T <{}; {}; {1}>, bar#3##0:T <{}; {}; {2}>, ?#res
 proc bar > {inline} (0 calls)
 1: anon_field_variable.bar<1>
 bar(?bar#1##0:wybe.int, ?field##0:T <{}; {}; {3}>, ?bar#3##0:T <{}; {}; {3}>, #result##0:anon_field_variable(T) <{}; {}; {3}>, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -70,8 +67,7 @@ bar(?bar#1##0:wybe.int, ?field##0:T <{}; {}; {3}>, ?bar#3##0:T <{}; {}; {3}>, #r
 proc field > {inline} (0 calls)
 0: anon_field_variable.field<0>
 field(#rec##0:anon_field_variable(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -86,8 +82,7 @@ field(#rec##0:anon_field_variable(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>,
 proc field > {inline} (0 calls)
 1: anon_field_variable.field<1>
 field(#rec##0:anon_field_variable(T) <{}; {}; {0}>, ?#rec##1:anon_field_variable(T) <{}; {}; {0, 2}>, #field##0:T <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -104,16 +99,14 @@ field(#rec##0:anon_field_variable(T) <{}; {}; {0}>, ?#rec##1:anon_field_variable
 proc foo > {inline} (3 calls)
 0: anon_field_variable.foo<0>
 foo(foo#1##0:T <{}; {}; {0}>, ?#result##0:anon_field_variable(T) <{}; {}; {0}>)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field_variable(T)) @anon_field_variable:nn:nn
     foreign lpvm mutate(~#rec##0:anon_field_variable(T), ?#result##0:anon_field_variable(T), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~foo#1##0:T) @anon_field_variable:nn:nn
 proc foo > {inline} (3 calls)
 1: anon_field_variable.foo<1>
 foo(?foo#1##0:T <{}; {}; {1}>, #result##0:anon_field_variable(T) <{}; {}; {1}>, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)

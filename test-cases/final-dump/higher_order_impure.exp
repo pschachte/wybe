@@ -20,8 +20,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: higher_order_impure.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     higher_order_impure.#anon#1<1><>:{impure}() #0 @higher_order_impure:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @higher_order_impure:nn:nn
@@ -33,22 +32,19 @@ module top-level code > public {semipure} (0 calls)
 proc #anon#1 > {inline,impure} (1 calls)
 0: higher_order_impure.#anon#1<0>
 #anon#1([^l2##0:wybe.list(wybe.int)])<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 proc #anon#1 > {inline,impure} (1 calls)
 1: higher_order_impure.#anon#1<1>
 #anon#1([^l2##0:wybe.list(wybe.int)])<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
 
 proc measure > public {inline,impure} (1 calls)
 0: higher_order_impure.measure<0>
 measure(func##0:{impure}(), ?seconds_elapsed##0:wybe.float)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~func##0:{impure}() #0 @higher_order_impure:nn:nn
     foreign llvm move(3.0:wybe.float, ?seconds_elapsed##0:wybe.float) @higher_order_impure:nn:nn

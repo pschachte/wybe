@@ -46,8 +46,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: sizeof.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(53,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(59,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(61,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(65,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(75,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(77,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(8:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#7##0:wybe.string) #52 @sizeof:nn:nn
@@ -230,8 +229,7 @@ define external fastcc void @"sizeof#.<0>"() {
 proc = > public {inline} (1 calls)
 0: sizeof.narrow.=<0>
 =(#left##0:sizeof.narrow, #right##0:sizeof.narrow, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:sizeof.narrow, ~#right##0:sizeof.narrow, ?#success##0:wybe.bool)
 
@@ -239,8 +237,7 @@ proc = > public {inline} (1 calls)
 proc five > {inline} (0 calls)
 0: sizeof.narrow.five<0>
 five(?#result##0:sizeof.narrow)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(4:sizeof.narrow, ?#result##0:sizeof.narrow)
 
@@ -248,8 +245,7 @@ five(?#result##0:sizeof.narrow)<{}; {}; {}>:
 proc four > {inline} (0 calls)
 0: sizeof.narrow.four<0>
 four(?#result##0:sizeof.narrow)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(3:sizeof.narrow, ?#result##0:sizeof.narrow)
 
@@ -257,8 +253,7 @@ four(?#result##0:sizeof.narrow)<{}; {}; {}>:
 proc one > {inline} (0 calls)
 0: sizeof.narrow.one<0>
 one(?#result##0:sizeof.narrow)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(0:sizeof.narrow, ?#result##0:sizeof.narrow)
 
@@ -266,8 +261,7 @@ one(?#result##0:sizeof.narrow)<{}; {}; {}>:
 proc three > {inline} (0 calls)
 0: sizeof.narrow.three<0>
 three(?#result##0:sizeof.narrow)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(2:sizeof.narrow, ?#result##0:sizeof.narrow)
 
@@ -275,8 +269,7 @@ three(?#result##0:sizeof.narrow)<{}; {}; {}>:
 proc two > {inline} (0 calls)
 0: sizeof.narrow.two<0>
 two(?#result##0:sizeof.narrow)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(1:sizeof.narrow, ?#result##0:sizeof.narrow)
 
@@ -284,8 +277,7 @@ two(?#result##0:sizeof.narrow)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: sizeof.narrow.~=<0>
 ~=(#left##0:sizeof.narrow, #right##0:sizeof.narrow, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:sizeof.narrow, ~#right##0:sizeof.narrow, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -349,11 +341,10 @@ proc = > public (2 calls)
 0: sizeof.wide.=<0>
 =(#left##0:sizeof.wide, #right##0:sizeof.wide, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -377,8 +368,7 @@ proc = > public (2 calls)
 proc other > {inline} (0 calls)
 0: sizeof.wide.other<0>
 other(?#result##0:sizeof.wide)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(0:sizeof.wide, ?#result##0:sizeof.wide)
 
@@ -386,16 +376,14 @@ other(?#result##0:sizeof.wide)<{}; {}; {}>:
 proc wide > {inline} (0 calls)
 0: sizeof.wide.wide<0>
 wide(wide#1##0:sizeof.wide, ?#result##0:sizeof.wide)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:sizeof.wide) @sizeof:nn:nn
     foreign lpvm mutate(~#rec##0:sizeof.wide, ?#result##0:sizeof.wide, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~wide#1##0:sizeof.wide) @sizeof:nn:nn
 proc wide > {inline} (8 calls)
 1: sizeof.wide.wide<1>
 wide(?wide#1##0:sizeof.wide, #result##0:sizeof.wide, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -412,8 +400,7 @@ wide(?wide#1##0:sizeof.wide, #result##0:sizeof.wide, ?#success##0:wybe.bool)<{};
 proc ~= > public {inline} (0 calls)
 0: sizeof.wide.~=<0>
 ~=(#left##0:sizeof.wide, #right##0:sizeof.wide, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     sizeof.wide.=<0>(~#left##0:sizeof.wide, ~#right##0:sizeof.wide, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -500,17 +487,16 @@ proc = > public (4 calls)
 0: sizeof.wider.=<0>
 =(#left##0:sizeof.wider, #right##0:sizeof.wider, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-      ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 0).Field 8 -> [ExtPhantom (ExtParam 0) (Field 0)]
-      ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
-      ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 0).Field 8 -> [ExtPhantom (ExtParam 1) (Field 0)]
-      ExtPhantom (ExtParam 1) (Field 8).Field 0 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 8 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 8 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 0 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -585,8 +571,7 @@ proc = > public (4 calls)
 proc c > {inline} (0 calls)
 0: sizeof.wider.c<0>
 c(#rec##0:sizeof.wider, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -611,8 +596,7 @@ c(#rec##0:sizeof.wider, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {
 proc c > {inline} (0 calls)
 1: sizeof.wider.c<1>
 c(#rec##0:sizeof.wider, ?#rec##2:sizeof.wider, #field##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -640,8 +624,7 @@ c(#rec##0:sizeof.wider, ?#rec##2:sizeof.wider, #field##0:wybe.char, ?#success##0
 proc foo > {inline} (0 calls)
 0: sizeof.wider.foo<0>
 foo(c##0:wybe.char, ?#result##3:sizeof.wider)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~c##0:wybe.char, ?#temp##0:sizeof.wider) @sizeof:nn:nn
     foreign llvm shl(~#temp##0:sizeof.wider, 1:sizeof.wider, ?#temp##1:sizeof.wider) @sizeof:nn:nn
@@ -650,8 +633,7 @@ foo(c##0:wybe.char, ?#result##3:sizeof.wider)<{}; {}; {}>:
 proc foo > {inline} (8 calls)
 1: sizeof.wider.foo<1>
 foo(?c##0:wybe.char, #result##0:sizeof.wider, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -678,8 +660,7 @@ foo(?c##0:wybe.char, #result##0:sizeof.wider, ?#success##0:wybe.bool)<{}; {}; {}
 proc wider > {inline} (0 calls)
 0: sizeof.wider.wider<0>
 wider(wider#1##0:sizeof.wider, wider#2##0:sizeof.wide, ?#result##0:sizeof.wider)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:sizeof.wider) @sizeof:nn:nn
     foreign lpvm mutate(~#rec##0:sizeof.wider, ?#rec##1:sizeof.wider, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~wider#1##0:sizeof.wider) @sizeof:nn:nn
@@ -687,8 +668,7 @@ wider(wider#1##0:sizeof.wider, wider#2##0:sizeof.wide, ?#result##0:sizeof.wider)
 proc wider > {inline} (16 calls)
 1: sizeof.wider.wider<1>
 wider(?wider#1##0:sizeof.wider, ?wider#2##0:sizeof.wide, #result##0:sizeof.wider, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -717,8 +697,7 @@ wider(?wider#1##0:sizeof.wider, ?wider#2##0:sizeof.wide, #result##0:sizeof.wider
 proc xxx > {inline} (0 calls)
 0: sizeof.wider.xxx<0>
 xxx(?#result##0:sizeof.wider)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(0:sizeof.wider, ?#result##0:sizeof.wider)
 
@@ -726,8 +705,7 @@ xxx(?#result##0:sizeof.wider)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: sizeof.wider.~=<0>
 ~=(#left##0:sizeof.wider, #right##0:sizeof.wider, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     sizeof.wider.=<0>(~#left##0:sizeof.wider, ~#right##0:sizeof.wider, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

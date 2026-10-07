@@ -18,8 +18,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: current_module_alias_fail.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     current_module_alias_fail.toCelsius<0>(1.0:wybe.float, ?tmp#0##0:wybe.float) #0 @current_module_alias_fail:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @current_module_alias_fail:nn:nn
@@ -31,8 +30,7 @@ module top-level code > public {semipure} (0 calls)
 proc toCelsius > public {noinline} (1 calls)
 0: current_module_alias_fail.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @current_module_alias_fail:nn:nn
     foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @current_module_alias_fail:nn:nn
@@ -77,8 +75,7 @@ define external fastcc double @"current_module_alias_fail#.toCelsius<0>"(double 
 proc toCelsius > public {inline} (0 calls)
 0: math.temperature.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @temperature:nn:nn
     foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @temperature:nn:nn

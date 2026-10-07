@@ -16,8 +16,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: resource_tmp_vars.<0>
 ()<{<<resource_tmp_vars.counter>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<resource_tmp_vars.counter>>:wybe.int, ?%tmp#1##0:wybe.int) @resource_tmp_vars:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @resource_tmp_vars:nn:nn
@@ -31,8 +30,7 @@ module top-level code > public {semipure} (0 calls)
 proc #cont#1 > {inline,semipure} (1 calls)
 0: resource_tmp_vars.#cont#1<0>
 #cont#1([tmp#0##0:wybe.int], tmp#1##0:wybe.int)<{<<wybe.io.io>>}; {<<resource_tmp_vars.counter>>, <<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @resource_tmp_vars:nn:nn
     foreign c print_int(1:wybe.int, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @resource_tmp_vars:nn:nn
