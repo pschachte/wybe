@@ -19,7 +19,9 @@ AFTER EVERYTHING:
 proc fold_add > public {inline} (3 calls)
 0: constfold.fold_add<0>
 fold_add(?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
 
@@ -27,7 +29,9 @@ fold_add(?#result##0:wybe.int)<{}; {}; {}>:
 proc fold_mult > public {inline} (3 calls)
 0: constfold.fold_mult<0>
 fold_mult(?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
 
@@ -35,7 +39,9 @@ fold_mult(?#result##0:wybe.int)<{}; {}; {}>:
 proc fold_test > public {inline} (0 calls)
 0: constfold.fold_test<0>
 fold_test(?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
 
@@ -43,7 +49,9 @@ fold_test(?#result##0:wybe.int)<{}; {}; {}>:
 proc fortytwo > public {inline} (0 calls)
 0: constfold.fortytwo<0>
 fortytwo(?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
 

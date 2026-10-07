@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 proc foo > public {inline} (0 calls)
 0: import_in_sub_mod_lib.foo<0>
 foo(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @import_in_sub_mod_lib:nn:nn
     foreign c print_int(~v##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @import_in_sub_mod_lib:nn:nn

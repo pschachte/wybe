@@ -71,7 +71,9 @@ AFTER EVERYTHING:
 proc print_t > public (0 calls)
 0: multictr2.print_t<0>
 print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(12,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(19,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(26,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(33,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(40,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(47,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(60,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign llvm and(x##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#27##0:3 bit unsigned) @multictr2:nn:nn
@@ -354,7 +356,9 @@ case.7.switch.0:
 proc = > public (1 calls)
 0: multictr2.t.=<0>
 =(#left##0:multictr2.t, #right##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#left##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#28##0:3 bit unsigned)
     case ~tmp#28##0:3 bit unsigned of
@@ -485,14 +489,18 @@ proc = > public (1 calls)
 proc c01 > public {inline} (0 calls)
 0: multictr2.t.c01<0>
 c01(f01##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#result##0:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01##0:wybe.int) @multictr2:nn:nn
 proc c01 > public {inline} (40 calls)
 1: multictr2.t.c01<1>
 c01(?f01##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 0:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -510,7 +518,9 @@ c01(?f01##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}
 proc c02 > public {inline} (0 calls)
 0: multictr2.t.c02<0>
 c02(f02##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02##0:wybe.int) @multictr2:nn:nn
@@ -518,7 +528,9 @@ c02(f02##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
 proc c02 > public {inline} (36 calls)
 1: multictr2.t.c02<1>
 c02(?f02##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 1:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -536,7 +548,9 @@ c02(?f02##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}
 proc c03 > public {inline} (0 calls)
 0: multictr2.t.c03<0>
 c03(f03##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03##0:wybe.int) @multictr2:nn:nn
@@ -544,7 +558,9 @@ c03(f03##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
 proc c03 > public {inline} (32 calls)
 1: multictr2.t.c03<1>
 c03(?f03##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 2:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -562,7 +578,9 @@ c03(?f03##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}
 proc c04 > public {inline} (0 calls)
 0: multictr2.t.c04<0>
 c04(f04##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04##0:wybe.int) @multictr2:nn:nn
@@ -570,7 +588,9 @@ c04(f04##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
 proc c04 > public {inline} (28 calls)
 1: multictr2.t.c04<1>
 c04(?f04##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 3:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -588,7 +608,9 @@ c04(?f04##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}
 proc c05 > public {inline} (0 calls)
 0: multictr2.t.c05<0>
 c05(f05##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05##0:wybe.int) @multictr2:nn:nn
@@ -596,7 +618,9 @@ c05(f05##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
 proc c05 > public {inline} (24 calls)
 1: multictr2.t.c05<1>
 c05(?f05##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 4:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -614,7 +638,9 @@ c05(?f05##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}
 proc c06 > public {inline} (0 calls)
 0: multictr2.t.c06<0>
 c06(f06##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06##0:wybe.int) @multictr2:nn:nn
@@ -622,7 +648,9 @@ c06(f06##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
 proc c06 > public {inline} (20 calls)
 1: multictr2.t.c06<1>
 c06(?f06##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 5:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -640,7 +668,9 @@ c06(?f06##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}
 proc c07 > public {inline} (0 calls)
 0: multictr2.t.c07<0>
 c07(f07##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07##0:wybe.int) @multictr2:nn:nn
@@ -648,7 +678,9 @@ c07(f07##0:wybe.int, ?#result##0:multictr2.t)<{}; {}; {}>:
 proc c07 > public {inline} (16 calls)
 1: multictr2.t.c07<1>
 c07(?f07##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 6:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -666,7 +698,9 @@ c07(?f07##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}
 proc c08 > public {inline} (0 calls)
 0: multictr2.t.c08<0>
 c08(f08_a##0:wybe.int, f08_b##0:wybe.int, f08_c##0:wybe.float, ?#result##0:multictr2.t)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_a##0:wybe.int) @multictr2:nn:nn
@@ -676,7 +710,9 @@ c08(f08_a##0:wybe.int, f08_b##0:wybe.int, f08_c##0:wybe.float, ?#result##0:multi
 proc c08 > public {inline} (16 calls)
 1: multictr2.t.c08<1>
 c08(?f08_a##0:wybe.int, ?f08_b##0:wybe.int, ?f08_c##0:wybe.float, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -698,7 +734,9 @@ c08(?f08_a##0:wybe.int, ?f08_b##0:wybe.int, ?f08_c##0:wybe.float, #result##0:mul
 proc f01 > public {inline} (0 calls)
 0: multictr2.t.f01<0>
 f01(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 0:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -714,7 +752,9 @@ f01(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {
 proc f01 > public {inline} (0 calls)
 1: multictr2.t.f01<1>
 f01(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 0:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -732,7 +772,9 @@ f01(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 proc f02 > public {inline} (0 calls)
 0: multictr2.t.f02<0>
 f02(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 1:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -748,7 +790,9 @@ f02(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {
 proc f02 > public {inline} (0 calls)
 1: multictr2.t.f02<1>
 f02(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 1:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -766,7 +810,9 @@ f02(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 proc f03 > public {inline} (0 calls)
 0: multictr2.t.f03<0>
 f03(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 2:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -782,7 +828,9 @@ f03(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {
 proc f03 > public {inline} (0 calls)
 1: multictr2.t.f03<1>
 f03(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 2:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -800,7 +848,9 @@ f03(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 proc f04 > public {inline} (0 calls)
 0: multictr2.t.f04<0>
 f04(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 3:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -816,7 +866,9 @@ f04(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {
 proc f04 > public {inline} (0 calls)
 1: multictr2.t.f04<1>
 f04(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 3:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -834,7 +886,9 @@ f04(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 proc f05 > public {inline} (0 calls)
 0: multictr2.t.f05<0>
 f05(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 4:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -850,7 +904,9 @@ f05(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {
 proc f05 > public {inline} (0 calls)
 1: multictr2.t.f05<1>
 f05(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 4:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -868,7 +924,9 @@ f05(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 proc f06 > public {inline} (0 calls)
 0: multictr2.t.f06<0>
 f06(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 5:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -884,7 +942,9 @@ f06(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {
 proc f06 > public {inline} (0 calls)
 1: multictr2.t.f06<1>
 f06(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 5:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -902,7 +962,9 @@ f06(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 proc f07 > public {inline} (0 calls)
 0: multictr2.t.f07<0>
 f07(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 6:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -918,7 +980,9 @@ f07(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {
 proc f07 > public {inline} (0 calls)
 1: multictr2.t.f07<1>
 f07(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 6:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -936,7 +1000,9 @@ f07(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 proc f08_a > public {inline} (0 calls)
 0: multictr2.t.f08_a<0>
 f08_a(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -952,7 +1018,9 @@ f08_a(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {};
 proc f08_a > public {inline} (0 calls)
 1: multictr2.t.f08_a<1>
 f08_a(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -970,7 +1038,9 @@ f08_a(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##
 proc f08_b > public {inline} (0 calls)
 0: multictr2.t.f08_b<0>
 f08_b(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -986,7 +1056,9 @@ f08_b(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {};
 proc f08_b > public {inline} (0 calls)
 1: multictr2.t.f08_b<1>
 f08_b(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -1004,7 +1076,9 @@ f08_b(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##
 proc f08_c > public {inline} (0 calls)
 0: multictr2.t.f08_c<0>
 f08_c(#rec##0:multictr2.t, ?#result##0:wybe.float, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -1020,7 +1094,9 @@ f08_c(#rec##0:multictr2.t, ?#result##0:wybe.float, ?#success##0:wybe.bool)<{}; {
 proc f08_c > public {inline} (0 calls)
 1: multictr2.t.f08_c<1>
 f08_c(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.float, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#1##0:3 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:3 bit unsigned, 7:3 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -1038,7 +1114,9 @@ f08_c(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.float, ?#success
 proc ~= > public {inline} (0 calls)
 0: multictr2.t.~=<0>
 ~=(#left##0:multictr2.t, #right##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     multictr2.t.=<0>(~#left##0:multictr2.t, ~#right##0:multictr2.t, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

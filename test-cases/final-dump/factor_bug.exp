@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: factor_bug.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @factor_bug:nn:nn
     foreign c print_int(20:wybe.int, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @factor_bug:nn:nn
@@ -27,7 +29,9 @@ module top-level code > public {inline,semipure} (0 calls)
 proc foo > {inline} (1 calls)
 0: factor_bug.foo<0>
 foo(?ret##1:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(20:wybe.int, ?ret##1:wybe.int)
 
@@ -35,14 +39,18 @@ foo(?ret##1:wybe.int)<{}; {}; {}>:
 proc foo#cont#1 > {inline} (2 calls)
 0: factor_bug.foo#cont#1<0>
 foo#cont#1(ret##0:wybe.int, [?ret##0:wybe.int])<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
 
 
 proc test > {inline} (3 calls)
 0: factor_bug.test<0>
 test(?#result##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#result##0:wybe.bool) @factor_bug:nn:nn
 

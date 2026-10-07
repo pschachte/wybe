@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: commonsubexpr.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @commonsubexpr:nn:nn
     foreign c print_int(198:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @commonsubexpr:nn:nn
@@ -31,7 +33,9 @@ module top-level code > public {semipure} (0 calls)
 proc common_subexpr > {inline} (1 calls)
 0: commonsubexpr.common_subexpr<0>
 common_subexpr(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm add(x##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int) @commonsubexpr:nn:nn
     foreign llvm sub(~x##0:wybe.int, 1:wybe.int, ?tmp#64##0:wybe.int) @commonsubexpr:nn:nn

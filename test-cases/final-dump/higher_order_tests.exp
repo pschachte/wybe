@@ -23,7 +23,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: higher_order_tests.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     higher_order_tests.#anon#1<1><>:(wybe.int, ?wybe.bool)(1:wybe.int, ?tmp#17##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#17##0:wybe.bool of
@@ -42,13 +44,17 @@ module top-level code > public {semipure} (0 calls)
 proc #anon#1 > {inline} (1 calls)
 0: higher_order_tests.#anon#1<0>
 #anon#1([anon#1#1##0:wybe.int], ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 proc #anon#1 > {inline} (3 calls)
 1: higher_order_tests.#anon#1<1>
 #anon#1(anon#1#1##0 <{}; {}; {0}>, ?#success##0)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -56,13 +62,17 @@ proc #anon#1 > {inline} (3 calls)
 proc #anon#2 > {inline} (1 calls)
 0: higher_order_tests.#anon#2<0>
 #anon#2(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @higher_order_tests:nn:nn
 proc #anon#2 > {inline} (3 calls)
 1: higher_order_tests.#anon#2<1>
 #anon#2(anon#2#1##0 <{}; {}; {0}>, ?#success##0)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @higher_order_tests:nn:nn
 
@@ -70,7 +80,9 @@ proc #anon#2 > {inline} (3 calls)
 proc #cont#1 > {semipure} (2 calls)
 0: higher_order_tests.#cont#1<0>
 #cont#1(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     t##0:(wybe.int, ?wybe.bool)(1:wybe.int, ?tmp#16##0:wybe.bool) #0 @higher_order_tests:nn:nn
@@ -90,7 +102,9 @@ proc #cont#1 > {semipure} (2 calls)
 proc #cont#2 > {semipure} (2 calls)
 0: higher_order_tests.#cont#2<0>
 #cont#2(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     t##0:(wybe.int, ?wybe.bool)(2:wybe.int, ?tmp#15##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#15##0:wybe.bool of
@@ -109,7 +123,9 @@ proc #cont#2 > {semipure} (2 calls)
 proc #cont#3 > {semipure} (2 calls)
 0: higher_order_tests.#cont#3<0>
 #cont#3(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     ~t##0:(wybe.int, ?wybe.bool)(2:wybe.int, ?tmp#14##0:wybe.bool) #0 @higher_order_tests:nn:nn
@@ -129,7 +145,9 @@ proc #cont#3 > {semipure} (2 calls)
 proc #cont#4 > {semipure} (2 calls)
 0: higher_order_tests.#cont#4<0>
 #cont#4([t##0:(wybe.int, ?wybe.bool)])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @higher_order_tests:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @higher_order_tests:nn:nn
@@ -152,7 +170,9 @@ proc #cont#4 > {semipure} (2 calls)
 proc #cont#5 > {semipure} (2 calls)
 0: higher_order_tests.#cont#5<0>
 #cont#5(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     t##0:(wybe.int, ?wybe.bool)(1:wybe.int, ?tmp#12##0:wybe.bool) #0 @higher_order_tests:nn:nn
@@ -172,7 +192,9 @@ proc #cont#5 > {semipure} (2 calls)
 proc #cont#6 > {semipure} (2 calls)
 0: higher_order_tests.#cont#6<0>
 #cont#6(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     t##0:(wybe.int, ?wybe.bool)(2:wybe.int, ?tmp#11##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#11##0:wybe.bool of
@@ -191,7 +213,9 @@ proc #cont#6 > {semipure} (2 calls)
 proc #cont#7 > {semipure} (2 calls)
 0: higher_order_tests.#cont#7<0>
 #cont#7(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     ~t##0:(wybe.int, ?wybe.bool)(2:wybe.int, ?tmp#10##0:wybe.bool) #0 @higher_order_tests:nn:nn
@@ -209,7 +233,9 @@ proc #cont#7 > {semipure} (2 calls)
 proc do_test > {inline} (12 calls)
 0: higher_order_tests.do_test<0>
 do_test(f##0:(I, ?wybe.bool) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ~f##0:(I, ?wybe.bool)(~i##0:I, ?#success##0:wybe.bool) #0 @higher_order_tests:nn:nn
 
@@ -217,7 +243,9 @@ do_test(f##0:(I, ?wybe.bool) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#success##0:w
 proc do_test2 > {inline} (12 calls)
 0: higher_order_tests.do_test2<0>
 do_test2(f##0:(I, ?wybe.bool) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ~f##0:(I, ?wybe.bool)(~i##0:I, ?#success##0:wybe.bool) #0 @higher_order_tests:nn:nn
 

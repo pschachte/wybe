@@ -19,7 +19,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: constant_struct.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.list.length1<0>(constant_struct#constant#2:wybe.list(wybe.int), 0:wybe.int, ?tmp#0##0:wybe.int) #12 @constant_struct:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @constant_struct:nn:nn

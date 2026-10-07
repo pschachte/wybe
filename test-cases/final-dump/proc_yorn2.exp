@@ -19,7 +19,9 @@ AFTER EVERYTHING:
 proc yorn > public {inline} (0 calls)
 0: proc_yorn2.yorn<0>
 yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     proc_yorn2.yorn#cont#1<0>(~prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_yorn2:nn:nn
 
@@ -27,7 +29,29 @@ yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.i
 proc yorn#cont#1 > (2 calls)
 0: proc_yorn2.yorn#cont#1<0>
 yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+      ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+      ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
+      ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+      ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+      ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+      ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+      ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+      ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+      ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+      ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+      ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+      ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+      ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+      ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
+      ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
+      ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
+      ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+      ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>(prompt##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_yorn2:nn:nn
     wybe.string.print<0>(" (y/n) ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_yorn2:nn:nn
@@ -53,7 +77,9 @@ yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wy
 proc yorn#cont#2 > {inline} (1 calls)
 0: proc_yorn2.yorn#cont#2<0>
 yorn#cont#2(prompt##0:wybe.string, [result##0:wybe.bool], ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("Please answer 'yes' or 'no'.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @proc_yorn2:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @proc_yorn2:nn:nn

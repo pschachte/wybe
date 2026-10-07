@@ -52,7 +52,9 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 proc = > public {inline} (1 calls)
 0: type_enum.season.=<0>
 =(#left##0:type_enum.season, #right##0:type_enum.season, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:type_enum.season, ~#right##0:type_enum.season, ?#success##0:wybe.bool)
 
@@ -60,7 +62,9 @@ proc = > public {inline} (1 calls)
 proc autumn > public {inline} (0 calls)
 0: type_enum.season.autumn<0>
 autumn(?#result##0:type_enum.season)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(3:type_enum.season, ?#result##0:type_enum.season)
 
@@ -68,7 +72,9 @@ autumn(?#result##0:type_enum.season)<{}; {}; {}>:
 proc spring > public {inline} (0 calls)
 0: type_enum.season.spring<0>
 spring(?#result##0:type_enum.season)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:type_enum.season, ?#result##0:type_enum.season)
 
@@ -76,7 +82,9 @@ spring(?#result##0:type_enum.season)<{}; {}; {}>:
 proc summer > public {inline} (0 calls)
 0: type_enum.season.summer<0>
 summer(?#result##0:type_enum.season)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(2:type_enum.season, ?#result##0:type_enum.season)
 
@@ -84,7 +92,9 @@ summer(?#result##0:type_enum.season)<{}; {}; {}>:
 proc winter > public {inline} (0 calls)
 0: type_enum.season.winter<0>
 winter(?#result##0:type_enum.season)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:type_enum.season, ?#result##0:type_enum.season)
 
@@ -92,7 +102,9 @@ winter(?#result##0:type_enum.season)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: type_enum.season.~=<0>
 ~=(#left##0:type_enum.season, #right##0:type_enum.season, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:type_enum.season, ~#right##0:type_enum.season, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

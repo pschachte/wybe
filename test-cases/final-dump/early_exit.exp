@@ -18,7 +18,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: early_exit.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("should print this":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @early_exit:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @early_exit:nn:nn

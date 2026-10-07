@@ -60,7 +60,7 @@ type AnalysisInfo =
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
 aliasSccBottomUp (AcyclicSCC single) = do
     _ <- aliasProcBottomUp single -- immediate fixpoint if no mutual dependency
-    finalizeProcSummary single
+    return ()
 -- | Gather all flags (indicating if any proc alias information changed or not)
 --     by comparing transitive closure of the (key, value) pairs of the map;
 --     Only cyclic procs need to reach a fixed point; False means alias info not
@@ -75,34 +75,8 @@ aliasSccBottomUp procs@(CyclicSCC multi) = do
     logAlias $ replicate 50 '>'
 
     -- Aliasing is always changed after the first run, so cyclic procs are
-    -- analysed at least twice.  Once the fixpoint is reached, prune each proc's
-    -- converged summary (see 'finalizeProcSummary').
-    if or changed
-        then aliasSccBottomUp procs
-        else mapM_ finalizeProcSummary multi
-
-
--- | After an SCC's alias fixpoint has converged, strip read-only phantom edges
--- from each proc's stored summary (see 'pruneReadOnlyPhantoms').  This is done as
--- a one-shot post-pass rather than inside 'projectSummary' because the pruning is
--- non-monotonic (it removes edges) and, run every iteration, would keep the
--- iterative solver oscillating forever.  The full summary is what the fixpoint
--- iterates on; only the final, converged summary is pruned, before it is consumed
--- by later (bottom-up) SCCs and serialized into the object file.
-finalizeProcSummary :: ProcSpec -> Compiler ()
-finalizeProcSummary = updateProcDefM (return . prunePTGSummaryInDef)
-
-
--- | Replace a proc's stored 'ProcPTGSummary' with its read-only-pruned form.
-prunePTGSummaryInDef :: ProcDef -> ProcDef
-prunePTGSummaryInDef def = case procImpln def of
-    impln@ProcDefPrim{procImplnAnalysis = analysis} ->
-        let summary  = procArgPTGSummary analysis
-            pruned   = summary { psEdges = pruneReadOnlyPhantoms
-                                             (psEscape summary) (psEdges summary) }
-        in def { procImpln = impln { procImplnAnalysis =
-                    analysis { procArgPTGSummary = pruned } } }
-    _ -> def
+    -- analysed at least twice.
+    when (or changed) $ aliasSccBottomUp procs
 
 
 currentAliasInfo :: SCC ProcSpec
@@ -469,51 +443,6 @@ projectSummary proto ptg =
             , esc /= NoEscape ]
     in ProcPTGSummary { psEdges  = edgesWithIdent
                       , psEscape = escapes }
-
-
--- | Drop "read-only" phantom edges from a projected summary.  An input-param
--- phantom that the callee only *reads* has, by K-limiting, every out-edge
--- folded back onto itself (a pure self-loop); if it also does not escape and is
--- exposed nowhere else (referenced by at most its single canonical incoming
--- field edge), it carries no cross-call aliasing -- the caller re-materializes
--- the very same phantom from its own field reads.  Removing it keeps the summary
--- sound while stripping the self-looping noise that a read-only consumer (e.g.
--- 'wybe.string.print' deconstructing a tagged string) would otherwise smear
--- onto whatever caller object happens to reach it.
---
--- Only 'ExtParam'-rooted phantoms are eligible: 'ExtReturn'/'ExtGlobal' phantoms
--- describe a freshly-built or globally-reachable structure the caller cannot
--- re-derive, and a phantom with a genuine (write-installed) out-edge or a second
--- referrer encodes real sharing -- both are preserved.  The K-limit guarantees a
--- pure-read phantom only ever self-loops, so a single pass suffices (no cascade).
-pruneReadOnlyPhantoms :: Map ExtNode EscapeState
-                      -> Map ExtNode (Map FieldKey (Set ExtNode))
-                      -> Map ExtNode (Map FieldKey (Set ExtNode))
-pruneReadOnlyPhantoms escapes edges = cleaned
-  where
-    isParamPhantom (ExtPhantom ExtParam{} _) = True
-    isParamPhantom _                         = False
-    -- Distinct sources (excluding self) whose fields point at @t@.
-    inRefs t = Set.fromList
-        [ src | (src, fm) <- Map.toList edges
-              , src /= t
-              , any (Set.member t) (Map.elems fm) ]
-    -- @t@'s own out-edge targets, excluding self-loops.
-    outTargets t = Set.delete t $ Set.unions $ Map.elems
-                 $ Map.findWithDefault Map.empty t edges
-    dead = Set.fromList
-        [ p | p <- Map.keys edges
-            , isParamPhantom p
-            , Map.notMember p escapes
-            , Set.null (outTargets p)
-            , Set.size (inRefs p) <= 1 ]
-    cleaned = Map.mapMaybe pruneFields
-            $ Map.filterWithKey (\src _ -> not (Set.member src dead)) edges
-    pruneFields fm =
-        let fm' = Map.mapMaybe (\ts -> let ts' = ts Set.\\ dead
-                                       in if Set.null ts' then Nothing else Just ts')
-                               fm
-        in if Map.null fm' then Nothing else Just fm'
 
 
 -- | Instantiate a callee's 'ProcPTGSummary' onto the caller's graph at a call

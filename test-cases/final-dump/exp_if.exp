@@ -23,7 +23,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: exp_if.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("expect larger: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @exp_if:nn:nn
     exp_if.if_test<0>(3:wybe.int, ?tmp#0##0:wybe.string) #2 @exp_if:nn:nn
@@ -33,7 +35,9 @@ module top-level code > public {inline,semipure} (0 calls)
 proc if_test > public (1 calls)
 0: exp_if.if_test<0>
 if_test(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(~x##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @exp_if:nn:nn
     factored ~tmp#3##0:wybe.bool of

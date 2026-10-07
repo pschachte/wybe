@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: bug_510_llvm_retval.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     bug_510_llvm_retval.proc<0>(3:wybe.int, ?tmp#0##0:wybe.bool) #0 @bug_510_llvm_retval:nn:nn
     wybe.bool.print<0>(~tmp#0##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @bug_510_llvm_retval:nn:nn
@@ -28,7 +30,9 @@ module top-level code > public {semipure} (0 calls)
 proc proc > {noinline} (1 calls)
 0: bug_510_llvm_retval.proc<0>
 proc(p##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~^p##0:wybe.int, 3:wybe.int, ?#success##0:wybe.bool) @bug_510_llvm_retval:nn:nn
 
@@ -36,13 +40,17 @@ proc(p##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 proc proc#anon#1 > {inline} (1 calls)
 0: bug_510_llvm_retval.proc#anon#1<0>
 proc#anon#1(^p##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~p##0:wybe.int, 3:wybe.int, ?#success##0:wybe.bool) @bug_510_llvm_retval:nn:nn
 proc proc#anon#1 > {inline} (1 calls)
 1: bug_510_llvm_retval.proc#anon#1<1>
 proc#anon#1(^p##0:wybe.int, ?#success##0)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~^p##0:wybe.int, 3:wybe.int, ?#success##0:wybe.bool) @bug_510_llvm_retval:nn:nn
 

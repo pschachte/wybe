@@ -34,7 +34,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: person4.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("Wang":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @person4:nn:nn
     wybe.string.print<0>("Smith":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @person4:nn:nn
@@ -83,7 +85,9 @@ define external fastcc void @"person4#.<0>"() {
 proc = > public {inline} (1 calls)
 0: person4.person.=<0>
 =(#left##0:person4.person, #right##0:person4.person, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string) @person4:nn:nn
     foreign lpvm access(~#left##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lastname##0:wybe.string) @person4:nn:nn
@@ -104,13 +108,17 @@ proc = > public {inline} (1 calls)
 proc firstname > public {inline} (0 calls)
 0: person4.person.firstname<0>
 firstname(#rec##0:person4.person, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person4:nn:nn
 proc firstname > public {inline} (0 calls)
 1: person4.person.firstname<1>
 firstname(#rec##0:person4.person, ?#rec##1:person4.person, #field##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:person4.person, ?#rec##1:person4.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person4:nn:nn
 
@@ -118,13 +126,17 @@ firstname(#rec##0:person4.person, ?#rec##1:person4.person, #field##0:wybe.string
 proc lastname > public {inline} (0 calls)
 0: person4.person.lastname<0>
 lastname(#rec##0:person4.person, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person4:nn:nn
 proc lastname > public {inline} (0 calls)
 1: person4.person.lastname<1>
 lastname(#rec##0:person4.person, ?#rec##1:person4.person, #field##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:person4.person, ?#rec##1:person4.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person4:nn:nn
 
@@ -132,7 +144,9 @@ lastname(#rec##0:person4.person, ?#rec##1:person4.person, #field##0:wybe.string)
 proc person > public {inline} (0 calls)
 0: person4.person.person<0>
 person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person4.person)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:person4.person) @person4:nn:nn
     foreign lpvm mutate(~#rec##0:person4.person, ?#rec##1:person4.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname##0:wybe.string) @person4:nn:nn
@@ -140,7 +154,9 @@ person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person4.pe
 proc person > public {inline} (6 calls)
 1: person4.person.person<1>
 person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person4.person)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string) @person4:nn:nn
     foreign lpvm access(~#result##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string) @person4:nn:nn
@@ -149,7 +165,9 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person4.p
 proc ~= > public {inline} (0 calls)
 0: person4.person.~=<0>
 ~=(#left##0:person4.person, #right##0:person4.person, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @person4:nn:nn
     foreign lpvm access(~#left##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string) @person4:nn:nn

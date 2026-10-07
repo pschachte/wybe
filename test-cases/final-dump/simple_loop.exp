@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: simple_loop.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     simple_loop.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @simple_loop:nn:nn
 
@@ -24,7 +26,9 @@ module top-level code > public {inline,semipure} (0 calls)
 proc #cont#1 > {semipure} (2 calls)
 0: simple_loop.#cont#1<0>
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @simple_loop:nn:nn
     foreign c read_char(?c##0:wybe.char, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @simple_loop:nn:nn
