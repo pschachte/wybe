@@ -49,7 +49,6 @@ instance Binary VTableComponent
 instance Binary VTableEntry
 instance Binary PrimArg
 instance Binary FieldKey
-instance Binary EscapeState
 instance Binary ExtNode
 instance Binary ProcPTGSummary
 instance Binary ProcAnalysis

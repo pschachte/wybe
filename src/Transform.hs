@@ -824,7 +824,7 @@ logTransform = logMsg Transform
 --   to any global or parameter in that map. A sweep of the whole final-dump suite
 --   confirms it: `escapedByAlias=True` appears in **zero** of the 57 alloc
 --   decisions, while genuinely-escaping allocs are all caught by
---   `escapedByMutation`. The stored whole-body `procArgAliasMap` would not help
+--   `escapedByMutation`. The stored whole-body `procArgPTGSummary` would not help
 --   either — it is *parameter-level* and does not track local alloc temporaries.
 --
 --   It is kept (rather than deleted) because it is harmless: being part of an

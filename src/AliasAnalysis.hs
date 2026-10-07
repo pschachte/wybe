@@ -30,16 +30,12 @@ import           Config        (specialName2)
 import Data.Maybe.HT (toMaybe)
 
 
--- The intraprocedural working state is a field- and direction-sensitive
--- "PointsToGraph" (see "PointsToGraph.hs"), replacing the old Steensgaard-style
--- union-find.  At proc exit it is projected ("projectSummary") onto the
--- serialized "ProcPTGSummary" (defined in "AST.hs"): a portable, field/
--- direction/escape-sensitive projection of the graph onto the nodes visible
--- across the call boundary.  This replaces the old coarse "AliasMap"
--- ("DisjointSet PrimVarName" of may-alias params), carrying far more
--- information to callers (and future analyses).  A call site re-inflates the
--- summary onto the caller's graph via "instantiateSummary".  See
--- "points_to_graph.md" §5.
+-- During analysis the working state is a "PointsToGraph" (see
+-- "PointsToGraph.hs"), tracking which fields point to what and in which
+-- direction.  At proc exit, "projectSummary" shrinks it to the nodes a caller
+-- can see (params and escaping values), producing a serializable
+-- "ProcPTGSummary" (defined in "AST.hs").  At a call site,
+-- "instantiateSummary" expands that summary back into the caller's graph.
 type AliasMapLocal = PointsToGraph
 
 
@@ -152,7 +148,7 @@ aliasProcDef def
         -- Project the final points-to graph onto the serialized, portable
         -- summary carrying field edges / pass-through aliases / escape.
         let summary = projectSummary caller aliasMap
-        logAlias $ "^^^  PTG summary: " ++ showProcPTGSummary summary
+        logAlias $ "^^^  PTG summary: " ++ show summary
         -- Update proc analysis with the new summary
         let newAnalysis =
                 oldAnalysis {
@@ -245,10 +241,9 @@ logAlias = logMsg Analysis
 -- Compute aliasMap on parameters for each procedure
 
 
--- | The transfer function (points_to_graph.md §4): fold the effect of one prim
+-- | The transfer function: fold the effect of one prim
 -- onto the points-to graph, then drop dead (final) variables so they stop
--- acting as aliasing roots (matching the old @removeDeadVar@).  Pointer-ness
--- gates every edge -- a non-pointer argument contributes no aliasing.
+-- acting as aliasing roots.  A non-pointer argument contributes no aliasing.
 updateAliasedByPrim :: AliasMapLocal -> Placed Prim -> Compiler AliasMapLocal
 updateAliasedByPrim ptg placed = do
     let prim = content placed
@@ -277,7 +272,7 @@ transferPrim ptg prim = case prim of
         return $ addVarNodes out (Set.singleton (Node (GlobalNode glob))) ptg
     PrimForeign "lpvm" "store" _ [val, ArgGlobal glob _] ->
         transferStore ptg val glob
-    -- Interior-pointer / tag-masking ops (TODO 2, TODO 11): `add`/`sub` compute
+    -- Interior-pointer / tag-masking ops: `add`/`sub` compute
     -- an interior pointer into a base object; `and`/`or`/`xor` mask/unmask a
     -- boxed-constructor tag.  All are value-preserving w.r.t. the base address,
     -- so the result points into whatever the pointer operand(s) point to.
@@ -288,10 +283,7 @@ transferPrim ptg prim = case prim of
 
 
 -- | Wybe call: instantiate the callee's stored 'ProcPTGSummary' onto the
--- caller's graph (see 'instantiateSummary').  The rich summary carries field
--- edges (embedding), pass-through aliases, and escape, so the caller learns the
--- precise shape of what the callee did to its arguments and returned structures
--- -- far more than the old field-insensitive param-alias classes.
+-- caller's graph (see 'instantiateSummary').
 transferCall :: PointsToGraph -> ProcSpec -> [PrimArg] -> Compiler PointsToGraph
 transferCall ptg spec args = do
     calleeDef <- getProcDef spec
@@ -309,31 +301,33 @@ argVarNameMaybe _                    = Nothing
 --        Rich interprocedural summary (ProcPTGSummary)
 ----------------------------------------------------------------
 -- The summary is the projection of a proc's final PointsToGraph onto the nodes
--- visible across the call boundary (points_to_graph.md §5).  It carries field
--- edges (embedding), direct pass-through aliases, and per-node escape -- far
--- more than the old field-insensitive param-alias classes.  Node identity is
--- made portable (ParameterID-keyed 'ExtNode') so the summary serializes into
--- object files and instantiates at any call site.
+-- visible across the call boundary.  It carries field edges (embedding) and
+-- direct pass-through aliases.  Node identity is made portable (ParameterID-keyed
+-- 'ExtNode') so the summary serializes into object files and instantiates at any
+-- call site.
 
 
--- | Cap phantom nesting at depth 1 (K-limiting): a phantom successor of a
--- phantom folds back to the inner phantom, so a self-recursive proc cannot
--- accrete an unbounded phantom chain across the SCC fixpoint (points_to_graph.md
--- TODO 8).  This is the summary analogue of the recursive-type node collapse.
-kLimitPhantom :: ExtNode -> ExtNode
-kLimitPhantom (ExtPhantom inner@ExtPhantom{} _) = inner
-kLimitPhantom e                                 = e
+-- | Collapse a phantom-of-phantom back to a single phantom, capping phantom
+-- nesting at depth 1.  Without this bound a self-recursive proc would wrap one
+-- more phantom per SCC iteration and the fixpoint would never converge.
+collapsePhantom :: ExtNode -> ExtNode
+collapsePhantom (ExtPhantom inner@ExtPhantom{} _) = inner
+collapsePhantom e                                 = e
 
 
--- | Project the final local PointsToGraph onto the serialized 'ProcPTGSummary'.
--- Roots are the params' external nodes plus whatever their variables point to at
--- exit (so a freshly-built returned structure -- a 'LocalNode' bound to an
--- output param -- is folded into its 'ExtReturn', preserving the returned
--- shape; TODO 9).  A forward walk over the field edges records embeddings in
--- 'psEdges', materializing k-limited 'ExtPhantom's for local cells that have no
--- portable identity.  Pass-through identity (a var directly bound to another
--- param's memory) is lifted into 'psEdges' as a 'FieldIdent' edge from the output
--- to its source roots, and 'psEscape' records the per-node escape class.
+-- | Convert the proc's local PointsToGraph into the serializable
+-- 'ProcPTGSummary'.  The summary can only name things a caller can see, so this
+-- rewrites every reachable node into a caller-visible 'ExtNode' identity while
+-- keeping the field structure:
+--
+--   * Start from each param's node plus whatever its variable points to at exit.
+--     A structure the proc builds and returns is a local node, but because it is
+--     bound to an output param it folds into that param's 'ExtReturn'.
+--   * Walk the field edges from those roots.  A local cell with no caller-visible
+--     name becomes a fresh 'ExtPhantom' (depth-capped by 'collapsePhantom').
+--   * An output bound directly to another param's memory (`?out = in`) is
+--     identity, not a field -- recorded as a 'FieldIdent' edge from the output to
+--     its source(s).
 projectSummary :: PrimProto -> PointsToGraph -> ProcPTGSummary
 projectSummary proto ptg =
     let indexed  = List.zip [0..] (primProtoParams proto)
@@ -351,7 +345,7 @@ projectSummary proto ptg =
             GlobalNode g       -> Just (ExtGlobal g)
             ConstNode s        -> Just (ExtConst s)
             PhantomNode base f ->
-                kLimitPhantom . (`ExtPhantom` f) <$> extOfOrigin base
+                collapsePhantom . (`ExtPhantom` f) <$> extOfOrigin base
             LocalNode _        -> Nothing
         -- Roots: (ext identity, node set) for every param.
         roots =
@@ -388,24 +382,13 @@ projectSummary proto ptg =
                 Nothing -> case Map.lookup t xl of
                     Just x  -> (xl, addEdge acc e f x, new)
                     Nothing ->
-                        let ph = kLimitPhantom (ExtPhantom e f)
+                        let ph = collapsePhantom (ExtPhantom e f)
                         in (Map.insert t ph xl, addEdge acc e f ph, t : new)
         addEdge acc e f x =
             Map.insertWith (Map.unionWith Set.union) e
                 (Map.singleton f (Set.singleton x)) acc
-        -- Pass-through returns folded into node identity.  Two params whose root
-        -- node sets directly overlap (e.g. `?out = in` binds out to in's node)
-        -- share memory with no field indirection -- not expressible as an edge.
-        -- Rather than a general alias-pair relation, this is recorded per *output*
-        -- param as the set of other roots it shares memory with (its
-        -- overlap-connected component minus itself): the input(s) it returns (a
-        -- merge `if c then ?out=a else ?out=b` yields several), and/or sibling
-        -- outputs returning the same memory.  An output that overlaps nothing is a
-        -- genuinely fresh return and is omitted.  (Two *inputs* never overlap by
-        -- identity -- their distinct 'ParamNode's meet only through an edge,
-        -- already in 'psEdges' -- so every entry is anchored at an output; input
-        -- args are not forced to alias each other, dropping the extra conservatism
-        -- of the old pair relation.)
+        -- `?out = in` makes out and in the *same* memory -- identity, which a field
+        -- edge can't express.
         overlapAdj = Map.fromListWith Set.union $ concat
             [ [(extA, Set.singleton extB), (extB, Set.singleton extA)]
             | ((extA, nsA) : rest) <- List.tails roots
@@ -428,61 +411,38 @@ projectSummary proto ptg =
             , not (isInputFlow (primParamFlow p))
             , let srcs = Set.delete (ExtReturn i) (componentOf (ExtReturn i))
             , not (Set.null srcs) ]
-        -- Lift the pass-through identity into the edge graph: each such output
-        -- gets a 'FieldIdent' edge to its source roots, so 'psEdges' alone carries
-        -- both containment (real field offsets) and identity aliasing.
+        -- Lift the pass-through identity into the edge graph
         edgesWithIdent = List.foldl'
             (\acc (rj, srcs) ->
                 Set.foldr (\s a -> addEdge a rj FieldIdent s) acc srcs)
             edges identEdges
-        -- Escape class per external node (only the non-trivial entries).
-        escapes = Map.fromListWith joinEscape
-            [ (e, esc)
-            | (n, e) <- Map.toList xlate
-            , let esc = escapeOf ptg n
-            , esc /= NoEscape ]
-    in ProcPTGSummary { psEdges  = edgesWithIdent
-                      , psEscape = escapes }
+    in ProcPTGSummary edgesWithIdent
 
 
--- | Instantiate a callee's 'ProcPTGSummary' onto the caller's graph at a call
--- site (points_to_graph.md §5.2).  Build a substitution σ mapping each callee
--- 'ExtNode' to the caller nodes it stands for -- input params to the actual
--- argument's nodes (minting a fresh node when the caller arg is nodeless, so
--- the union-find variable-identity is preserved), output params to the caller's
--- out-argument (minting a fresh returned cell when absent), globals/consts to
--- their sinks, and phantoms by reading the corresponding field of their base in
--- the caller (materializing caller phantoms only when the base is external).
--- Then replay the summary: containment edges become 'writeField's (embedding); a
--- pass-through output's 'FieldIdent' edge is consumed during σ resolution, binding
--- the caller out-arg variable to its source nodes (identity, not a fresh cell);
--- and escape classes are raised on the caller nodes.  Because σ(input param) is
--- the caller arg's own nodes, two actual arguments that already alias share σ
--- automatically, so the soundness-critical alias merge (TODO 5) falls out for
--- free.
+-- | Paste a callee's 'ProcPTGSummary' into the caller's graph at a call site.
+-- Resolve each callee 'ExtNode' to the caller nodes it stands for:
+--
+--   * input param  -> the actual argument's nodes (mint one if nodeless)
+--   * output param -> the caller's out-argument (mint a cell if absent)
+--   * global/const -> its sink
+--   * phantom      -> its field read on its base in the caller
 instantiateSummary :: PrimProto -> [PrimArg] -> ProcPTGSummary
         -> PointsToGraph -> Compiler PointsToGraph
-instantiateSummary calleeProto args summary ptg0 = do
-    -- Every external node mentioned in the summary needs a σ image.  A
-    -- pass-through output and its sources are 'FieldIdent' edge endpoints, so they
-    -- are already covered by the edge keys/targets below.
+instantiateSummary calleeProto args (ProcPTGSummary summary) ptg0 = do
+    -- Collect every ext node that needs resolving: the edge keys and their targets.
     let extNodes = Set.toList $ Set.unions
-            [ Map.keysSet (psEdges summary)
+            [ Map.keysSet summary
             , Set.unions [ Set.unions (Map.elems fm)
-                         | fm <- Map.elems (psEdges summary) ]
-            , Map.keysSet (psEscape summary) ]
-    -- Resolve σ for every needed ext node, threading the graph (minting /
-    -- materializing may extend it) and memoizing.
+                         | fm <- Map.elems summary ] ]
+    -- Resolve every ext node to caller nodes, threading the (possibly extended) graph.
     (sigma, ptg1) <- foldM
         (\(memo, g) e -> do
             (_, memo', g') <- resolveExt e (memo, g)
             return (memo', g'))
         (Map.empty, ptg0) extNodes
     let lookupSig e = Map.findWithDefault Set.empty e sigma
-    -- (1) Replay field edges: for base.f -> tgt, embed σ(tgt) in σ(base).f.  A
-    -- 'FieldIdent' edge is identity, not containment: it is consumed during σ
-    -- resolution (see 'resolveExt' for 'ExtReturn', which binds the out-arg var to
-    -- the source nodes), so it is skipped here rather than written as a field.
+    -- Replay field edges: base.f -> tgt embeds the resolved tgt in the resolved
+    -- base's f.  Skip 'FieldIdent' (already resolved).
     let ptg2 = List.foldl'
             (\g (base, fm) ->
                 let bases = lookupSig base
@@ -492,31 +452,19 @@ instantiateSummary calleeProto args summary ptg0 = do
                         let tgtNs = Set.unions (List.map lookupSig (Set.toList tgts))
                         in Set.foldr (\n -> writeField n f tgtNs) g' bases)
                     g (Map.toList fm))
-            ptg1 (Map.toList (psEdges summary))
-    -- Pass-through binding of the actual out-arg variables is done during σ
-    -- resolution (see 'resolveExt' for 'ExtReturn'): a pass-through output shares
-    -- its canonical source's caller nodes, so the out-arg variable is bound there
-    -- and no separate alias-replay pass is needed.
-    --
-    -- (2) Raise escape classes on the caller nodes (and everything reachable).
-    let ptg3 = Map.foldrWithKey
-            (\e st g -> if st >= ArgEscape
-                            then raiseEscapeReachable st (lookupSig e) g
-                            else g)
-            ptg2 (psEscape summary)
-    return ptg3
+            ptg1 (Map.toList summary)
+    -- Out-args were already bound while resolving, so return as-is.
+    return ptg2
   where
     argAt i = if i >= 0 && i < List.length args then Just (args !! i) else Nothing
     isExtReturn ExtReturn{} = True
     isExtReturn _           = False
     notExtReturn = not . isExtReturn
-    -- The identity ('FieldIdent') sources of an ext node: the nodes it IS (shares
-    -- memory with), as recorded in 'psEdges'.  Empty for a fresh/non-aliased node.
+    -- The nodes an ext node IS (shares memory with).  Empty if fresh/non-aliased.
     identSourcesOf e = Map.findWithDefault Set.empty FieldIdent
-                           (Map.findWithDefault Map.empty e (psEdges summary))
+                           (Map.findWithDefault Map.empty e summary)
 
-    -- Resolve one 'ExtNode' to the set of caller nodes it stands for, threading
-    -- the (possibly extended) graph and a memo.
+    -- Resolve one 'ExtNode' to the caller nodes it stands for (memoized).
     resolveExt :: ExtNode -> (Map ExtNode (Set Node), PointsToGraph)
             -> Compiler (Set Node, Map ExtNode (Set Node), PointsToGraph)
     resolveExt ext (memo, g) =
@@ -529,21 +477,12 @@ instantiateSummary calleeProto args summary ptg0 = do
     compute ext memo g = case ext of
         ExtParam i  -> resolveArg (argAt i) memo g
         ExtReturn i ->
-            -- A pass-through return SHARES its sources' nodes (the input(s) it
-            -- returns, or a sibling output -- carried by the output's 'FieldIdent'
-            -- edge) rather than minting a fresh cell: the callee threaded the same
-            -- structure through (an in-place update), so the returned var must have
-            -- the sources' identity, not a spurious fresh local that would leak
-            -- into their field edges and defeat the unaliased query (the nbody
-            -- regression).  Only a genuinely fresh return (no 'FieldIdent' edge, or
-            -- one whose sources are nodeless) mints.
+            -- A pass-through return shares its sources' nodes instead of minting
             case identSourcesOf (ExtReturn i) of
                 srcs | Set.null srcs -> resolveOut (argAt i) memo g
                 srcs -> do
-                    -- Non-return sources are concrete (input args / const / global
-                    -- sinks); resolve and union them.  Resolving sibling *returns*
-                    -- would only chase back to these same sources (or cycle), so a
-                    -- pure sibling-return merge is handled by the min-return mint.
+                    -- Resolve the concrete (non-return) sources and union them.
+                    -- Pure sibling-return merges fall to the min-return mint below.
                     let nonRet = [ s | s <- Set.toList srcs, notExtReturn s ]
                     (inNs, memoA, gA) <- foldM
                         (\(acc, m, gg) s -> do
@@ -554,9 +493,8 @@ instantiateSummary calleeProto args summary ptg0 = do
                         if not (Set.null inNs)
                             then return (inNs, memoA, gA)
                             else
-                                -- Pure sibling-return merge (or nodeless inputs):
-                                -- the lowest-indexed return of the class mints the
-                                -- single shared cell; the rest resolve to it.
+                                -- Pure sibling merge: the lowest-indexed return
+                                -- mints the shared cell; the rest resolve to it.
                                 let comp   = Set.insert (ExtReturn i) srcs
                                     minRet = Set.findMin
                                                  (Set.filter isExtReturn comp)
@@ -577,15 +515,10 @@ instantiateSummary calleeProto args summary ptg0 = do
                     (Set.empty, g') baseNs
             return (collected, memo', g'')
 
-    -- An input param resolves to the actual argument's VARIABLE nodes only.
-    -- Const/global args are dropped at the boundary (mirroring the old var-only
-    -- @_zipParamToArgVar@): propagating a shared constant into the caller would
-    -- spuriously tie a returned value to a dead constant and block its reuse
-    -- (the nbody regression).  A nodeless pointer *variable* is minted a fresh
-    -- node (keyed by the var, stable across fixpoint iterations) so it still
-    -- shares identity with the other members of its summary class -- the
-    -- union-find variable-identity that protects a freshly-returned value from
-    -- an unsound destructive reuse (the string corruption case).
+    -- An input param resolves to the actual arg's VARIABLE nodes only.  Const/
+    -- global args are dropped: tying a return to a shared constant would wrongly
+    -- block reuse.  A nodeless pointer var gets a fresh node so it still shares 
+    -- its summary class's identity.
     resolveArg (Just arg) memo gg = do
         ptr <- argIsPointer arg
         case (ptr, argVarNameMaybe arg) of
@@ -597,8 +530,7 @@ instantiateSummary calleeProto args summary ptg0 = do
                     else return (ns, memo, gg)
             _ -> return (Set.empty, memo, gg)
     resolveArg Nothing memo gg = return (Set.empty, memo, gg)
-    -- A genuinely fresh returned structure: whatever the caller's out-arg
-    -- variable already points to, or a fresh cell bound to it when absent.
+    -- A genuinely fresh return: whatever the out-arg points to, or a fresh cell.
     resolveOut (Just ArgVar{argVarName=v}) memo gg =
         let existing = varNodes gg v
         in if Set.null existing
@@ -608,10 +540,11 @@ instantiateSummary calleeProto args summary ptg0 = do
     resolveOut _ memo gg = return (Set.empty, memo, gg)
 
 
--- | Field read: @pts(member) ⊇ ⋃_{n ∈ pts(struct)} readFieldMat(n, key)@.
--- Skipped when the member is not a pointer.  'readFieldMat' materializes a
--- phantom (external base) or falls back to the base node (local base with an
--- unknown field), keeping an embedded/interior read conservatively aliased.
+-- | Field read: point the member at whatever the struct's field holds.
+-- Skipped when the member is not a pointer.  For each node the struct points to,
+-- 'readFieldMat' reads field 'key': it materializes a phantom (external base) or
+-- falls back to the base node (local base, unknown field), keeping an interior
+-- read conservatively aliased.
 transferAccess :: PointsToGraph -> PrimArg -> PrimArg -> PrimArg
         -> Compiler PointsToGraph
 transferAccess ptg struct offset member = case member of
@@ -630,10 +563,10 @@ transferAccess ptg struct offset member = case member of
     _ -> return ptg
 
 
--- | Field write.  (1) Struct edge: @pts(fOut) ⊇ pts(fIn)@, honouring `noalias`
--- (a genuinely fresh copy) by giving fOut a fresh local node instead.  (2) Field
--- store: for every node of the struct being written, @writeField(n, key) ⊇
--- pts(member)@ (skipped when member is not a pointer).
+-- | Field write.  (1) Struct edge: point fOut at whatever fIn points to -- unless
+-- `noalias` marks it a genuinely fresh copy, in which case fOut gets a fresh local
+-- node.  (2) Field store: for every node fOut points to, store the member into its
+-- field 'key' (skipped when member is not a pointer).
 transferMutate :: PointsToGraph -> [Ident] -> [PrimArg] -> Compiler PointsToGraph
 transferMutate ptg flags [fIn, fOut, offset, _, _, _, member] = do
     let noalias = "noalias" `elem` flags
@@ -652,13 +585,12 @@ transferMutate ptg flags [fIn, fOut, offset, _, _, _, member] = do
 transferMutate ptg _ _ = return ptg
 
 
--- | Value-preserving copy: @pts(out) ⊇ pts(in)@.  When @gated@ is set (an
--- `llvm move`), the copy only carries points-to information if the source is
--- pointer-represented: copying a non-pointer scalar (e.g. an int) must not
--- create an alias between two values that merely share a numeric value, matching
--- the old analysis's `aliasedRep` filter.  When @gated@ is unset (an `lpvm
--- cast`), the copy is ungated because a cast may move an address through an
--- int-typed intermediate and must still carry the points-to set (TODO 12).
+-- | Value-preserving copy: out points at whatever in points at.  When `gated` is
+-- set (an `llvm move`), the copy only carries points-to info if the source is
+-- pointer-represented: copying a non-pointer scalar (e.g. an int) must not alias
+-- two values that merely share a numeric value.  When `gated` is unset (an
+-- `lpvm cast`), the copy is ungated because a cast may move an address through an
+-- int-typed intermediate and must still carry the points-to set.
 transferCopy :: Bool -> PointsToGraph -> PrimArg -> PrimArg
         -> Compiler PointsToGraph
 transferCopy gated ptg inp outp = do
@@ -669,20 +601,18 @@ transferCopy gated ptg inp outp = do
         _ -> ptg
 
 
--- | Global store: @writeField(GlobalNode, FieldAny) ⊇ pts(val)@ and taint the
--- stored value (and everything reachable) as escaping.  The edge from the
--- (external) global node is what makes the stored value read as aliased.
+-- | Global store: store val into the global node (under 'FieldAny').  The edge
+-- from the (external) global node is what makes the stored value read as aliased.
 transferStore :: PointsToGraph -> PrimArg -> GlobalInfo -> Compiler PointsToGraph
 transferStore ptg val glob = do
     ptrVal <- argIsPointer val
     let valNodes = if ptrVal then rawSourceNodes ptg val else Set.empty
     let gNode    = Node (GlobalNode glob)
-    return $ raiseEscapeReachable GlobalEscape valNodes
-                (writeField gNode FieldAny valNodes ptg)
+    return $ writeField gNode FieldAny valNodes ptg
 
 
 -- | Interior-pointer / tag ops: every output points into whatever the pointer
--- inputs point to (@pts(out) ⊇ ⋃ pts(pointer inputs)@).
+-- inputs point to.
 transferInterior :: PointsToGraph -> [PrimArg] -> Compiler PointsToGraph
 transferInterior ptg args = do
     let ins  = [ a | a <- args, argFlowDirection a /= FlowOut ]
@@ -695,7 +625,7 @@ transferInterior ptg args = do
 
 
 -- | Nodes contributed by a source argument (pointer variables, global sinks,
--- and constant memory blocks).  Constant refs introduce a 'ConstNode' (TODO 3).
+-- and constant memory blocks).  Constant refs introduce a 'ConstNode'.
 rawSourceNodes :: PointsToGraph -> PrimArg -> Set Node
 rawSourceNodes ptg arg = case arg of
     ArgVar{argVarName=v} -> varNodes ptg v
@@ -716,9 +646,9 @@ argIsPointer arg = do
     aliasedRep _        = False
 
 
--- | Drop dead (final) argument variables from the environment.  Their nodes and
--- edges are retained (they are the persistent aliasing substrate); only the
--- var->node bindings go, so a dead var stops being an aliasing root.
+-- | Drop dead (final) argument variables from the environment.  Their
+-- nodes and edges are retained; only the var->node bindings go,
+-- so a dead var stops being an aliasing root.
 dropFinalArgs :: PointsToGraph -> [PrimArg] -> PointsToGraph
 dropFinalArgs ptg args =
     dropVars (Set.fromList
