@@ -28,7 +28,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("lt(1,2)":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @foreign_test:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @foreign_test:nn:nn
@@ -42,7 +41,6 @@ proc #cont#1 > {inline,semipure} (2 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign_test.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
 
@@ -52,7 +50,6 @@ proc #cont#2 > {semipure} (2 calls)
 #cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c strcmp(c"string":wybe.c_string, c"string":wybe.c_string, ?tmp#8##0:wybe.int) @foreign_test:nn:nn
     foreign llvm icmp_ne(~tmp#8##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @foreign_test:nn:nn
@@ -74,7 +71,6 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c strcmp(c"string":wybe.c_string, c"strong":wybe.c_string, ?tmp#7##0:wybe.int) @foreign_test:nn:nn
     foreign llvm icmp_ne(~tmp#7##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @foreign_test:nn:nn
@@ -94,7 +90,6 @@ proc lt > public {inline} (6 calls)
 lt(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(~x##0:wybe.int, ~y##0:wybe.int, ?#success##0:wybe.bool) @foreign_test:nn:nn
 
@@ -104,7 +99,6 @@ proc neq > public {inline} (6 calls)
 neq(x##0:wybe.c_string, y##0:wybe.c_string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c strcmp(~x##0:wybe.c_string, ~y##0:wybe.c_string, ?tmp#0##0:wybe.int) @foreign_test:nn:nn
     foreign llvm icmp_ne(~tmp#0##0:wybe.int, 0:wybe.int, ?#success##0:wybe.bool)

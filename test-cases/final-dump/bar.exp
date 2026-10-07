@@ -19,7 +19,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     numbers.factorial<0>(4:wybe.int, ?tmp#0##0:wybe.int) #0 @bar:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @bar:nn:nn
@@ -72,7 +71,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("Numbers has been initialised.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @numbers:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @numbers:nn:nn
@@ -85,7 +83,6 @@ proc factorial > public (1 calls)
 factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @numbers:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -104,7 +101,6 @@ proc toCelsius > public {inline} (0 calls)
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @numbers:nn:nn
     foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @numbers:nn:nn

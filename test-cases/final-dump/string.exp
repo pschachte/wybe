@@ -38,7 +38,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(32,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(85,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(86,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(88,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(89,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(94,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(98,(string.print_loop#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @string:nn:nn
@@ -132,7 +131,6 @@ proc print_loop > {inline} (2 calls)
 print_loop(s##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     string.print_loop#cont#1<0>(~s##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @string:nn:nn
 
@@ -162,7 +160,6 @@ print_loop#cont#1(tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
       ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
       ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
       ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(0,(wybe.string.[|]<0>,fromList [NonAliasedParamCond 2 [0]])),(2,(string.print_loop#cont#1<0>,fromList [NonAliasedParamCond 0 [0]]))]
     wybe.string.[|]<0>(?c##0:wybe.char, ?tmp#0##1:wybe.string, ~tmp#0##0:wybe.string, ?tmp#2##0:wybe.bool) #0 @string:nn:nn
@@ -219,7 +216,6 @@ test_index(s##0:wybe.string, i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; 
       ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
       ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
       ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
-    escape: []
   InterestingCallProperties: []
     wybe.string.[]<0>(~s##0:wybe.string, ~i##0:wybe.int, ?tmp#0##0:wybe.char, ?tmp#1##0:wybe.bool) #0 @string:nn:nn
     case ~tmp#1##0:wybe.bool of

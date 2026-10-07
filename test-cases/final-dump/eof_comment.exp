@@ -19,7 +19,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("Wominjeka!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @eof_comment:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @eof_comment:nn:nn

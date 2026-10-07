@@ -19,7 +19,6 @@ proc print2 > public {inline} (0 calls)
 print2([x##0:wybe.int], [y##0:wybe.int])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("hello, world":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_hello:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @proc_hello:nn:nn

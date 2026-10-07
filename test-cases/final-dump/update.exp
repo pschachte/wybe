@@ -19,7 +19,6 @@ proc inc2 > public {inline} (0 calls)
 inc2(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @update:nn:nn
     foreign llvm add(~tmp#1##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @update:nn:nn
@@ -28,7 +27,6 @@ proc inc2 > public {inline} (0 calls)
 inc2(?x##0:wybe.int, y##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm sub(~y##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @update:nn:nn
     foreign llvm sub(~tmp#0##0:wybe.int, 1:wybe.int, ?x##0:wybe.int) @update:nn:nn

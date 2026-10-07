@@ -54,7 +54,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:type_enum.season, #right##0:type_enum.season, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:type_enum.season, ~#right##0:type_enum.season, ?#success##0:wybe.bool)
 
@@ -64,7 +63,6 @@ proc autumn > public {inline} (0 calls)
 autumn(?#result##0:type_enum.season)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(3:type_enum.season, ?#result##0:type_enum.season)
 
@@ -74,7 +72,6 @@ proc spring > public {inline} (0 calls)
 spring(?#result##0:type_enum.season)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:type_enum.season, ?#result##0:type_enum.season)
 
@@ -84,7 +81,6 @@ proc summer > public {inline} (0 calls)
 summer(?#result##0:type_enum.season)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(2:type_enum.season, ?#result##0:type_enum.season)
 
@@ -94,7 +90,6 @@ proc winter > public {inline} (0 calls)
 winter(?#result##0:type_enum.season)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:type_enum.season, ?#result##0:type_enum.season)
 
@@ -104,7 +99,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:type_enum.season, #right##0:type_enum.season, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:type_enum.season, ~#right##0:type_enum.season, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

@@ -24,7 +24,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @io_flow_ok:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io_flow_ok:nn:nn
@@ -48,7 +47,6 @@ proc aok > {inline} (5 calls)
 aok()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @io_flow_ok:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io_flow_ok:nn:nn
@@ -61,7 +59,6 @@ proc unknown > {noinline} (3 calls)
 unknown(?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 

@@ -21,7 +21,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     higher_order_loop.#cont#1<0>(higher_order_loop#constant#3:wybe.list({resource}(wybe.int)))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #3 @higher_order_loop:nn:nn
 
@@ -31,7 +30,6 @@ proc #closure#1 > {inline} (1 calls)
 #closure#1(x##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
     foreign c print_int(~x##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @int:nn:nn
@@ -44,7 +42,6 @@ proc #closure#2 > {inline} (1 calls)
 #closure#2(x##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
     foreign c print_int(~x##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @int:nn:nn
@@ -60,7 +57,6 @@ proc #cont#1 > {semipure} (2 calls)
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @higher_order_loop:nn:nn
     case ~tmp#9##0:wybe.bool of

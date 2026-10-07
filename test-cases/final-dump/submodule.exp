@@ -48,7 +48,6 @@ proc hidden > {inline} (0 calls)
 hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("private proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
@@ -58,7 +57,6 @@ proc semi_hidden > public {inline} (0 calls)
 semi_hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("public proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
@@ -108,7 +106,6 @@ proc semi_visible > {inline} (0 calls)
 semi_visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("private proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 
@@ -118,7 +115,6 @@ proc visible > public {inline} (0 calls)
 visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("public proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @submodule:nn:nn
 

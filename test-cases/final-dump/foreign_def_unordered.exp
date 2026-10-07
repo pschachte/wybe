@@ -19,7 +19,6 @@ proc a_in_b_in > {inline} (0 calls)
 a_in_b_in()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -28,7 +27,6 @@ proc a_in_b_inout > {inline} (0 calls)
 a_in_b_inout()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -41,7 +39,6 @@ proc a_in_b_out > {inline} (0 calls)
 a_in_b_out()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign c a_in_b_out(~tmp#0##0:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -53,7 +50,6 @@ proc a_inout_b_in > {inline} (0 calls)
 a_inout_b_in()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -66,7 +62,6 @@ proc a_inout_b_inout > {inline} (0 calls)
 a_inout_b_inout()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -80,7 +75,6 @@ proc a_inout_b_out > {inline} (0 calls)
 a_inout_b_out()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign c a_inout_b_out(~%a##0:wybe.int, ?%a##1:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -93,7 +87,6 @@ proc a_out_b_in > {inline} (0 calls)
 a_out_b_in()<{<<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign c a_out_b_in(?%a##0:wybe.int, ~tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -105,7 +98,6 @@ proc a_out_b_inout > {inline} (0 calls)
 a_out_b_inout()<{<<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign c a_out_b_inout(?%a##0:wybe.int, ~%b##0:wybe.int, ?%b##1:wybe.int) @foreign_def_unordered:nn:nn
@@ -118,7 +110,6 @@ proc a_out_b_out > {inline} (0 calls)
 a_out_b_out()<{}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c a_out_b_out(?%a##0:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign lpvm store(~%a##0:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
@@ -130,7 +121,6 @@ proc b_in_a_in > {inline} (0 calls)
 b_in_a_in()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -139,7 +129,6 @@ proc b_in_a_inout > {inline} (0 calls)
 b_in_a_inout()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -152,7 +141,6 @@ proc b_in_a_out > {inline} (0 calls)
 b_in_a_out()<{<<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign c b_in_a_out(~tmp#0##0:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -164,7 +152,6 @@ proc b_inout_a_in > {inline} (0 calls)
 b_inout_a_in()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -177,7 +164,6 @@ proc b_inout_a_inout > {inline} (0 calls)
 b_inout_a_inout()<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -191,7 +177,6 @@ proc b_inout_a_out > {inline} (0 calls)
 b_inout_a_out()<{<<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%b##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign c b_inout_a_out(~%b##0:wybe.int, ?%b##1:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -204,7 +189,6 @@ proc b_out_a_in > {inline} (0 calls)
 b_out_a_in()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign c b_out_a_in(?%b##0:wybe.int, ~tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -216,7 +200,6 @@ proc b_out_a_inout > {inline} (0 calls)
 b_out_a_inout()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign c b_out_a_inout(?%b##0:wybe.int, ~%a##0:wybe.int, ?%a##1:wybe.int) @foreign_def_unordered:nn:nn
@@ -229,7 +212,6 @@ proc b_out_a_out > {inline} (0 calls)
 b_out_a_out()<{}; {<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c b_out_a_out(?%b##0:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign lpvm store(~%a##0:wybe.int, <<foreign_def_unordered.a>>:wybe.int) @foreign_def_unordered:nn:nn
@@ -241,7 +223,6 @@ proc out_in > {inline} (0 calls)
 out_in()<{<<foreign_def_unordered.a>>}; {<<foreign_def_unordered.a>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign c out_in(?%a##1:wybe.int, ~%a##0:wybe.int) @foreign_def_unordered:nn:nn
@@ -253,7 +234,6 @@ proc repeated > {inline} (0 calls)
 repeated(x##0:wybe.int)<{<<foreign_def_unordered.a>>, <<foreign_def_unordered.b>>}; {<<foreign_def_unordered.a>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<foreign_def_unordered.b>>:wybe.int, ?%tmp#0##0:wybe.int) @foreign_def_unordered:nn:nn
     foreign lpvm load(<<foreign_def_unordered.a>>:wybe.int, ?%a##0:wybe.int) @foreign_def_unordered:nn:nn

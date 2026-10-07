@@ -21,7 +21,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("Outer":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @nested_loop:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @nested_loop:nn:nn
@@ -39,7 +38,6 @@ proc #cont#1 > {inline,semipure} (1 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("Outer":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @nested_loop:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @nested_loop:nn:nn
@@ -57,7 +55,6 @@ proc #cont#2 > {inline,semipure} (2 calls)
 #cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("Inner":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @nested_loop:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @nested_loop:nn:nn

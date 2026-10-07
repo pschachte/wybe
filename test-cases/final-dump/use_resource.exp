@@ -21,7 +21,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<use_resource.count>>, <<wybe.io.io>>}; {<<use_resource.count>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%tmp#0##0:wybe.int) @use_resource:nn:nn
     foreign llvm add(~tmp#0##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @use_resource:nn:nn
@@ -46,7 +45,6 @@ proc inc_count > {inline} (4 calls)
 inc_count()<{<<use_resource.count>>}; {<<use_resource.count>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%count##0:wybe.int) @use_resource:nn:nn
     foreign llvm add(~count##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @use_resource:nn:nn
@@ -58,7 +56,6 @@ proc use_test > {inline} (1 calls)
 use_test()<{<<use_resource.count>>, <<wybe.io.io>>}; {<<use_resource.count>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%tmp#4##0:wybe.int) @use_resource:nn:nn
     foreign llvm add(~tmp#4##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @use_resource:nn:nn

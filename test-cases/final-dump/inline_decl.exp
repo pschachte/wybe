@@ -20,7 +20,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @inline_decl:nn:nn
     foreign c putchar(104:wybe.char, ~%tmp#0##0:wybe.phantom, ?%tmp#1##0:wybe.phantom) @inline_decl:nn:nn
@@ -44,7 +43,6 @@ proc finish > public {noinline} (1 calls)
 finish()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @inline_decl:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#0##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @inline_decl:nn:nn
@@ -56,7 +54,6 @@ proc long > public {inline} (1 calls)
 long()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @inline_decl:nn:nn
     foreign c putchar(104:wybe.char, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @inline_decl:nn:nn

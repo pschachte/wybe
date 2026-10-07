@@ -18,7 +18,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     uneeded_closure_args.call<0>(uneeded_closure_args.#closure#1<0><>:(wybe.int, ?wybe.int), 2:wybe.int, ?tmp#0##0:wybe.int) #0 @uneeded_closure_args:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @uneeded_closure_args:nn:nn
@@ -31,7 +30,6 @@ proc #closure#1 > {inline} (1 calls)
 #closure#1([^a##0:A <{}; {}; {0}>], b##0 <{}; {}; {1}>, ?#result##0 <{}; {}; {1}>)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
 
@@ -41,7 +39,6 @@ proc call > {noinline} (1 calls)
 call(f##0:(A, ?A) <{}; {}; {0}>, a##0:A <{}; {}; {1}>, ?#result##0:A <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~f##0:(A, ?A)(~a##0:A, ?#result##0:A) #0 @uneeded_closure_args:nn:nn
 
@@ -51,7 +48,6 @@ proc second > {inline} (1 calls)
 second([a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
 

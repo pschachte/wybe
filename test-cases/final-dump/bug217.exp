@@ -47,7 +47,6 @@ proc = > public {inline} (1 calls)
 =([#left##0:bug217.foo], [#right##0:bug217.foo], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -57,7 +56,6 @@ proc foo > {inline} (0 calls)
 foo(?#result##0:bug217.foo)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:bug217.foo, ?#result##0:bug217.foo)
 
@@ -67,7 +65,6 @@ proc ~= > public {inline} (0 calls)
 ~=([#left##0:bug217.foo], [#right##0:bug217.foo], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
@@ -112,7 +109,6 @@ proc = > public {inline} (1 calls)
 =([#left##0:bug217.foo.bar], [#right##0:bug217.foo.bar], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -122,7 +118,6 @@ proc bar > {inline} (0 calls)
 bar(?#result##0:bug217.foo.bar)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:bug217.foo.bar, ?#result##0:bug217.foo.bar)
 
@@ -132,7 +127,6 @@ proc ~= > public {inline} (0 calls)
 ~=([#left##0:bug217.foo.bar], [#right##0:bug217.foo.bar], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 

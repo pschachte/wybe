@@ -25,7 +25,6 @@ proc nested_if > public (0 calls)
 nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     case ~i##0:wybe.int of
     0:

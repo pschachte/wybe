@@ -19,7 +19,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     func_factorial.factorial<0>(5:wybe.int, ?tmp#0##0:wybe.int) #0 @func_factorial:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @func_factorial:nn:nn
@@ -33,7 +32,6 @@ proc factorial > public (2 calls)
 factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @func_factorial:nn:nn
     case ~tmp#4##0:wybe.bool of

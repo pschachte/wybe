@@ -48,7 +48,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     alias_multifunc4.replicate1<0>(alias_multifunc4#constant#17:position.position, ?p2##0:position.position, ?p3##0:position.position) #1 @alias_multifunc4:nn:nn
     wybe.string.print<0>("--- After calling replicate1:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @alias_multifunc4:nn:nn
@@ -85,7 +84,6 @@ replicate1(pa##0:position.position, ?pb##1:position.position, ?pc##0:position.po
   AliasSummary:
     edges:
       ExtReturn 2.FieldIdent -> [ExtParam 0]
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(pa##0:position.position, ?pc##0:position.position) @alias_multifunc4:nn:nn
     foreign lpvm {noalias} mutate(~pa##0:position.position, ?pb##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 99:wybe.int) @alias_multifunc4:nn:nn
@@ -96,7 +94,6 @@ proc replicate21 > public (1 calls)
 replicate21(?pb##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(alias_multifunc4#constant#12:position.position, ?pb##0:position.position) @alias_multifunc4:nn:nn
     foreign lpvm {noalias} mutate(alias_multifunc4#constant#12:position.position, ?pc##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111111111:wybe.int) @alias_multifunc4:nn:nn
@@ -109,7 +106,6 @@ proc replicate22 > public (1 calls)
 replicate22(?pb##0:position.position, ?pc##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(alias_multifunc4#constant#12:position.position, ?pb##0:position.position) @alias_multifunc4:nn:nn
     wybe.string.print<0>("--- Inside replicate22, expect pc(99999,99999):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @alias_multifunc4:nn:nn
@@ -271,7 +267,6 @@ proc printPosition > public (0 calls)
 printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(10,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.string.print<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @position:nn:nn
@@ -345,7 +340,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int) @position:nn:nn
     foreign lpvm access(~#left##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#y##0:wybe.int) @position:nn:nn
@@ -366,7 +360,6 @@ proc position > public {inline} (0 calls)
 position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position.position) @position:nn:nn
     foreign lpvm mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int) @position:nn:nn
@@ -376,7 +369,6 @@ proc position > public {inline} (6 calls)
 position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int) @position:nn:nn
     foreign lpvm access(~#result##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int) @position:nn:nn
@@ -387,7 +379,6 @@ proc x > public {inline} (0 calls)
 x(#rec##0:position.position, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @position:nn:nn
 proc x > public {inline} (0 calls)
@@ -395,7 +386,6 @@ proc x > public {inline} (0 calls)
 x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @position:nn:nn
 
@@ -405,7 +395,6 @@ proc y > public {inline} (0 calls)
 y(#rec##0:position.position, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @position:nn:nn
 proc y > public {inline} (0 calls)
@@ -413,7 +402,6 @@ proc y > public {inline} (0 calls)
 y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @position:nn:nn
 
@@ -423,7 +411,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @position:nn:nn
     foreign lpvm access(~#left##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @position:nn:nn

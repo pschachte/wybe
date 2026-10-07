@@ -21,7 +21,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     current_module_alias_warning.toCelsius<0>(1.0:wybe.float, ?tmp#0##0:wybe.float) #0 @current_module_alias_warning:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @current_module_alias_warning:nn:nn
@@ -35,7 +34,6 @@ proc toCelsius > public {noinline} (1 calls)
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @current_module_alias_warning:nn:nn
     foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @current_module_alias_warning:nn:nn
@@ -44,7 +42,6 @@ proc toCelsius > public {noinline} (0 calls)
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @current_module_alias_warning:nn:nn
     foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @current_module_alias_warning:nn:nn
@@ -97,7 +94,6 @@ proc toCelsius > public {inline} (0 calls)
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @temperature:nn:nn
     foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @temperature:nn:nn

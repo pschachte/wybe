@@ -59,7 +59,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("hypot(3,4) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @hypot:nn:nn
     foreign c llvm.sqrt.f64(25.0:wybe.float, ?tmp#0##0:wybe.float) @hypot:nn:nn
@@ -221,7 +220,6 @@ proc area > {inline} (1 calls)
 area(r##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm fmul(~r##0:wybe.float, ~r##0:wybe.float, ?tmp#2##0:wybe.float) @hypot:nn:nn
     foreign llvm fmul(3.141592653589793:wybe.float, ~tmp#2##0:wybe.float, ?#result##0:wybe.float) @hypot:nn:nn
@@ -232,7 +230,6 @@ proc hypot > {inline} (1 calls)
 hypot(s1##0:wybe.float, s2##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm fmul(~s1##0:wybe.float, ~s1##0:wybe.float, ?tmp#2##0:wybe.float) @hypot:nn:nn
     foreign llvm fmul(~s2##0:wybe.float, ~s2##0:wybe.float, ?tmp#3##0:wybe.float) @hypot:nn:nn

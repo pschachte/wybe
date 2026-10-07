@@ -19,7 +19,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("DDD: Init":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @ddd:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @ddd:nn:nn
