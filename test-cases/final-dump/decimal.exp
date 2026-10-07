@@ -18,7 +18,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @decimal:nn:nn
     foreign c print_float(1.0e-2:wybe.float, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @decimal:nn:nn

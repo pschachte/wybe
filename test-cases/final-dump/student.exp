@@ -48,7 +48,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     student.printStudent<0>(student#constant#9:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @student:nn:nn
 
@@ -64,7 +63,6 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
       ExtPhantom (ExtParam 0) (Field 8).Field 6 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 7 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(13,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [0]]))]
     wybe.string.print<0>("student id: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @student:nn:nn
@@ -163,7 +161,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#code##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#left##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#name##0:wybe.string) @student:nn:nn
@@ -185,7 +182,6 @@ proc code > public {inline} (0 calls)
 code(#rec##0:student.course, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @student:nn:nn
 proc code > public {inline} (0 calls)
@@ -193,7 +189,6 @@ proc code > public {inline} (0 calls)
 code(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @student:nn:nn
 
@@ -203,7 +198,6 @@ proc course > public {inline} (0 calls)
 course(code##0:wybe.int, name##0:wybe.string, ?#result##0:student.course)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:student.course) @student:nn:nn
     foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code##0:wybe.int) @student:nn:nn
@@ -213,7 +207,6 @@ proc course > public {inline} (6 calls)
 course(?code##0:wybe.int, ?name##0:wybe.string, #result##0:student.course)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?code##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#result##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?name##0:wybe.string) @student:nn:nn
@@ -224,7 +217,6 @@ proc name > public {inline} (0 calls)
 name(#rec##0:student.course, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @student:nn:nn
 proc name > public {inline} (0 calls)
@@ -232,7 +224,6 @@ proc name > public {inline} (0 calls)
 name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:student.course, ?#rec##1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @student:nn:nn
 
@@ -242,7 +233,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#left##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string) @student:nn:nn
@@ -401,7 +391,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#id##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#left##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#major##0:student.course) @student:nn:nn
@@ -434,7 +423,6 @@ proc id > public {inline} (0 calls)
 id(#rec##0:student.student, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @student:nn:nn
 proc id > public {inline} (0 calls)
@@ -442,7 +430,6 @@ proc id > public {inline} (0 calls)
 id(#rec##0:student.student, ?#rec##1:student.student, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @student:nn:nn
 
@@ -452,7 +439,6 @@ proc major > public {inline} (0 calls)
 major(#rec##0:student.student, ?#result##0:student.course)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:student.course) @student:nn:nn
 proc major > public {inline} (0 calls)
@@ -460,7 +446,6 @@ proc major > public {inline} (0 calls)
 major(#rec##0:student.student, ?#rec##1:student.student, #field##0:student.course)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:student.student, ?#rec##1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:student.course) @student:nn:nn
 
@@ -470,7 +455,6 @@ proc student > public {inline} (0 calls)
 student(id##0:wybe.int, major##0:student.course, ?#result##0:student.student)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:student.student) @student:nn:nn
     foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id##0:wybe.int) @student:nn:nn
@@ -480,7 +464,6 @@ proc student > public {inline} (6 calls)
 student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?id##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#result##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?major##0:student.course) @student:nn:nn
@@ -491,7 +474,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#left##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:student.course) @student:nn:nn

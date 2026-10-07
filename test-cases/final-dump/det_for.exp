@@ -18,7 +18,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     det_for.#cont#1<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @det_for:nn:nn
 
@@ -28,7 +27,6 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1(tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm add(tmp#0##0:wybe.int, 1:wybe.int, ?tmp#0##1:wybe.int) @det_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @det_for:nn:nn
@@ -43,7 +41,6 @@ proc [|] > {inline} (1 calls)
 [|](?value##0:wybe.int, ?next##0:wybe.int, current##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(current##0:wybe.int, ?value##0:wybe.int) @det_for:nn:nn
     foreign llvm add(~current##0:wybe.int, 1:wybe.int, ?next##0:wybe.int) @det_for:nn:nn

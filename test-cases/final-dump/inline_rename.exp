@@ -18,7 +18,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     inline_rename.eq<0>(0:wybe.int, ?b##0:wybe.int) #2 @inline_rename:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @inline_rename:nn:nn
@@ -34,7 +33,6 @@ proc eq > {noinline} (1 calls)
 eq(x##0:wybe.int, ?y##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:wybe.int, ?y##0:wybe.int) @inline_rename:nn:nn
 
@@ -44,7 +42,6 @@ proc foo > {inline} (1 calls)
 foo(?bar##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     inline_rename.eq<0>(0:wybe.int, ?bar##0:wybe.int) #0 @inline_rename:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @inline_rename:nn:nn

@@ -20,7 +20,6 @@ proc loop0 > {inline} (0 calls)
 loop0()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -29,7 +28,6 @@ proc loop0#cont#1 > {inline} (2 calls)
 loop0#cont#1()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -38,7 +36,6 @@ proc loop1 > {inline} (0 calls)
 loop1()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -47,7 +44,6 @@ proc loop1#cont#1 > {inline} (2 calls)
 loop1#cont#1()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -56,7 +52,6 @@ proc loop2 > {inline} (0 calls)
 loop2()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -65,7 +60,6 @@ proc loop2#cont#1 > {inline} (1 calls)
 loop2#cont#1()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -74,7 +68,6 @@ proc loop3 > {inline} (0 calls)
 loop3()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.c_string<0>("lol":wybe.string, ?tmp#1##0:wybe.c_string) #1 @loop_terminators:nn:nn
     foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#1##0:wybe.c_string) @loop_terminators:nn:nn
@@ -85,7 +78,6 @@ proc loop3#cont#1 > {inline} (1 calls)
 loop3#cont#1()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.c_string<0>("lol":wybe.string, ?tmp#7##0:wybe.c_string) #2 @loop_terminators:nn:nn
     foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#7##0:wybe.c_string) @loop_terminators:nn:nn

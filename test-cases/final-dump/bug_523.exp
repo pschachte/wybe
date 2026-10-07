@@ -18,7 +18,6 @@ proc impure > {noinline,impure} (2 calls)
 impure()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -27,7 +26,6 @@ proc pure > {inline,pure} (0 calls)
 pure()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     bug_523.semipure<0> #0 @bug_523:nn:nn
     bug_523.impure<0> #1 @bug_523:nn:nn
@@ -38,7 +36,6 @@ proc semipure > {noinline,semipure} (1 calls)
 semipure()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     bug_523.impure<0> #0 @bug_523:nn:nn
 

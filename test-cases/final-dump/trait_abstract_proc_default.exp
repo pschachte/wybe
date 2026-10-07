@@ -20,7 +20,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     trait_abstract_proc_default.printable.print_value<0>(42:wybe.int, vtable(global,wybe.int <: trait_abstract_proc_default.printable):opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #0 @trait_abstract_proc_default:nn:nn
 
@@ -30,7 +29,6 @@ proc print_value#adapter > {noinline} (0 calls)
 print_value#adapter(x##0:T<:trait_abstract_proc_default.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     trait_abstract_proc_default.printable.print_value<1>(_:T<:trait_abstract_proc_default.printable, _:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #0
 
@@ -75,7 +73,6 @@ proc print_value > public abstract {inline} (0 calls)
 print_value(x##0:T<:trait_abstract_proc_default.printable <{}; {}; {0}>, #vtable##0:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:trait_abstract_proc_default.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0
 proc print_value > public {inline} (0 calls)
@@ -83,7 +80,6 @@ proc print_value > public {inline} (0 calls)
 print_value([x##0:T<:trait_abstract_proc_default.printable <{}; {}; {0}>], [#vtable##0:opaque])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("default value":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @trait_abstract_proc_default:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @trait_abstract_proc_default:nn:nn

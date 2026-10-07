@@ -24,7 +24,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     proc_yorn.yorn#cont#1<0>("Well, yes or no?":wybe.string, ?r##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @proc_yorn:nn:nn
     wybe.bool.print<0>(~r##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @proc_yorn:nn:nn
@@ -38,7 +37,6 @@ proc is_yes > {inline} (4 calls)
 is_yes(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(ch##0:wybe.char, 121:wybe.char, ?tmp#2##0:wybe.bool) @proc_yorn:nn:nn
     foreign llvm icmp_ne(~ch##0:wybe.char, 89:wybe.char, ?tmp#3##0:wybe.bool) @proc_yorn:nn:nn
@@ -51,7 +49,6 @@ proc is_yes_or_no > (3 calls)
 is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(ch##0:wybe.char, 121:wybe.char, ?tmp#6##0:wybe.bool) @proc_yorn:nn:nn
     foreign llvm icmp_ne(ch##0:wybe.char, 89:wybe.char, ?tmp#7##0:wybe.bool) @proc_yorn:nn:nn
@@ -68,7 +65,6 @@ proc yorn > public {inline} (1 calls)
 yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     proc_yorn.yorn#cont#1<0>(~prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_yorn:nn:nn
 
@@ -98,7 +94,6 @@ yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wy
       ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
       ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
       ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>(prompt##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_yorn:nn:nn
     wybe.string.print<0>(" (y/n) ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_yorn:nn:nn
@@ -128,7 +123,6 @@ proc yorn#cont#2 > {inline} (1 calls)
 yorn#cont#2(prompt##0:wybe.string, [result##0:wybe.bool], ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("Please answer 'yes' or 'no'.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @proc_yorn:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @proc_yorn:nn:nn

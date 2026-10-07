@@ -47,7 +47,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(19,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(20,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(21,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign llvm or(1:wybe.int, common_fields#constant#4:common_fields, ?tmp#1##0:common_fields) @common_fields:nn:nn
@@ -192,7 +191,6 @@ proc = > public (1 calls)
       ExtPhantom (ExtParam 1) (Field 16).Field 6 -> [ExtPhantom (ExtParam 1) (Field 16)]
       ExtPhantom (ExtParam 1) (Field 16).Field 7 -> [ExtPhantom (ExtParam 1) (Field 16)]
       ExtPhantom (ExtParam 1) (Field 16).Field 8 -> [ExtPhantom (ExtParam 1) (Field 16)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#left##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#23##0:2 bit unsigned)
     case ~tmp#23##0:2 bit unsigned of
@@ -344,7 +342,6 @@ proc DVD > public {inline} (0 calls)
 DVD(title##0:wybe.string, director##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~title##0:wybe.string) @common_fields:nn:nn
@@ -357,7 +354,6 @@ proc DVD > public {inline} (26 calls)
 DVD(?title##0:wybe.string, ?director##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -383,7 +379,6 @@ proc author > public {inline} (0 calls)
 author(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -401,7 +396,6 @@ proc author > public {inline} (0 calls)
 author(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -421,7 +415,6 @@ proc book > public {inline} (7 calls)
 book(title##0:wybe.string, author##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~title##0:wybe.string) @common_fields:nn:nn
@@ -433,7 +426,6 @@ proc book > public {inline} (44 calls)
 book(?title##0:wybe.string, ?author##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -459,7 +451,6 @@ proc director > public {inline} (0 calls)
 director(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -477,7 +468,6 @@ proc director > public {inline} (0 calls)
 director(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -497,7 +487,6 @@ proc frequency > public {inline} (0 calls)
 frequency(#rec##0:common_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 1:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -515,7 +504,6 @@ proc frequency > public {inline} (0 calls)
 frequency(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 1:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -537,7 +525,6 @@ genre(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}
     edges:
       ExtParam 0.Field 14 -> [ExtPhantom (ExtParam 0) (Field 14)]
       ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -568,7 +555,6 @@ genre(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#su
       ExtReturn 1.Field 14 -> [ExtParam 2]
       ExtReturn 1.Field 16 -> [ExtParam 2]
       ExtReturn 1.FieldIdent -> [ExtParam 0]
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -596,7 +582,6 @@ proc id > public (14 calls)
 id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
@@ -610,7 +595,6 @@ id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}; {}
   AliasSummary:
     edges:
       ExtReturn 1.FieldIdent -> [ExtParam 0]
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
@@ -625,7 +609,6 @@ proc magazine > public {inline} (7 calls)
 magazine(title##0:wybe.string, frequency##0:wybe.int, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~title##0:wybe.string) @common_fields:nn:nn
@@ -637,7 +620,6 @@ proc magazine > public {inline} (32 calls)
 magazine(?title##0:wybe.string, ?frequency##0:wybe.int, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 1:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -661,7 +643,6 @@ proc other > public {inline} (0 calls)
 other(title##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~title##0:wybe.string) @common_fields:nn:nn
@@ -672,7 +653,6 @@ proc other > public {inline} (12 calls)
 other(?title##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -696,7 +676,6 @@ title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}; {}>:
     edges:
       ExtParam 0.Field (-3) -> [ExtPhantom (ExtParam 0) (Field (-3))]
       ExtParam 0.FieldAny -> [ExtPhantom (ExtParam 0) FieldAny]
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     factored tmp#1##0:2 bit unsigned of
@@ -716,7 +695,6 @@ title(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string)<{}; 
       ExtReturn 1.Field (-1) -> [ExtParam 2]
       ExtReturn 1.Field 0 -> [ExtParam 2]
       ExtReturn 1.FieldIdent -> [ExtParam 0]
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     case ~tmp#1##0:2 bit unsigned of
@@ -739,7 +717,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:common_fields, #right##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     common_fields.=<0>(~#left##0:common_fields, ~#right##0:common_fields, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

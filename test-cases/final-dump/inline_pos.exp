@@ -28,7 +28,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<command_line.arguments>>:wybe.c_array(wybe.c_string), ?%arguments##0:wybe.c_array(wybe.c_string))
     wybe.c_array.[|]<0>(?command##1:wybe.c_string, ?arguments##2:wybe.c_array(wybe.c_string), ~arguments##0:wybe.c_array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
@@ -47,7 +46,6 @@ proc set_exit_code > public {inline} (0 calls)
 set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm store(~code##0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
 
@@ -110,7 +108,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<command_line.arguments>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<command_line.arguments>>:wybe.c_array(wybe.c_string), ?%arguments##0:wybe.c_array(wybe.c_string)) @inline_pos:nn:nn
@@ -129,7 +126,6 @@ proc myincr > {inline} (1 calls)
 myincr(x##0:wybe.int, ?x##1:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?x##1:wybe.int) @inline_pos:nn:nn
 

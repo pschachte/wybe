@@ -20,7 +20,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     vtable(global,trait_import_support.default_silent <: trait_import_support.default_greeter):opaque@0(0:trait_import_support.default_silent, ?tmp#0##0:wybe.string) #0 @trait_default:nn:nn
@@ -35,7 +34,6 @@ proc greet_through_trait > {inline} (1 calls)
 greet_through_trait(x##0:Type0<:trait_import_support.default_greeter <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.default_greeter, ?#result##0:wybe.string) #0 @trait_default:nn:nn
 
@@ -88,7 +86,6 @@ proc greet > public abstract {inline} (0 calls)
 greet(x##0:T<:trait_import_support.default_greeter <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:trait_import_support.default_greeter, ?#result##0:wybe.string) #0
 proc greet > public {inline} (0 calls)
@@ -96,7 +93,6 @@ proc greet > public {inline} (0 calls)
 greet([x##0:Type0<:trait_import_support.default_greeter <{}; {}; {0}>], ?#result##0:wybe.string, [#vtable##0:opaque])<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @default_greeter:nn:nn
 
@@ -144,7 +140,6 @@ proc = > public {inline} (1 calls)
 =([#left##0:trait_import_support.default_silent], [#right##0:trait_import_support.default_silent], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -154,7 +149,6 @@ proc greet#adapter > {noinline} (0 calls)
 greet#adapter(x##0:T<:trait_import_support.default_greeter, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @default_greeter:nn:nn
 
@@ -164,7 +158,6 @@ proc trait_default_silent > public {inline} (0 calls)
 trait_default_silent(?#result##0:trait_import_support.default_silent)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:trait_import_support.default_silent, ?#result##0:trait_import_support.default_silent)
 
@@ -174,7 +167,6 @@ proc ~= > public {inline} (0 calls)
 ~=([#left##0:trait_import_support.default_silent], [#right##0:trait_import_support.default_silent], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 

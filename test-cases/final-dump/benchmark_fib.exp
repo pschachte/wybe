@@ -21,7 +21,6 @@ proc end > public {inline,semipure} (0 calls)
 end(?time##0:wybe.float, %call_source_location##0:wybe.c_string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} benchmark_end(~call_source_location##0:wybe.c_string, ?time##0:wybe.float) @benchmark:nn:nn
 
@@ -31,7 +30,6 @@ proc start > public {inline,semipure} (0 calls)
 start(%call_source_location##0:wybe.c_string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} benchmark_start(~call_source_location##0:wybe.c_string) @benchmark:nn:nn
 
@@ -41,7 +39,6 @@ proc time_execution > public {inline,semipure} (0 calls)
 time_execution(proc##0:{semipure}(), ?time##0:wybe.float, %call_source_location##0:wybe.c_string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} benchmark_start(call_source_location##0:wybe.c_string) @benchmark:nn:nn
     ~proc##0:{semipure}() #0 @benchmark:nn:nn
@@ -105,7 +102,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} benchmark_start(c"benchmark_fib:30:2":wybe.c_string) @benchmark_fib:nn:nn
     benchmark_fib.naive_fib<0>(42:wybe.int, ?res##0:wybe.int) #1 @benchmark_fib:nn:nn
@@ -138,7 +134,6 @@ proc #anon#1 > {inline,semipure} (1 calls)
 #anon#1()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     benchmark_fib.naive_fib<0>(42:wybe.int, ?res##0:wybe.int) #0 @benchmark_fib:nn:nn
 proc #anon#1 > {inline,semipure} (1 calls)
@@ -146,7 +141,6 @@ proc #anon#1 > {inline,semipure} (1 calls)
 #anon#1()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     benchmark_fib.naive_fib<0>(42:wybe.int, ?tmp#6##0:wybe.int) #1 @benchmark_fib:nn:nn
 
@@ -156,7 +150,6 @@ proc fib > (1 calls)
 fib(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @benchmark_fib:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -189,7 +182,6 @@ proc fib1 > (2 calls)
 fib1(pprev##0:wybe.int, prev##0:wybe.int, n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(n##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @benchmark_fib:nn:nn
     case ~tmp#5##0:wybe.bool of
@@ -208,7 +200,6 @@ proc naive_fib > (2 calls)
 naive_fib(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @benchmark_fib:nn:nn
     case ~tmp#1##0:wybe.bool of
@@ -226,7 +217,6 @@ proc naive_fib1 > (3 calls)
 naive_fib1(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(n##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.bool) @benchmark_fib:nn:nn
     case ~tmp#7##0:wybe.bool of

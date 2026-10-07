@@ -20,7 +20,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @call_site_id:nn:nn
     foreign c read_int(?x##0:wybe.int, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @call_site_id:nn:nn
@@ -60,7 +59,6 @@ proc bar > public {inline} (10 calls)
 bar(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     call_site_id.foo<0>(~x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @call_site_id:nn:nn
 
@@ -70,7 +68,6 @@ proc foo > public (1 calls)
 foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(1,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(9,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(11,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(13,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.string.print<0>[410bae77d3](1155:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @call_site_id:nn:nn

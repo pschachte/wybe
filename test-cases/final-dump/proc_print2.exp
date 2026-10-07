@@ -18,7 +18,6 @@ proc print2 > public {inline} (0 calls)
 print2(x##0:wybe.int, y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @proc_print2:nn:nn
     foreign c print_int(~x##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @proc_print2:nn:nn

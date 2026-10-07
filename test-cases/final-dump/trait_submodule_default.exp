@@ -20,7 +20,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     trait_submodule_default.greeter.greet<0>(42:wybe.int, ?tmp#0##0:wybe.string, vtable(global,wybe.int <: trait_submodule_default.greeter):opaque)<{}; {}; {0}> #0 @trait_submodule_default:nn:nn
@@ -35,7 +34,6 @@ proc greet#adapter > {noinline} (0 calls)
 greet#adapter(x##0:T<:trait_submodule_default.greeter, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     trait_submodule_default.greeter.greet<1>(_:T<:trait_submodule_default.greeter, ?#result##0:wybe.string, _:opaque)<{}; {}; {0}> #0
 
@@ -84,7 +82,6 @@ proc greet > public abstract {inline} (0 calls)
 greet(x##0:T<:trait_submodule_default.greeter <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:trait_submodule_default.greeter, ?#result##0:wybe.string) #0
 proc greet > public {inline} (0 calls)
@@ -92,7 +89,6 @@ proc greet > public {inline} (0 calls)
 greet([x##0:T<:trait_submodule_default.greeter <{}; {}; {0}>], ?#result##0:wybe.string, [#vtable##0:opaque])<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @trait_submodule_default:nn:nn
 

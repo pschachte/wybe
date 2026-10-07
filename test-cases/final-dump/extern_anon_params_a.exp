@@ -19,7 +19,6 @@ proc need > public {inline,semipure} (1 calls)
 need(stmt##0:{impure}())<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~stmt##0:{impure}() #0 @extern_anon_params_a:nn:nn
 
@@ -29,7 +28,6 @@ proc run > public {inline,impure} (0 calls)
 run(func##0:{impure}())<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     extern_anon_params_a.run#anon#1<0>(~^func##0:{impure}()) #0 @extern_anon_params_a:nn:nn
 
@@ -39,7 +37,6 @@ proc run#anon#1 > {inline,impure} (1 calls)
 run#anon#1(^func##0:{impure}())<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~func##0:{impure}() #0 @extern_anon_params_a:nn:nn
 proc run#anon#1 > {inline,impure} (1 calls)
@@ -47,7 +44,6 @@ proc run#anon#1 > {inline,impure} (1 calls)
 run#anon#1(^func##0:{impure}())<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~^func##0:{impure}() #0 @extern_anon_params_a:nn:nn
 

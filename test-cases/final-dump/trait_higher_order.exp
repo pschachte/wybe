@@ -24,7 +24,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast("Ada":wybe.string, ?tmp#0##0:trait_import_support.higher_order_box) @trait_higher_order:nn:nn
@@ -40,7 +39,6 @@ proc #closure#1 > {inline} (1 calls)
 #closure#1(x##0 <{}; {}; {0}>, ?#result##0)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_import_support.higher_order_box, ?tmp#5##0:wybe.string) @trait_higher_order:nn:nn
     wybe.string.,,<0>("box: ":wybe.string, ~tmp#5##0:wybe.string, ?#result##0:wybe.string) #1 @trait_higher_order:nn:nn
@@ -51,7 +49,6 @@ proc describe_box > {inline} (1 calls)
 describe_box(x##0:trait_import_support.higher_order_box, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_import_support.higher_order_box, ?tmp#2##0:wybe.string) @trait_higher_order:nn:nn
     wybe.string.,,<0>("box: ":wybe.string, ~tmp#2##0:wybe.string, ?#result##0:wybe.string) #3 @trait_higher_order:nn:nn
@@ -117,7 +114,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:trait_import_support.higher_order_box, #right##0:trait_import_support.higher_order_box, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.higher_order_box, ~#right##0:trait_import_support.higher_order_box, ?#success##0:wybe.bool)
 
@@ -127,7 +123,6 @@ proc apply_to_self > public {inline} (1 calls)
 apply_to_self(x##0:trait_import_support.higher_order_box, f##0:(trait_import_support.higher_order_box, ?wybe.string), ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~f##0:(trait_import_support.higher_order_box, ?wybe.string)(~x##0:trait_import_support.higher_order_box, ?#result##0:wybe.string) #0 @higher_order_box:nn:nn
 
@@ -137,7 +132,6 @@ proc apply_to_self#adapter > {noinline} (0 calls)
 apply_to_self#adapter(x##0:T<:trait_import_support.higher_order_mapper, f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:T<:trait_import_support.higher_order_mapper, ?x#adapter0##0:trait_import_support.higher_order_box)
     foreign lpvm cast(~f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?f#adapter1##0:(trait_import_support.higher_order_box, ?wybe.string))
@@ -149,7 +143,6 @@ proc name > public {inline} (0 calls)
 name(#rec##0:trait_import_support.higher_order_box, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_import_support.higher_order_box, ?#result##0:wybe.string) @higher_order_box:nn:nn
 proc name > public {inline} (0 calls)
@@ -157,7 +150,6 @@ proc name > public {inline} (0 calls)
 name([#rec##0:trait_import_support.higher_order_box], ?#rec##2:trait_import_support.higher_order_box, #field##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:wybe.string, ?#rec##2:trait_import_support.higher_order_box) @higher_order_box:nn:nn
 
@@ -167,7 +159,6 @@ proc trait_higher_order_box > public {inline} (0 calls)
 trait_higher_order_box(name##0:wybe.string, ?#result##2:trait_import_support.higher_order_box)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~name##0:wybe.string, ?#result##2:trait_import_support.higher_order_box) @higher_order_box:nn:nn
 proc trait_higher_order_box > public {inline} (0 calls)
@@ -175,7 +166,6 @@ proc trait_higher_order_box > public {inline} (0 calls)
 trait_higher_order_box(?name##0:wybe.string, #result##0:trait_import_support.higher_order_box)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_import_support.higher_order_box, ?name##0:wybe.string) @higher_order_box:nn:nn
 
@@ -185,7 +175,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:trait_import_support.higher_order_box, #right##0:trait_import_support.higher_order_box, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.higher_order_box, ~#right##0:trait_import_support.higher_order_box, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -257,7 +246,6 @@ proc apply_to_self > public abstract {inline} (0 calls)
 apply_to_self(x##0:T<:trait_import_support.higher_order_mapper <{}; {}; {0}>, f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string) <{}; {}; {1}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:trait_import_support.higher_order_mapper, ~f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?#result##0:wybe.string) #0
 

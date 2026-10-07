@@ -24,7 +24,6 @@ proc = > public {inline} (1 calls)
 =([#left##0:weird_err_d], [#right##0:weird_err_d], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -34,7 +33,6 @@ proc empty > public {inline} (0 calls)
 empty(?#result##0:weird_err_d)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:weird_err_d, ?#result##0:weird_err_d)
 
@@ -44,7 +42,6 @@ proc ~= > public {inline} (0 calls)
 ~=([#left##0:weird_err_d], [#right##0:weird_err_d], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 

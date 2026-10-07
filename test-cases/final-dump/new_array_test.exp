@@ -21,7 +21,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(new_array_test.#cont#4<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 []]))]
     wybe.array.array<0>(0:wybe.int, 1000000:wybe.int, ?tmp#0##0:wybe.array(wybe.int)) #0 @new_array_test:nn:nn
@@ -38,7 +37,6 @@ proc #cont#1 > {inline,semipure} (1 calls)
 #cont#1(ar##0:wybe.array(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm add(ar##0:wybe.array(wybe.int), 8:wybe.int, ?tmp#14##0:wybe.c_array.raw_array) @new_array_test:nn:nn
     foreign lpvm access(~ar##0:wybe.array(wybe.int), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.int) @new_array_test:nn:nn
@@ -55,7 +53,6 @@ proc #cont#2 > {inline,semipure} (1 calls)
 #cont#2(sum##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.int.fmt<2>(~sum##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#7##0:wybe.string) #4 @new_array_test:nn:nn
     wybe.string.,,<0>("Sum   : ":wybe.string, ~tmp#7##0:wybe.string, ?tmp#6##0:wybe.string) #2 @new_array_test:nn:nn
@@ -72,7 +69,6 @@ proc #cont#3 > {semipure} (2 calls)
     edges:
       ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
       ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(tmp#4##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#14##0:wybe.c_array.raw_array) @new_array_test:nn:nn
@@ -101,7 +97,6 @@ proc #cont#4 > {semipure} (2 calls)
 #cont#4(ar##0:wybe.array(wybe.int), tmp#1##0:wybe.range)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1]
   MultiSpeczDepInfo: [(0,(wybe.range.[|]<0>,fromList [NonAliasedParamCond 2 [1]])),(2,(new_array_test.#cont#4<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 []]))]
     wybe.range.[|]<0>(?i##0:wybe.int, ?tmp#1##1:wybe.range, ~tmp#1##0:wybe.range, ?tmp#14##0:wybe.bool) #0 @new_array_test:nn:nn

@@ -23,7 +23,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     trait_output_only_adapter.from_string.from_string<0>("123":wybe.string, ?tmp#0##0:wybe.int, vtable(global,wybe.int <: trait_output_only_adapter.from_string):opaque) #1 @trait_output_only_adapter:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @trait_output_only_adapter:nn:nn
@@ -37,7 +36,6 @@ proc from_string > public {inline} (1 calls)
 from_string([x##0:wybe.string], ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(123:wybe.int, ?#result##0:wybe.int) @trait_output_only_adapter:nn:nn
 
@@ -47,7 +45,6 @@ proc from_string#adapter > {noinline} (0 calls)
 from_string#adapter(x##0:wybe.string, ?#result##0:Type0<:trait_output_only_adapter.from_string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(123:Type0<:trait_output_only_adapter.from_string, ?#result##0:Type0<:trait_output_only_adapter.from_string)
 
@@ -99,7 +96,6 @@ proc from_string > public abstract {inline} (0 calls)
 from_string(x##0:wybe.string, ?#result##0:Type0<:trait_output_only_adapter.from_string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:wybe.string, ?#result##0:Type0<:trait_output_only_adapter.from_string) #0
 

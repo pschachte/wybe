@@ -24,7 +24,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     trait_impl_multiple_traits.render<0>(42:wybe.int, ?tmp#0##0:wybe.string) #0 @trait_impl_multiple_traits:nn:nn
@@ -49,7 +48,6 @@ render(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
       ExtReturn 1.Field 6 -> [ExtReturn 1]
       ExtReturn 1.Field 7 -> [ExtReturn 1]
       ExtReturn 1.Field 8 -> [ExtReturn 1]
-    escape: []
   InterestingCallProperties: []
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #3 @trait_impl_multiple_traits:nn:nn
     wybe.string.,,<0>("integer ":wybe.string, ~tmp#1##0:wybe.string, ?#result##0:wybe.string) #2 @trait_impl_multiple_traits:nn:nn
@@ -66,7 +64,6 @@ render#adapter(x##0:Type0<:trait_impl_multiple_traits.printable, ?#result##0:wyb
       ExtReturn 1.Field 6 -> [ExtReturn 1]
       ExtReturn 1.Field 7 -> [ExtReturn 1]
       ExtReturn 1.Field 8 -> [ExtReturn 1]
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_impl_multiple_traits.printable, ?x#adapter0##0:wybe.int)
     trait_impl_multiple_traits.render<0>(~x#adapter0##0:wybe.int, ?#result##0:wybe.string) #0
@@ -77,7 +74,6 @@ proc same > {inline} (2 calls)
 same(x##0:wybe.int, y##0:wybe.int, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~x##0:wybe.int, ~y##0:wybe.int, ?#result##0:wybe.bool) @trait_impl_multiple_traits:nn:nn
 
@@ -87,7 +83,6 @@ proc same#adapter > {noinline} (0 calls)
 same#adapter(x##0:Type0<:trait_impl_multiple_traits.equivalent, y##0:Type0<:trait_impl_multiple_traits.equivalent, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_impl_multiple_traits.equivalent, ?x#adapter0##0:wybe.int)
     foreign lpvm cast(~y##0:Type0<:trait_impl_multiple_traits.equivalent, ?y#adapter1##0:wybe.int)
@@ -160,7 +155,6 @@ proc same > public abstract {inline} (0 calls)
 same(x##0:Type0<:trait_impl_multiple_traits.equivalent <{}; {}; {0}>, y##0:Type0<:trait_impl_multiple_traits.equivalent <{}; {}; {1}>, ?#result##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_impl_multiple_traits.equivalent, ~y##0:Type0<:trait_impl_multiple_traits.equivalent, ?#result##0:wybe.bool) #0
 
@@ -199,7 +193,6 @@ proc render > public abstract {inline} (0 calls)
 render(x##0:Type0<:trait_impl_multiple_traits.printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_impl_multiple_traits.printable, ?#result##0:wybe.string) #0
 

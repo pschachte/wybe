@@ -42,7 +42,6 @@ lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe
       ExtPhantom (ExtParam 1) (Field 24).FieldAny -> [ExtPhantom (ExtParam 1) (Field 24)]
       ExtPhantom (ExtParam 1) FieldAny.Field 24 -> [ExtPhantom (ExtParam 1) FieldAny]
       ExtPhantom (ExtParam 1) FieldAny.FieldAny -> [ExtPhantom (ExtParam 1) FieldAny]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(map##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool) @tests:nn:nn
     case ~tmp#15##0:wybe.bool of
@@ -73,7 +72,6 @@ proc lt > public {inline} (1 calls)
 lt(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(~x##0:wybe.int, ~y##0:wybe.int, ?tmp#3##0:wybe.bool) @tests:nn:nn
     foreign llvm move(~tmp#3##0:wybe.bool, ?#success##0:wybe.bool)
@@ -84,7 +82,6 @@ proc lt2 > public {inline} (1 calls)
 lt2(x##0:wybe.int, y##0:wybe.int, ?res##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(~x##0:wybe.int, ~y##0:wybe.int, ?res##0:wybe.bool) @tests:nn:nn
 
@@ -94,7 +91,6 @@ proc lt3 > public {inline} (0 calls)
 lt3(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(~x##0:wybe.int, ~y##0:wybe.int, ?#success##0:wybe.bool) @tests:nn:nn
 
@@ -202,7 +198,6 @@ proc = > public (9 calls)
       ExtPhantom (ExtParam 1) (Field 0).Field 24 -> [ExtPhantom (ExtParam 1) (Field 0)]
       ExtPhantom (ExtParam 1) (Field 24).Field 0 -> [ExtPhantom (ExtParam 1) (Field 24)]
       ExtPhantom (ExtParam 1) (Field 24).Field 24 -> [ExtPhantom (ExtParam 1) (Field 24)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -255,7 +250,6 @@ proc empty > public {inline} (0 calls)
 empty(?#result##0:tests.map)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:tests.map, ?#result##0:tests.map)
 
@@ -265,7 +259,6 @@ proc key > public {inline} (0 calls)
 key(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -282,7 +275,6 @@ proc key > public {inline} (0 calls)
 key(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -301,7 +293,6 @@ proc left > public {inline} (0 calls)
 left(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -318,7 +309,6 @@ proc left > public {inline} (0 calls)
 left(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -337,7 +327,6 @@ proc node > public {inline} (0 calls)
 node(left##0:tests.map, key##0:wybe.int, value##0:wybe.int, right##0:tests.map, ?#result##0:tests.map)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:tests.map) @tests:nn:nn
     foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~left##0:tests.map) @tests:nn:nn
@@ -349,7 +338,6 @@ proc node > public {inline} (20 calls)
 node(?left##0:tests.map, ?key##0:wybe.int, ?value##0:wybe.int, ?right##0:tests.map, #result##0:tests.map, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -374,7 +362,6 @@ proc right > public {inline} (0 calls)
 right(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -391,7 +378,6 @@ proc right > public {inline} (0 calls)
 right(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -410,7 +396,6 @@ proc value > public {inline} (0 calls)
 value(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -427,7 +412,6 @@ proc value > public {inline} (0 calls)
 value(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -446,7 +430,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:tests.map, #right##0:tests.map, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     tests.map.=<0>(~#left##0:tests.map, ~#right##0:tests.map, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

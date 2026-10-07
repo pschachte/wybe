@@ -29,7 +29,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ancestor_alias.b.a.foo<0> #0 @ancestor_alias:nn:nn
     ancestor_alias.b.a.foo<0> #1 @ancestor_alias:nn:nn
@@ -71,7 +70,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ancestor_alias.b.c.foo<0> #0 @ancestor_alias:nn:nn
     ancestor_alias.a.foo<0> #1 @ancestor_alias:nn:nn
@@ -82,7 +80,6 @@ proc foo > public {noinline,impure} (1 calls)
 foo()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
   LLVM code       :
@@ -130,7 +127,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ancestor_alias.b.a.foo<0> #0 @ancestor_alias:nn:nn
     ancestor_alias.a.foo<0> #1 @ancestor_alias:nn:nn
@@ -169,7 +165,6 @@ proc foo > public {noinline,impure} (0 calls)
 foo()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
   LLVM code       :
@@ -205,7 +200,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ancestor_alias.b.c.foo<0> #0 @ancestor_alias:nn:nn
     ancestor_alias.b.a.foo<0> #1 @ancestor_alias:nn:nn
@@ -217,7 +211,6 @@ proc foo > public {noinline,impure} (1 calls)
 foo()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
   LLVM code       :

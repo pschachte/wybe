@@ -31,7 +31,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<compound_resource.bar>>, <<wybe.io.io>>}; {<<compound_resource.bar>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(11,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(19,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%tmp#4##0:wybe.int) @compound_resource:nn:nn
@@ -66,7 +65,6 @@ proc testproc > {inline} (1 calls)
 testproc()<{<<compound_resource.bar>>, <<compound_resource.baz>>, <<compound_resource.qux>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%bar##0:wybe.int) @compound_resource:nn:nn
     wybe.int.fmt<2>(~bar##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#2##0:wybe.string) #12 @compound_resource:nn:nn
@@ -89,7 +87,6 @@ proc use_bar > {inline} (1 calls)
 use_bar()<{<<compound_resource.bar>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%tmp#0##0:wybe.int) @compound_resource:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @compound_resource:nn:nn
@@ -103,7 +100,6 @@ proc use_baz > {inline} (1 calls)
 use_baz()<{<<compound_resource.baz>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<compound_resource.baz>>:wybe.string, ?%tmp#0##0:wybe.string) @compound_resource:nn:nn
     wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @compound_resource:nn:nn
@@ -117,7 +113,6 @@ proc use_foo > {inline} (1 calls)
 use_foo()<{<<compound_resource.bar>>, <<compound_resource.baz>>, <<wybe.io.io>>}; {<<compound_resource.bar>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%bar##0:wybe.int) @compound_resource:nn:nn
     wybe.int.fmt<2>(~bar##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #6 @compound_resource:nn:nn

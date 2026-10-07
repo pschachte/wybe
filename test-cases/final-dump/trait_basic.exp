@@ -23,7 +23,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast("Rex":wybe.string, ?tmp#1##0:trait_import_support.basic_dog) @trait_basic:nn:nn
@@ -39,7 +38,6 @@ proc speak_and_describe > {inline} (0 calls)
 speak_and_describe(x##0:T<:{trait_import_support.basic_named, trait_import_support.basic_speaker} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque, [#vtable##1:opaque])<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:{trait_import_support.basic_named, trait_import_support.basic_speaker}, ?#result##0:wybe.string) #0 @trait_basic:nn:nn
 
@@ -49,7 +47,6 @@ proc speak_through_trait > {inline} (1 calls)
 speak_through_trait(x##0:Type0<:trait_import_support.basic_speaker <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string) #0 @trait_basic:nn:nn
 
@@ -59,7 +56,6 @@ proc type_var_bound_union > {inline} (0 calls)
 type_var_bound_union(x##0:T<:{trait_import_support.basic_named, trait_import_support.basic_speaker} <{}; {}; {0}>, [y##0:T<:{trait_import_support.basic_named, trait_import_support.basic_speaker} <{}; {}; {1}>], ?#result##0:wybe.string, #vtable##0:opaque, [#vtable##1:opaque])<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:trait_import_support.basic_speaker, ?#result##0:wybe.string) #0 @trait_basic:nn:nn
 
@@ -136,7 +132,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:trait_import_support.basic_dog, #right##0:trait_import_support.basic_dog, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.basic_dog, ~#right##0:trait_import_support.basic_dog, ?#success##0:wybe.bool)
 
@@ -146,7 +141,6 @@ proc name > public {inline} (1 calls)
 name(#rec##0:trait_import_support.basic_dog, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_import_support.basic_dog, ?#result##0:wybe.string) @basic_dog:nn:nn
 proc name > public {inline} (0 calls)
@@ -154,7 +148,6 @@ proc name > public {inline} (0 calls)
 name([#rec##0:trait_import_support.basic_dog], ?#rec##2:trait_import_support.basic_dog, #field##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:wybe.string, ?#rec##2:trait_import_support.basic_dog) @basic_dog:nn:nn
 
@@ -164,7 +157,6 @@ proc speak > public {inline} (1 calls)
 speak(x##0:trait_import_support.basic_dog, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_import_support.basic_dog, ?tmp#2##0:wybe.string) @basic_dog:nn:nn
     wybe.string.,,<0>(~tmp#2##0:wybe.string, " says woof":wybe.string, ?#result##0:wybe.string) #3 @basic_dog:nn:nn
@@ -197,7 +189,6 @@ speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.s
       ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
       ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
       ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
-    escape: []
   InterestingCallProperties: []
     wybe.string.,,<0>(~x##0:wybe.string, " says woof":wybe.string, ?#result##0:wybe.string) #1 @basic_dog:nn:nn
 
@@ -207,7 +198,6 @@ proc trait_basic_dog > public {inline} (0 calls)
 trait_basic_dog(name##0:wybe.string, ?#result##2:trait_import_support.basic_dog)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~name##0:wybe.string, ?#result##2:trait_import_support.basic_dog) @basic_dog:nn:nn
 proc trait_basic_dog > public {inline} (0 calls)
@@ -215,7 +205,6 @@ proc trait_basic_dog > public {inline} (0 calls)
 trait_basic_dog(?name##0:wybe.string, #result##0:trait_import_support.basic_dog)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_import_support.basic_dog, ?name##0:wybe.string) @basic_dog:nn:nn
 
@@ -225,7 +214,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:trait_import_support.basic_dog, #right##0:trait_import_support.basic_dog, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.basic_dog, ~#right##0:trait_import_support.basic_dog, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -298,7 +286,6 @@ proc describe > public abstract {inline} (0 calls)
 describe(x##0:Type0<:trait_import_support.basic_named <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.basic_named, ?#result##0:wybe.string) #0
 
@@ -336,7 +323,6 @@ proc speak > public abstract {inline} (0 calls)
 speak(x##0:Type0<:trait_import_support.basic_speaker <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string) #0
 

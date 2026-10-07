@@ -21,7 +21,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     trait_inferred_trait_type.my_trait.my_method<0>(1:wybe.int, ?tmp#0##0:wybe.int, vtable(global,wybe.int <: trait_inferred_trait_type.my_trait):opaque)<{}; {}; {0}> #4 @trait_inferred_trait_type:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @trait_inferred_trait_type:nn:nn
@@ -38,7 +37,6 @@ proc inferred_trait_type > {inline} (2 calls)
 inferred_trait_type(x##0:Type0<:trait_inferred_trait_type.my_trait <{}; {}; {0}>, ?#result##0:Type0<:trait_inferred_trait_type.my_trait <{}; {}; {0}>, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     trait_inferred_trait_type.my_trait.my_method<0>(~x##0:Type0, ?#result##0:Type0, ~#vtable##0:opaque)<{}; {}; {0}> #0 @trait_inferred_trait_type:nn:nn
 
@@ -48,7 +46,6 @@ proc my_method > {inline} (1 calls)
 my_method(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:wybe.int, ?#result##0:wybe.int) @trait_inferred_trait_type:nn:nn
 proc my_method > {inline} (1 calls)
@@ -56,7 +53,6 @@ proc my_method > {inline} (1 calls)
 my_method(x##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:wybe.float, ?#result##0:wybe.float) @trait_inferred_trait_type:nn:nn
 
@@ -66,7 +62,6 @@ proc my_method#adapter > {noinline} (0 calls)
 my_method#adapter(x##0:Type0<:trait_inferred_trait_type.my_trait, ?#result##0:Type0<:trait_inferred_trait_type.my_trait)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_inferred_trait_type.my_trait, ?#result##0:Type0<:trait_inferred_trait_type.my_trait)
 proc my_method#adapter > {noinline} (0 calls)
@@ -74,7 +69,6 @@ proc my_method#adapter > {noinline} (0 calls)
 my_method#adapter(x##0:Type0<:trait_inferred_trait_type.my_trait, ?#result##0:Type0<:trait_inferred_trait_type.my_trait)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_inferred_trait_type.my_trait, ?#result##0:Type0<:trait_inferred_trait_type.my_trait)
 
@@ -143,7 +137,6 @@ proc my_method > public abstract {inline} (0 calls)
 my_method(x##0:Type0<:trait_inferred_trait_type.my_trait <{}; {}; {0}>, ?#result##0:Type0<:trait_inferred_trait_type.my_trait <{}; {}; {0}>, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_inferred_trait_type.my_trait, ?#result##0:Type0<:trait_inferred_trait_type.my_trait) #0
 

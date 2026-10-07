@@ -19,7 +19,6 @@ proc fn > public {inline} (0 calls)
 fn(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c ipow(2:wybe.int, ~i##0:wybe.int, ?#result##0:wybe.int) @exporter:nn:nn
 
@@ -29,7 +28,6 @@ proc three > public {inline} (0 calls)
 three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<exporter.res>>:wybe.int, ?%n##0:wybe.int) @exporter:nn:nn
 
@@ -76,7 +74,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<exporter.res>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(24,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<exporter.res>>:wybe.int, ?tmp#31##0:wybe.int) @importer:nn:nn
@@ -104,7 +101,6 @@ proc my_three > {inline} (1 calls)
 my_three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<exporter.res>>:wybe.int, ?%n##0:wybe.int) @importer:nn:nn
 

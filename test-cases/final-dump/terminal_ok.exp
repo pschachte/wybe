@@ -18,7 +18,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {terminal,impure} exit(0:wybe.int) @terminal_ok:nn:nn
 
@@ -28,7 +27,6 @@ proc exit_bool > {terminal,inline,semipure} (1 calls)
 exit_bool(b##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~b##0:wybe.bool, ?tmp#1##0:wybe.int)
     foreign c {terminal,impure} exit(~tmp#1##0:wybe.int) @terminal_ok:nn:nn

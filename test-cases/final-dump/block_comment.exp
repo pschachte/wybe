@@ -21,7 +21,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("print(x:string) creates a newline already":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @block_comment:nn:nn
     wybe.string.print<0>("println(x:string) generates an extra newline?":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @block_comment:nn:nn

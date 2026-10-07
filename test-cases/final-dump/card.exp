@@ -58,7 +58,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     card.suit.suits<0>(?tmp#1##0:wybe.list(card.suit)) #0 @card:nn:nn
     card.#cont#1<0>(~tmp#1##0:wybe.list(card.suit))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @card:nn:nn
@@ -71,7 +70,6 @@ proc #cont#1 > {semipure} (2 calls)
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @card:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -94,7 +92,6 @@ proc #cont#2 > {semipure} (2 calls)
       ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
       ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
       ExtPhantom (ExtParam 2) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#2##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @card:nn:nn
     case ~tmp#9##0:wybe.bool of
@@ -121,7 +118,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:card, #right##0:card, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:card, ~#right##0:card, ?#success##0:wybe.bool)
 
@@ -131,7 +127,6 @@ proc card > public {inline} (1 calls)
 card(rank##0:card.rank, suit##0:card.suit, ?#result##3:card)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~rank##0:card.rank, ?#temp##0:card) @card:nn:nn
     foreign llvm shl(~#temp##0:card, 2:card, ?#temp##1:card) @card:nn:nn
@@ -142,7 +137,6 @@ proc card > public {inline} (0 calls)
 card(?rank##0:card.rank, ?suit##0:card.suit, #result##0:card)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm lshr(#result##0:card, 2:card, ?#temp##0:card) @card:nn:nn
     foreign llvm and(~#temp##0:card, 15:card, ?#temp2##0:card) @card:nn:nn
@@ -156,7 +150,6 @@ proc print > public (1 calls)
 print(c##0:card)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm lshr(c##0:card, 2:card, ?tmp#3##0:card) @card:nn:nn
     foreign llvm and(~tmp#3##0:card, 15:card, ?tmp#4##0:card) @card:nn:nn
@@ -172,7 +165,6 @@ proc rank > public {inline} (1 calls)
 rank(#rec##0:card, ?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm lshr(~#rec##0:card, 2:card, ?#rec##1:card) @card:nn:nn
     foreign llvm and(~#rec##1:card, 15:card, ?#field##0:card) @card:nn:nn
@@ -182,7 +174,6 @@ proc rank > public {inline} (0 calls)
 rank(#rec##0:card, ?#rec##2:card, #field##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(~#rec##0:card, -61:card, ?#rec##1:card) @card:nn:nn
     foreign lpvm cast(~#field##0:card.rank, ?#temp##0:card) @card:nn:nn
@@ -195,7 +186,6 @@ proc suit > public {inline} (1 calls)
 suit(#rec##0:card, ?#result##0:card.suit)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(~#rec##0:card, 3:card, ?#field##0:card) @card:nn:nn
     foreign lpvm cast(~#field##0:card, ?#result##0:card.suit) @card:nn:nn
@@ -204,7 +194,6 @@ proc suit > public {inline} (0 calls)
 suit(#rec##0:card, ?#rec##2:card, #field##0:card.suit)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(~#rec##0:card, -4:card, ?#rec##1:card) @card:nn:nn
     foreign lpvm cast(~#field##0:card.suit, ?#temp##0:card) @card:nn:nn
@@ -216,7 +205,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:card, #right##0:card, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:card, ~#right##0:card, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -394,7 +382,6 @@ proc = > public {inline} (196 calls)
 =(#left##0:card.rank, #right##0:card.rank, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:card.rank, ~#right##0:card.rank, ?#success##0:wybe.bool)
 
@@ -404,7 +391,6 @@ proc ace > public {inline} (4 calls)
 ace(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(12:card.rank, ?#result##0:card.rank)
 
@@ -414,7 +400,6 @@ proc char > public (1 calls)
 char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     factored ~r##0:card.rank of
       ?tmp#67##0:wybe.char <- card.rank#constant#14[IntStructMember 50 1,IntStructMember 51 1,IntStructMember 52 1,IntStructMember 53 1,IntStructMember 54 1,IntStructMember 55 1,IntStructMember 56 1,IntStructMember 57 1,IntStructMember 84 1,IntStructMember 74 1,IntStructMember 81 1,IntStructMember 75 1,IntStructMember 65 1]
@@ -430,7 +415,6 @@ proc jack > public {inline} (10 calls)
 jack(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(9:card.rank, ?#result##0:card.rank)
 
@@ -440,7 +424,6 @@ proc king > public {inline} (6 calls)
 king(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(11:card.rank, ?#result##0:card.rank)
 
@@ -450,7 +433,6 @@ proc print > public {inline} (0 calls)
 print(r##0:card.rank)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     card.rank.char<0>(~r##0:card.rank, ?tmp#0##0:wybe.char) #0 @card:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @card:nn:nn
@@ -463,7 +445,6 @@ proc queen > public {inline} (8 calls)
 queen(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(10:card.rank, ?#result##0:card.rank)
 
@@ -473,7 +454,6 @@ proc r10 > public {inline} (12 calls)
 r10(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(8:card.rank, ?#result##0:card.rank)
 
@@ -483,7 +463,6 @@ proc r2 > public {inline} (28 calls)
 r2(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:card.rank, ?#result##0:card.rank)
 
@@ -493,7 +472,6 @@ proc r3 > public {inline} (26 calls)
 r3(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:card.rank, ?#result##0:card.rank)
 
@@ -503,7 +481,6 @@ proc r4 > public {inline} (24 calls)
 r4(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(2:card.rank, ?#result##0:card.rank)
 
@@ -513,7 +490,6 @@ proc r5 > public {inline} (22 calls)
 r5(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(3:card.rank, ?#result##0:card.rank)
 
@@ -523,7 +499,6 @@ proc r6 > public {inline} (20 calls)
 r6(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(4:card.rank, ?#result##0:card.rank)
 
@@ -533,7 +508,6 @@ proc r7 > public {inline} (18 calls)
 r7(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(5:card.rank, ?#result##0:card.rank)
 
@@ -543,7 +517,6 @@ proc r8 > public {inline} (16 calls)
 r8(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(6:card.rank, ?#result##0:card.rank)
 
@@ -553,7 +526,6 @@ proc r9 > public {inline} (14 calls)
 r9(?#result##0:card.rank)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(7:card.rank, ?#result##0:card.rank)
 
@@ -563,7 +535,6 @@ proc ranks > public {inline} (0 calls)
 ranks(?#result##0:wybe.list(card.rank))<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(card.rank#constant#13:wybe.list(card.rank), ?#result##0:wybe.list(card.rank)) @card:nn:nn
 
@@ -573,7 +544,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:card.rank, #right##0:card.rank, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:card.rank, ~#right##0:card.rank, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -724,7 +694,6 @@ proc = > public {inline} (25 calls)
 =(#left##0:card.suit, #right##0:card.suit, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:card.suit, ~#right##0:card.suit, ?#success##0:wybe.bool)
 
@@ -734,7 +703,6 @@ proc char > public (1 calls)
 char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     factored ~s##0:card.suit of
       ?tmp#22##0:wybe.char <- card.suit#constant#5[IntStructMember 67 1,IntStructMember 68 1,IntStructMember 72 1,IntStructMember 83 1]
@@ -746,7 +714,6 @@ proc clubs > public {inline} (10 calls)
 clubs(?#result##0:card.suit)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:card.suit, ?#result##0:card.suit)
 
@@ -756,7 +723,6 @@ proc diamonds > public {inline} (8 calls)
 diamonds(?#result##0:card.suit)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:card.suit, ?#result##0:card.suit)
 
@@ -766,7 +732,6 @@ proc hearts > public {inline} (6 calls)
 hearts(?#result##0:card.suit)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(2:card.suit, ?#result##0:card.suit)
 
@@ -776,7 +741,6 @@ proc print > public {inline} (0 calls)
 print(r##0:card.suit)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     card.suit.char<0>(~r##0:card.suit, ?tmp#0##0:wybe.char) #0 @card:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @card:nn:nn
@@ -789,7 +753,6 @@ proc spades > public {inline} (4 calls)
 spades(?#result##0:card.suit)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(3:card.suit, ?#result##0:card.suit)
 
@@ -799,7 +762,6 @@ proc suits > public {inline} (0 calls)
 suits(?#result##0:wybe.list(card.suit))<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(card.suit#constant#4:wybe.list(card.suit), ?#result##0:wybe.list(card.suit)) @card:nn:nn
 
@@ -809,7 +771,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:card.suit, #right##0:card.suit, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:card.suit, ~#right##0:card.suit, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

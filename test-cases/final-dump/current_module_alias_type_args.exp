@@ -18,7 +18,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(0:wybe.int, current_module_alias_type_args#constant#0:wybe.int, ?tmp#9##0:wybe.bool) @current_module_alias_type_args:nn:nn
     case ~tmp#9##0:wybe.bool of
@@ -37,7 +36,6 @@ proc cons > {inline} (3 calls)
 cons(head##0:T <{}; {}; {0}>, tail##0:current_module_alias_type_args(T) <{}; {}; {1}>, ?#result##0:current_module_alias_type_args(T) <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:current_module_alias_type_args(T)) @current_module_alias_type_args:nn:nn
     foreign lpvm mutate(~#rec##0:current_module_alias_type_args(T), ?#rec##1:current_module_alias_type_args(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:T) @current_module_alias_type_args:nn:nn
@@ -47,7 +45,6 @@ proc cons > {inline} (0 calls)
 cons(?head##0:T <{}; {}; {2}>, ?tail##0:current_module_alias_type_args(T) <{}; {}; {2}>, #result##0:current_module_alias_type_args(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -68,7 +65,6 @@ proc empty > {inline} (3 calls)
 empty(?#result##0:current_module_alias_type_args(T))<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:current_module_alias_type_args(T), ?#result##0:current_module_alias_type_args(T))
 
@@ -78,7 +74,6 @@ proc head > {inline} (3 calls)
 head(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -95,7 +90,6 @@ proc head > {inline} (0 calls)
 head(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#rec##1:current_module_alias_type_args(T) <{}; {}; {0, 2}>, #field##0:T <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -114,7 +108,6 @@ proc tail > {inline} (0 calls)
 tail(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#result##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -131,7 +124,6 @@ proc tail > {inline} (0 calls)
 tail(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#rec##1:current_module_alias_type_args(T) <{}; {}; {0, 2}>, #field##0:current_module_alias_type_args(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of

@@ -29,7 +29,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(unique_position#constant#2:unique_position.unique_position, ?p2##1:unique_position.unique_position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 5:wybe.int) @unique_position:nn:nn
     unique_position.printPosition<0>(~p2##1:unique_position.unique_position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @unique_position:nn:nn
@@ -40,7 +39,6 @@ proc printPosition > public (1 calls)
 printPosition(pos##0:unique_position.unique_position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(9,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm {unique} access(pos##0:unique_position.unique_position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int) @unique_position:nn:nn
@@ -131,7 +129,6 @@ proc unique_position > public {inline} (0 calls)
 unique_position(x##0:wybe.int, y##0:wybe.int, ?#result##0:unique_position.unique_position)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:unique_position.unique_position) @unique_position:nn:nn
     foreign lpvm mutate(~#rec##0:unique_position.unique_position, ?#rec##1:unique_position.unique_position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int) @unique_position:nn:nn
@@ -141,7 +138,6 @@ proc unique_position > public {inline} (0 calls)
 unique_position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:unique_position.unique_position)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {unique} access(#result##0:unique_position.unique_position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int) @unique_position:nn:nn
     foreign lpvm {unique} access(~#result##0:unique_position.unique_position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int) @unique_position:nn:nn
@@ -152,7 +148,6 @@ proc x > public {inline} (0 calls)
 x(#rec##0:unique_position.unique_position, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:unique_position.unique_position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @unique_position:nn:nn
 proc x > public {inline} (0 calls)
@@ -160,7 +155,6 @@ proc x > public {inline} (0 calls)
 x(#rec##0:unique_position.unique_position, ?#rec##1:unique_position.unique_position, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:unique_position.unique_position, ?#rec##1:unique_position.unique_position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @unique_position:nn:nn
 
@@ -170,7 +164,6 @@ proc y > public {inline} (0 calls)
 y(#rec##0:unique_position.unique_position, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:unique_position.unique_position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @unique_position:nn:nn
 proc y > public {inline} (0 calls)
@@ -178,7 +171,6 @@ proc y > public {inline} (0 calls)
 y(#rec##0:unique_position.unique_position, ?#rec##1:unique_position.unique_position, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:unique_position.unique_position, ?#rec##1:unique_position.unique_position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @unique_position:nn:nn
 

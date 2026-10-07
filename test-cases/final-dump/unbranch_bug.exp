@@ -18,7 +18,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     unbranch_bug.#cont#3<0>(0:wybe.list(Type7))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @unbranch_bug:nn:nn
 
@@ -28,7 +27,6 @@ proc #cont#1 > {inline,semipure} (1 calls)
 #cont#1()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -37,7 +35,6 @@ proc #cont#2 > {inline,semipure} (1 calls)
 #cont#2()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -48,7 +45,6 @@ proc #cont#3 > {semipure} (2 calls)
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @unbranch_bug:nn:nn
     case ~tmp#7##0:wybe.bool of

@@ -22,7 +22,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     trait_abstract_proc_dispatch.printable.print_value<0>(42:wybe.int, vtable(global,wybe.int <: trait_abstract_proc_dispatch.printable):opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #0 @trait_abstract_proc_dispatch:nn:nn
 
@@ -32,7 +31,6 @@ proc print_value > {inline} (1 calls)
 print_value(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #4 @trait_abstract_proc_dispatch:nn:nn
     wybe.string.,,<0>("value ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #2 @trait_abstract_proc_dispatch:nn:nn
@@ -47,7 +45,6 @@ proc print_value#adapter > {noinline} (0 calls)
 print_value#adapter(x##0:Type0<:trait_abstract_proc_dispatch.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast(~x##0:Type0<:trait_abstract_proc_dispatch.printable, ?x#adapter0##0:wybe.int)
@@ -115,7 +112,6 @@ proc print_value > public abstract {inline} (0 calls)
 print_value(x##0:Type0<:trait_abstract_proc_dispatch.printable <{}; {}; {0}>, #vtable##0:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_abstract_proc_dispatch.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0
 

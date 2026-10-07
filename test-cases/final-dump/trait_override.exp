@@ -20,7 +20,6 @@ proc describe > public abstract {inline} (0 calls)
 describe(x##0:Type0<:trait_import_support.override_named <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string) #0
 proc describe > public {inline} (0 calls)
@@ -28,7 +27,6 @@ proc describe > public {inline} (0 calls)
 describe([x##0:Type0<:trait_import_support.override_named <{}; {}; {0}>], ?#result##0:wybe.string, [#vtable##0:opaque])<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move("unnamed":wybe.string, ?#result##0:wybe.string) @override_named:nn:nn
 
@@ -80,7 +78,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:trait_import_support.override_person, #right##0:trait_import_support.override_person, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.override_person, ~#right##0:trait_import_support.override_person, ?#success##0:wybe.bool)
 
@@ -90,7 +87,6 @@ proc describe > public {inline} (1 calls)
 describe(x##0:trait_import_support.override_person, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_import_support.override_person, ?#result##0:wybe.string) @override_person:nn:nn
 
@@ -100,7 +96,6 @@ proc describe#adapter > {noinline} (0 calls)
 describe#adapter(x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string) @override_person:nn:nn
 
@@ -110,7 +105,6 @@ proc name > public {inline} (1 calls)
 name(#rec##0:trait_import_support.override_person, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_import_support.override_person, ?#result##0:wybe.string) @override_person:nn:nn
 proc name > public {inline} (0 calls)
@@ -118,7 +112,6 @@ proc name > public {inline} (0 calls)
 name([#rec##0:trait_import_support.override_person], ?#rec##2:trait_import_support.override_person, #field##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:wybe.string, ?#rec##2:trait_import_support.override_person) @override_person:nn:nn
 
@@ -128,7 +121,6 @@ proc trait_override_person > public {inline} (0 calls)
 trait_override_person(name##0:wybe.string, ?#result##2:trait_import_support.override_person)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~name##0:wybe.string, ?#result##2:trait_import_support.override_person) @override_person:nn:nn
 proc trait_override_person > public {inline} (0 calls)
@@ -136,7 +128,6 @@ proc trait_override_person > public {inline} (0 calls)
 trait_override_person(?name##0:wybe.string, #result##0:trait_import_support.override_person)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_import_support.override_person, ?name##0:wybe.string) @override_person:nn:nn
 
@@ -146,7 +137,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:trait_import_support.override_person, #right##0:trait_import_support.override_person, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.override_person, ~#right##0:trait_import_support.override_person, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -218,7 +208,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast("Ada":wybe.string, ?tmp#0##0:trait_import_support.override_person) @trait_override:nn:nn
@@ -238,7 +227,6 @@ proc describe_through_trait > {inline} (1 calls)
 describe_through_trait(x##0:Type0<:trait_import_support.override_named <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string) #0 @trait_override:nn:nn
 

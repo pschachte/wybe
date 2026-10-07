@@ -18,7 +18,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     bug_509.call<0>(bug_509.#anon#1<1><>:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool) #0 @bug_509:nn:nn
     wybe.bool.print<0>(~x##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @bug_509:nn:nn
@@ -29,7 +28,6 @@ proc #anon#1 > {inline} (1 calls)
 #anon#1([^t##0:wybe.int], anon#1#1##0:wybe.bool, ?anon#1#2##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn
 proc #anon#1 > {inline} (1 calls)
@@ -37,7 +35,6 @@ proc #anon#1 > {inline} (1 calls)
 #anon#1([^t##0:wybe.int], anon#1#1##0 <{}; {}; {1}>, ?anon#1#2##0)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#1#1##0:wybe.bool, 1:wybe.bool, ?anon#1#2##0:wybe.bool) @bug_509:nn:nn
 
@@ -47,7 +44,6 @@ proc call > {noinline} (1 calls)
 call(f##0:(wybe.bool, ?wybe.bool), ?x##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~f##0:(wybe.bool, ?wybe.bool)(0:wybe.bool, ?x##0:wybe.bool) #1 @bug_509:nn:nn
 

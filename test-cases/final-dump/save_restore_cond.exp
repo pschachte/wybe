@@ -18,7 +18,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     save_restore_cond.suc<0>(?tmp#0##0:wybe.bool) #0 @save_restore_cond:nn:nn
 
@@ -28,7 +27,6 @@ proc suc > {noinline} (3 calls)
 suc(?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 

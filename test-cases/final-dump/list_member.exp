@@ -65,7 +65,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.list.in<0>(5:wybe.int, list_member#constant#33:wybe.list(wybe.int), ?tmp#49##0:wybe.bool, vtable(global,wybe.int <: wybe.eq):opaque) #22 @list_member:nn:nn
     case ~tmp#49##0:wybe.bool of
@@ -92,7 +91,6 @@ proc #cont#1 > {semipure} (2 calls)
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
       ExtPhantom (ExtParam 2) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     wybe.list.in<0>(8:wybe.int, ~lst##0:wybe.list(wybe.int), ?tmp#48##0:wybe.bool, vtable(global,wybe.int <: wybe.eq):opaque) #0 @list_member:nn:nn
     case ~tmp#48##0:wybe.bool of
@@ -117,7 +115,6 @@ proc #cont#2 > {semipure} (2 calls)
       ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     wybe.list.in<0>("Wybe":wybe.string, ~langs##0:wybe.list(wybe.string), ?tmp#47##0:wybe.bool, vtable(global,wybe.string <: wybe.eq):opaque) #1 @list_member:nn:nn
     case ~tmp#47##0:wybe.bool of
@@ -140,7 +137,6 @@ proc #cont#3 > {semipure} (2 calls)
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     wybe.list.in<0>("Wybe":wybe.string, ~fruit##0:wybe.list(wybe.string), ?tmp#46##0:wybe.bool, vtable(global,wybe.string <: wybe.eq):opaque) #1 @list_member:nn:nn
     case ~tmp#46##0:wybe.bool of
@@ -161,7 +157,6 @@ proc #cont#4 > {semipure} (2 calls)
 #cont#4()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.range.construct<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#15##0:wybe.range) #6 @list_member:nn:nn
     wybe.range.in<0>(5:wybe.int, ~tmp#15##0:wybe.range, ?tmp#45##0:wybe.bool) #1 @list_member:nn:nn
@@ -183,7 +178,6 @@ proc #cont#5 > {semipure} (2 calls)
 #cont#5()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.range.construct<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#16##0:wybe.range) #6 @list_member:nn:nn
     wybe.range.in<0>(0:wybe.int, ~tmp#16##0:wybe.range, ?tmp#44##0:wybe.bool) #1 @list_member:nn:nn
@@ -205,7 +199,6 @@ proc #cont#6 > {semipure} (2 calls)
 #cont#6()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.range.construct<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#17##0:wybe.range) #6 @list_member:nn:nn
     wybe.range.in<0>(10:wybe.int, ~tmp#17##0:wybe.range, ?tmp#43##0:wybe.bool) #1 @list_member:nn:nn
@@ -227,7 +220,6 @@ proc #cont#7 > {semipure} (2 calls)
 #cont#7()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.range.construct<0>(9:wybe.int, -1:wybe.int, 0:wybe.int, ?tmp#18##0:wybe.range) #6 @list_member:nn:nn
     wybe.range.in<0>(5:wybe.int, ~tmp#18##0:wybe.range, ?tmp#42##0:wybe.bool) #1 @list_member:nn:nn
@@ -249,7 +241,6 @@ proc #cont#8 > {semipure} (2 calls)
 #cont#8()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.range.construct<0>(9:wybe.int, -1:wybe.int, 0:wybe.int, ?tmp#19##0:wybe.range) #6 @list_member:nn:nn
     wybe.range.in<0>(0:wybe.int, ~tmp#19##0:wybe.range, ?tmp#41##0:wybe.bool) #1 @list_member:nn:nn
@@ -271,7 +262,6 @@ proc #cont#9 > {semipure} (2 calls)
 #cont#9()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.range.construct<0>(9:wybe.int, -1:wybe.int, 0:wybe.int, ?tmp#20##0:wybe.range) #4 @list_member:nn:nn
     wybe.range.in<0>(10:wybe.int, ~tmp#20##0:wybe.range, ?tmp#40##0:wybe.bool) #1 @list_member:nn:nn

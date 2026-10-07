@@ -18,7 +18,6 @@ proc test > {inline} (0 calls)
 test(?#success##0:wybe.bool)<{<<unbranch_issue.n>>}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<unbranch_issue.n>>:wybe.int, ?%tmp#2##0:wybe.int) @unbranch_issue:nn:nn
     unbranch_issue.test#cont#1<0>(0:wybe.bool, ~tmp#2##0:wybe.int, ~tmp#2##0:wybe.int, ?#success##0:wybe.bool)<{}; {<<unbranch_issue.n>>}; {}> #2
@@ -29,7 +28,6 @@ proc test#cont#1 > (1 calls)
 test#cont#1(b##0:wybe.bool, tmp#2##0:wybe.int, tmp#3##0:wybe.int, ?#success##0:wybe.bool)<{}; {<<unbranch_issue.n>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     case ~b##0:wybe.bool of
     0:

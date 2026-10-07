@@ -20,7 +20,6 @@ len(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.int)<{}; {}; {}>:
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @cases:nn:nn
     case ~tmp#5##0:wybe.bool of
@@ -41,7 +40,6 @@ len2(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.int)<{}; {}; {}>:
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @cases:nn:nn
     case ~tmp#6##0:wybe.bool of

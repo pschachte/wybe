@@ -21,7 +21,6 @@ proc baz > {inline} (0 calls)
 baz(i##0:wybe.int, ?j##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     sister_module.m1.foo<0>(~i##0:wybe.int, ?j##0:wybe.int) #0 @sister_module:nn:nn
 
@@ -31,7 +30,6 @@ proc buzz > {inline} (0 calls)
 buzz(i##0:wybe.int, ?j##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     sister_module.m2.bar<0>(~i##0:wybe.int, ?j##0:wybe.int) #0 @sister_module:nn:nn
 
@@ -73,7 +71,6 @@ proc foo > public {inline} (0 calls)
 foo(i##0:wybe.int, ?j##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?j##0:wybe.int) @sister_module:nn:nn
 
@@ -110,7 +107,6 @@ proc bar > public {inline} (0 calls)
 bar(i##0:wybe.int, ?j##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?k##0:wybe.int) @sister_module:nn:nn
     sister_module.m1.foo<0>(~k##0:wybe.int, ?j##0:wybe.int) #2 @sister_module:nn:nn
