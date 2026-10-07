@@ -17,11 +17,10 @@ proc insert > (2 calls)
 0: higher_order_sort.insert<0>
 insert(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, x##0:X <{}; {}; {1}>, xs##0:wybe.list(X) <{}; {}; {2}>, outByReference xs##1:wybe.list(X) <{}; {}; {0, 1, 2}>)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
-      ExtReturn 3.Field 8 -> [ExtParam 2, ExtPhantom (ExtReturn 3) (Field 8)]
-      ExtPhantom (ExtParam 2) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
-      ExtPhantom (ExtReturn 3) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8), ExtPhantom (ExtReturn 3) (Field 8)]
+    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+    ExtReturn 3.Field 8 -> [ExtParam 2, ExtPhantom (ExtReturn 3) (Field 8)]
+    ExtPhantom (ExtParam 2) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+    ExtPhantom (ExtReturn 3) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8), ExtPhantom (ExtReturn 3) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(xs##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @higher_order_sort:nn:nn
     case ~tmp#7##0:wybe.bool of
@@ -52,8 +51,7 @@ insert(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, x##0:X <{}; {}; {1}>, xs##0:wybe.
 proc sort > {inline} (0 calls)
 0: higher_order_sort.sort<0>
 sort(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, xs##0:wybe.list(X) <{}; {}; {1}>, ?sorted##1:wybe.list(X) <{}; {}; {0, 1}>)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     higher_order_sort.sort#cont#1<0>(~<=##0:(X, X, ?wybe.bool), 0:wybe.list(X), ~xs##0:wybe.list(X), ?sorted##1:wybe.list(X)) #1 @higher_order_sort:nn:nn
 
@@ -62,13 +60,12 @@ proc sort#cont#1 > (2 calls)
 0: higher_order_sort.sort#cont#1<0>
 sort#cont#1(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, sorted##0:wybe.list(X) <{}; {}; {1}>, tmp#1##0:wybe.list(X) <{}; {}; {2}>, ?sorted##2:wybe.list(X) <{}; {}; {0, 1, 2}>)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 1.Field 8 -> [ExtParam 1, ExtReturn 3, ExtPhantom (ExtParam 1) (Field 8)]
-      ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
-      ExtReturn 3.Field 8 -> [ExtParam 1, ExtReturn 3, ExtPhantom (ExtParam 1) (Field 8)]
-      ExtReturn 3.FieldIdent -> [ExtParam 1]
-      ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtParam 1, ExtReturn 3, ExtPhantom (ExtParam 1) (Field 8)]
-      ExtPhantom (ExtParam 2) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+    ExtParam 1.Field 8 -> [ExtParam 1, ExtReturn 3, ExtPhantom (ExtParam 1) (Field 8)]
+    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+    ExtReturn 3.Field 8 -> [ExtParam 1, ExtReturn 3, ExtPhantom (ExtParam 1) (Field 8)]
+    ExtReturn 3.FieldIdent -> [ExtParam 1]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtParam 1, ExtReturn 3, ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 2) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#1##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @higher_order_sort:nn:nn
     case ~tmp#5##0:wybe.bool of

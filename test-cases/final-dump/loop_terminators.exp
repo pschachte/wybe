@@ -18,56 +18,49 @@ AFTER EVERYTHING:
 proc loop0 > {inline} (0 calls)
 0: loop_terminators.loop0<0>
 loop0()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
 
 proc loop0#cont#1 > {inline} (2 calls)
 0: loop_terminators.loop0#cont#1<0>
 loop0#cont#1()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
 
 proc loop1 > {inline} (0 calls)
 0: loop_terminators.loop1<0>
 loop1()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
 
 proc loop1#cont#1 > {inline} (2 calls)
 0: loop_terminators.loop1#cont#1<0>
 loop1#cont#1()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
 
 proc loop2 > {inline} (0 calls)
 0: loop_terminators.loop2<0>
 loop2()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
 
 proc loop2#cont#1 > {inline} (1 calls)
 0: loop_terminators.loop2#cont#1<0>
 loop2#cont#1()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
 
 
 proc loop3 > {inline} (0 calls)
 0: loop_terminators.loop3<0>
 loop3()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.c_string<0>("lol":wybe.string, ?tmp#1##0:wybe.c_string) #1 @loop_terminators:nn:nn
     foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#1##0:wybe.c_string) @loop_terminators:nn:nn
@@ -76,8 +69,7 @@ loop3()<{}; {}; {}>:
 proc loop3#cont#1 > {inline} (1 calls)
 0: loop_terminators.loop3#cont#1<0>
 loop3#cont#1()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.c_string<0>("lol":wybe.string, ?tmp#7##0:wybe.c_string) #2 @loop_terminators:nn:nn
     foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#7##0:wybe.c_string) @loop_terminators:nn:nn

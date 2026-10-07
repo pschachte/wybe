@@ -16,8 +16,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: save_restore_cond.<0>
 ()<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     save_restore_cond.suc<0>(?tmp#0##0:wybe.bool) #0 @save_restore_cond:nn:nn
 
@@ -25,8 +24,7 @@ module top-level code > public {inline,semipure} (0 calls)
 proc suc > {noinline} (3 calls)
 0: save_restore_cond.suc<0>
 suc(?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 

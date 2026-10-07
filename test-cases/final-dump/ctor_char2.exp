@@ -18,8 +18,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: ctor_char2.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ctor_char2.foo<0>(1412:ctor_char2, ?tmp#0##0:wybe.char) #1 @ctor_char2:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @ctor_char2:nn:nn
@@ -32,19 +31,18 @@ proc = > public (3 calls)
 0: ctor_char2.=<0>
 =(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    edges:
-      ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtParam 1.Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-      ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtParam 1.Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-2))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -127,8 +125,7 @@ proc = > public (3 calls)
 proc another_ctor > {inline} (0 calls)
 0: ctor_char2.another_ctor<0>
 another_ctor(another_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2) @ctor_char2:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~another_ctor#1##0:ctor_char2) @ctor_char2:nn:nn
@@ -136,8 +133,7 @@ another_ctor(another_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}; {}>:
 proc another_ctor > {inline} (8 calls)
 1: ctor_char2.another_ctor<1>
 another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -163,8 +159,7 @@ another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:
 proc c > {inline} (0 calls)
 0: ctor_char2.c<0>
 c(#rec##0:ctor_char2, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -190,8 +185,7 @@ c(#rec##0:ctor_char2, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>
 proc c > {inline} (0 calls)
 1: ctor_char2.c<1>
 c(#rec##0:ctor_char2, ?#rec##2:ctor_char2, #field##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -220,8 +214,7 @@ c(#rec##0:ctor_char2, ?#rec##2:ctor_char2, #field##0:wybe.char, ?#success##0:wyb
 proc const > {inline} (0 calls)
 0: ctor_char2.const<0>
 const(?#result##0:ctor_char2)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(0:ctor_char2, ?#result##0:ctor_char2)
 
@@ -229,8 +222,7 @@ const(?#result##0:ctor_char2)<{}; {}; {}>:
 proc ctor > {inline} (1 calls)
 0: ctor_char2.ctor<0>
 ctor(c##0:wybe.char, ?#result##3:ctor_char2)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~c##0:wybe.char, ?#temp##0:ctor_char2) @ctor_char2:nn:nn
     foreign llvm shl(~#temp##0:ctor_char2, 2:ctor_char2, ?#temp##1:ctor_char2) @ctor_char2:nn:nn
@@ -238,8 +230,7 @@ ctor(c##0:wybe.char, ?#result##3:ctor_char2)<{}; {}; {}>:
 proc ctor > {inline} (19 calls)
 1: ctor_char2.ctor<1>
 ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -267,8 +258,7 @@ ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>
 proc foo > (1 calls)
 0: ctor_char2.foo<0>
 foo(this##0:ctor_char2, ?#result##0:wybe.char)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(this##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @ctor_char2:nn:nn
     case ~tmp#3##0:wybe.bool of
@@ -293,8 +283,7 @@ foo(this##0:ctor_char2, ?#result##0:wybe.char)<{}; {}; {}>:
 proc other_ctor > {inline} (0 calls)
 0: ctor_char2.other_ctor<0>
 other_ctor(other_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2) @ctor_char2:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char2) @ctor_char2:nn:nn
@@ -302,8 +291,7 @@ other_ctor(other_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}; {}>:
 proc other_ctor > {inline} (12 calls)
 1: ctor_char2.other_ctor<1>
 other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -329,8 +317,7 @@ other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe
 proc ~= > public {inline} (0 calls)
 0: ctor_char2.~=<0>
 ~=(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    edges: []
+  AliasSummary: []
   InterestingCallProperties: []
     ctor_char2.=<0>(~#left##0:ctor_char2, ~#right##0:ctor_char2, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
