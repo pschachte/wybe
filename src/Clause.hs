@@ -432,6 +432,8 @@ localVTableParam name bound = do
             _ -> Nothing
 
 
+-- |Find a supplied vtable containing the required prerequisite for the same
+-- type variable, and its offset in method slots.
 prerequisiteProjection :: TypeVarName -> TraitSpec -> TypeVarBound -> PrimParam
                        -> ClauseComp (Maybe (PrimParam, Int))
 prerequisiteProjection wantedName wantedTrait (name, suppliedTrait) param
@@ -446,6 +448,7 @@ prerequisiteProjection wantedName wantedTrait (name, suppliedTrait) param
                 return $ Just (param, sum counts)
 
 
+-- |Compile a pointer to a prerequisite vtable at the given method-slot offset.
 projectVTable :: PrimParam -> Int -> ClauseComp ([Prim], PrimArg)
 projectVTable param 0 = return ([], primParamToArg param)
 projectVTable param offsetSlots = do

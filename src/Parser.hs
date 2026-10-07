@@ -181,6 +181,7 @@ traitItem = do
     return $ TraitDecl params prerequisites modifiers $ Just keypos
 
 
+-- | Optional trait prerequisites: `<:` followed by one trait or a braced list.
 traitPrerequisiteList :: Parser [TraitSpec]
 traitPrerequisiteList = option [] $ symbol "<:" *>
     (betweenB Brace (typeSpec `sepBy1` comma) <|> pure <$> typeSpec)
