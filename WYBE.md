@@ -1984,18 +1984,23 @@ def shop_label(x:listable): string =
 
 An `impl` declaration for `listable` requires a unique applicable implementation
 of each prerequisite for the same type.  It does not declare those
-implementations automatically.  Reusing the earlier `named` implementation for
-`int`, we can add:
+implementations automatically.  Reusing the earlier traits, a new `book` type
+can implement all three:
 
 ```
-impl int <: {priced, listable}
+type book {
+    pub book(title:string, cost:int)
+}
 
-def price(x:int): int = x
+impl book <: {named, priced, listable}
 
-def listing(x:int): string = "special offer"
+def name(x:book): string = x^title
+def price(x:book): int = x^cost
+
+def listing(x:book): string = "paperback"
 ```
 
-Now `shop_label(7)` returns `"int: 7 - special offer"`.  Prerequisites are
+Now `shop_label(book("Dune", 12))` returns `"Dune: 12 - paperback"`.  Prerequisites are
 transitive: if a prerequisite itself requires another trait, that trait is also
 available through the original bound and must have an applicable implementation.
 Missing or ambiguous prerequisite implementations are compile-time errors.
