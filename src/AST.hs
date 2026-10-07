@@ -69,8 +69,8 @@ module AST (
   getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
   ParameterID, parameterIDToVarName,
-  FieldKey(..), EscapeState(..), ExtNode(..),
-  ProcPTGSummary(..), emptyProcPTGSummary, showProcPTGSummary,
+  FieldKey(..), ExtNode(..),
+  ProcPTGSummary(..), emptyProcPTGSummary,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
@@ -2681,32 +2681,14 @@ type SpeczProcBodies = Map SpeczVersion (Maybe ProcBody)
 
 
 -- | A field selector for the points-to graph.  LPVM addresses fields by byte
--- offset, almost always a compile-time constant ('Field'); a non-constant
--- offset collapses to 'FieldAny', the sound field-insensitive fallback.
+-- offset, almost always a compile-time constant; a non-constant
+-- offset collapses to 'FieldAny'.
 -- (Lives here, rather than in PointsToGraph, so the serialized summary below
 -- can reference it without an import cycle -- PointsToGraph imports AST.)
 data FieldKey
     = Field !Int   -- ^ a constant byte offset
     | FieldAny     -- ^ unknown offset: the catch-all, a supertype of every Field
-    | FieldIdent   -- ^ identity ("same memory") edge, NOT a field offset: the
-                   --   source node IS the target node -- a pass-through where a
-                   --   value is aliased to another (a returned input, a merge of
-                   --   inputs, a copied param) rather than embedded in a field.
-                   --   Local aliasing lives as node-sharing in 'ptgEnv', so this
-                   --   is emitted only when a summary is projected (in 'psEdges'),
-                   --   where the environment is dropped and the shared identity
-                   --   would otherwise be lost -- letting the edge graph itself
-                   --   carry what the removed @psReturns@/@psAlias@ field did.
-    deriving (Eq, Ord, Show, Generic)
-
-
--- | Escape lattice (Choi et al.): NoEscape < ArgEscape < GlobalEscape, so the
--- join (least upper bound) is 'max' and escape can only ever grow.  NoEscape is
--- the optimistic starting point.
-data EscapeState
-    = NoEscape      -- ^ provably local; safe to stack-allocate
-    | ArgEscape     -- ^ escapes only to the caller's frame (via return/out-param)
-    | GlobalEscape  -- ^ globally reachable
+    | FieldIdent   -- ^ identity ("same memory") edge, NOT a field offset
     deriving (Eq, Ord, Show, Generic)
 
 
@@ -2717,64 +2699,38 @@ data EscapeState
 data ExtNode
     = ExtParam   ParameterID      -- ^ memory reachable from an input parameter
     | ExtReturn  ParameterID      -- ^ memory written to an output parameter
-    | ExtGlobal  GlobalInfo       -- ^ a resource / global sink (always escaping)
+    | ExtGlobal  GlobalInfo       -- ^ a resource / global sink
     | ExtConst   StructID         -- ^ a constant memory block
-    | ExtPhantom ExtNode FieldKey -- ^ k-limited successor of an external node's
-                                  --   pointer field (unknown callee-side memory)
+    | ExtPhantom ExtNode FieldKey -- ^ callee-side memory with no portable name,
+                                  --   reached via a field of another node;
+                                  --   nesting capped at depth 1 (see
+                                  --   'collapsePhantom')
     deriving (Eq, Ord, Show, Generic)
 
 
 -- | The serialized interprocedural points-to summary: a projection of a proc's
--- final PointsToGraph onto the nodes visible across the call boundary.  It
--- replaces the old coarse @AliasMap@ (@DisjointSet PrimVarName@), preserving
--- field/direction/escape structure for the caller (and future analyses).
---
---   * 'psEdges'   : projected points-to edges (the callee embeds one external
---                   node into another's field -- e.g. a returned cons cell whose
---                   tail points at a parameter).
---                   Pass-through identity aliasing -- an output whose memory IS an
---                   input's (a proc returning its input), a merge of several
---                   inputs (`if c then ?out=a else ?out=b`), or another output's --
---                   is carried here too, as a 'FieldIdent' edge from the output's
---                   'ExtReturn' to its source 'ExtNode's.  Identity is node-sharing
---                   in the local 'ptgEnv', which the summary drops; the 'FieldIdent'
---                   edge lifts it into the edge graph so nothing else is needed
---                   (two *inputs* never alias by identity -- distinct 'ParamNode's
---                   meet only through a real field edge -- so every 'FieldIdent'
---                   edge is anchored at an output).
---   * 'psEscape' : per-external-node escape classification.
-data ProcPTGSummary = ProcPTGSummary
-    { psEdges  :: Map ExtNode (Map FieldKey (Set ExtNode))
-    , psEscape :: Map ExtNode EscapeState
-    } deriving (Eq, Ord, Show, Generic)
+-- final PointsToGraph onto the nodes visible across the call boundary, preserving
+-- field/direction structure for the caller (and future analyses).
+newtype ProcPTGSummary = ProcPTGSummary (Map ExtNode (Map FieldKey (Set ExtNode)))
+    deriving (Eq, Ord, Generic)
 
 
--- | The empty summary (lattice bottom: the callee does nothing observable).
+-- | The empty summary (the callee does nothing observable).
 emptyProcPTGSummary :: ProcPTGSummary
-emptyProcPTGSummary = ProcPTGSummary Map.empty Map.empty
+emptyProcPTGSummary = ProcPTGSummary Map.empty
 
 
--- | A readable, deterministic rendering of a 'ProcPTGSummary' for logging and
--- the final-dump tests (sorted so the output is stable across runs).  Keeps the
--- constructor names ('ExtParam'/'ExtReturn'/'Field'/'FieldIdent'/'ExtPhantom'),
--- and lays the summary out over multiple lines -- one @src.field -> [targets]@
--- per line under an @edges:@ header, one @node -> escape@ per line under
--- @escape:@ -- so a wide summary no longer runs off in a single line.  An empty
--- section prints inline as @edges: []@ / @escape: []@.
-showProcPTGSummary :: ProcPTGSummary -> String
-showProcPTGSummary (ProcPTGSummary edges escape) =
-    let edgeStrs = [ show src ++ "." ++ show f ++ " -> " ++ showNodeList tgts
-                   | (src, fm) <- Map.toAscList edges
-                   , (f, tgts) <- Map.toAscList fm ]
-        escStrs  = [ show n ++ " -> " ++ show e
-                   | (n, e) <- Map.toAscList escape ]
-    in "\n    edges:" ++ showBlock edgeStrs
-        ++ "\n    escape:" ++ showBlock escStrs
-  where
-    showNodeList ns =
-        "[" ++ intercalate ", " (List.map show (Set.toAscList ns)) ++ "]"
-    showBlock [] = " []"
-    showBlock xs = concatMap ("\n      " ++) xs
+instance Show ProcPTGSummary where
+    show (ProcPTGSummary edges) =
+        let edgeStrs = [ show src ++ "." ++ show f ++ " -> " ++ showNodeList tgts
+                       | (src, fm) <- Map.toAscList edges
+                       , (f, tgts) <- Map.toAscList fm ]
+        in "\n    edges:" ++ showBlock edgeStrs
+      where
+        showNodeList ns =
+            "[" ++ intercalate ", " (List.map show (Set.toAscList ns)) ++ "]"
+        showBlock [] = " []"
+        showBlock xs = concatMap ("\n      " ++) xs
 
 
 -- |Infomation about specialization versions the current proc directly uses.
@@ -2856,7 +2812,7 @@ instance Show ProcAnalysis where
         let multiSpeczDepInfo' = Map.toList multiSpeczDepInfo
                 |> List.filter (not . List.null . snd)
         in
-        "\n  AliasSummary:" ++ showProcPTGSummary ptgSummary
+        "\n  AliasSummary:" ++ show ptgSummary
         ++ "\n  InterestingCallProperties: "
         ++ show (Set.toAscList interestingCallProperties)
         ++ if List.null multiSpeczDepInfo'

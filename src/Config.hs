@@ -177,7 +177,7 @@ localCacheLibDir = do
 -- | Magic version number for the current iteration of LPVM.
 magicVersion :: [Word8]
 magicVersion =
-    let magicStr = "WB05"
+    let magicStr = "WB03"
     in List.map (fromIntegral . fromEnum) magicStr
 
 
