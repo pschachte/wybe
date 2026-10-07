@@ -50,7 +50,9 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 proc = > public {inline} (1 calls)
 0: ctor_visibility.all_priv.=<0>
 =(#left##0:ctor_visibility.all_priv, #right##0:ctor_visibility.all_priv, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.all_priv, ~#right##0:ctor_visibility.all_priv, ?#success##0:wybe.bool)
 
@@ -58,7 +60,9 @@ proc = > public {inline} (1 calls)
 proc bar > {inline} (0 calls)
 0: ctor_visibility.all_priv.bar<0>
 bar(?#result##0:ctor_visibility.all_priv)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:ctor_visibility.all_priv, ?#result##0:ctor_visibility.all_priv)
 
@@ -66,7 +70,9 @@ bar(?#result##0:ctor_visibility.all_priv)<{}; {}; {}>:
 proc foo > {inline} (0 calls)
 0: ctor_visibility.all_priv.foo<0>
 foo(?#result##0:ctor_visibility.all_priv)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:ctor_visibility.all_priv, ?#result##0:ctor_visibility.all_priv)
 
@@ -74,7 +80,9 @@ foo(?#result##0:ctor_visibility.all_priv)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: ctor_visibility.all_priv.~=<0>
 ~=(#left##0:ctor_visibility.all_priv, #right##0:ctor_visibility.all_priv, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.all_priv, ~#right##0:ctor_visibility.all_priv, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -127,7 +135,9 @@ define external fastcc i1 @"ctor_visibility#.all_priv#.~=<0>"(i1 %"#left##0", i1
 proc = > public {inline} (1 calls)
 0: ctor_visibility.all_public_long.=<0>
 =(#left##0:ctor_visibility.all_public_long, #right##0:ctor_visibility.all_public_long, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.all_public_long, ~#right##0:ctor_visibility.all_public_long, ?#success##0:wybe.bool)
 
@@ -135,7 +145,9 @@ proc = > public {inline} (1 calls)
 proc bar > public {inline} (0 calls)
 0: ctor_visibility.all_public_long.bar<0>
 bar(?#result##0:ctor_visibility.all_public_long)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:ctor_visibility.all_public_long, ?#result##0:ctor_visibility.all_public_long)
 
@@ -143,7 +155,9 @@ bar(?#result##0:ctor_visibility.all_public_long)<{}; {}; {}>:
 proc foo > public {inline} (0 calls)
 0: ctor_visibility.all_public_long.foo<0>
 foo(?#result##0:ctor_visibility.all_public_long)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:ctor_visibility.all_public_long, ?#result##0:ctor_visibility.all_public_long)
 
@@ -151,7 +165,9 @@ foo(?#result##0:ctor_visibility.all_public_long)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: ctor_visibility.all_public_long.~=<0>
 ~=(#left##0:ctor_visibility.all_public_long, #right##0:ctor_visibility.all_public_long, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.all_public_long, ~#right##0:ctor_visibility.all_public_long, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -204,7 +220,9 @@ define external fastcc i1 @"ctor_visibility#.all_public_long#.~=<0>"(i1 %"#left#
 proc = > public {inline} (1 calls)
 0: ctor_visibility.all_public_short.=<0>
 =(#left##0:ctor_visibility.all_public_short, #right##0:ctor_visibility.all_public_short, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.all_public_short, ~#right##0:ctor_visibility.all_public_short, ?#success##0:wybe.bool)
 
@@ -212,7 +230,9 @@ proc = > public {inline} (1 calls)
 proc bar > public {inline} (0 calls)
 0: ctor_visibility.all_public_short.bar<0>
 bar(?#result##0:ctor_visibility.all_public_short)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:ctor_visibility.all_public_short, ?#result##0:ctor_visibility.all_public_short)
 
@@ -220,7 +240,9 @@ bar(?#result##0:ctor_visibility.all_public_short)<{}; {}; {}>:
 proc foo > public {inline} (0 calls)
 0: ctor_visibility.all_public_short.foo<0>
 foo(?#result##0:ctor_visibility.all_public_short)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:ctor_visibility.all_public_short, ?#result##0:ctor_visibility.all_public_short)
 
@@ -228,7 +250,9 @@ foo(?#result##0:ctor_visibility.all_public_short)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: ctor_visibility.all_public_short.~=<0>
 ~=(#left##0:ctor_visibility.all_public_short, #right##0:ctor_visibility.all_public_short, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.all_public_short, ~#right##0:ctor_visibility.all_public_short, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -279,7 +303,9 @@ define external fastcc i1 @"ctor_visibility#.all_public_short#.~=<0>"(i1 %"#left
 proc = > public {inline} (1 calls)
 0: ctor_visibility.ctor_keyword.=<0>
 =(#left##0:ctor_visibility.ctor_keyword, #right##0:ctor_visibility.ctor_keyword, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.ctor_keyword, ~#right##0:ctor_visibility.ctor_keyword, ?#success##0:wybe.bool)
 
@@ -287,7 +313,9 @@ proc = > public {inline} (1 calls)
 proc bar > {inline} (0 calls)
 0: ctor_visibility.ctor_keyword.bar<0>
 bar(?#result##0:ctor_visibility.ctor_keyword)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:ctor_visibility.ctor_keyword, ?#result##0:ctor_visibility.ctor_keyword)
 
@@ -295,7 +323,9 @@ bar(?#result##0:ctor_visibility.ctor_keyword)<{}; {}; {}>:
 proc foo > {inline} (0 calls)
 0: ctor_visibility.ctor_keyword.foo<0>
 foo(?#result##0:ctor_visibility.ctor_keyword)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:ctor_visibility.ctor_keyword, ?#result##0:ctor_visibility.ctor_keyword)
 
@@ -303,7 +333,9 @@ foo(?#result##0:ctor_visibility.ctor_keyword)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: ctor_visibility.ctor_keyword.~=<0>
 ~=(#left##0:ctor_visibility.ctor_keyword, #right##0:ctor_visibility.ctor_keyword, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.ctor_keyword, ~#right##0:ctor_visibility.ctor_keyword, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -355,7 +387,9 @@ define external fastcc i1 @"ctor_visibility#.ctor_keyword#.~=<0>"(i1 %"#left##0"
 proc = > public {inline} (1 calls)
 0: ctor_visibility.one_pub.=<0>
 =(#left##0:ctor_visibility.one_pub, #right##0:ctor_visibility.one_pub, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.one_pub, ~#right##0:ctor_visibility.one_pub, ?#success##0:wybe.bool)
 
@@ -363,7 +397,9 @@ proc = > public {inline} (1 calls)
 proc bar > {inline} (0 calls)
 0: ctor_visibility.one_pub.bar<0>
 bar(?#result##0:ctor_visibility.one_pub)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:ctor_visibility.one_pub, ?#result##0:ctor_visibility.one_pub)
 
@@ -371,7 +407,9 @@ bar(?#result##0:ctor_visibility.one_pub)<{}; {}; {}>:
 proc foo > public {inline} (0 calls)
 0: ctor_visibility.one_pub.foo<0>
 foo(?#result##0:ctor_visibility.one_pub)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:ctor_visibility.one_pub, ?#result##0:ctor_visibility.one_pub)
 
@@ -379,7 +417,9 @@ foo(?#result##0:ctor_visibility.one_pub)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: ctor_visibility.one_pub.~=<0>
 ~=(#left##0:ctor_visibility.one_pub, #right##0:ctor_visibility.one_pub, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.one_pub, ~#right##0:ctor_visibility.one_pub, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -431,7 +471,9 @@ define external fastcc i1 @"ctor_visibility#.one_pub#.~=<0>"(i1 %"#left##0", i1 
 proc = > public {inline} (1 calls)
 0: ctor_visibility.one_pub2.=<0>
 =(#left##0:ctor_visibility.one_pub2, #right##0:ctor_visibility.one_pub2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.one_pub2, ~#right##0:ctor_visibility.one_pub2, ?#success##0:wybe.bool)
 
@@ -439,7 +481,9 @@ proc = > public {inline} (1 calls)
 proc bar > public {inline} (0 calls)
 0: ctor_visibility.one_pub2.bar<0>
 bar(?#result##0:ctor_visibility.one_pub2)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:ctor_visibility.one_pub2, ?#result##0:ctor_visibility.one_pub2)
 
@@ -447,7 +491,9 @@ bar(?#result##0:ctor_visibility.one_pub2)<{}; {}; {}>:
 proc foo > {inline} (0 calls)
 0: ctor_visibility.one_pub2.foo<0>
 foo(?#result##0:ctor_visibility.one_pub2)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:ctor_visibility.one_pub2, ?#result##0:ctor_visibility.one_pub2)
 
@@ -455,7 +501,9 @@ foo(?#result##0:ctor_visibility.one_pub2)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: ctor_visibility.one_pub2.~=<0>
 ~=(#left##0:ctor_visibility.one_pub2, #right##0:ctor_visibility.one_pub2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:ctor_visibility.one_pub2, ~#right##0:ctor_visibility.one_pub2, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -516,7 +564,9 @@ define external fastcc i1 @"ctor_visibility#.one_pub2#.~=<0>"(i1 %"#left##0", i1
 proc = > public (1 calls)
 0: ctor_visibility.with_fields.=<0>
 =(#left##0:ctor_visibility.with_fields, #right##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#left##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#9##0:1 bit unsigned)
     foreign llvm icmp_eq(tmp#9##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#10##0:wybe.bool)
@@ -566,7 +616,9 @@ proc = > public (1 calls)
 proc a > public (0 calls)
 0: ctor_visibility.with_fields.a<0>
 a(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -578,7 +630,9 @@ a(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int)<{}; {}; {}>:
 proc a > public (0 calls)
 1: ctor_visibility.with_fields.a<1>
 a(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #field##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -592,7 +646,9 @@ a(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #fi
 proc b > public {inline} (0 calls)
 0: ctor_visibility.with_fields.b<0>
 b(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -607,7 +663,9 @@ b(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int, ?#success##0:wybe.b
 proc b > public {inline} (0 calls)
 1: ctor_visibility.with_fields.b<1>
 b(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -624,7 +682,9 @@ b(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #fi
 proc bar > public {inline} (0 calls)
 0: ctor_visibility.with_fields.bar<0>
 bar(a##0:wybe.int, b##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:ctor_visibility.with_fields) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
@@ -633,7 +693,9 @@ bar(a##0:wybe.int, b##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {
 proc bar > public {inline} (12 calls)
 1: ctor_visibility.with_fields.bar<1>
 bar(?a##0:wybe.int, ?b##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -652,14 +714,18 @@ bar(?a##0:wybe.int, ?b##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#su
 proc foo > public {inline} (0 calls)
 0: ctor_visibility.with_fields.foo<0>
 foo(a##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields, ?#result##0:ctor_visibility.with_fields, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
 proc foo > public {inline} (14 calls)
 1: ctor_visibility.with_fields.foo<1>
 foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -677,7 +743,9 @@ foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bo
 proc ~= > public {inline} (0 calls)
 0: ctor_visibility.with_fields.~=<0>
 ~=(#left##0:ctor_visibility.with_fields, #right##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ctor_visibility.with_fields.=<0>(~#left##0:ctor_visibility.with_fields, ~#right##0:ctor_visibility.with_fields, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -918,7 +986,9 @@ define external fastcc i1 @"ctor_visibility#.with_fields#.~=<0>"(i64 %"#left##0"
 proc = > public (1 calls)
 0: ctor_visibility.with_fields2.=<0>
 =(#left##0:ctor_visibility.with_fields2, #right##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#left##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#8##0:1 bit unsigned)
     foreign llvm icmp_eq(tmp#8##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#9##0:wybe.bool)
@@ -959,7 +1029,9 @@ proc = > public (1 calls)
 proc a > public {inline} (0 calls)
 0: ctor_visibility.with_fields2.a<0>
 a(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -975,7 +1047,9 @@ a(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.
 proc a > public {inline} (0 calls)
 1: ctor_visibility.with_fields2.a<1>
 a(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -993,7 +1067,9 @@ a(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #
 proc b > {inline} (0 calls)
 0: ctor_visibility.with_fields2.b<0>
 b(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -1008,7 +1084,9 @@ b(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.
 proc b > {inline} (0 calls)
 1: ctor_visibility.with_fields2.b<1>
 b(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -1025,7 +1103,9 @@ b(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #
 proc bar > {inline} (0 calls)
 0: ctor_visibility.with_fields2.bar<0>
 bar(b##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~b##0:wybe.int) @ctor_visibility:nn:nn
@@ -1033,7 +1113,9 @@ bar(b##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
 proc bar > {inline} (8 calls)
 1: ctor_visibility.with_fields2.bar<1>
 bar(?b##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -1050,14 +1132,18 @@ bar(?b##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.b
 proc foo > public {inline} (0 calls)
 0: ctor_visibility.with_fields2.foo<0>
 foo(a##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields2, ?#result##0:ctor_visibility.with_fields2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
 proc foo > public {inline} (12 calls)
 1: ctor_visibility.with_fields2.foo<1>
 foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -1075,7 +1161,9 @@ foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.b
 proc ~= > public {inline} (0 calls)
 0: ctor_visibility.with_fields2.~=<0>
 ~=(#left##0:ctor_visibility.with_fields2, #right##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ctor_visibility.with_fields2.=<0>(~#left##0:ctor_visibility.with_fields2, ~#right##0:ctor_visibility.with_fields2, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

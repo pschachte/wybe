@@ -32,7 +32,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: stmt_if2.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     stmt_if2.lookup<0>(1:wybe.int, stmt_if2#constant#1:stmt_if2.tree, ?tmp#4##0:wybe.bool) #3 @stmt_if2:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -46,7 +48,15 @@ module top-level code > public {semipure} (0 calls)
 proc lookup > public (5 calls)
 0: stmt_if2.lookup<0>
 lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+      ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+      ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+      ExtPhantom (ExtParam 1) (Field 0).Field 16 -> [ExtPhantom (ExtParam 1) (Field 0)]
+      ExtPhantom (ExtParam 1) (Field 16).Field 0 -> [ExtPhantom (ExtParam 1) (Field 16)]
+      ExtPhantom (ExtParam 1) (Field 16).Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+    escape: []
   InterestingCallProperties: []
     stmt_if2.tree.=<0>(tree##0:stmt_if2.tree, 0:stmt_if2.tree, ?tmp#13##0:wybe.bool) #1 @stmt_if2:nn:nn
     case ~tmp#13##0:wybe.bool of
@@ -85,7 +95,9 @@ lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool)<{}; {}; {}
 proc lookup#cont#1 > {inline} (3 calls)
 0: stmt_if2.lookup#cont#1<0>
 lookup#cont#1(tmp#4##0:wybe.bool, ?#result##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(~tmp#4##0:wybe.bool, ?#result##0:wybe.bool) @stmt_if2:nn:nn
 
@@ -177,7 +189,21 @@ define external fastcc i1 @"stmt_if2#.lookup#cont#1<0>"(i1 %"tmp#4##0") {
 proc = > public (7 calls)
 0: stmt_if2.tree.=<0>
 =(#left##0:stmt_if2.tree, #right##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+      ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
+      ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+      ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+      ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+      ExtPhantom (ExtParam 0) (Field 0).Field 16 -> [ExtPhantom (ExtParam 0) (Field 0)]
+      ExtPhantom (ExtParam 0) (Field 16).Field 0 -> [ExtPhantom (ExtParam 0) (Field 16)]
+      ExtPhantom (ExtParam 0) (Field 16).Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
+      ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+      ExtPhantom (ExtParam 1) (Field 0).Field 16 -> [ExtPhantom (ExtParam 1) (Field 0)]
+      ExtPhantom (ExtParam 1) (Field 16).Field 0 -> [ExtPhantom (ExtParam 1) (Field 16)]
+      ExtPhantom (ExtParam 1) (Field 16).Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -219,7 +245,9 @@ proc = > public (7 calls)
 proc empty > public {inline} (0 calls)
 0: stmt_if2.tree.empty<0>
 empty(?#result##0:stmt_if2.tree)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:stmt_if2.tree, ?#result##0:stmt_if2.tree)
 
@@ -227,7 +255,9 @@ empty(?#result##0:stmt_if2.tree)<{}; {}; {}>:
 proc key > public {inline} (0 calls)
 0: stmt_if2.tree.key<0>
 key(#rec##0:stmt_if2.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -242,7 +272,9 @@ key(#rec##0:stmt_if2.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {};
 proc key > public {inline} (0 calls)
 1: stmt_if2.tree.key<1>
 key(#rec##0:stmt_if2.tree, ?#rec##1:stmt_if2.tree, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -259,7 +291,9 @@ key(#rec##0:stmt_if2.tree, ?#rec##1:stmt_if2.tree, #field##0:wybe.int, ?#success
 proc left > public {inline} (0 calls)
 0: stmt_if2.tree.left<0>
 left(#rec##0:stmt_if2.tree, ?#result##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -274,7 +308,9 @@ left(#rec##0:stmt_if2.tree, ?#result##0:stmt_if2.tree, ?#success##0:wybe.bool)<{
 proc left > public {inline} (0 calls)
 1: stmt_if2.tree.left<1>
 left(#rec##0:stmt_if2.tree, ?#rec##1:stmt_if2.tree, #field##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -291,7 +327,9 @@ left(#rec##0:stmt_if2.tree, ?#rec##1:stmt_if2.tree, #field##0:stmt_if2.tree, ?#s
 proc node > public {inline} (0 calls)
 0: stmt_if2.tree.node<0>
 node(left##0:stmt_if2.tree, key##0:wybe.int, right##0:stmt_if2.tree, ?#result##0:stmt_if2.tree)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:stmt_if2.tree) @stmt_if2:nn:nn
     foreign lpvm mutate(~#rec##0:stmt_if2.tree, ?#rec##1:stmt_if2.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left##0:stmt_if2.tree) @stmt_if2:nn:nn
@@ -300,7 +338,9 @@ node(left##0:stmt_if2.tree, key##0:wybe.int, right##0:stmt_if2.tree, ?#result##0
 proc node > public {inline} (16 calls)
 1: stmt_if2.tree.node<1>
 node(?left##0:stmt_if2.tree, ?key##0:wybe.int, ?right##0:stmt_if2.tree, #result##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -321,7 +361,9 @@ node(?left##0:stmt_if2.tree, ?key##0:wybe.int, ?right##0:stmt_if2.tree, #result#
 proc right > public {inline} (0 calls)
 0: stmt_if2.tree.right<0>
 right(#rec##0:stmt_if2.tree, ?#result##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -336,7 +378,9 @@ right(#rec##0:stmt_if2.tree, ?#result##0:stmt_if2.tree, ?#success##0:wybe.bool)<
 proc right > public {inline} (0 calls)
 1: stmt_if2.tree.right<1>
 right(#rec##0:stmt_if2.tree, ?#rec##1:stmt_if2.tree, #field##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -353,7 +397,9 @@ right(#rec##0:stmt_if2.tree, ?#rec##1:stmt_if2.tree, #field##0:stmt_if2.tree, ?#
 proc ~= > public {inline} (0 calls)
 0: stmt_if2.tree.~=<0>
 ~=(#left##0:stmt_if2.tree, #right##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     stmt_if2.tree.=<0>(~#left##0:stmt_if2.tree, ~#right##0:stmt_if2.tree, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

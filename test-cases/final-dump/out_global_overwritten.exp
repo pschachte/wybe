@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: out_global_overwritten.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<out_global_overwritten.res>>:wybe.int, ?%tmp#0##0:wybe.int) @out_global_overwritten:nn:nn
     out_global_overwritten.out<0><{}; {<<out_global_overwritten.res>>}; {}> #0 @out_global_overwritten:nn:nn
@@ -30,7 +32,9 @@ module top-level code > public {semipure} (0 calls)
 proc out > {noinline} (1 calls)
 0: out_global_overwritten.out<0>
 out()<{}; {<<out_global_overwritten.res>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm store(11:wybe.int, <<out_global_overwritten.res>>:wybe.int) @out_global_overwritten:nn:nn
 

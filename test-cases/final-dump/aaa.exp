@@ -19,7 +19,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: aaa.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("AAA: Init":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @aaa:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @aaa:nn:nn
@@ -63,7 +65,9 @@ define external fastcc void @"aaa#.<0>"() {
 module top-level code > public {inline,semipure} (0 calls)
 0: bbb.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("BBB: Init":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @bbb:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @bbb:nn:nn
@@ -107,7 +111,9 @@ define external fastcc void @"bbb#.<0>"() {
 module top-level code > public {inline,semipure} (0 calls)
 0: ccc.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("CCC: Init":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @ccc:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @ccc:nn:nn
@@ -150,7 +156,9 @@ define external fastcc void @"ccc#.<0>"() {
 module top-level code > public {inline,semipure} (0 calls)
 0: ddd.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("DDD: Init":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @ddd:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @ddd:nn:nn

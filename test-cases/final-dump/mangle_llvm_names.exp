@@ -18,7 +18,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: mangle_llvm_names.<0>
 ()<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     mangle_llvm_names.foo.bar<0> #0 @mangle_llvm_names:nn:nn
     mangle_llvm_names.foo.bar<0> #1 @mangle_llvm_names:nn:nn
@@ -27,7 +29,9 @@ module top-level code > public {inline,semipure} (0 calls)
 proc foo.bar > {noinline} (1 calls)
 0: mangle_llvm_names.foo.bar<0>
 foo.bar()<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
 
   LLVM code       :
@@ -66,7 +70,9 @@ define external fastcc void @"mangle_llvm_names#.foo.bar<0>"() {
 proc bar > public {noinline} (0 calls)
 0: mangle_llvm_names.foo.bar<0>
 bar()<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
 
   LLVM code       :

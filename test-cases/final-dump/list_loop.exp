@@ -31,7 +31,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: list_loop.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     list_loop.#cont#1<0>(list_loop#constant#4:list_loop.intlist, list_loop#constant#4:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @list_loop:nn:nn
 
@@ -39,7 +41,13 @@ module top-level code > public {inline,semipure} (0 calls)
 proc #cont#1 > {semipure} (2 calls)
 0: list_loop.#cont#1<0>
 #cont#1(l##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+      ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+      ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+      ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(l##0:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.bool) @list_loop:nn:nn
     case ~tmp#11##0:wybe.bool of
@@ -59,7 +67,9 @@ proc #cont#1 > {semipure} (2 calls)
 proc #cont#2 > {inline,semipure} (1 calls)
 0: list_loop.#cont#2<0>
 #cont#2(h##0:wybe.int, l##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @list_loop:nn:nn
     foreign c print_int(h##0:wybe.int, ~%tmp#10##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @list_loop:nn:nn
@@ -71,7 +81,15 @@ proc #cont#2 > {inline,semipure} (1 calls)
 proc #cont#3 > {semipure} (2 calls)
 0: list_loop.#cont#3<0>
 #cont#3(h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+      ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+      ExtParam 3.Field 8 -> [ExtPhantom (ExtParam 3) (Field 8)]
+      ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+      ExtPhantom (ExtParam 2) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+      ExtPhantom (ExtParam 3) (Field 8).Field 8 -> [ExtPhantom (ExtParam 3) (Field 8)]
+    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign llvm icmp_ne(l2##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @list_loop:nn:nn
@@ -98,7 +116,9 @@ proc #cont#3 > {semipure} (2 calls)
 proc #cont#4 > {inline,semipure} (1 calls)
 0: list_loop.#cont#4<0>
 #cont#4(h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("    ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @list_loop:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @list_loop:nn:nn
@@ -214,7 +234,13 @@ define external fastcc void @"list_loop#.#cont#4<0>"(i64 %"h##0", i64 %"h2##0", 
 proc = > public (2 calls)
 0: list_loop.intlist.=<0>
 =(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+      ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+      ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+      ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -247,7 +273,9 @@ proc = > public (2 calls)
 proc cons > public {inline} (0 calls)
 0: list_loop.intlist.cons<0>
 cons(head##0:wybe.int, tail##0:list_loop.intlist, ?#result##0:list_loop.intlist)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:list_loop.intlist) @list_loop:nn:nn
     foreign lpvm mutate(~#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int) @list_loop:nn:nn
@@ -255,7 +283,9 @@ cons(head##0:wybe.int, tail##0:list_loop.intlist, ?#result##0:list_loop.intlist)
 proc cons > public {inline} (12 calls)
 1: list_loop.intlist.cons<1>
 cons(?head##0:wybe.int, ?tail##0:list_loop.intlist, #result##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -274,7 +304,9 @@ cons(?head##0:wybe.int, ?tail##0:list_loop.intlist, #result##0:list_loop.intlist
 proc head > public {inline} (0 calls)
 0: list_loop.intlist.head<0>
 head(#rec##0:list_loop.intlist, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -289,7 +321,9 @@ head(#rec##0:list_loop.intlist, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}
 proc head > public {inline} (0 calls)
 1: list_loop.intlist.head<1>
 head(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -306,7 +340,9 @@ head(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:wybe.int, 
 proc nil > public {inline} (0 calls)
 0: list_loop.intlist.nil<0>
 nil(?#result##0:list_loop.intlist)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:list_loop.intlist, ?#result##0:list_loop.intlist)
 
@@ -314,7 +350,9 @@ nil(?#result##0:list_loop.intlist)<{}; {}; {}>:
 proc tail > public {inline} (0 calls)
 0: list_loop.intlist.tail<0>
 tail(#rec##0:list_loop.intlist, ?#result##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -329,7 +367,9 @@ tail(#rec##0:list_loop.intlist, ?#result##0:list_loop.intlist, ?#success##0:wybe
 proc tail > public {inline} (0 calls)
 1: list_loop.intlist.tail<1>
 tail(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -346,7 +386,9 @@ tail(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:list_loop.
 proc ~= > public {inline} (0 calls)
 0: list_loop.intlist.~=<0>
 ~=(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     list_loop.intlist.=<0>(~#left##0:list_loop.intlist, ~#right##0:list_loop.intlist, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

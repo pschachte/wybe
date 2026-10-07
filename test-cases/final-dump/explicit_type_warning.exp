@@ -17,7 +17,13 @@ AFTER EVERYTHING:
 proc = > public (2 calls)
 0: explicit_type_warning.=<0>
 =(#left##0:explicit_type_warning, #right##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+      ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+      ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+      ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -50,7 +56,9 @@ proc = > public (2 calls)
 proc h > {inline} (0 calls)
 0: explicit_type_warning.h<0>
 h(#rec##0:explicit_type_warning, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -65,7 +73,9 @@ h(#rec##0:explicit_type_warning, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{
 proc h > {inline} (0 calls)
 1: explicit_type_warning.h<1>
 h(#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -82,7 +92,9 @@ h(#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, #field##0:wybe.
 proc mt > {inline} (0 calls)
 0: explicit_type_warning.mt<0>
 mt(?#result##0:explicit_type_warning)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:explicit_type_warning, ?#result##0:explicit_type_warning)
 
@@ -90,7 +102,9 @@ mt(?#result##0:explicit_type_warning)<{}; {}; {}>:
 proc oops > {inline} (0 calls)
 0: explicit_type_warning.oops<0>
 oops(h##0:wybe.int, t##0:explicit_type_warning, ?#result##0:explicit_type_warning)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:explicit_type_warning) @explicit_type_warning:nn:nn
     foreign lpvm mutate(~#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:wybe.int) @explicit_type_warning:nn:nn
@@ -98,7 +112,9 @@ oops(h##0:wybe.int, t##0:explicit_type_warning, ?#result##0:explicit_type_warnin
 proc oops > {inline} (15 calls)
 1: explicit_type_warning.oops<1>
 oops(?h##0:wybe.int, ?t##0:explicit_type_warning, #result##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -117,7 +133,11 @@ oops(?h##0:wybe.int, ?t##0:explicit_type_warning, #result##0:explicit_type_warni
 proc oops2 > (1 calls)
 0: explicit_type_warning.oops2<0>
 oops2(l##0:explicit_type_warning, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+      ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(l##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @explicit_type_warning:nn:nn
     case ~tmp#6##0:wybe.bool of
@@ -134,7 +154,9 @@ oops2(l##0:explicit_type_warning, ?#result##0:wybe.int)<{}; {}; {}>:
 proc t > {inline} (0 calls)
 0: explicit_type_warning.t<0>
 t(#rec##0:explicit_type_warning, ?#result##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -149,7 +171,9 @@ t(#rec##0:explicit_type_warning, ?#result##0:explicit_type_warning, ?#success##0
 proc t > {inline} (0 calls)
 1: explicit_type_warning.t<1>
 t(#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, #field##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -166,7 +190,9 @@ t(#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, #field##0:expli
 proc ~= > public {inline} (0 calls)
 0: explicit_type_warning.~=<0>
 ~=(#left##0:explicit_type_warning, #right##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     explicit_type_warning.=<0>(~#left##0:explicit_type_warning, ~#right##0:explicit_type_warning, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

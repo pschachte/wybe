@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 proc render > public abstract {inline} (0 calls)
 0: trait_import_support.specificity_printable.render<0>
 render(x##0:Type0<:trait_import_support.specificity_printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.specificity_printable, ?#result##0:wybe.string) #0
 
@@ -61,7 +63,9 @@ define external fastcc i64 @"trait_import_support#.specificity_printable#.render
 proc = > public {inline} (1 calls)
 0: trait_import_support.specificity_scalar.=<0>
 =(#left##0:trait_import_support.specificity_scalar, #right##0:trait_import_support.specificity_scalar, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.specificity_scalar, ~#right##0:trait_import_support.specificity_scalar, ?#success##0:wybe.bool)
 
@@ -69,7 +73,15 @@ proc = > public {inline} (1 calls)
 proc render > public (1 calls)
 0: trait_import_support.specificity_scalar.render<0>
 render(x##0:trait_import_support.specificity_scalar, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtReturn 1.Field (-2) -> [ExtReturn 1]
+      ExtReturn 1.Field (-1) -> [ExtReturn 1]
+      ExtReturn 1.Field 0 -> [ExtReturn 1]
+      ExtReturn 1.Field 6 -> [ExtReturn 1]
+      ExtReturn 1.Field 7 -> [ExtReturn 1]
+      ExtReturn 1.Field 8 -> [ExtReturn 1]
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_import_support.specificity_scalar, ?tmp#2##0:wybe.int) @specificity_scalar:nn:nn
     wybe.int.fmt<2>(~tmp#2##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #4 @specificity_scalar:nn:nn
@@ -79,7 +91,15 @@ render(x##0:trait_import_support.specificity_scalar, ?#result##0:wybe.string)<{}
 proc render#adapter > {noinline} (0 calls)
 0: trait_import_support.specificity_scalar.render#adapter<0>
 render#adapter(x##0:Type0<:trait_import_support.specificity_printable, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtReturn 1.Field (-2) -> [ExtReturn 1]
+      ExtReturn 1.Field (-1) -> [ExtReturn 1]
+      ExtReturn 1.Field 0 -> [ExtReturn 1]
+      ExtReturn 1.Field 6 -> [ExtReturn 1]
+      ExtReturn 1.Field 7 -> [ExtReturn 1]
+      ExtReturn 1.Field 8 -> [ExtReturn 1]
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_import_support.specificity_printable, ?x#adapter0##0:trait_import_support.specificity_scalar)
     trait_import_support.specificity_scalar.render<0>(~x#adapter0##0:trait_import_support.specificity_scalar, ?#result##0:wybe.string) #0
@@ -88,13 +108,17 @@ render#adapter(x##0:Type0<:trait_import_support.specificity_printable, ?#result#
 proc trait_specificity_scalar > public {inline} (0 calls)
 0: trait_import_support.specificity_scalar.trait_specificity_scalar<0>
 trait_specificity_scalar(value##0:wybe.int, ?#result##2:trait_import_support.specificity_scalar)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~value##0:wybe.int, ?#result##2:trait_import_support.specificity_scalar) @specificity_scalar:nn:nn
 proc trait_specificity_scalar > public {inline} (0 calls)
 1: trait_import_support.specificity_scalar.trait_specificity_scalar<1>
 trait_specificity_scalar(?value##0:wybe.int, #result##0:trait_import_support.specificity_scalar)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_import_support.specificity_scalar, ?value##0:wybe.int) @specificity_scalar:nn:nn
 
@@ -102,13 +126,17 @@ trait_specificity_scalar(?value##0:wybe.int, #result##0:trait_import_support.spe
 proc value > public {inline} (1 calls)
 0: trait_import_support.specificity_scalar.value<0>
 value(#rec##0:trait_import_support.specificity_scalar, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_import_support.specificity_scalar, ?#result##0:wybe.int) @specificity_scalar:nn:nn
 proc value > public {inline} (0 calls)
 1: trait_import_support.specificity_scalar.value<1>
 value([#rec##0:trait_import_support.specificity_scalar], ?#rec##2:trait_import_support.specificity_scalar, #field##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:wybe.int, ?#rec##2:trait_import_support.specificity_scalar) @specificity_scalar:nn:nn
 
@@ -116,7 +144,9 @@ value([#rec##0:trait_import_support.specificity_scalar], ?#rec##2:trait_import_s
 proc ~= > public {inline} (0 calls)
 0: trait_import_support.specificity_scalar.~=<0>
 ~=(#left##0:trait_import_support.specificity_scalar, #right##0:trait_import_support.specificity_scalar, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.specificity_scalar, ~#right##0:trait_import_support.specificity_scalar, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -191,7 +221,9 @@ define external fastcc i1 @"trait_import_support#.specificity_scalar#.~=<0>"(i64
 module top-level code > public {semipure} (0 calls)
 0: trait_specificity.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     trait_import_support.specificity_scalar.render<0>(42:trait_import_support.specificity_scalar, ?tmp#0##0:wybe.string) #1 @trait_specificity:nn:nn

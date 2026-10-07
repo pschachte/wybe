@@ -22,7 +22,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_inferred_union_bounds.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     trait_inferred_union_bounds.print_larger<0>(3:wybe.int, 5:wybe.int, vtable(global,wybe.int <: trait_inferred_union_bounds.comparable):opaque, vtable(global,wybe.int <: trait_inferred_union_bounds.printable):opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @trait_inferred_union_bounds:nn:nn
     trait_inferred_union_bounds.print_larger<0>(3.14:wybe.float, 1.0:wybe.float, vtable(global,wybe.float <: trait_inferred_union_bounds.comparable):opaque, vtable(global,wybe.float <: trait_inferred_union_bounds.printable):opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @trait_inferred_union_bounds:nn:nn
@@ -31,7 +33,9 @@ module top-level code > public {semipure} (0 calls)
 proc <#adapter > {noinline} (0 calls)
 0: trait_inferred_union_bounds.<#adapter<0>
 <#adapter(a##0:Type0<:trait_inferred_union_bounds.comparable, b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~a##0:Type0<:trait_inferred_union_bounds.comparable, ?x#adapter0##0:wybe.float)
     foreign lpvm cast(~b##0:Type0<:trait_inferred_union_bounds.comparable, ?y#adapter1##0:wybe.float)
@@ -39,7 +43,9 @@ proc <#adapter > {noinline} (0 calls)
 proc <#adapter > {noinline} (0 calls)
 1: trait_inferred_union_bounds.<#adapter<1>
 <#adapter(a##0:Type0<:trait_inferred_union_bounds.comparable, b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~a##0:Type0<:trait_inferred_union_bounds.comparable, ?x#adapter0##0:wybe.int)
     foreign lpvm cast(~b##0:Type0<:trait_inferred_union_bounds.comparable, ?y#adapter1##0:wybe.int)
@@ -49,7 +55,9 @@ proc <#adapter > {noinline} (0 calls)
 proc print_larger > (2 calls)
 0: trait_inferred_union_bounds.print_larger<0>
 print_larger(a##0:Type0<:{trait_inferred_union_bounds.comparable, trait_inferred_union_bounds.printable} <{}; {}; {0}>, b##0:Type0<:{trait_inferred_union_bounds.comparable, trait_inferred_union_bounds.printable} <{}; {}; {1}>, #vtable##0:opaque, #vtable##1:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     trait_inferred_union_bounds.comparable.<<0>(a##0:Type0, b##0:Type0, ?tmp#0##0:wybe.bool, ~#vtable##0:opaque)<{}; {}; {0, 1}> #0 @trait_inferred_union_bounds:nn:nn
     case ~tmp#0##0:wybe.bool of
@@ -64,7 +72,9 @@ print_larger(a##0:Type0<:{trait_inferred_union_bounds.comparable, trait_inferred
 proc println#adapter > {noinline} (0 calls)
 0: trait_inferred_union_bounds.println#adapter<0>
 println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_inferred_union_bounds.printable, ?x#adapter0##0:wybe.float)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @float:nn:nn
@@ -74,7 +84,9 @@ println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io
 proc println#adapter > {noinline} (0 calls)
 1: trait_inferred_union_bounds.println#adapter<1>
 println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_inferred_union_bounds.printable, ?x#adapter0##0:wybe.int)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
@@ -157,7 +169,9 @@ define external fastcc void @"trait_inferred_union_bounds#.println#adapter<1>"(i
 proc < > public abstract {inline} (0 calls)
 0: trait_inferred_union_bounds.comparable.<<0>
 <(a##0:Type0<:trait_inferred_union_bounds.comparable <{}; {}; {0}>, b##0:Type0<:trait_inferred_union_bounds.comparable <{}; {}; {1}>, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~a##0:Type0<:trait_inferred_union_bounds.comparable, ~b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool) #0
 
@@ -194,7 +208,9 @@ define external fastcc i1 @"trait_inferred_union_bounds#.comparable#.<<0>"(i64 %
 proc println > public abstract {inline} (0 calls)
 0: trait_inferred_union_bounds.printable.println<0>
 println(x##0:Type0<:trait_inferred_union_bounds.printable <{}; {}; {0}>, #vtable##0:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0
 

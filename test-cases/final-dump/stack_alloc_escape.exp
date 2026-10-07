@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: stack_alloc_escape.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     stack_alloc_escape.show#cont#3<0>(5:wybe.int, 0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stack_alloc_escape:nn:nn
 
@@ -24,7 +26,9 @@ module top-level code > public {inline,semipure} (0 calls)
 proc show > {inline} (1 calls)
 0: stack_alloc_escape.show<0>
 show(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     stack_alloc_escape.show#cont#3<0>(~n##0:wybe.int, 0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stack_alloc_escape:nn:nn
 
@@ -32,7 +36,9 @@ show(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc show#cont#1 > {inline} (1 calls)
 0: stack_alloc_escape.show#cont#1<0>
 show#cont#1(xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     stack_alloc_escape.show#cont#2<0>(~xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @stack_alloc_escape:nn:nn
 
@@ -40,7 +46,11 @@ show#cont#1(xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc show#cont#2 > (2 calls)
 0: stack_alloc_escape.show#cont#2<0>
 show#cont#2(tmp#3##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+      ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#3##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @stack_alloc_escape:nn:nn
     case ~tmp#7##0:wybe.bool of
@@ -63,7 +73,11 @@ show#cont#2(tmp#3##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}
 proc show#cont#3 > (2 calls)
 0: stack_alloc_escape.show#cont#3<0>
 show#cont#3(i##0:wybe.int, xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 1.Field 8 -> [ExtParam 1, ExtPhantom (ExtParam 1) (Field 8)]
+      ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(i##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @stack_alloc_escape:nn:nn
     case ~tmp#6##0:wybe.bool of
@@ -82,7 +96,9 @@ show#cont#3(i##0:wybe.int, xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.
 proc show#cont#4 > {inline} (1 calls)
 0: stack_alloc_escape.show#cont#4<0>
 show#cont#4(i##0:wybe.int, xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:wybe.list(wybe.int)) @stack_alloc_escape:nn:nn
     foreign lpvm mutate(~tmp#8##0:wybe.list(wybe.int), ?tmp#9##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, i##0:wybe.int) @stack_alloc_escape:nn:nn

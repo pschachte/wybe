@@ -19,7 +19,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_submodule_impl_vtable.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     trait_submodule_impl_vtable.my_eq.my_equal<0>(1:wybe.int, 2:wybe.int, ?tmp#0##0:wybe.bool, vtable(global,wybe.int <: trait_submodule_impl_vtable.my_eq):opaque)<{}; {}; {0, 1}> #2 @trait_submodule_impl_vtable:nn:nn
     wybe.bool.print<0>(~tmp#0##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @trait_submodule_impl_vtable:nn:nn
@@ -31,7 +33,9 @@ module top-level code > public {semipure} (0 calls)
 proc requires_eq > {inline} (1 calls)
 0: trait_submodule_impl_vtable.requires_eq<0>
 requires_eq(x##0:Type0<:trait_submodule_impl_vtable.my_eq <{}; {}; {0}>, y##0:Type0<:trait_submodule_impl_vtable.my_eq <{}; {}; {1}>, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     trait_submodule_impl_vtable.my_eq.my_equal<0>(~x##0:Type0<:trait_submodule_impl_vtable.my_eq, ~y##0:Type0<:trait_submodule_impl_vtable.my_eq, ?#success##0:wybe.bool, ~#vtable##0:opaque)<{}; {}; {0, 1}> #0 @trait_submodule_impl_vtable:nn:nn
 
@@ -76,7 +80,9 @@ define external fastcc i1 @"trait_submodule_impl_vtable#.requires_eq<0>"(i64 %"x
 proc my_equal > public abstract {inline} (0 calls)
 0: trait_submodule_impl_vtable.my_eq.my_equal<0>
 my_equal(a##0:Type0<:trait_submodule_impl_vtable.my_eq <{}; {}; {0}>, b##0:Type0<:trait_submodule_impl_vtable.my_eq <{}; {}; {1}>, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~a##0:Type0<:trait_submodule_impl_vtable.my_eq, ~b##0:Type0<:trait_submodule_impl_vtable.my_eq, ?#success##0:wybe.bool) #0
 
@@ -113,7 +119,9 @@ define external fastcc i1 @"trait_submodule_impl_vtable#.my_eq#.my_equal<0>"(i64
 proc my_equal > {inline} (1 calls)
 0: trait_submodule_impl_vtable.sub.my_equal<0>
 my_equal(a##0:wybe.int, b##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~a##0:wybe.int, ~b##0:wybe.int, ?#success##0:wybe.bool) @trait_submodule_impl_vtable:nn:nn
 
@@ -121,7 +129,9 @@ my_equal(a##0:wybe.int, b##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 proc my_equal#adapter > {noinline} (0 calls)
 0: trait_submodule_impl_vtable.sub.my_equal#adapter<0>
 my_equal#adapter(a##0:Type0<:trait_submodule_impl_vtable.my_eq, b##0:Type0<:trait_submodule_impl_vtable.my_eq, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~a##0:Type0<:trait_submodule_impl_vtable.my_eq, ?a#adapter0##0:wybe.int)
     foreign lpvm cast(~b##0:Type0<:trait_submodule_impl_vtable.my_eq, ?b#adapter1##0:wybe.int)

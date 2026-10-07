@@ -20,7 +20,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: foreign_def.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @foreign_def:nn:nn
     foreign c putchar(87:wybe.char, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @foreign_def:nn:nn
@@ -33,7 +35,9 @@ module top-level code > public {semipure} (0 calls)
 proc fmul > public {inline} (0 calls)
 0: foreign_def.fmul<0>
 fmul(x##0:wybe.float, y##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm fmul(~x##0:wybe.float, ~y##0:wybe.float, ?#result##0:wybe.float) @foreign_def:nn:nn
 
@@ -41,7 +45,9 @@ fmul(x##0:wybe.float, y##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 proc fmult > public {inline} (0 calls)
 0: foreign_def.fmult<0>
 fmult(x##0:wybe.float, y##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm fmul(~x##0:wybe.float, ~y##0:wybe.float, ?#result##0:wybe.float) @foreign_def:nn:nn
 
@@ -49,7 +55,9 @@ fmult(x##0:wybe.float, y##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 proc putc > public {inline} (2 calls)
 0: foreign_def.putc<0>
 putc(c##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%io##0:wybe.phantom) @foreign_def:nn:nn
     foreign c putchar(~c##0:wybe.char, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) @foreign_def:nn:nn
@@ -59,7 +67,9 @@ putc(c##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc putchar > public {inline} (2 calls)
 0: foreign_def.putchar<0>
 putchar(c##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%io##0:wybe.phantom) @foreign_def:nn:nn
     foreign c putchar(~c##0:wybe.char, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) @foreign_def:nn:nn

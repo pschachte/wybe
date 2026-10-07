@@ -35,7 +35,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: higher_order_resources.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#31##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
@@ -62,14 +64,18 @@ module top-level code > public {semipure} (0 calls)
 proc #anon#1 > {inline} (1 calls)
 0: higher_order_resources.#anon#1<0>
 #anon#1(anon#1#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.list.length1<0>(~anon#1#1##0:wybe.list(wybe.int), 0:wybe.int, ?tmp#10##0:wybe.int) #2 @higher_order_resources:nn:nn
     higher_order_resources.take_max<0>(~tmp#10##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #1 @higher_order_resources:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: higher_order_resources.#anon#1<1>
 #anon#1(anon#1#1##0 <{}; {}; {0}>)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.list.length1<0>(~anon#1#1##0:wybe.list(wybe.int), 0:wybe.int, ?tmp#36##0:wybe.int) #1 @higher_order_resources:nn:nn
     higher_order_resources.take_max<0>(~tmp#36##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #2 @higher_order_resources:nn:nn
@@ -78,7 +84,9 @@ proc #anon#1 > {inline} (1 calls)
 proc #anon#2 > {inline} (1 calls)
 0: higher_order_resources.#anon#2<0>
 #anon#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#34##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
@@ -95,7 +103,9 @@ proc #anon#2 > {inline} (1 calls)
 proc #anon#2 > {inline} (1 calls)
 1: higher_order_resources.#anon#2<1>
 #anon#2(anon#2#1##0 <{}; {}; {0}>)<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#36##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
@@ -114,7 +124,9 @@ proc #anon#2 > {inline} (1 calls)
 proc #anon#2#closure#1 > {inline} (1 calls)
 0: higher_order_resources.#anon#2#closure#1<0>
 #anon#2#closure#1(i##0 <{}; {}; {0}>)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     higher_order_resources.take_max<0>(~i##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #0
 
@@ -122,7 +134,9 @@ proc #anon#2#closure#1 > {inline} (1 calls)
 proc take_max > (3 calls)
 0: higher_order_resources.take_max<0>
 take_max(i##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##0:wybe.int) @higher_order_resources:nn:nn
     wybe.int.max<0>(~i##0:wybe.int, ~maximum##0:wybe.int, ?tmp#0##0:wybe.int) #0 @higher_order_resources:nn:nn

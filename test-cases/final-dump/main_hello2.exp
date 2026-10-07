@@ -19,7 +19,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: main_hello2.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("hello, ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @main_hello2:nn:nn
     wybe.string.print<0>("world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @main_hello2:nn:nn

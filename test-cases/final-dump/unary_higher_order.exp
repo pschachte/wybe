@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: unary_higher_order.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     unary_higher_order.main<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @unary_higher_order:nn:nn
 
@@ -24,7 +26,9 @@ module top-level code > public {inline,semipure} (0 calls)
 proc fetch_number > {inline} (1 calls)
 0: unary_higher_order.fetch_number<0>
 fetch_number(f##0:(?wybe.int), ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ~f##0:(?wybe.int)(?#result##0:wybe.int) #0 @unary_higher_order:nn:nn
 
@@ -32,7 +36,9 @@ fetch_number(f##0:(?wybe.int), ?#result##0:wybe.int)<{}; {}; {}>:
 proc main > {noinline} (1 calls)
 0: unary_higher_order.main<0>
 main()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     unary_higher_order.main#closure#1<0><>:(?wybe.int)(?tmp#0##0:wybe.int) #0 @unary_higher_order:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @unary_higher_order:nn:nn
@@ -43,7 +49,9 @@ main()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc main#closure#1 > {inline} (1 calls)
 0: unary_higher_order.main#closure#1<0>
 main#closure#1(?result##0)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(42:wybe.int, ?result##0:wybe.int) @unary_higher_order:nn:nn
 
@@ -51,7 +59,9 @@ main#closure#1(?result##0)<{}; {}; {}>:
 proc return_number > {inline} (1 calls)
 0: unary_higher_order.return_number<0>
 return_number(?result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(42:wybe.int, ?result##0:wybe.int) @unary_higher_order:nn:nn
 

@@ -19,7 +19,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_adapter_float.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     trait_adapter_float.my_trait.my_method<0>(3.14:wybe.float, ?tmp#0##0:wybe.float, vtable(global,wybe.float <: trait_adapter_float.my_trait):opaque)<{}; {}; {0}> #0 @trait_adapter_float:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @trait_adapter_float:nn:nn
@@ -31,7 +33,9 @@ module top-level code > public {semipure} (0 calls)
 proc my_method > public {inline} (1 calls)
 0: trait_adapter_float.my_method<0>
 my_method(x##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm fadd(~x##0:wybe.float, ~x##0:wybe.float, ?#result##0:wybe.float) @trait_adapter_float:nn:nn
 
@@ -39,7 +43,9 @@ my_method(x##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 proc my_method#adapter > {noinline} (0 calls)
 0: trait_adapter_float.my_method#adapter<0>
 my_method#adapter(x##0:Type0<:trait_adapter_float.my_trait, ?#result##0:Type0<:trait_adapter_float.my_trait)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_adapter_float.my_trait, ?x#adapter0##0:wybe.float)
     foreign llvm fadd(~x#adapter0##0:wybe.float, ~x#adapter0##0:wybe.float, ?#result#adapter1##0:wybe.float) @trait_adapter_float:nn:nn
@@ -94,7 +100,9 @@ define external fastcc i64 @"trait_adapter_float#.my_method#adapter<0>"(i64 %"x#
 proc my_method > public abstract {inline} (0 calls)
 0: trait_adapter_float.my_trait.my_method<0>
 my_method(x##0:Type0<:trait_adapter_float.my_trait <{}; {}; {0}>, ?#result##0:Type0<:trait_adapter_float.my_trait <{}; {}; {0}>, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_adapter_float.my_trait, ?#result##0:Type0<:trait_adapter_float.my_trait) #0
 

@@ -42,7 +42,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: char-escape.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     char-escape.test<0>(0:wybe.char, 0:wybe.int, "null":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @char-escape:nn:nn
     char-escape.test<0>(7:wybe.char, 7:wybe.int, "bell":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @char-escape:nn:nn
@@ -60,7 +62,29 @@ module top-level code > public {semipure} (0 calls)
 proc test > (10 calls)
 0: char-escape.test<0>
 test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges:
+      ExtParam 2.Field (-2) -> [ExtPhantom (ExtParam 2) (Field (-2))]
+      ExtParam 2.Field (-1) -> [ExtPhantom (ExtParam 2) (Field (-1))]
+      ExtParam 2.Field 6 -> [ExtPhantom (ExtParam 2) (Field 6)]
+      ExtParam 2.Field 7 -> [ExtPhantom (ExtParam 2) (Field 7)]
+      ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+      ExtPhantom (ExtParam 2) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 2) (Field (-2))]
+      ExtPhantom (ExtParam 2) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 2) (Field (-2))]
+      ExtPhantom (ExtParam 2) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 2) (Field (-2))]
+      ExtPhantom (ExtParam 2) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 2) (Field (-2))]
+      ExtPhantom (ExtParam 2) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 2) (Field (-2))]
+      ExtPhantom (ExtParam 2) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 2) (Field (-1))]
+      ExtPhantom (ExtParam 2) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 2) (Field (-1))]
+      ExtPhantom (ExtParam 2) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 2) (Field (-1))]
+      ExtPhantom (ExtParam 2) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 2) (Field (-1))]
+      ExtPhantom (ExtParam 2) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 2) (Field (-1))]
+      ExtPhantom (ExtParam 2) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 2) (Field 7)]
+      ExtPhantom (ExtParam 2) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 2) (Field 7)]
+      ExtPhantom (ExtParam 2) (Field 7).Field 6 -> [ExtPhantom (ExtParam 2) (Field 7)]
+      ExtPhantom (ExtParam 2) (Field 7).Field 7 -> [ExtPhantom (ExtParam 2) (Field 7)]
+      ExtPhantom (ExtParam 2) (Field 7).Field 8 -> [ExtPhantom (ExtParam 2) (Field 7)]
+    escape: []
   InterestingCallProperties: [InterestingUnaliased 2]
   MultiSpeczDepInfo: [(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [2]]))]
     foreign lpvm cast(~ch##0:wybe.char, ?tmp#0##0:wybe.int) @char-escape:nn:nn

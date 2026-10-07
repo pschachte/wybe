@@ -17,7 +17,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: proc_factorial.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     proc_factorial.factorial#cont#1<0>(5:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) #2 @proc_factorial:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @proc_factorial:nn:nn
@@ -29,7 +31,9 @@ module top-level code > public {semipure} (0 calls)
 proc factorial > public {inline} (1 calls)
 0: proc_factorial.factorial<0>
 factorial(n##0:wybe.int, ?result##1:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     proc_factorial.factorial#cont#1<0>(~n##0:wybe.int, 1:wybe.int, ?result##1:wybe.int) #0 @proc_factorial:nn:nn
 
@@ -37,7 +41,9 @@ factorial(n##0:wybe.int, ?result##1:wybe.int)<{}; {}; {}>:
 proc factorial#cont#1 > (2 calls)
 0: proc_factorial.factorial#cont#1<0>
 factorial#cont#1(n##0:wybe.int, result##0:wybe.int, ?result##1:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(n##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.bool) @proc_factorial:nn:nn
     case ~tmp#2##0:wybe.bool of
@@ -54,7 +60,9 @@ factorial#cont#1(n##0:wybe.int, result##0:wybe.int, ?result##1:wybe.int)<{}; {};
 proc factorial#cont#2 > {inline} (1 calls)
 0: proc_factorial.factorial#cont#2<0>
 factorial#cont#2(n##0:wybe.int, result##0:wybe.int, ?result##2:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm mul(n##0:wybe.int, ~result##0:wybe.int, ?tmp#0##0:wybe.int) @proc_factorial:nn:nn
     foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @proc_factorial:nn:nn

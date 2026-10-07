@@ -21,7 +21,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_output_only_adapter.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     trait_output_only_adapter.from_string.from_string<0>("123":wybe.string, ?tmp#0##0:wybe.int, vtable(global,wybe.int <: trait_output_only_adapter.from_string):opaque) #1 @trait_output_only_adapter:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @trait_output_only_adapter:nn:nn
@@ -33,7 +35,9 @@ module top-level code > public {semipure} (0 calls)
 proc from_string > public {inline} (1 calls)
 0: trait_output_only_adapter.from_string<0>
 from_string([x##0:wybe.string], ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(123:wybe.int, ?#result##0:wybe.int) @trait_output_only_adapter:nn:nn
 
@@ -41,7 +45,9 @@ from_string([x##0:wybe.string], ?#result##0:wybe.int)<{}; {}; {}>:
 proc from_string#adapter > {noinline} (0 calls)
 0: trait_output_only_adapter.from_string#adapter<0>
 from_string#adapter(x##0:wybe.string, ?#result##0:Type0<:trait_output_only_adapter.from_string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(123:Type0<:trait_output_only_adapter.from_string, ?#result##0:Type0<:trait_output_only_adapter.from_string)
 
@@ -91,7 +97,9 @@ define external fastcc i64 @"trait_output_only_adapter#.from_string#adapter<0>"(
 proc from_string > public abstract {inline} (0 calls)
 0: trait_output_only_adapter.from_string.from_string<0>
 from_string(x##0:wybe.string, ?#result##0:Type0<:trait_output_only_adapter.from_string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:wybe.string, ?#result##0:Type0<:trait_output_only_adapter.from_string) #0
 
