@@ -31,7 +31,6 @@ append(x##0:generic_list(T) <{}; {}; {0}>, y##0:generic_list(T) <{}; {}; {1}>, o
       ExtReturn 2.Field 8 -> [ExtParam 1]
       ExtReturn 2.FieldIdent -> [ExtParam 1]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(generic_list.append<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @generic_list:nn:nn
@@ -54,7 +53,6 @@ proc car > public {inline} (0 calls)
 car(#rec##0:generic_list(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -71,7 +69,6 @@ proc car > public {inline} (0 calls)
 car(#rec##0:generic_list(T) <{}; {}; {0}>, ?#rec##1:generic_list(T) <{}; {}; {0, 2}>, #field##0:T <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -90,7 +87,6 @@ proc cdr > public {inline} (0 calls)
 cdr(#rec##0:generic_list(T) <{}; {}; {0}>, ?#result##0:generic_list(T) <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -107,7 +103,6 @@ proc cdr > public {inline} (0 calls)
 cdr(#rec##0:generic_list(T) <{}; {}; {0}>, ?#rec##1:generic_list(T) <{}; {}; {0, 2}>, #field##0:generic_list(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -126,7 +121,6 @@ proc cons > public {inline} (1 calls)
 cons(car##0:T <{}; {}; {0}>, cdr##0:generic_list(T) <{}; {}; {1}>, ?#result##0:generic_list(T) <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:generic_list(T)) @generic_list:nn:nn
     foreign lpvm mutate(~#rec##0:generic_list(T), ?#rec##1:generic_list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~car##0:T) @generic_list:nn:nn
@@ -136,7 +130,6 @@ proc cons > public {inline} (6 calls)
 cons(?car##0:T <{}; {}; {2}>, ?cdr##0:generic_list(T) <{}; {}; {2}>, #result##0:generic_list(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -157,7 +150,6 @@ proc length > public {inline} (0 calls)
 length(x##0:generic_list(T) <{}; {}; {0}>, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     generic_list.length1<0>(~x##0:generic_list(T), 0:wybe.int, ?#result##0:wybe.int) #0 @generic_list:nn:nn
 
@@ -169,7 +161,6 @@ length1(x##0:generic_list(T) <{}; {}; {0}>, acc##0:wybe.int, ?#result##0:wybe.in
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @generic_list:nn:nn
     case ~tmp#5##0:wybe.bool of
@@ -188,7 +179,6 @@ proc nil > public {inline} (0 calls)
 nil(?#result##0:generic_list(T))<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:generic_list(T), ?#result##0:generic_list(T))
 
@@ -379,7 +369,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(8,(generic_use.nrev<0>,fromList [NonAliasedParamCond 0 []])),(15,(generic_use.reverse1<0>,fromList [NonAliasedParamCond 0 []]))]
     generic_use.fromto1<0>(1:wybe.int, 5:wybe.int, 0:generic_list(wybe.int), ?tmp#0##0:generic_list(wybe.int)) #10 @generic_use:nn:nn
@@ -419,7 +408,6 @@ concat(l1##0:generic_list(T) <{}; {}; {0}>, l2##0:generic_list(T) <{}; {}; {1}>,
       ExtReturn 2.Field 8 -> [ExtParam 1]
       ExtReturn 2.FieldIdent -> [ExtParam 1]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(generic_use.concat<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(l1##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @generic_use:nn:nn
@@ -453,7 +441,6 @@ proc fromto > public {inline} (2 calls)
 fromto(lo##0:wybe.int, hi##0:wybe.int, ?#result##0:generic_list(wybe.int))<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     generic_use.fromto1<0>(~lo##0:wybe.int, ~hi##0:wybe.int, 0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)) #1 @generic_use:nn:nn
 
@@ -465,7 +452,6 @@ fromto1(lo##0:wybe.int, hi##0:wybe.int, sofar##0:generic_list(wybe.int), ?#resul
     edges:
       ExtReturn 3.Field 8 -> [ExtParam 2, ExtReturn 3]
       ExtReturn 3.FieldIdent -> [ExtParam 2]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sge(hi##0:wybe.int, lo##0:wybe.int, ?tmp#4##0:wybe.bool) @generic_use:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -486,7 +472,6 @@ proc iota > public {inline} (1 calls)
 iota(n##0:wybe.int, ?#result##0:generic_list(wybe.int))<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     generic_use.fromto1<0>(1:wybe.int, ~n##0:wybe.int, 0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)) #1 @generic_use:nn:nn
 
@@ -499,7 +484,6 @@ nrev(lst##0:generic_list(T) <{}; {}; {0}>, ?#result##0:generic_list(T) <{}; {}; 
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtReturn 1.Field 8 -> [ExtReturn 1]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(generic_use.nrev<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(generic_use.concat<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool) @generic_use:nn:nn
@@ -537,7 +521,6 @@ print(lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @generic_use:nn:nn
     foreign c putchar(91:wybe.char, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @generic_use:nn:nn
@@ -566,7 +549,6 @@ print_tail(lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @generic_use:nn:nn
     case ~tmp#3##0:wybe.bool of
@@ -588,7 +570,6 @@ proc println > {inline} (5 calls)
 println(lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     generic_use.print<0>(~lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @generic_use:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @generic_use:nn:nn
@@ -601,7 +582,6 @@ proc reverse > public {inline} (1 calls)
 reverse(lst##0:generic_list(T) <{}; {}; {0}>, ?#result##0:generic_list(T) <{}; {}; {0}>)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     generic_use.reverse1<0>(~lst##0:generic_list(T), 0:generic_list(T), ?#result##0:generic_list(T)) #1 @generic_use:nn:nn
 
@@ -615,7 +595,6 @@ reverse1(lst##0:generic_list(T) <{}; {}; {0}>, suffix##0:generic_list(T) <{}; {}
       ExtReturn 2.Field 8 -> [ExtParam 1, ExtReturn 2]
       ExtReturn 2.FieldIdent -> [ExtParam 1]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(generic_use.reverse1<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @generic_use:nn:nn

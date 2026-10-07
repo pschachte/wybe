@@ -19,7 +19,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @func_let:nn:nn
     foreign c print_int(40:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @func_let:nn:nn
@@ -31,7 +30,6 @@ proc quad > public {inline} (1 calls)
 quad(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, ~x##0:wybe.int, ?tmp#0##0:wybe.int) @func_let:nn:nn
     foreign llvm add(~tmp#0##0:wybe.int, ~tmp#0##0:wybe.int, ?#result##0:wybe.int) @func_let:nn:nn

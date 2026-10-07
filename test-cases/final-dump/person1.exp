@@ -34,7 +34,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("Wang":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @person1:nn:nn
 
@@ -81,7 +80,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:person1.person, #right##0:person1.person, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string) @person1:nn:nn
     foreign lpvm access(~#left##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lastname##0:wybe.string) @person1:nn:nn
@@ -104,7 +102,6 @@ proc firstname > public {inline} (0 calls)
 firstname(#rec##0:person1.person, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person1:nn:nn
 proc firstname > public {inline} (0 calls)
@@ -112,7 +109,6 @@ proc firstname > public {inline} (0 calls)
 firstname(#rec##0:person1.person, ?#rec##1:person1.person, #field##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person1:nn:nn
 
@@ -122,7 +118,6 @@ proc lastname > public {inline} (0 calls)
 lastname(#rec##0:person1.person, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person1:nn:nn
 proc lastname > public {inline} (0 calls)
@@ -130,7 +125,6 @@ proc lastname > public {inline} (0 calls)
 lastname(#rec##0:person1.person, ?#rec##1:person1.person, #field##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person1:nn:nn
 
@@ -140,7 +134,6 @@ proc person > public {inline} (0 calls)
 person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person1.person)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:person1.person) @person1:nn:nn
     foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname##0:wybe.string) @person1:nn:nn
@@ -150,7 +143,6 @@ proc person > public {inline} (6 calls)
 person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person1.person)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string) @person1:nn:nn
     foreign lpvm access(~#result##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string) @person1:nn:nn
@@ -161,7 +153,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:person1.person, #right##0:person1.person, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @person1:nn:nn
     foreign lpvm access(~#left##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string) @person1:nn:nn

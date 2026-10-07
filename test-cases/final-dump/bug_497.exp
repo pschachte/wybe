@@ -19,7 +19,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     bug_497.call<0>(bug_497.#anon#1<1><3>:(wybe.int, ?wybe.bool), 2:wybe.int, ?tmp#0##0:wybe.bool) #0 @bug_497:nn:nn
     wybe.bool.print<0>(~tmp#0##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @bug_497:nn:nn
@@ -38,7 +37,6 @@ proc #anon#1 > {inline} (1 calls)
 #anon#1(^p##0:wybe.int, anon#1#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.int.fmt<2>(p##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#2##0:wybe.string) #8 @bug_497:nn:nn
     wybe.int.fmt<2>(~anon#1#1##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#4##0:wybe.string) #9 @bug_497:nn:nn
@@ -53,7 +51,6 @@ proc #anon#1 > {inline} (1 calls)
 #anon#1(^p##0:wybe.int, anon#1#1##0 <{}; {}; {1}>, ?#success##0)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.int.fmt<2>(^p##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#9##0:wybe.string) #1 @bug_497:nn:nn
     wybe.int.fmt<2>(~anon#1#1##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#10##0:wybe.string) #2 @bug_497:nn:nn
@@ -70,7 +67,6 @@ proc call > {noinline} (2 calls)
 call(f##0:(X, ?wybe.bool) <{}; {}; {0}>, x##0:X <{}; {}; {1}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     ~f##0:(X, ?wybe.bool)(~x##0:X, ?#success##0:wybe.bool) #0 @bug_497:nn:nn
 
@@ -80,7 +76,6 @@ proc proc > {noinline} (1 calls)
 proc(p##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     bug_497.call<0>(bug_497.proc#anon#1<1><^p##0:wybe.int>:(wybe.int, ?wybe.bool), 2:wybe.int, ?#success##0:wybe.bool) #0 @bug_497:nn:nn
 
@@ -90,7 +85,6 @@ proc proc#anon#1 > {inline} (1 calls)
 proc#anon#1(^p##0:wybe.int, anon#1#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.int.fmt<2>(p##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #8 @bug_497:nn:nn
     wybe.int.fmt<2>(~anon#1#1##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#3##0:wybe.string) #9 @bug_497:nn:nn
@@ -105,7 +99,6 @@ proc proc#anon#1 > {inline} (1 calls)
 proc#anon#1(^p##0:wybe.int, anon#1#1##0 <{}; {}; {1}>, ?#success##0)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.int.fmt<2>(^p##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#8##0:wybe.string) #1 @bug_497:nn:nn
     wybe.int.fmt<2>(~anon#1#1##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#9##0:wybe.string) #2 @bug_497:nn:nn
@@ -250,7 +243,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_int(~x##0:wybe.int) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -258,7 +250,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.int64)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_int64(~x##0:wybe.int64) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -266,7 +257,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.int32)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_int32(~x##0:wybe.int32) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -274,7 +264,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.int16)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_int16(~x##0:wybe.int16) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -282,7 +271,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.int8)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_int8(~x##0:wybe.int8) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -290,7 +278,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.count)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_count(~x##0:wybe.count) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -298,7 +285,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.count64)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_count64(~x##0:wybe.count64) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -306,7 +292,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.count32)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_count32(~x##0:wybe.count32) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -314,7 +299,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.count16)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_count16(~x##0:wybe.count16) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -322,7 +306,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.count8)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_count8(~x##0:wybe.count8) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -330,7 +313,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.float)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_float(~x##0:wybe.float) @logging:nn:nn
 proc logmsg > public {inline,semipure} (1 calls)
@@ -338,7 +320,6 @@ proc logmsg > public {inline,semipure} (1 calls)
 logmsg(x##0:wybe.char)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_char(~x##0:wybe.char) @logging:nn:nn
 proc logmsg > public {inline,semipure} (0 calls)
@@ -346,7 +327,6 @@ proc logmsg > public {inline,semipure} (0 calls)
 logmsg(x##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.c_string<0>(~x##0:wybe.string, ?tmp#0##0:wybe.c_string) #0 @logging:nn:nn
     foreign c {impure} log_string(~tmp#0##0:wybe.c_string) @logging:nn:nn
@@ -355,7 +335,6 @@ proc logmsg > public {inline,semipure} (3 calls)
 logmsg(x##0:wybe.c_string)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_string(~x##0:wybe.c_string) @logging:nn:nn
 proc logmsg > public {semipure} (0 calls)
@@ -363,7 +342,6 @@ proc logmsg > public {semipure} (0 calls)
 logmsg(x##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     factored ~x##0:wybe.bool of
       ?tmp#4##0:wybe.c_string <- logging#constant#2[PointerStructMember c"false",PointerStructMember c"true"]
@@ -375,7 +353,6 @@ proc lognl > public {inline,semipure} (0 calls)
 lognl()<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign c {impure} log_char(10:wybe.char) @logging:nn:nn
 

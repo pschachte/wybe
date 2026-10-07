@@ -30,7 +30,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("all good":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @disjunctive-cond:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @disjunctive-cond:nn:nn
@@ -44,7 +43,6 @@ proc #cont#1 > {semipure} (3 calls)
 #cont#1(a##0:wybe.bool, b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     case ~a##0:wybe.bool of
     0:
@@ -70,7 +68,6 @@ proc #cont#2 > {semipure} (2 calls)
 #cont#2(a##0:wybe.bool, b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     case ~a##0:wybe.bool of
     0:
@@ -92,7 +89,6 @@ proc #cont#3 > {semipure} (7 calls)
 #cont#3(a##0:wybe.bool, b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     case ~a##0:wybe.bool of
     0:
@@ -116,7 +112,6 @@ proc #cont#4 > {inline,semipure} (2 calls)
 #cont#4(a##0:wybe.bool, b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("also good":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @disjunctive-cond:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @disjunctive-cond:nn:nn
@@ -130,7 +125,6 @@ proc #cont#5 > {inline,semipure} (2 calls)
 #cont#5(a##0:wybe.bool, b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("all good":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @disjunctive-cond:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @disjunctive-cond:nn:nn
@@ -144,7 +138,6 @@ proc #cont#6 > {inline,semipure} (2 calls)
 #cont#6(a##0:wybe.bool, b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("no good":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @disjunctive-cond:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @disjunctive-cond:nn:nn

@@ -56,7 +56,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(36,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<failure_backtrack.r>>:wybe.int, ?%tmp#189##0:wybe.int) @failure_backtrack:nn:nn
@@ -87,7 +86,6 @@ proc #cont#1 > {semipure} (3 calls)
 #cont#1(tmp#189##0:wybe.int, tmp#190##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(37,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#12##0:wybe.string) #29 @failure_backtrack:nn:nn
@@ -135,7 +133,6 @@ proc #cont#2 > {semipure} (2 calls)
 #cont#2(tmp#189##0:wybe.int, tmp#190##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(37,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#27##0:wybe.string) #29 @failure_backtrack:nn:nn
@@ -182,7 +179,6 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3(tmp#189##0:wybe.int, tmp#190##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(75,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(80,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#42##0:wybe.string) #63 @failure_backtrack:nn:nn
@@ -262,7 +258,6 @@ proc #cont#4 > {semipure} (3 calls)
 #cont#4(tmp#189##0:wybe.int, tmp#190##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(44,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#69##0:wybe.string) #35 @failure_backtrack:nn:nn
@@ -312,7 +307,6 @@ proc #cont#5 > {semipure} (2 calls)
 #cont#5(tmp#189##0:wybe.int, tmp#190##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(41,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(46,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#91##0:wybe.string) #37 @failure_backtrack:nn:nn
@@ -373,7 +367,6 @@ proc #cont#6 > {semipure} (3 calls)
 #cont#6(tmp#189##0:wybe.int, tmp#190##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(20,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#113##0:wybe.string) #16 @failure_backtrack:nn:nn
@@ -402,7 +395,6 @@ proc nope > {noinline} (17 calls)
 nope(?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
@@ -412,7 +404,6 @@ proc nope2 > {noinline} (6 calls)
 nope2(?value##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(2:wybe.int, ?value##0:wybe.int) @failure_backtrack:nn:nn
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -423,7 +414,6 @@ proc yup > {noinline} (5 calls)
 yup(?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 

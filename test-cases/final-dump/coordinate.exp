@@ -35,7 +35,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(coordinate#constant#2:coordinate.Coordinate, ?crd1##1:coordinate.Coordinate, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int) @coordinate:nn:nn
     wybe.string.print<0>("expect crd1^z=8000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @coordinate:nn:nn
@@ -56,7 +55,6 @@ proc fcopy > public {inline} (1 calls)
 fcopy(crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(~crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate) @coordinate:nn:nn
 
@@ -129,7 +127,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:coordinate.Coordinate, #right##0:coordinate.Coordinate, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int) @coordinate:nn:nn
     foreign lpvm access(#left##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#y##0:wybe.int) @coordinate:nn:nn
@@ -159,7 +156,6 @@ proc Coordinate > public {inline} (0 calls)
 Coordinate(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, ?#result##0:coordinate.Coordinate)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:coordinate.Coordinate) @coordinate:nn:nn
     foreign lpvm mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~x##0:wybe.int) @coordinate:nn:nn
@@ -170,7 +166,6 @@ proc Coordinate > public {inline} (10 calls)
 Coordinate(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, #result##0:coordinate.Coordinate)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?x##0:wybe.int) @coordinate:nn:nn
     foreign lpvm access(#result##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?y##0:wybe.int) @coordinate:nn:nn
@@ -182,7 +177,6 @@ proc x > public {inline} (0 calls)
 x(#rec##0:coordinate.Coordinate, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @coordinate:nn:nn
 proc x > public {inline} (0 calls)
@@ -190,7 +184,6 @@ proc x > public {inline} (0 calls)
 x(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @coordinate:nn:nn
 
@@ -200,7 +193,6 @@ proc y > public {inline} (0 calls)
 y(#rec##0:coordinate.Coordinate, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @coordinate:nn:nn
 proc y > public {inline} (0 calls)
@@ -208,7 +200,6 @@ proc y > public {inline} (0 calls)
 y(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @coordinate:nn:nn
 
@@ -218,7 +209,6 @@ proc z > public {inline} (0 calls)
 z(#rec##0:coordinate.Coordinate, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @coordinate:nn:nn
 proc z > public {inline} (0 calls)
@@ -226,7 +216,6 @@ proc z > public {inline} (0 calls)
 z(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @coordinate:nn:nn
 
@@ -236,7 +225,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:coordinate.Coordinate, #right##0:coordinate.Coordinate, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @coordinate:nn:nn
     foreign lpvm access(#left##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @coordinate:nn:nn

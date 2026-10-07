@@ -18,7 +18,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.bool.print<0>(1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @inequality:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @inequality:nn:nn

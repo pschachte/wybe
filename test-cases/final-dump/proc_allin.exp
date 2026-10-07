@@ -18,7 +18,6 @@ proc nada > public {inline} (0 calls)
 nada([x##0:wybe.int], [y##0:wybe.int])<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
   LLVM code       :

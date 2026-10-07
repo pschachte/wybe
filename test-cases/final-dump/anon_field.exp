@@ -38,7 +38,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm or(1:wybe.int, anon_field#constant#4:anon_field, ?tmp#2##0:anon_field) @anon_field:nn:nn
     anon_field.=<0>(anon_field#constant#6:anon_field, ~tmp#2##0:anon_field, ?tmp#21##0:wybe.bool) #3 @anon_field:nn:nn
@@ -60,7 +59,6 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(3:2 bit unsigned, anon_field#constant#6:2 bit unsigned, ?tmp#28##0:2 bit unsigned) @anon_field:nn:nn
     foreign llvm icmp_eq(~tmp#28##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#29##0:wybe.bool) @anon_field:nn:nn
@@ -82,7 +80,6 @@ proc #cont#2 > {semipure} (3 calls)
 #cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     anon_field.=<0>(anon_field#constant#6:anon_field, anon_field#constant#7:anon_field, ?tmp#18##0:wybe.bool) #4 @anon_field:nn:nn
     case ~tmp#18##0:wybe.bool of
@@ -103,7 +100,6 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm or(2:wybe.int, anon_field#constant#4:anon_field, ?tmp#11##0:anon_field) @anon_field:nn:nn
     foreign llvm and(tmp#11##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#22##0:2 bit unsigned) @anon_field:nn:nn
@@ -131,7 +127,6 @@ proc = > public (7 calls)
 =(#left##0:anon_field, #right##0:anon_field, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#left##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#13##0:2 bit unsigned)
     case ~tmp#13##0:2 bit unsigned of
@@ -202,7 +197,6 @@ proc bar > {inline} (3 calls)
 bar(bar#1##0:wybe.int, ?#result##0:anon_field)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~#rec##0:anon_field, ?#rec##1:anon_field, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~bar#1##0:wybe.int) @anon_field:nn:nn
@@ -212,7 +206,6 @@ proc bar > {inline} (12 calls)
 bar(?bar#1##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 1:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -232,7 +225,6 @@ proc baz > {inline} (5 calls)
 baz(field##0:wybe.int, ?#result##0:anon_field)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~#rec##0:anon_field, ?#rec##1:anon_field, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~field##0:wybe.int) @anon_field:nn:nn
@@ -242,7 +234,6 @@ proc baz > {inline} (8 calls)
 baz(?field##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -262,7 +253,6 @@ proc field > {inline} (5 calls)
 field(#rec##0:anon_field, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -280,7 +270,6 @@ proc field > {inline} (0 calls)
 field(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 2:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -300,7 +289,6 @@ proc foo > {inline} (14 calls)
 foo(foo#1##0:wybe.int, foo#2##0:wybe.bool, i##0:wybe.int, ?#result##0:anon_field)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~#rec##0:anon_field, ?#rec##1:anon_field, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~foo#2##0:wybe.bool) @anon_field:nn:nn
@@ -311,7 +299,6 @@ proc foo > {inline} (24 calls)
 foo(?foo#1##0:wybe.int, ?foo#2##0:wybe.bool, ?i##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -335,7 +322,6 @@ proc i > {inline} (5 calls)
 i(#rec##0:anon_field, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -353,7 +339,6 @@ proc i > {inline} (0 calls)
 i(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:2 bit unsigned, 3:2 bit unsigned, ?tmp#1##0:2 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:2 bit unsigned, 0:2 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -373,7 +358,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:anon_field, #right##0:anon_field, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     anon_field.=<0>(~#left##0:anon_field, ~#right##0:anon_field, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -748,7 +732,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:anon_field.quux, #right##0:anon_field.quux, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:anon_field.quux, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#quuz#1##0:wybe.int) @anon_field:nn:nn
     foreign lpvm access(~#left##0:anon_field.quux, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#j##0:wybe.int) @anon_field:nn:nn
@@ -769,7 +752,6 @@ proc j > public {inline} (0 calls)
 j(#rec##0:anon_field.quux, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:anon_field.quux, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @anon_field:nn:nn
 proc j > public {inline} (0 calls)
@@ -777,7 +759,6 @@ proc j > public {inline} (0 calls)
 j(#rec##0:anon_field.quux, ?#rec##1:anon_field.quux, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:anon_field.quux, ?#rec##1:anon_field.quux, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @anon_field:nn:nn
 
@@ -787,7 +768,6 @@ proc quuz > public {inline} (0 calls)
 quuz(quuz#1##0:wybe.int, j##0:wybe.int, ?#result##0:anon_field.quux)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:anon_field.quux) @anon_field:nn:nn
     foreign lpvm mutate(~#rec##0:anon_field.quux, ?#rec##1:anon_field.quux, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~quuz#1##0:wybe.int) @anon_field:nn:nn
@@ -797,7 +777,6 @@ proc quuz > public {inline} (6 calls)
 quuz(?quuz#1##0:wybe.int, ?j##0:wybe.int, #result##0:anon_field.quux)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:anon_field.quux, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?quuz#1##0:wybe.int) @anon_field:nn:nn
     foreign lpvm access(~#result##0:anon_field.quux, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?j##0:wybe.int) @anon_field:nn:nn
@@ -808,7 +787,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:anon_field.quux, #right##0:anon_field.quux, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:anon_field.quux, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @anon_field:nn:nn
     foreign lpvm access(~#left##0:anon_field.quux, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @anon_field:nn:nn

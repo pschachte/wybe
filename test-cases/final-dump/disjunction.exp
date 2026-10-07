@@ -23,7 +23,6 @@ in(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}; {}
     edges:
       ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
       ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#6##0:wybe.bool of
@@ -51,7 +50,6 @@ member(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}
     edges:
       ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
       ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -78,7 +76,6 @@ saturating_tail(lst##0:wybe.list(T) <{}; {}; {0}>, ?tl##0:wybe.list(T) <{}; {}; 
   AliasSummary:
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -96,7 +93,6 @@ saturating_tail2(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.list(T) <{}
   AliasSummary:
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#5##0:wybe.bool of

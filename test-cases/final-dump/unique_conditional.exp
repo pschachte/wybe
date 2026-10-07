@@ -20,7 +20,6 @@ proc bar > public {inline} (1 calls)
 bar([a##0:unique_conditional])<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -29,7 +28,6 @@ proc baz > public {inline} (1 calls)
 baz([a##0:unique_conditional])<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
 
@@ -38,7 +36,6 @@ proc foo > {inline} (0 calls)
 foo(b##0:wybe.bool, [a##0:unique_conditional])<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
 
   LLVM code       :

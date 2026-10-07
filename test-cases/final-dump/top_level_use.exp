@@ -18,7 +18,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<top_level_use.res>>, <<wybe.io.io>>}; {<<top_level_use.res>>, <<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @top_level_use:nn:nn
     foreign c print_int(0:wybe.int, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @top_level_use:nn:nn

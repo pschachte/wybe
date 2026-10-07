@@ -19,7 +19,6 @@ proc double > public {inline} (2 calls)
 double(a##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm add(~a##0:wybe.int, ~a##0:wybe.int, ?#result##0:wybe.int) @func_quadruple:nn:nn
 
@@ -29,7 +28,6 @@ proc quadruple > public {inline} (0 calls)
 quadruple(a##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm add(~a##0:wybe.int, ~a##0:wybe.int, ?tmp#1##0:wybe.int) @func_quadruple:nn:nn
     foreign llvm add(~tmp#1##0:wybe.int, ~tmp#1##0:wybe.int, ?#result##0:wybe.int) @func_quadruple:nn:nn

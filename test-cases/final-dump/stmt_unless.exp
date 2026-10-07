@@ -19,7 +19,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_unless.#cont#1<0>(10:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @stmt_unless:nn:nn
 
@@ -29,7 +28,6 @@ proc #cont#1 > {semipure} (3 calls)
 #cont#1(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(n##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @stmt_unless:nn:nn
     case ~tmp#3##0:wybe.bool of
@@ -45,7 +43,6 @@ proc #cont#2 > {semipure} (1 calls)
 #cont#2(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @stmt_unless:nn:nn
     foreign llvm urem(tmp#0##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.int) @stmt_unless:nn:nn
@@ -68,7 +65,6 @@ proc mod > public {inline} (3 calls)
 mod(x##0:wybe.int, y##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm urem(~x##0:wybe.int, ~y##0:wybe.int, ?#result##0:wybe.int) @stmt_unless:nn:nn
 

@@ -84,7 +84,6 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("single_generator:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #39 @stmt_for:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @stmt_for:nn:nn
@@ -162,7 +161,6 @@ proc irange > public (2 calls)
 irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(stride##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -187,7 +185,6 @@ proc multiple_generator > public {inline} (1 calls)
 multiple_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.multiple_generator#cont#1<0>(stmt_for#constant#19:wybe.list(wybe.int), stmt_for#constant#24:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
 
@@ -201,7 +198,6 @@ multiple_generator#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.
       ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#15##0:wybe.bool of
@@ -233,7 +229,6 @@ proc semi_det_for_loop > public (0 calls)
 semi_det_for_loop(?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.xrange<0>(0:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
     stmt_for.semi_det_for_loop#cont#1<0>(~tmp#1##0:stmt_for.int_sequence, ?#success##0:wybe.bool) #1 @stmt_for:nn:nn
@@ -244,7 +239,6 @@ proc semi_det_for_loop#cont#1 > (2 calls)
 semi_det_for_loop#cont#1(tmp#0##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#4##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -268,7 +262,6 @@ proc shortest_generator_termination > public {inline} (1 calls)
 shortest_generator_termination()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.shortest_generator_termination#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int), stmt_for#constant#21:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
 
@@ -282,7 +275,6 @@ shortest_generator_termination#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wyb
       ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#15##0:wybe.bool of
@@ -314,7 +306,6 @@ proc single_generator > public {inline} (1 calls)
 single_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.single_generator#cont#1<0>(stmt_for#constant#19:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_for:nn:nn
 
@@ -326,7 +317,6 @@ single_generator#cont#1(tmp#4##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#4##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#8##0:wybe.bool of
@@ -348,7 +338,6 @@ proc using_break > public {inline} (1 calls)
 using_break()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.using_break#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
@@ -360,7 +349,6 @@ using_break#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -388,7 +376,6 @@ proc using_irange > public {inline} (1 calls)
 using_irange()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
     stmt_for.using_irange#cont#1<0>(~tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stmt_for:nn:nn
@@ -399,7 +386,6 @@ proc using_irange#cont#1 > (2 calls)
 using_irange#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#3##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#3##0:wybe.bool of
@@ -419,7 +405,6 @@ proc using_irange_reverse > public {inline} (1 calls)
 using_irange_reverse()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
     stmt_for.using_irange_reverse#cont#1<0>(~tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stmt_for:nn:nn
@@ -430,7 +415,6 @@ proc using_irange_reverse#cont#1 > (2 calls)
 using_irange_reverse#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#3##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#3##0:wybe.bool of
@@ -450,7 +434,6 @@ proc using_next > public {inline} (1 calls)
 using_next()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.using_next#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
@@ -462,7 +445,6 @@ using_next#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -491,7 +473,6 @@ proc using_unless > public {inline} (1 calls)
 using_unless()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.using_unless#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
@@ -503,7 +484,6 @@ using_unless#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.i
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -532,7 +512,6 @@ proc using_until > public {inline} (1 calls)
 using_until()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.using_until#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
@@ -544,7 +523,6 @@ using_until#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -572,7 +550,6 @@ proc using_when > public {inline} (1 calls)
 using_when()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.using_when#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
@@ -584,7 +561,6 @@ using_when#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -613,7 +589,6 @@ proc using_while > public {inline} (1 calls)
 using_while()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.using_while#cont#1<0>(stmt_for#constant#16:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
@@ -625,7 +600,6 @@ using_while#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
     edges:
       ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
       ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    escape: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -653,7 +627,6 @@ proc using_xrange > public {inline} (1 calls)
 using_xrange()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
     stmt_for.using_xrange#cont#1<0>(~tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stmt_for:nn:nn
@@ -664,7 +637,6 @@ proc using_xrange#cont#1 > (2 calls)
 using_xrange#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#3##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#3##0:wybe.bool of
@@ -684,7 +656,6 @@ proc using_xrange_reverse > public {inline} (1 calls)
 using_xrange_reverse()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
     stmt_for.using_xrange_reverse#cont#1<0>(~tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stmt_for:nn:nn
@@ -695,7 +666,6 @@ proc using_xrange_reverse#cont#1 > (2 calls)
 using_xrange_reverse#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#3##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#3##0:wybe.bool of
@@ -715,7 +685,6 @@ proc xrange > public (3 calls)
 xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#4##0:stmt_for.int_sequence) @stmt_for:nn:nn
     foreign lpvm mutate(~tmp#4##0:stmt_for.int_sequence, ?tmp#5##0:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start##0:wybe.int) @stmt_for:nn:nn
@@ -1257,7 +1226,6 @@ proc = > public {inline} (1 calls)
 =(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#start##0:wybe.int) @stmt_for:nn:nn
     foreign lpvm access(#left##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#stride##0:wybe.int) @stmt_for:nn:nn
@@ -1287,7 +1255,6 @@ proc [|] > public (0 calls)
 [|](?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, current##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(current##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?s##0:wybe.int) @stmt_for:nn:nn
     foreign lpvm access(current##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?st##0:wybe.int) @stmt_for:nn:nn
@@ -1325,7 +1292,6 @@ proc [|]#cont#1 > (2 calls)
 [|]#cont#1(en##0:wybe.int, s##0:wybe.int, st##0:wybe.int, ?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign llvm move(s##0:wybe.int, ?value##0:wybe.int) @stmt_for:nn:nn
     foreign llvm add(~s##0:wybe.int, st##0:wybe.int, ?tmp#1##0:wybe.int) @stmt_for:nn:nn
@@ -1341,7 +1307,6 @@ proc end > public {inline} (0 calls)
 end(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_for:nn:nn
 proc end > public {inline} (0 calls)
@@ -1349,7 +1314,6 @@ proc end > public {inline} (0 calls)
 end(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_for:nn:nn
 
@@ -1359,7 +1323,6 @@ proc int_sequence > public {inline} (1 calls)
 int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:stmt_for.int_sequence) @stmt_for:nn:nn
     foreign lpvm mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start##0:wybe.int) @stmt_for:nn:nn
@@ -1370,7 +1333,6 @@ proc int_sequence > public {inline} (17 calls)
 int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, #result##0:stmt_for.int_sequence)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?start##0:wybe.int) @stmt_for:nn:nn
     foreign lpvm access(#result##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?stride##0:wybe.int) @stmt_for:nn:nn
@@ -1382,7 +1344,6 @@ proc start > public {inline} (0 calls)
 start(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_for:nn:nn
 proc start > public {inline} (0 calls)
@@ -1390,7 +1351,6 @@ proc start > public {inline} (0 calls)
 start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_for:nn:nn
 
@@ -1400,7 +1360,6 @@ proc stride > public {inline} (0 calls)
 stride(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_for:nn:nn
 proc stride > public {inline} (0 calls)
@@ -1408,7 +1367,6 @@ proc stride > public {inline} (0 calls)
 stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_for:nn:nn
 
@@ -1418,7 +1376,6 @@ proc ~= > public {inline} (0 calls)
 ~=(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @stmt_for:nn:nn
     foreign lpvm access(#left##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @stmt_for:nn:nn

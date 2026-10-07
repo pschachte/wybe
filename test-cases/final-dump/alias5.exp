@@ -29,7 +29,6 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     alias5.bar<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @alias5:nn:nn
 
@@ -39,7 +38,6 @@ proc bar > public (1 calls)
 bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     alias5.replicate1<0>(100:wybe.int, ?p2##0:wybe.int, 800:wybe.int, ?p4##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @alias5:nn:nn
     alias5.replicate1<0>(100:wybe.int, ?p3##0:wybe.int, 800:wybe.int, ?p4##1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias5:nn:nn
@@ -70,7 +68,6 @@ proc replicate1 > public (2 calls)
 replicate1(v1##0:wybe.int, ?v2##0:wybe.int, v3##0:wybe.int, ?v4##1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
     edges: []
-    escape: []
   InterestingCallProperties: []
     wybe.string.print<0>("random replicate1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias5:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @alias5:nn:nn
