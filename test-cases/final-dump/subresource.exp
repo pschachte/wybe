@@ -19,7 +19,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: subresource.<0>
 ()<{<<subresource.a.res>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<subresource.a.res>>:wybe.int, ?%res##0:wybe.int) @subresource:nn:nn

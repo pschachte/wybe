@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: terminal_ok.<0>
 ()<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign c {terminal,impure} exit(0:wybe.int) @terminal_ok:nn:nn
 
@@ -24,7 +26,9 @@ module top-level code > public {inline,semipure} (0 calls)
 proc exit_bool > {terminal,inline,semipure} (1 calls)
 0: terminal_ok.exit_bool<0>
 exit_bool(b##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm cast(~b##0:wybe.bool, ?tmp#1##0:wybe.int)
     foreign c {terminal,impure} exit(~tmp#1##0:wybe.int) @terminal_ok:nn:nn

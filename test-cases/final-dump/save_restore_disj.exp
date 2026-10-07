@@ -16,7 +16,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: save_restore_disj.<0>
 ()<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
 
   LLVM code       :

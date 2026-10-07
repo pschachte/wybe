@@ -17,7 +17,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: weird_err_b.<0>
 ()<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
 
   LLVM code       :
@@ -55,7 +57,9 @@ define external fastcc void @"weird_err_b#.<0>"() {
 proc = > public {inline} (1 calls)
 0: weird_err_d.=<0>
 =([#left##0:weird_err_d], [#right##0:weird_err_d], ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -63,7 +67,9 @@ proc = > public {inline} (1 calls)
 proc empty > public {inline} (0 calls)
 0: weird_err_d.empty<0>
 empty(?#result##0:weird_err_d)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:weird_err_d, ?#result##0:weird_err_d)
 
@@ -71,7 +77,9 @@ empty(?#result##0:weird_err_d)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: weird_err_d.~=<0>
 ~=([#left##0:weird_err_d], [#right##0:weird_err_d], ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 

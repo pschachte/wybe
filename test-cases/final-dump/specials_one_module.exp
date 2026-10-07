@@ -24,7 +24,9 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: specials_one_module.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials_one_module:nn:nn
     foreign c print_string(c"specials_one_module":wybe.c_string, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials_one_module:nn:nn
@@ -40,7 +42,9 @@ module top-level code > public {semipure} (0 calls)
 proc indirect_call_location > public (1 calls)
 0: specials_one_module.indirect_call_location<0>
 indirect_call_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials_one_module:nn:nn
     foreign c print_string(~call_source_location##0:wybe.c_string, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @specials_one_module:nn:nn
@@ -54,7 +58,9 @@ indirect_call_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>};
 proc show_column > public {inline} (1 calls)
 0: specials_one_module.show_column<0>
 show_column(%call_source_column_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials_one_module:nn:nn
     foreign c print_int(~call_source_column_number##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials_one_module:nn:nn
@@ -65,7 +71,9 @@ show_column(%call_source_column_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io
 proc show_file > public {inline} (1 calls)
 0: specials_one_module.show_file<0>
 show_file(%call_source_file_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials_one_module:nn:nn
     foreign c print_string(~call_source_file_name##0:wybe.c_string, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials_one_module:nn:nn
@@ -76,7 +84,9 @@ show_file(%call_source_file_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.
 proc show_line > public {inline} (1 calls)
 0: specials_one_module.show_line<0>
 show_line(%call_source_line_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @specials_one_module:nn:nn
     foreign c print_int(~call_source_line_number##0:wybe.int, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @specials_one_module:nn:nn
@@ -87,7 +97,9 @@ show_line(%call_source_line_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>
 proc show_location > public {inline} (1 calls)
 0: specials_one_module.show_location<0>
 show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    edges: []
+    escape: []
   InterestingCallProperties: []
     specials_one_module.indirect_call_location<0>(~%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @specials_one_module:nn:nn
 
