@@ -29,6 +29,8 @@ module AST (
   typePatternsMoreGeneral, specialiseTraitImpl,
   traitImplTypeBounds, traitImplConstraints,
   traitImplConstraintsFor, canonicalise, sameTraitConstraint,
+  directTraitPrerequisites, allTraitPrerequisites, traitPrerequisiteLayout,
+  prerequisiteSlotOffset,
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
   genericType, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, isTraitType, typeModule,
@@ -60,7 +62,7 @@ module AST (
   InterfaceHash, PubProcInfo(..),
   StructID, structConstName, recordConstStruct,
   lookupConstStruct, lookupConstInfo, cStringExpr,
-  StructInfo(..), ConstValue(..), constValueSize, constantValue, closureStructId, constValueRepresentation,
+  StructInfo(..), VTableComponent(..), VTableEntry(..), ConstValue(..), constValueSize, constantValue, closureStructId, constValueRepresentation,
   constValueAtOffset, constValuePrimArg, constValueExp,
   ImportSpec(..), ImportPhase(..), importSpec, Pragma(..), addPragma,
   descendentModules, sameOriginModules,
@@ -213,7 +215,7 @@ data Item
      = TypeDecl Visibility TypeProto TypeModifiers TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
      | RepresentationDecl [Ident] TypeModifiers TypeRepresentation OptPos
-     | TraitDecl [Ident] TypeModifiers OptPos
+     | TraitDecl [Ident] [TraitSpec] TypeModifiers OptPos
      | ConstructorDecl Visibility [Ident] TypeModifiers [(Visibility, Placed ProcProto)]
                        OptPos
      | ImportMods Visibility [ModSpec] OptPos
@@ -956,8 +958,8 @@ setTypeRep repn size = do
 -- |Add the specified trait to the current module.  This makes the
 -- module a type.  Checks that the type doesn't already have a representation or
 -- constructors defined.
-addTrait :: OptPos -> Compiler ()
-addTrait pos = do
+addTrait :: [TraitSpec] -> OptPos -> Compiler ()
+addTrait prerequisites pos = do
     currMod <- getModuleSpec
     hasRepn <- isJust <$> getModule modTypeRep
     hasCtors <- isJust <$> getModuleImplementationField modConstructors
@@ -974,14 +976,14 @@ addTrait pos = do
       then errmsg pos
            $ "Duplicated trait declarations for type " ++ show currMod
       else do
-        setTrait
+        setTrait prerequisites
         addKnownType currMod
 
--- |Set the type representation of the current module.
-setTrait :: Compiler ()
-setTrait = do
+-- |Set the trait information of the current module.
+setTrait :: [TraitSpec] -> Compiler ()
+setTrait prerequisites = do
     updateModule (\m -> m { modIsType  = True
-                          , modTrait = Just () })
+                          , modTrait = Just prerequisites })
 
 
 -- |Add the specified data constructor to the current module.  This makes the
@@ -1549,8 +1551,7 @@ data Module = Module {
   modIsType :: Bool,               -- ^Is this module a type, defined early
   modTypeRep :: Maybe TypeRepresentation, -- ^Type representation, when known
   modTypeSize :: Maybe Int,        -- ^The maximum size required to allocate an object of this type
-  modTrait :: Maybe (),            -- ^Is this module a trait;
-                                   --  The Maybe value is reserved for the trait dependency feature
+  modTrait :: Maybe [TraitSpec],   -- ^Is this module a trait; and its prerequisites
   modInterface :: ModuleInterface, -- ^The public face of this module
   modInterfaceHash :: InterfaceHash,
                                    -- ^Hash of the "modInterface" above
@@ -1570,7 +1571,7 @@ data Module = Module {
   modAbstractProcCount :: Int,
                                    -- ^The number of abstract procs defined in
                                    -- this module
-  modVTables :: Map TraitImplSpec (Int, StructID),
+  modVTables :: Map TraitImplSpec VTableEntry,
                                    -- ^The vtables defined in this module
   stmtDecls :: [Placed Stmt],      -- ^top-level statements in this module
   itemsHash :: Maybe String        -- ^map of proc name to its hash
@@ -2408,7 +2409,7 @@ primImpurity (PrimHigher _ (ArgConstRef structID _) impurity _) = do
     lookupConstInfo structID >>= \case
         Just (StructInfo _ (FnPointerStructMember pspec:t)) ->
             max impurity . procImpurity <$> getProcDef pspec
-        Just (VTableInfo _ (FnPointerStructMember pspec:t) _ _ _ _ _) ->
+        Just (VTableInfo _ (FnPointerStructMember pspec:t) _ _ _ _ _ _) ->
             max impurity . procImpurity <$> getProcDef pspec
         _ -> return impurity
 primImpurity (PrimHigher _ fn impurity _) = return impurity
@@ -4246,6 +4247,59 @@ substituteTypeVars bindings ty@HigherOrderType{higherTypeParams=flows} =
 substituteTypeVars _ ty = ty
 
 
+-- |Direct prerequisites of a specialised trait, with the declaring trait's
+-- parameters substituted into the prerequisite specifications.
+directTraitPrerequisites :: TraitSpec -> Compiler [TraitSpec]
+directTraitPrerequisites trait = case typeModule trait of
+    Nothing -> return []
+    Just traitMod -> do
+        info <- getModule modTrait `inModule` traitMod
+        params <- getModule modParams `inModule` traitMod
+        let bindings = Map.fromList $ zip params $ typeParams trait
+        return $ maybe [] (List.map $ substituteTypeVars bindings) info
+
+
+-- |Transitive prerequisites in source-ordered depth-first order, with diamond
+-- ancestors retained only at their first occurrence.
+allTraitPrerequisites :: TraitSpec -> Compiler [TraitSpec]
+allTraitPrerequisites trait = snd <$> visit [] trait
+  where
+    visit seen current = do
+        direct <- directTraitPrerequisites current
+        foldM step (seen, []) direct
+    step (seen, ordered) prerequisite
+        | any (sameTraitConstraint prerequisite) seen = return (seen, ordered)
+        | otherwise = do
+            (seen', descendants) <- visit (seen ++ [prerequisite]) prerequisite
+            return (seen', ordered ++ prerequisite : descendants)
+
+
+-- |Transitive prerequisites in source-ordered depth-first order, with a
+-- diamond ancestor repeated once per direct prerequisite whose own closure
+-- reaches it.
+traitPrerequisiteLayout :: TraitSpec -> Compiler [TraitSpec]
+traitPrerequisiteLayout trait = do
+    direct <- directTraitPrerequisites trait
+    fmap concat $ forM direct $ \prerequisite -> do
+        descendants <- traitPrerequisiteLayout prerequisite
+        return $ prerequisite : descendants
+
+
+-- |The method-slot offset of targetTrait's own methods within the flat
+-- layout of hostTrait, given targetTrait occurs in
+-- traitPrerequisiteLayout hostTrait.  This is the same formula used to
+-- project a prerequisite's vtable out of a caller-supplied vtable pointer;
+-- here it is used to compute the offset from a concrete host constant.
+prerequisiteSlotOffset :: TraitSpec -> TraitSpec -> Compiler Int
+prerequisiteSlotOffset hostTrait targetTrait = do
+    layout <- traitPrerequisiteLayout hostTrait
+    let index = trustFromJust ("prerequisiteSlotOffset: " ++ show targetTrait
+            ++ " is not a prerequisite of " ++ show hostTrait) $
+            List.findIndex (sameTraitConstraint targetTrait) layout
+    counts <- mapM (fmap length . abstractProcs) (hostTrait : List.take index layout)
+    return $ sum counts
+
+
 -- |The trait bounds declared within an implementation type, in ABI order:
 -- type variables by first occurrence, then each variable's bounds in ascending
 -- order. Repeated occurrences of a variable contribute their union of bounds.
@@ -4313,6 +4367,8 @@ data StructInfo
         vtableIndex :: Int,         -- ^ Its index in the defining module
         vtableSpec :: TraitImplSpec,-- ^ The trait impl spec
         vtableMod  :: ModSpec,      -- ^ The mod where this vtable is defined
+        vtableComponents :: [VTableComponent],
+                                    -- ^ Method layouts for the trait and its prerequisites
         vtableConstraints :: [TypeVarBound]
                                     -- ^ Constraint slots after method slots
     }
@@ -4324,7 +4380,41 @@ data StructInfo
     | ArrayInfo {
         arrayData :: [ConstValue]
         }
-     deriving (Eq,Ord,Show,Generic)
+     deriving (Eq,Ord,Generic)
+
+
+instance Show StructInfo where
+    show (StructInfo size fields) = "StructInfo {structSize = " ++ show size
+        ++ ", structData = " ++ show fields ++ "}"
+    show (VTableInfo size fields external index spec mod _ constraints) =
+        "VTableInfo {vtableSize = " ++ show size
+        ++ ", vtableData = " ++ show fields
+        ++ ", vtableExternal = " ++ show external
+        ++ ", vtableIndex = " ++ show index
+        ++ ", vtableSpec = " ++ show spec
+        ++ ", vtableMod = " ++ show mod
+        ++ ", vtableConstraints = " ++ show constraints ++ "}"
+    show (CStringInfo chars) = "CStringInfo {cstringChars = " ++ show chars ++ "}"
+    show (ArrayInfo elements) = "ArrayInfo {arrayData = " ++ show elements ++ "}"
+
+
+data VTableComponent = VTableComponent {
+        vtableComponentSpec :: TraitImplSpec,
+        vtableComponentOffset :: Int,
+        vtableComponentMethods :: Int
+    }
+    deriving (Eq,Ord,Show,Generic)
+
+
+-- | An entry in a module's modVTables map
+data VTableEntry
+    = VTableStandalone Int StructID
+        -- ^ Genuinely compiled as its own global constant.
+    | VTableEmbedded TraitImplSpec Int
+        -- ^ Embedded in another trait impl's vtable
+        -- `TraitImplSpec` is the host's trait impl spec
+        -- `Int` is the word offset
+    deriving (Eq,Show,Generic)
 
 
 -- | The value of a field in a constant memory block, including its size in
@@ -4402,7 +4492,7 @@ constValueAtOffset (StructInfo _ fields) offset = go fields offset
             | off < 0 = Nothing
             | otherwise = go fields (off - constValueSize field)
           go [] _ = Nothing
-constValueAtOffset (VTableInfo _ fields _ _ _ _ _) offset = go fields offset
+constValueAtOffset (VTableInfo _ fields _ _ _ _ _ _) offset = go fields offset
     where go (field:fields) off
             | off == 0 = Just field
             | off < 0 = Nothing
@@ -4499,7 +4589,7 @@ argGlobalFlow varFlows (ArgClosure pspec args _) = do
 argGlobalFlow varFlows (ArgConstRef structID _) = do
     lookupConstInfo structID >>= (\case
             StructInfo _ fields -> constsGlobalFlows fields
-            VTableInfo _ fields _ _ _ _ _ -> constsGlobalFlows fields
+            VTableInfo _ fields _ _ _ _ _ _ -> constsGlobalFlows fields
             _ -> return emptyGlobalFlows)
         . trustFromJust "lookupConstStruct"
 argGlobalFlow _ _ = return emptyGlobalFlows
@@ -4535,7 +4625,7 @@ constGlobalFlows :: ConstValue -> Compiler GlobalFlows
 constGlobalFlows (PointerStructMember structID) = do
     lookupConstInfo structID >>= (\case
             StructInfo _ fields -> constsGlobalFlows fields
-            VTableInfo _ fields _ _ _ _ _ -> constsGlobalFlows fields
+            VTableInfo _ fields _ _ _ _ _ _ -> constsGlobalFlows fields
             _ -> return emptyGlobalFlows)
         . trustFromJust "lookupConstStruct"
 constGlobalFlows _ = return emptyGlobalFlows
@@ -4947,9 +5037,11 @@ instance Show Item where
     "representation"
     ++ bracketList "(" ", " ")" (("?"++) <$> params)
     ++ " is " ++ show typeModifiers ++ show repn ++ showOptPos pos ++ "\n"
-  show (TraitDecl params typeModifiers pos) =
+  show (TraitDecl params prerequisites typeModifiers pos) =
     "trait"
     ++ bracketList "(" ", " ")" (("?"++) <$> params)
+    ++ (if List.null prerequisites then "" else " <: " ++
+        bracketList "{" ", " "}" (show <$> prerequisites))
     ++ show typeModifiers ++ showOptPos pos ++ "\n"
   show (ConstructorDecl vis params typeModifiers ctors pos) =
     visibilityPrefix vis ++ "constructors"

@@ -45,6 +45,8 @@ instance Binary Prim
 instance Binary PrimVarName
 instance Binary ConstValue
 instance Binary StructInfo
+instance Binary VTableComponent
+instance Binary VTableEntry
 instance Binary PrimArg
 instance Binary ProcAnalysis
 instance Binary GlobalFlows

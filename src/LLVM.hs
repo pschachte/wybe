@@ -289,7 +289,9 @@ preScanProcs = do
                 ++ intercalate ", " (concatMap (List.map (show.procName)) procss)
     vTables <- lift $ getModule modVTables
     logLLVM $ "Start recording vTables in module " ++ showModSpec thisMod
-    mapM_ (recordConst . snd) vTables
+    let standaloneStructId (VTableStandalone _ sid) = Just sid
+        standaloneStructId VTableEmbedded{} = Nothing
+    mapM_ recordConst $ mapMaybe standaloneStructId $ Map.elems vTables
     logLLVM "End recording vTables"
     let bodies = concatMap (concatMap allProcBodies) procss
     mapM_ (mapLPVMBodyM (recordExtern mod) (prescanArg mod)) bodies
@@ -1259,7 +1261,7 @@ declareStructConstant name (StructInfo sz members) section = do
                     ++ " = private unnamed_addr constant " ++ llvmFields
                     ++ maybe "" ((", section "++) . show) section
                     ++ ", align " ++ show wordSizeBytes
-declareStructConstant _ (VTableInfo sz members external index _ mod _) section = do
+declareStructConstant _ (VTableInfo sz members external index _ mod _ _) section = do
     let llvmType = llvmStructType $ llvmConstValueRep <$> members
     llvmFields <- llvmConstStruct members
     let name = llvmVTableName mod index
@@ -2501,10 +2503,10 @@ llvmGlobalInfoName (GlobalVTable ispec) = do
     thisMod <- lift getModuleSpec
     let mod = fromMaybe thisMod opmod
     vTables <- lift $ getModule modVTables `inModule` mod
-    let (index, _) = trustFromJust
-            ("llvmGlobalInfoName: missing vtable " ++ show ispec ++ " in "
-                ++ showModSpec mod)
-            (Map.lookup ispec vTables)
+    let index = case Map.lookup ispec vTables of
+            Just (VTableStandalone i _) -> i
+            _ -> shouldnt $ "llvmGlobalInfoName: missing standalone vtable "
+                ++ show ispec ++ " in " ++ showModSpec mod
     return $ llvmGlobalName $ llvmVTableName mod index
 
 

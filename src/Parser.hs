@@ -151,9 +151,10 @@ typeItem v = do
 typeTraitItem :: Visibility -> Ident -> [Ident] -> TypeModifiers -> SourcePos -> Parser Item
 typeTraitItem v typeName params modifiers pos = do
     keypos <- tokenPosition <$> ident "trait"
+    prerequisites <- traitPrerequisiteList
     body <- betweenB Brace items
     return $ ModuleDecl v typeName
-        (TraitDecl params modifiers (Just keypos) : body)
+        (TraitDecl params prerequisites modifiers (Just keypos) : body)
         (Just pos)
 
 
@@ -176,7 +177,14 @@ traitItem = do
     params <- typeVarNames
     modifiers <- List.foldl processTypeModifier defaultTypeModifiers
                  <$> modifierList
-    return $ TraitDecl params modifiers $ Just keypos
+    prerequisites <- traitPrerequisiteList
+    return $ TraitDecl params prerequisites modifiers $ Just keypos
+
+
+-- | Optional trait prerequisites: `<:` followed by one trait or a braced list.
+traitPrerequisiteList :: Parser [TraitSpec]
+traitPrerequisiteList = option [] $ symbol "<:" *>
+    (betweenB Brace (typeSpec `sepBy1` comma) <|> pure <$> typeSpec)
 
 
 -- | Module type representation declaration

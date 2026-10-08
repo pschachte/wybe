@@ -392,15 +392,24 @@ compileVTableArg typeVarMap (paramVarName,paramVarBound) = do
 
 
 -- |Compile the vtable for a trait requirement. A requirement on one of this
--- proc's type variables uses the vtable passed in for that bound, if there is
--- one; any other requirement is resolved to a trait implementation.
+-- proc's type variables uses the vtable passed in for that bound, or one
+-- projected from a vtable for a bound implying it; any other requirement is
+-- resolved to a trait implementation.
 compileRequirementVTable :: TraitImplSpec -> ClauseComp ([Prim], PrimArg)
 compileRequirementVTable
-        requested@(TraitImplSpec bound TypeVariable{typeVariableName=name}) = do
+        (TraitImplSpec bound TypeVariable{typeVariableName=name}) = do
     param <- localVTableParam name bound
     case param of
         Just param' -> return ([], primParamToArg param')
-        Nothing -> compileImplVTableArg requested
+        Nothing -> do
+            vTableParamDict <- gets vTableParamDict
+            projections <- catMaybes <$> mapM
+                (uncurry $ prerequisiteProjection name bound)
+                (Map.toList vTableParamDict)
+            case projections of
+                [(param', offset)] -> projectVTable param' offset
+                _ -> shouldnt $ "compileRequirementVTable for vtable: "
+                    ++ show (name, bound)
 compileRequirementVTable requested = compileImplVTableArg requested
 
 
@@ -423,6 +432,89 @@ localVTableParam name bound = do
             _ -> Nothing
 
 
+-- |Find a supplied vtable containing the required prerequisite for the same
+-- type variable, and its offset in method slots.
+prerequisiteProjection :: TypeVarName -> TraitSpec -> TypeVarBound -> PrimParam
+                       -> ClauseComp (Maybe (PrimParam, Int))
+prerequisiteProjection wantedName wantedTrait (name, suppliedTrait) param
+    | name /= wantedName = return Nothing
+    | otherwise = do
+        prerequisites <- lift $ traitPrerequisiteLayout suppliedTrait
+        case List.findIndex (sameTraitConstraint wantedTrait) prerequisites of
+            Nothing -> return Nothing
+            Just index -> do
+                counts <- lift $ mapM (fmap length . abstractProcs)
+                    (suppliedTrait : List.take index prerequisites)
+                return $ Just (param, sum counts)
+
+
+-- |Compile a pointer to a prerequisite vtable at the given method-slot offset.
+projectVTable :: PrimParam -> Int -> ClauseComp ([Prim], PrimArg)
+projectVTable param 0 = return ([], primParamToArg param)
+projectVTable param offsetSlots = do
+    castName <- nextVar $ vtableNamePrefix ++ "viewbase"
+    name <- nextVar $ vtableNamePrefix ++ "view"
+    let castOut = ArgVar castName (Representation Pointer) FlowOut Ordinary False
+        castIn = castOut { argVarFlow = FlowIn }
+        castPrim = PrimForeign "lpvm" "cast" [] [primParamToArg param, castOut]
+        output = ArgVar name (Representation Pointer) FlowOut VTable False
+        input = setArgType (Representation CPointer) $
+            output { argVarFlow = FlowIn }
+        offset = ArgInt (fromIntegral $ offsetSlots * wordSizeBytes) intType
+        addPrim = PrimForeign "llvm" "add" [] [castIn, offset, output]
+    return ([castPrim, addPrim], input)
+
+
+-- |Build a pointer to a redundant implementation's data, embedded at a word
+-- offset within a local host implementation's own standalone constant.
+embedVTablePointer :: TraitImplSpec -> Int -> ClauseComp ([Prim], PrimArg)
+embedVTablePointer host 0 =
+    return ([], ArgGlobal (GlobalVTable host) (Representation CPointer))
+embedVTablePointer host offsetSlots = do
+    castName <- nextVar $ vtableNamePrefix ++ "viewbase"
+    name <- nextVar $ vtableNamePrefix ++ "view"
+    let base = ArgGlobal (GlobalVTable host) (Representation CPointer)
+        castOut = ArgVar castName (Representation Pointer) FlowOut Ordinary False
+        castIn = castOut { argVarFlow = FlowIn }
+        castPrim = PrimForeign "lpvm" "cast" [] [base, castOut]
+        output = ArgVar name (Representation Pointer) FlowOut VTable False
+        input = setArgType (Representation CPointer) $
+            output { argVarFlow = FlowIn }
+        offset = ArgInt (fromIntegral $ offsetSlots * wordSizeBytes) intType
+        addPrim = PrimForeign "llvm" "add" [] [castIn, offset, output]
+    return ([castPrim, addPrim], input)
+
+
+-- |The trait-level layout metadata (total flattened method count,
+-- constraint layout) for a trait implementation, computed the same way
+-- compileVTable's standalone-compilation path would, but usable even when
+-- no standalone constant for it exists because it was skipped as
+-- redundant with another local implementation's embedding.
+vtableLayoutInfo :: TraitImplSpec -> Compiler (Int, [TypeVarBound])
+vtableLayoutInfo ispec = do
+    thisMod <- getModuleSpec
+    knownTraitImpls <- getModuleImplementationField modKnownTraitImpls
+    prerequisites <- traitPrerequisiteLayout $ implTrait ispec
+    let requests = ispec : [TraitImplSpec prerequisite (implType ispec)
+            | prerequisite <- prerequisites]
+        resolve request = case resolveTraitImpl request knownTraitImpls of
+            TraitImplResolved declared impl -> return (declared, traitImplMod impl)
+            TraitImplNotFound -> shouldnt $
+                "missing trait prerequisite implementation " ++ show request
+            TraitImplAmbiguous req candidates -> shouldnt $
+                "ambiguous trait prerequisite implementation " ++ show req
+                    ++ ": " ++ show candidates
+    resolved <- mapM resolve requests
+    counts <- forM resolved $ \(declared, owner) -> do
+        procMap <- getModuleImplementationField modTraitImplProcs
+            `inModule` fromMaybe thisMod owner
+        let procs = trustFromJust
+                ("trait implementation procedures for " ++ show declared) $
+                Map.lookup declared procMap
+        return $ length procs
+    return (sum counts, concatMap (traitImplTypeBounds . fst) resolved)
+
+
 -- |Compile the vtable for a trait requirement by resolving it to a trait
 -- implementation. Ordinary impls use their global table directly; partial
 -- impls construct a complete call-local table from their global method
@@ -441,21 +533,26 @@ compileImplVTableArg requested = do
     thisMod <- lift getModuleSpec
     let definingMod = fromMaybe thisMod $ traitImplMod impl
     vtables <- lift $ getModule modVTables `inModule` definingMod
-    let (_, structID) = trustFromJust
+    let entry = trustFromJust
             ("compileImplVTableArg vtable for " ++ show declared) $
             Map.lookup declared vtables
-    info <- lift $ trustFromJustM
-        ("compileImplVTableArg metadata for " ++ show declared) $
-        lookupConstInfo structID
-    let (methodCount, constraints) = case info of
-            VTableInfo{vtableData=methods,
-                       vtableConstraints=bounds} ->
-                (length methods, bounds)
-            _ -> shouldnt $ "non-vtable metadata for " ++ show declared
-        requiredConstraints = traitImplConstraintsFor
+    (prefixPrims, template, methodCount, constraints) <- case entry of
+        VTableStandalone _ structID -> do
+            info <- lift $ trustFromJustM
+                ("compileImplVTableArg metadata for " ++ show declared) $
+                lookupConstInfo structID
+            let (methods, bounds) = case info of
+                    VTableInfo{vtableData=m, vtableConstraints=b} -> (m, b)
+                    _ -> shouldnt $ "non-vtable metadata for " ++ show declared
+            return ([], ArgGlobal (GlobalVTable declared) (Representation CPointer),
+                     length methods, bounds)
+        VTableEmbedded host offsetSlots -> do
+            (count, bounds) <- lift $ vtableLayoutInfo declared
+            (prims, tmpl) <- embedVTablePointer host offsetSlots
+            return (prims, tmpl, count, bounds)
+    let requiredConstraints = traitImplConstraintsFor
             constraints declared requested
-        template = ArgGlobal (GlobalVTable declared) (Representation CPointer)
-    if List.null requiredConstraints then return ([], template) else do
+    if List.null requiredConstraints then return (prefixPrims, template) else do
         compiledConstraints <- mapM compileRequirementVTable requiredConstraints
         resultName <- nextVar $ vtableNamePrefix ++ "runtime"
         let resultOut = ArgVar resultName (Representation CPointer)
@@ -464,7 +561,7 @@ compileImplVTableArg requested = do
             prim = PrimForeign "lpvm" "make_vtable" [] $
                 [template, ArgInt (fromIntegral methodCount) intType]
                 ++ (snd <$> compiledConstraints) ++ [resultOut]
-        return (concatMap fst compiledConstraints ++ [prim], resultIn)
+        return (prefixPrims ++ concatMap fst compiledConstraints ++ [prim], resultIn)
 
 
 compileFlowArg :: FlowDirection -> Exp -> OptPos -> ClauseComp [PrimArg]
@@ -587,6 +684,26 @@ vtableParamsFor idx bounds =
     [vtableParam i | (i, _) <- zip [idx..] bounds]
 
 
+-- |Partition local trait impls into standalone ones and embedded ones
+-- mapping each embedded one to (host, word offset to host).
+classifyLocalImpls :: [TraitImplSpec] -> Compiler (Map TraitImplSpec (TraitImplSpec, Int))
+classifyLocalImpls localImpls = do
+    layouts <- Map.fromList <$> mapM
+        (\y -> (,) y <$> traitPrerequisiteLayout (implTrait y)) localImpls
+    let embeds y x = x /= y
+            && implType y `sameTraitConstraint` implType x
+            && any (sameTraitConstraint $ implTrait x) (layouts Map.! y)
+        embedders x = [y | y <- localImpls, embeds y x]
+        redundant x = not $ List.null $ embedders x
+        maximalEmbedders x = List.sort [y | y <- embedders x, not (redundant y)]
+    fmap (Map.fromList . catMaybes) $ forM localImpls $ \x ->
+        case maximalEmbedders x of
+            [] -> return Nothing   -- maximal itself, needs standalone compile
+            host:_ -> do
+                offset <- prerequisiteSlotOffset (implTrait host) (implTrait x)
+                return $ Just (x, (host, offset))
+
+
 -- |Compile all locally-defined trait vtables.  This must happen before clause
 -- compilation because adapting a concrete implementation to the trait ABI can
 -- add adapter procedures to the current module.
@@ -594,11 +711,14 @@ compileLocalVTables :: ModSpec -> Compiler ()
 compileLocalVTables thisMod = do
     reenterModule thisMod
     traitImpls <- Map.map traitImplMod <$> getModuleImplementationField modKnownTraitImpls
-    let localImpls = Map.toAscList $ Map.filter isNothing traitImpls
+    let localImpls = List.map fst $ Map.toAscList $ Map.filter isNothing traitImpls
+    redundancy <- classifyLocalImpls localImpls
     vTables <- Map.fromAscList <$> mapM
-        (\(index, (ispec, _)) -> do
-            vtable <- compileVTable index ispec Nothing
-            return (ispec, vtable))
+        (\(index, ispec) -> do
+            entry <- case Map.lookup ispec redundancy of
+                Just (host, offset) -> return $ VTableEmbedded host offset
+                Nothing -> uncurry VTableStandalone <$> compileVTable index ispec Nothing
+            return (ispec, entry))
         (zip [0..] localImpls)
     updateModule (\mod -> mod{ modVTables = Map.union vTables $ modVTables mod })
     reexitModule
@@ -625,37 +745,64 @@ compileExternalVTables thisMod = do
     vTables <- Map.traverseWithKey
         (\ispec mod -> do
             definingVTables <- getModule modVTables `inModule` mod
-            let (index, _) = trustFromJust
-                    ("compileExternalVTables: missing vtable " ++ show ispec
-                        ++ " in " ++ showModSpec mod)
-                    (Map.lookup ispec definingVTables)
-            compileVTable index ispec $ Just mod)
+            let index = case Map.lookup ispec definingVTables of
+                    Just (VTableStandalone i _) -> i
+                    _ -> shouldnt $ "compileExternalVTables: " ++ show ispec
+                        ++ " has no standalone vtable in " ++ showModSpec mod
+            uncurry VTableStandalone <$> compileVTable index ispec (Just mod))
         externalImpls
     updateModule (\mod -> mod{ modVTables = Map.union vTables $ modVTables mod })
     reexitModule
 
 
 compileVTable :: Int -> TraitImplSpec -> Maybe ModSpec -> Compiler (Int, StructID)
-compileVTable index ispec opmod = do
-    logMsg Clause $ "Compiling vtable for trait impl " ++ show ispec ++ " defined in " ++ show opmod
+compileVTable index ispec (Just definingMod) = do
+    definingVTables <- getModule modVTables `inModule` definingMod
+    let definingStruct = case Map.lookup ispec definingVTables of
+            Just (VTableStandalone _ sid) -> sid
+            _ -> shouldnt $ "external vtable definition: " ++ show ispec
+    info <- trustFromJust "external vtable metadata" <$>
+        lookupConstInfo definingStruct
+    externalInfo <- case info of
+        table@VTableInfo{} -> return table { vtableExternal = True }
+        _ -> shouldnt $ "external vtable is not a vtable: " ++ show ispec
+    structId <- recordConstStruct externalInfo Nothing
+    return (index, structId)
+compileVTable index ispec Nothing = do
+    logMsg Clause $ "Compiling local vtable for trait impl " ++ show ispec
     thisMod <- getModuleSpec
-    traitImplProcSpecs <- getModuleImplementationField
-        (if isNothing opmod then modTraitImplProcs else modVTableProcs)
-        `inModule` fromMaybe thisMod opmod
-    let procSpecs = trustFromJust "compileVTable" $ Map.lookup ispec traitImplProcSpecs
-    let constraints = traitImplTypeBounds ispec
-    procSpecs' <- case opmod of
-        Nothing -> adaptTraitImplProcs ispec constraints procSpecs
-        Just _  -> return procSpecs
-    when (isNothing opmod) $
-        updateModImplementation $ \imp -> imp {
-            modVTableProcs = Map.insert ispec procSpecs'
-                (modVTableProcs imp) }
-    let sz = wordSizeBytes * length procSpecs
+    knownTraitImpls <- getModuleImplementationField modKnownTraitImpls
+    prerequisites <- traitPrerequisiteLayout $ implTrait ispec
+    let requests = ispec : [TraitImplSpec prerequisite (implType ispec)
+            | prerequisite <- prerequisites]
+        resolve request = case resolveTraitImpl request knownTraitImpls of
+            TraitImplResolved declared impl -> return (request, declared, traitImplMod impl)
+            TraitImplNotFound -> shouldnt $ "missing trait prerequisite implementation " ++ show request
+            TraitImplAmbiguous req candidates -> shouldnt $
+                "ambiguous trait prerequisite implementation " ++ show req ++ ": " ++ show candidates
+    resolved <- mapM resolve requests
+    entries <- forM resolved $ \(request, declared, owner) -> do
+        procMap <- getModuleImplementationField modTraitImplProcs
+            `inModule` fromMaybe thisMod owner
+        let procs = trustFromJust ("trait implementation procedures for " ++ show declared) $
+                Map.lookup declared procMap
+        return (request, declared, procs, traitImplTypeBounds declared)
+    let methodCounts = [length procs | (_,_,procs,_) <- entries]
+        offsets = init $ scanl (+) 0 methodCounts
+        totalMethods = sum methodCounts
+        constraints = concat [bounds | (_,_,_,bounds) <- entries]
+    componentProcs <- forM (zip offsets entries) $ \(offset, (_, declared, procs, _)) ->
+        adaptTraitImplProcs declared constraints (totalMethods - offset) procs
+    let procSpecs' = concat componentProcs
+        components = zipWith3
+            (\offset (request,_,_,_) count -> VTableComponent request offset count)
+            offsets entries methodCounts
+    updateModImplementation $ \imp -> imp {
+        modVTableProcs = Map.insert ispec procSpecs' (modVTableProcs imp) }
+    let sz = wordSizeBytes * length procSpecs'
         values = List.map FnPointerStructMember procSpecs'
     structId <- recordConstStruct
-            (VTableInfo sz values (isJust opmod) index ispec
-                (fromMaybe thisMod opmod) constraints) Nothing
+            (VTableInfo sz values False index ispec thisMod components constraints) Nothing
     return (index, structId)
 
 
@@ -663,24 +810,24 @@ compileVTable index ispec opmod = do
 -- implementation can have a different ABI from the corresponding abstract
 -- method because abstract type variables use defaultTypeRepresentation.  When
 -- that happens, store a generated adapter in the vtable instead.
-adaptTraitImplProcs :: TraitImplSpec -> [TypeVarBound] -> [ProcSpec]
+adaptTraitImplProcs :: TraitImplSpec -> [TypeVarBound] -> Int -> [ProcSpec]
                     -> Compiler [ProcSpec]
-adaptTraitImplProcs ispec@(TraitImplSpec trait typ) constraints procSpecs = do
+adaptTraitImplProcs ispec@(TraitImplSpec trait typ) constraints constraintBase procSpecs = do
     absProcs <- List.map fst <$> abstractProcs trait
     unless (sameLength absProcs procSpecs) $
         shouldnt $ "vtable proc count mismatch for " ++ show ispec
             ++ ": abstract procs " ++ show absProcs
             ++ ", implementation procs " ++ show procSpecs
-    zipWithM (adaptTraitImplProc ispec constraints) absProcs procSpecs
+    zipWithM (adaptTraitImplProc ispec constraints constraintBase) absProcs procSpecs
 
 
-adaptTraitImplProc :: TraitImplSpec -> [TypeVarBound] -> ProcSpec -> ProcSpec
+adaptTraitImplProc :: TraitImplSpec -> [TypeVarBound] -> Int -> ProcSpec -> ProcSpec
                    -> Compiler ProcSpec
-adaptTraitImplProc ispec constraints absProcSpec implProcSpec = do
+adaptTraitImplProc ispec constraints constraintBase absProcSpec implProcSpec = do
     absProcDef <- getProcDef absProcSpec
     implProcDef <- getProcDef implProcSpec
     let adapterParams = vtableSlotParams ispec absProcDef
-    generateAdapter ispec constraints absProcDef adapterParams
+    generateAdapter ispec constraints constraintBase absProcDef adapterParams
         implProcSpec implProcDef
 
 
@@ -743,9 +890,9 @@ compileABIParams = concatMap compileABIParam
     outNum flow = if flowsIn flow then 1 else 0
 
 
-generateAdapter :: TraitImplSpec -> [TypeVarBound] -> ProcDef -> [PrimParam]
+generateAdapter :: TraitImplSpec -> [TypeVarBound] -> Int -> ProcDef -> [PrimParam]
                 -> ProcSpec -> ProcDef -> Compiler ProcSpec
-generateAdapter ispec constraints absProcDef adapterParams implProcSpec implProcDef = do
+generateAdapter ispec constraints constraintBase absProcDef adapterParams implProcSpec implProcDef = do
     adapterMod <- getModuleSpec
     gFlows <- getProcGlobalFlows implProcSpec
     let adapterOrdinaryParams = procOrdinaryABIParams absProcDef
@@ -759,7 +906,7 @@ generateAdapter ispec constraints absProcDef adapterParams implProcSpec implProc
         adapterOrdinaryParams implOrdinaryParams
     let (preCasts, implOrdinaryArgs, postCasts) = unzip3 bridges
     (vtablePrims, implVTableArgs) <-
-        resolveImplVTableArgs ispec constraints absProcDef implProcDef adapterParams
+        resolveImplVTableArgs ispec constraints constraintBase absProcDef implProcDef adapterParams
     let implCallArgs = implOrdinaryArgs ++ implVTableArgs
     let adapterName = procName absProcDef ++ adapterNamePostfix
         proto = PrimProto adapterName adapterParams
@@ -845,12 +992,11 @@ adapterArgBridge idx adapterParam implParam
 
 -- |Build the vtable arguments passed from an adapter to its concrete
 -- implementation. 
-resolveImplVTableArgs :: TraitImplSpec -> [TypeVarBound] -> ProcDef -> ProcDef
+resolveImplVTableArgs :: TraitImplSpec -> [TypeVarBound] -> Int -> ProcDef -> ProcDef
                   -> [PrimParam] -> Compiler ([Prim], [PrimArg])
-resolveImplVTableArgs (TraitImplSpec trait _) constraints absProcDef implProcDef adapterParams = do
-    methodCount <- length <$> abstractProcs trait
+resolveImplVTableArgs (TraitImplSpec trait _) constraints constraintBase absProcDef implProcDef adapterParams = do
     let (_, prims, args) = List.foldl'
-            (vtableArg methodCount) ([], [], [])
+            vtableArg ([], [], [])
             (procBoundedTypeParams implProcDef)
     return (prims, args)
   where
@@ -864,7 +1010,7 @@ resolveImplVTableArgs (TraitImplSpec trait _) constraints absProcDef implProcDef
                 (dispatch, zip forwardedBounds forwarded)
         _ -> shouldnt "resolveImplVTableArgs: vtable parameter layout mismatch"
     dispatchArg = primParamToArg dispatchParam
-    vtableArg methodCount (used, prims, args) bounded@(_, bound)
+    vtableArg (used, prims, args) bounded@(_, bound)
         | Just constraintIndex <- List.findIndex
             (\(index, constraint) -> index `notElem` used
                 && matchesConstraint bounded constraint)
@@ -874,7 +1020,7 @@ resolveImplVTableArgs (TraitImplSpec trait _) constraints absProcDef implProcDef
                 out = ArgVar name (Representation CPointer) FlowOut VTable False
                 input = out { argVarFlow = FlowIn }
                 offset = ArgInt (fromIntegral $
-                    (methodCount + constraintIndex) * wordSizeBytes) intType
+                    (constraintBase + constraintIndex) * wordSizeBytes) intType
                 size = ArgInt (fromIntegral wordSizeBytes) intType
                 zero = ArgInt 0 intType
                 access = PrimForeign "lpvm" "access" []

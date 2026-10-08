@@ -73,10 +73,10 @@ normaliseItem (RepresentationDecl params mods rep pos) = do
     updateTypeModifiers mods
     addParameters (RealTypeVar <$> params) pos
     addTypeRep rep pos
-normaliseItem (TraitDecl params mods pos) = do
+normaliseItem (TraitDecl params prerequisites mods pos) = do
     updateTypeModifiers mods
     addParameters (RealTypeVar <$> params) pos
-    addTrait pos
+    addTrait prerequisites pos
 normaliseItem (ConstructorDecl vis params mods ctors pos) = do
     updateTypeModifiers mods
     addParameters (RealTypeVar <$> params) pos
@@ -312,9 +312,64 @@ completeNormalisation :: [ModSpec] -> Compiler ()
 completeNormalisation modSCC = do
     logNormalise $ "Completing normalisation of modules " ++ showModSpecs modSCC
     completeTypeNormalisation modSCC
+    mapM_ (normaliseTraitPrerequisites `inModule`) modSCC
+    mapM_ validateTraitPrerequisiteCycles modSCC
     mapM_ (normaliseModMain modSCC `inModule`) modSCC
     mapM_ (transformModuleProcs flattenProcBody) modSCC
     mapM_ (normaliseTraitImpls `inModule`) modSCC
+
+
+-- |Resolve and validate the prerequisite list once imports are available.
+normaliseTraitPrerequisites :: Compiler ()
+normaliseTraitPrerequisites = do
+    trait <- getModule modTrait
+    case trait of
+        Nothing -> return ()
+        Just info -> do
+            prerequisites <- mapM (lookupType "trait prerequisite" Nothing) info
+            declaredParams <- Set.fromList <$> getModule modParams
+            forM_ prerequisites $ \prerequisite -> do
+                valid <- isTraitType prerequisite
+                unless (valid || prerequisite == InvalidType) $
+                    errmsg Nothing $ "Invalid trait prerequisite: " ++
+                        show prerequisite ++ " is not a trait"
+                case typeModule prerequisite of
+                    Nothing -> return ()
+                    Just prerequisiteMod -> do
+                        expectedParams <- getModule modParams `inModule` prerequisiteMod
+                        unless (length expectedParams == length (typeParams prerequisite)) $
+                            errmsg Nothing $ "Invalid trait prerequisite " ++ show prerequisite
+                                ++ ": expected " ++ show (length expectedParams)
+                                ++ " type parameter(s)"
+                let undeclared = typeVarSet prerequisite `Set.difference` declaredParams
+                unless (Set.null undeclared) $
+                    errmsg Nothing $ "Invalid trait prerequisite " ++ show prerequisite
+                        ++ ": undeclared type variable(s) "
+                        ++ intercalate ", " (show <$> Set.toAscList undeclared)
+            let duplicates = [List.head group | group <- List.group $ List.sort prerequisites,
+                    List.length group > 1]
+            unless (List.null duplicates) $
+                errmsg Nothing $ "Duplicate trait prerequisite: " ++
+                    show (List.head duplicates)
+            updateModule $ \mod -> mod { modTrait = Just $ List.nub prerequisites }
+
+
+-- |Reject prerequisite cycles after every trait in the SCC has been resolved.
+validateTraitPrerequisiteCycles :: ModSpec -> Compiler ()
+validateTraitPrerequisiteCycles = go []
+  where
+    go path mod
+        | mod `elem` path = message Error
+            ("Cyclic trait prerequisites: " ++ showModSpecs
+                (dropWhile (/= mod) path ++ [mod])) Nothing
+        | otherwise = do
+            trait <- getModule modTrait `inModule` mod
+            case trait of
+                Nothing -> return ()
+                Just info -> forM_ info $ \prerequisite ->
+                    case typeModule prerequisite of
+                        Nothing -> return ()
+                        Just prerequisiteMod -> go (path ++ [mod]) prerequisiteMod
 
 
 -- | Layout the types on the specified module list, which comprise a strongly
