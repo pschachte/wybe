@@ -1,0 +1,20 @@
+# Incomparable partial implementations are legal until their intersection is
+# needed by a concrete selection.
+
+type hash trait {
+    abstract hash(x:_): int
+}
+
+type hashmap(K,V) {
+    pub hashmap(key:K, value:V)
+}
+
+type mapping(K,V) trait {
+    abstract selection(x:_(K,V)): int
+}
+
+impl hashmap(K<:hash,V) <: mapping(K,V)
+impl hashmap(K,V<:hash) <: mapping(K,V)
+
+def selection(x:hashmap(K<:hash,V)): int = 1
+def selection(x:hashmap(K,V<:hash)): int = 2

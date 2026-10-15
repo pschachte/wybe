@@ -1,0 +1,51 @@
+# A diamond duplicates prerequisite method components for each branch,
+# with separate constraint offsets for their partial implementation adapters.
+
+type printable trait {
+    abstract label(x:_): string
+}
+
+type ta trait {
+    abstract label_a(x:_): string
+}
+
+type tb trait <: ta {
+    abstract label_b(x:_): string
+}
+
+type tc trait <: ta {
+    abstract label_c(x:_): string
+}
+
+type td trait <: {tb, tc} {
+    abstract label_d(x:_): string
+}
+
+type box(T) {
+    pub box(value:T)
+}
+
+impl int <: printable
+def label(x:int): string = "$x"
+
+impl box(T<:printable) <: ta
+def label_a(x:box(T<:printable)): string = printable.label(x^value)
+
+impl box(T<:printable) <: tb
+def label_b(x:box(T<:printable)): string = printable.label(x^value)
+
+impl box(T<:printable) <: tc
+def label_c(x:box(T<:printable)): string = printable.label(x^value)
+
+impl box(T<:printable) <: td
+def label_d(x:box(T<:printable)): string = printable.label(x^value)
+
+def calls_ta(x:T<:ta): string = ta.label_a(x)
+def calls_tb(x:T<:tb): string = calls_ta(x)
+def calls_tc(x:T<:tc): string = calls_ta(x)
+def calls_td_via_tb(x:T<:td): string = calls_tb(x)
+def calls_td_via_tc(x:T<:td): string = calls_tc(x)
+
+?boxed = box(7)
+!println(calls_td_via_tb(boxed))
+!println(calls_td_via_tc(boxed))

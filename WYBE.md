@@ -1719,6 +1719,40 @@ def combine2(x:T<:formattable, y:T2<:formattable): string =
     "$(fmt(x)), $(fmt(y))"
 ```
 
+Traits may have type parameters.  In a top-level trait module, place the
+parameters after `trait`:
+
+```
+# collection.wybe
+trait(T)
+
+abstract insert(!collection:_(T), item:T)
+abstract contains(collection:_(T), item:T): bool
+```
+
+In the shorthand declaration, place the parameters after the trait name:
+
+```
+type collection(T) trait {
+    abstract insert(!collection:_(T), item:T)
+    abstract contains(collection:_(T), item:T): bool
+}
+```
+
+Each implementation supplies concrete arguments for those parameters, which
+specialise the signatures of the trait's abstract procedures and functions.
+For example, an integer set can implement `collection(int)`:
+
+```
+impl int_set <: collection(int)
+
+def insert(!set:int_set, item:int) { ... }
+def contains(set:int_set, item:int): bool = ...
+```
+
+Here the trait parameter `T` becomes `int`, while `_` becomes the
+implementing type, `int_set`.
+
 
 ### Implementing a trait
 
@@ -1741,9 +1775,10 @@ pub def fmt(x:_): string = "Dog($(x^name))"
 
 Each abstract procedure or function in the trait module must have exactly one
 concrete (non-abstract) procedure or function that matches the signature of the
-abstract procedure/function, except that it has a parameter of the concrete type
-wherever the abstract procedure/function has the trait type (or type variable
-with the trait as type bound).  The parameter flows, argument and
+abstract procedure/function, except that every occurrence of the trait type (or
+of a type variable with the trait as type bound) is replaced by the
+implementation type.  The implementation type may be generic, and the trait type
+may occur in any number of parameters.  The parameter flows, argument and
 result types, determinism, purity, and resource use of the concrete
 procedure/function must match the abstract declaration.
 
@@ -1785,6 +1820,190 @@ The implementation procedures are resolved in the module containing the
 `impl` declaration, and they can come from imported modules.  If multiple
 matching procedures exist, one is defined locally and others are imported from
 elsewhere, then the local matching procedure is preferred.
+
+The implementation type in an `impl` declaration may itself be generic, so
+that a single declaration covers every instantiation of the type.  Here
+`list(T)` implements the `collection(T)` trait defined earlier, for every
+element type:
+
+```
+impl list(T) <: collection(T)
+
+def insert(!lst:list(T), item:T) { ... }
+def contains(lst:list(T), item:T): bool = ...
+```
+
+Thus `list(int)` implements `collection(int)`, `list(string)` implements
+`collection(string)`, and so on, with a single generic vtable shared by all
+instantiations.
+
+The implementation type may also be a bare type variable, giving a generic
+implementation that applies to any type.  With the `named` trait defined
+earlier, this gives every type a default name:
+
+```
+impl T <: named
+
+def name(x:T): string = "<unknown>"
+```
+
+Every type variable appearing in the trait must also appear in the
+implementation type.  A generic implementation is used only when no
+implementation with an exactly matching type is known.  Thus, with the
+generic implementation of `named` above, the following causes
+`named.name(42)` to use the `int` implementation and return `"int"`, while
+other types continue to use the generic implementation and return
+`"<unknown>"`, regardless of the order in which the two implementations are
+declared:
+
+```
+impl int <: named
+
+def name(x:int): string = "int"
+```
+
+The implementing procedures and functions must match the signatures of the
+specialised abstract procedures and functions.  In particular, a generic
+procedure does not implement a trait for a concrete type: `def name(x:T):
+string` does not satisfy `impl int <: named`.
+
+Type variables in the implementation type may have trait bounds.  Such a
+bounded generic implementation applies only when the corresponding concrete
+type implements every bound.  For example:
+
+```
+type box(T) {
+    pub box(value:T)
+}
+
+impl box(named) <: formattable
+
+def fmt(x:box(named)): string = "box of " ,, name(x^value)
+```
+
+where `box(named)` is an abbreviation for `box(T<:named)`.
+
+This implementation of `formattable` applies to `box(int)` if `int` implements
+`named`, but not to `box(U)` when `U` does not.  The same bounds must be
+written on the type variables in the implementing procedures and functions.
+Bounds constrain variables in the implementation type; type variables in the
+implemented trait cannot introduce additional bounds.
+
+The implementation type may also be a trait, so that every type implementing
+one trait also implements another:
+
+```
+impl named <: formattable
+
+def fmt(x:named): string = "<" ,, name(x) ,, ">"
+```
+
+As with parameter types, a trait used as the implementation type abbreviates a
+type variable bounded by that trait, so the declaration above is equivalent to:
+
+```
+impl T<:named <: formattable
+
+def fmt(x:T<:named): string = "<" ,, name(x) ,, ">"
+```
+
+The explicit form allows the type variable to have several bounds, so that the
+implementation applies only to types implementing all of them.  For example,
+any type that has both a name and a price can be listed in a shop:
+
+```
+type priced trait {
+    abstract price(x:_): int
+}
+
+type listable trait {
+    abstract listing(x:_): string
+}
+
+impl T<:{named, priced} <: listable
+
+def listing(x:T<:{named, priced}): string =
+    named.name(x) ,, " costs $(priced.price(x))"
+```
+
+When more than one implementation applies, Wybe selects the unique most
+specific one.  A concrete implementation is more specific than a bounded
+generic implementation, which is more specific than the corresponding
+unbounded generic implementation.  Implementations with independent bounds
+may overlap without error, but using a type in their overlap is ambiguous if
+neither implementation is more specific.  A further implementation covering
+the intersection can resolve the ambiguity.  For example, given generic
+`pair(A,B)` and trait `formattable`:
+
+```
+impl pair(named, B) <: formattable
+impl pair(A, named) <: formattable
+impl pair(A<:named, B<:named) <: formattable
+```
+
+The third declaration is selected when both type arguments implement
+`named`; without it, selecting a `formattable` implementation for such a pair
+would be ambiguous.
+
+### Trait prerequisites
+
+A trait may require its implementing types to implement other traits.  Declare
+these *prerequisites* with `<:` after `trait`, using braces for multiple traits.
+In a top-level trait module, write `trait <: named` for a single prerequisite.
+For example, a top-level version of the earlier `listable` trait can require
+the existing `named` and `priced` traits:
+
+```
+# listable.wybe
+use named
+use priced
+
+trait <: {named, priced}
+
+abstract listing(x:_): string
+```
+
+For a submodule trait, place the prerequisites after `trait` in the `type`
+declaration.  The earlier `listable` declaration can be replaced with:
+
+```
+type listable trait <: {named, priced} {
+    abstract listing(x:_): string
+}
+```
+
+For a single prerequisite, write `type listable trait <: named { ... }`.
+
+A procedure constrained by `listable` can also use its prerequisites without
+listing them separately in the type bound:
+
+```
+def shop_label(x:listable): string =
+    "$(named.name(x)): $(priced.price(x)) - $(listable.listing(x))"
+```
+
+An `impl` declaration for `listable` requires a unique applicable implementation
+of each prerequisite for the same type.  It does not declare those
+implementations automatically.  Reusing the earlier traits, a new `book` type
+can implement all three:
+
+```
+type book {
+    pub book(title:string, cost:int)
+}
+
+impl book <: {named, priced, listable}
+
+def name(x:book): string = x^title
+def price(x:book): int = x^cost
+
+def listing(x:book): string = "paperback"
+```
+
+Now `shop_label(book("Dune", 12))` returns `"Dune: 12 - paperback"`.  Prerequisites are
+transitive: if a prerequisite itself requires another trait, that trait is also
+available through the original bound and must have an applicable implementation.
+Missing or ambiguous prerequisite implementations are compile-time errors.
 
 ### Default trait implementations
 

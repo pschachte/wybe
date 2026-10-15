@@ -1,0 +1,2 @@
+Error detected during final normalisation of module(s) trait_partial_blanket_impl_invalid_bound, trait_partial_blanket_impl_invalid_bound.printable
+final-dump/trait_partial_blanket_impl_invalid_bound.wybe:4:1: Invalid partial trait implementation bound: wybe.int is not a trait

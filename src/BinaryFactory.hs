@@ -45,6 +45,8 @@ instance Binary Prim
 instance Binary PrimVarName
 instance Binary ConstValue
 instance Binary StructInfo
+instance Binary VTableComponent
+instance Binary VTableEntry
 instance Binary PrimArg
 instance Binary ProcAnalysis
 instance Binary GlobalFlows
@@ -76,6 +78,7 @@ instance Binary ModuleInterface
 instance Binary Pragma
 instance Binary StructID
 instance Binary TraitImplSpec
+instance Binary KnownTraitImpl
 
 instance Binary ProcModifiers
 instance Binary Inlining

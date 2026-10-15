@@ -1,0 +1,10 @@
+# A generic procedure does not satisfy a trait implementation requiring a
+# concrete parameter type.
+
+type maybe_int trait {
+    abstract is_int(x:_): bool
+}
+
+impl int <: maybe_int
+
+def is_int(x:T): bool = false

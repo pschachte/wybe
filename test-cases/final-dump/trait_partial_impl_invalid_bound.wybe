@@ -1,0 +1,6 @@
+# A partial trait implementation bound on a type that is not a trait is
+# rejected.
+type mapping(K) trait { abstract get(x:_(K)): K }
+type hashmap(K) { pub hashmap(value:K) }
+
+impl hashmap(K<:int) <: mapping(K)

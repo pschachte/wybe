@@ -1,0 +1,28 @@
+# Concrete, bounded generic, and unbounded generic implementations are chosen
+# in descending specificity.
+
+type box(T) {
+    pub box(value:T)
+}
+
+type my_trait trait {
+    abstract specificity(x:_): int
+}
+
+impl int <: my_trait
+impl bool <: my_trait
+
+def specificity(x:int): int = 100
+def specificity(x:bool): int = 200
+
+impl box(int) <: my_trait
+impl box(T<:my_trait) <: my_trait
+impl box(T) <: my_trait
+
+def specificity(x:box(T)): int = 1
+def specificity(x:box(T<:my_trait)): int = 2
+def specificity(x:box(int)): int = 3
+
+!println(my_trait.specificity(box(42)))
+!println(my_trait.specificity(box(true)))
+!println(my_trait.specificity(box("generic")))

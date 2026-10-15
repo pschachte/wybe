@@ -1,0 +1,19 @@
+# Concrete prerequisite dispatch uses its embedded vtable when the
+# standalone prerequisite constant is omitted.
+
+type ta trait {
+    abstract label_a(x:_): string
+}
+
+type tb trait <: ta {
+    abstract label_b(x:_): string
+}
+
+impl int <: ta
+def label_a(x:int): string = "a:$x"
+
+impl int <: tb
+def label_b(x:int): string = "b:$x"
+
+!println(ta.label_a(5))
+!println(tb.label_b(5))

@@ -1,0 +1,8 @@
+type sequence(T) trait {
+}
+
+type box(T) {
+    pub box(value:T)
+}
+
+impl box(T) <: sequence(U)

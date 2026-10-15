@@ -418,9 +418,6 @@ expandArg' arg@(ArgVar var ty flow ft _) = do
 expandArg' arg@(ArgClosure ps as ty) = do
     as' <- mapM expandArg as
     return $ ArgClosure ps as' ty
-expandArg' arg@(ArgVTable info ty) = case info of
-    Left spec -> return arg
-    Right var -> expandArg $ ArgVar var ty FlowIn VTable False
 expandArg' arg = return arg
 
 

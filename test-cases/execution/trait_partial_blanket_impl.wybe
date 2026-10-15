@@ -1,0 +1,60 @@
+# A trait implementation whose type is a bounded type variable applies to
+# every type implementing the bound, while more specific implementations
+# still take precedence.
+
+type debug trait {
+    abstract dbg(x:_): string
+}
+
+type printable trait {
+    abstract show(x:_): string
+}
+
+type named trait {
+    abstract name(x:_): string
+}
+
+type greeter trait {
+    abstract greet(x:_): string
+}
+
+type box(T) {
+    pub box(value:T)
+}
+
+impl int <: debug
+impl float <: debug
+
+def dbg(x:int): string = "int"
+def dbg(x:float): string = "float"
+
+# Shorthand for `impl T<:debug <: printable`.
+impl debug <: printable
+
+def show(x:debug): string = "debug " ,, debug.dbg(x)
+
+# A concrete implementation is more specific than the blanket one.
+impl float <: printable
+
+def show(x:float): string = "float directly"
+
+# A trait type nested in the implementation type is also a bounded variable.
+impl box(debug) <: printable
+
+def show(x:box(debug)): string = "box of " ,, debug.dbg(x^value)
+
+impl int <: named
+
+def name(x:int): string = "forty-two"
+
+impl T<:named <: greeter
+
+def greet(x:T<:named): string = "hello, " ,, named.name(x)
+
+def via(x:T<:debug): string = printable.show(x)
+
+!println(printable.show(1))
+!println(printable.show(2.5))
+!println(printable.show(box(3)))
+!println(greeter.greet(42))
+!println(via(4))

@@ -1,0 +1,47 @@
+# A generic proc can use a partial trait implementation whose constraints fall
+# on its own type variables; the constraint vtables are the ones passed to it.
+
+type hash trait {
+    abstract hash(x:_): int
+}
+
+type debug trait {
+    abstract dbg(x:_): string
+}
+
+type printable trait {
+    abstract show(x:_): string
+}
+
+type mapping(K,V) trait {
+    abstract key_hash(x:_(K,V), key:K): int
+}
+
+type hashmap(K,V) {
+    pub hashmap(key:K, value:V)
+}
+
+type box(T) {
+    pub box(value:T)
+}
+
+impl int <: {hash, debug}
+
+def hash(x:int): int = x * 2
+def dbg(x:int): string = "int $(x)"
+
+impl hashmap(K<:hash,V) <: mapping(K,V)
+
+def key_hash(x:hashmap(K<:hash,V), key:K<:hash): int = hash.hash(key)
+
+impl box(debug) <: printable
+
+def show(x:box(debug)): string = "box of " ,, debug.dbg(x^value)
+
+def lookup_hash(m:hashmap(U<:hash,V), key:U<:hash): int = mapping.key_hash(m, key)
+
+def show_boxed(x:U<:debug): string = printable.show(box(x))
+
+?m:hashmap(int,float) = hashmap(21, 3.14)
+!println(lookup_hash(m, 21))
+!println(show_boxed(7))

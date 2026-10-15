@@ -1,0 +1,3 @@
+Error detected during type checking of module(s) trait_partial_blanket_impl_multiple_bounds_unsatisfied, trait_partial_blanket_impl_multiple_bounds_unsatisfied.listable, trait_partial_blanket_impl_multiple_bounds_unsatisfied.named, trait_partial_blanket_impl_multiple_bounds_unsatisfied.priced
+final-dump/trait_partial_blanket_impl_multiple_bounds_unsatisfied.wybe:16:13: Type error in call to proc listing, argument 1
+final-dump/trait_partial_blanket_impl_multiple_bounds_unsatisfied.wybe:16:13: Type error in partial application of proc listing, argument 1

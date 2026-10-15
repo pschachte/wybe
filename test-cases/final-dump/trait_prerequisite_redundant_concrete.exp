@@ -1,0 +1,209 @@
+======================================================================
+AFTER EVERYTHING:
+
+
+--------------------------------------------------
+ Module trait_prerequisite_redundant_concrete
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : trait_prerequisite_redundant_concrete.<0>
+  constants       : 0:: CStringInfo {cstringChars = "b:"}
+                    1:: CStringInfo {cstringChars = "a:"}
+                    2:: VTableInfo {vtableSize = 16, vtableData = [FnPointerStructMember trait_prerequisite_redundant_concrete.label_b#adapter<0>,FnPointerStructMember trait_prerequisite_redundant_concrete.label_a#adapter<0>], vtableExternal = False, vtableIndex = 1, vtableSpec = wybe.int <: trait_prerequisite_redundant_concrete.tb, vtableMod = ["trait_prerequisite_redundant_concrete"], vtableConstraints = []}
+                    3:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"b:"]}
+                    4:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"a:"]}
+  imports         : use trait_prerequisite_redundant_concrete.ta
+                    use trait_prerequisite_redundant_concrete.tb
+                    use wybe
+  resources       : 
+  submodules      : trait_prerequisite_redundant_concrete.ta, trait_prerequisite_redundant_concrete.tb
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: trait_prerequisite_redundant_concrete.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    foreign lpvm cast(vtable wybe.int <: trait_prerequisite_redundant_concrete.tb:opaque, ?#vtableviewbase##0:pointer) @trait_prerequisite_redundant_concrete:nn:nn
+    foreign llvm add(~#vtableviewbase##0:pointer, 8:wybe.int, ?#vtableview##0:pointer) @trait_prerequisite_redundant_concrete:nn:nn
+    trait_prerequisite_redundant_concrete.ta.label_a<0>(5:wybe.int, ?tmp#0##0:wybe.string, ~#vtableview##0:opaque)<{}; {}; {0}> #0 @trait_prerequisite_redundant_concrete:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @trait_prerequisite_redundant_concrete:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @trait_prerequisite_redundant_concrete:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @trait_prerequisite_redundant_concrete:nn:nn
+    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_prerequisite_redundant_concrete:nn:nn
+    trait_prerequisite_redundant_concrete.tb.label_b<0>(5:wybe.int, ?tmp#1##0:wybe.string, vtable wybe.int <: trait_prerequisite_redundant_concrete.tb:opaque)<{}; {}; {0}> #2 @trait_prerequisite_redundant_concrete:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @trait_prerequisite_redundant_concrete:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @trait_prerequisite_redundant_concrete:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @trait_prerequisite_redundant_concrete:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_prerequisite_redundant_concrete:nn:nn
+
+
+proc label_a > {inline} (1 calls)
+0: trait_prerequisite_redundant_concrete.label_a<0>
+label_a(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #3 @trait_prerequisite_redundant_concrete:nn:nn
+    wybe.string.,,<0>("a:":wybe.string, ~tmp#1##0:wybe.string, ?#result##0:wybe.string) #2 @trait_prerequisite_redundant_concrete:nn:nn
+
+
+proc label_a#adapter > {noinline} (0 calls)
+0: trait_prerequisite_redundant_concrete.label_a#adapter<0>
+label_a#adapter(x##0:Type0<:trait_prerequisite_redundant_concrete.ta, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~x##0:Type0<:trait_prerequisite_redundant_concrete.ta, ?x#adapter0##0:wybe.int)
+    wybe.int.fmt<2>(~x#adapter0##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #1 @trait_prerequisite_redundant_concrete:nn:nn
+    wybe.string.,,<0>("a:":wybe.string, ~tmp#1##0:wybe.string, ?#result##0:wybe.string) #2 @trait_prerequisite_redundant_concrete:nn:nn
+
+
+proc label_b > {inline} (1 calls)
+0: trait_prerequisite_redundant_concrete.label_b<0>
+label_b(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #3 @trait_prerequisite_redundant_concrete:nn:nn
+    wybe.string.,,<0>("b:":wybe.string, ~tmp#1##0:wybe.string, ?#result##0:wybe.string) #2 @trait_prerequisite_redundant_concrete:nn:nn
+
+
+proc label_b#adapter > {noinline} (0 calls)
+0: trait_prerequisite_redundant_concrete.label_b#adapter<0>
+label_b#adapter(x##0:Type0<:{trait_prerequisite_redundant_concrete.ta, trait_prerequisite_redundant_concrete.tb}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(~x##0:Type0<:{trait_prerequisite_redundant_concrete.ta, trait_prerequisite_redundant_concrete.tb}, ?x#adapter0##0:wybe.int)
+    wybe.int.fmt<2>(~x#adapter0##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #1 @trait_prerequisite_redundant_concrete:nn:nn
+    wybe.string.,,<0>("b:":wybe.string, ~tmp#1##0:wybe.string, ?#result##0:wybe.string) #2 @trait_prerequisite_redundant_concrete:nn:nn
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_prerequisite_redundant_concrete'
+
+source_filename = "!ROOT!/final-dump/trait_prerequisite_redundant_concrete.wybe"
+target triple   = ????
+
+@"trait_prerequisite_redundant_concrete#constant#0" = private unnamed_addr constant [ ?? x i8 ] c"b:\00", align 8
+@"trait_prerequisite_redundant_concrete#constant#1" = private unnamed_addr constant [ ?? x i8 ] c"a:\00", align 8
+@"trait_prerequisite_redundant_concrete##vtable#1" = unnamed_addr constant {ptr, ptr} { ptr @"trait_prerequisite_redundant_concrete#.label_b#adapter<0>", ptr @"trait_prerequisite_redundant_concrete#.label_a#adapter<0>" }, align 8
+@"trait_prerequisite_redundant_concrete#constant#3" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"trait_prerequisite_redundant_concrete#constant#0" }, align 8
+@"trait_prerequisite_redundant_concrete#constant#4" = private unnamed_addr constant {i64, ptr} { i64 2, ptr @"trait_prerequisite_redundant_concrete#constant#1" }, align 8
+
+declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
+declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
+declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
+declare external ccc void @putchar(i8)
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc void @"trait_prerequisite_redundant_concrete#.<0>"() {
+  %"#vtableviewbase##0" = ptrtoint ptr @"trait_prerequisite_redundant_concrete##vtable#1" to i64
+  %"#vtableview##0" = add i64 %"#vtableviewbase##0", 8
+  %"tmp#8##0" = inttoptr i64 %"#vtableview##0" to ptr
+  %"tmp#0##0" = tail call fastcc i64 @"trait_prerequisite_redundant_concrete#.ta#.label_a<0>"(i64 5, ptr %"tmp#8##0")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  call ccc void @putchar(i8 10)
+  %"tmp#1##0" = tail call fastcc i64 @"trait_prerequisite_redundant_concrete#.tb#.label_b<0>"(i64 5, ptr @"trait_prerequisite_redundant_concrete##vtable#1")
+  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#1##0")
+  call ccc void @putchar(i8 10)
+  ret void
+}
+
+define external fastcc i64 @"trait_prerequisite_redundant_concrete#.label_a<0>"(i64 %"x##0") {
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"x##0", i64 0, i8 32)
+  %"tmp#8##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"trait_prerequisite_redundant_concrete#constant#4" to i64 ), i64 %"tmp#1##0")
+  ret i64 %"tmp#8##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_redundant_concrete#.label_a#adapter<0>"(i64 %"x##0", ptr %"#vtable##0") {
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"x##0", i64 0, i8 32)
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"trait_prerequisite_redundant_concrete#constant#4" to i64 ), i64 %"tmp#1##0")
+  ret i64 %"tmp#2##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_redundant_concrete#.label_b<0>"(i64 %"x##0") {
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"x##0", i64 0, i8 32)
+  %"tmp#8##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"trait_prerequisite_redundant_concrete#constant#3" to i64 ), i64 %"tmp#1##0")
+  ret i64 %"tmp#8##0"
+}
+
+define external fastcc i64 @"trait_prerequisite_redundant_concrete#.label_b#adapter<0>"(i64 %"x##0", ptr %"#vtable##0") {
+  %"tmp#1##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"x##0", i64 0, i8 32)
+  %"tmp#2##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"trait_prerequisite_redundant_concrete#constant#3" to i64 ), i64 %"tmp#1##0")
+  ret i64 %"tmp#2##0"
+}
+
+--------------------------------------------------
+ Module trait_prerequisite_redundant_concrete.ta
+  representation  : (not yet known)
+  public submods  : 
+  public resources: 
+  public procs    : trait_prerequisite_redundant_concrete.ta.label_a<0>
+  constants       : 
+  imports         : use trait_prerequisite_redundant_concrete
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc label_a > public abstract {inline} (0 calls)
+0: trait_prerequisite_redundant_concrete.ta.label_a<0>
+label_a(x##0:Type0<:trait_prerequisite_redundant_concrete.ta <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~#vtable##0:opaque@0(~x##0:Type0<:trait_prerequisite_redundant_concrete.ta, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_prerequisite_redundant_concrete.ta'
+
+source_filename = "!ROOT!/final-dump/trait_prerequisite_redundant_concrete.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i64 @"trait_prerequisite_redundant_concrete#.ta#.label_a<0>"(i64 %"x##0", ptr %"#vtable##0") {
+  %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
+  %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
+  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0", ptr %"#vtable##0")
+  ret i64 %"tmp#2##0"
+}
+
+--------------------------------------------------
+ Module trait_prerequisite_redundant_concrete.tb
+  representation  : (not yet known)
+  public submods  : 
+  public resources: 
+  public procs    : trait_prerequisite_redundant_concrete.tb.label_b<0>
+  constants       : 
+  imports         : use trait_prerequisite_redundant_concrete
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc label_b > public abstract {inline} (0 calls)
+0: trait_prerequisite_redundant_concrete.tb.label_b<0>
+label_b(x##0:Type0<:{trait_prerequisite_redundant_concrete.ta, trait_prerequisite_redundant_concrete.tb} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~#vtable##0:opaque@0(~x##0:Type0<:{trait_prerequisite_redundant_concrete.ta, trait_prerequisite_redundant_concrete.tb}, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
+
+  LLVM code       :
+
+;; FILE GENERATED BY wybemk XXX
+; ModuleID = 'trait_prerequisite_redundant_concrete.tb'
+
+source_filename = "!ROOT!/final-dump/trait_prerequisite_redundant_concrete.wybe"
+target triple   = ????
+
+
+declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
+
+define external fastcc i64 @"trait_prerequisite_redundant_concrete#.tb#.label_b<0>"(i64 %"x##0", ptr %"#vtable##0") {
+  %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
+  %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
+  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0", ptr %"#vtable##0")
+  ret i64 %"tmp#2##0"
+}

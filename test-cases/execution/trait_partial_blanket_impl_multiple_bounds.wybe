@@ -1,0 +1,52 @@
+# A blanket trait implementation may require several traits: any type that
+# is both named and priced can be listed in a shop, while a type with its own
+# listing implementation still uses it.
+
+type named trait {
+    abstract name(x:_): string
+}
+
+type priced trait {
+    abstract price(x:_): int
+}
+
+type listable trait {
+    abstract listing(x:_): string
+}
+
+type book {
+    pub book(title:string, cost:int)
+}
+
+type coffee {
+    pub coffee(size:string, cost:int)
+}
+
+impl book <: {named, priced}
+
+def name(x:book): string = x^title
+def price(x:book): int = x^cost
+
+impl coffee <: {named, priced}
+
+def name(x:coffee): string = x^size ,, " coffee"
+def price(x:coffee): int = x^cost
+
+impl T<:{named, priced} <: listable
+
+def listing(x:T<:{named, priced}): string =
+    named.name(x) ,, " costs $(priced.price(x))"
+
+# A concrete listing implementation is more specific than the blanket one.
+impl int <: {named, priced, listable}
+
+def name(x:int): string = "item #$(x)"
+def price(x:int): int = x
+def listing(x:int): string = "special offer"
+
+def shelf_label(x:T<:{named, priced}): string = "[" ,, listable.listing(x) ,, "]"
+
+!println(listable.listing(book("Dune", 12)))
+!println(listable.listing(coffee("large", 5)))
+!println(listable.listing(7))
+!println(shelf_label(book("Emma", 9)))

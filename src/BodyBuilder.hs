@@ -583,7 +583,9 @@ instr' prim@(PrimForeign "llvm" "move" []
 -- with impurity because if we forgot the impurity modifier on any alloc,
 -- disaster would ensue, and an impure alloc wouldn't be removed if the
 -- structure weren't needed, which we want.
-instr' prim@(PrimForeign "lpvm" "alloc" [] [sz,argvar]) pos = do
+-- Wildcard for flags so that escape-analysis-tagged allocs (e.g. {stack})
+-- are also handled here rather than falling through to the generic case.
+instr' prim@(PrimForeign "lpvm" "alloc" _ [sz,argvar]) pos = do
     logBuild "  Leaving alloc alone"
     rawInstr prim pos
     case sz of
@@ -695,7 +697,6 @@ mkInput arg@ArgFloat{} = arg
 mkInput arg@ArgClosure{} = arg
 mkInput (ArgUnneeded _ ty) = ArgUnneeded FlowIn ty
 mkInput arg@ArgGlobal{} = arg
-mkInput arg@ArgVTable{} = arg
 mkInput arg@ArgConstRef{} = arg
 mkInput arg@ArgUndef{} = arg
 
@@ -960,7 +961,6 @@ canonicaliseArg (ArgClosure ms as _) =
 canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
 canonicaliseArg (ArgGlobal info _)  = ArgGlobal info AnyType
-canonicaliseArg arg@ArgVTable{}     = arg
 canonicaliseArg (ArgConstRef ms _)  = ArgConstRef ms AnyType
 canonicaliseArg (ArgUnneeded dir _) = ArgUnneeded dir AnyType
 canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
@@ -979,7 +979,6 @@ validateArg instr (ArgInt    _ ty)      = validateType ty instr
 validateArg instr (ArgFloat  _ ty)      = validateType ty instr
 validateArg instr (ArgClosure _ _ ty)   = validateType ty instr
 validateArg instr (ArgGlobal _ ty)      = validateType ty instr
-validateArg instr (ArgVTable _ ty)      = validateType ty instr
 validateArg instr (ArgConstRef _ ty)    = validateType ty instr
 validateArg instr (ArgUnneeded _ ty)    = validateType ty instr
 validateArg instr (ArgUndef ty)         = validateType ty instr

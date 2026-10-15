@@ -242,7 +242,7 @@ define external fastcc void @"thistype#.<0>"() {
   %"tmp#33##0" = alloca i8, i64 8, align 8
   call fastcc void @"thistype#.concat<0>"(i64 ptrtoint( ptr @"thistype#constant#2" to i64 ), i64 ptrtoint( ptr @"thistype#constant#4" to i64 ), ptr %"tmp#33##0")
   %"tmp#8##0" = load i64, ptr %"tmp#33##0"
-  %"tmp#7##0" = call fastcc i64 @"thistype#.length<0>"(i64 %"tmp#8##0")
+  %"tmp#7##0" = tail call fastcc i64 @"thistype#.length<0>"(i64 %"tmp#8##0")
   call ccc void @print_int(i64 %"tmp#7##0")
   call ccc void @putchar(i8 10)
   ret void

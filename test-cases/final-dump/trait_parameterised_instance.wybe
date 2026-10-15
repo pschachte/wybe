@@ -1,0 +1,20 @@
+# Verify a parameterised trait can have multiple instances for one type.
+
+type from(U) trait {
+    abstract from(x: U): _(U)
+}
+
+impl int <: from(string)
+impl int <: from(float)
+
+def from(s:string): int = result
+    where {
+        ?result = foreign c atoi(c_string(s))
+    }
+
+def from(f:float): int = iround(f)
+
+?x = from("123")
+!println(x)
+?y = from(3.14)
+!println(y)

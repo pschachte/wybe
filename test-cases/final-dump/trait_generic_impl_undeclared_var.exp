@@ -1,0 +1,2 @@
+Error detected during preliminary processing of module trait_generic_impl_undeclared_var
+final-dump/trait_generic_impl_undeclared_var.wybe:8:1: Invalid generic trait implementation: type variable(s) U not defined in the implementation type

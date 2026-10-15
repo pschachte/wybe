@@ -1,0 +1,37 @@
+# A derived partial implementation embeds its prerequisite methods, with
+# both adapters loading constraints after the complete method region.
+
+type printable trait {
+    abstract label(x:_): string
+}
+
+type equivalent trait {
+    abstract equivalent_label(left:_, right:_): string
+}
+
+type ordered trait <: equivalent {
+    abstract before_label(left:_, right:_): string
+}
+
+type box(T) {
+    pub box(value:T)
+}
+
+impl int <: printable
+def label(x:int): string = "$x"
+
+impl box(T<:printable) <: equivalent
+def equivalent_label(left:box(T<:printable), right:box(T)): string =
+    printable.label(left^value)
+
+impl box(T<:printable) <: ordered
+def before_label(left:box(T<:printable), right:box(T)): string =
+    printable.label(right^value)
+
+def equivalent_from_ordered(left:T<:ordered, right:T): string =
+    equivalent.equivalent_label(left, right)
+
+?left = box(1)
+?right = box(2)
+!println(ordered.before_label(left, right))
+!println(equivalent_from_ordered(left, right))

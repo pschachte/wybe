@@ -9,7 +9,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 -- |Support for type checking/inference.
-module Types (validateModExportTypes, typeCheckModSCC) where
+module Types (validateModExportTypes, typeCheckModSCC, canonicalise) where
 
 
 import           AST
@@ -44,16 +44,9 @@ import Data.Tuple.HT (mapSnd)
 ----------------------------------------------------------------
 
 
-type Validator = StateT ValidatorState Compiler
-
-data ValidatorState = ValidatorState {
-    valTraitTypeDict :: Map TraitSpec TypeSpec,
-                            -- ^ Generated type variables that look like
-                            -- `Type0<:comparable` for trait types like
-                            -- `comparable`.
-    valTypeVarCounter :: Int
-                            -- ^ For numbering type variables.
-}
+-- |Validation of proc parameter types, sharing the type variables introduced
+-- for trait types across the params of one proc.
+type Validator = StateT TraitTypeVars Compiler
 
 
 -- |Check declared types of exported procs for the specified module.
@@ -93,10 +86,10 @@ validateProcDefTypes name def = do
     let tvarCount = procFauxTypeVarCount def
     logTypes $ "Validating def of " ++ showProcName name
     (params', finalState) <- runStateT (traverse (updatePlacedM $ validateParam name pos public) params)
-                             $ ValidatorState Map.empty tvarCount
-    let boundedTypeParams = getBoundedTypeParams params'
+                             $ TraitTypeVars Map.empty tvarCount
+    boundedTypeParams <- minimiseTypeVarBounds $ getBoundedTypeParams params'
     return $ def { procProto = proto { procProtoParams = params' }
-                 , procFauxTypeVarCount = valTypeVarCounter finalState
+                 , procFauxTypeVarCount = traitTypeVarCounter finalState
                  , procBoundedTypeParams = boundedTypeParams }
 
 
@@ -114,21 +107,35 @@ validateParam pname ppos public param = do
 validateParamType :: OptPos -> TypeSpec -> Validator TypeSpec
 validateParamType ppos ty = do
     ty' <- lift $ lookupType "proc declaration" ppos ty
-    case ty' of
-        TypeSpec{typeParams=params} -> do
-            traitType <- lift $ isTraitType ty'
-            params' <- mapM (validateParamType ppos) params
-            let ty'' = ty'{typeParams=params'}
-            if traitType
-                then validateParamTraitType ty''
-                else return ty''
-        TypeVariable name bounds -> do
-            validateTypeVarBounds ppos bounds
-            return ty'
-        HigherOrderType{higherTypeParams=tfs} -> do
-            types' <- mapM (validateParamType ppos . typeFlowType) tfs
-            return ty'{higherTypeParams=zipWith setTypeFlowType types' tfs}
-        _ -> return ty'
+    validateTypeVarBoundsIn ppos ty'
+    ty'' <- traitTypesToTypeVars ty'
+    lift $ addImpliedBounds ty''
+
+
+-- |Add the prerequisites of every type variable bound within a type to the
+-- bounds of that type variable.
+addImpliedBounds :: TypeSpec -> Compiler TypeSpec
+addImpliedBounds ty@TypeSpec{typeParams=params} = do
+    params' <- mapM addImpliedBounds params
+    return ty{typeParams=params'}
+addImpliedBounds ty@(TypeVariable _ bounds) = do
+    implied <- concat <$> mapM allTraitPrerequisites (Set.toAscList bounds)
+    return ty{typeVariableBounds = bounds `Set.union` Set.fromList implied}
+addImpliedBounds ty@HigherOrderType{higherTypeParams=tfs} = do
+    types' <- mapM (addImpliedBounds . typeFlowType) tfs
+    return ty{higherTypeParams=zipWith setTypeFlowType types' tfs}
+addImpliedBounds ty = return ty
+
+
+-- |Check the bounds of every type variable within a type.
+validateTypeVarBoundsIn :: OptPos -> TypeSpec -> Validator ()
+validateTypeVarBoundsIn ppos TypeSpec{typeParams=params} =
+    mapM_ (validateTypeVarBoundsIn ppos) params
+validateTypeVarBoundsIn ppos (TypeVariable _ bounds) =
+    validateTypeVarBounds ppos bounds
+validateTypeVarBoundsIn ppos HigherOrderType{higherTypeParams=tfs} =
+    mapM_ (validateTypeVarBoundsIn ppos . typeFlowType) tfs
+validateTypeVarBoundsIn _ _ = return ()
 
 
 validateTypeVarBounds :: OptPos -> Set TraitSpec -> Validator ()
@@ -141,20 +148,6 @@ validateTypeVarBounds ppos bounds =
             lift $ message Error
                 ("Invalid type variable bound: " ++ show bound ++ " is not a trait")
                 ppos
-
-
-validateParamTraitType :: TraitSpec -> Validator TypeSpec
-validateParamTraitType tspec = do
-    traitTypeDict <- gets valTraitTypeDict
-    case Map.lookup tspec traitTypeDict of
-        Just typ -> return typ
-        Nothing -> do
-            next <- gets valTypeVarCounter
-            let name = FauxTypeVar next
-            let typ = TypeVariable name (Set.singleton tspec)
-            modify $ \st -> st {valTypeVarCounter = next+1
-                               ,valTraitTypeDict = Map.insert tspec typ $ valTraitTypeDict st}
-            return typ
 
 
 checkDeclIfPublic :: Ident -> OptPos -> Bool -> TypeSpec -> Validator ()
@@ -173,6 +166,18 @@ getBoundedTypeParams params = concatMap boundedParams typeVarNames
     boundedParams name =
         [(name, bound) | bound <- Set.toAscList $
             Map.findWithDefault Set.empty name allBounds]
+
+
+-- |Drop a bound when another bound on the same variable implies it.  This is
+-- what lets a derived-trait vtable parameter stand in for all prerequisites.
+minimiseTypeVarBounds :: [TypeVarBound] -> Compiler [TypeVarBound]
+minimiseTypeVarBounds bounds = filterM keep bounds
+  where
+    keep (name, bound) = not . or <$> mapM (implies bound)
+        [other | (otherName, other) <- bounds,
+            otherName == name, not $ sameTraitConstraint other bound]
+    implies required other = any (sameTraitConstraint required) <$>
+        allTraitPrerequisites other
 
 
 -- |Return the type variable names in a type, preserving their occurrence order.
@@ -256,9 +261,11 @@ typeCheckModSCC scc = do
       intercalate "\n"
        (List.map (("    " ++) . intercalate ", " . List.map show . sccElts)
        ordered)
-    errs <- concat <$> mapM typecheckProcSCC ordered
+    procErrs <- concat <$> mapM typecheckProcSCC ordered
     traitErrs <- concat <$> mapM typecheckLocalTraitImpls scc
-    mapM_ (queueMessage . typeErrorMessage) (errs ++ traitErrs)
+    importedTraitErrs <- concat <$> mapM checkImportedTraitImpls scc
+    mapM_ (queueMessage . typeErrorMessage)
+        (procErrs ++ traitErrs ++ importedTraitErrs)
 
 
 -- |Return the module, name, and defn of all procs in the specified module
@@ -424,6 +431,16 @@ data TypeError = ReasonMessage Message
                    -- ^Trait implementation lacks a matching concrete proc
                | ReasonMultipleTraitImpl TraitImplSpec ProcName OptPos
                    -- ^Multiple concrete procs exist for a trait implementation
+               | ReasonAmbiguousTraitImpl TraitImplSpec [TraitImplSpec] OptPos
+                   -- ^Several equally-specific trait implementations apply
+               | ReasonTraitPrerequisiteMissing TraitImplSpec TraitImplSpec OptPos
+                   -- ^Trait implementation lacks a required prerequisite
+               | ReasonTraitPrerequisiteAmbiguous TraitImplSpec TraitImplSpec
+                   [TraitImplSpec] OptPos
+                   -- ^Trait implementation has an ambiguous prerequisite
+               | ReasonConflictingTraitImpls ModSpec TraitImplSpec
+                   [(ModSpec, Set ProcSpec)] OptPos
+                   -- ^Imported trait implementations resolve to different procs
                deriving (Eq, Ord)
 
 
@@ -625,6 +642,31 @@ typeErrorMessage (ReasonMultipleTraitImpl (TraitImplSpec trait typ) name pos) =
         ++ " for type " ++ show typ
         ++ ": multiple implementations of "
         ++ showProcName name
+typeErrorMessage (ReasonAmbiguousTraitImpl requested candidates pos) =
+    Message Error pos $
+        "Ambiguous trait implementation for " ++ show requested
+        ++ "; most-specific candidates are tied:"
+        ++ concatMap (("\n    " ++) . show) candidates
+typeErrorMessage (ReasonTraitPrerequisiteMissing implementation required pos) =
+    Message Error pos $ "Invalid implementation " ++ show implementation
+        ++ ": missing prerequisite implementation " ++ show required
+typeErrorMessage (ReasonTraitPrerequisiteAmbiguous implementation required candidates pos) =
+    Message Error pos $ "Invalid implementation " ++ show implementation
+        ++ ": prerequisite " ++ show required ++ " is ambiguous:"
+        ++ concatMap (("\n    " ++) . show) candidates
+typeErrorMessage (ReasonConflictingTraitImpls importingMod
+                  (TraitImplSpec trait typ) implementations pos) =
+    Message Error pos $
+        "Module " ++ showModSpec importingMod
+        ++ " imports conflicting implementations of trait " ++ show trait
+        ++ " for type " ++ show typ ++ ":"
+        ++ concatMap showImplementation implementations
+        ++ "\nDeclare a local implementation in module "
+        ++ showModSpec importingMod ++ " to override the imported implementations"
+  where
+    showImplementation (mod, procs) =
+        "\n    " ++ showModSpec mod ++ " provides {"
+        ++ intercalate ", " (show <$> Set.toAscList procs) ++ "}"
 
 
 -- |Explain why a same-named concrete procedure cannot implement an abstract
@@ -735,6 +777,10 @@ typeErrorPos (ReasonWrongTraitParam _ pos) = pos
 typeErrorPos (ReasonNotATrait _ pos) = pos
 typeErrorPos (ReasonTraitImplMissing _ _ _ pos) = pos
 typeErrorPos (ReasonMultipleTraitImpl _ _ pos) = pos
+typeErrorPos (ReasonAmbiguousTraitImpl _ _ pos) = pos
+typeErrorPos (ReasonTraitPrerequisiteMissing _ _ pos) = pos
+typeErrorPos (ReasonTraitPrerequisiteAmbiguous _ _ _ pos) = pos
+typeErrorPos (ReasonConflictingTraitImpls _ _ _ pos) = pos
 
 
 ----------------------------------------------------------------
@@ -1073,10 +1119,24 @@ mergeTypeVarBounds name ty1 ty2 = do
 unifyTypeVarBounds :: TypeError -> Set TraitSpec -> TypeSpec -> Typed TypeSpec
 unifyTypeVarBounds reason bounds ty = do
     knownTraitImpls <- lift $ getModuleImplementationField modKnownTraitImpls
-    if all (\bound -> Map.member (TraitImplSpec bound ty) knownTraitImpls)
-            (Set.toList bounds)
-        then return ty
-        else invalidTypeError reason
+    let resolve bound = do
+            let requested = TraitImplSpec bound ty
+            case resolveTraitImpl requested knownTraitImpls of
+                TraitImplNotFound ->
+                    typeError reason >> return Nothing
+                TraitImplAmbiguous ambiguousReq candidates ->
+                    typeError (ReasonAmbiguousTraitImpl ambiguousReq candidates $
+                        typeErrorPos reason) >> return Nothing
+                TraitImplResolved declared _ ->
+                    return $ (bound,) <$> specialiseTraitImpl declared ty
+    resolved <- mapM resolve $ Set.toList bounds
+    case sequence resolved of
+        Nothing -> return InvalidType
+        Just implementations -> do
+            forM_ implementations $ \(bound, specialised) -> do
+                void $ unifyTypes reason ty $ implType specialised
+                void $ unifyTypes reason bound $ implTrait specialised
+            return ty
 
 invalidTypeError :: TypeError -> Typed TypeSpec
 invalidTypeError reason = typeError reason >> return InvalidType
@@ -1243,21 +1303,94 @@ typecheckLocalTraitImpls thisMod = do
     logMsg Types "Checking local trait impls:"
     traitImpls <- getModuleImplementationField modKnownTraitImpls
     traitImplProcs <- mapM (uncurry typecheckLocalTraitImpl)
-            $ Map.toList $ Map.filter (isNothing . content) traitImpls
+            $ Map.toList $ Map.filter (isNothing . traitImplMod) traitImpls
     logMsg Types $ "Local trait impls: " ++ show traitImplProcs
     updateModImplementation $ \imp -> imp { modTraitImplProcs = Map.fromList $ catOKs traitImplProcs }
     reexitModule
     return $ concatMap errList traitImplProcs
 
 
-typecheckLocalTraitImpl :: TraitImplSpec -> Placed (Maybe ModSpec)
+-- |Check that all independently imported implementations of each trait/type
+-- pair resolve to the same concrete procedures. 
+checkImportedTraitImpls :: ModSpec -> Compiler [TypeError]
+checkImportedTraitImpls [] = return []
+checkImportedTraitImpls thisMod = do
+    reenterModule thisMod
+    impl <- getModuleImplementationField id
+    directOwners <- importedTraitImplOwners $ Map.keys $ modImports impl
+    inheritedOwners <- maybe (return Map.empty) inheritedTraitImplOwners
+        $ modNestedIn impl
+    let owners = Map.unionWith Set.union directOwners inheritedOwners
+        localSpecs = Map.keysSet
+            $ Map.filter (isNothing . traitImplMod) $ modKnownTraitImpls impl
+        importedOnly = Map.withoutKeys owners localSpecs
+    errs <- concat <$> mapM (uncurry (checkImportedTraitImpl thisMod))
+        (Map.toAscList importedOnly)
+    reexitModule
+    return errs
+
+
+-- |Collect the original defining modules advertised by direct imports.
+importedTraitImplOwners :: [ModSpec]
+                        -> Compiler (Map TraitImplSpec (Set ModSpec))
+importedTraitImplOwners mods = Map.unionsWith Set.union <$> mapM owners mods
+  where
+    owners mod = do
+        iface <- modInterface . trustFromJust "importedTraitImplOwners"
+            <$> getLoadingModule mod
+        return $ Map.map Set.singleton $ traitImpls iface
+
+
+-- |A nested module inherits the effective implementations visible in its
+-- parent.  Convert a parent-local marker back to the parent's module spec.
+inheritedTraitImplOwners :: ModSpec
+                         -> Compiler (Map TraitImplSpec (Set ModSpec))
+inheritedTraitImplOwners parent = do
+    impl <- getLoadedModuleImpln parent
+    return $ Map.map (Set.singleton . fromMaybe parent . traitImplMod)
+        $ modKnownTraitImpls impl
+
+
+-- |Compare the resolved procedure sets for all owners of one imported impl.
+checkImportedTraitImpl :: ModSpec -> TraitImplSpec -> Set ModSpec
+                       -> Compiler [TypeError]
+checkImportedTraitImpl thisMod ispec owners
+  | Set.size owners < 2 = return []
+  | otherwise = do
+        implementations <- mapM implementation $ Set.toAscList owners
+        return $ case sequence implementations of
+            Nothing -> []
+            Just impls@((_, firstProcs):rest)
+                | all ((== firstProcs) . snd) rest -> []
+                | otherwise ->
+                    [ReasonConflictingTraitImpls
+                        thisMod ispec impls Nothing]
+            Just [] -> shouldnt "checkImportedTraitImpl: no implementation owners"
+  where
+    implementation owner = do
+        procs <- Map.lookup ispec . modTraitImplProcs
+            <$> getLoadedModuleImpln owner
+        return $ (owner,) . Set.fromList <$> procs
+
+
+typecheckLocalTraitImpl :: TraitImplSpec -> KnownTraitImpl
                         -> Compiler (MaybeErr (TraitImplSpec, [ProcSpec]))
 typecheckLocalTraitImpl ispec@(TraitImplSpec trait _) traitImpl = do
     let traitMod = trustFromJust "typecheckLocalTraitImpl" (typeModule trait)
-    let pos = place traitImpl
+    let pos = traitImplPos traitImpl
     absProcs <- abstractProcs trait
     matched <- mapM (uncurry (typecheckTraitImplProc pos ispec)) absProcs
-    let errs = concatMap errList matched
+    prerequisites <- allTraitPrerequisites trait
+    known <- getModuleImplementationField modKnownTraitImpls
+    let prerequisiteErrors = concatMap (checkPrerequisite known) prerequisites
+        checkPrerequisite implementations prerequisite =
+            let required = TraitImplSpec prerequisite (implType ispec)
+            in case resolveTraitImpl required implementations of
+                TraitImplNotFound -> [ReasonTraitPrerequisiteMissing ispec required pos]
+                TraitImplAmbiguous req candidates ->
+                    [ReasonTraitPrerequisiteAmbiguous ispec req candidates pos]
+                TraitImplResolved{} -> []
+        errs = prerequisiteErrors ++ concatMap errList matched
     return $ if List.null errs
         then OK (ispec, catOKs matched)
         else Err errs
@@ -1285,14 +1418,15 @@ matchTraitImplProc :: TraitImplSpec -> ProcSpec -> ProcDef -> ProcSpec
 matchTraitImplProc ispec@(TraitImplSpec trait _) absProcSpec absProcDef implProcSpec = do
     implProcDef <- getProcDef implProcSpec
     let traitMod = trustFromJust "typecheckLocalTraitImpl" (typeModule trait)
-        absProcDef' = absProcDef { procProto = traitImplProcProto ispec absProcDef }
-    ((absInfo, implInfo, result), _) <- runStateT
+    absProto <- traitImplProcProto ispec absProcDef
+    let absProcDef' = absProcDef { procProto = absProto }
+    ((absInfo, displayImplInfo, result), _) <- runStateT
         (matchTraitImplProc' absProcSpec absProcDef' implProcSpec implProcDef)
         $ initTyping absProcDef' traitMod
 
     return $ case result of
         OK _ -> Right implProcSpec
-        Err errs -> Left $ TraitImplMismatch absInfo implInfo errs
+        Err errs -> Left $ TraitImplMismatch absInfo displayImplInfo errs
 
 
 matchTraitImplProc' :: ProcSpec -> ProcDef -> ProcSpec -> ProcDef
@@ -1301,17 +1435,54 @@ matchTraitImplProc' :: ProcSpec -> ProcDef -> ProcSpec -> ProcDef
 matchTraitImplProc' absProcSpec absProcDef implProcSpec implProcDef = do
     absInfo <- firstInfo absProcDef absProcSpec
     implInfo <- firstInfo implProcDef implProcSpec
+    let displayImplInfo = callInfoWithDeclaredTypes implProcDef implInfo
     let absInfo' = fromMaybe absInfo $ boolFnToTest absInfo
         implInfo' = fromMaybe implInfo $ boolFnToTest implInfo
+        displayImplInfo' = fromMaybe displayImplInfo
+            $ boolFnToTest displayImplInfo
     let pos = procPos absProcDef
         hasBang = fiNeedsResBang absInfo
+    typesMatch <- matchTraitImplTypes
+        absProcDef implProcDef absInfo' implInfo'
+    -- A default method is declared against the unspecialised trait type and
+    -- is intentionally instantiated separately for each implementation.
+    defaultImpl <- lift $ isDefaultTraitImpl implInfo
     result <- if matchTraitImplHeaders absInfo' implInfo'
+                    && (typesMatch || defaultImpl)
         then matchTypes (procName absProcDef) (procName implProcDef) pos hasBang
             (fiTypes absInfo) (fiFlows absInfo) implInfo
         else do
             logTyped $ "proc headers mismatched: \n" ++ show absInfo ++ "\n" ++ show implInfo
             return $ Err []
-    return (absInfo', implInfo', result)
+    return (absInfo', displayImplInfo', result)
+
+
+-- |Restore a procedure's declared types for diagnostics.
+callInfoWithDeclaredTypes :: ProcDef -> CallInfo -> CallInfo
+callInfoWithDeclaredTypes def info@FirstInfo{} = do
+    let params = content <$> procProtoParams (procProto def)
+        types = paramType <$> List.filter ((== Ordinary) . paramFlowType) params
+    info { fiTypes = types, fiMatchedTypes = types }
+callInfoWithDeclaredTypes _ info = info
+
+
+-- |A concrete procedure implementing a trait method must have the expected
+-- types, modulo renaming its type variables.
+matchTraitImplTypes :: ProcDef -> ProcDef -> CallInfo -> CallInfo -> Typed Bool
+matchTraitImplTypes expectedDef actualDef expected actual = do
+    bounds <- gets tvarDict
+    let canonicalTypes info =
+            let ((types, _), _) = canonicalise 0 bounds $ fiTypes info
+            in types
+        typesMatch
+            | genericParams expectedDef || genericParams actualDef =
+                canonicalParams expectedDef == canonicalParams actualDef
+            | otherwise = canonicalTypes expected == canonicalTypes actual
+    return typesMatch
+  where
+    paramTypes = (paramType . content <$>) . procProtoParams . procProto
+    genericParams = any genericType . paramTypes
+    canonicalParams def = fst $ canonicalise 0 Map.empty $ paramTypes def
 
 
 matchTraitImplHeaders :: CallInfo -> CallInfo -> Bool
@@ -1323,27 +1494,6 @@ matchTraitImplHeaders absInfo implInfo =
     && fiOutRes absInfo == fiOutRes implInfo
     && fiNeedsResBang absInfo == fiNeedsResBang implInfo
     && fiPartial absInfo == fiPartial implInfo
-
-
-traitImplProcProto :: TraitImplSpec -> ProcDef -> ProcProto
-traitImplProcProto ispec@(TraitImplSpec trait implTy) absProcDef = do
-    let proto = procProto absProcDef
-        bounds = Map.fromListWith Set.union
-            [(name, Set.singleton bound) | (name, bound) <- procBoundedTypeParams absProcDef]
-    proto { procProtoParams = contentApply (substParam bounds) <$> procProtoParams proto }
-    where
-        substParam bounds param =
-            param { paramType = substParamType bounds $ paramType param }
-        substParamType bounds ty@TypeVariable{typeVariableName=name}
-            | trait `Set.member` Map.findWithDefault Set.empty name bounds = implTy
-            | otherwise = ty
-        substParamType bounds ty@TypeSpec{typeParams=params} =
-            ty { typeParams = substParamType bounds <$> params }
-        substParamType bounds ty@HigherOrderType{higherTypeParams=tfs} =
-            ty { higherTypeParams = substTypeFlow bounds <$> tfs }
-        substParamType _ ty = ty
-        substTypeFlow bounds tf =
-            tf { typeFlowType = substParamType bounds $ typeFlowType tf }
 
 
 ----------------------------------------------------------------
@@ -2298,51 +2448,6 @@ typeVarFromInputParam ty = do
     return $ not . Set.null $ typeVarSet ty `Set.intersection` inputParamVars
 
 
--- | Canonicalise a list of types, with type variables starting from the
--- supplied Int.  The returned dictionary is in the canonical namespace and
--- contains the effective trait bounds of every generated type variable.
-canonicalise :: Int -> TypeVarDict -> [TypeSpec]
-             -> (([TypeSpec], TypeVarDict), Int)
-canonicalise ctr tvarDict tys =
-    let (tys', ctr', (_, canonicalDict)) =
-            canonicaliseList tvarDict (Map.empty, Map.empty) ctr tys
-    in ((tys', canonicalDict), ctr')
-
-
-type Canonicalisation = (Map TypeVarName TypeSpec, TypeVarDict)
-
-
-canonicaliseList :: TypeVarDict -> Canonicalisation -> Int -> [TypeSpec]
-                 -> ([TypeSpec], Int, Canonicalisation)
-canonicaliseList _ state ctr [] = ([], ctr, state)
-canonicaliseList tvarDict state ctr (ty:tys) =
-    let (ty', ctr', state') = canonicaliseSingle tvarDict state ctr ty
-        (tys', ctr'', state'') = canonicaliseList tvarDict state' ctr' tys
-    in (ty':tys', ctr'', state'')
-
-
-canonicaliseSingle :: TypeVarDict -> Canonicalisation -> Int -> TypeSpec
-                   -> (TypeSpec, Int, Canonicalisation)
-canonicaliseSingle tvarDict state@(tyMap, canonicalDict) ctr ty@TypeVariable{typeVariableName=name} =
-    case Map.lookup name tyMap of
-        Just ty' -> (ty', ctr, state)
-        Nothing ->
-            let ty' = TypeVariable (FauxTypeVar ctr) Set.empty
-                bounds = typeVarBoundsIn tvarDict ty
-                canonicalDict' = if Set.null bounds
-                    then canonicalDict
-                    else Map.insert (FauxTypeVar ctr) (Right bounds) canonicalDict
-            in (ty', ctr + 1, (Map.insert name ty' tyMap, canonicalDict'))
-canonicaliseSingle tvarDict state ctr ty@TypeSpec{typeParams=tys} =
-    let (tys', ctr', state') = canonicaliseList tvarDict state ctr tys
-    in (ty{typeParams=tys'}, ctr', state')
-canonicaliseSingle tvarDict state ctr ty@HigherOrderType{higherTypeParams=tfs} =
-    let tys = typeFlowType <$> tfs
-        (tys', ctr', state') = canonicaliseList tvarDict state ctr tys
-    in (ty{higherTypeParams=zipWith TypeFlow tys' $ typeFlowMode <$> tfs}, ctr', state')
-canonicaliseSingle _ state ctr ty = (ty, ctr, state)
-
-
 typeVarBoundDict :: [TypeVarBound] -> TypeVarDict
 typeVarBoundDict = Map.fromListWith mergeBounds . List.map toBound
   where
@@ -2666,7 +2771,7 @@ matchModeList modes info@FirstInfo{fiPartial=False, fiFlows=flows}
     = sameLength modes flows
     -- Check that no param is in/in-out where formal is out,
     -- ie formal = ParamOut ==> actual = ParamOut
-      && all ((/=ParamOut) . snd ||| (==ParamOut) . fst) 
+      && all ((/=ParamOut) . snd ||| (==ParamOut) . fst)
             (actualFormalModes modes info)
 matchModeList _ _ = False
 
@@ -2727,61 +2832,24 @@ matchProcSignatures left right =
     paramFlowTypes def = List.map paramFlowType $ params def
 
 
--- |Return true if the first type accepts every value accepted by the second
-moreGeneral :: Map TraitImplSpec (Placed (Maybe ModSpec))
-                -> TypeVarDict -> TypeVarDict -> TypeSpec -> TypeSpec -> Bool
-moreGeneral _ _ _ general specific
-    | general == specific = True
-moreGeneral _ _ _ AnyType _ = True
-moreGeneral traitImpls generalDict specificDict general@TypeVariable{} specific =
-    let generalBounds = typeVarBoundsIn generalDict general
-    in Set.null generalBounds || case specific of
-        specificVar@TypeVariable{} ->
-            generalBounds `Set.isSubsetOf`
-                typeVarBoundsIn specificDict specificVar
-        _ -> all (\bound -> Map.member (TraitImplSpec bound specific) traitImpls)
-            (Set.toList generalBounds)
-moreGeneral traitImpls generalDict specificDict
-        (TypeSpec generalMod generalName generalParams)
-        (TypeSpec specificMod specificName specificParams) =
-    generalMod == specificMod
-    && generalName == specificName
-    && sameLength generalParams specificParams
-    && and (List.zipWith (moreGeneral traitImpls generalDict specificDict)
-                          generalParams specificParams)
-moreGeneral traitImpls generalDict specificDict
-        (HigherOrderType generalMods generalParams)
-        (HigherOrderType specificMods specificParams) =
-    generalMods == specificMods
-    && sameLength generalParams specificParams
-    && and (List.zipWith moreGeneralFlow generalParams specificParams)
-  where
-    moreGeneralFlow (TypeFlow generalTy generalFlow)
-                    (TypeFlow specificTy specificFlow) =
-        generalFlow == specificFlow
-        && moreGeneral traitImpls generalDict specificDict generalTy specificTy
-moreGeneral _ _ _ _ _ = False
-
-
 -- |Return true if every param type in the first @CallInfo@ is strictly more general
 -- than that in the second @CallInfo@
-paramsMoreGeneral :: Map TraitImplSpec (Placed (Maybe ModSpec))
+paramsMoreGeneral :: Map TraitImplSpec KnownTraitImpl
                        -> (CallInfo, Typing) -> (CallInfo, Typing) -> Bool
 paramsMoreGeneral traitImpls general specific =
     let generalTypes = callInfoTypes $ fst general
         specificTypes = callInfoTypes $ fst specific
         generalDict = tvarDict $ snd general
         specificDict = tvarDict $ snd specific
-        compareTypes = List.zipWith
-            (moreGeneral traitImpls generalDict specificDict)
-    in sameLength generalTypes specificTypes
-        && and (compareTypes generalTypes specificTypes)
-        && not (and (List.zipWith
-            (moreGeneral traitImpls specificDict generalDict)
-            specificTypes generalTypes))
-  where
-    callInfoTypes FirstInfo{fiTypes=types} = types
-    callInfoTypes _ = []
+        satisfiesBound bound ty = case resolveTraitImpl
+                (TraitImplSpec bound ty) traitImpls of
+            TraitImplResolved{} -> True
+            _ -> False
+        callInfoTypes FirstInfo{fiTypes=types} = types
+        callInfoTypes _ = []
+        accepts gd sd = typePatternsMoreGeneral gd sd satisfiesBound
+    in accepts generalDict specificDict generalTypes specificTypes
+        && not (accepts specificDict generalDict specificTypes generalTypes)
 
 
 -- |Choose a unique candidate whose parameter types are strictly less general
@@ -2865,7 +2933,7 @@ modeCheckProcDecl pdef = do
     typeErrors modeErrs
     params' <- updateParamTypes posParams
     let proto' = proto { procProtoParams = params' }
-    let boundedTypeParams' = getBoundedTypeParams params'
+    boundedTypeParams' <- lift $ minimiseTypeVarBounds $ getBoundedTypeParams params'
     let pdef' = pdef { procProto = proto',
                         procTmpCount = tmpCount',
                         procBoundedTypeParams = boundedTypeParams',

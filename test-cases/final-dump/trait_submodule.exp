@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : trait_submodule.<0>
   constants       : 0:: CStringInfo {cstringChars = "integer "}
-                    1:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_submodule.render#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = wybe.int <: trait_submodule.printable, vtableMod = ["trait_submodule"]}
+                    1:: VTableInfo {vtableSize = 8, vtableData = [FnPointerStructMember trait_submodule.render#adapter<0>], vtableExternal = False, vtableIndex = 0, vtableSpec = wybe.int <: trait_submodule.printable, vtableMod = ["trait_submodule"], vtableConstraints = []}
                     2:: StructInfo {structSize = 16, structData = [IntStructMember 8 8,PointerStructMember c"integer "]}
   imports         : use trait_submodule.printable
                     use wybe
@@ -41,7 +41,7 @@ render(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
 
 proc render#adapter > {noinline} (0 calls)
 0: trait_submodule.render#adapter<0>
-render#adapter(x##0:T<:trait_submodule.printable, ?#result##0:wybe.string)<{}; {}; {}>:
+render#adapter(x##0:T<:trait_submodule.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:T<:trait_submodule.printable, ?x#adapter0##0:wybe.int)
@@ -78,7 +78,7 @@ define external fastcc i64 @"trait_submodule#.render<0>"(i64 %"x##0") {
   ret i64 %"tmp#8##0"
 }
 
-define external fastcc i64 @"trait_submodule#.render#adapter<0>"(i64 %"x##0") {
+define external fastcc i64 @"trait_submodule#.render#adapter<0>"(i64 %"x##0", ptr %"#vtable##0") {
   %"tmp#0##0" = tail call fastcc i64 @"trait_submodule#.render<0>"(i64 %"x##0")
   ret i64 %"tmp#0##0"
 }
@@ -100,7 +100,7 @@ proc render > public abstract {inline} (0 calls)
 render(x##0:T<:trait_submodule.printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    ~#vtable##0:opaque@0(~x##0:T<:trait_submodule.printable, ?#result##0:wybe.string) #0
+    ~#vtable##0:opaque@0(~x##0:T<:trait_submodule.printable, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
   LLVM code       :
 
@@ -116,6 +116,6 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 define external fastcc i64 @"trait_submodule#.printable#.render<0>"(i64 %"x##0", ptr %"#vtable##0") {
   %"tmp#0##0" = getelementptr inbounds ptr, ptr %"#vtable##0", i64 0
   %"tmp#1##0" = load ptr, ptr %"tmp#0##0"
-  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0")
+  %"tmp#2##0" = tail call fastcc i64 %"tmp#1##0"(i64 %"x##0", ptr %"#vtable##0")
   ret i64 %"tmp#2##0"
 }

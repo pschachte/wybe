@@ -1,0 +1,26 @@
+# The declarations are valid, but selecting their shared intersection is
+# ambiguous without a third implementation that is more specific than both.
+
+type hash trait {
+    abstract hash(x:_): int
+}
+
+impl int <: hash
+def hash(x:int): int = x
+
+type hashmap(K,V) {
+    pub hashmap(key:K, value:V)
+}
+
+type mapping(K,V) trait {
+    abstract selection(x:_(K,V)): int
+}
+
+impl hashmap(K<:hash,V) <: mapping(K,V)
+impl hashmap(K,V<:hash) <: mapping(K,V)
+
+def selection(x:hashmap(K<:hash,V)): int = 1
+def selection(x:hashmap(K,V<:hash)): int = 2
+
+?m:hashmap(int,int) = hashmap(1, 2)
+!println(mapping.selection(m))

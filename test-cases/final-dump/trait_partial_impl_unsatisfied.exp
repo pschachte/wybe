@@ -1,0 +1,3 @@
+Error detected during type checking of module(s) trait_partial_impl_unsatisfied, trait_partial_impl_unsatisfied.hash, trait_partial_impl_unsatisfied.hashmap, trait_partial_impl_unsatisfied.mapping
+final-dump/trait_partial_impl_unsatisfied.wybe:11:12: Type error in call to proc get, argument 1
+final-dump/trait_partial_impl_unsatisfied.wybe:11:12: Type error in partial application of proc get, argument 1

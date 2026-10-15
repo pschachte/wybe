@@ -1,0 +1,14 @@
+# A concrete implementation wins over a blanket generic implementation.
+
+type maybe_int trait {
+    abstract is_int(x:_): bool
+}
+
+impl T <: maybe_int
+impl int <: maybe_int
+
+def is_int(x:T): bool = false
+def is_int(x:int): bool = true
+
+!println(maybe_int.is_int(true))
+!println(maybe_int.is_int(42))

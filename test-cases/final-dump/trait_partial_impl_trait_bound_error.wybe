@@ -1,0 +1,7 @@
+# A type variable bound is only permitted on the implementation type, not on
+# the trait being implemented.
+type hash trait { abstract hash(x:_): int }
+type mapping(K) trait { abstract get(x:_(K)): K }
+type hashmap(K) { pub hashmap(value:K) }
+
+impl hashmap(K) <: mapping(K<:hash)

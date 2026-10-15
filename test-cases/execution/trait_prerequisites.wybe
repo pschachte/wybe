@@ -1,0 +1,30 @@
+# A generic caller uses multiple prerequisites of its trait bound,
+# and dispatch preserves the concrete arguments and method results.
+type equal trait {
+    abstract same(left:_, right:_): bool
+}
+
+type display trait {
+    abstract text(value:_): string
+}
+
+type ordered trait <: {equal, display} {
+    abstract before(left:_, right:_): bool
+}
+
+impl int <: equal
+impl int <: display
+impl int <: ordered
+
+def same(left:int, right:int): bool = left = right
+def text(value:int): string = "$value"
+def before(left:int, right:int): bool = left < right
+
+def equal_from_ordered(left:T<:ordered, right:T): bool = equal.same(left, right)
+def display_from_ordered(value:T<:ordered): string = display.text(value)
+
+!println(equal_from_ordered(4, 4))
+!println(equal_from_ordered(4, 5))
+!println(display_from_ordered(42))
+!println(ordered.before(1, 2))
+!println(ordered.before(2, 1))

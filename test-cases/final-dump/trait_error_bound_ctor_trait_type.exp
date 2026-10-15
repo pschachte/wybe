@@ -1,0 +1,2 @@
+Error detected during final normalisation of module(s) trait_error_bound_ctor_trait_type, trait_error_bound_ctor_trait_type.debug, trait_error_bound_ctor_trait_type.parcel
+final-dump/trait_error_bound_ctor_trait_type.wybe:6:26: Trait type trait_error_bound_ctor_trait_type.debug is not allowed in a constructor parameter; trait bounds are only allowed in procedure and function parameter types and trait implementation types

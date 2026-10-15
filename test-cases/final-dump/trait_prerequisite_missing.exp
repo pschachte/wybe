@@ -1,0 +1,2 @@
+Error detected during type checking of module(s) trait_prerequisite_missing, trait_prerequisite_missing.equal, trait_prerequisite_missing.ordered
+final-dump/trait_prerequisite_missing.wybe:10:1: Invalid implementation wybe.int <: trait_prerequisite_missing.ordered: missing prerequisite implementation wybe.int <: trait_prerequisite_missing.equal

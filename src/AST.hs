@@ -23,10 +23,19 @@ module AST (
   determinismSeq, determinismProceding, determinismName, determinismCanFail,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TraitSpec, TraitImplSpec(..), TypeVarBound,
+  TraitSpec, TraitImplSpec(..), KnownTraitImpl(..), traitImplModule,
+  TraitImplResolution(..), TypeVarBound,
+  resolveTraitImpl, lookupTraitImpl, traitImplMoreSpecific,
+  typePatternsMoreGeneral, specialiseTraitImpl,
+  traitImplTypeBounds, traitImplConstraints,
+  traitImplConstraintsFor, canonicalise, sameTraitConstraint,
+  directTraitPrerequisites, allTraitPrerequisites, traitPrerequisiteLayout,
+  prerequisiteSlotOffset,
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
   genericType, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, isTraitType, typeModule,
+  TraitTypeVars(..), traitTypesToTypeVars, rejectTraitBounds,
+  traitBoundNotAllowedMsg,
   VarDict, TypeVarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
   paramTypeFlow, primParamTypeFlow, setParamArgFlowType,
@@ -53,7 +62,7 @@ module AST (
   InterfaceHash, PubProcInfo(..),
   StructID, structConstName, recordConstStruct,
   lookupConstStruct, lookupConstInfo, cStringExpr,
-  StructInfo(..), ConstValue(..), constValueSize, constantValue, closureStructId, constValueRepresentation,
+  StructInfo(..), VTableComponent(..), VTableEntry(..), ConstValue(..), constValueSize, constantValue, closureStructId, constValueRepresentation,
   constValueAtOffset, constValuePrimArg, constValueExp,
   ImportSpec(..), ImportPhase(..), importSpec, Pragma(..), addPragma,
   descendentModules, sameOriginModules,
@@ -109,7 +118,7 @@ module AST (
   optionallyPutStr, message, errmsg, warnmsg, (<!>), prettyPos,
   Message(..), queueMessage,
   genProcName, addImport, doImport, importFromSupermodule, publishTraitImpls,
-  lookupType, lookupType', typeIsUnique, 
+  lookupType, lookupType', typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), PrimResourceImpln(..),
   initialisedResources, initialisedVisibleResources,
   addResource, lookupResourceSpec, lookupResource,
@@ -119,7 +128,7 @@ module AST (
   setDetism, setInline, setImpurity, setVariant,
   ProcVariant(..), Inlining(..), Impurity(..),
   addProc, addProcDef, addAbstractProc, addTraitImpl, lookupProc, publicProc, callTargets,
-  abstractProcs, outputVariableName, outputStatusName,
+  abstractProcs, traitImplProcProto, outputVariableName, outputStatusName,
   envParamName, envPrimParam, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
   showProcIdentifier, showProcName, showProcOrVarName,
@@ -159,6 +168,7 @@ import Data.Map as Map
       findWithDefault,
       foldr,
       fromList,
+      fromListWith,
       insert,
       insertWith,
       keys,
@@ -205,7 +215,7 @@ data Item
      = TypeDecl Visibility TypeProto TypeModifiers TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
      | RepresentationDecl [Ident] TypeModifiers TypeRepresentation OptPos
-     | TraitDecl [Ident] TypeModifiers OptPos
+     | TraitDecl [Ident] [TraitSpec] TypeModifiers OptPos
      | ConstructorDecl Visibility [Ident] TypeModifiers [(Visibility, Placed ProcProto)]
                        OptPos
      | ImportMods Visibility [ModSpec] OptPos
@@ -948,8 +958,8 @@ setTypeRep repn size = do
 -- |Add the specified trait to the current module.  This makes the
 -- module a type.  Checks that the type doesn't already have a representation or
 -- constructors defined.
-addTrait :: OptPos -> Compiler ()
-addTrait pos = do
+addTrait :: [TraitSpec] -> OptPos -> Compiler ()
+addTrait prerequisites pos = do
     currMod <- getModuleSpec
     hasRepn <- isJust <$> getModule modTypeRep
     hasCtors <- isJust <$> getModuleImplementationField modConstructors
@@ -966,14 +976,14 @@ addTrait pos = do
       then errmsg pos
            $ "Duplicated trait declarations for type " ++ show currMod
       else do
-        setTrait
+        setTrait prerequisites
         addKnownType currMod
 
--- |Set the type representation of the current module.
-setTrait :: Compiler ()
-setTrait = do
+-- |Set the trait information of the current module.
+setTrait :: [TraitSpec] -> Compiler ()
+setTrait prerequisites = do
     updateModule (\m -> m { modIsType  = True
-                          , modTrait = Just () })
+                          , modTrait = Just prerequisites })
 
 
 -- |Add the specified data constructor to the current module.  This makes the
@@ -1403,10 +1413,16 @@ addProcDef procDef = do
     return spec
 
 
-addTraitImpl :: OptPos -> TraitImplSpec -> Maybe ModSpec -> Compiler ()
-addTraitImpl pos spec mod = do
-    updateImplementation (\imp -> imp {
-        modKnownTraitImpls = Map.insert spec (maybePlace mod pos) $ modKnownTraitImpls imp })
+addTraitImpl :: OptPos -> TraitImplSpec -> Compiler ()
+addTraitImpl pos spec = do
+    knownTraitImpls <- getModuleImplementationField modKnownTraitImpls
+    case Map.lookup spec knownTraitImpls of
+        Just _ ->
+            warnmsg pos $
+                "Duplicate trait implementation declaration: " ++ show spec
+        _ -> updateImplementation (\imp -> imp {
+            modKnownTraitImpls = Map.insert spec (KnownTraitImpl Nothing pos) $
+                modKnownTraitImpls imp })
 
 
 getParams :: ProcSpec -> Compiler [Param]
@@ -1535,8 +1551,7 @@ data Module = Module {
   modIsType :: Bool,               -- ^Is this module a type, defined early
   modTypeRep :: Maybe TypeRepresentation, -- ^Type representation, when known
   modTypeSize :: Maybe Int,        -- ^The maximum size required to allocate an object of this type
-  modTrait :: Maybe (),            -- ^Is this module a trait;
-                                   --  The Maybe value is reserved for the trait dependency feature
+  modTrait :: Maybe [TraitSpec],   -- ^Is this module a trait; and its prerequisites
   modInterface :: ModuleInterface, -- ^The public face of this module
   modInterfaceHash :: InterfaceHash,
                                    -- ^Hash of the "modInterface" above
@@ -1556,7 +1571,7 @@ data Module = Module {
   modAbstractProcCount :: Int,
                                    -- ^The number of abstract procs defined in
                                    -- this module
-  modVTables :: Map TraitImplSpec (Int, StructID),
+  modVTables :: Map TraitImplSpec VTableEntry,
                                    -- ^The vtables defined in this module
   stmtDecls :: [Placed Stmt],      -- ^top-level statements in this module
   itemsHash :: Maybe String        -- ^map of proc name to its hash
@@ -1733,6 +1748,44 @@ abstractProcs trait = do
         (List.filter (isJust . procAbstract . snd) procsInTraitMod)
 
 
+-- |Specialize an abstract trait method prototype for a concrete vtable spec.
+traitImplProcProto :: TraitImplSpec -> ProcDef -> Compiler ProcProto
+traitImplProcProto ispec@(TraitImplSpec trait implTy) absProcDef = do
+    traitParams <- maybe (return []) (getModule modParams `inModule`) $
+        typeModule trait
+    let proto = procProto absProcDef
+        bounds = Map.fromListWith Set.union
+            [(name, Set.singleton bound) | (name, bound) <- procBoundedTypeParams absProcDef]
+        traitParamBindings = Map.fromList $ zip traitParams (typeParams trait)
+    return proto {
+        procProtoParams =
+            contentApply (substParam traitParamBindings bounds) <$>
+                procProtoParams proto
+    }
+  where
+    substParam traitParamBindings bounds param =
+        param { paramType =
+            substParamType traitParamBindings bounds $ paramType param }
+    substParamType traitParamBindings bounds ty@TypeVariable{typeVariableName=name}
+        | any sameTraitModule (Map.findWithDefault Set.empty name bounds) =
+            implTy
+        | otherwise =
+            fromMaybe ty {
+                typeVariableBounds =
+                    Set.map (substParamType traitParamBindings bounds)
+                        (typeVariableBounds ty)
+            } $ Map.lookup name traitParamBindings
+    substParamType traitParamBindings bounds ty@TypeSpec{typeParams=params} =
+        ty { typeParams = substParamType traitParamBindings bounds <$> params }
+    substParamType traitParamBindings bounds ty@HigherOrderType{higherTypeParams=tfs} =
+        ty { higherTypeParams = substTypeFlow traitParamBindings bounds <$> tfs }
+    substParamType _ _ ty = ty
+    substTypeFlow traitParamBindings bounds tf =
+        tf { typeFlowType =
+            substParamType traitParamBindings bounds $ typeFlowType tf }
+    sameTraitModule bound = typeModule bound == typeModule trait
+
+
 -- |Apply the given function to the current module implementation.
 updateModImplementation :: (ModuleImplementation -> ModuleImplementation) ->
                           Compiler ()
@@ -1844,14 +1897,13 @@ data ModuleImplementation = ModuleImplementation {
     modKnownResources :: Map Ident (Set ResourceSpec),
                                               -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec), -- ^Procs visible to this module
-    modKnownTraitImpls :: Map TraitImplSpec (Placed (Maybe ModSpec)),
-      -- ^Trait impls visible to this module.  The `Placed` value always records
-      -- where the impl declaration was defined for error reporting.
-      -- `Maybe ModSpec` indicates whether the trait impl is external:
-      --   `Nothing` means the impl is defined in the current module (local)
-      --   `Just mod` means it is defined in another module (external)
+    modKnownTraitImpls :: Map TraitImplSpec KnownTraitImpl,
+                                              -- ^Trait impls visible to this mod
     modTraitImplProcs :: Map TraitImplSpec [ProcSpec],
-                                              -- Procs that satisfie trait impls
+                                              -- Original procs satisfying impls
+    modVTableProcs :: Map TraitImplSpec [ProcSpec],
+                                              -- Final procs stored in vtables,
+                                              -- including generated adapters
     modForeignObjects:: Set FilePath,         -- ^Foreign object files used
     modForeignLibs:: Set String               -- ^Foreign libraries used
     } deriving (Generic)
@@ -1860,7 +1912,7 @@ emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Set.empty Map.empty Nothing Map.empty Map.empty
                          Map.empty Nothing Map.empty Map.empty Map.empty
-                         Map.empty Map.empty Map.empty Set.empty Set.empty -- Nothing
+                         Map.empty Map.empty Map.empty Map.empty Set.empty Set.empty -- Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax
@@ -2048,7 +2100,8 @@ doImport phase mod (imports, _) = do
                             $ importsSelected allImports $ pubProcs fromIFace
     let importedTraitImpls
           | phase == AfterCompleteNormalisation =
-              Map.map (Unplaced . Just) $ traitImpls fromIFace
+              Map.map (\owner -> KnownTraitImpl (Just owner) Nothing)
+              $ traitImpls fromIFace
           | otherwise = Map.empty
     logAST $ "    importing types    : "
              ++ showModSpecs (snd <$> importedTypesAssoc)
@@ -2102,7 +2155,9 @@ importFromSupermodule phase modspec = do
     let knownResources =
             Map.unionWith Set.union (modKnownResources impl) kResources
     let knownProcs = Map.unionWith Set.union (modKnownProcs impl) kProcs
-    let importedTraitImpls = Map.map (fmap (Just . fromMaybe modspec))
+    let importedTraitImpls = Map.map
+            (\timpl -> timpl{ traitImplMod =
+                Just $ traitImplModule modspec timpl })
             (modKnownTraitImpls impl)
         knownTraitImpls
           | phase == AfterCompleteNormalisation =
@@ -2119,7 +2174,7 @@ publishTraitImpls :: Compiler ()
 publishTraitImpls = do
     thisMod <- getModuleSpec
     knownTraitImpls <- getModuleImplementationField modKnownTraitImpls
-    let traitImpls = Map.map (fromMaybe thisMod . content) knownTraitImpls
+    let traitImpls = Map.map (traitImplModule thisMod) knownTraitImpls
     updateModInterface (\int -> int{ traitImpls=traitImpls })
 
 
@@ -2354,7 +2409,7 @@ primImpurity (PrimHigher _ (ArgConstRef structID _) impurity _) = do
     lookupConstInfo structID >>= \case
         Just (StructInfo _ (FnPointerStructMember pspec:t)) ->
             max impurity . procImpurity <$> getProcDef pspec
-        Just (VTableInfo _ (FnPointerStructMember pspec:t) _ _ _ _) ->
+        Just (VTableInfo _ (FnPointerStructMember pspec:t) _ _ _ _ _ _) ->
             max impurity . procImpurity <$> getProcDef pspec
         _ -> return impurity
 primImpurity (PrimHigher _ fn impurity _) = return impurity
@@ -3167,6 +3222,77 @@ isTraitType typ =
         Nothing -> return False
 
 
+-- |The type variables introduced for trait types used as types, and the
+-- number of the next faux type variable to introduce.
+data TraitTypeVars = TraitTypeVars {
+    traitTypeVarDict :: Map TraitSpec TypeSpec,
+                            -- ^ Generated type variables that look like
+                            -- `Type0<:comparable` for trait types like
+                            -- `comparable`.
+    traitTypeVarCounter :: Int
+                            -- ^ For numbering type variables.
+}
+
+
+-- |Replace each trait type within a type with a type variable bounded by that
+-- trait, so `comparable` means `T<:comparable`.  Type arguments are replaced
+-- before the type containing them.  Every occurrence of the same trait,
+-- across all types converted with the same state, shares one type variable.
+traitTypesToTypeVars :: TypeSpec -> StateT TraitTypeVars Compiler TypeSpec
+traitTypesToTypeVars ty@TypeSpec{typeParams=params} = do
+    params' <- mapM traitTypesToTypeVars params
+    let ty' = ty { typeParams = params' }
+    isTrait <- lift $ isTraitType ty'
+    if not isTrait then return ty' else do
+        dict <- gets traitTypeVarDict
+        case Map.lookup ty' dict of
+            Just var -> return var
+            Nothing -> do
+                next <- gets traitTypeVarCounter
+                let var = TypeVariable (FauxTypeVar next) (Set.singleton ty')
+                put $ TraitTypeVars (Map.insert ty' var dict) (next + 1)
+                return var
+traitTypesToTypeVars ty@HigherOrderType{higherTypeParams=flows} = do
+    tys <- mapM (traitTypesToTypeVars . typeFlowType) flows
+    return ty { higherTypeParams = zipWith setTypeFlowType tys flows }
+traitTypesToTypeVars ty = return ty
+
+
+-- |Report every trait bound within a type declared in a context that does not
+-- allow them, such as "a constructor parameter", and return the type with
+-- those bounds removed.  A trait used as a type is replaced by InvalidType, so
+-- later passes do not report further errors for it.
+rejectTraitBounds :: String -> OptPos -> TypeSpec -> Compiler TypeSpec
+rejectTraitBounds context pos ty@TypeSpec{typeParams=params} = do
+    isTrait <- isTraitType ty
+    if isTrait
+        then do
+            errmsg pos $ traitBoundNotAllowedMsg
+                ("Trait type " ++ show ty) context
+            return InvalidType
+        else do
+            params' <- mapM (rejectTraitBounds context pos) params
+            return ty { typeParams = params' }
+rejectTraitBounds context pos ty@TypeVariable{typeVariableBounds=bounds}
+    | Set.null bounds = return ty
+    | otherwise = do
+        errmsg pos $ traitBoundNotAllowedMsg ("Trait bound " ++ show ty) context
+        return ty { typeVariableBounds = Set.empty }
+rejectTraitBounds context pos ty@HigherOrderType{higherTypeParams=flows} = do
+    tys <- mapM (rejectTraitBounds context pos . typeFlowType) flows
+    return ty { higherTypeParams = zipWith setTypeFlowType tys flows }
+rejectTraitBounds _ _ ty = return ty
+
+
+-- |The message for a trait bound, described by the first argument, written
+-- in a context that does not allow them, such as "a constructor parameter".
+traitBoundNotAllowedMsg :: String -> String -> String
+traitBoundNotAllowedMsg what context =
+    what ++ " is not allowed in " ++ context
+    ++ "; trait bounds are only allowed in procedure and function parameter "
+    ++ "types and trait implementation types"
+
+
 -- | Return the module of the specified type, if it has one.
 typeModule :: TypeSpec -> Maybe ModSpec
 typeModule (TypeSpec mod name _) = Just $ mod ++ [name]
@@ -3547,6 +3673,7 @@ data StringVariant = WybeString | CString
 -- constant list.
 data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
                 | GlobalVariable { globalVarSpec :: Ident }
+                | GlobalVTable { globalTraitImplSpec :: TraitImplSpec }
     deriving (Eq, Ord, Generic)
 
 
@@ -3749,8 +3876,6 @@ data PrimArg
      | ArgFloat Double TypeSpec                -- ^Constant floating point arg
      | ArgClosure ProcSpec [PrimArg] TypeSpec  -- ^Closure, with closed args
      | ArgGlobal GlobalInfo TypeSpec           -- ^Constant global reference
-     | ArgVTable (Either TraitImplSpec PrimVarName) TypeSpec
-                                               -- ^Ref to vtable (either global or local)
      | ArgConstRef StructID TypeSpec           -- ^Ref to constant memory block
      | ArgUnneeded PrimFlow TypeSpec           -- ^Unneeded input or output
      | ArgUndef TypeSpec                       -- ^Undefined variable, used
@@ -3769,6 +3894,462 @@ data TraitImplSpec =
     }
     deriving (Eq,Ord,Generic)
 
+
+-- |A trait implementation known to a module.
+data KnownTraitImpl =
+    KnownTraitImpl {
+        traitImplMod :: Maybe ModSpec,
+            -- ^'Nothing' if the implementation is declared in the current
+            -- module, otherwise the module that provides it
+        traitImplPos :: OptPos
+            -- ^Where the implementation was declared
+    }
+    deriving (Eq,Ord,Generic)
+
+-- |The module providing the given trait implementation, defaulting to the
+-- given module for a locally declared implementation.
+traitImplModule :: ModSpec -> KnownTraitImpl -> ModSpec
+traitImplModule thisMod = fromMaybe thisMod . traitImplMod
+
+
+
+-- |The result of selecting a trait implementation. Ambiguity records both the
+-- requirement whose selection failed and its undominated matching declarations.
+data TraitImplResolution a
+    = TraitImplNotFound
+        -- ^No declaration matches structurally with satisfiable constraints.
+    | TraitImplResolved TraitImplSpec a
+        -- ^The uniquely most-specific declaration and its associated value.
+    | TraitImplAmbiguous TraitImplSpec [TraitImplSpec]
+        -- ^The concrete requirement and its canonically ordered, undominated
+        -- matching declarations.
+
+
+-- |The applicability of one structurally matching declaration while resolving
+-- its constraints. Ambiguous candidates remain relevant to specificity until
+-- a known applicable candidate is proved to dominate them.
+data CandidateStatus a
+    = CandidateApplicable (TraitImplSpec, a)
+        -- ^All constraints resolve uniquely, so the candidate can be ranked.
+    | CandidateInapplicable
+        -- ^At least one required bound has no implementation.
+    | CandidateAmbiguous (TraitImplSpec, a) (TraitImplSpec, [TraitImplSpec])
+        -- ^The candidate and the nested requirement whose constraints have
+        -- multiple undominated implementations.
+
+
+-- |Select the unique most-specific applicable implementation. Candidate
+-- constraints are resolved recursively; incomparable undominated candidates
+-- remain ambiguous rather than being ordered by their map or source order.
+resolveTraitImpl :: TraitImplSpec -> Map TraitImplSpec a
+                 -> TraitImplResolution a
+resolveTraitImpl requested impls = go Set.empty requested
+  where
+    go seen req
+        | req `Set.member` seen = TraitImplNotFound
+        | otherwise =
+            let seen' = Set.insert req seen
+                candidates =
+                    [ candidateStatus seen' req candidate
+                    | candidate <- Map.toAscList impls
+                    , isJust $ traitImplBindings (fst candidate) req
+                    ]
+                applicable = [candidate | CandidateApplicable candidate <- candidates]
+                ambiguous =
+                    [ (candidate, ambiguity)
+                    | CandidateAmbiguous candidate ambiguity <- candidates
+                    , not $ any
+                        (\(other, _) -> traitImplMoreSpecific other $ fst candidate)
+                        applicable
+                    ]
+            in case ambiguous of
+                (_, (ambiguousReq, ambiguousSpecs)):_ ->
+                    TraitImplAmbiguous ambiguousReq ambiguousSpecs
+                [] -> select req applicable
+    candidateStatus seen req candidate@(declared, _) =
+        case firstUnresolved seen $ traitImplConstraints declared req of
+            Nothing -> CandidateApplicable candidate
+            Just TraitImplNotFound -> CandidateInapplicable
+            Just (TraitImplAmbiguous ambiguousReq ambiguousSpecs) ->
+                CandidateAmbiguous candidate (ambiguousReq, ambiguousSpecs)
+            Just TraitImplResolved{} ->
+                shouldnt "candidateStatus: resolved constraints reported unresolved"
+    firstUnresolved _ [] = Nothing
+    firstUnresolved seen (constraint:rest)
+        | constraintGuaranteed constraint = firstUnresolved seen rest
+        | otherwise = case go seen constraint of
+            TraitImplResolved{} -> firstUnresolved seen rest
+            unresolved -> Just unresolved
+    constraintGuaranteed (TraitImplSpec bound TypeVariable{
+            typeVariableBounds=bounds}) = any (sameTraitConstraint bound) bounds
+    constraintGuaranteed _ = False
+    select req candidates = case undominated candidates of
+        [] -> TraitImplNotFound
+        [(declared, value)] -> TraitImplResolved declared value
+        ties@((first, _):_) -> TraitImplAmbiguous
+            (fromMaybe req $ specialiseTraitImpl first $ implType req)
+            (fst <$> ties)
+    undominated candidates =
+        [ candidate
+        | candidate@(declared, _) <- candidates
+        , not $ any
+            (\(other, _) -> traitImplMoreSpecific other declared) candidates
+        ]
+
+-- |Look up a uniquely selected trait implementation. Absence and ambiguity
+-- both return Nothing; callers that must diagnose the distinction use
+-- 'resolveTraitImpl'.
+lookupTraitImpl :: TraitImplSpec -> Map TraitImplSpec a
+                -> Maybe (TraitImplSpec, a)
+lookupTraitImpl requested impls = case resolveTraitImpl requested impls of
+    TraitImplResolved declared value -> Just (declared, value)
+    _ -> Nothing
+
+
+-- |Whether the first implementation declaration is strictly more specific
+-- than the second. Structural specialization and stronger variable bounds
+-- both contribute to specificity.
+traitImplMoreSpecific :: TraitImplSpec -> TraitImplSpec -> Bool
+traitImplMoreSpecific specific general =
+    traitImplSubsumes general specific
+        && not (traitImplSubsumes specific general)
+
+
+-- |Whether every type described by the specific declaration is also
+-- described by the general declaration. Concrete patterns may satisfy a
+-- bounded general variable because applicability is checked before ranking.
+traitImplSubsumes :: TraitImplSpec -> TraitImplSpec -> Bool
+traitImplSubsumes general specific =
+    typePatternsMoreGeneral Map.empty Map.empty (const $ const True)
+        [implType general, implTrait general]
+        [implType specific, implTrait specific]
+
+
+-- |Whether each general type pattern accepts every type accepted by the
+-- corresponding specific pattern. Bindings are shared across the pattern
+-- lists, and the supplied predicate handles a bound mapped to a concrete type.
+typePatternsMoreGeneral :: TypeVarDict -> TypeVarDict
+                        -> (TraitSpec -> TypeSpec -> Bool)
+                        -> [TypeSpec] -> [TypeSpec] -> Bool
+typePatternsMoreGeneral generalDict specificDict satisfiesBound
+        generalPatterns specificPatterns =
+    sameLength generalPatterns specificPatterns
+    && case foldM (uncurry . bindTypeVarsWith SubsumptionMatch) Map.empty $
+                zip generalPatterns specificPatterns of
+        Nothing -> False
+        Just bindings -> all (all (boundGuaranteed bindings) . (\(name, bounds) -> (name,)
+            <$> Set.toList bounds)) (Map.toList $ patternBounds generalDict generalPatterns)
+  where
+    specificBounds = patternBounds specificDict specificPatterns
+    boundGuaranteed bindings (name, bound) =
+        case Map.lookup name bindings of
+            Just TypeVariable{typeVariableName=specificName} ->
+                any (sameTraitConstraint specialisedBound) $ Map.findWithDefault Set.empty specificName
+                        specificBounds
+            Just concrete -> satisfiesBound specialisedBound concrete
+            Nothing -> False
+      where
+        specialisedBound = substituteTypeVars bindings bound
+
+
+-- |Collect and merge bounds from all occurrences of variables in patterns.
+patternBounds :: TypeVarDict -> [TypeSpec]
+              -> Map TypeVarName (Set TraitSpec)
+patternBounds dict = List.foldl' (Map.unionWith Set.union) Map.empty
+    . List.map boundsIn
+  where
+    boundsIn ty@TypeVariable{typeVariableName=name} =
+        Map.singleton name $ typeVarBoundsIn dict ty
+    boundsIn TypeSpec{typeParams=params} =
+        List.foldl' (Map.unionWith Set.union) Map.empty $ boundsIn <$> params
+    boundsIn HigherOrderType{higherTypeParams=flows} =
+        List.foldl' (Map.unionWith Set.union) Map.empty $
+            boundsIn . typeFlowType <$> flows
+    boundsIn _ = Map.empty
+
+
+data TypePatternMatch = RequestMatch | SubsumptionMatch
+
+
+-- |Match a type pattern using request-selection or pattern-subsumption
+-- semantics for repeated variables.
+bindTypeVarsWith :: TypePatternMatch -> Map TypeVarName TypeSpec
+                 -> TypeSpec -> TypeSpec -> Maybe (Map TypeVarName TypeSpec)
+bindTypeVarsWith mode bindings TypeVariable{typeVariableName=name} requested =
+    case Map.lookup name bindings of
+        Nothing -> Just $ Map.insert name requested bindings
+        Just previous
+            | repeatedVariableMatches mode previous requested -> Just bindings
+            | otherwise -> Nothing
+bindTypeVarsWith SubsumptionMatch bindings AnyType _ = Just bindings
+bindTypeVarsWith mode bindings (TypeSpec dmod dname dparams)
+                                (TypeSpec rmod rname rparams)
+    | dmod == rmod && dname == rname && sameLength dparams rparams =
+        foldM (uncurry . bindTypeVarsWith mode) bindings $
+            zip dparams rparams
+bindTypeVarsWith mode bindings (HigherOrderType dmods dparams)
+                                (HigherOrderType rmods rparams)
+    | dmods == rmods && sameLength dparams rparams =
+        foldM matchFlow bindings $ zip dparams rparams
+  where
+    matchFlow current (TypeFlow dty dflow, TypeFlow rty rflow)
+        | dflow == rflow = bindTypeVarsWith mode current dty rty
+        | otherwise = Nothing
+bindTypeVarsWith _ bindings declared requested
+    | declared == requested = Just bindings
+    | otherwise = Nothing
+
+
+repeatedVariableMatches :: TypePatternMatch -> TypeSpec -> TypeSpec -> Bool
+repeatedVariableMatches RequestMatch previous requested =
+    previous == requested || case requested of
+        TypeVariable{} -> True
+        _ -> False
+repeatedVariableMatches SubsumptionMatch previous requested =
+    sameTypePattern previous requested
+
+
+-- |Compare canonical patterns without forgetting variable identity. Bounds on
+-- the variable occurrences themselves do not participate.
+sameTypePattern :: TypeSpec -> TypeSpec -> Bool
+sameTypePattern TypeVariable{typeVariableName=left}
+                TypeVariable{typeVariableName=right} = left == right
+sameTypePattern (TypeSpec lmod lname lparams)
+                (TypeSpec rmod rname rparams) =
+    lmod == rmod && lname == rname && sameLength lparams rparams
+        && and (zipWith sameTypePattern lparams rparams)
+sameTypePattern (HigherOrderType lmods lparams)
+                (HigherOrderType rmods rparams) =
+    lmods == rmods && sameLength lparams rparams
+        && and (zipWith sameFlowPattern lparams rparams)
+  where
+    sameFlowPattern (TypeFlow lty lflow) (TypeFlow rty rflow) =
+        lflow == rflow && sameTypePattern lty rty
+sameTypePattern left right = left == right
+
+
+-- |Match a possibly-generic trait implementation declaration against a
+-- requested implementation, returning its type-variable bindings.
+traitImplBindings :: TraitImplSpec -> TraitImplSpec
+                  -> Maybe (Map TypeVarName TypeSpec)
+traitImplBindings declared requested = do
+    bindings <- bindTypeVars Map.empty
+        (implType declared) (implType requested)
+    bindTypeVars bindings (implTrait declared) (implTrait requested)
+
+
+-- |Match a possibly-generic declared type against a requested type, extending
+-- the supplied type-variable bindings.
+bindTypeVars :: Map TypeVarName TypeSpec -> TypeSpec -> TypeSpec
+                 -> Maybe (Map TypeVarName TypeSpec)
+bindTypeVars = bindTypeVarsWith RequestMatch
+
+
+-- |Canonicalise a list of types, with type variables starting from the
+-- supplied Int. The returned dictionary is in the canonical namespace and
+-- contains the effective trait bounds of every generated type variable.
+canonicalise :: Int -> TypeVarDict -> [TypeSpec]
+             -> (([TypeSpec], TypeVarDict), Int)
+canonicalise ctr tvarDict tys =
+    let (tys', ctr', (_, canonicalDict)) =
+            canonicaliseList tvarDict (Map.empty, Map.empty) ctr tys
+    in ((tys', canonicalDict), ctr')
+
+
+type Canonicalisation = (Map TypeVarName TypeSpec, TypeVarDict)
+
+
+canonicaliseList :: TypeVarDict -> Canonicalisation -> Int -> [TypeSpec]
+                 -> ([TypeSpec], Int, Canonicalisation)
+canonicaliseList _ state ctr [] = ([], ctr, state)
+canonicaliseList tvarDict state ctr (ty:tys) =
+    let (ty', ctr', state') = canonicaliseSingle tvarDict state ctr ty
+        (tys', ctr'', state'') = canonicaliseList tvarDict state' ctr' tys
+    in (ty':tys', ctr'', state'')
+
+
+canonicaliseSingle :: TypeVarDict -> Canonicalisation -> Int -> TypeSpec
+                   -> (TypeSpec, Int, Canonicalisation)
+canonicaliseSingle tvarDict state@(tyMap, canonicalDict) ctr
+        ty@TypeVariable{typeVariableName=name} =
+    case Map.lookup name tyMap of
+        Just ty' -> (ty', ctr, state)
+        Nothing ->
+            let canonicalName = FauxTypeVar ctr
+                ty' = TypeVariable canonicalName Set.empty
+                stateWithVar = (Map.insert name ty' tyMap, canonicalDict)
+                bounds = Set.toAscList $ typeVarBoundsIn tvarDict ty
+                (bounds', ctr', (tyMap', canonicalDict')) =
+                    canonicaliseList tvarDict stateWithVar (ctr + 1) bounds
+                canonicalDict'' = if List.null bounds'
+                    then canonicalDict'
+                    else Map.insert canonicalName (Right $ Set.fromList bounds')
+                            canonicalDict'
+            in (ty', ctr', (tyMap', canonicalDict''))
+canonicaliseSingle tvarDict state ctr ty@TypeSpec{typeParams=tys} =
+    let (tys', ctr', state') = canonicaliseList tvarDict state ctr tys
+    in (ty{typeParams=tys'}, ctr', state')
+canonicaliseSingle tvarDict state ctr
+        ty@HigherOrderType{higherTypeParams=tfs} =
+    let tys = typeFlowType <$> tfs
+        (tys', ctr', state') = canonicaliseList tvarDict state ctr tys
+    in (ty{higherTypeParams=zipWith TypeFlow tys' $ typeFlowMode <$> tfs},
+        ctr', state')
+canonicaliseSingle _ state ctr ty = (ty, ctr, state)
+
+
+-- |Return the bounds stated directly on a type-variable occurrence together
+-- with bounds recorded directly for that variable.
+typeVarBoundsIn :: TypeVarDict -> TypeSpec -> Set TraitSpec
+typeVarBoundsIn dict TypeVariable{typeVariableName=name,
+                                  typeVariableBounds=bounds} =
+    bounds `Set.union` case Map.lookup name dict of
+        Just (Right bounds') -> bounds'
+        _ -> Set.empty
+typeVarBoundsIn _ _ = Set.empty
+
+
+-- |Whether two trait constraints differ only in their type-variable names.
+-- Bounds on the variables themselves do not participate in the comparison.
+sameTraitConstraint :: TypeSpec -> TypeSpec -> Bool
+sameTraitConstraint left right = canonicalType left == canonicalType right
+  where
+    canonicalType = fst . fst . canonicalise 0 Map.empty . pure . clearBounds
+    clearBounds ty@TypeVariable{} = ty { typeVariableBounds=Set.empty }
+    clearBounds ty@TypeSpec{typeParams=params} =
+        ty { typeParams=clearBounds <$> params }
+    clearBounds ty@HigherOrderType{higherTypeParams=flows} =
+        ty { higherTypeParams=clearFlow <$> flows }
+    clearBounds ty = ty
+    clearFlow flow = flow { typeFlowType=clearBounds $ typeFlowType flow }
+
+
+-- |Instantiate a generic implementation declaration for a requested
+-- implementation type.
+specialiseTraitImpl :: TraitImplSpec -> TypeSpec -> Maybe TraitImplSpec
+specialiseTraitImpl declared requestedType = do
+    bindings <- bindTypeVars Map.empty (implType declared) requestedType
+    return $ TraitImplSpec
+        (substituteTypeVars bindings $ implTrait declared)
+        (substituteTypeVars bindings $ implType declared)
+
+
+substituteTypeVars :: Map TypeVarName TypeSpec -> TypeSpec -> TypeSpec
+substituteTypeVars bindings ty@TypeVariable{typeVariableName=name} =
+    Map.findWithDefault ty name bindings
+substituteTypeVars bindings ty@TypeSpec{typeParams=params} =
+    ty { typeParams = substituteTypeVars bindings <$> params }
+substituteTypeVars bindings ty@HigherOrderType{higherTypeParams=flows} =
+    ty { higherTypeParams = substituteFlow <$> flows }
+  where
+    substituteFlow flow =
+        flow { typeFlowType = substituteTypeVars bindings $ typeFlowType flow }
+substituteTypeVars _ ty = ty
+
+
+-- |Direct prerequisites of a specialised trait, with the declaring trait's
+-- parameters substituted into the prerequisite specifications.
+directTraitPrerequisites :: TraitSpec -> Compiler [TraitSpec]
+directTraitPrerequisites trait = case typeModule trait of
+    Nothing -> return []
+    Just traitMod -> do
+        info <- getModule modTrait `inModule` traitMod
+        params <- getModule modParams `inModule` traitMod
+        let bindings = Map.fromList $ zip params $ typeParams trait
+        return $ maybe [] (List.map $ substituteTypeVars bindings) info
+
+
+-- |Transitive prerequisites in source-ordered depth-first order, with diamond
+-- ancestors retained only at their first occurrence.
+allTraitPrerequisites :: TraitSpec -> Compiler [TraitSpec]
+allTraitPrerequisites trait = snd <$> visit [] trait
+  where
+    visit seen current = do
+        direct <- directTraitPrerequisites current
+        foldM step (seen, []) direct
+    step (seen, ordered) prerequisite
+        | any (sameTraitConstraint prerequisite) seen = return (seen, ordered)
+        | otherwise = do
+            (seen', descendants) <- visit (seen ++ [prerequisite]) prerequisite
+            return (seen', ordered ++ prerequisite : descendants)
+
+
+-- |Transitive prerequisites in source-ordered depth-first order, with a
+-- diamond ancestor repeated once per direct prerequisite whose own closure
+-- reaches it.
+traitPrerequisiteLayout :: TraitSpec -> Compiler [TraitSpec]
+traitPrerequisiteLayout trait = do
+    direct <- directTraitPrerequisites trait
+    fmap concat $ forM direct $ \prerequisite -> do
+        descendants <- traitPrerequisiteLayout prerequisite
+        return $ prerequisite : descendants
+
+
+-- |The method-slot offset of targetTrait's own methods within the flat
+-- layout of hostTrait, given targetTrait occurs in
+-- traitPrerequisiteLayout hostTrait.  This is the same formula used to
+-- project a prerequisite's vtable out of a caller-supplied vtable pointer;
+-- here it is used to compute the offset from a concrete host constant.
+prerequisiteSlotOffset :: TraitSpec -> TraitSpec -> Compiler Int
+prerequisiteSlotOffset hostTrait targetTrait = do
+    layout <- traitPrerequisiteLayout hostTrait
+    let index = trustFromJust ("prerequisiteSlotOffset: " ++ show targetTrait
+            ++ " is not a prerequisite of " ++ show hostTrait) $
+            List.findIndex (sameTraitConstraint targetTrait) layout
+    counts <- mapM (fmap length . abstractProcs) (hostTrait : List.take index layout)
+    return $ sum counts
+
+
+-- |The trait bounds declared within an implementation type, in ABI order:
+-- type variables by first occurrence, then each variable's bounds in ascending
+-- order. Repeated occurrences of a variable contribute their union of bounds.
+traitImplTypeBounds :: TraitImplSpec -> [TypeVarBound]
+traitImplTypeBounds = typeBounds . implType
+  where
+    typeBounds ty =
+        [ (name, bound)
+        | name <- List.nub $ typeVarNames ty
+        , bound <- Set.toAscList $ Map.findWithDefault Set.empty name (boundsIn ty)
+        ]
+    typeVarNames TypeVariable{typeVariableName=name} = [name]
+    typeVarNames TypeSpec{typeParams=params} = concatMap typeVarNames params
+    typeVarNames HigherOrderType{higherTypeParams=flows} =
+        concatMap (typeVarNames . typeFlowType) flows
+    typeVarNames _ = []
+    boundsIn TypeVariable{typeVariableName=name,typeVariableBounds=bounds} =
+        Map.singleton name bounds
+    boundsIn TypeSpec{typeParams=params} =
+        List.foldl' (Map.unionWith Set.union) Map.empty $ boundsIn <$> params
+    boundsIn HigherOrderType{higherTypeParams=flows} =
+        List.foldl' (Map.unionWith Set.union) Map.empty $
+            boundsIn . typeFlowType <$> flows
+    boundsIn _ = Map.empty
+
+
+-- |The concrete trait implementations that provide the constraints needed
+-- to instantiate a partial implementation. An empty list means either the
+-- declaration does not match the request or the implementation is not partial.
+traitImplConstraints :: TraitImplSpec -> TraitImplSpec -> [TraitImplSpec]
+traitImplConstraints declared =
+    traitImplConstraintsFor (traitImplTypeBounds declared) declared
+
+
+-- |Specialise an explicitly supplied, canonically ordered constraint
+-- layout for a requested implementation. Compiled code should obtain this
+-- list from VTableInfo rather than reconstructing it from the implementation.
+traitImplConstraintsFor :: [TypeVarBound] -> TraitImplSpec -> TraitImplSpec
+                          -> [TraitImplSpec]
+traitImplConstraintsFor constraints declared requested =
+  case traitImplBindings declared requested of
+    Nothing -> []
+    Just bindings ->
+        [ TraitImplSpec (substituteTypeVars bindings bound) concrete
+        | (name, bound) <- constraints
+        , let concrete = Map.findWithDefault
+                (TypeVariable name Set.empty) name bindings
+        ]
+
+
 -- |A type variable together with the trait it is required to implement.
 type TypeVarBound = (TypeVarName, TraitSpec)
 
@@ -3785,7 +4366,11 @@ data StructInfo
         vtableExternal :: Bool,     -- ^ Whether this vtable is defined in other module
         vtableIndex :: Int,         -- ^ Its index in the defining module
         vtableSpec :: TraitImplSpec,-- ^ The trait impl spec
-        vtableMod  :: ModSpec       -- ^ The mod where this vtable is defined
+        vtableMod  :: ModSpec,      -- ^ The mod where this vtable is defined
+        vtableComponents :: [VTableComponent],
+                                    -- ^ Method layouts for the trait and its prerequisites
+        vtableConstraints :: [TypeVarBound]
+                                    -- ^ Constraint slots after method slots
     }
     -- | A constant memory block of characters, with 0-termination.  A more
     -- concise representation for this special case.
@@ -3795,7 +4380,41 @@ data StructInfo
     | ArrayInfo {
         arrayData :: [ConstValue]
         }
-     deriving (Eq,Ord,Show,Generic)
+     deriving (Eq,Ord,Generic)
+
+
+instance Show StructInfo where
+    show (StructInfo size fields) = "StructInfo {structSize = " ++ show size
+        ++ ", structData = " ++ show fields ++ "}"
+    show (VTableInfo size fields external index spec mod _ constraints) =
+        "VTableInfo {vtableSize = " ++ show size
+        ++ ", vtableData = " ++ show fields
+        ++ ", vtableExternal = " ++ show external
+        ++ ", vtableIndex = " ++ show index
+        ++ ", vtableSpec = " ++ show spec
+        ++ ", vtableMod = " ++ show mod
+        ++ ", vtableConstraints = " ++ show constraints ++ "}"
+    show (CStringInfo chars) = "CStringInfo {cstringChars = " ++ show chars ++ "}"
+    show (ArrayInfo elements) = "ArrayInfo {arrayData = " ++ show elements ++ "}"
+
+
+data VTableComponent = VTableComponent {
+        vtableComponentSpec :: TraitImplSpec,
+        vtableComponentOffset :: Int,
+        vtableComponentMethods :: Int
+    }
+    deriving (Eq,Ord,Show,Generic)
+
+
+-- | An entry in a module's modVTables map
+data VTableEntry
+    = VTableStandalone Int StructID
+        -- ^ Genuinely compiled as its own global constant.
+    | VTableEmbedded TraitImplSpec Int
+        -- ^ Embedded in another trait impl's vtable
+        -- `TraitImplSpec` is the host's trait impl spec
+        -- `Int` is the word offset
+    deriving (Eq,Show,Generic)
 
 
 -- | The value of a field in a constant memory block, including its size in
@@ -3873,7 +4492,7 @@ constValueAtOffset (StructInfo _ fields) offset = go fields offset
             | off < 0 = Nothing
             | otherwise = go fields (off - constValueSize field)
           go [] _ = Nothing
-constValueAtOffset (VTableInfo _ fields _ _ _ _) offset = go fields offset
+constValueAtOffset (VTableInfo _ fields _ _ _ _ _ _) offset = go fields offset
     where go (field:fields) off
             | off == 0 = Just field
             | off < 0 = Nothing
@@ -3970,7 +4589,7 @@ argGlobalFlow varFlows (ArgClosure pspec args _) = do
 argGlobalFlow varFlows (ArgConstRef structID _) = do
     lookupConstInfo structID >>= (\case
             StructInfo _ fields -> constsGlobalFlows fields
-            VTableInfo _ fields _ _ _ _ -> constsGlobalFlows fields
+            VTableInfo _ fields _ _ _ _ _ _ -> constsGlobalFlows fields
             _ -> return emptyGlobalFlows)
         . trustFromJust "lookupConstStruct"
 argGlobalFlow _ _ = return emptyGlobalFlows
@@ -4006,7 +4625,7 @@ constGlobalFlows :: ConstValue -> Compiler GlobalFlows
 constGlobalFlows (PointerStructMember structID) = do
     lookupConstInfo structID >>= (\case
             StructInfo _ fields -> constsGlobalFlows fields
-            VTableInfo _ fields _ _ _ _ -> constsGlobalFlows fields
+            VTableInfo _ fields _ _ _ _ _ _ -> constsGlobalFlows fields
             _ -> return emptyGlobalFlows)
         . trustFromJust "lookupConstStruct"
 constGlobalFlows _ = return emptyGlobalFlows
@@ -4038,7 +4657,6 @@ argIsConst ArgInt{}            = True
 argIsConst ArgFloat{}          = True
 argIsConst (ArgClosure _ as _) = all argIsConst as
 argIsConst ArgGlobal{}         = True
-argIsConst ArgVTable{}         = True
 argIsConst ArgConstRef{}       = True
 argIsConst ArgUnneeded{}       = True
 argIsConst ArgUndef{}          = False
@@ -4052,7 +4670,6 @@ argIsReal (ArgInt _ ty)         = not <$> typeIsPhantom ty -- 0 is a valid phant
 argIsReal ArgFloat{}            = return True
 argIsReal (ArgClosure _ as _)   = return True
 argIsReal (ArgGlobal _ ty)      = not <$> typeIsPhantom ty
-argIsReal ArgVTable{}           = return True
 argIsReal (ArgConstRef _ ty)    = return True
 argIsReal ArgUnneeded{}         = return False
 argIsReal ArgUndef{}            = return True
@@ -4089,7 +4706,6 @@ argFlowDirection ArgInt{} = FlowIn
 argFlowDirection ArgFloat{} = FlowIn
 argFlowDirection ArgClosure{} = FlowIn
 argFlowDirection ArgGlobal{} = FlowIn
-argFlowDirection ArgVTable{} = FlowIn
 argFlowDirection ArgConstRef{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
 argFlowDirection ArgUndef{} = FlowIn
@@ -4102,7 +4718,6 @@ argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgClosure _ _ typ) = typ
 argType (ArgGlobal _ typ) = typ
-argType (ArgVTable _ typ) = typ
 argType (ArgConstRef _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
 argType (ArgUndef typ) = typ
@@ -4115,7 +4730,6 @@ setArgType typ (ArgInt i _) = ArgInt i typ
 setArgType typ (ArgFloat f _) = ArgFloat f typ
 setArgType typ (ArgClosure ms as _) = ArgClosure ms as typ
 setArgType typ (ArgGlobal rs _) = ArgGlobal rs typ
-setArgType typ arg@ArgVTable{} = arg
 setArgType typ (ArgConstRef ms _) = ArgConstRef ms typ
 setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
 setArgType typ (ArgUndef _) = ArgUndef typ
@@ -4152,9 +4766,6 @@ argDescription (ArgClosure ms as _)
     = "closure of '" ++ show ms ++ "' with <"
     ++ intercalate ", " (argDescription <$> as) ++ "> closed arguments"
 argDescription (ArgGlobal info _) = "global reference to " ++ show info
-argDescription (ArgVTable info _) = case info of
-    Left spec -> "reference to global vtable " ++ show spec
-    Right val -> "reference to local vtable " ++ show val
 argDescription (ArgConstRef info _) = "reference to const struct " ++ show info
 argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
 argDescription (ArgUndef _) = "undefined argument"
@@ -4331,7 +4942,6 @@ varsInPrimArg dir (ArgClosure _ as _)
 varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty
 varsInPrimArg _ ArgGlobal{}   = Set.empty
-varsInPrimArg _ ArgVTable{}   = Set.empty
 varsInPrimArg _ ArgConstRef{} = Set.empty
 varsInPrimArg _ ArgUnneeded{} = Set.empty
 varsInPrimArg _ ArgUndef{}    = Set.empty
@@ -4427,9 +5037,11 @@ instance Show Item where
     "representation"
     ++ bracketList "(" ", " ")" (("?"++) <$> params)
     ++ " is " ++ show typeModifiers ++ show repn ++ showOptPos pos ++ "\n"
-  show (TraitDecl params typeModifiers pos) =
+  show (TraitDecl params prerequisites typeModifiers pos) =
     "trait"
     ++ bracketList "(" ", " ")" (("?"++) <$> params)
+    ++ (if List.null prerequisites then "" else " <: " ++
+        bracketList "{" ", " "}" (show <$> prerequisites))
     ++ show typeModifiers ++ showOptPos pos ++ "\n"
   show (ConstructorDecl vis params typeModifiers ctors pos) =
     visibilityPrefix vis ++ "constructors"
@@ -4897,9 +5509,6 @@ instance Show PrimArg where
   show (ArgClosure ms as typ) = show ms ++ "<" ++ intercalate ", " (show <$> as)
                              ++ ">" ++ showTypeSuffix typ Nothing
   show (ArgGlobal info typ) = show info ++ showTypeSuffix typ Nothing
-  show (ArgVTable info typ) = case info of
-    Left spec -> "vtable(global," ++ show spec ++ ")" ++ showTypeSuffix typ Nothing
-    Right val -> "vtable(local," ++ show val ++ ")" ++ showTypeSuffix typ Nothing
   show (ArgConstRef ms typ) = show ms ++ showTypeSuffix typ Nothing
   show (ArgUnneeded dir typ) =
       primFlowPrefix dir ++ "_" ++ showTypeSuffix typ Nothing
@@ -4950,6 +5559,7 @@ instance Show StringVariant where
 instance Show GlobalInfo where
     show (GlobalResource res) = "<<" ++ show res ++ ">>"
     show (GlobalVariable res) = "@" ++ res
+    show (GlobalVTable res) = "vtable " ++ show res
 
 
 showMap :: String -> String -> String -> (k->String) -> (v->String)

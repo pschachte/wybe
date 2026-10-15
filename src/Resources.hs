@@ -173,6 +173,7 @@ checkResourceImpln rspec impln@(PrimResource ty mbPInit pos) = do
     logResources $ "Check resource " ++ show rspec
                  ++ " with implementation " ++ show impln
     ty' <- lookupType "resource declaration" pos ty
+        >>= rejectTraitBounds "a resource declaration" pos
     logResources $ "Actual type is " ++ show ty'
 
     (initChg, mbPInit') <-

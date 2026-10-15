@@ -1,0 +1,31 @@
+# Partial prerequisite dispatch builds a constrained vtable from an embedded
+# template when the standalone prerequisite constant is omitted.
+
+type printable trait {
+    abstract label(x:_): string
+}
+
+type ta trait {
+    abstract label_a(x:_): string
+}
+
+type tb trait <: ta {
+    abstract label_b(x:_): string
+}
+
+type box(T) {
+    pub box(value:T)
+}
+
+impl int <: printable
+def label(x:int): string = "$x"
+
+impl box(T<:printable) <: ta
+def label_a(x:box(T<:printable)): string = "a:" ,, printable.label(x^value)
+
+impl box(T<:printable) <: tb
+def label_b(x:box(T<:printable)): string = "b:" ,, printable.label(x^value)
+
+?boxed = box(9)
+!println(ta.label_a(boxed))
+!println(tb.label_b(boxed))

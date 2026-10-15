@@ -1,0 +1,2 @@
+Error detected during loading module: trait_error_bound_type_param
+final-dump/trait_error_bound_type_param.wybe:6:14: Syntax error: Trait bound on type parameter T is not allowed in a type parameter list; trait bounds are only allowed in procedure and function parameter types and trait implementation types
