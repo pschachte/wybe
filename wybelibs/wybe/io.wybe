@@ -8,8 +8,7 @@ use foreign library gc
 
 pub use wybe.phantom
 use wybe.char, wybe.address, wybe.int, wybe.int32, wybe.bool
-use wybe.input_stream, wybe.output_stream, wybe.source, wybe.sink
-use wybe.printable
+use wybe.input_stream, wybe.output_stream
 
 pub resource io = io_state, stdin, stdout, stderr,
                     current_in, current_out, current_err
@@ -17,26 +16,23 @@ pub resource io = io_state, stdin, stdout, stderr,
 # XXX We shouldn't need to initialise a resource (or variable) of a 0-bit type
 pub resource io_state:phantom = phantom
 
-pub resource stdin :input_stream = !input_buffer(0)
-pub resource stdout:output_stream = !output_buffer(1)
-pub resource stderr:output_stream = !output_buffer(2)
+pub resource stdin :input_stream  = foreign lpvm cast(0)
+pub resource stdout:output_stream = foreign lpvm cast(0)
+pub resource stderr:output_stream = foreign lpvm cast(0)
 
-pub resource current_in :input_stream = stdin
-pub resource current_out:output_stream = stdout
-pub resource current_err:output_stream = stderr
+pub resource current_in :input_stream = foreign lpvm cast(0)
+pub resource current_out:output_stream = foreign lpvm cast(0)
+pub resource current_err:output_stream = foreign lpvm cast(0)
+
+!input_buffer(0, ?stdin)
+!output_buffer(1, ?stdout)
+!output_buffer(2, ?stderr)
+
+?current_in = stdin
+?current_out = stdout
+?current_err = stderr
 
 ## Printing
 
-# Print a printable thing to the current output stream
-pub def print(datum:printable) use !io { !print(datum, current_out) }
-
-# Print a printable thing to the current output stream, follwed by a newline
-pub def println(datum:printable, sink:sink) use !io_state {
-    !print(datum, sink)
-    !nl(sink)
-}
-
-pub def println(datum:printable) use !io { !println(datum, current_out) }
-
-pub def nl(buf:sink) use !io_state { !write('\n', !buf) }
+pub def nl(buf:output_stream) use !io_state { !write('\n', !buf) }
 pub def nl use current_out, !io_state { !nl(current_out) }

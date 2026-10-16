@@ -29,6 +29,8 @@ pub def {test} [](str:_, idx:int):char = c where {
     ?c = unsafe_c_string_index(str, idx)
 }
 
+pub def to_address(cstr:_):address = foreign lpvm cast(cstr)
+
 pub def unsafe_c_string_index(str:_, idx:int):char 
     = foreign lpvm access(str, idx, foreign lpvm sizeof(_:char):int, 0)
 

@@ -119,4 +119,14 @@ pub def fmt(x:_, minlength:int, fill:_):string =
     fmt(string(x), minlength, fill)
 
 ## I/O
-# Character I/O is in the io module.
+pub def print(x:_) use !io { !print(x, !current_out) }
+
+pub def print(x:_, !out:output_stream) use !io_state { !write(x, !out) }
+
+pub def println(x:_) use !io { !println(x, !current_out) }
+
+pub def println(x:_, !out:output_stream) use !io_state {
+    !print(x, !out);
+    !nl(!out)
+}
+

@@ -12,9 +12,6 @@
 
 representation is address
 
-impl sink # (char) XXX No trait type parameters yet
-# an output stream of characters
-
 
 # The size of an output buffer.
 pub def output_buffer_size : int = 8*1024 # fixed buffer size in bytes
