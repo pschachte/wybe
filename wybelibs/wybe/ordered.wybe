@@ -1,0 +1,27 @@
+# purpose:  Standard trait describing totally ordered types
+# since  : 0.2
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.bool, wybe.comparison
+
+# XXX This trait should require types also to implement eq.
+trait
+
+# Equality and disequality.
+abstract {test} (a:_ <  b:_)
+abstract {test} (a:_ <= b:_)
+abstract (x:_ <=> y:_):comparison
+
+# XXX All of the below should be abstract with default implementations, so they
+# can be given more efficient implementations for some types.
+
+# The other standard comparisons can be implemented in terms of <
+# pub def {test} (a:_ <= b:_) { ~(b < a) }
+pub def {test,inline} (a:_ > b:_) { b < a }
+pub def {test,inline} (a:_ >= b:_) { b <= a }
+
+# # Three-way comparison.
+# pub def (x:_ <=> y:_):comparison = 
+#     if { x < y :: lesser | y < x :: greater | else :: equal }
+

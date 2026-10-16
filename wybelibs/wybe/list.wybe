@@ -4,8 +4,8 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int, wybe.char, wybe.array, wybe.machine_word
-use wybe.io
-use wybe.eq
+use wybe.io, wybe.comparison
+use wybe.eq, wybe.ordered
 
 pub constructors (T) [] | [head:T | tail:_(T)]
 
@@ -33,6 +33,37 @@ pub def {test} `[]`(xs:_(T), idx:int):T = x where {
     idx >= 0 # we don't want to check this every time
     ?x = index1(xs, idx)
 }
+
+
+## Comparisons
+
+# # Equality and disequality.
+# impl _(ordered) <: eq
+# pub def {test} (xs:_(ordered)  = ys:_(ordered)) { (xs <=> ys)  = equal }
+# pub def {test} (xs:_(ordered) ~= ys:_(ordered)) { (xs <=> ys) ~= equal }
+
+# # Inequalities.
+# impl _(ordered) <: ordered
+# pub def {test} (xs:_(ordered) <  ys:_(ordered)) { (xs <=> ys) = lesser }
+# pub def {test} (xs:_(ordered) <= ys:_(ordered)) { (xs <=> ys) <= equal }
+
+# # Three-way comparison.
+# pub def (xs:_(ordered) <=> ys:_(ordered)):comparison = (
+#     if {xs = [?x|?xs1] ::
+#         if {ys = [?y|?ys1] ::
+#             let { ?cmp = x <=> y } in (
+#                 if {cmp = equal :: xs1 <=> ys1
+#                 |   else :: cmp
+#                 }
+#             )
+#         |   else :: greater
+#         }
+#     |   else ::
+#         if {ys = [] :: equal
+#         |   else :: lesser
+#         }
+#     }
+# )
 
 
 # Membership

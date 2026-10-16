@@ -5,8 +5,8 @@ pragma no_standard_library # Standard library can't depend on itself!
 
 representation is address
 
-use wybe.int, wybe.count, wybe.bool
-use wybe.eq
+use wybe.int, wybe.count, wybe.bool, wybe.comparison
+use wybe.eq, wybe.ordered
 
 pub def {inline} word_size_bytes:int = foreign lpvm sizeof(_:_)
 
@@ -24,7 +24,11 @@ pub def foreign lpvm count=cast(x:_):count
 pub def foreign lpvm machine_word=cast(x:count):_
 
 # # Equality and disequality.
-impl eq
+impl {eq, ordered}
 pub def {test} (x:_  = y:_) { count(x) = count(y) }
 pub def {test} (x:_ ~= y:_) { count(x) ~= count(y) }
 
+pub def {test} (x:_ <  y:_) { count(x) < count(y) }
+pub def {test} (x:_ <= y:_) { count(x) <= count(y) }
+
+pub def (x:_ <=> y:_):comparison = ( count(x) <=> count(y) )

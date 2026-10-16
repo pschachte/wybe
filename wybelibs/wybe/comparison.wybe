@@ -4,16 +4,16 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.string, wybe.c_string, wybe.int, wybe.control
-use wybe.eq
+use wybe.eq, wybe.ordered
 
 pub constructors lesser | equal | greater
 
-pub def foreign llvm `=` =icmp_eq(x:_,  y:_):bool
-pub def foreign llvm `~=`=icmp_ne(x:_,  y:_):bool
+impl {eq, ordered}
 pub def foreign llvm `<` =icmp_ult(x:_, y:_):bool
 pub def foreign llvm `<=`=icmp_ule(x:_, y:_):bool
-pub def foreign llvm `>` =icmp_ugt(x:_, y:_):bool
-pub def foreign llvm `>=`=icmp_uge(x:_, y:_):bool
+
+pub def (x:_ <=> y:_):_ = 
+    if { x < y :: lesser | y < x :: greater | else :: equal }
 
 pub def fmt(x:_):string = case x in {
     lesser  :: "lesser"

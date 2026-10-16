@@ -5,7 +5,7 @@ pragma no_standard_library
 
 use wybe.c_string, wybe.range, wybe.int, wybe.char, wybe.bool, wybe.comparison
 use wybe.control, wybe.io 
-use wybe.eq
+use wybe.eq, wybe.ordered
 
 # Private constructors. This ensures that strings can only be manipulated with
 # public procedures, providing a more typical interface.  The `empty` and
@@ -149,10 +149,9 @@ pub def (x:_ =  y:_):bool = (x <=> y) =  equal
 pub def (x:_ ~= y:_):bool = (x <=> y) ~= equal
 
 # Inequalities.
+impl ordered
 pub def (x:_ <  y:_):bool = (x <=> y) <  equal
 pub def (x:_ <= y:_):bool = (x <=> y) <= equal
-pub def (x:_ >  y:_):bool = (x <=> y) >  equal
-pub def (x:_ >= y:_):bool = (x <=> y) >= equal
 
 # Three-way comparison.
 pub def (x:_ <=> y:_):comparison = c where {

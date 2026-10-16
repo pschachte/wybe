@@ -5,7 +5,7 @@ pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.comparison, wybe.int, wybe.io, wybe.string, wybe.char
 use wybe.control, wybe.c_string, wybe.count
-use wybe.eq
+use wybe.eq, wybe.ordered
 
 representation is 16 bit unsigned
 
@@ -66,10 +66,9 @@ pub def foreign llvm {test} `=` =icmp_eq(x:_, y:_)
 pub def foreign llvm {test} `~=`=icmp_ne(x:_, y:_)
 
 # Inequalities.
+impl ordered
 pub def foreign llvm {test} `<` =icmp_ult(x:_, y:_)
 pub def foreign llvm {test} `<=`=icmp_ule(x:_, y:_)
-pub def foreign llvm {test} `>` =icmp_ugt(x:_, y:_)
-pub def foreign llvm {test} `>=`=icmp_uge(x:_, y:_)
 
 # Three-way comparison.
 pub def (x:_ <=> y:_):comparison = 
