@@ -15,9 +15,10 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: top_level_use.<0>
-()<{<<top_level_use.res>>, <<wybe.io.io>>}; {<<top_level_use.res>>, <<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>}; {<<top_level_use.res>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
+    foreign lpvm store(0:wybe.int, <<top_level_use.res>>:wybe.int) @top_level_use:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @top_level_use:nn:nn
     foreign c print_int(0:wybe.int, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @top_level_use:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @top_level_use:nn:nn
@@ -38,6 +39,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#top_level_use.res" = global i64 undef
 
 define external fastcc void @"top_level_use#.<0>"() {
+  store i64 0, ptr @"resource#top_level_use.res"
   call ccc void @print_int(i64 0)
   call ccc void @putchar(i8 10)
   ret void

@@ -7,8 +7,9 @@ AFTER EVERYTHING:
   representation  : (not a type)
   public submods  : 
   public resources: 
-  public procs    : 
-  constants       : 
+  public procs    : stack_alloc_global.<0>
+  constants       : 0:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 0 8]}
+                    1:: StructInfo {structSize = 16, structData = [PointerStructMember stack_alloc_global#constant#0,IntStructMember 0 8]}
   imports         : use stack_alloc_global.cell
                     use stack_alloc_global.pair
                     use wybe
@@ -16,6 +17,15 @@ AFTER EVERYTHING:
                     gpair: fromList [(stack_alloc_global.gpair,stack_alloc_global.pair = pair(cell(0 @stack_alloc_global:nn:nn, 0 @stack_alloc_global:nn:nn) @stack_alloc_global:nn:nn, 0 @stack_alloc_global:nn:nn) @stack_alloc_global:nn:nn @stack_alloc_global:nn:nn)]
   submodules      : stack_alloc_global.cell, stack_alloc_global.pair
   procs           : 
+
+module top-level code > public {inline,semipure} (0 calls)
+0: stack_alloc_global.<0>
+()<{}; {<<stack_alloc_global.gcell>>, <<stack_alloc_global.gpair>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(stack_alloc_global#constant#0:stack_alloc_global.cell, <<stack_alloc_global.gcell>>:stack_alloc_global.cell) @stack_alloc_global:nn:nn
+    foreign lpvm store(stack_alloc_global#constant#1:stack_alloc_global.pair, <<stack_alloc_global.gpair>>:stack_alloc_global.pair) @stack_alloc_global:nn:nn
+
 
 proc local_only > {noinline} (0 calls)
 0: stack_alloc_global.local_only<0>
@@ -80,6 +90,8 @@ store_global_nested(x##0:wybe.int)<{}; {<<stack_alloc_global.gpair>>}; {}>:
 source_filename = "!ROOT!/final-dump/stack_alloc_global.wybe"
 target triple   = ????
 
+@"stack_alloc_global#constant#0" = private unnamed_addr constant {i64, i64} { i64 0, i64 0 }, align 8
+@"stack_alloc_global#constant#1" = private unnamed_addr constant {ptr, i64} { ptr @"stack_alloc_global#constant#0", i64 0 }, align 8
 
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
@@ -87,6 +99,12 @@ declare external ccc ptr @wybe_malloc(i32)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#stack_alloc_global.gcell" = global i64 undef
 @"resource#stack_alloc_global.gpair" = global i64 undef
+
+define external fastcc void @"stack_alloc_global#.<0>"() {
+  store ptr @"stack_alloc_global#constant#0", ptr @"resource#stack_alloc_global.gcell"
+  store ptr @"stack_alloc_global#constant#1", ptr @"resource#stack_alloc_global.gpair"
+  ret void
+}
 
 define external fastcc void @"stack_alloc_global#.local_only<0>"(i64 %"x##0") {
   %"tmp#12##0" = alloca i8, i64 16, align 8

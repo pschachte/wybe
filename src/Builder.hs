@@ -1167,23 +1167,14 @@ buildMain sccs = do
     return $ ProcDecl Private detism proto mainBody Nothing
 
 
--- |Returns a pair of lists of resource initialisations and initialisation procs
--- for all the specified modules.
+-- |Returns the set of initialised resources defined in, and a list of
+-- the initialisation procs for, all the specified modules.
 sccInits :: [ModSpec] -> Compiler (Set ResourceSpec,[Placed Stmt])
 sccInits mods = do
     logBuild $ "Collecting initialisations for modules:  " ++ showModSpecs mods
     initialisedRes <- mapM (initialisedResources `inModule`) mods
     logBuild $ "Initialised resources:  " ++ show initialisedRes
     let initRes = Set.unions $ List.map Map.keysSet initialisedRes
-    let resInits = [maybePlace
-                    (ForeignCall "llvm" "move" []
-                        [initVal, Unplaced (varSet resName)])
-                    (resourcePos def)
-                   | (spec,def) <- concatMap Map.toList initialisedRes
-                   , let resName = resourceName spec
-                   , let maybeInit = resourceInit def
-                   , isJust maybeInit
-                   , let initVal = fromJust maybeInit]
     initMods <- filterM
                     ((isJust . Map.lookup ""
                         <$> getModuleImplementationField modProcs) `inModule`)
@@ -1192,7 +1183,7 @@ sccInits mods = do
                             $ ProcCall (First modSpec "" Nothing) Det True []
                         | modSpec <- initMods
                         ]
-    return (initRes, resInits ++ initProcCalls)
+    return (initRes, initProcCalls)
 
 
 -- | Traverse and collect a depth first dependency list from the given initial

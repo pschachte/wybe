@@ -243,6 +243,15 @@ data ResourceDefn =
     deriving (Eq, Ord, Show, Generic)
 
 
+-- |If the given ResourceDefn contains an initialisation, returns it as a
+-- StmtDecl; otherwise, returns Nothing.
+resourceDefnInitialisation :: Ident -> ResourceDefn -> OptPos -> Maybe Item
+resourceDefnInitialisation name (SimpleResourceDefn ty (Just exp)) pos =
+    Just $ StmtDecl (ForeignCall "llvm" "move" [] 
+                        [exp,Unplaced (Var name ParamOut Ordinary)]) pos 
+resourceDefnInitialisation _ _ _ = Nothing
+    
+
 
 -- |Determinism describes whether a statement can succeed or fail if execution
 -- reaches a given program point.  Det means it will definitely succeed, Failure
@@ -1118,17 +1127,23 @@ typeIsUnique _ = return False
 -- if so.  Otherwise, providing the type is not generic, we record the
 -- definition to process once types have been checked.
 addResource :: ResourceName -> Visibility -> ResourceDefn -> OptPos
-            -> Compiler ()
+            -> Compiler (Maybe Item)
 addResource name vis def pos = do
+    let err msg = do
+            errmsg pos $ "Duplicate declaration of resource '" ++ name ++ "'"
+            return Nothing
+    let updateIface rspec init = do
+            updateInterface vis $ updatePubResources $ Map.insert name rspec
+            return init
     currMod <- getModuleSpec
     let rspec = ResourceSpec currMod name
     modRess <- getModuleImplementationField modResources
     if name `Map.member` modRess
-    then errmsg pos $ "Duplicate declaration of resource '" ++ name ++ "'"
+    then err $ "Duplicate declaration of resource '" ++ name ++ "'"
     else case def of
         SimpleResourceDefn ty init -> do
             if genericType ty
-            then errmsg pos $ "Resource type cannot contain type variables: "
+            then err $ "Resource type cannot contain type variables: "
                                 ++ show ty
             else do
                 let impln = PrimResource ty init pos
@@ -1138,7 +1153,7 @@ addResource name vis def pos = do
                                                     $ modResources imp,
                                 modKnownResources = setMapInsert name rspec
                                                     $ modKnownResources imp })
-                updateInterface vis $ updatePubResources $ Map.insert name rspec
+                updateIface rspec $ resourceDefnInitialisation name def pos
         CompoundResourceDefn ress -> do
             let resSet = Set.fromList ress
             updateImplementation
@@ -1147,7 +1162,7 @@ addResource name vis def pos = do
                                     $ modCompoundResources imp,
                             modKnownResources = setMapInsert name rspec
                                                 $ modKnownResources imp })
-            updateInterface vis $ updatePubResources $ Map.insert name rspec
+            updateIface rspec Nothing
 
 
 -- |Fully qualify the given resource spec, if the resource has been defined.

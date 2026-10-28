@@ -60,13 +60,19 @@ define external fastcc void @"subresource#.<0>"() {
   representation  : (not a type)
   public submods  : 
   public resources: res: subresource.a.res
-  public procs    : 
+  public procs    : subresource.a.<0>
   constants       : 
   imports         : use subresource
                     use wybe
   resources       : res: fromList [(subresource.a.res,wybe.int = 42 @subresource:nn:nn @subresource:nn:nn)]
   procs           : 
 
+module top-level code > public {inline,semipure} (0 calls)
+0: subresource.a.<0>
+()<{}; {<<subresource.a.res>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(42:wybe.int, <<subresource.a.res>>:wybe.int) @subresource:nn:nn
 
   LLVM code       :
 
@@ -79,3 +85,8 @@ target triple   = ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#subresource.a.res" = global i64 undef
+
+define external fastcc void @"subresource#.a#.<0>"() {
+  store i64 42, ptr @"resource#subresource.a.res"
+  ret void
+}

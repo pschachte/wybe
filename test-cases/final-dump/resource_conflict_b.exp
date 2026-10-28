@@ -7,12 +7,18 @@ AFTER EVERYTHING:
   representation  : (not a type)
   public submods  : 
   public resources: res: resource_conflict_b.res
-  public procs    : 
+  public procs    : resource_conflict_b.<0>
   constants       : 
   imports         : use wybe
   resources       : res: fromList [(resource_conflict_b.res,wybe.char = 'c' @resource_conflict_b:nn:nn @resource_conflict_b:nn:nn)]
   procs           : 
 
+module top-level code > public {inline,semipure} (0 calls)
+0: resource_conflict_b.<0>
+()<{}; {<<resource_conflict_b.res>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(99:wybe.char, <<resource_conflict_b.res>>:wybe.char) @resource_conflict_b:nn:nn
 
   LLVM code       :
 
@@ -25,3 +31,8 @@ target triple   = ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#resource_conflict_b.res" = global i8 undef
+
+define external fastcc void @"resource_conflict_b#.<0>"() {
+  store i8 99, ptr @"resource#resource_conflict_b.res"
+  ret void
+}
