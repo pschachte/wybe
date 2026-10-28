@@ -1130,7 +1130,7 @@ addResource :: ResourceName -> Visibility -> ResourceDefn -> OptPos
             -> Compiler (Maybe Item)
 addResource name vis def pos = do
     let err msg = do
-            errmsg pos $ "Duplicate declaration of resource '" ++ name ++ "'"
+            errmsg pos msg
             return Nothing
     let updateIface rspec init = do
             updateInterface vis $ updatePubResources $ Map.insert name rspec
