@@ -2083,14 +2083,18 @@ It may optionally specify an initial value:
 
 > `resource` *name*`:`*type* `=` *expr*
 
-In this case, the resource is
-defined in any top level code in that module, as well as any top level code in
-any module that `use`s this module, but not in any module that this module
-`use`s.  The latter restriction is necessary because when two modules depend on
-one another, the order in which their resources are initialised is unspecified.
+The expression *expr* is evaluated after any top level code appearing before it,
+so it may refer to variables and resources assigned in top level code earlier in
+the module.  Likewise, top level code appearing after the resource declaration
+may use and reassign this resource.
 
 A resource may be exported, allowing it to be referred to in other modules, by
 preceding the `resource` declaration with the `pub` keyword.
+This also permits it to be used and reassigned in any top level code in
+any modules that `use` this module, but *not* in any module that this module
+`use`s.  The latter restriction is necessary because when two modules depend on
+one another, the order in which their resources are initialised is unspecified.
+
 
 ### <a name="compound-resource-declarations"></a>Declaring a compound resource
 

@@ -710,10 +710,6 @@ normaliseModMain modSCC = do
 initResources :: [ModSpec] -> Compiler [ResourceFlowSpec]
 initResources modSCC = do
     thisMod <- getModule modSpec
-    -- mods <- getModuleImplementationField (Map.keys . modImports)
-    -- mods' <- (mods ++) . concat <$> mapM descendentModules mods
-    -- logNormalise $ "in initResources for module " ++ showModSpec thisMod
-    --                ++ ", mods = " ++ showModSpecs mods'
     visibleInitSet <- Map.keysSet <$> initialisedVisibleResources
     logNormalise $ "in initResources, initialised resources = "
                    ++ show visibleInitSet
@@ -898,36 +894,6 @@ constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
            varSetTyped recName typeSpec `maybePlace` pos]) pos]
          ++
          -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-
-         -- fill in the secondary tag, if necessary
-
-         -- fill in the secondary tag, if necessary
-
-         -- fill in the secondary tag, if necessary
-
-         -- fill in the secondary tag, if necessary
-         
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-
-         -- fill in the secondary tag, if necessary
          ([maybePlace (ForeignCall "lpvm" "mutate" []
             [varGetTyped recName typeSpec `maybePlace` pos,
               varSetTyped recName typeSpec `maybePlace` pos,
@@ -938,36 +904,6 @@ constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
               Unplaced $ iVal tag]) pos
           | tag > tagLimit])
          ++
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-
-         -- Code to fill all the fields
-
-         -- Code to fill all the fields
-
-         -- Code to fill all the fields
-
-         -- Code to fill all the fields
-         
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-
          -- Code to fill all the fields
          List.map
           (\(FieldInfo var pPos _ ty _ offset _) ->
@@ -981,14 +917,6 @@ constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
                   varGetTyped var ty `maybePlace` pPos]) pos)
           fields
          ++
-         -- Finally, code to tag the reference
-         -- Finally, code to tag the reference
-         -- Finally, code to tag the reference
-         -- Finally, code to tag the reference
-         -- Finally, code to tag the reference
-         -- Finally, code to tag the reference
-         -- Finally, code to tag the reference
-         -- Finally, code to tag the reference
          -- Finally, code to tag the reference
          [maybePlace (ForeignCall "llvm" "or" []
            [varGetTyped recName typeSpec `maybePlace` pos,
