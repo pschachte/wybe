@@ -1,0 +1,5 @@
+# Test that resource initialisations are executed in the order written
+resource b:int = 42
+resource a:int = b
+
+!println(a)

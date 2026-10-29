@@ -7,13 +7,19 @@ AFTER EVERYTHING:
   representation  : (not a type)
   public submods  : 
   public resources: a_res: mutual_res_a.a_res
-  public procs    : 
+  public procs    : mutual_res_a.<0>
   constants       : 
   imports         : use mutual_res_b
                     use wybe
   resources       : a_res: fromList [(mutual_res_a.a_res,wybe.int = 42 @mutual_res_a:nn:nn @mutual_res_a:nn:nn)]
   procs           : 
 
+module top-level code > public {inline,semipure} (0 calls)
+0: mutual_res_a.<0>
+()<{}; {<<mutual_res_a.a_res>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(42:wybe.int, <<mutual_res_a.a_res>>:wybe.int) @mutual_res_a:nn:nn
 
   LLVM code       :
 
@@ -27,18 +33,29 @@ target triple   = ????
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#mutual_res_a.a_res" = global i64 undef
 
+define external fastcc void @"mutual_res_a#.<0>"() {
+  store i64 42, ptr @"resource#mutual_res_a.a_res"
+  ret void
+}
+
 --------------------------------------------------
  Module mutual_res_b
   representation  : (not a type)
   public submods  : 
   public resources: b_res: mutual_res_b.b_res
-  public procs    : 
+  public procs    : mutual_res_b.<0>
   constants       : 
   imports         : use mutual_res_a
                     use wybe
   resources       : b_res: fromList [(mutual_res_b.b_res,wybe.char = 'c' @mutual_res_b:nn:nn @mutual_res_b:nn:nn)]
   procs           : 
 
+module top-level code > public {inline,semipure} (0 calls)
+0: mutual_res_b.<0>
+()<{}; {<<mutual_res_b.b_res>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(99:wybe.char, <<mutual_res_b.b_res>>:wybe.char) @mutual_res_b:nn:nn
 
   LLVM code       :
 
@@ -51,3 +68,8 @@ target triple   = ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#mutual_res_b.b_res" = global i8 undef
+
+define external fastcc void @"mutual_res_b#.<0>"() {
+  store i8 99, ptr @"resource#mutual_res_b.b_res"
+  ret void
+}

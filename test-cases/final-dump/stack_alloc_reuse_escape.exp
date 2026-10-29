@@ -9,6 +9,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : stack_alloc_reuse_escape.<0>
   constants       : 0:: ArrayInfo {arrayData = [IntStructMember (-1) 8,IntStructMember 1 8]}
+                    1:: StructInfo {structSize = 16, structData = [IntStructMember 0 8,IntStructMember 0 8]}
   imports         : use stack_alloc_reuse_escape.cell
                     use wybe
   resources       : saved: fromList [(stack_alloc_reuse_escape.saved,stack_alloc_reuse_escape.cell = cell(0 @stack_alloc_reuse_escape:nn:nn, 0 @stack_alloc_reuse_escape:nn:nn) @stack_alloc_reuse_escape:nn:nn @stack_alloc_reuse_escape:nn:nn)]
@@ -20,19 +21,19 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<stack_alloc_reuse_escape.saved>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stack_alloc_reuse_escape.stash<0>(42:wybe.int)<{}; {<<stack_alloc_reuse_escape.saved>>}; {}> #0 @stack_alloc_reuse_escape:nn:nn
-    stack_alloc_reuse_escape.clobber<0>(1000:wybe.int, ?junk##0:wybe.int) #1 @stack_alloc_reuse_escape:nn:nn
-    foreign lpvm load(<<stack_alloc_reuse_escape.saved>>:stack_alloc_reuse_escape.cell, ?%saved##3:stack_alloc_reuse_escape.cell) @stack_alloc_reuse_escape:nn:nn
-    foreign lpvm access(saved##3:stack_alloc_reuse_escape.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @stack_alloc_reuse_escape:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
-    foreign lpvm access(~saved##3:stack_alloc_reuse_escape.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @stack_alloc_reuse_escape:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
-    foreign c print_int(~junk##0:wybe.int, ~tmp#13##0:wybe.phantom, ?%tmp#16##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
-    foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
-    foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
+    stack_alloc_reuse_escape.stash<0>(42:wybe.int)<{}; {<<stack_alloc_reuse_escape.saved>>}; {}> #1 @stack_alloc_reuse_escape:nn:nn
+    stack_alloc_reuse_escape.clobber<0>(1000:wybe.int, ?junk##0:wybe.int) #2 @stack_alloc_reuse_escape:nn:nn
+    foreign lpvm load(<<stack_alloc_reuse_escape.saved>>:stack_alloc_reuse_escape.cell, ?%saved##4:stack_alloc_reuse_escape.cell) @stack_alloc_reuse_escape:nn:nn
+    foreign lpvm access(saved##4:stack_alloc_reuse_escape.cell, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @stack_alloc_reuse_escape:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#12##0:wybe.phantom, ?%tmp#13##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
+    foreign lpvm access(~saved##4:stack_alloc_reuse_escape.cell, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @stack_alloc_reuse_escape:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#14##0:wybe.phantom, ?%tmp#18##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
+    foreign c print_int(~junk##0:wybe.int, ~tmp#19##0:wybe.phantom, ?%tmp#22##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
+    foreign c putchar(10:wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
+    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stack_alloc_reuse_escape:nn:nn
 
 
 proc clobber > {noinline} (1 calls)
@@ -111,15 +112,15 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 define external fastcc void @"stack_alloc_reuse_escape#.<0>"() {
   tail call fastcc void @"stack_alloc_reuse_escape#.stash<0>"(i64 42)
   %"junk##0" = tail call fastcc i64 @"stack_alloc_reuse_escape#.clobber<0>"(i64 1000)
-  %"saved##3" = load i64, ptr @"resource#stack_alloc_reuse_escape.saved"
-  %"tmp#18##0" = inttoptr i64 %"saved##3" to ptr
-  %"tmp#0##0" = load i64, ptr %"tmp#18##0"
-  call ccc void @print_int(i64 %"tmp#0##0")
-  call ccc void @putchar(i8 10)
-  %"tmp#19##0" = add i64 %"saved##3", 8
-  %"tmp#20##0" = inttoptr i64 %"tmp#19##0" to ptr
-  %"tmp#1##0" = load i64, ptr %"tmp#20##0"
+  %"saved##4" = load i64, ptr @"resource#stack_alloc_reuse_escape.saved"
+  %"tmp#24##0" = inttoptr i64 %"saved##4" to ptr
+  %"tmp#1##0" = load i64, ptr %"tmp#24##0"
   call ccc void @print_int(i64 %"tmp#1##0")
+  call ccc void @putchar(i8 10)
+  %"tmp#25##0" = add i64 %"saved##4", 8
+  %"tmp#26##0" = inttoptr i64 %"tmp#25##0" to ptr
+  %"tmp#2##0" = load i64, ptr %"tmp#26##0"
+  call ccc void @print_int(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   call ccc void @print_int(i64 %"junk##0")
   call ccc void @putchar(i8 10)

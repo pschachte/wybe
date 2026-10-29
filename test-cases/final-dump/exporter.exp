@@ -7,12 +7,21 @@ AFTER EVERYTHING:
   representation  : (not a type)
   public submods  : 
   public resources: res: exporter.res
-  public procs    : exporter.fn<0>
+  public procs    : exporter.<0>
+                    exporter.fn<0>
                     exporter.three<0>
   constants       : 
   imports         : use wybe
   resources       : res: fromList [(exporter.res,wybe.int = 3 @exporter:nn:nn @exporter:nn:nn)]
   procs           : 
+
+module top-level code > public {inline,semipure} (0 calls)
+0: exporter.<0>
+()<{}; {<<exporter.res>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(3:wybe.int, <<exporter.res>>:wybe.int) @exporter:nn:nn
+
 
 proc fn > public {inline} (0 calls)
 0: exporter.fn<0>
@@ -41,6 +50,11 @@ target triple   = ????
 declare external ccc i64 @ipow(i64, i64)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#exporter.res" = global i64 undef
+
+define external fastcc void @"exporter#.<0>"() {
+  store i64 3, ptr @"resource#exporter.res"
+  ret void
+}
 
 define external fastcc i64 @"exporter#.fn<0>"(i64 %"i##0") {
   %"tmp#3##0" = call ccc i64 @ipow(i64 2, i64 %"i##0")
