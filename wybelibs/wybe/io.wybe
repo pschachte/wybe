@@ -16,21 +16,17 @@ pub resource io = io_state, stdin, stdout, stderr,
 # XXX We shouldn't need to initialise a resource (or variable) of a 0-bit type
 pub resource io_state:phantom = phantom
 
-pub resource stdin :input_stream  = foreign lpvm cast(0)
-pub resource stdout:output_stream = foreign lpvm cast(0)
-pub resource stderr:output_stream = foreign lpvm cast(0)
+!input_buffer(0, ?instrm)
+!output_buffer(1, ?outstrm)
+!output_buffer(2, ?errstrm)
 
-pub resource current_in :input_stream = foreign lpvm cast(0)
-pub resource current_out:output_stream = foreign lpvm cast(0)
-pub resource current_err:output_stream = foreign lpvm cast(0)
+pub resource stdin :input_stream  = instrm
+pub resource stdout:output_stream = outstrm
+pub resource stderr:output_stream = errstrm
 
-!input_buffer(0, ?stdin)
-!output_buffer(1, ?stdout)
-!output_buffer(2, ?stderr)
-
-?current_in = stdin
-?current_out = stdout
-?current_err = stderr
+pub resource current_in :input_stream = stdin
+pub resource current_out:output_stream = stdout
+pub resource current_err:output_stream = stderr
 
 ## Printing
 
