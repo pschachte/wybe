@@ -7,11 +7,19 @@ AFTER EVERYTHING:
   representation  : (not a type)
   public submods  : 
   public resources: 
-  public procs    : 
+  public procs    : unbranch_issue.<0>
   constants       : 
   imports         : use wybe
   resources       : n: fromList [(unbranch_issue.n,wybe.int = 0 @unbranch_issue:nn:nn @unbranch_issue:nn:nn)]
   procs           : 
+
+module top-level code > public {inline,semipure} (0 calls)
+0: unbranch_issue.<0>
+()<{}; {<<unbranch_issue.n>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(0:wybe.int, <<unbranch_issue.n>>:wybe.int) @unbranch_issue:nn:nn
+
 
 proc test > {inline} (0 calls)
 0: unbranch_issue.test<0>
@@ -48,6 +56,11 @@ target triple   = ????
 
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#unbranch_issue.n" = global i64 undef
+
+define external fastcc void @"unbranch_issue#.<0>"() {
+  store i64 0, ptr @"resource#unbranch_issue.n"
+  ret void
+}
 
 define external fastcc i1 @"unbranch_issue#.test<0>"() {
   %"tmp#2##0" = load i64, ptr @"resource#unbranch_issue.n"

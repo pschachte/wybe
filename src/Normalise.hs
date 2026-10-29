@@ -35,6 +35,7 @@ import Distribution.Parsec.FieldLineStream (fieldLineStreamEnd)
 import UnivSet (UnivSet(FiniteSet, UniversalSet))
 import Data.Function (on)
 import Data.List.Extra (groupSort)
+import qualified Data.Foldable
 
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
@@ -94,8 +95,9 @@ normaliseItem (ImportForeign files _) =
     mapM_ addForeignImport files
 normaliseItem (ImportForeignLib files _) =
     mapM_ addForeignLib files
-normaliseItem (ResourceDecl vis name defn pos) =
-  addResource name vis defn pos
+normaliseItem (ResourceDecl vis name defn pos) = do
+    mbInit <- addResource name vis defn pos
+    forM_ mbInit normaliseItem
 normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
     (Placed (Where body (Placed (Var var ParamOut rflow) _)) _) pos) =
     -- Handle special reverse mode case of def foo(...) = var where ....
@@ -695,19 +697,20 @@ normaliseModMain modSCC = do
                         (ProcProto initProcName [] resources) initBody Nothing
 
 
--- |The resource flows for the initialisation code of the current module.  This
--- assumes that all resource initialisations have already been completed, and
--- all are permitted to be modified by the initialisation code, so all
--- visible initialised resources flow both in and out.
+-- |The resource flows for the initialisation code of the current module.  Each
+-- module's top-level code is responsible for the module's resource
+-- initialisations, so the initialised resources of a module must be out-only
+-- resources of that module.  Additionally, any public initialised resources of
+-- any modules used by the current module can be used and modified by the module
+-- top-level code, so they must be in-out resources of the initialisation.
+-- However, the module's initialisation cannot use or modify initialised
+-- resource of any module that depends upon it, so any mutually dependent
+-- modules must be excluded from the set of in-out resources of the module
+-- initialisation.
 initResources :: [ModSpec] -> Compiler [ResourceFlowSpec]
 initResources modSCC = do
     thisMod <- getModule modSpec
-    mods <- getModuleImplementationField (Map.keys . modImports)
-    mods' <- (mods ++) . concat <$> mapM descendentModules mods
-    logNormalise $ "in initResources for module " ++ showModSpec thisMod
-                   ++ ", mods = " ++ showModSpecs mods'
-    visibleInitialised <- initialisedVisibleResources
-    let visibleInitSet = Map.keysSet visibleInitialised
+    visibleInitSet <- Map.keysSet <$> initialisedVisibleResources
     logNormalise $ "in initResources, initialised resources = "
                    ++ show visibleInitSet
     -- Direct tie-in to command_line library module:  for the command_line
@@ -722,9 +725,10 @@ initResources modSCC = do
                  in [ResourceFlowSpec (cmdline "argc") ParamInOut
                     ,ResourceFlowSpec (cmdline "argv") ParamInOut]
             else []
-    let resources = cmdlineResources
-                    ++ ((`ResourceFlowSpec` ParamInOut)
-                         <$> Set.toList visibleInitSet)
+    let flowSpec res =
+            let f = if resourceMod res == thisMod then ParamOut else ParamInOut
+            in ResourceFlowSpec res f
+    let resources = cmdlineResources ++ (flowSpec <$> Set.toList visibleInitSet)
     logNormalise $ "In initResources for module " ++ showModSpec thisMod
                    ++ ", resources = " ++ show resources
     return resources
@@ -890,11 +894,6 @@ constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
            varSetTyped recName typeSpec `maybePlace` pos]) pos]
          ++
          -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         -- fill in the secondary tag, if necessary
-         
-         -- fill in the secondary tag, if necessary
          ([maybePlace (ForeignCall "lpvm" "mutate" []
             [varGetTyped recName typeSpec `maybePlace` pos,
               varSetTyped recName typeSpec `maybePlace` pos,
@@ -905,11 +904,6 @@ constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
               Unplaced $ iVal tag]) pos
           | tag > tagLimit])
          ++
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         -- Code to fill all the fields
-         
          -- Code to fill all the fields
          List.map
           (\(FieldInfo var pPos _ ty _ offset _) ->
@@ -923,8 +917,6 @@ constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
                   varGetTyped var ty `maybePlace` pPos]) pos)
           fields
          ++
-         -- Finally, code to tag the reference
-         -- Finally, code to tag the reference
          -- Finally, code to tag the reference
          [maybePlace (ForeignCall "llvm" "or" []
            [varGetTyped recName typeSpec `maybePlace` pos,
@@ -981,9 +973,24 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
            ++
            -- If there is more than one non-const constructors, check that
            -- If there is more than one non-const constructors, check that
+           -- If there is more than one non-const constructors, check that
+           -- If there is more than one non-const constructors, check that
+           -- it's the right one
+           -- it's the right one
+           -- it's the right one
+           -- it's the right one
+
+           -- If there is more than one non-const constructors, check that
+
+           -- If there is more than one non-const constructors, check that
            -- it's the right one
            -- it's the right one
            
+           -- If there is more than one non-const constructors, check that
+           -- If there is more than one non-const constructors, check that
+           -- it's the right one
+           -- it's the right one
+
            -- If there is more than one non-const constructors, check that
            -- it's the right one
            (case numNonConsts of
@@ -995,6 +1002,8 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
                                       then wordSizeBytes-1
                                       else tag) `withType` tagTy)])
            ++
+           -- If there's a secondary tag, check that, too.
+           -- If there's a secondary tag, check that, too.
            -- If there's a secondary tag, check that, too.
            -- If there's a secondary tag, check that, too.
            if tag > tagLimit
@@ -1073,7 +1082,32 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          -- Shift each field into place and or with the result
          -- Shift each field into place and or with the result
          -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+
+         -- Shift each field into place and or with the result
+
+         -- Shift each field into place and or with the result
+
+         -- Shift each field into place and or with the result
+
+         -- Shift each field into place and or with the result
          
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+         -- Shift each field into place and or with the result
+
          -- Shift each field into place and or with the result
          List.concatMap
           (\(FieldInfo var pPos _ ty _ shift sz) ->
@@ -1095,11 +1129,56 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          -- Or in the bit to ensure the value is greater than the greatest
          -- Or in the bit to ensure the value is greater than the greatest
          -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+
+         -- Or in the bit to ensure the value is greater than the greatest
+
+         -- Or in the bit to ensure the value is greater than the greatest
+
+         -- Or in the bit to ensure the value is greater than the greatest
+
+         -- Or in the bit to ensure the value is greater than the greatest
          -- possible const value, if necessary
          -- possible const value, if necessary
          -- possible const value, if necessary
          -- possible const value, if necessary
          
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- Or in the bit to ensure the value is greater than the greatest
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+         -- possible const value, if necessary
+
          -- Or in the bit to ensure the value is greater than the greatest
          -- possible const value, if necessary
          (case nonConstBit of

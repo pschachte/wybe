@@ -28,15 +28,14 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: compound_resource.<0>
-()<{<<compound_resource.bar>>, <<wybe.io.io>>}; {<<compound_resource.bar>>, <<wybe.io.io>>}; {}>:
+()<{<<wybe.io.io>>}; {<<compound_resource.bar>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<compound_resource.bar>>:wybe.int, ?%tmp#4##0:wybe.int) @compound_resource:nn:nn
     wybe.string.print<0>("hello":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @compound_resource:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @compound_resource:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @compound_resource:nn:nn
     foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @compound_resource:nn:nn
-    wybe.int.fmt<2>(~tmp#4##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#19##0:wybe.string) #8 @compound_resource:nn:nn
+    wybe.int.fmt<2>(42:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#19##0:wybe.string) #8 @compound_resource:nn:nn
     wybe.string.,,<0>(", ":wybe.string, "hello":wybe.string, ?tmp#21##0:wybe.string) #9 @compound_resource:nn:nn
     wybe.string.,,<0>(~tmp#19##0:wybe.string, ~tmp#21##0:wybe.string, ?tmp#22##0:wybe.string) #10 @compound_resource:nn:nn
     wybe.string.print<0>(~tmp#22##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @compound_resource:nn:nn
@@ -56,6 +55,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#39##0:wybe.phantom) @compound_resource:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#39##0:wybe.phantom, ?tmp#40##0:wybe.phantom) @compound_resource:nn:nn
     foreign lpvm store(~%tmp#40##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @compound_resource:nn:nn
+    foreign lpvm store(42:wybe.int, <<compound_resource.bar>>:wybe.int) @compound_resource:nn:nn
 
 
 proc testproc > {inline} (1 calls)
@@ -150,10 +150,9 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 @"resource#compound_resource.qux" = global double undef
 
 define external fastcc void @"compound_resource#.<0>"() {
-  %"tmp#4##0" = load i64, ptr @"resource#compound_resource.bar"
   tail call fastcc void @"wybe#.string#.print<0>"(i64 ptrtoint( ptr @"compound_resource#constant#9" to i64 ))
   call ccc void @putchar(i8 10)
-  %"tmp#19##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"tmp#4##0", i64 0, i8 32)
+  %"tmp#19##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 42, i64 0, i8 32)
   %"tmp#21##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#5" to i64 ), i64 ptrtoint( ptr @"compound_resource#constant#9" to i64 ))
   %"tmp#22##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#19##0", i64 %"tmp#21##0")
   tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#22##0")
@@ -169,6 +168,7 @@ define external fastcc void @"compound_resource#.<0>"() {
   %"tmp#38##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"compound_resource#constant#8" to i64 ), i64 %"tmp#37##0")
   tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#38##0")
   call ccc void @putchar(i8 10)
+  store i64 42, ptr @"resource#compound_resource.bar"
   ret void
 }
 
