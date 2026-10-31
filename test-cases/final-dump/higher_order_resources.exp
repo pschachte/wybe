@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   public procs    : higher_order_resources.<0>
   constants       : 0:: CStringInfo {cstringChars = "*****"}
                     1:: CStringInfo {cstringChars = "> "}
-                    2:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_resources.#anon#2#closure#1<0>]}
+                    2:: ClosureInfo {closureProcSpec = higher_order_resources.#anon#2#closure#1<0>, closureArgs = []}
                     3:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember c"> "]}
                     4:: StructInfo {structSize = 16, structData = [IntStructMember 3 8,IntStructMember 0 8]}
                     5:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,PointerStructMember higher_order_resources#constant#4]}
@@ -19,7 +19,7 @@ AFTER EVERYTHING:
                     8:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_resources#constant#5]}
                     9:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#7,IntStructMember 0 8]}
                     10:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#8,PointerStructMember higher_order_resources#constant#9]}
-                    11:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_resources.#anon#1<1>]}
+                    11:: ClosureInfo {closureProcSpec = higher_order_resources.#anon#1<1>, closureArgs = []}
                     12:: StructInfo {structSize = 16, structData = [IntStructMember 5 8,PointerStructMember c"*****"]}
                     13:: StructInfo {structSize = 16, structData = [IntStructMember 2 8,IntStructMember 0 8]}
                     14:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_resources#constant#13]}
@@ -27,7 +27,7 @@ AFTER EVERYTHING:
                     16:: StructInfo {structSize = 16, structData = [IntStructMember 1 8,PointerStructMember higher_order_resources#constant#15]}
                     17:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#16,PointerStructMember higher_order_resources#constant#9]}
                     18:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_resources#constant#8,PointerStructMember higher_order_resources#constant#17]}
-                    19:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_resources.#anon#2<1>]}
+                    19:: ClosureInfo {closureProcSpec = higher_order_resources.#anon#2<1>, closureArgs = []}
   imports         : use wybe
   resources       : maximum: fromList [(higher_order_resources.maximum,wybe.int @higher_order_resources:nn:nn)]
   procs           : 
@@ -68,7 +68,7 @@ proc #anon#1 > {inline} (1 calls)
     higher_order_resources.take_max<0>(~tmp#10##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #1 @higher_order_resources:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: higher_order_resources.#anon#1<1>
-#anon#1(anon#1#1##0 <{}; {}; {0}>)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
+#anon#1(@#env##0:opaque, anon#1#1##0 <{}; {}; {1}>)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.list.length1<0>(~anon#1#1##0:wybe.list(wybe.int), 0:wybe.int, ?tmp#36##0:wybe.int) #1 @higher_order_resources:nn:nn
@@ -94,7 +94,7 @@ proc #anon#2 > {inline} (1 calls)
     higher_order_resources.take_max<0>(~tmp#28##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #5 @higher_order_resources:nn:nn
 proc #anon#2 > {inline} (1 calls)
 1: higher_order_resources.#anon#2<1>
-#anon#2(anon#2#1##0 <{}; {}; {0}>)<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {}>:
+#anon#2(@#env##0:opaque, anon#2#1##0 <{}; {}; {1}>)<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#36##0:wybe.int) @higher_order_resources:nn:nn
@@ -113,7 +113,7 @@ proc #anon#2 > {inline} (1 calls)
 
 proc #anon#2#closure#1 > {inline} (1 calls)
 0: higher_order_resources.#anon#2#closure#1<0>
-#anon#2#closure#1(i##0 <{}; {}; {0}>)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
+#anon#2#closure#1(@#env##0:opaque, i##0 <{}; {}; {1}>)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_resources.take_max<0>(~i##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #0
