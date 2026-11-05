@@ -11,3 +11,4 @@ The following have contributed code to the Wybe project:
 * James Barnes
 * Leyan (Terry) Lin
 * Chris Chamberlain
+* Haopeng Luo
