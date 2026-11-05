@@ -40,7 +40,7 @@ from_string([x##0:wybe.string], ?#result##0:wybe.int)<{}; {}; {}>:
 
 proc from_string#adapter > {noinline} (0 calls)
 0: trait_output_only_adapter.from_string#adapter<0>
-from_string#adapter(x##0:wybe.string, ?#result##0:Type0<:trait_output_only_adapter.from_string)<{}; {}; {}>:
+from_string#adapter(x##0:wybe.string, ?#result##0:Type0<:trait_output_only_adapter.from_string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(123:Type0<:trait_output_only_adapter.from_string, ?#result##0:Type0<:trait_output_only_adapter.from_string)

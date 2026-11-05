@@ -141,7 +141,7 @@ proc = > public {inline} (1 calls)
 
 proc greet#adapter > {noinline} (0 calls)
 0: trait_import_support.default_silent.greet#adapter<0>
-greet#adapter(x##0:T<:trait_import_support.default_greeter, ?#result##0:wybe.string)<{}; {}; {}>:
+greet#adapter(x##0:T<:trait_import_support.default_greeter, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @default_greeter:nn:nn

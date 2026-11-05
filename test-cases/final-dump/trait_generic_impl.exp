@@ -19,7 +19,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_generic_impl.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     trait_generic_impl.sequence.first<0>(42:trait_generic_impl.box(wybe.int), ?tmp#1##0:wybe.int, vtable trait_generic_impl.box(Type0) <: trait_generic_impl.sequence(Type0):opaque)<{}; {}; {0}> #1 @trait_generic_impl:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @trait_generic_impl:nn:nn
@@ -31,7 +31,7 @@ module top-level code > public {semipure} (0 calls)
 proc first > {inline} (1 calls)
 0: trait_generic_impl.first<0>
 first(x##0:trait_generic_impl.box(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_generic_impl.box(T), ?#result##0:T) @trait_generic_impl:nn:nn
 
@@ -39,7 +39,7 @@ first(x##0:trait_generic_impl.box(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>)
 proc first#adapter > {noinline} (0 calls)
 0: trait_generic_impl.first#adapter<0>
 first#adapter(x##0:Type0<:trait_generic_impl.sequence(T), ?#result##0:T, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: [(#result##0,x##0)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_generic_impl.sequence(T), ?#result##0:T) @trait_generic_impl:nn:nn
 
@@ -47,7 +47,7 @@ first#adapter(x##0:Type0<:trait_generic_impl.sequence(T), ?#result##0:T, #vtable
 proc int_box > {inline} (1 calls)
 0: trait_generic_impl.int_box<0>
 int_box(x##0:wybe.int, ?#result##0:trait_generic_impl.box(wybe.int))<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:wybe.int, ?#result##0:trait_generic_impl.box(wybe.int)) @trait_generic_impl:nn:nn
 
@@ -102,13 +102,13 @@ define external fastcc i64 @"trait_generic_impl#.int_box<0>"(i64 %"x##0") {
 proc box > public {inline} (0 calls)
 0: trait_generic_impl.box.box<0>
 box(value##0:T <{}; {}; {0}>, ?#result##2:trait_generic_impl.box(T) <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~value##0:T, ?#result##2:trait_generic_impl.box(T)) @trait_generic_impl:nn:nn
 proc box > public {inline} (0 calls)
 1: trait_generic_impl.box.box<1>
 box(?value##0:T <{}; {}; {1}>, #result##0:trait_generic_impl.box(T) <{}; {}; {1}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_generic_impl.box(T), ?value##0:T) @trait_generic_impl:nn:nn
 
@@ -116,13 +116,13 @@ box(?value##0:T <{}; {}; {1}>, #result##0:trait_generic_impl.box(T) <{}; {}; {1}
 proc value > public {inline} (0 calls)
 0: trait_generic_impl.box.value<0>
 value(#rec##0:trait_generic_impl.box(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_generic_impl.box(T), ?#result##0:T) @trait_generic_impl:nn:nn
 proc value > public {inline} (0 calls)
 1: trait_generic_impl.box.value<1>
 value([#rec##0:trait_generic_impl.box(T) <{}; {}; {0}>], ?#rec##2:trait_generic_impl.box(T) <{}; {}; {2}>, #field##0:T <{}; {}; {2}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:T, ?#rec##2:trait_generic_impl.box(T)) @trait_generic_impl:nn:nn
 
@@ -168,7 +168,7 @@ define external fastcc i64 @"trait_generic_impl#.box#.value<1>"(i64 %"#field##0"
 proc first > public abstract {inline} (0 calls)
 0: trait_generic_impl.sequence.first<0>
 first(x##0:Type0<:trait_generic_impl.sequence(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_generic_impl.sequence(T), ?#result##0:T, ~#vtable##0:opaque) #0
 

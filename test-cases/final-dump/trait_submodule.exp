@@ -47,7 +47,7 @@ render(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
 
 proc render#adapter > {noinline} (0 calls)
 0: trait_submodule.render#adapter<0>
-render#adapter(x##0:T<:trait_submodule.printable, ?#result##0:wybe.string)<{}; {}; {}>:
+render#adapter(x##0:T<:trait_submodule.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     ExtReturn 1.Field (-2) -> [ExtReturn 1]
     ExtReturn 1.Field (-1) -> [ExtReturn 1]

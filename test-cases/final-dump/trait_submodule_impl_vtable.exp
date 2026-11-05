@@ -120,7 +120,7 @@ my_equal(a##0:wybe.int, b##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 
 proc my_equal#adapter > {noinline} (0 calls)
 0: trait_submodule_impl_vtable.sub.my_equal#adapter<0>
-my_equal#adapter(a##0:Type0<:trait_submodule_impl_vtable.my_eq, b##0:Type0<:trait_submodule_impl_vtable.my_eq, ?#success##0:wybe.bool)<{}; {}; {}>:
+my_equal#adapter(a##0:Type0<:trait_submodule_impl_vtable.my_eq, b##0:Type0<:trait_submodule_impl_vtable.my_eq, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~a##0:Type0<:trait_submodule_impl_vtable.my_eq, ?a#adapter0##0:wybe.int)

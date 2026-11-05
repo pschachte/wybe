@@ -55,13 +55,13 @@ render([x##0:trait_concrete_type_args.box(wybe.float)], ?#result##0:wybe.string)
 
 proc render#adapter > {noinline} (0 calls)
 0: trait_concrete_type_args.render#adapter<0>
-render#adapter(x##0:Type0<:trait_concrete_type_args.printable, ?#result##0:wybe.string)<{}; {}; {}>:
+render#adapter(x##0:Type0<:trait_concrete_type_args.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move("boxed float":wybe.string, ?#result##0:wybe.string) @trait_concrete_type_args:nn:nn
 proc render#adapter > {noinline} (0 calls)
 1: trait_concrete_type_args.render#adapter<1>
-render#adapter(x##0:Type0<:trait_concrete_type_args.printable, ?#result##0:wybe.string)<{}; {}; {}>:
+render#adapter(x##0:Type0<:trait_concrete_type_args.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move("boxed int":wybe.string, ?#result##0:wybe.string) @trait_concrete_type_args:nn:nn

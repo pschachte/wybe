@@ -156,7 +156,7 @@ speak(x##0:trait_import_support.basic_dog, ?#result##0:wybe.string)<{}; {}; {}>:
 
 proc speak#adapter > {noinline} (0 calls)
 0: trait_import_support.basic_dog.speak#adapter<0>
-speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string)<{}; {}; {}>:
+speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
     ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]

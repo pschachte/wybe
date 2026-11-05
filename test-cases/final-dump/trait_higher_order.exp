@@ -124,7 +124,7 @@ apply_to_self(x##0:trait_import_support.higher_order_box, f##0:(trait_import_sup
 
 proc apply_to_self#adapter > {noinline} (0 calls)
 0: trait_import_support.higher_order_box.apply_to_self#adapter<0>
-apply_to_self#adapter(x##0:T<:trait_import_support.higher_order_mapper, f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?#result##0:wybe.string)<{}; {}; {}>:
+apply_to_self#adapter(x##0:T<:trait_import_support.higher_order_mapper, f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:T<:trait_import_support.higher_order_mapper, ?x#adapter0##0:trait_import_support.higher_order_box)

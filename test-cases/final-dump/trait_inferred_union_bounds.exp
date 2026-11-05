@@ -30,7 +30,7 @@ module top-level code > public {semipure} (0 calls)
 
 proc <#adapter > {noinline} (0 calls)
 0: trait_inferred_union_bounds.<#adapter<0>
-<#adapter(a##0:Type0<:trait_inferred_union_bounds.comparable, b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool)<{}; {}; {}>:
+<#adapter(a##0:Type0<:trait_inferred_union_bounds.comparable, b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~a##0:Type0<:trait_inferred_union_bounds.comparable, ?x#adapter0##0:wybe.float)
@@ -38,7 +38,7 @@ proc <#adapter > {noinline} (0 calls)
     foreign llvm fcmp_olt(~x#adapter0##0:wybe.float, ~y#adapter1##0:wybe.float, ?#success##0:wybe.bool) @float:nn:nn
 proc <#adapter > {noinline} (0 calls)
 1: trait_inferred_union_bounds.<#adapter<1>
-<#adapter(a##0:Type0<:trait_inferred_union_bounds.comparable, b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool)<{}; {}; {}>:
+<#adapter(a##0:Type0<:trait_inferred_union_bounds.comparable, b##0:Type0<:trait_inferred_union_bounds.comparable, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~a##0:Type0<:trait_inferred_union_bounds.comparable, ?x#adapter0##0:wybe.int)
@@ -63,7 +63,7 @@ print_larger(a##0:Type0<:{trait_inferred_union_bounds.comparable, trait_inferred
 
 proc println#adapter > {noinline} (0 calls)
 0: trait_inferred_union_bounds.println#adapter<0>
-println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable, #vtable##0:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_inferred_union_bounds.printable, ?x#adapter0##0:wybe.float)
@@ -73,7 +73,7 @@ println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @float:nn:nn
 proc println#adapter > {noinline} (0 calls)
 1: trait_inferred_union_bounds.println#adapter<1>
-println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+println#adapter(x##0:Type0<:trait_inferred_union_bounds.printable, #vtable##0:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_inferred_union_bounds.printable, ?x#adapter0##0:wybe.int)

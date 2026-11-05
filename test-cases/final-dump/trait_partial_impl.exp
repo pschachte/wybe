@@ -22,7 +22,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_partial_impl.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm make_vtable(vtable trait_partial_impl.hashmap(Type0<:trait_partial_impl.hash, Type1) <: trait_partial_impl.mapping(Type0, Type1):opaque, 1:wybe.int, vtable wybe.int <: trait_partial_impl.hash:opaque, ?#vtableruntime##0:opaque) @trait_partial_impl:nn:nn
     trait_partial_impl.mapping.key_hash<0>(trait_partial_impl#constant#2:trait_partial_impl.hashmap(wybe.int, wybe.float), 42:wybe.int, ?tmp#1##0:wybe.int, ~#vtableruntime##0:opaque)<{}; {}; {0, 1}> #1 @trait_partial_impl:nn:nn
@@ -35,7 +35,7 @@ module top-level code > public {semipure} (0 calls)
 proc hash > {inline} (1 calls)
 0: trait_partial_impl.hash<0>
 hash(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(~x##0:wybe.int, ?#result##0:wybe.int) @trait_partial_impl:nn:nn
 
@@ -43,7 +43,8 @@ hash(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 proc hash#adapter > {noinline} (0 calls)
 0: trait_partial_impl.hash#adapter<0>
 hash#adapter(x##0:Type0<:trait_partial_impl.hash, ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_partial_impl.hash, ?#result##0:wybe.int)
 
@@ -51,7 +52,7 @@ hash#adapter(x##0:Type0<:trait_partial_impl.hash, ?#result##0:wybe.int, #vtable#
 proc key_hash > {inline} (1 calls)
 0: trait_partial_impl.key_hash<0>
 key_hash([x##0:trait_partial_impl.hashmap(K<:trait_partial_impl.hash, V) <{}; {}; {0}>], key##0:K<:trait_partial_impl.hash <{}; {}; {1}>, ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     trait_partial_impl.hash.hash<0>(~key##0:K<:trait_partial_impl.hash, ?#result##0:wybe.int, ~#vtable##0:opaque)<{}; {}; {0}> #0 @trait_partial_impl:nn:nn
 
@@ -59,7 +60,8 @@ key_hash([x##0:trait_partial_impl.hashmap(K<:trait_partial_impl.hash, V) <{}; {}
 proc key_hash#adapter > {noinline} (0 calls)
 0: trait_partial_impl.key_hash#adapter<0>
 key_hash#adapter(x##0:Type0<:trait_partial_impl.mapping(K, V), key##0:K, ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 3.Field 8 -> [ExtPhantom (ExtParam 3) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm cast(~key##0:K, ?key#adapter1##0:K<:trait_partial_impl.hash)
     foreign lpvm access(~#vtable##0:pointer, 8:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
@@ -129,7 +131,7 @@ define external fastcc i64 @"trait_partial_impl#.key_hash#adapter<0>"(i64 %"x##0
 proc hash > public abstract {inline} (0 calls)
 0: trait_partial_impl.hash.hash<0>
 hash(x##0:Type0<:trait_partial_impl.hash <{}; {}; {0}>, ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_partial_impl.hash, ?#result##0:wybe.int, ~#vtable##0:opaque) #0
 
@@ -171,7 +173,7 @@ define external fastcc i64 @"trait_partial_impl#.hash#.hash<0>"(i64 %"x##0", ptr
 proc hashmap > public {inline} (0 calls)
 0: trait_partial_impl.hashmap.hashmap<0>
 hashmap(key##0:K <{}; {}; {0}>, value##0:V <{}; {}; {1}>, ?#result##0:trait_partial_impl.hashmap(K, V) <{}; {}; {0, 1}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:trait_partial_impl.hashmap(K, V)) @trait_partial_impl:nn:nn
     foreign lpvm mutate(~#rec##0:trait_partial_impl.hashmap(K, V), ?#rec##1:trait_partial_impl.hashmap(K, V), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~key##0:K) @trait_partial_impl:nn:nn
@@ -179,7 +181,7 @@ hashmap(key##0:K <{}; {}; {0}>, value##0:V <{}; {}; {1}>, ?#result##0:trait_part
 proc hashmap > public {inline} (0 calls)
 1: trait_partial_impl.hashmap.hashmap<1>
 hashmap(?key##0:K <{}; {}; {2}>, ?value##0:V <{}; {}; {2}>, #result##0:trait_partial_impl.hashmap(K, V) <{}; {}; {2}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:trait_partial_impl.hashmap(K, V), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?key##0:K) @trait_partial_impl:nn:nn
     foreign lpvm access(~#result##0:trait_partial_impl.hashmap(K, V), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?value##0:V) @trait_partial_impl:nn:nn
@@ -188,13 +190,13 @@ hashmap(?key##0:K <{}; {}; {2}>, ?value##0:V <{}; {}; {2}>, #result##0:trait_par
 proc key > public {inline} (0 calls)
 0: trait_partial_impl.hashmap.key<0>
 key(#rec##0:trait_partial_impl.hashmap(K, V) <{}; {}; {0}>, ?#result##0:K <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:trait_partial_impl.hashmap(K, V), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:K) @trait_partial_impl:nn:nn
 proc key > public {inline} (0 calls)
 1: trait_partial_impl.hashmap.key<1>
 key(#rec##0:trait_partial_impl.hashmap(K, V) <{}; {}; {0}>, ?#rec##1:trait_partial_impl.hashmap(K, V) <{}; {}; {0, 2}>, #field##0:K <{}; {}; {2}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:trait_partial_impl.hashmap(K, V), ?#rec##1:trait_partial_impl.hashmap(K, V), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:K) @trait_partial_impl:nn:nn
 
@@ -202,13 +204,13 @@ key(#rec##0:trait_partial_impl.hashmap(K, V) <{}; {}; {0}>, ?#rec##1:trait_parti
 proc value > public {inline} (0 calls)
 0: trait_partial_impl.hashmap.value<0>
 value(#rec##0:trait_partial_impl.hashmap(K, V) <{}; {}; {0}>, ?#result##0:V <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:trait_partial_impl.hashmap(K, V), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:V) @trait_partial_impl:nn:nn
 proc value > public {inline} (0 calls)
 1: trait_partial_impl.hashmap.value<1>
 value(#rec##0:trait_partial_impl.hashmap(K, V) <{}; {}; {0}>, ?#rec##1:trait_partial_impl.hashmap(K, V) <{}; {}; {0, 2}>, #field##0:V <{}; {}; {2}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:trait_partial_impl.hashmap(K, V), ?#rec##1:trait_partial_impl.hashmap(K, V), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:V) @trait_partial_impl:nn:nn
 
@@ -299,7 +301,7 @@ define external fastcc i64 @"trait_partial_impl#.hashmap#.value<1>"(i64 %"#rec##
 proc key_hash > public abstract {inline} (0 calls)
 0: trait_partial_impl.mapping.key_hash<0>
 key_hash(x##0:Type0<:trait_partial_impl.mapping(K, V) <{}; {}; {0}>, key##0:K <{}; {}; {1}>, ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_partial_impl.mapping(K, V), ~key##0:K, ?#result##0:wybe.int, ~#vtable##0:opaque) #0
 
