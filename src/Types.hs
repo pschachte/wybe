@@ -2043,7 +2043,7 @@ callInfos vars pstmt = do
                             ([to, from], [ParamOut, ParamIn]) -> [MoveInfo from to]
                             _ -> []
                         else []
-                return $ StmtTypings pstmt $ firstInfos ++ catMaybes partialInfos ++ moveInfo
+                return $ StmtTypings pstmt $ moveInfo ++ firstInfos ++ catMaybes partialInfos
         ProcCall (Higher fn) _ _ _ ->
             return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
