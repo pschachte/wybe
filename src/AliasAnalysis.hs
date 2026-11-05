@@ -591,10 +591,20 @@ transferMutate ptg _ _ = return ptg
 -- two values that merely share a numeric value.  When `gated` is unset (an
 -- `lpvm cast`), the copy is ungated because a cast may move an address through an
 -- int-typed intermediate and must still carry the points-to set.
+--
+-- A generically-typed (type-variable) source is also carried: its representation
+-- is unknown here -- a generic proc is compiled once with a uniform boxed
+-- representation, so the value may be a pointer at runtime ('typeNeedsBoxing').
+-- Treating `?out = in` on a generic type as non-aliasing is unsound (an identity
+-- function like `force_box(x:X):X = x` would wrongly report its result as
+-- unaliased to its argument).  Call sites stay precise: 'instantiateSummary'
+-- resolves the identity against the actual argument type, so a generic proc
+-- applied to a non-pointer scalar still yields no alias.
 transferCopy :: Bool -> PointsToGraph -> PrimArg -> PrimArg
         -> Compiler PointsToGraph
 transferCopy gated ptg inp outp = do
-    carry <- if gated then argIsPointer inp else return True
+    ptr <- argIsPointer inp
+    let carry = not gated || ptr || typeNeedsBoxing (argType inp)
     return $ case outp of
         ArgVar{argVarName=out} | carry ->
             addVarNodes out (rawSourceNodes ptg inp) ptg

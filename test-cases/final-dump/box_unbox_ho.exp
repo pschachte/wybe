@@ -129,7 +129,8 @@ copy(x##0:box_unbox, ?#result##0:box_unbox)<{}; {}; {}>:
 proc force_box > public {noinline} (4 calls)
 0: box_unbox.force_box<0>
 force_box(x##0:X <{}; {}; {0}>, ?#result##0:X <{}; {}; {0}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~x##0:X, ?#result##0:X) @box_unbox:nn:nn
 

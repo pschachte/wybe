@@ -56,13 +56,15 @@ my_method(x##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 proc my_method#adapter > {noinline} (0 calls)
 0: trait_inferred_trait_type.my_method#adapter<0>
 my_method#adapter(x##0:Type0<:trait_inferred_trait_type.my_trait, ?#result##0:Type0<:trait_inferred_trait_type.my_trait, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_inferred_trait_type.my_trait, ?#result##0:Type0<:trait_inferred_trait_type.my_trait)
 proc my_method#adapter > {noinline} (0 calls)
 1: trait_inferred_trait_type.my_method#adapter<1>
 my_method#adapter(x##0:Type0<:trait_inferred_trait_type.my_trait, ?#result##0:Type0<:trait_inferred_trait_type.my_trait, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_inferred_trait_type.my_trait, ?#result##0:Type0<:trait_inferred_trait_type.my_trait)
 
