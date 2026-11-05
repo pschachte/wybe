@@ -1,5 +1,4 @@
-# purpose: Standard low-level pointer type, allowing indexing and pointer
-# arithmetic.
+# purpose: Standard low-level pointer type, supporting pointer arithmetic.
 # since  : 0.2
 
 pragma no_standard_library # Standard library can't depend on itself!

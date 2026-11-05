@@ -105,6 +105,7 @@ AFTER BUILDING MAIN:
                     use int_list.int_list
                     use int_list_test
                     use wybe
+                    use wybe.address
                     use wybe.array
                     use wybe.array.array_iterator
                     use wybe.bool
@@ -975,6 +976,7 @@ AFTER EVERYTHING:
                     use int_list.int_list
                     use int_list_test
                     use wybe
+                    use wybe.address
                     use wybe.array
                     use wybe.array.array_iterator
                     use wybe.bool
