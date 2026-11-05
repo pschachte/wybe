@@ -8,8 +8,8 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : higher_order_loop.<0>
-  constants       : 0:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_loop.#closure#1<0>]}
-                    1:: StructInfo {structSize = 8, structData = [FnPointerStructMember higher_order_loop.#closure#2<0>]}
+  constants       : 0:: ClosureInfo {closureProcSpec = higher_order_loop.#closure#1<0>, closureArgs = []}
+                    1:: ClosureInfo {closureProcSpec = higher_order_loop.#closure#2<0>, closureArgs = []}
                     2:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_loop.#closure#2<0><>,IntStructMember 0 8]}
                     3:: StructInfo {structSize = 16, structData = [PointerStructMember higher_order_loop.#closure#1<0><>,PointerStructMember higher_order_loop#constant#2]}
   imports         : use wybe
@@ -26,7 +26,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 proc #closure#1 > {inline} (1 calls)
 0: higher_order_loop.#closure#1<0>
-#closure#1(x##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#closure#1(@#env##0:opaque, x##0 <{}; {}; {1}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
@@ -37,7 +37,7 @@ proc #closure#1 > {inline} (1 calls)
 
 proc #closure#2 > {inline} (1 calls)
 0: higher_order_loop.#closure#2<0>
-#closure#2(x##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#closure#2(@#env##0:opaque, x##0 <{}; {}; {1}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
