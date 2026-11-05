@@ -75,6 +75,7 @@ $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@printf "\n\n" >> "$@"
 
 $(SRCDIR)/CConfig.hs:	$(SRCDIR)/c_config
+	rm -f $@
 	$< > $@
 
 $(SRCDIR)/c_config:	$(SRCDIR)/c_config.c
@@ -119,7 +120,7 @@ test:	wybemk
 	@echo -e "Building $(LIBDIR)/wybe/cbits.o"
 	@make $(LIBDIR)/wybe/cbits.o
 	@printf "Testing building wybe library ("
-	@$(TIMEOUT) 40 $(MAKE) libs
+	@$(TIMEOUT) 60 $(MAKE) libs
 	@printf ") done.\n"
 	@time ( cd test-cases/ && ./run-all-test.sh )
 

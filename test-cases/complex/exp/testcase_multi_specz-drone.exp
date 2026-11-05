@@ -36,6 +36,7 @@ AFTER BUILDING MAIN:
                     use drone
                     use drone.drone_info
                     use wybe
+                    use wybe.address
                     use wybe.array
                     use wybe.array.array_iterator
                     use wybe.bool
@@ -577,6 +578,7 @@ AFTER EVERYTHING:
                     use drone
                     use drone.drone_info
                     use wybe
+                    use wybe.address
                     use wybe.array
                     use wybe.array.array_iterator
                     use wybe.bool
