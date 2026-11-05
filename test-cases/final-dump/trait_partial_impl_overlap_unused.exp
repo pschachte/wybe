@@ -21,13 +21,13 @@ AFTER EVERYTHING:
 proc selection > {inline} (1 calls)
 0: trait_partial_impl_overlap_unused.selection<0>
 selection([x##0:trait_partial_impl_overlap_unused.hashmap(K<:trait_partial_impl_overlap_unused.hash, V) <{}; {}; {0}>], ?#result##0:wybe.int, [#vtable##0:opaque])<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.int, ?#result##0:wybe.int) @trait_partial_impl_overlap_unused:nn:nn
 proc selection > {inline} (1 calls)
 1: trait_partial_impl_overlap_unused.selection<1>
 selection([x##0:trait_partial_impl_overlap_unused.hashmap(K, V<:trait_partial_impl_overlap_unused.hash) <{}; {}; {0}>], ?#result##0:wybe.int, [#vtable##0:opaque])<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(2:wybe.int, ?#result##0:wybe.int) @trait_partial_impl_overlap_unused:nn:nn
 
@@ -35,13 +35,13 @@ selection([x##0:trait_partial_impl_overlap_unused.hashmap(K, V<:trait_partial_im
 proc selection#adapter > {noinline} (0 calls)
 0: trait_partial_impl_overlap_unused.selection#adapter<0>
 selection#adapter(x##0:Type0<:trait_partial_impl_overlap_unused.mapping(K, V), ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(2:wybe.int, ?#result##0:wybe.int) @trait_partial_impl_overlap_unused:nn:nn
 proc selection#adapter > {noinline} (0 calls)
 1: trait_partial_impl_overlap_unused.selection#adapter<1>
 selection#adapter(x##0:Type0<:trait_partial_impl_overlap_unused.mapping(K, V), ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.int, ?#result##0:wybe.int) @trait_partial_impl_overlap_unused:nn:nn
 
@@ -89,7 +89,7 @@ define external fastcc i64 @"trait_partial_impl_overlap_unused#.selection#adapte
 proc hash > public abstract {inline} (0 calls)
 0: trait_partial_impl_overlap_unused.hash.hash<0>
 hash(x##0:Type0<:trait_partial_impl_overlap_unused.hash <{}; {}; {0}>, ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_partial_impl_overlap_unused.hash, ?#result##0:wybe.int, ~#vtable##0:opaque) #0
 
@@ -131,7 +131,7 @@ define external fastcc i64 @"trait_partial_impl_overlap_unused#.hash#.hash<0>"(i
 proc hashmap > public {inline} (0 calls)
 0: trait_partial_impl_overlap_unused.hashmap.hashmap<0>
 hashmap(key##0:K <{}; {}; {0}>, value##0:V <{}; {}; {1}>, ?#result##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0, 1}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V)) @trait_partial_impl_overlap_unused:nn:nn
     foreign lpvm mutate(~#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V), ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~key##0:K) @trait_partial_impl_overlap_unused:nn:nn
@@ -139,7 +139,7 @@ hashmap(key##0:K <{}; {}; {0}>, value##0:V <{}; {}; {1}>, ?#result##0:trait_part
 proc hashmap > public {inline} (0 calls)
 1: trait_partial_impl_overlap_unused.hashmap.hashmap<1>
 hashmap(?key##0:K <{}; {}; {2}>, ?value##0:V <{}; {}; {2}>, #result##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {2}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:trait_partial_impl_overlap_unused.hashmap(K, V), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?key##0:K) @trait_partial_impl_overlap_unused:nn:nn
     foreign lpvm access(~#result##0:trait_partial_impl_overlap_unused.hashmap(K, V), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?value##0:V) @trait_partial_impl_overlap_unused:nn:nn
@@ -148,13 +148,13 @@ hashmap(?key##0:K <{}; {}; {2}>, ?value##0:V <{}; {}; {2}>, #result##0:trait_par
 proc key > public {inline} (0 calls)
 0: trait_partial_impl_overlap_unused.hashmap.key<0>
 key(#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0}>, ?#result##0:K <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:K) @trait_partial_impl_overlap_unused:nn:nn
 proc key > public {inline} (0 calls)
 1: trait_partial_impl_overlap_unused.hashmap.key<1>
 key(#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0}>, ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0, 2}>, #field##0:K <{}; {}; {2}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V), ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:K) @trait_partial_impl_overlap_unused:nn:nn
 
@@ -162,13 +162,13 @@ key(#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0}>, ?#rec
 proc value > public {inline} (0 calls)
 0: trait_partial_impl_overlap_unused.hashmap.value<0>
 value(#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0}>, ?#result##0:V <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:V) @trait_partial_impl_overlap_unused:nn:nn
 proc value > public {inline} (0 calls)
 1: trait_partial_impl_overlap_unused.hashmap.value<1>
 value(#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0}>, ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0, 2}>, #field##0:V <{}; {}; {2}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V), ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:V) @trait_partial_impl_overlap_unused:nn:nn
 
@@ -259,7 +259,7 @@ define external fastcc i64 @"trait_partial_impl_overlap_unused#.hashmap#.value<1
 proc selection > public abstract {inline} (0 calls)
 0: trait_partial_impl_overlap_unused.mapping.selection<0>
 selection(x##0:Type0<:trait_partial_impl_overlap_unused.mapping(K, V) <{}; {}; {0}>, ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_partial_impl_overlap_unused.mapping(K, V), ?#result##0:wybe.int, ~#vtable##0:opaque) #0
 

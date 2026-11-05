@@ -53,7 +53,7 @@ render(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
 
 proc render#adapter > {noinline} (0 calls)
 0: trait_impl_multiple_traits.render#adapter<0>
-render#adapter(x##0:Type0<:trait_impl_multiple_traits.printable, ?#result##0:wybe.string)<{}; {}; {}>:
+render#adapter(x##0:Type0<:trait_impl_multiple_traits.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     ExtReturn 1.Field (-2) -> [ExtReturn 1]
     ExtReturn 1.Field (-1) -> [ExtReturn 1]
@@ -76,7 +76,7 @@ same(x##0:wybe.int, y##0:wybe.int, ?#result##0:wybe.bool)<{}; {}; {}>:
 
 proc same#adapter > {noinline} (0 calls)
 0: trait_impl_multiple_traits.same#adapter<0>
-same#adapter(x##0:Type0<:trait_impl_multiple_traits.equivalent, y##0:Type0<:trait_impl_multiple_traits.equivalent, ?#result##0:wybe.bool)<{}; {}; {}>:
+same#adapter(x##0:Type0<:trait_impl_multiple_traits.equivalent, y##0:Type0<:trait_impl_multiple_traits.equivalent, ?#result##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_impl_multiple_traits.equivalent, ?x#adapter0##0:wybe.int)

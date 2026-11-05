@@ -53,7 +53,7 @@ from(f##0:wybe.float, ?#result##0:wybe.int)<{}; {}; {}>:
 
 proc from#adapter > {noinline} (0 calls)
 0: trait_parameterised_instance.from#adapter<0>
-from#adapter(x##0:U, ?#result##0:Type0<:trait_parameterised_instance.from(U))<{}; {}; {}>:
+from#adapter(x##0:U, ?#result##0:Type0<:trait_parameterised_instance.from(U), #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:U, ?f#adapter0##0:wybe.float)
@@ -62,7 +62,7 @@ from#adapter(x##0:U, ?#result##0:Type0<:trait_parameterised_instance.from(U))<{}
     foreign lpvm cast(~#result#adapter1##0:wybe.int, ?#result##0:Type0<:trait_parameterised_instance.from(U))
 proc from#adapter > {noinline} (0 calls)
 1: trait_parameterised_instance.from#adapter<1>
-from#adapter(x##0:U, ?#result##0:Type0<:trait_parameterised_instance.from(U))<{}; {}; {}>:
+from#adapter(x##0:U, ?#result##0:Type0<:trait_parameterised_instance.from(U), #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
     ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]

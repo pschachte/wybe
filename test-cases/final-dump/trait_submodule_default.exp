@@ -30,7 +30,7 @@ module top-level code > public {semipure} (0 calls)
 
 proc greet#adapter > {noinline} (0 calls)
 0: trait_submodule_default.greet#adapter<0>
-greet#adapter(x##0:T<:trait_submodule_default.greeter, ?#result##0:wybe.string)<{}; {}; {}>:
+greet#adapter(x##0:T<:trait_submodule_default.greeter, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     trait_submodule_default.greeter.greet<1>(_:T<:trait_submodule_default.greeter, ?#result##0:wybe.string, _:opaque)<{}; {}; {0}> #0

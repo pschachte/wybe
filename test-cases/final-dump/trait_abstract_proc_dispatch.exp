@@ -40,7 +40,7 @@ print_value(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 
 proc print_value#adapter > {noinline} (0 calls)
 0: trait_abstract_proc_dispatch.print_value#adapter<0>
-print_value#adapter(x##0:Type0<:trait_abstract_proc_dispatch.printable)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+print_value#adapter(x##0:Type0<:trait_abstract_proc_dispatch.printable, #vtable##0:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]

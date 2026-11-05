@@ -44,7 +44,7 @@ matches(x##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
 
 proc matches#adapter > {noinline,semipure} (0 calls)
 0: trait_abstract_proc_modifiers.matches#adapter<0>
-matches#adapter(x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?#success##0:wybe.bool)<{}; {}; {}>:
+matches#adapter(x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?#success##0:wybe.bool, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_abstract_proc_modifiers.matcher, ?x#adapter0##0:wybe.int)

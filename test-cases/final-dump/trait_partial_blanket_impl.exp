@@ -22,7 +22,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_partial_blanket_impl.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm make_vtable(vtable Type0<:trait_partial_blanket_impl.debug <: trait_partial_blanket_impl.printable:opaque, 1:wybe.int, vtable wybe.int <: trait_partial_blanket_impl.debug:opaque, ?#vtableruntime##0:opaque) @trait_partial_blanket_impl:nn:nn
@@ -36,7 +36,7 @@ module top-level code > public {semipure} (0 calls)
 proc dbg > {inline} (1 calls)
 0: trait_partial_blanket_impl.dbg<0>
 dbg([x##0:wybe.int], ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move("int":wybe.string, ?#result##0:wybe.string) @trait_partial_blanket_impl:nn:nn
 
@@ -44,7 +44,7 @@ dbg([x##0:wybe.int], ?#result##0:wybe.string)<{}; {}; {}>:
 proc dbg#adapter > {noinline} (0 calls)
 0: trait_partial_blanket_impl.dbg#adapter<0>
 dbg#adapter(x##0:Type0<:trait_partial_blanket_impl.debug, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move("int":wybe.string, ?#result##0:wybe.string) @trait_partial_blanket_impl:nn:nn
 
@@ -52,7 +52,7 @@ dbg#adapter(x##0:Type0<:trait_partial_blanket_impl.debug, ?#result##0:wybe.strin
 proc show > {inline} (1 calls)
 0: trait_partial_blanket_impl.show<0>
 show(x##0:T<:trait_partial_blanket_impl.debug <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     trait_partial_blanket_impl.debug.dbg<0>(~x##0:T<:trait_partial_blanket_impl.debug, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #0 @trait_partial_blanket_impl:nn:nn
 
@@ -60,7 +60,8 @@ show(x##0:T<:trait_partial_blanket_impl.debug <{}; {}; {0}>, ?#result##0:wybe.st
 proc show#adapter > {noinline} (0 calls)
 0: trait_partial_blanket_impl.show#adapter<0>
 show#adapter(x##0:Type0<:trait_partial_blanket_impl.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_partial_blanket_impl.printable, ?x#adapter0##0:T<:trait_partial_blanket_impl.debug)
     foreign lpvm access(~#vtable##0:pointer, 8:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
@@ -133,7 +134,7 @@ define external fastcc i64 @"trait_partial_blanket_impl#.show#adapter<0>"(i64 %"
 proc dbg > public abstract {inline} (0 calls)
 0: trait_partial_blanket_impl.debug.dbg<0>
 dbg(x##0:Type0<:trait_partial_blanket_impl.debug <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_partial_blanket_impl.debug, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
@@ -170,7 +171,7 @@ define external fastcc i64 @"trait_partial_blanket_impl#.debug#.dbg<0>"(i64 %"x#
 proc show > public abstract {inline} (0 calls)
 0: trait_partial_blanket_impl.printable.show<0>
 show(x##0:Type0<:trait_partial_blanket_impl.printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_partial_blanket_impl.printable, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
