@@ -118,7 +118,8 @@ person_name(x##0:trait_multiple_trait_params.student, ?#result##0:wybe.string)<{
 proc person_name#adapter > {noinline} (0 calls)
 0: trait_multiple_trait_params.person_name#adapter<0>
 person_name#adapter(x##0:Type0<:trait_multiple_trait_params.person, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_multiple_trait_params.person, ?#result##0:wybe.string) @trait_multiple_trait_params:nn:nn
 

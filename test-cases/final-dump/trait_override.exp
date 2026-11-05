@@ -90,7 +90,8 @@ describe(x##0:trait_import_support.override_person, ?#result##0:wybe.string)<{};
 proc describe#adapter > {noinline} (0 calls)
 0: trait_import_support.override_person.describe#adapter<0>
 describe#adapter(x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string) @override_person:nn:nn
 

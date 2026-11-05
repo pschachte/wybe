@@ -39,7 +39,8 @@ first(x##0:trait_generic_impl.box(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>)
 proc first#adapter > {noinline} (0 calls)
 0: trait_generic_impl.first#adapter<0>
 first#adapter(x##0:Type0<:trait_generic_impl.sequence(T), ?#result##0:T, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_generic_impl.sequence(T), ?#result##0:T) @trait_generic_impl:nn:nn
 

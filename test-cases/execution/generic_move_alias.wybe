@@ -1,0 +1,48 @@
+# Regression test for a latent alias-analysis bug involving generic `move`.
+#
+# `wrap` is a generic identity proc: `wrap(v:X):X = v` compiles to a single
+# `llvm move(~v:X, ?#result:X)` on a type VARIABLE.  Because a type variable's
+# representation defaults to a word (Bits), `argIsPointer` treats it as a
+# non-pointer and the alias analysis records NO alias between `v` and the result.
+#
+# But generic procs are compiled once with a uniform (boxed) representation, so
+# when `X` is a boxed type (`position`), the result and the argument are the SAME
+# pointer -- they genuinely alias.
+#
+# `pos2 = wrap(pos)` makes `pos2` share `pos`'s (heap) cell.  The in-place update
+# `x(!pos, 200)` must therefore be NON-destructive, leaving `pos2` unchanged.  If
+# the analysis misses the alias it updates `pos` in place and corrupts `pos2`.
+#
+# Compare with execution/destructive-update.wybe, which does the same via a direct
+# `pos2 = pos` (a concrete-typed move) and is handled correctly.  `pos` is read
+# from stdin so it is heap-allocated (not a shared compile-time constant, which
+# could never be destructively updated and would hide the bug).
+
+pub type position { pub position(x:int, y:int) }
+
+pub def printPosition(pos:position) use !io {
+    !print(" (")
+    !print(pos^x)
+    !print(",")
+    !print(pos^y)
+    !println(")")
+}
+
+# generic identity: forces the alias to flow through a generic `move`
+pub def {noinline} wrap(v:X):X = v
+
+!read(?a:int)
+!read(?b:int)
+?pos = position(a, b)
+?pos2 = wrap(pos)        # pos2 aliases pos (same cell)
+x(!pos, 200)             # must be non-destructive: pos2 shares the cell
+!print("expect pos (200,")
+!print(b)
+!print("): ")
+!printPosition(pos)
+!print("expect pos2(")
+!print(a)
+!print(",")
+!print(b)
+!print("): ")
+!printPosition(pos2)
