@@ -75,7 +75,7 @@ $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@printf "\n\n" >> "$@"
 
 $(SRCDIR)/CConfig.hs:	$(SRCDIR)/c_config
-	rm $@
+	rm -f $@
 	$< > $@
 
 $(SRCDIR)/c_config:	$(SRCDIR)/c_config.c
