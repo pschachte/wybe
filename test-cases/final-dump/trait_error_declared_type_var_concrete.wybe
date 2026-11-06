@@ -1,0 +1,16 @@
+# A declared type variable can't become a concrete type, whether it was declared
+# with a trait bound, or only acquired one from calling a trait's method.
+
+type my_add trait {
+    abstract plus(a:_, b:_):_
+}
+
+impl int <: my_add
+
+def plus(a:int, b:int):int = a + b
+
+def inferred_bound(i:I, ?j:I) { ?j = my_add.plus(i, 1) }
+
+def declared_bound(i:I<:my_add, ?j:I) { ?j = my_add.plus(i, 1) }
+
+def as_concrete(i:I<:my_add, ?j:int) { ?j = i }

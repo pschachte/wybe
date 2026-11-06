@@ -1055,11 +1055,8 @@ unifyTypes' _ ty1@TypeVariable{} ty2@TypeVariable{} = do
     let result = min ty1 ty2
     mergeTypeVarBounds (typeVariableName result) ty1 ty2
     return result
-unifyTypes' reason var@TypeVariable{typeVariableName=RealTypeVar{}} ty = do
-    bounds <- typeVarBounds var
-    if Set.null bounds
-        then invalidTypeError reason
-        else unifyTypeVarBounds reason bounds ty
+unifyTypes' reason TypeVariable{typeVariableName=RealTypeVar{}} _ =
+    invalidTypeError reason
 unifyTypes' reason var@TypeVariable{typeVariableName=FauxTypeVar{}} ty = do
     bounds <- typeVarBounds var
     if Set.null bounds
