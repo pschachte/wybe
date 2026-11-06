@@ -2133,11 +2133,16 @@ typecheckCalls' _ [] residue@(overloaded:_) False foreigns = do
     typecheckCalls'' _ _ [] alt = alt
     typecheckCalls'' typings rest infos alt = do
         typings' <- snd <$$> mapM (getTyping . typecheckCallWithInfo typings rest) infos
-        case List.filter (List.null . typingErrs) typings' of
-            [typing] -> do
+        let valid = List.filter (List.null . typingErrs . snd) $ zip infos typings'
+        preferred <- lift $ mostSpecificMatch valid
+        case (valid, preferred) of
+            ([(_, typing)], _) -> do
                 logTyped "Found one valid typing"
                 put typing
-            valid -> do
+            (_, Just (_, typing)) -> do
+                logTyped "Found one most specific valid typing"
+                put typing
+            _ -> do
                 logTyped $ "Still ambiguous: " ++ show (length valid)
                 alt
     typecheckCallWithInfo typings rest info = do
