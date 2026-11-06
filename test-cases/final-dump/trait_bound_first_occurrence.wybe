@@ -1,0 +1,17 @@
+# Trait bounds set at the first occurrence of a type variable apply to the rest.
+
+type printy trait {
+    abstract printy_val(a:_):int
+}
+
+type ordy trait {
+    abstract ordy_val(a:_):int
+}
+
+def one_bound(a:T<:printy, b:T):int = printy_val(a) + printy_val(b)
+
+def two_bounds(a:T<:{printy, ordy}, b:T):int = printy_val(a) + ordy_val(b)
+
+def nested_first(a:list(T<:printy), b:T):int = printy_val(b)
+
+def shorthand(a:printy, b:printy):int = printy_val(a) + printy_val(b)

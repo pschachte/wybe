@@ -85,12 +85,17 @@ validateProcDefTypes name def = do
     let params = procProtoParams proto
     let tvarCount = procFauxTypeVarCount def
     logTypes $ "Validating def of " ++ showProcName name
+    forM_ (repeatedTypeVarBounds $ paramType . content <$> params) $
+        errmsg pos . repeatedTypeVarBoundMsg
     (params', finalState) <- runStateT (traverse (updatePlacedM $ validateParam name pos public) params)
                              $ TraitTypeVars Map.empty tvarCount
     boundedTypeParams <- minimiseTypeVarBounds $ getBoundedTypeParams params'
     return $ def { procProto = proto { procProtoParams = params' }
                  , procFauxTypeVarCount = traitTypeVarCounter finalState
-                 , procBoundedTypeParams = boundedTypeParams }
+                 , procBoundedTypeParams = boundedTypeParams
+                 , procAnnotatedParams = Set.fromList
+                    [paramName param | param <- content <$> params
+                                     , paramType param /= AnyType] }
 
 
 validateParam :: Ident -> OptPos -> Bool -> Param -> Validator Param
@@ -359,6 +364,10 @@ data TypeError = ReasonMessage Message
                | ReasonBadReification ProcName OptPos
                    -- ^Attempt to reify a semidet proc with outputs
                | ReasonUndeclared ProcName OptPos
+                    -- ^Public proc with some undeclared types
+               | ReasonUnsatisfiedBound ProcName VarName TypeVarName TraitSpec OptPos
+                    -- ^A type variable of an annotated parameter was required
+                    -- to implement a trait its declared bounds don't guarantee
                    -- ^Public proc with some undeclared types
                | ReasonEqual Exp Exp OptPos
                    -- ^Expression types should be equal
@@ -507,6 +516,14 @@ typeErrorMessage (ReasonUndeclared name pos) =
     Message Error pos $
         "Public definition of " ++ showProcName name
         ++ " with some undeclared types."
+typeErrorMessage (ReasonUnsatisfiedBound name param tvar bound pos) =
+    Message Error pos $
+        subject ++ " parameter " ++ param ++ " of " ++ showProcName name
+        ++ " does not implement trait " ++ show bound
+  where
+    subject = case tvar of
+        RealTypeVar{} -> "Type variable " ++ show tvar ++ " of"
+        FauxTypeVar{} -> "The type of"
 typeErrorMessage (ReasonEqual exp1 exp2 pos) =
     Message Error pos $
         "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
@@ -745,6 +762,7 @@ typeErrorPos (ReasonAmbig _ pos _) = pos
 typeErrorPos (ReasonArity _ _ pos _ _) = pos
 typeErrorPos (ReasonBadReification _ pos) = pos
 typeErrorPos (ReasonUndeclared _ pos) = pos
+typeErrorPos (ReasonUnsatisfiedBound _ _ _ _ pos) = pos
 typeErrorPos (ReasonEqual _ _ pos) = pos
 typeErrorPos (ReasonExpType _ _ pos) = pos
 typeErrorPos (ReasonHigher _ _ pos) = pos
@@ -1213,7 +1231,7 @@ expType' (AnonProc mods params pstmts _ _) pos = do
     params' <- updateParamTypes $ (`maybePlace` pos) <$> params
     return $ HigherOrderType mods $ paramTypeFlow . content <$> params'
 expType' (Closure pspec closed) _ = do
-    ProcDef _ (ProcProto _ params res) _ _ _ _ _ _ _ detism _ impurity _ _ _ _ _
+    ProcDef _ (ProcProto _ params res) _ _ _ _ _ _ _ detism _ impurity _ _ _ _ _ _
         <- lift $ getProcDef pspec
     let params' = List.filter ((==Ordinary) . paramFlowType . content) params
     let typeFlows = paramTypeFlow . content <$> params'
@@ -1419,7 +1437,7 @@ matchTraitImplProc ispec@(TraitImplSpec trait _) absProcSpec absProcDef implProc
     let absProcDef' = absProcDef { procProto = absProto }
     ((absInfo, displayImplInfo, result), _) <- runStateT
         (matchTraitImplProc' absProcSpec absProcDef' implProcSpec implProcDef)
-        $ initTyping absProcDef' traitMod
+        $ initTyping absProcDef'{procAnnotatedParams = Set.empty} traitMod
 
     return $ case result of
         OK _ -> Right implProcSpec
@@ -2393,10 +2411,11 @@ matchTypeList callee pos callTypes
         <- getTyping $ unifyTypeList' callee pos callTypes calleeTypes
     let mismatches = List.map fst $ List.filter (invalidType . snd)
                        $ zip [1..] matches
-    return $ if List.null mismatches
+    unsatisfiedBounds <- unsatisfiedBoundErrors pos typing
+    return $ if List.null mismatches && List.null unsatisfiedBounds
     then OK (calleeInfo{fiMatchedTypes=matches}, typing)
     else Err $ [ReasonArgType partial callee n pos | n <- mismatches]
-            ++ typingErrs typing
+            ++ unsatisfiedBounds ++ typingErrs typing
 matchTypeList _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 
 
@@ -2410,6 +2429,37 @@ unifyTypeList' callee pos callerTypes calleeTypes
             if mismatch
                 then return InvalidType
                 else unifyTypes (ReasonArgType False callee n pos) callerTy calleeTy
+
+
+-- |Report each trait a typing requires a type variable of an annotated parameter
+-- to implement that isn't guaranteed by the bounds the variable was declared
+-- with, either directly or through a blanket trait implementation.  A variable
+-- declared without bounds has no bounds, so it guarantees nothing.
+unsatisfiedBoundErrors :: OptPos -> Typing -> Typed [TypeError]
+unsatisfiedBoundErrors pos typing = do
+    knownImpls <- lift $ getModuleImplementationField modKnownTraitImpls
+    let guaranteed name declared bound =
+            any (sameTraitConstraint bound) declared
+            || case resolveTraitImpl
+                    (TraitImplSpec bound $ TypeVariable name declared) knownImpls of
+                TraitImplResolved{} -> True
+                _                   -> False
+    return
+        [ ReasonUnsatisfiedBound (procName def) param name bound pos
+        | (name, declared) <- Map.toList annotatedBounds
+        , let param = head [paramName p | p <- annotated
+                                    , name `Set.member` typeVarSet (paramType p)]
+        , bound <- Set.toAscList $ effectiveTypeVarBoundsIn (tvarDict typing)
+                                    (TypeVariable name Set.empty)
+        , not $ guaranteed name declared bound
+        ]
+  where
+    def = tyProcDef typing
+    annotated = List.filter
+        ((`Set.member` procAnnotatedParams def) . paramName)
+        $ content <$> procProtoParams (procProto def)
+    annotatedBounds = Map.unionsWith Set.union
+        $ declaredTypeVarBounds . paramType <$> annotated
 
 
 invalidType :: TypeSpec -> Bool
@@ -2933,6 +2983,7 @@ modeCheckProcDecl pdef = do
                param <- Set.toList $ missingBindings outParams assigned]
             ++ detismCheck name pos detism (bindingDetism assigned)
     typeErrors modeErrs
+    get >>= unsatisfiedBoundErrors pos >>= typeErrors
     params' <- updateParamTypes posParams
     let proto' = proto { procProtoParams = params' }
     boundedTypeParams' <- lift $ minimiseTypeVarBounds $ getBoundedTypeParams params'

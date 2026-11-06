@@ -1,0 +1,15 @@
+Error detected during type checking of module(s) trait_error_unsatisfied_bound, trait_error_unsatisfied_bound.ordy, trait_error_unsatisfied_bound.printy
+final-dump/trait_error_unsatisfied_bound.wybe:11:25: Type variable T of parameter a of proc no_bound does not implement trait trait_error_unsatisfied_bound.printy
+final-dump/trait_error_unsatisfied_bound.wybe:11:25: Type error in partial application of proc printy_val, argument 2
+final-dump/trait_error_unsatisfied_bound.wybe:11:25: Type error in call to proc printy_val, argument 2
+final-dump/trait_error_unsatisfied_bound.wybe:13:35: Type variable T of parameter a of proc other_bound does not implement trait trait_error_unsatisfied_bound.printy
+final-dump/trait_error_unsatisfied_bound.wybe:13:35: Type error in partial application of proc printy_val, argument 2
+final-dump/trait_error_unsatisfied_bound.wybe:13:35: Type error in call to proc printy_val, argument 2
+final-dump/trait_error_unsatisfied_bound.wybe:15:35: The type of parameter a of proc trait_shorthand does not implement trait trait_error_unsatisfied_bound.printy
+final-dump/trait_error_unsatisfied_bound.wybe:15:35: Type error in partial application of proc printy_val, argument 2
+final-dump/trait_error_unsatisfied_bound.wybe:15:35: Type error in call to proc printy_val, argument 2
+final-dump/trait_error_unsatisfied_bound.wybe:17:34: Type variable T of parameter a of proc nested does not implement trait trait_error_unsatisfied_bound.printy
+final-dump/trait_error_unsatisfied_bound.wybe:17:34: Type error in partial application of proc printy_val, argument 2
+final-dump/trait_error_unsatisfied_bound.wybe:17:34: Type error in call to proc printy_val, argument 2
+final-dump/trait_error_unsatisfied_bound.wybe:21:10: Type variable T of parameter a of proc through_var does not implement trait trait_error_unsatisfied_bound.printy
+final-dump/trait_error_unsatisfied_bound.wybe:24:41: Type variable T of parameter b of proc mixed does not implement trait trait_error_unsatisfied_bound.printy

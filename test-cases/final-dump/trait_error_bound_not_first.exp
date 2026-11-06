@@ -1,0 +1,7 @@
+Error detected during checking parameter type declarations in module(s) trait_error_bound_not_first, trait_error_bound_not_first.ordy, trait_error_bound_not_first.printy
+final-dump/trait_error_bound_not_first.wybe:11:1: Trait bounds of type variable T must all be specified at its first occurrence
+final-dump/trait_error_bound_not_first.wybe:13:1: Trait bounds of type variable T must all be specified at its first occurrence
+final-dump/trait_error_bound_not_first.wybe:15:1: Trait bounds of type variable T must all be specified at its first occurrence
+final-dump/trait_error_bound_not_first.wybe:17:1: Trait bounds of type variable T must all be specified at its first occurrence
+final-dump/trait_error_bound_not_first.wybe:19:1: Trait bounds of type variable T must all be specified at its first occurrence
+final-dump/trait_error_bound_not_first.wybe:21:1: Trait bounds of type variable T must all be specified at its first occurrence

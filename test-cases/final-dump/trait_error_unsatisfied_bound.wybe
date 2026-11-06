@@ -1,0 +1,24 @@
+# An annotated parameter only implements the traits its type variables declare.
+
+type printy trait {
+    abstract printy_val(a:_):int
+}
+
+type ordy trait {
+    abstract ordy_val(a:_):int
+}
+
+def no_bound(a:T):int = printy_val(a)
+
+def other_bound(a:T<:ordy):int = printy_val(a)
+
+def trait_shorthand(a:ordy):int = printy_val(a)
+
+def nested(a:list(T), b:T):int = printy_val(b)
+
+def through_var(a:T, ?r:int) {
+    ?x = a
+    ?r = printy_val(x)
+}
+
+def mixed(a, b:T):int = printy_val(a) + printy_val(b)

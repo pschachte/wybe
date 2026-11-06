@@ -53,7 +53,7 @@ proc key_hash > {inline} (1 calls)
 key_hash([x##0:trait_partial_impl.hashmap(K<:trait_partial_impl.hash, V) <{}; {}; {0}>], key##0:K<:trait_partial_impl.hash <{}; {}; {1}>, ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    trait_partial_impl.hash.hash<0>(~key##0:K<:trait_partial_impl.hash, ?#result##0:wybe.int, ~#vtable##0:opaque)<{}; {}; {0}> #0 @trait_partial_impl:nn:nn
+    trait_partial_impl.hash.hash<0>(~key##0:K, ?#result##0:wybe.int, ~#vtable##0:opaque)<{}; {}; {0}> #0 @trait_partial_impl:nn:nn
 
 
 proc key_hash#adapter > {noinline} (0 calls)

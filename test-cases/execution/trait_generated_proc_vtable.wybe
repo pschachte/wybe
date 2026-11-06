@@ -31,16 +31,16 @@ def branch_then_call(x:T<:adder, n:int): int = r where {
     ?r = a + adder.add1(x)
 }
 
-# The loop only mentions x, but the bound on y also constrains x.
-def split_bounds(x:T<:adder, y:T<:scaler, n:int): int = acc where {
+# The loop only mentions x, but y shares the bounds of x.
+def split_bounds(x:T<:{adder, scaler}, y:T, n:int): int = acc where {
     ?acc = 0
     for ?i in 0 .. n {
         ?acc = acc + adder.add1(x) + scaler.scale(x, i)
     }
 }
 
-# Nested loops calling methods of two traits.
-def nested_loops(x:T<:adder, y:T<:scaler, n:int): int = acc where {
+# Nested loops calling methods of two traits on values sharing the bounds of x.
+def nested_loops(x:T<:{adder, scaler}, y:T, n:int): int = acc where {
     ?acc = 0
     for ?i in 0 .. n {
         for ?j in 0 .. n {

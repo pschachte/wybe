@@ -1,0 +1,2 @@
+Error detected during checking parameter type declarations in module(s) trait_error_inferred_bound_public, trait_error_inferred_bound_public.printy
+final-dump/trait_error_inferred_bound_public.wybe:7:5: Public proc unannotated with undeclared parameter or return type

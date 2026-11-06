@@ -903,7 +903,7 @@ generateAdapter ispec constraints constraintBase absProcDef adapterParams implPr
             (ProcDefPrim pSpec proto body emptyProcAnalysis Map.empty)
             Nothing 0 1 Map.empty Private Nothing (procDetism implProcDef)
             NoInline (procImpurity implProcDef) AdapterProc
-            (initSuperprocSpec Private) Map.empty [] 0
+            (initSuperprocSpec Private) Map.empty [] 0 Set.empty
     adapterSpec <- addProcDef adapter `inModule` adapterMod
     updateProcDef
         (\proc -> case procImpln proc of

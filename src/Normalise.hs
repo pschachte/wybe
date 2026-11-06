@@ -240,6 +240,8 @@ normaliseTraitImpl ispec@(TraitImplSpec trait typ) impl =
                 >>= flip evalStateT (TraitTypeVars Map.empty 0)
                     . traitTypesToTypeVars
             trait' <- lookupType "trait impl" Nothing trait
+            forM_ (repeatedTypeVarBounds [typ']) $
+                errmsg (traitImplPos impl) . repeatedTypeVarBoundMsg
             forM_ (traitImplTypeBounds $ TraitImplSpec trait' typ') $ \(_, bound) -> do
                 validBound <- isTraitType bound
                 unless validBound $ errmsg (traitImplPos impl) $

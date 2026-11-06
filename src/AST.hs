@@ -35,6 +35,7 @@ module AST (
   genericType, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, isTraitType, typeModule,
   TraitTypeVars(..), traitTypesToTypeVars, rejectTraitBounds,
+  repeatedTypeVarBounds, repeatedTypeVarBoundMsg,
   traitBoundNotAllowedMsg,
   VarDict, TypeVarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
@@ -1386,6 +1387,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let ProcModifiers detism inlining impurity variant _ = mods
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
                   vis Nothing detism inlining impurity variant (initSuperprocSpec vis) Map.empty [] 0
+                  Set.empty
     void $ addProcDef procDef
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
@@ -1400,7 +1402,7 @@ addAbstractProc tmpCtr (AbstractProcDecl mods proto stmts pos) = do
     updateModule (\mod -> mod { modAbstractProcCount = abstractProcIndex + 1 })
     let procDef = ProcDef name proto ProcDefAbstract pos tmpCtr 0 Map.empty
                   Public (Just abstractProcIndex) detism inlining impurity variant (initSuperprocSpec Public)
-                  Map.empty [] 0
+                  Map.empty [] 0 Set.empty
     void $ addProcDef procDef
 addAbstractProc _ item =
     shouldnt $ "addAbstractProc given non-AbstractProc item " ++ show item
@@ -2376,8 +2378,11 @@ data ProcDef = ProcDef {
     procBoundedTypeParams :: [TypeVarBound],
                                 -- ^The bounded type variables in the proc's params
                                 -- used for generating vtable params
-    procFauxTypeVarCount :: Int
+    procFauxTypeVarCount :: Int,
                                 -- ^The number of faux type variables
+    procAnnotatedParams :: Set VarName
+                                -- ^The parameters with a type annotation in
+                                -- the source
 }
              deriving (Eq, Generic)
 
@@ -3333,6 +3338,33 @@ rejectTraitBounds context pos ty@HigherOrderType{higherTypeParams=flows} = do
     tys <- mapM (rejectTraitBounds context pos . typeFlowType) flows
     return ty { higherTypeParams = zipWith setTypeFlowType tys flows }
 rejectTraitBounds _ _ ty = return ty
+
+
+-- |The type variables, in order and without duplicates, that have a trait bound
+-- on any occurrence but their first in the specified types.  Bounds appearing
+-- inside a bound don't count as occurrences of the variables they mention.
+repeatedTypeVarBounds :: [TypeSpec] -> [TypeVarName]
+repeatedTypeVarBounds tys = List.nub $ reverse $ snd
+    $ List.foldl' occurrences (Set.empty, []) tys
+  where
+    occurrences (seen, bad) TypeVariable{typeVariableName=name,
+                                         typeVariableBounds=bounds} =
+        (Set.insert name seen,
+         if name `Set.member` seen && not (Set.null bounds)
+            then name:bad
+            else bad)
+    occurrences acc TypeSpec{typeParams=params} =
+        List.foldl' occurrences acc params
+    occurrences acc HigherOrderType{higherTypeParams=flows} =
+        List.foldl' occurrences acc $ typeFlowType <$> flows
+    occurrences acc _ = acc
+
+
+-- |The message for a trait bound on a later occurrence of a type variable.
+repeatedTypeVarBoundMsg :: TypeVarName -> String
+repeatedTypeVarBoundMsg name =
+    "Trait bounds of type variable " ++ show name
+    ++ " must all be specified at its first occurrence"
 
 
 -- |The message for a trait bound, described by the first argument, written
@@ -4353,7 +4385,7 @@ prerequisiteSlotOffset hostTrait targetTrait = do
 
 -- |The trait bounds declared within an implementation type, in ABI order:
 -- type variables by first occurrence, then each variable's bounds in ascending
--- order. Repeated occurrences of a variable contribute their union of bounds.
+-- order.
 traitImplTypeBounds :: TraitImplSpec -> [TypeVarBound]
 traitImplTypeBounds = typeBounds . implType
   where
@@ -5298,7 +5330,7 @@ showProcDefs firstID (def:defs) =
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
   procdef@(ProcDef n proto def pos tmpCount _ _ vis abstract detism inline impurity ctor
-                   sub _ _ _) =
+                   sub _ _ _ _) =
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
