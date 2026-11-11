@@ -1,0 +1,58 @@
+# Procs generated for loops and branch continuations inside a trait-generic
+# proc receive the vtables for the bounded type variables of their params.
+
+type adder trait {
+    abstract add1(x:_): int
+}
+
+type scaler trait {
+    abstract scale(x:_, n:int): int
+}
+
+impl int <: {adder, scaler}
+
+def add1(x:int): int = x + 1
+def scale(x:int, n:int): int = x * n
+
+# A do loop calling a trait method.
+def loop_sum(x:T<:adder, n:int): int = acc where {
+    ?acc = 0
+    ?i = 0
+    do {
+        while i < n
+        ?acc = acc + adder.add1(x) + i
+        !i + 1
+    }
+}
+
+# A branch followed by a trait call, which needs a continuation proc.
+def branch_then_call(x:T<:adder, n:int): int = r where {
+    if { n > 5 :: ?a = 1 | else :: ?a = 2 }
+    ?r = a + adder.add1(x)
+}
+
+# The loop only mentions x, but the bound on y also constrains x.
+def split_bounds(x:T<:adder, y:T<:scaler, n:int): int = acc where {
+    ?acc = 0
+    for ?i in 0 .. n {
+        ?acc = acc + adder.add1(x) + scaler.scale(x, i)
+    }
+}
+
+# Nested loops calling methods of two traits.
+def nested_loops(x:T<:adder, y:T<:scaler, n:int): int = acc where {
+    ?acc = 0
+    for ?i in 0 .. n {
+        for ?j in 0 .. n {
+            if { i = j :: ?acc = acc + adder.add1(x)
+               | else :: ?acc = acc + scaler.scale(y, 2)
+            }
+        }
+    }
+}
+
+!println(loop_sum(1, 10))
+!println(branch_then_call(1, 10))
+!println(branch_then_call(1, 0))
+!println(split_bounds(3, 4, 5))
+!println(nested_loops(2, 2, 3))

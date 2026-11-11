@@ -120,7 +120,8 @@ unbranchProc' proc = do
     let impurity = procImpurity proc
     let proto' = proto {procProtoParams = params'}
     (body',tmpCtr',newProcs) <-
-        unbranchBody name tmpCtr params' detism impurity stmts
+        unbranchBody name tmpCtr params' detism impurity
+            (procBoundedTypeParams proc) stmts
     let proc' = proc { procProto = proto'
                      , procDetism = selectDetism detism Det detism
                      , procImpln = ProcDefSrc body'
@@ -134,10 +135,12 @@ unbranchProc' proc = do
 -- |Eliminate loops and ensure that Conds only appear as the final
 --  statement of a body.
 unbranchBody :: ProcName -> Int -> [Placed Param] -> Determinism -> Impurity
-             -> [Placed Stmt] -> Compiler ([Placed Stmt],Int,[ProcDef])
-unbranchBody name tmpCtr params detism impurity body = do
+             -> [TypeVarBound] -> [Placed Stmt]
+             -> Compiler ([Placed Stmt],Int,[ProcDef])
+unbranchBody name tmpCtr params detism impurity bounds body = do
     let unbrancher =
-            initUnbrancherState Nothing tmpCtr detism impurity params name
+            initUnbrancherState Nothing tmpCtr detism impurity bounds params
+                name
     let outparams =  brOutParams unbrancher
     let outvars = brOutArgs unbrancher
     let stmts = body
@@ -228,6 +231,9 @@ data UnbrancherState = Unbrancher {
                                   -- saved if they are reassigned)
     brDetism     :: Determinism,  -- ^The determinism of the current context
     brImpurity   :: Impurity,     -- ^The impurity of the enclosing proc
+    brBoundedTypeParams :: [TypeVarBound],
+                                  -- ^The bounded type variables of the
+                                  -- enclosing proc
     brAlternate  :: [Placed Stmt], -- ^Code to execute in case of failure
     brSense      :: Bool,         -- ^True iff execute brAlternate on failure 
     brProcName   :: ProcName      -- ^The name of the proc being unbranched
@@ -241,8 +247,9 @@ data LoopInfo = LoopInfo {
 
 
 initUnbrancherState :: Maybe LoopInfo -> Int -> Determinism -> Impurity
-                    -> [Placed Param] -> ProcName -> UnbrancherState
-initUnbrancherState loopinfo tmpCtr detism impurity params =
+                    -> [TypeVarBound] -> [Placed Param] -> ProcName
+                    -> UnbrancherState
+initUnbrancherState loopinfo tmpCtr detism impurity bounds params =
     let defined = inputParams $ content <$> params
         outParams = [unbranchParam (Param nm ty ParamOut ft) `maybePlace` pos
                     | (Param nm ty fl ft, pos) <- unPlace <$> params
@@ -256,7 +263,7 @@ initUnbrancherState loopinfo tmpCtr detism impurity params =
         alt = selectDetism [] [move boolFalse testOutExp] detism
     in Unbrancher loopinfo defined tmpCtr outParams outArgs
             (Set.fromList inOuts) Map.empty Map.empty Set.empty detism impurity
-            alt True
+            bounds alt True
 
 
 -- | Add the specified variable to the symbol table
@@ -318,16 +325,22 @@ newProcName name = lift . genProcName . (`specialName2` name) =<< gets brProcNam
 
 
 -- |Create, unbranch, and record a new proc with the specified proto,
--- determinism and body.  Takes its impurity from the parent proc.
+-- determinism and body.  Takes its impurity from the parent proc, and the
+-- parent's trait bounds on the type variables appearing in its params, so it
+-- takes vtable params for them.
 genProc :: ProcProto -> Determinism -> [Placed Stmt] -> Unbrancher ()
 genProc proto detism stmts = do
     let name = procProtoName proto
     tmpCtr <- gets brTempCtr
     impurity <- gets brImpurity
+    parentBounds <- gets brBoundedTypeParams
+    let typeVars = Set.unions $ typeVarSet . paramType . content
+                    <$> procProtoParams proto
+        bounds = List.filter ((`Set.member` typeVars) . fst) parentBounds
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
                   Map.empty Private Nothing detism MayInline impurity GeneratedProc
-                  NoSuperproc Map.empty [] 0
+                  NoSuperproc Map.empty bounds 0
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
