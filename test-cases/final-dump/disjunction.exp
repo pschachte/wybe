@@ -73,6 +73,7 @@ proc saturating_tail > public (0 calls)
 saturating_tail(lst##0:wybe.list(T) <{}; {}; {0}>, ?tl##0:wybe.list(T) <{}; {}; {0}>)<{}; {}; {}>:
   AliasSummary:
     ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#4##0:wybe.bool of
@@ -89,6 +90,7 @@ proc saturating_tail2 > public (0 calls)
 saturating_tail2(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.list(T) <{}; {}; {0}>)<{}; {}; {}>:
   AliasSummary:
     ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#5##0:wybe.bool of

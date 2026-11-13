@@ -35,7 +35,8 @@ proc #closure#1 > {inline} (1 calls)
 proc call > {noinline} (1 calls)
 0: uneeded_closure_args.call<0>
 call(f##0:(A, ?A) <{}; {}; {0}>, a##0:A <{}; {}; {1}>, ?#result##0:A <{}; {}; {0, 1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 0, ExtParam 1]
   InterestingCallProperties: []
     ~f##0:(A, ?A)(~a##0:A, ?#result##0:A) #0 @uneeded_closure_args:nn:nn
 

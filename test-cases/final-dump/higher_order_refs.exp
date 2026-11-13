@@ -130,7 +130,8 @@ add_one(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 proc app > {noinline} (7 calls)
 0: higher_order_refs.app<0>
 app(f##0:(I, ?J) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#result##0:J <{}; {}; {0, 1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 0, ExtParam 1]
   InterestingCallProperties: []
     ~f##0:(I, ?J)(~i##0:I, ?#result##0:J) #0 @higher_order_refs:nn:nn
 

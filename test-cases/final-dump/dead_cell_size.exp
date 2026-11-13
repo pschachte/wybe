@@ -104,7 +104,8 @@ bar(x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)<{}; {}; {}>:
 proc diff_type > public (1 calls)
 0: dead_cell_size.diff_type<0>
 diff_type(x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtConst dead_cell_size#constant#12]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @dead_cell_size:nn:nn
     case ~tmp#4##0:wybe.bool of

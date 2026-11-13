@@ -1,0 +1,21 @@
+# BUG-2 (Class A): output aliasing an interior pointer of an input.
+# `getfst` returns p^fst; the result aliases the stored inner position.
+# Destructively updating `inner` while `x2` is live must NOT corrupt x2.
+# Correct: x2 stays (100,150).  Bug: x2 becomes (200,150).
+pub type position { pub position(x:int, y:int) }
+pub type pair { pub pair(fst:position, snd:int) }
+
+pub def printPosition(pos:position) use !io {
+    !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")")
+}
+
+pub def {noinline} getfst(p:pair):position = p^fst
+
+!read(?a:int)
+!read(?b:int)
+?inner = position(a, b)
+?pr = pair(inner, 0)
+?x2 = getfst(pr)          # x2 aliases inner (and pr^fst)
+x(!inner, 200)           # must be non-destructive
+!print("expect inner(200,"); !print(b); !print("): "); !printPosition(inner)
+!print("expect x2   (100,"); !print(b); !print("): "); !printPosition(x2)

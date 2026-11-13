@@ -24,10 +24,9 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast("Ada":wybe.string, ?tmp#0##0:trait_import_support.higher_order_box) @trait_higher_order:nn:nn
     trait_higher_order.#closure#1<0><>:(trait_import_support.higher_order_box, ?wybe.string)(~tmp#0##0:trait_import_support.higher_order_box, ?tmp#1##0:wybe.string) #0 @trait_higher_order:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @trait_higher_order:nn:nn
+    wybe.string.print<0>(~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @trait_higher_order:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @trait_higher_order:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @trait_higher_order:nn:nn
     foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_higher_order:nn:nn
@@ -65,7 +64,7 @@ target triple   = ????
 @"trait_higher_order#constant#4" = private unnamed_addr constant {ptr} { ptr @"trait_higher_order#.#closure#1<0>" }, align 8
 
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -73,7 +72,7 @@ define external fastcc void @"trait_higher_order#.<0>"() {
   %"tmp#0##0" = ptrtoint ptr @"trait_higher_order#constant#3" to i64
   %"tmp#14##0" = load ptr, ptr @"trait_higher_order#constant#4"
   %"tmp#1##0" = tail call fastcc i64 %"tmp#14##0"(ptr @"trait_higher_order#constant#4", i64 %"tmp#0##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#1##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -117,7 +116,8 @@ proc = > public {inline} (1 calls)
 proc apply_to_self > public {inline} (1 calls)
 0: trait_import_support.higher_order_box.apply_to_self<0>
 apply_to_self(x##0:trait_import_support.higher_order_box, f##0:(trait_import_support.higher_order_box, ?wybe.string), ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     ~f##0:(trait_import_support.higher_order_box, ?wybe.string)(~x##0:trait_import_support.higher_order_box, ?#result##0:wybe.string) #0 @higher_order_box:nn:nn
 
@@ -125,7 +125,8 @@ apply_to_self(x##0:trait_import_support.higher_order_box, f##0:(trait_import_sup
 proc apply_to_self#adapter > {noinline} (0 calls)
 0: trait_import_support.higher_order_box.apply_to_self#adapter<0>
 apply_to_self#adapter(x##0:T<:trait_import_support.higher_order_mapper, f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:T<:trait_import_support.higher_order_mapper, ?x#adapter0##0:trait_import_support.higher_order_box)
     foreign lpvm cast(~f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?f#adapter1##0:(trait_import_support.higher_order_box, ?wybe.string))
@@ -233,7 +234,8 @@ define external fastcc i1 @"trait_import_support#.higher_order_box#.~=<0>"(i64 %
 proc apply_to_self > public abstract {inline} (0 calls)
 0: trait_import_support.higher_order_mapper.apply_to_self<0>
 apply_to_self(x##0:T<:trait_import_support.higher_order_mapper <{}; {}; {0}>, f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string) <{}; {}; {1}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 0, ExtParam 1, ExtParam 3]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:trait_import_support.higher_order_mapper, ~f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 

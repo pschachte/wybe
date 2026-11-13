@@ -456,6 +456,8 @@ proc pop > public (1 calls)
 pop(lst##0:int_list.int_list, idx##0:wybe.int, outByReference #result##0:int_list.int_list)<{}; {}; {}>:
   AliasSummary:
     ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 2.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 2.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(3,(int_list.pop<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -563,6 +565,8 @@ proc remove > public (1 calls)
 remove(lst##0:int_list.int_list, v##0:wybe.int, outByReference #result##0:int_list.int_list)<{}; {}; {}>:
   AliasSummary:
     ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 2.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 2.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.remove<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1505,6 +1509,8 @@ proc pop > public (1 calls)
 pop(lst##0:int_list.int_list, idx##0:wybe.int, outByReference #result##0:int_list.int_list)<{}; {}; {}>:
   AliasSummary:
     ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 2.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 2.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(3,(int_list.pop<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1644,6 +1650,8 @@ proc remove > public (1 calls)
 remove(lst##0:int_list.int_list, v##0:wybe.int, outByReference #result##0:int_list.int_list)<{}; {}; {}>:
   AliasSummary:
     ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 2.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 2.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.remove<0>,fromList [NonAliasedParamCond 0 [0]]))]

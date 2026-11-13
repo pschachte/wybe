@@ -38,7 +38,7 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(32,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(85,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(86,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(88,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(89,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(94,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(98,(string.print_loop#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
+  MultiSpeczDepInfo: [(85,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(86,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(88,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(89,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(94,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(98,(string.print_loop#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @string:nn:nn
     foreign c print_string(c"TESTING CONSTRUCTION":wybe.c_string, ~%tmp#56##0:wybe.phantom, ?%tmp#57##0:wybe.phantom) @string:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#57##0:wybe.phantom, ?tmp#58##0:wybe.phantom) @string:nn:nn
@@ -84,7 +84,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.,,<0>(1427:wybe.string, ~tmp#11##0:wybe.string, ?tmp#9##0:wybe.string) #28 @string:nn:nn
     wybe.string.,,<0>("abc":wybe.string, ~tmp#9##0:wybe.string, ?tmp#8##0:wybe.string) #30 @string:nn:nn
     wybe.string.c_string<0>(tmp#8##0:wybe.string, ?r##0:wybe.c_string) #31 @string:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#8##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @string:nn:nn
+    wybe.string.print<0>(~tmp#8##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #32 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#139##0:wybe.phantom) @string:nn:nn
     foreign c putchar(32:wybe.char, ~%tmp#139##0:wybe.phantom, ?%tmp#140##0:wybe.phantom) @string:nn:nn
     foreign c print_string(~r##0:wybe.c_string, ~tmp#140##0:wybe.phantom, ?%tmp#143##0:wybe.phantom) @string:nn:nn
@@ -149,14 +149,16 @@ print_loop#cont#1(tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
     ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
     ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-1))]
     ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
     ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
     ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
     ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
     ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-2)), ExtPhantom (ExtParam 0) (Field (-1)), ExtPhantom (ExtParam 0) (Field 7)]
     ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
     ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
-    ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7), ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(0,(wybe.string.[|]<0>,fromList [NonAliasedParamCond 2 [0]])),(2,(string.print_loop#cont#1<0>,fromList [NonAliasedParamCond 0 [0]]))]
     wybe.string.[|]<0>(?c##0:wybe.char, ?tmp#0##1:wybe.string, ~tmp#0##0:wybe.string, ?tmp#2##0:wybe.bool) #0 @string:nn:nn
@@ -301,7 +303,7 @@ define external fastcc void @"string#.<0>"() {
   %"tmp#9##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 1427, i64 %"tmp#11##0")
   %"tmp#8##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"string#constant#13" to i64 ), i64 %"tmp#9##0")
   %"r##0" = tail call fastcc i64 @"wybe#.string#.c_string<0>"(i64 %"tmp#8##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#8##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#8##0")
   call ccc void @putchar(i8 32)
   call ccc void @print_string(i64 %"r##0")
   call ccc void @putchar(i8 10)

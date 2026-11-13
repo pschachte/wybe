@@ -130,8 +130,14 @@ aliasProcBottomUp pspec = do
 -- Return updated ProcDef and a flag (indicating if proc analysis info changed)
 aliasProcDef :: ProcDef -> Compiler ProcDef
 aliasProcDef def
-    | not (procInline def) = do
-        let oldImpln@(ProcDefPrim _ caller body oldAnalysis speczBodies) =
+    -- Analyse non-inline procs, and inline procs whose body performs an opaque
+    -- indirect/virtual call (a trait-method dispatcher): the latter are normally
+    -- skipped, leaving an empty summary, but their dispatch can alias result to
+    -- argument, so they need a (conservative) summary computed once here rather
+    -- than re-derived at every call site.
+    | ProcDefPrim _ caller body _ _ <- procImpln def
+    , not (procInline def) || bodyHasOpaqueCall body = do
+        let oldImpln@(ProcDefPrim _ _ _ oldAnalysis speczBodies) =
              procImpln def
         logAlias $ show caller
 
@@ -279,6 +285,10 @@ transferPrim ptg prim = case prim of
     PrimForeign "llvm" op _ args
         | op `elem` ["add", "sub", "and", "or", "xor"] ->
             transferInterior ptg args
+    -- Indirect and virtual calls are opaque: assume the callee may alias its
+    -- outputs to its inputs rather than silently assuming no aliasing.
+    PrimHigher{}      -> conservativeTransfer ptg prim
+    PrimVirtualCall{} -> conservativeTransfer ptg prim
     _ -> return ptg
 
 
@@ -416,7 +426,23 @@ projectSummary proto ptg =
             (\acc (rj, srcs) ->
                 Set.foldr (\s a -> addEdge a rj FieldIdent s) acc srcs)
             edges identEdges
-    in ProcPTGSummary edgesWithIdent
+        -- An output whose value is an interior pointer of an input
+        -- (`?out = in.field`) points to an external-origin node (a phantom or
+        -- another param) that keeps its own identity rather than folding into the
+        -- return.  The whole-node identity pass above (overlapAdj) only links
+        -- outputs that *share* a node, so it misses this.  Record that the return
+        -- IS that node, so a caller resolves the output to the memory it aliases.
+        returnInteriorEdges =
+            [ (ExtReturn i, e)
+            | (i, p) <- indexed
+            , not (isInputFlow (primParamFlow p))
+            , n <- Set.toList (varNodes ptg (primParamName p))
+            , Just e <- [extOfOrigin (nodeOrigin n)]
+            , e /= ExtReturn i ]
+        edgesFinal = List.foldl'
+            (\acc (rj, e) -> addEdge acc rj FieldIdent e)
+            edgesWithIdent returnInteriorEdges
+    in ProcPTGSummary edgesFinal
 
 
 -- | Paste a callee's 'ProcPTGSummary' into the caller's graph at a call site.
@@ -517,18 +543,25 @@ instantiateSummary calleeProto args (ProcPTGSummary summary) ptg0 = do
 
     -- An input param resolves to the actual arg's VARIABLE nodes only.  Const/
     -- global args are dropped: tying a return to a shared constant would wrongly
-    -- block reuse.  A nodeless pointer var gets a fresh node so it still shares 
+    -- block reuse.  A nodeless pointer var gets a fresh node so it still shares
     -- its summary class's identity.
-    resolveArg (Just arg) memo gg = do
-        ptr <- argIsPointer arg
-        case (ptr, argVarNameMaybe arg) of
-            (True, Just v) ->
-                let ns = varNodes gg v
-                in if Set.null ns
+    --
+    -- If the arg variable already carries points-to nodes we use them regardless
+    -- of its representation test: it is being tracked as a pointer (e.g. a value
+    -- cast through a transparent single-field wrapper, whose type reads as a word
+    -- even though it holds an address).  Only a nodeless var falls back to the
+    -- representation check before minting a fresh node.
+    resolveArg (Just arg) memo gg =
+        case argVarNameMaybe arg of
+            Just v | ns <- varNodes gg v, not (Set.null ns) ->
+                return (ns, memo, gg)
+            Just v -> do
+                ptr <- argMayBePointer arg
+                if ptr
                     then let (n, gg') = freshLocalNode v gg
                          in return (Set.singleton n, memo, gg')
-                    else return (ns, memo, gg)
-            _ -> return (Set.empty, memo, gg)
+                    else return (Set.empty, memo, gg)
+            Nothing -> return (Set.empty, memo, gg)
     resolveArg Nothing memo gg = return (Set.empty, memo, gg)
     -- A genuinely fresh return: whatever the out-arg points to, or a fresh cell.
     resolveOut (Just ArgVar{argVarName=v}) memo gg =
@@ -603,8 +636,7 @@ transferMutate ptg _ _ = return ptg
 transferCopy :: Bool -> PointsToGraph -> PrimArg -> PrimArg
         -> Compiler PointsToGraph
 transferCopy gated ptg inp outp = do
-    ptr <- argIsPointer inp
-    let carry = not gated || ptr || typeNeedsBoxing (argType inp)
+    carry <- if gated then argMayBePointer inp else return True
     return $ case outp of
         ArgVar{argVarName=out} | carry ->
             addVarNodes out (rawSourceNodes ptg inp) ptg
@@ -634,6 +666,40 @@ transferInterior ptg args = do
     return $ List.foldl' (\g v -> addVarNodes v inNodes g) ptg outs
 
 
+-- | Conservative "worst case" transfer for opaque prims (indirect 'PrimHigher'
+-- and virtual 'PrimVirtualCall' calls): assume every pointer-ish output may alias
+-- every pointer-ish input.  Fail-safe -- an unmodelled effect degrades to "may
+-- alias", never to "no alias".
+conservativeTransfer :: PointsToGraph -> Prim -> Compiler PointsToGraph
+conservativeTransfer ptg prim = conservativeArgs ptg (fst (primArgs prim))
+
+
+-- | The conservative transfer over an explicit argument list.
+conservativeArgs :: PointsToGraph -> [PrimArg] -> Compiler PointsToGraph
+conservativeArgs ptg args = do
+    ptrs <- filterM argMayBePointer args
+    let ins     = [ a | a <- ptrs, argFlowDirection a /= FlowOut ]
+        outVars = [ v | a@ArgVar{argVarName=v} <- ptrs
+                      , argFlowDirection a == FlowOut ]
+        inNodes = Set.unions (List.map (rawSourceNodes ptg) ins)
+    return $ List.foldl' (\g v -> addVarNodes v inNodes g) ptg outVars
+
+
+-- | Does a proc body contain an opaque call (indirect 'PrimHigher' or virtual
+-- 'PrimVirtualCall')?  Used to decide that an inline forwarder/dispatcher still
+-- needs a (conservative) summary computed for it.
+bodyHasOpaqueCall :: ProcBody -> Bool
+bodyHasOpaqueCall body =
+    any (opaque . content) (bodyPrims body)
+    || case bodyFork body of
+        PrimFork _ _ _ bs d -> any bodyHasOpaqueCall (List.map snd bs ++ maybeToList d)
+        _                   -> False
+  where
+    opaque PrimHigher{}      = True
+    opaque PrimVirtualCall{} = True
+    opaque _                 = False
+
+
 -- | Nodes contributed by a source argument (pointer variables, global sinks,
 -- and constant memory blocks).  Constant refs introduce a 'ConstNode'.
 rawSourceNodes :: PointsToGraph -> PrimArg -> Set Node
@@ -654,6 +720,17 @@ argIsPointer arg = do
     aliasedRep Pointer  = True
     aliasedRep Func{}   = True
     aliasedRep _        = False
+
+
+-- | Conservative pointer test: a value may be an address if its representation
+-- is pointer-like OR its type is generic (a type variable / 'AnyType'), whose
+-- representation is unknown here and which is boxed at runtime
+-- ('typeNeedsBoxing').  Used wherever treating a possibly-pointer value as a
+-- non-pointer (and so dropping its aliasing) would be unsound.
+argMayBePointer :: PrimArg -> Compiler Bool
+argMayBePointer arg = do
+    ptr <- argIsPointer arg
+    return $ ptr || typeNeedsBoxing (argType arg)
 
 
 -- | Drop dead (final) argument variables from the environment.  Their

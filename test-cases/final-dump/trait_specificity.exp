@@ -16,7 +16,8 @@ AFTER EVERYTHING:
 proc render > public abstract {inline} (0 calls)
 0: trait_import_support.specificity_printable.render<0>
 render(x##0:Type0<:trait_import_support.specificity_printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.specificity_printable, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 

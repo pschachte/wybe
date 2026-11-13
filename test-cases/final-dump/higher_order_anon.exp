@@ -116,13 +116,15 @@ proc #anon#6 > {inline} (1 calls)
 proc #anon#7 > {inline} (1 calls)
 0: higher_order_anon.#anon#7<0>
 #anon#7(^id##0:((wybe.int, ?wybe.int), ?(wybe.int, ?wybe.int)), ?anon#7#1##0:(wybe.int, ?wybe.int))<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtConst higher_order_anon.#anon#7#anon#1<1><>]
   InterestingCallProperties: []
     ~id##0:((wybe.int, ?wybe.int), ?(wybe.int, ?wybe.int))(higher_order_anon.#anon#7#anon#1<1><>:(wybe.int, ?wybe.int), ?anon#7#1##0:(wybe.int, ?wybe.int)) #0 @higher_order_anon:nn:nn
 proc #anon#7 > {inline} (1 calls)
 1: higher_order_anon.#anon#7<1>
 #anon#7(^id##0:((wybe.int, ?wybe.int), ?(wybe.int, ?wybe.int)), ?anon#7#1##0)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtConst higher_order_anon.#anon#7#anon#1<1><>]
   InterestingCallProperties: []
     ~^id##0:((wybe.int, ?wybe.int), ?(wybe.int, ?wybe.int))(higher_order_anon.#anon#7#anon#1<1><>:(wybe.int, ?wybe.int), ?anon#7#1##0:(wybe.int, ?wybe.int)) #0 @higher_order_anon:nn:nn
 

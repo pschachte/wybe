@@ -39,6 +39,7 @@ simpleMerge(tl##0:mytree.tree, tr##0:mytree.tree, ?#result##0:mytree.tree)<{}; {
     ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
     ExtReturn 2.Field 0 -> [ExtParam 0, ExtParam 1]
     ExtReturn 2.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16), ExtPhantom (ExtParam 1) (Field 16)]
+    ExtReturn 2.FieldIdent -> [ExtConst alias_fork1#constant#0]
   InterestingCallProperties: []
     foreign llvm icmp_ne(tl##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool) @alias_fork1:nn:nn
     case ~tmp#15##0:wybe.bool of
@@ -222,14 +223,16 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
     ExtPhantom (ExtParam 1) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-2))]
     ExtPhantom (ExtParam 1) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-1))]
     ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+    ExtPhantom (ExtParam 1) (Field (-1)).Field 0 -> [ExtPhantom (ExtParam 1) (Field (-1))]
     ExtPhantom (ExtParam 1) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 1) (Field (-1))]
     ExtPhantom (ExtParam 1) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 1) (Field (-1))]
     ExtPhantom (ExtParam 1) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 1) (Field (-1))]
     ExtPhantom (ExtParam 1) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 7)]
     ExtPhantom (ExtParam 1) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 7)]
+    ExtPhantom (ExtParam 1) (Field 7).Field 0 -> [ExtPhantom (ExtParam 1) (Field (-2)), ExtPhantom (ExtParam 1) (Field (-1)), ExtPhantom (ExtParam 1) (Field 7)]
     ExtPhantom (ExtParam 1) (Field 7).Field 6 -> [ExtPhantom (ExtParam 1) (Field 7)]
     ExtPhantom (ExtParam 1) (Field 7).Field 7 -> [ExtPhantom (ExtParam 1) (Field 7)]
-    ExtPhantom (ExtParam 1) (Field 7).Field 8 -> [ExtPhantom (ExtParam 1) (Field 7)]
+    ExtPhantom (ExtParam 1) (Field 7).Field 8 -> [ExtPhantom (ExtParam 1) (Field 7), ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(1,(mytree.printTree1<0>,fromList [NonAliasedParamCond 1 [1]])),(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [1]]))]
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @mytree:nn:nn

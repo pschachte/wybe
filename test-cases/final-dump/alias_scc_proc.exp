@@ -50,7 +50,7 @@ proc bar > public (1 calls)
 0: alias_scc_proc.bar<0>
 bar(p1##0:position.position, ?p3##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
-    ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtConst alias_scc_proc#constant#6]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(5,(alias_scc_proc.foo<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @alias_scc_proc:nn:nn
@@ -82,7 +82,8 @@ proc foo > public (2 calls)
 0: alias_scc_proc.foo<0>
 foo(p1##0:position.position, ?p2##0:position.position, ?p3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary:
-    ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtConst alias_scc_proc#constant#5]
+    ExtReturn 2.FieldIdent -> [ExtConst alias_scc_proc#constant#6]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(9,(alias_scc_proc.bar<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @alias_scc_proc:nn:nn

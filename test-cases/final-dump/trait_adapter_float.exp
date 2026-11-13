@@ -94,7 +94,8 @@ define external fastcc i64 @"trait_adapter_float#.my_method#adapter<0>"(i64 %"x#
 proc my_method > public abstract {inline} (0 calls)
 0: trait_adapter_float.my_trait.my_method<0>
 my_method(x##0:Type0<:trait_adapter_float.my_trait <{}; {}; {0}>, ?#result##0:Type0<:trait_adapter_float.my_trait <{}; {}; {0}>, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_adapter_float.my_trait, ?#result##0:Type0<:trait_adapter_float.my_trait, ~#vtable##0:opaque) #0
 

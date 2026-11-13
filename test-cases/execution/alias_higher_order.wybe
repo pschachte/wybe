@@ -1,0 +1,21 @@
+# BUG-3 (Class E): higher-order call contributes no aliasing.
+# `apply` calls an identity closure, so b aliases a; the PrimHigher call is
+# untracked, so the destructive update of p corrupts p2.
+# Correct: p2 stays (100,150).  Bug: p2 becomes (200,150).
+pub type position { pub position(x:int, y:int) }
+
+pub def printPosition(pos:position) use !io {
+    !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")")
+}
+
+pub def {noinline} apply(f:(position, ?position), a:position, ?b:position) {
+    f(a, ?b)
+}
+
+!read(?a:int)
+!read(?b:int)
+?p = position(a, b)
+apply({ @ = ?@ }, p, ?p2)   # identity closure -> p2 aliases p
+x(!p, 200)                  # must be non-destructive
+!print("expect p (200,"); !print(b); !print("): "); !printPosition(p)
+!print("expect p2(100,"); !print(b); !print("): "); !printPosition(p2)

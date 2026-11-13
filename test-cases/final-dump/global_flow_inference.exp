@@ -114,7 +114,8 @@ inout(b##0:wybe.bool)<{<<global_flow_inference.res>>}; {<<global_flow_inference.
 proc only_in > {noinline} (0 calls)
 0: global_flow_inference.only_in<0>
 only_in(?x##0:wybe.int)<{<<global_flow_inference.res>>}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtGlobal <<global_flow_inference.res>>]
   InterestingCallProperties: []
     foreign lpvm load(<<global_flow_inference.res>>:wybe.int, ?%x##0:wybe.int) @global_flow_inference:nn:nn
 
@@ -164,7 +165,8 @@ rec_out_only_notail2()<{}; {<<global_flow_inference.res>>}; {}>:
 proc still_only_in > {noinline} (0 calls)
 0: global_flow_inference.still_only_in<0>
 still_only_in(b##0:wybe.bool, ?x##0:wybe.int)<{<<global_flow_inference.res>>}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtGlobal <<global_flow_inference.res>>]
   InterestingCallProperties: []
     case ~b##0:wybe.bool of
     0:

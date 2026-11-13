@@ -553,7 +553,8 @@ proc #closure#1 > {inline} (2 calls)
 proc do_something > {noinline} (2 calls)
 0: box_unbox_ho.do_something<0>
 do_something(f##0:{resource}(X, ?X) <{}; {}; {0}>, a##0:X <{}; {}; {1}>, ?b##0:X <{}; {}; {0, 1}>)<{}; {}; {0}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 0, ExtParam 1]
   InterestingCallProperties: []
     ~f##0:{resource}(X, ?X)(~a##0:X, ?b##0:X) #0 @box_unbox_ho:nn:nn
 
