@@ -389,8 +389,11 @@ transformForks caller body (aliasMap, deadCells, stackVars) callSiteMap escapedV
             lift $ logTransform "Forking:"
             mapM_ (\(brNum, currBody) -> do
                     beginBranch brNum
+                    -- same path refinement as the analysis (refineForkBranch)
+                    let aliasMap' =
+                            refineForkBranch (bodyPrims body) var brNum aliasMap
                     transformBody caller currBody
-                                (aliasMap, deadCells, stackVars) callSiteMap escapedVars
+                                (aliasMap', deadCells, stackVars) callSiteMap escapedVars
                     endBranch
                 ) (List.map (mapFst Just) fBodies ++ maybeToList ((Nothing,) <$> deflt))
             completeFork

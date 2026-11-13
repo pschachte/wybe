@@ -1,0 +1,16 @@
+# BUG-9 (alias audit pass 2, see scratch/alias_analysis_bugs.md): a destructive
+# update must not corrupt a live alias; correct output matches each "expect".
+pub type position { pub position(x:int, y:int) }
+pub type gpair(T) { pub gpair(a:T, b:T) }
+pub def pp(pos:position) use !io { !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")") }
+# setter a() is noalias (b is generic, not counted as Pointer) -> result gets a
+# fresh node with no edge for b, so g^b reads as the fresh node itself.
+pub def {noinline} setget(g:gpair(position), n:position, ?r:position) { a(!g, n); ?r = g^b }
+!read(?i:int)
+?p = position(i, 2)
+?q = position(i, 4)
+?g = gpair(p, q)
+setget(g, position(i,6), ?z)   # z IS q
+x(!z, 99)
+!print("expect z (99,4):"); !pp(z)
+!print("expect q (1,4):"); !pp(q)

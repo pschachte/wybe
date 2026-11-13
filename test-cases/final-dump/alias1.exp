@@ -166,7 +166,8 @@ foo()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc replicate > public {inline} (3 calls)
 0: alias1.replicate<0>
 replicate(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     wybe.string.print<0>("random print":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @alias1:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @alias1:nn:nn

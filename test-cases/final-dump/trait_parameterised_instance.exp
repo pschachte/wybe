@@ -38,7 +38,29 @@ module top-level code > public {semipure} (0 calls)
 proc from > {inline} (2 calls)
 0: trait_parameterised_instance.from<0>
 from(s##0:wybe.string, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-2)), ExtPhantom (ExtParam 0) (Field (-1)), ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7), ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     wybe.string.c_string<0>(~s##0:wybe.string, ?tmp#1##0:wybe.c_string) #0 @trait_parameterised_instance:nn:nn
     foreign c atoi(~tmp#1##0:wybe.c_string, ?#result##0:wybe.int) @trait_parameterised_instance:nn:nn

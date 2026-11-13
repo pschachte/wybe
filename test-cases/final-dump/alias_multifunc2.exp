@@ -83,7 +83,8 @@ replicate1(p1##0:position.position, ?p2##1:position.position, ?p3##0:position.po
 proc replicate2 > public {inline} (2 calls)
 0: alias_multifunc2.replicate2<0>
 replicate2(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     wybe.string.print<0>("random replicate2 ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @alias_multifunc2:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @alias_multifunc2:nn:nn

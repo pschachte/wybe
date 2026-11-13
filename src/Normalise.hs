@@ -824,7 +824,11 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
         let (fields,sizeBytes) = layoutRecord paramInfos tag tagLimit
         logNormalise $ "Laid out structure size " ++ show sizeBytes
             ++ ": " ++ show fields
-        let ptrCount = length $ List.filter ((==Pointer) . paramInfoTypeRep) paramInfos
+        let ptrCount = length $ List.filter
+                (\info -> fieldMayHoldAddress
+                            (paramType $ content $ paramInfoParam info)
+                            (paramInfoTypeRep info))
+                paramInfos
         logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
                         ++ show numConsts ++ " const constructors, "
                         ++ show numNonConsts ++ " non-const constructors"
@@ -1022,8 +1026,20 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
        else seqToStmt tests
 
 
+-- | Can a field of this type/representation hold an address?  Not just
+-- 'Pointer': C pointers and closures are addresses too, and a generic
+-- (type-variable) field has a word representation but is boxed at runtime, so
+-- may hold a pointer.  Used to decide the setter's "noalias" flag.
+fieldMayHoldAddress :: TypeSpec -> TypeRepresentation -> Bool
+fieldMayHoldAddress ty rep = typeNeedsBoxing ty || case rep of
+    Pointer  -> True
+    CPointer -> True
+    Func{}   -> True
+    _        -> False
+
+
 -- | Produce a getter and a setter for one field of the specified type.
-boxedGetterSetterStmts :: Visibility -> TypeSpec
+boxedGetterSetterStmts ::Visibility -> TypeSpec
                        -> Int -> Int -> Int -> Int -> Int -> Int -> Int
                        -> FieldInfo
                        -> [(VarName, GetterSetterInfo)]
@@ -1032,10 +1048,12 @@ boxedGetterSetterStmts vis rectype numConsts numNonConsts ptrCount size
         tag tagBits tagLimit (FieldInfo field pos _ fieldtype rep offset _) =
     let startOffset = if tag > tagLimit then tagLimit+1 else tag
         detism = deconstructorDetism numConsts numNonConsts
-        -- Set the "noalias" flag when all other fields (exclude the one
-        -- that is being changed) in this struct aren't [Pointer].
-        -- This flag is used in [AliasAnalysis.hs]
-        otherPtrCount = if rep == Pointer then ptrCount-1 else ptrCount
+        -- Set the "noalias" flag when no other field (excluding the one
+        -- being changed) can hold an address (see 'fieldMayHoldAddress').
+        -- AliasAnalysis then models the copy as a fresh cell with no edges
+        -- for the other fields, which is only sound if they carry none.
+        otherPtrCount = if fieldMayHoldAddress fieldtype rep
+                        then ptrCount-1 else ptrCount
         flags = ["noalias" | otherPtrCount == 0]
     in [( field
         , GetterSetterInfo pos vis fieldtype

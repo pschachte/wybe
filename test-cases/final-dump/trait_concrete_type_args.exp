@@ -24,16 +24,59 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_concrete_type_args.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable.Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable.Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable.Field 6 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 6)]
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable.Field 7 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable.Field 8 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 8)]
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable.Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable.Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable.Field 6 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 6)]
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable.Field 7 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable.Field 8 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 8)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2)).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2)).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2)).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2)).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2)).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1)).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1)).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1)).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1)).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1)).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1)).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-2)), ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field (-1)), ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 7), ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable) (Field 8)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2)).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2)).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2)).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2)).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2)).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1)).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1)).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1)).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1)).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1)).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1)).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-2)), ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field (-1)), ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 7), ExtPhantom (ExtGlobal vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable) (Field 8)]
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     trait_concrete_type_args.printable.render<0>(1:trait_concrete_type_args.box(wybe.int), ?tmp#0##0:wybe.string, vtable trait_concrete_type_args.box(wybe.int) <: trait_concrete_type_args.printable:opaque)<{}; {}; {0}> #1 @trait_concrete_type_args:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @trait_concrete_type_args:nn:nn
+    wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @trait_concrete_type_args:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @trait_concrete_type_args:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @trait_concrete_type_args:nn:nn
     foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_concrete_type_args:nn:nn
     trait_concrete_type_args.printable.render<0>(3.14:trait_concrete_type_args.box(wybe.float), ?tmp#2##0:wybe.string, vtable trait_concrete_type_args.box(wybe.float) <: trait_concrete_type_args.printable:opaque)<{}; {}; {0}> #4 @trait_concrete_type_args:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @trait_concrete_type_args:nn:nn
+    wybe.string.print<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @trait_concrete_type_args:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @trait_concrete_type_args:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @trait_concrete_type_args:nn:nn
     foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_concrete_type_args:nn:nn
@@ -42,13 +85,15 @@ module top-level code > public {semipure} (0 calls)
 proc render > {inline} (1 calls)
 0: trait_concrete_type_args.render<0>
 render([x##0:trait_concrete_type_args.box(wybe.int)], ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtConst "boxed int"]
   InterestingCallProperties: []
     foreign llvm move("boxed int":wybe.string, ?#result##0:wybe.string) @trait_concrete_type_args:nn:nn
 proc render > {inline} (1 calls)
 1: trait_concrete_type_args.render<1>
 render([x##0:trait_concrete_type_args.box(wybe.float)], ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtConst "boxed float"]
   InterestingCallProperties: []
     foreign llvm move("boxed float":wybe.string, ?#result##0:wybe.string) @trait_concrete_type_args:nn:nn
 
@@ -83,16 +128,16 @@ target triple   = ????
 @"trait_concrete_type_args#constant#4" = private unnamed_addr constant {i64, ptr} { i64 11, ptr @"trait_concrete_type_args#constant#1" }, align 8
 @"trait_concrete_type_args#constant#5" = private unnamed_addr constant {i64, ptr} { i64 9, ptr @"trait_concrete_type_args#constant#0" }, align 8
 
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
 define external fastcc void @"trait_concrete_type_args#.<0>"() {
   %"tmp#0##0" = tail call fastcc i64 @"trait_concrete_type_args#.printable#.render<0>"(i64 1, ptr @"trait_concrete_type_args##vtable#1")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   %"tmp#2##0" = tail call fastcc i64 @"trait_concrete_type_args#.printable#.render<0>"(i64 bitcast( double 3.14 to i64 ), ptr @"trait_concrete_type_args##vtable#0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#2##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -135,13 +180,15 @@ define external fastcc i64 @"trait_concrete_type_args#.render#adapter<1>"(i64 %"
 proc box > public {inline} (0 calls)
 0: trait_concrete_type_args.box.box<0>
 box(value##0:T <{}; {}; {0}>, ?#result##2:trait_concrete_type_args.box(T) <{}; {}; {0}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~value##0:T, ?#result##2:trait_concrete_type_args.box(T)) @trait_concrete_type_args:nn:nn
 proc box > public {inline} (0 calls)
 1: trait_concrete_type_args.box.box<1>
 box(?value##0:T <{}; {}; {1}>, #result##0:trait_concrete_type_args.box(T) <{}; {}; {1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_concrete_type_args.box(T), ?value##0:T) @trait_concrete_type_args:nn:nn
 
@@ -149,13 +196,15 @@ box(?value##0:T <{}; {}; {1}>, #result##0:trait_concrete_type_args.box(T) <{}; {
 proc value > public {inline} (0 calls)
 0: trait_concrete_type_args.box.value<0>
 value(#rec##0:trait_concrete_type_args.box(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_concrete_type_args.box(T), ?#result##0:T) @trait_concrete_type_args:nn:nn
 proc value > public {inline} (0 calls)
 1: trait_concrete_type_args.box.value<1>
 value([#rec##0:trait_concrete_type_args.box(T) <{}; {}; {0}>], ?#rec##2:trait_concrete_type_args.box(T) <{}; {}; {2}>, #field##0:T <{}; {}; {2}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:T, ?#rec##2:trait_concrete_type_args.box(T)) @trait_concrete_type_args:nn:nn
 

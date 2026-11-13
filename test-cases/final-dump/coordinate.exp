@@ -52,7 +52,8 @@ module top-level code > public {semipure} (0 calls)
 proc fcopy > public {inline} (1 calls)
 0: coordinate.fcopy<0>
 fcopy(crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate) @coordinate:nn:nn
 

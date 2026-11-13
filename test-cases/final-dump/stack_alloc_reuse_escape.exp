@@ -19,7 +19,8 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: stack_alloc_reuse_escape.<0>
 ()<{<<wybe.io.io>>}; {<<stack_alloc_reuse_escape.saved>>, <<wybe.io.io>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtGlobal <<stack_alloc_reuse_escape.saved>>.FieldAny -> [ExtPhantom (ExtGlobal <<stack_alloc_reuse_escape.saved>>) FieldAny]
   InterestingCallProperties: []
     stack_alloc_reuse_escape.stash<0>(42:wybe.int)<{}; {<<stack_alloc_reuse_escape.saved>>}; {}> #1 @stack_alloc_reuse_escape:nn:nn
     stack_alloc_reuse_escape.clobber<0>(1000:wybe.int, ?junk##0:wybe.int) #2 @stack_alloc_reuse_escape:nn:nn
@@ -79,7 +80,8 @@ clobber#cont#1(acc##0:wybe.int, tmp#0##0:wybe.range, ?out##0:wybe.int)<{}; {}; {
 proc stash > {noinline} (1 calls)
 0: stack_alloc_reuse_escape.stash<0>
 stash(x##0:wybe.int)<{}; {<<stack_alloc_reuse_escape.saved>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtGlobal <<stack_alloc_reuse_escape.saved>>.FieldAny -> [ExtPhantom (ExtGlobal <<stack_alloc_reuse_escape.saved>>) FieldAny]
   InterestingCallProperties: []
     foreign lpvm {stack} alloc(16:wybe.int, ?tmp#5##0:stack_alloc_reuse_escape.cell) @stack_alloc_reuse_escape:nn:nn
     foreign lpvm mutate(~tmp#5##0:stack_alloc_reuse_escape.cell, ?tmp#6##0:stack_alloc_reuse_escape.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_reuse_escape:nn:nn

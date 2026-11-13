@@ -34,7 +34,8 @@ module top-level code > public {inline,semipure} (0 calls)
 proc backup > public {inline} (1 calls)
 0: alias_data.backup<0>
 backup(student1##0:student.student, ?student2##0:student.student)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~student1##0:student.student, ?student2##0:student.student) @alias_data:nn:nn
 
@@ -252,7 +253,21 @@ define external fastcc void @"student#.printStudent<0>"(i64 %"stu##0") {
 proc = > public {inline} (1 calls)
 0: student.course.=<0>
 =(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 6 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 7 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 0 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 6 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 7 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#code##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#left##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#name##0:wybe.string) @student:nn:nn
@@ -278,7 +293,8 @@ code(#rec##0:student.course, ?#result##0:wybe.int)<{}; {}; {}>:
 proc code > public {inline} (0 calls)
 1: student.course.code<1>
 code(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.int)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @student:nn:nn
 
@@ -286,7 +302,8 @@ code(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.int)<{}; {}
 proc course > public {inline} (0 calls)
 0: student.course.course<0>
 course(code##0:wybe.int, name##0:wybe.string, ?#result##0:student.course)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.Field 8 -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:student.course) @student:nn:nn
     foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code##0:wybe.int) @student:nn:nn
@@ -294,7 +311,9 @@ course(code##0:wybe.int, name##0:wybe.string, ?#result##0:student.course)<{}; {}
 proc course > public {inline} (6 calls)
 1: student.course.course<1>
 course(?code##0:wybe.int, ?name##0:wybe.string, #result##0:student.course)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#result##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?code##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#result##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?name##0:wybe.string) @student:nn:nn
@@ -303,13 +322,16 @@ course(?code##0:wybe.int, ?name##0:wybe.string, #result##0:student.course)<{}; {
 proc name > public {inline} (0 calls)
 0: student.course.name<0>
 name(#rec##0:student.course, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @student:nn:nn
 proc name > public {inline} (0 calls)
 1: student.course.name<1>
 name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.Field 8 -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:student.course, ?#rec##1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @student:nn:nn
 
@@ -317,7 +339,21 @@ name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string)<{};
 proc ~= > public {inline} (0 calls)
 0: student.course.~=<0>
 ~=(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 6 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 7 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 0 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 6 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 7 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#left##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string) @student:nn:nn
@@ -474,7 +510,21 @@ if.else.0:
 proc = > public {inline} (1 calls)
 0: student.student.=<0>
 =(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 6 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 7 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 0 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 6 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 7 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#id##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#left##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#major##0:student.course) @student:nn:nn
@@ -511,7 +561,8 @@ id(#rec##0:student.student, ?#result##0:wybe.int)<{}; {}; {}>:
 proc id > public {inline} (0 calls)
 1: student.student.id<1>
 id(#rec##0:student.student, ?#rec##1:student.student, #field##0:wybe.int)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @student:nn:nn
 
@@ -519,13 +570,16 @@ id(#rec##0:student.student, ?#rec##1:student.student, #field##0:wybe.int)<{}; {}
 proc major > public {inline} (0 calls)
 0: student.student.major<0>
 major(#rec##0:student.student, ?#result##0:student.course)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:student.course) @student:nn:nn
 proc major > public {inline} (0 calls)
 1: student.student.major<1>
 major(#rec##0:student.student, ?#rec##1:student.student, #field##0:student.course)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.Field 8 -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:student.student, ?#rec##1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:student.course) @student:nn:nn
 
@@ -533,7 +587,8 @@ major(#rec##0:student.student, ?#rec##1:student.student, #field##0:student.cours
 proc student > public {inline} (0 calls)
 0: student.student.student<0>
 student(id##0:wybe.int, major##0:student.course, ?#result##0:student.student)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.Field 8 -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:student.student) @student:nn:nn
     foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id##0:wybe.int) @student:nn:nn
@@ -541,7 +596,9 @@ student(id##0:wybe.int, major##0:student.course, ?#result##0:student.student)<{}
 proc student > public {inline} (6 calls)
 1: student.student.student<1>
 student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#result##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?id##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#result##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?major##0:student.course) @student:nn:nn
@@ -550,7 +607,21 @@ student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student)<{
 proc ~= > public {inline} (0 calls)
 0: student.student.~=<0>
 ~=(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 6 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 7 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 0 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 6 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 7 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @student:nn:nn
     foreign lpvm access(~#left##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:student.course) @student:nn:nn

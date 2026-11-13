@@ -28,7 +28,8 @@ module top-level code > public {semipure} (0 calls)
 proc #closure#1 > {inline} (1 calls)
 0: higher_order_inline.#closure#1<0>
 #closure#1(a##0 <{}; {}; {0}>, ?#result##0 <{}; {}; {0}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~a##0:A, ?#result##0:A) @predicate:nn:nn
 

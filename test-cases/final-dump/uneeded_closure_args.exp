@@ -27,7 +27,8 @@ module top-level code > public {semipure} (0 calls)
 proc #closure#1 > {inline} (1 calls)
 0: uneeded_closure_args.#closure#1<0>
 #closure#1([^a##0:A <{}; {}; {0}>], b##0 <{}; {}; {1}>, ?#result##0 <{}; {}; {1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
 
@@ -44,7 +45,8 @@ call(f##0:(A, ?A) <{}; {}; {0}>, a##0:A <{}; {}; {1}>, ?#result##0:A <{}; {}; {0
 proc second > {inline} (1 calls)
 0: uneeded_closure_args.second<0>
 second([a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
 

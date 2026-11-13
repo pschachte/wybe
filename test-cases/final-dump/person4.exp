@@ -83,7 +83,35 @@ define external fastcc void @"person4#.<0>"() {
 proc = > public {inline} (1 calls)
 0: person4.person.=<0>
 =(#left##0:person4.person, #right##0:person4.person, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 0).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 6 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 7 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 8 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 6 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 7 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 0).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 6 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 7 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 8 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 0 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 6 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 7 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string) @person4:nn:nn
     foreign lpvm access(~#left##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lastname##0:wybe.string) @person4:nn:nn
@@ -104,13 +132,18 @@ proc = > public {inline} (1 calls)
 proc firstname > public {inline} (0 calls)
 0: person4.person.firstname<0>
 firstname(#rec##0:person4.person, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person4:nn:nn
 proc firstname > public {inline} (0 calls)
 1: person4.person.firstname<1>
 firstname(#rec##0:person4.person, ?#rec##1:person4.person, #field##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtParam 2]
+    ExtReturn 1.Field 0 -> [ExtParam 2]
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:person4.person, ?#rec##1:person4.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person4:nn:nn
 
@@ -118,13 +151,18 @@ firstname(#rec##0:person4.person, ?#rec##1:person4.person, #field##0:wybe.string
 proc lastname > public {inline} (0 calls)
 0: person4.person.lastname<0>
 lastname(#rec##0:person4.person, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person4:nn:nn
 proc lastname > public {inline} (0 calls)
 1: person4.person.lastname<1>
 lastname(#rec##0:person4.person, ?#rec##1:person4.person, #field##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtParam 2]
+    ExtReturn 1.Field 8 -> [ExtParam 2]
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:person4.person, ?#rec##1:person4.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person4:nn:nn
 
@@ -132,7 +170,9 @@ lastname(#rec##0:person4.person, ?#rec##1:person4.person, #field##0:wybe.string)
 proc person > public {inline} (0 calls)
 0: person4.person.person<0>
 person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person4.person)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.Field 0 -> [ExtParam 0]
+    ExtReturn 2.Field 8 -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:person4.person) @person4:nn:nn
     foreign lpvm mutate(~#rec##0:person4.person, ?#rec##1:person4.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname##0:wybe.string) @person4:nn:nn
@@ -140,7 +180,11 @@ person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person4.pe
 proc person > public {inline} (6 calls)
 1: person4.person.person<1>
 person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person4.person)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 2.Field 0 -> [ExtPhantom (ExtParam 2) (Field 0)]
+    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+    ExtReturn 0.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 0)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#result##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string) @person4:nn:nn
     foreign lpvm access(~#result##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string) @person4:nn:nn
@@ -149,7 +193,35 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person4.p
 proc ~= > public {inline} (0 calls)
 0: person4.person.~=<0>
 ~=(#left##0:person4.person, #right##0:person4.person, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 0).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 6 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 7 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 0).Field 8 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 6 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 7 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 0).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 6 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 7 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 0).Field 8 -> [ExtPhantom (ExtParam 1) (Field 0)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-2) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field (-1) -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 0 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 6 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 7 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @person4:nn:nn
     foreign lpvm access(~#left##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string) @person4:nn:nn

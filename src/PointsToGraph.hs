@@ -263,8 +263,10 @@ externalNodes = Set.filter (isExternalOrigin . nodeOrigin) . allNodes
 -- Queries (reachability-based -- replacing the DisjointSet queries)
 ----------------------------------------------------------------
 
--- | Reachability-based aliasing query.  @v@ is aliased both by what points into it
--- and by what it transitively contains, so both directions of the directed graph are walked.
+-- | Reachability-based aliasing query.  @v@ is unaliased only if the heap it
+-- reaches is disjoint from the heap reachable from every other live variable
+-- and from every external sink (deep unaliasedness).  Returns @Just ps@ if the
+-- only contact is with maybe-aliased params @ps@, @Nothing@ if aliased.
 queryUnaliased :: PointsToGraph -> PrimVarName -> Maybe [PrimVarName]
 queryUnaliased ptg v =
     let vNodes     = varNodes ptg v
@@ -276,14 +278,22 @@ queryUnaliased ptg v =
         exts       = externalNodes ptg
         -- everything v embeds: its own cells plus what they transitively contain
         fReach     = reachableNodes ptg vNodes
-        -- contamination in either direction (something points into v, or v embeds
-        -- it): internal = shared with another live var; external = an external sink
-        internalContam = Set.union
-            (Set.intersection vNodes (reachableNodes ptg otherRoots))
-            (Set.intersection fReach otherRoots)
-        externalContam = Set.union
-            (Set.intersection vNodes (reachableNodes ptg exts))
-            (Set.intersection fReach exts)
+        -- contamination: internal = v's heap overlaps another live var's heap;
+        -- external = v's heap touches an external sink.
+        --
+        -- "Unaliased" is DEEP: nothing v reaches may be reachable from any other
+        -- live var.  Checking only v's own cells (or only cells another var names
+        -- directly) is unsound, because a var may point to an ANCESTOR of its
+        -- real target (the depth-capped phantom, the local unknown-field
+        -- fallback in 'readFieldMat', the conservative transfer of an opaque
+        -- call), and because a callee treats every phantom of an unaliased
+        -- param as owned.  In both cases the real target is a shared descendant.
+        internalContam =
+            Set.intersection fReach (reachableNodes ptg otherRoots)
+        -- (also deep: a cell both v and an external sink reach -- e.g. one stored
+        -- in a global and embedded in v -- contaminates v even though neither
+        -- v's own cells nor the cell itself is external)
+        externalContam = Set.intersection fReach (reachableNodes ptg exts)
         -- the maybe-alias param an external contaminant roots at, if any
         classify (Node o) = case rootParamOfOrigin o of
             Just p | p `Set.member` ptgMaybeAliasParams ptg -> Just p

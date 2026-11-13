@@ -43,11 +43,10 @@ proc print_value#adapter > {noinline} (0 calls)
 print_value#adapter(x##0:Type0<:trait_abstract_proc_dispatch.printable, #vtable##0:opaque)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasSummary: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast(~x##0:Type0<:trait_abstract_proc_dispatch.printable, ?x#adapter0##0:wybe.int)
     wybe.int.fmt<2>(~x#adapter0##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #1 @trait_abstract_proc_dispatch:nn:nn
     wybe.string.,,<0>("value ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#2##0:wybe.string) #2 @trait_abstract_proc_dispatch:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @trait_abstract_proc_dispatch:nn:nn
+    wybe.string.print<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @trait_abstract_proc_dispatch:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @trait_abstract_proc_dispatch:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @trait_abstract_proc_dispatch:nn:nn
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_abstract_proc_dispatch:nn:nn
@@ -67,7 +66,6 @@ target triple   = ????
 declare external fastcc i64 @"wybe#.int#.fmt<2>"(i64, i64, i8)
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -87,7 +85,7 @@ define external fastcc void @"trait_abstract_proc_dispatch#.print_value<0>"(i64 
 define external fastcc void @"trait_abstract_proc_dispatch#.print_value#adapter<0>"(i64 %"x##0", ptr %"#vtable##0") {
   %"tmp#1##0" = tail call fastcc i64 @"wybe#.int#.fmt<2>"(i64 %"x##0", i64 0, i8 32)
   %"tmp#2##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 ptrtoint( ptr @"trait_abstract_proc_dispatch#constant#2" to i64 ), i64 %"tmp#1##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#2##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   ret void
 }

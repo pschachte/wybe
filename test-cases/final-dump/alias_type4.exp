@@ -337,7 +337,9 @@ if.else.0:
 proc = > public {inline} (1 calls)
 0: alias_type4.posrec.=<0>
 =(#left##0:alias_type4.posrec, #right##0:alias_type4.posrec, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#p##0:alias_type4.position) @alias_type4:nn:nn
     foreign lpvm access(~#left##0:alias_type4.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#a##0:wybe.int) @alias_type4:nn:nn
@@ -373,7 +375,8 @@ a(#rec##0:alias_type4.posrec, ?#result##0:wybe.int)<{}; {}; {}>:
 proc a > public {inline} (0 calls)
 1: alias_type4.posrec.a<1>
 a(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:wybe.int)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @alias_type4:nn:nn
 
@@ -381,13 +384,16 @@ a(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:wybe.int)<{
 proc p > public {inline} (0 calls)
 0: alias_type4.posrec.p<0>
 p(#rec##0:alias_type4.posrec, ?#result##0:alias_type4.position)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:alias_type4.position) @alias_type4:nn:nn
 proc p > public {inline} (0 calls)
 1: alias_type4.posrec.p<1>
 p(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:alias_type4.position)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.Field 0 -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:alias_type4.position) @alias_type4:nn:nn
 
@@ -395,7 +401,8 @@ p(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:alias_type4
 proc posrec > public {inline} (0 calls)
 0: alias_type4.posrec.posrec<0>
 posrec(p##0:alias_type4.position, a##0:wybe.int, ?#result##0:alias_type4.posrec)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.Field 0 -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:alias_type4.posrec) @alias_type4:nn:nn
     foreign lpvm mutate(~#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p##0:alias_type4.position) @alias_type4:nn:nn
@@ -403,7 +410,9 @@ posrec(p##0:alias_type4.position, a##0:wybe.int, ?#result##0:alias_type4.posrec)
 proc posrec > public {inline} (6 calls)
 1: alias_type4.posrec.posrec<1>
 posrec(?p##0:alias_type4.position, ?a##0:wybe.int, #result##0:alias_type4.posrec)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 2.Field 0 -> [ExtPhantom (ExtParam 2) (Field 0)]
+    ExtReturn 0.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(#result##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?p##0:alias_type4.position) @alias_type4:nn:nn
     foreign lpvm access(~#result##0:alias_type4.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?a##0:wybe.int) @alias_type4:nn:nn
@@ -412,7 +421,9 @@ posrec(?p##0:alias_type4.position, ?a##0:wybe.int, #result##0:alias_type4.posrec
 proc ~= > public {inline} (0 calls)
 0: alias_type4.posrec.~=<0>
 ~=(#left##0:alias_type4.posrec, #right##0:alias_type4.posrec, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:alias_type4.position) @alias_type4:nn:nn
     foreign lpvm access(~#left##0:alias_type4.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @alias_type4:nn:nn

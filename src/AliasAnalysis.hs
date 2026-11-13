@@ -11,7 +11,7 @@ module AliasAnalysis (
     AliasMapLocal, aliasSccBottomUp, currentAliasInfo,
     isAliasInfoChanged, updateAliasedByPrim, isArgUnaliased, isArgEscaped,
     isArgVarUsedOnceInArgs, DeadCells, updateDeadCellsByAccessArgs,
-    assignDeadCellsByAllocArgs
+    assignDeadCellsByAllocArgs, refineForkBranch
     ) where
 
 import           AST
@@ -130,13 +130,11 @@ aliasProcBottomUp pspec = do
 -- Return updated ProcDef and a flag (indicating if proc analysis info changed)
 aliasProcDef :: ProcDef -> Compiler ProcDef
 aliasProcDef def
-    -- Analyse non-inline procs, and inline procs whose body performs an opaque
-    -- indirect/virtual call (a trait-method dispatcher): the latter are normally
-    -- skipped, leaving an empty summary, but their dispatch can alias result to
-    -- argument, so they need a (conservative) summary computed once here rather
-    -- than re-derived at every call site.
-    | ProcDefPrim _ caller body _ _ <- procImpln def
-    , not (procInline def) || bodyHasOpaqueCall body = do
+    -- Analyse every proc, inline ones included.  Calls to an inline proc can
+    -- survive expansion (a trait-method dispatcher; a recursive {inline} proc,
+    -- whose self-call is not inlined while inlining its body), and a callee
+    -- with no summary reads as "result aliases nothing" -- unsound.
+    | ProcDefPrim _ caller body _ _ <- procImpln def = do
         let oldImpln@(ProcDefPrim _ _ _ oldAnalysis speczBodies) =
              procImpln def
         logAlias $ show caller
@@ -155,12 +153,20 @@ aliasProcDef def
         -- summary carrying field edges / pass-through aliases / escape.
         let summary = projectSummary caller aliasMap
         logAlias $ "^^^  PTG summary: " ++ show summary
-        -- Update proc analysis with the new summary
+        -- Update proc analysis with the new summary.  An inline proc is never
+        -- specialised (Transform rejects it), so it must not advertise
+        -- interesting params or request specialised callees: only its summary
+        -- is recorded.
+        let inline = procInline def
         let newAnalysis =
                 oldAnalysis {
                     procArgPTGSummary = summary,
-                    procInterestingCallProperties = interestingCallProperties,
-                    procMultiSpeczDepInfo = multiSpeczDepInfo}
+                    procInterestingCallProperties =
+                        if inline then Set.empty else interestingCallProperties,
+                    procMultiSpeczDepInfo =
+                        if inline then Map.empty
+                        -- drop call sites recorded with no conditions
+                        else Map.filter (not . Set.null . snd) multiSpeczDepInfo}
         return $
             def { procImpln = oldImpln { procImplnAnalysis = newAnalysis } }
 aliasProcDef def = return def
@@ -190,11 +196,15 @@ aliasedByFork caller body analysisInfo = do
     logAlias "\nAnalyse forks (aliasedByFork):"
     let fork = bodyFork body
     case fork of
-        PrimFork _ _ _ fBodies deflt -> do
+        PrimFork var _ _ fBodies deflt -> do
             logAlias ">>> Forking:"
+            let (ptg, icp, msdi, dc) = analysisInfo
+            let branchInfo idx =
+                    (refineForkBranch (bodyPrims body) var idx ptg, icp, msdi, dc)
             analysisInfos <-
-                mapM (\body' -> aliasedByBody caller body' analysisInfo)
-                    $ List.map snd fBodies ++ maybeToList deflt
+                mapM (\(idx, body') -> aliasedByBody caller body' (branchInfo idx))
+                    $ [ (Just i, b) | (i, b) <- fBodies ]
+                      ++ [ (Nothing, d) | d <- maybeToList deflt ]
             return $ mergeAnalysisInfo analysisInfos
         MergedFork{} -> do
             logAlias ">>> Merged fork:"
@@ -204,6 +214,35 @@ aliasedByFork caller body analysisInfo = do
             logAlias ">>> No fork."
             -- drop "deadCells", we don't need it after fork
             return analysisInfo
+
+
+-- | Path refinement on entry to fork branch @idx@ (Nothing = default branch).
+-- If the fork variable was computed in the enclosing body as
+-- @icmp_eq/icmp_ne(x, n)@ for a small integer literal @n@, then in the branch
+-- where @x == n@ holds, @x@ is a constant constructor (a small integer, never
+-- an address: nothing is allocated in the null page), so it points to nothing.
+-- Without this, the base case of a list recursion -- `?out = in` taken only
+-- when `in` is `empty` -- reads as "the result may be the input list".
+--
+-- Shared by the analysis and the transform so both see the same graph.
+refineForkBranch :: [Placed Prim] -> PrimVarName -> Maybe Integer
+        -> AliasMapLocal -> AliasMapLocal
+refineForkBranch prims forkV (Just idx) ptg =
+    case [ (op, x, n) | PrimForeign "llvm" op _ args <- List.map content prims
+                      , op `elem` ["icmp_eq", "icmp_ne"]
+                      , (x, n, ArgVar{argVarName=t}) <- operands args
+                      , t == forkV ] of
+        [(op, x, n)]
+            | n >= 0 && n < 4096
+            , (op == "icmp_eq" && idx == 1) || (op == "icmp_ne" && idx == 0)
+            , Map.member x (ptgEnv ptg) ->
+                setVarNodes x Set.empty ptg
+        _ -> ptg
+  where
+    operands [ArgVar{argVarName=x}, ArgInt n _, out] = [(x, n, out)]
+    operands [ArgInt n _, ArgVar{argVarName=x}, out] = [(x, n, out)]
+    operands _                                       = []
+refineForkBranch _ _ Nothing ptg = ptg
 
 
 aliasedByPrim :: PrimProto -> AnalysisInfo -> Placed Prim
@@ -230,8 +269,9 @@ mergeAnalysisInfo infos =
         aliasMap = List.foldl joinPTG emptyPTG aliasMapList
         interestingCallProperties =
             List.foldl Set.union Set.empty interestingCallPropertiesList
-        -- XXX there could be something better than "Map.unions"
-        multiSpeczDepInfo = Map.unions multiSpeczDepInfoList
+        multiSpeczDepInfo = if List.null multiSpeczDepInfoList
+                            then Map.empty
+                            else mergeMultiSpeczDepInfo multiSpeczDepInfoList
         -- We don't need "deadCells" after fork for now.
         deadCells = Map.empty
     in (aliasMap, interestingCallProperties, multiSpeczDepInfo, deadCells)
@@ -363,6 +403,13 @@ projectSummary proto ptg =
             | (_, p) <- indexed
             , let nm = primParamName p
             , Just ext <- [Map.lookup nm paramExt] ]
+        -- Globals holding edges are roots too: a store into a global (directly
+        -- or via a callee) is an edge *out of* the global node, e.g. global ->
+        -- param, which a walk from the params alone never reaches.  Dropping it
+        -- would hide the escape from callers.
+        globalRoots =
+            [ (ExtGlobal g, Set.singleton n)
+            | n@(Node (GlobalNode g)) <- Map.keys (ptgEdges ptg) ]
         -- Seed the node -> ext map: an external-origin node keeps its own
         -- identity; a local node folds into the root's ext (a returned/param
         -- structure).
@@ -372,7 +419,7 @@ projectSummary proto ptg =
                             Just self -> Map.insert n self m'
                             Nothing   -> Map.insertWith (\_ old -> old) n ext m')
                 m (Set.toList ns))
-            Map.empty roots
+            Map.empty (roots ++ globalRoots)
         -- Forward walk: assign identities and collect field edges.
         (xlate, edges) = bfs seedXlate Map.empty (Map.keys seedXlate)
         bfs xl acc []        = (xl, acc)
@@ -541,9 +588,11 @@ instantiateSummary calleeProto args (ProcPTGSummary summary) ptg0 = do
                     (Set.empty, g') baseNs
             return (collected, memo', g'')
 
-    -- An input param resolves to the actual arg's VARIABLE nodes only.  Const/
-    -- global args are dropped: tying a return to a shared constant would wrongly
-    -- block reuse.  A nodeless pointer var gets a fresh node so it still shares
+    -- An input param resolves to the actual arg's nodes.  A non-variable arg
+    -- resolves to its sink ('rawSourceNodes': ConstNode / GlobalNode / a
+    -- closure's captured args); dropping it would make a return that IS, or
+    -- embeds, a constant read as fresh and get it updated in place inside
+    -- static data.  A nodeless pointer var gets a fresh node so it still shares
     -- its summary class's identity.
     --
     -- If the arg variable already carries points-to nodes we use them regardless
@@ -561,7 +610,7 @@ instantiateSummary calleeProto args (ProcPTGSummary summary) ptg0 = do
                     then let (n, gg') = freshLocalNode v gg
                          in return (Set.singleton n, memo, gg')
                     else return (Set.empty, memo, gg)
-            Nothing -> return (Set.empty, memo, gg)
+            Nothing -> return (rawSourceNodes gg arg, memo, gg)
     resolveArg Nothing memo gg = return (Set.empty, memo, gg)
     -- A genuinely fresh return: whatever the out-arg points to, or a fresh cell.
     resolveOut (Just ArgVar{argVarName=v}) memo gg =
@@ -685,28 +734,15 @@ conservativeArgs ptg args = do
     return $ List.foldl' (\g v -> addVarNodes v inNodes g) ptg outVars
 
 
--- | Does a proc body contain an opaque call (indirect 'PrimHigher' or virtual
--- 'PrimVirtualCall')?  Used to decide that an inline forwarder/dispatcher still
--- needs a (conservative) summary computed for it.
-bodyHasOpaqueCall :: ProcBody -> Bool
-bodyHasOpaqueCall body =
-    any (opaque . content) (bodyPrims body)
-    || case bodyFork body of
-        PrimFork _ _ _ bs d -> any bodyHasOpaqueCall (List.map snd bs ++ maybeToList d)
-        _                   -> False
-  where
-    opaque PrimHigher{}      = True
-    opaque PrimVirtualCall{} = True
-    opaque _                 = False
-
-
 -- | Nodes contributed by a source argument (pointer variables, global sinks,
--- and constant memory blocks).  Constant refs introduce a 'ConstNode'.
+-- and constant memory blocks).  Constant refs introduce a 'ConstNode'.  A
+-- closure literal holds its captured args, so it contributes their nodes.
 rawSourceNodes :: PointsToGraph -> PrimArg -> Set Node
 rawSourceNodes ptg arg = case arg of
     ArgVar{argVarName=v} -> varNodes ptg v
     ArgGlobal glob _     -> Set.singleton (Node (GlobalNode glob))
     ArgConstRef ref _    -> Set.singleton (Node (ConstNode ref))
+    ArgClosure _ closed _ -> Set.unions (List.map (rawSourceNodes ptg) closed)
     _                    -> Set.empty
 
 
@@ -878,17 +914,38 @@ addInterestingUnaliasedParams proto properties params =
 -- adding new specz version dependency
 updateMultiSpeczDepInfo :: MultiSpeczDepInfo -> CallSiteID -> ProcSpec
         -> [CallSiteProperty] -> Compiler MultiSpeczDepInfo
-updateMultiSpeczDepInfo multiSpeczDepInfo callSiteID pSpec items =
-    if List.null items
-    then
-        return multiSpeczDepInfo
-    else do
-        logAlias $ "Update MultiSpeczDepInfo, CallSiteID: " ++ show callSiteID
+-- The call site is recorded even with no items: 'mergeMultiSpeczDepInfo' must
+-- know that a branch *contains* the call without licensing any specialization.
+-- Empty entries are dropped once the whole proc is analysed.
+updateMultiSpeczDepInfo multiSpeczDepInfo callSiteID pSpec items = do
+        unless (List.null items) $
+            logAlias $ "Update MultiSpeczDepInfo, CallSiteID: " ++ show callSiteID
                 ++ " ProcSpec: " ++ show pSpec ++ " items:" ++ show items
         return $ Map.alter (\x ->
             fromMaybe (pSpec, Set.empty) x
             |> second (Set.union (Set.fromList items))
             |> Just) callSiteID multiSpeczDepInfo
+
+
+-- | Merge the MultiSpeczDepInfo of fork branches.  Code following a fork may be
+-- duplicated into every branch keeping its CallSiteID, yet one call site gets a
+-- single specialised callee.  So a callee param condition survives only if
+-- EVERY branch containing the call site has it, with the union of the caller
+-- params each branch requires.  (A left-biased 'Map.unions' let one branch's
+-- "unaliased here" license the call in a branch where the arg is aliased.)
+mergeMultiSpeczDepInfo :: [MultiSpeczDepInfo] -> MultiSpeczDepInfo
+mergeMultiSpeczDepInfo = List.foldr1 (Map.unionWith combine)
+  where
+    combine (spec, a) (_, b) =
+        let condMap s = Map.fromListWith List.union
+                [ (p, rs) | NonAliasedParamCond p rs <- Set.toList s ]
+            both = Map.intersectionWith List.union (condMap a) (condMap b)
+            others = Set.filter (\case NonAliasedParamCond{} -> False
+                                       _                     -> True)
+                                (Set.union a b)
+        in (spec, Set.union others $ Set.fromList
+                    [ NonAliasedParamCond p (List.sort (List.nub rs))
+                    | (p, rs) <- Map.toList both ])
 
 
 ----------------------------------------------------------------

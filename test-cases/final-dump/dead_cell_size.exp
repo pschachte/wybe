@@ -663,7 +663,8 @@ tb1(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; 
 proc tb1 > public {inline} (0 calls)
 1: dead_cell_size.t.tb1<1>
 tb1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -755,7 +756,8 @@ tc1(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; 
 proc tc1 > public {inline} (0 calls)
 1: dead_cell_size.t.tc1<1>
 tc1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -805,7 +807,8 @@ tc2(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; 
 proc tc2 > public {inline} (0 calls)
 1: dead_cell_size.t.tc2<1>
 tc2(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -855,7 +858,8 @@ tc3(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; 
 proc tc3 > public {inline} (0 calls)
 1: dead_cell_size.t.tc3<1>
 tc3(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -939,7 +943,8 @@ td1(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; 
 proc td1 > public {inline} (0 calls)
 1: dead_cell_size.t.td1<1>
 td1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of

@@ -32,7 +32,9 @@ show(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc show#cont#1 > {inline} (1 calls)
 0: stack_alloc_escape.show#cont#1<0>
 show#cont#1(xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     stack_alloc_escape.show#cont#2<0>(~xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @stack_alloc_escape:nn:nn
 
@@ -86,7 +88,8 @@ show#cont#3(i##0:wybe.int, xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.
 proc show#cont#4 > {inline} (1 calls)
 0: stack_alloc_escape.show#cont#4<0>
 show#cont#4(i##0:wybe.int, xs##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 1.Field 8 -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:wybe.list(wybe.int)) @stack_alloc_escape:nn:nn
     foreign lpvm mutate(~tmp#8##0:wybe.list(wybe.int), ?tmp#9##0:wybe.list(wybe.int), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, i##0:wybe.int) @stack_alloc_escape:nn:nn

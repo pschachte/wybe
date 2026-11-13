@@ -21,7 +21,29 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_basic.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker.Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2))]
+    ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker.Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1))]
+    ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker.Field 6 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 6)]
+    ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker.Field 7 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7)]
+    ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker.Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 8)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2)).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2)).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2)).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2)).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2)).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1)).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1)).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1)).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1)).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1)).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1)).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-2)), ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field (-1)), ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 7), ExtPhantom (ExtGlobal vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm cast("Rex":wybe.string, ?tmp#1##0:trait_import_support.basic_dog) @trait_basic:nn:nn
     vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker:opaque@0(~tmp#1##0:trait_import_support.basic_dog, ?tmp#0##0:wybe.string, vtable trait_import_support.basic_dog <: trait_import_support.basic_speaker:opaque) #0 @trait_basic:nn:nn
@@ -136,13 +158,15 @@ proc = > public {inline} (1 calls)
 proc name > public {inline} (1 calls)
 0: trait_import_support.basic_dog.name<0>
 name(#rec##0:trait_import_support.basic_dog, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_import_support.basic_dog, ?#result##0:wybe.string) @basic_dog:nn:nn
 proc name > public {inline} (0 calls)
 1: trait_import_support.basic_dog.name<1>
 name([#rec##0:trait_import_support.basic_dog], ?#rec##2:trait_import_support.basic_dog, #field##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:wybe.string, ?#rec##2:trait_import_support.basic_dog) @basic_dog:nn:nn
 
@@ -150,23 +174,20 @@ name([#rec##0:trait_import_support.basic_dog], ?#rec##2:trait_import_support.bas
 proc speak > public {inline} (1 calls)
 0: trait_import_support.basic_dog.speak<0>
 speak(x##0:trait_import_support.basic_dog, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasSummary: []
-  InterestingCallProperties: []
-    foreign lpvm cast(~x##0:trait_import_support.basic_dog, ?tmp#2##0:wybe.string) @basic_dog:nn:nn
-    wybe.string.,,<0>(~tmp#2##0:wybe.string, " says woof":wybe.string, ?#result##0:wybe.string) #3 @basic_dog:nn:nn
-
-
-proc speak#adapter > {noinline} (0 calls)
-0: trait_import_support.basic_dog.speak#adapter<0>
-speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
     ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
     ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
     ExtParam 0.Field 0 -> [ExtParam 0]
     ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
     ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtReturn 1.FieldIdent -> [ExtParam 0]
+    ExtParam 0.Field 8 -> [ExtConst " says woof", ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtConst " says woof"]
+    ExtConst " says woof".Field (-2) -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtConst " says woof".Field (-1) -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtConst " says woof".Field 0 -> [ExtParam 0]
+    ExtConst " says woof".Field 6 -> [ExtPhantom (ExtConst " says woof") (Field 6)]
+    ExtConst " says woof".Field 7 -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtConst " says woof".Field 8 -> [ExtConst " says woof", ExtPhantom (ExtConst " says woof") (Field 8)]
     ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
     ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
     ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
@@ -184,6 +205,79 @@ speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.s
     ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
     ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
     ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7), ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field (-2) -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field (-1) -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field 6 -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field 7 -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field 8 -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field (-2) -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field (-1) -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field 0 -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field 6 -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field 7 -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field 8 -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field (-2) -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field (-1) -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field 0 -> [ExtPhantom (ExtConst " says woof") (Field (-2)), ExtPhantom (ExtConst " says woof") (Field (-1)), ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field 6 -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field 7 -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field 8 -> [ExtPhantom (ExtConst " says woof") (Field 7), ExtPhantom (ExtConst " says woof") (Field 8)]
+  InterestingCallProperties: []
+    foreign lpvm cast(~x##0:trait_import_support.basic_dog, ?tmp#2##0:wybe.string) @basic_dog:nn:nn
+    wybe.string.,,<0>(~tmp#2##0:wybe.string, " says woof":wybe.string, ?#result##0:wybe.string) #3 @basic_dog:nn:nn
+
+
+proc speak#adapter > {noinline} (0 calls)
+0: trait_import_support.basic_dog.speak#adapter<0>
+speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
+  AliasSummary:
+    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtParam 0.Field 0 -> [ExtParam 0]
+    ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtParam 0.Field 8 -> [ExtConst " says woof", ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtConst " says woof"]
+    ExtConst " says woof".Field (-2) -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtConst " says woof".Field (-1) -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtConst " says woof".Field 0 -> [ExtParam 0]
+    ExtConst " says woof".Field 6 -> [ExtPhantom (ExtConst " says woof") (Field 6)]
+    ExtConst " says woof".Field 7 -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtConst " says woof".Field 8 -> [ExtConst " says woof", ExtPhantom (ExtConst " says woof") (Field 8)]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-2)), ExtPhantom (ExtParam 0) (Field (-1)), ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7), ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field (-2) -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field (-1) -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field 6 -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field 7 -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-2)).Field 8 -> [ExtPhantom (ExtConst " says woof") (Field (-2))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field (-2) -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field (-1) -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field 0 -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field 6 -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field 7 -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field (-1)).Field 8 -> [ExtPhantom (ExtConst " says woof") (Field (-1))]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field (-2) -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field (-1) -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field 0 -> [ExtPhantom (ExtConst " says woof") (Field (-2)), ExtPhantom (ExtConst " says woof") (Field (-1)), ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field 6 -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field 7 -> [ExtPhantom (ExtConst " says woof") (Field 7)]
+    ExtPhantom (ExtConst " says woof") (Field 7).Field 8 -> [ExtPhantom (ExtConst " says woof") (Field 7), ExtPhantom (ExtConst " says woof") (Field 8)]
   InterestingCallProperties: []
     wybe.string.,,<0>(~x##0:wybe.string, " says woof":wybe.string, ?#result##0:wybe.string) #1 @basic_dog:nn:nn
 
@@ -191,13 +285,15 @@ speak#adapter(x##0:Type0<:trait_import_support.basic_speaker, ?#result##0:wybe.s
 proc trait_basic_dog > public {inline} (0 calls)
 0: trait_import_support.basic_dog.trait_basic_dog<0>
 trait_basic_dog(name##0:wybe.string, ?#result##2:trait_import_support.basic_dog)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~name##0:wybe.string, ?#result##2:trait_import_support.basic_dog) @basic_dog:nn:nn
 proc trait_basic_dog > public {inline} (0 calls)
 1: trait_import_support.basic_dog.trait_basic_dog<1>
 trait_basic_dog(?name##0:wybe.string, #result##0:trait_import_support.basic_dog)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_import_support.basic_dog, ?name##0:wybe.string) @basic_dog:nn:nn
 

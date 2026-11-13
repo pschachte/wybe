@@ -60,13 +60,15 @@ proc #anon#2 > {inline} (1 calls)
 proc #anon#3 > {inline} (1 calls)
 0: higher_order_anon.#anon#3<0>
 #anon#3([anon#3#1##0:Type32 <{}; {}; {0}>], anon#3#2##0:Type2 <{}; {}; {1}>, ?anon#3#3##0:Type2 <{}; {}; {1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign llvm move(~anon#3#2##0:Type2, ?anon#3#3##0:Type2) @higher_order_anon:nn:nn
 proc #anon#3 > {inline} (1 calls)
 1: higher_order_anon.#anon#3<1>
 #anon#3(anon#3#1##0 <{}; {}; {0}>, anon#3#2##0 <{}; {}; {1}>, ?anon#3#3##0 <{}; {}; {1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign llvm move(~anon#3#2##0:Type2, ?anon#3#3##0:Type2) @higher_order_anon:nn:nn
 
@@ -74,13 +76,15 @@ proc #anon#3 > {inline} (1 calls)
 proc #anon#4 > {inline} (1 calls)
 0: higher_order_anon.#anon#4<0>
 #anon#4([anon#4#1##0:Type32 <{}; {}; {0}>], anon#4#2##0:Type2 <{}; {}; {1}>, ?anon#4#3##0:Type2 <{}; {}; {1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign llvm move(~anon#4#2##0:Type2, ?anon#4#3##0:Type2) @higher_order_anon:nn:nn
 proc #anon#4 > {inline} (1 calls)
 1: higher_order_anon.#anon#4<1>
 #anon#4(anon#4#1##0 <{}; {}; {0}>, anon#4#2##0 <{}; {}; {1}>, ?anon#4#3##0 <{}; {}; {1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign llvm move(~anon#4#2##0:Type2, ?anon#4#3##0:Type2) @higher_order_anon:nn:nn
 
@@ -88,13 +92,15 @@ proc #anon#4 > {inline} (1 calls)
 proc #anon#5 > {inline} (1 calls)
 0: higher_order_anon.#anon#5<0>
 #anon#5(anon#5#1##0:(wybe.int, ?wybe.int), ?anon#5#2##0:(wybe.int, ?wybe.int))<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~anon#5#1##0:(wybe.int, ?wybe.int), ?anon#5#2##0:(wybe.int, ?wybe.int)) @higher_order_anon:nn:nn
 proc #anon#5 > {inline} (1 calls)
 1: higher_order_anon.#anon#5<1>
 #anon#5(anon#5#1##0 <{}; {}; {0}>, ?anon#5#2##0)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~anon#5#1##0:(wybe.int, ?wybe.int), ?anon#5#2##0:(wybe.int, ?wybe.int)) @higher_order_anon:nn:nn
 
@@ -102,13 +108,15 @@ proc #anon#5 > {inline} (1 calls)
 proc #anon#6 > {inline} (1 calls)
 0: higher_order_anon.#anon#6<0>
 #anon#6(anon#6#1##0:(wybe.int, ?wybe.int), ?anon#6#2##0:(wybe.int, ?wybe.int))<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~anon#6#1##0:(wybe.int, ?wybe.int), ?anon#6#2##0:(wybe.int, ?wybe.int)) @higher_order_anon:nn:nn
 proc #anon#6 > {inline} (1 calls)
 1: higher_order_anon.#anon#6<1>
 #anon#6(anon#6#1##0 <{}; {}; {0}>, ?anon#6#2##0)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~anon#6#1##0:(wybe.int, ?wybe.int), ?anon#6#2##0:(wybe.int, ?wybe.int)) @higher_order_anon:nn:nn
 

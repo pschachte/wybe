@@ -51,7 +51,10 @@ insert(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, x##0:X <{}; {}; {1}>, xs##0:wybe.
 proc sort > {inline} (0 calls)
 0: higher_order_sort.sort<0>
 sort(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, xs##0:wybe.list(X) <{}; {}; {1}>, ?sorted##1:wybe.list(X) <{}; {}; {0, 1}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtReturn 2.Field 8 -> [ExtReturn 2]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     higher_order_sort.sort#cont#1<0>(~<=##0:(X, X, ?wybe.bool), 0:wybe.list(X), ~xs##0:wybe.list(X), ?sorted##1:wybe.list(X)) #1 @higher_order_sort:nn:nn
 

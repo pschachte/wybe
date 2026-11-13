@@ -1608,7 +1608,8 @@ f01(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f01 > public {inline} (0 calls)
 1: multictr.complicated.f01<1>
 f01(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -1658,7 +1659,8 @@ f02(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f02 > public {inline} (0 calls)
 1: multictr.complicated.f02<1>
 f02(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -1708,7 +1710,8 @@ f03(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f03 > public {inline} (0 calls)
 1: multictr.complicated.f03<1>
 f03(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -1758,7 +1761,8 @@ f04(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f04 > public {inline} (0 calls)
 1: multictr.complicated.f04<1>
 f04(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -1808,7 +1812,8 @@ f05(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f05 > public {inline} (0 calls)
 1: multictr.complicated.f05<1>
 f05(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -1858,7 +1863,8 @@ f06(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f06 > public {inline} (0 calls)
 1: multictr.complicated.f06<1>
 f06(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -1908,7 +1914,8 @@ f07(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f07 > public {inline} (0 calls)
 1: multictr.complicated.f07<1>
 f07(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -1967,7 +1974,8 @@ f08(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f08 > public {inline} (0 calls)
 1: multictr.complicated.f08<1>
 f08(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -2035,7 +2043,8 @@ f09(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f09 > public {inline} (0 calls)
 1: multictr.complicated.f09<1>
 f09(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -2103,7 +2112,8 @@ f10(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f10 > public {inline} (0 calls)
 1: multictr.complicated.f10<1>
 f10(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -2171,7 +2181,8 @@ f11(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f11 > public {inline} (0 calls)
 1: multictr.complicated.f11<1>
 f11(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -2239,7 +2250,8 @@ f12(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f12 > public {inline} (0 calls)
 1: multictr.complicated.f12<1>
 f12(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -2307,7 +2319,8 @@ f13(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f13 > public {inline} (0 calls)
 1: multictr.complicated.f13<1>
 f13(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -2375,7 +2388,8 @@ f14(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f14 > public {inline} (0 calls)
 1: multictr.complicated.f14<1>
 f14(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -2443,7 +2457,8 @@ f15(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f15 > public {inline} (0 calls)
 1: multictr.complicated.f15<1>
 f15(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -2511,7 +2526,8 @@ f16(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f16 > public {inline} (0 calls)
 1: multictr.complicated.f16<1>
 f16(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -2579,7 +2595,8 @@ f17(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool)<
 proc f17 > public {inline} (0 calls)
 1: multictr.complicated.f17<1>
 f17(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -5020,13 +5037,15 @@ proc = > public {inline} (1 calls)
 proc metres > public {inline} (0 calls)
 0: multictr.length.metres<0>
 metres(value##0:wybe.float, ?#result##2:multictr.length)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~value##0:wybe.float, ?#result##2:multictr.length) @multictr:nn:nn
 proc metres > public {inline} (0 calls)
 1: multictr.length.metres<1>
 metres(?value##0:wybe.float, #result##0:multictr.length)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:multictr.length, ?value##0:wybe.float) @multictr:nn:nn
 
@@ -5034,13 +5053,15 @@ metres(?value##0:wybe.float, #result##0:multictr.length)<{}; {}; {}>:
 proc value > public {inline} (0 calls)
 0: multictr.length.value<0>
 value(#rec##0:multictr.length, ?#result##0:wybe.float)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:multictr.length, ?#result##0:wybe.float) @multictr:nn:nn
 proc value > public {inline} (0 calls)
 1: multictr.length.value<1>
 value([#rec##0:multictr.length], ?#rec##2:multictr.length, #field##0:wybe.float)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:wybe.float, ?#rec##2:multictr.length) @multictr:nn:nn
 
@@ -5411,7 +5432,8 @@ float_value(#rec##0:multictr.number, ?#result##0:wybe.float, ?#success##0:wybe.b
 proc float_value > public {inline} (0 calls)
 1: multictr.number.float_value<1>
 float_value(#rec##0:multictr.number, ?#rec##1:multictr.number, #field##0:wybe.float, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -5469,7 +5491,8 @@ int_value(#rec##0:multictr.number, ?#result##0:wybe.int, ?#success##0:wybe.bool)
 proc int_value > public {inline} (0 calls)
 1: multictr.number.int_value<1>
 int_value(#rec##0:multictr.number, ?#rec##1:multictr.number, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -5702,13 +5725,15 @@ proc = > public {inline} (1 calls)
 proc content > public {inline} (0 calls)
 0: multictr.perhaps.content<0>
 content(#rec##0:multictr.perhaps, ?#result##0:multictr.maybe_int)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:multictr.perhaps, ?#result##0:multictr.maybe_int) @multictr:nn:nn
 proc content > public {inline} (0 calls)
 1: multictr.perhaps.content<1>
 content([#rec##0:multictr.perhaps], ?#rec##2:multictr.perhaps, #field##0:multictr.maybe_int)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:multictr.maybe_int, ?#rec##2:multictr.perhaps) @multictr:nn:nn
 
@@ -5716,13 +5741,15 @@ content([#rec##0:multictr.perhaps], ?#rec##2:multictr.perhaps, #field##0:multict
 proc perhaps > public {inline} (0 calls)
 0: multictr.perhaps.perhaps<0>
 perhaps(content##0:multictr.maybe_int, ?#result##2:multictr.perhaps)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~content##0:multictr.maybe_int, ?#result##2:multictr.perhaps) @multictr:nn:nn
 proc perhaps > public {inline} (0 calls)
 1: multictr.perhaps.perhaps<1>
 perhaps(?content##0:multictr.maybe_int, #result##0:multictr.perhaps)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:multictr.perhaps, ?content##0:multictr.maybe_int) @multictr:nn:nn
 
@@ -6148,7 +6175,8 @@ one_field(#rec##0:multictr.simple, ?#result##0:wybe.int, ?#success##0:wybe.bool)
 proc one_field > public {inline} (0 calls)
 1: multictr.simple.one_field<1>
 one_field(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -6234,7 +6262,8 @@ two_field1(#rec##0:multictr.simple, ?#result##0:wybe.int, ?#success##0:wybe.bool
 proc two_field1 > public {inline} (0 calls)
 1: multictr.simple.two_field1<1>
 two_field1(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -6282,7 +6311,8 @@ two_field2(#rec##0:multictr.simple, ?#result##0:wybe.int, ?#success##0:wybe.bool
 proc two_field2 > public {inline} (0 calls)
 1: multictr.simple.two_field2<1>
 two_field2(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of

@@ -154,9 +154,10 @@ key(#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0}>, ?#res
 proc key > public {inline} (0 calls)
 1: trait_partial_impl_overlap_unused.hashmap.key<1>
 key(#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0}>, ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0, 2}>, #field##0:K <{}; {}; {2}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V), ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:K) @trait_partial_impl_overlap_unused:nn:nn
+    foreign lpvm mutate(~#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V), ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:K) @trait_partial_impl_overlap_unused:nn:nn
 
 
 proc value > public {inline} (0 calls)
@@ -168,9 +169,10 @@ value(#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0}>, ?#r
 proc value > public {inline} (0 calls)
 1: trait_partial_impl_overlap_unused.hashmap.value<1>
 value(#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0}>, ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V) <{}; {}; {0, 2}>, #field##0:V <{}; {}; {2}>)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V), ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:V) @trait_partial_impl_overlap_unused:nn:nn
+    foreign lpvm mutate(~#rec##0:trait_partial_impl_overlap_unused.hashmap(K, V), ?#rec##1:trait_partial_impl_overlap_unused.hashmap(K, V), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:V) @trait_partial_impl_overlap_unused:nn:nn
 
   LLVM code       :
 

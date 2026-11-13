@@ -42,13 +42,21 @@ module top-level code > public {semipure} (0 calls)
 proc #anon#1 > {inline} (1 calls)
 0: higher_order_append.#anon#1<0>
 #anon#1(^cons##0:wybe.list(wybe.int), anon#1#1##0:wybe.list(wybe.int), ?anon#1#2##0:wybe.list(wybe.int))<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtParam 0]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtReturn 2.FieldIdent -> [ExtParam 0]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     higher_order_append.append<0>(~anon#1#1##0:wybe.list(wybe.int), ~cons##0:wybe.list(wybe.int), outByReference anon#1#2##0:wybe.list(wybe.int)) #0 @higher_order_append:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: higher_order_append.#anon#1<1>
 #anon#1(^cons##0:wybe.list(wybe.int), anon#1#1##0 <{}; {}; {1}>, ?anon#1#2##0)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtParam 0]
+    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+    ExtReturn 2.FieldIdent -> [ExtParam 0]
+    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
   InterestingCallProperties: []
     higher_order_append.append<0>(~anon#1#1##0:wybe.list(wybe.int), ~^cons##0:wybe.list(wybe.int), outByReference anon#1#2##0:wybe.list(wybe.int)) #1 @higher_order_append:nn:nn
 
@@ -56,7 +64,9 @@ proc #anon#1 > {inline} (1 calls)
 proc #closure#1 > {inline} (2 calls)
 0: higher_order_append.#closure#1<0>
 #closure#1(l##0 <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     wybe.list.print<0>(higher_order_append.print_list_of_ints#closure#1<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0, 1}> #1 @higher_order_append:nn:nn
 
@@ -90,7 +100,9 @@ append(front##0:wybe.list(wybe.int), back##0:wybe.list(wybe.int), outByReference
 proc print_list_of_ints > {inline} (1 calls)
 0: higher_order_append.print_list_of_ints<0>
 print_list_of_ints(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     wybe.list.print<0>(higher_order_append.print_list_of_ints#closure#1<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0, 1}> #0 @higher_order_append:nn:nn
 

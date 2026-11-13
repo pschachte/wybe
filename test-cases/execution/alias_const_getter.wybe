@@ -1,0 +1,11 @@
+# BUG-10 (alias audit pass 2, see scratch/alias_analysis_bugs.md): a destructive
+# update must not corrupt a live alias; correct output matches each "expect".
+pub type position { pub position(x:int, y:int) }
+pub type pair { pub pair(fst:position, snd:int) }
+pub def pp(pos:position) use !io { !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")") }
+pub def {noinline} getfst(p:pair):position = p^fst
+?c = pair(position(1, 2), 0)
+?y = getfst(c)
+x(!y, 99)
+!print("expect y (99,2):"); !pp(y)
+!print("expect c^fst (1,2):"); !pp(c^fst)

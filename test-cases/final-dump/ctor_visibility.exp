@@ -607,7 +607,8 @@ b(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int, ?#success##0:wybe.b
 proc b > public {inline} (0 calls)
 1: ctor_visibility.with_fields.b<1>
 b(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of
@@ -975,7 +976,8 @@ a(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.
 proc a > public {inline} (0 calls)
 1: ctor_visibility.with_fields2.a<1>
 a(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     foreign llvm icmp_eq(~tmp#1##0:1 bit unsigned, 0:1 bit unsigned, ?tmp#0##0:wybe.bool)
@@ -1008,7 +1010,8 @@ b(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.
 proc b > {inline} (0 calls)
 1: ctor_visibility.with_fields2.b<1>
 b(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:1 bit unsigned, 1:1 bit unsigned, ?tmp#1##0:1 bit unsigned)
     case ~tmp#1##0:wybe.bool of

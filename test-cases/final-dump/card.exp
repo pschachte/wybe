@@ -505,7 +505,8 @@ r9(?#result##0:card.rank)<{}; {}; {}>:
 proc ranks > public {inline} (0 calls)
 0: card.rank.ranks<0>
 ranks(?#result##0:wybe.list(card.rank))<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtConst card.rank#constant#13]
   InterestingCallProperties: []
     foreign llvm move(card.rank#constant#13:wybe.list(card.rank), ?#result##0:wybe.list(card.rank)) @card:nn:nn
 
@@ -723,7 +724,8 @@ spades(?#result##0:card.suit)<{}; {}; {}>:
 proc suits > public {inline} (0 calls)
 0: card.suit.suits<0>
 suits(?#result##0:wybe.list(card.suit))<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtConst card.suit#constant#4]
   InterestingCallProperties: []
     foreign llvm move(card.suit#constant#4:wybe.list(card.suit), ?#result##0:wybe.list(card.suit)) @card:nn:nn
 

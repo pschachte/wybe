@@ -45,7 +45,8 @@ local_only(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc store_global > {noinline} (0 calls)
 0: stack_alloc_global.store_global<0>
 store_global(x##0:wybe.int)<{}; {<<stack_alloc_global.gcell>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtGlobal <<stack_alloc_global.gcell>>.FieldAny -> [ExtPhantom (ExtGlobal <<stack_alloc_global.gcell>>) FieldAny]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~tmp#3##0:stack_alloc_global.cell, ?tmp#4##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
@@ -56,7 +57,8 @@ store_global(x##0:wybe.int)<{}; {<<stack_alloc_global.gcell>>}; {}>:
 proc store_global_cond > {noinline} (0 calls)
 0: stack_alloc_global.store_global_cond<0>
 store_global_cond(x##0:wybe.int, flag##0:wybe.bool)<{<<stack_alloc_global.gcell>>}; {<<stack_alloc_global.gcell>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtGlobal <<stack_alloc_global.gcell>>.FieldAny -> [ExtPhantom (ExtGlobal <<stack_alloc_global.gcell>>) FieldAny]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~tmp#3##0:stack_alloc_global.cell, ?tmp#4##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
@@ -72,7 +74,9 @@ store_global_cond(x##0:wybe.int, flag##0:wybe.bool)<{<<stack_alloc_global.gcell>
 proc store_global_nested > {noinline} (0 calls)
 0: stack_alloc_global.store_global_nested<0>
 store_global_nested(x##0:wybe.int)<{}; {<<stack_alloc_global.gpair>>}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtGlobal <<stack_alloc_global.gpair>>.FieldAny -> [ExtPhantom (ExtGlobal <<stack_alloc_global.gpair>>) FieldAny]
+    ExtPhantom (ExtGlobal <<stack_alloc_global.gpair>>) FieldAny.Field 0 -> [ExtPhantom (ExtGlobal <<stack_alloc_global.gpair>>) FieldAny]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~tmp#4##0:stack_alloc_global.cell, ?tmp#5##0:stack_alloc_global.cell, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, x##0:wybe.int) @stack_alloc_global:nn:nn
@@ -407,7 +411,9 @@ if.else.0:
 proc = > public {inline} (1 calls)
 0: stack_alloc_global.pair.=<0>
 =(#left##0:stack_alloc_global.pair, #right##0:stack_alloc_global.pair, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm access(~#left##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#q##0:wybe.int) @stack_alloc_global:nn:nn
@@ -437,13 +443,16 @@ proc = > public {inline} (1 calls)
 proc p > public {inline} (0 calls)
 0: stack_alloc_global.pair.p<0>
 p(#rec##0:stack_alloc_global.pair, ?#result##0:stack_alloc_global.cell)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
 proc p > public {inline} (0 calls)
 1: stack_alloc_global.pair.p<1>
 p(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:stack_alloc_global.cell)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.Field 0 -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
 
@@ -451,7 +460,8 @@ p(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:s
 proc pair > public {inline} (0 calls)
 0: stack_alloc_global.pair.pair<0>
 pair(p##0:stack_alloc_global.cell, q##0:wybe.int, ?#result##0:stack_alloc_global.pair)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 2.Field 0 -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:stack_alloc_global.pair) @stack_alloc_global:nn:nn
     foreign lpvm mutate(~#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
@@ -459,7 +469,9 @@ pair(p##0:stack_alloc_global.cell, q##0:wybe.int, ?#result##0:stack_alloc_global
 proc pair > public {inline} (6 calls)
 1: stack_alloc_global.pair.pair<1>
 pair(?p##0:stack_alloc_global.cell, ?q##0:wybe.int, #result##0:stack_alloc_global.pair)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 2.Field 0 -> [ExtPhantom (ExtParam 2) (Field 0)]
+    ExtReturn 0.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(#result##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm access(~#result##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?q##0:wybe.int) @stack_alloc_global:nn:nn
@@ -474,7 +486,8 @@ q(#rec##0:stack_alloc_global.pair, ?#result##0:wybe.int)<{}; {}; {}>:
 proc q > public {inline} (0 calls)
 1: stack_alloc_global.pair.q<1>
 q(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:wybe.int)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stack_alloc_global:nn:nn
 
@@ -482,7 +495,9 @@ q(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:w
 proc ~= > public {inline} (0 calls)
 0: stack_alloc_global.pair.~=<0>
 ~=(#left##0:stack_alloc_global.pair, #right##0:stack_alloc_global.pair, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary: []
+  AliasSummary:
+    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
+    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm access(~#left##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @stack_alloc_global:nn:nn
