@@ -248,7 +248,7 @@ def main():
         for f in glob.glob("wybelibs/*.o") + glob.glob("wybelibs/wybe/*.o"):
             os.remove(f)
         for cmd in (["make", "-s", "wybemk"], ["make", "-s", "wybelibs/wybe/cbits.o"],
-                    [TIMEOUT, "40", "make", "-s", "libs"]):
+                    [TIMEOUT, "60", "make", "-s", "libs"]):
             if subprocess.run(cmd).returncode != 0:
                 sys.exit(f"Build failed: {' '.join(cmd)}")
 
