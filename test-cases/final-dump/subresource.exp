@@ -70,7 +70,7 @@ define external fastcc void @"subresource#.<0>"() {
 module top-level code > public {inline,semipure} (0 calls)
 0: subresource.a.<0>
 ()<{}; {<<subresource.a.res>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm store(42:wybe.int, <<subresource.a.res>>:wybe.int) @subresource:nn:nn
 

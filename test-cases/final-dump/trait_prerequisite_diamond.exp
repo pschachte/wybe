@@ -24,7 +24,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_prerequisite_diamond.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(8,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm make_vtable(vtable trait_prerequisite_diamond.box(Type0<:trait_prerequisite_diamond.printable) <: trait_prerequisite_diamond.td:opaque, 5:wybe.int, vtable wybe.int <: trait_prerequisite_diamond.printable:opaque, vtable wybe.int <: trait_prerequisite_diamond.printable:opaque, vtable wybe.int <: trait_prerequisite_diamond.printable:opaque, vtable wybe.int <: trait_prerequisite_diamond.printable:opaque, vtable wybe.int <: trait_prerequisite_diamond.printable:opaque, ?tmp#18##0:opaque) @trait_prerequisite_diamond:nn:nn
@@ -50,7 +50,8 @@ module top-level code > public {semipure} (0 calls)
 proc calls_ta > {inline} (2 calls)
 0: trait_prerequisite_diamond.calls_ta<0>
 calls_ta(x##0:T<:trait_prerequisite_diamond.ta <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     trait_prerequisite_diamond.ta.label_a<0>(~x##0:T<:trait_prerequisite_diamond.ta, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #0 @trait_prerequisite_diamond:nn:nn
 
@@ -58,7 +59,8 @@ calls_ta(x##0:T<:trait_prerequisite_diamond.ta <{}; {}; {0}>, ?#result##0:wybe.s
 proc calls_tb > {inline} (1 calls)
 0: trait_prerequisite_diamond.calls_tb<0>
 calls_tb(x##0:T<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#vtable##0:opaque, ?#vtableviewbase##0:pointer) @trait_prerequisite_diamond:nn:nn
     foreign llvm add(~#vtableviewbase##0:pointer, 8:wybe.int, ?#vtableview##0:pointer) @trait_prerequisite_diamond:nn:nn
@@ -68,7 +70,8 @@ calls_tb(x##0:T<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb} 
 proc calls_tc > {inline} (1 calls)
 0: trait_prerequisite_diamond.calls_tc<0>
 calls_tc(x##0:T<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tc} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#vtable##0:opaque, ?#vtableviewbase##0:pointer) @trait_prerequisite_diamond:nn:nn
     foreign llvm add(~#vtableviewbase##0:pointer, 8:wybe.int, ?#vtableview##0:pointer) @trait_prerequisite_diamond:nn:nn
@@ -78,7 +81,8 @@ calls_tc(x##0:T<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tc} 
 proc calls_td_via_tb > {inline} (1 calls)
 0: trait_prerequisite_diamond.calls_td_via_tb<0>
 calls_td_via_tb(x##0:T<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb, trait_prerequisite_diamond.tc, trait_prerequisite_diamond.td} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#vtable##0:opaque, ?#vtableviewbase##0:pointer) @trait_prerequisite_diamond:nn:nn
     foreign llvm add(~#vtableviewbase##0:pointer, 8:wybe.int, ?#vtableview##0:pointer) @trait_prerequisite_diamond:nn:nn
@@ -90,7 +94,8 @@ calls_td_via_tb(x##0:T<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamo
 proc calls_td_via_tc > {inline} (1 calls)
 0: trait_prerequisite_diamond.calls_td_via_tc<0>
 calls_td_via_tc(x##0:T<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb, trait_prerequisite_diamond.tc, trait_prerequisite_diamond.td} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#vtable##0:opaque, ?#vtableviewbase##0:pointer) @trait_prerequisite_diamond:nn:nn
     foreign llvm add(~#vtableviewbase##0:pointer, 24:wybe.int, ?#vtableview##0:pointer) @trait_prerequisite_diamond:nn:nn
@@ -102,7 +107,25 @@ calls_td_via_tc(x##0:T<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamo
 proc label > {inline} (1 calls)
 0: trait_prerequisite_diamond.label<0>
 label(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.Field (-2) -> [ExtReturn 1]
+    ExtReturn 1.Field (-1) -> [ExtReturn 1]
+    ExtReturn 1.Field 0 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtReturn 1.Field 6 -> [ExtReturn 1]
+    ExtReturn 1.Field 7 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 8)]
   InterestingCallProperties: []
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?#result##0:wybe.string) #1 @trait_prerequisite_diamond:nn:nn
 
@@ -110,7 +133,25 @@ label(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
 proc label#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label#adapter<0>
 label#adapter(x##0:Type0<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.Field (-2) -> [ExtReturn 1]
+    ExtReturn 1.Field (-1) -> [ExtReturn 1]
+    ExtReturn 1.Field 0 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtReturn 1.Field 6 -> [ExtReturn 1]
+    ExtReturn 1.Field 7 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_prerequisite_diamond.printable, ?x#adapter0##0:wybe.int)
     wybe.int.fmt<2>(~x#adapter0##0:wybe.int, 0:wybe.int, 32:wybe.char, ?#result##0:wybe.string) #1 @trait_prerequisite_diamond:nn:nn
@@ -119,7 +160,8 @@ label#adapter(x##0:Type0<:trait_prerequisite_diamond.printable, ?#result##0:wybe
 proc label_a > {inline} (2 calls)
 0: trait_prerequisite_diamond.label_a<0>
 label_a(x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printable) <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printable), ?tmp#1##0:T<:trait_prerequisite_diamond.printable) @trait_prerequisite_diamond:nn:nn
     trait_prerequisite_diamond.printable.label<0>(~tmp#1##0:T<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_diamond:nn:nn
@@ -128,14 +170,18 @@ label_a(x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printa
 proc label_a#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label_a#adapter<0>
 label_a#adapter(x##0:Type0<:trait_prerequisite_diamond.ta, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 2.Field 24 -> [ExtPhantom (ExtParam 2) (Field 24)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 24)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 24:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
     trait_prerequisite_diamond.printable.label<0>(~x##0:T<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable#adapter0##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_diamond:nn:nn
 proc label_a#adapter > {noinline} (0 calls)
 1: trait_prerequisite_diamond.label_a#adapter<1>
 label_a#adapter(x##0:Type0<:trait_prerequisite_diamond.ta, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 8:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
     trait_prerequisite_diamond.printable.label<0>(~x##0:T<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable#adapter0##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_diamond:nn:nn
@@ -144,7 +190,8 @@ label_a#adapter(x##0:Type0<:trait_prerequisite_diamond.ta, ?#result##0:wybe.stri
 proc label_b > {inline} (1 calls)
 0: trait_prerequisite_diamond.label_b<0>
 label_b(x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printable) <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printable), ?tmp#1##0:T<:trait_prerequisite_diamond.printable) @trait_prerequisite_diamond:nn:nn
     trait_prerequisite_diamond.printable.label<0>(~tmp#1##0:T<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_diamond:nn:nn
@@ -153,7 +200,9 @@ label_b(x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printa
 proc label_b#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label_b#adapter<0>
 label_b#adapter(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 2.Field 32 -> [ExtPhantom (ExtParam 2) (Field 32)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 32)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 32:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
     trait_prerequisite_diamond.printable.label<0>(~x##0:T<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable#adapter0##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_diamond:nn:nn
@@ -162,7 +211,8 @@ label_b#adapter(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_d
 proc label_c > {inline} (1 calls)
 0: trait_prerequisite_diamond.label_c<0>
 label_c(x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printable) <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printable), ?tmp#1##0:T<:trait_prerequisite_diamond.printable) @trait_prerequisite_diamond:nn:nn
     trait_prerequisite_diamond.printable.label<0>(~tmp#1##0:T<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_diamond:nn:nn
@@ -171,7 +221,9 @@ label_c(x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printa
 proc label_c#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label_c#adapter<0>
 label_c#adapter(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tc}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 2.Field 16 -> [ExtPhantom (ExtParam 2) (Field 16)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 16)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 16:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
     trait_prerequisite_diamond.printable.label<0>(~x##0:T<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable#adapter0##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_diamond:nn:nn
@@ -180,7 +232,8 @@ label_c#adapter(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_d
 proc label_d > {inline} (1 calls)
 0: trait_prerequisite_diamond.label_d<0>
 label_d(x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printable) <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printable), ?tmp#1##0:T<:trait_prerequisite_diamond.printable) @trait_prerequisite_diamond:nn:nn
     trait_prerequisite_diamond.printable.label<0>(~tmp#1##0:T<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_diamond:nn:nn
@@ -189,7 +242,9 @@ label_d(x##0:trait_prerequisite_diamond.box(T<:trait_prerequisite_diamond.printa
 proc label_d#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label_d#adapter<0>
 label_d#adapter(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb, trait_prerequisite_diamond.tc, trait_prerequisite_diamond.td}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 2.Field 40 -> [ExtPhantom (ExtParam 2) (Field 40)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 40)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 40:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
     trait_prerequisite_diamond.printable.label<0>(~x##0:T<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable#adapter0##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_diamond:nn:nn
@@ -379,13 +434,15 @@ define external fastcc i64 @"trait_prerequisite_diamond#.label_d#adapter<0>"(i64
 proc box > public {inline} (0 calls)
 0: trait_prerequisite_diamond.box.box<0>
 box(value##0:T <{}; {}; {0}>, ?#result##2:trait_prerequisite_diamond.box(T) <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~value##0:T, ?#result##2:trait_prerequisite_diamond.box(T)) @trait_prerequisite_diamond:nn:nn
 proc box > public {inline} (0 calls)
 1: trait_prerequisite_diamond.box.box<1>
 box(?value##0:T <{}; {}; {1}>, #result##0:trait_prerequisite_diamond.box(T) <{}; {}; {1}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_prerequisite_diamond.box(T), ?value##0:T) @trait_prerequisite_diamond:nn:nn
 
@@ -393,13 +450,15 @@ box(?value##0:T <{}; {}; {1}>, #result##0:trait_prerequisite_diamond.box(T) <{};
 proc value > public {inline} (0 calls)
 0: trait_prerequisite_diamond.box.value<0>
 value(#rec##0:trait_prerequisite_diamond.box(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_prerequisite_diamond.box(T), ?#result##0:T) @trait_prerequisite_diamond:nn:nn
 proc value > public {inline} (0 calls)
 1: trait_prerequisite_diamond.box.value<1>
 value([#rec##0:trait_prerequisite_diamond.box(T) <{}; {}; {0}>], ?#rec##2:trait_prerequisite_diamond.box(T) <{}; {}; {2}>, #field##0:T <{}; {}; {2}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:T, ?#rec##2:trait_prerequisite_diamond.box(T)) @trait_prerequisite_diamond:nn:nn
 
@@ -445,7 +504,8 @@ define external fastcc i64 @"trait_prerequisite_diamond#.box#.value<1>"(i64 %"#f
 proc label > public abstract {inline} (0 calls)
 0: trait_prerequisite_diamond.printable.label<0>
 label(x##0:Type0<:trait_prerequisite_diamond.printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
@@ -482,7 +542,8 @@ define external fastcc i64 @"trait_prerequisite_diamond#.printable#.label<0>"(i6
 proc label_a > public abstract {inline} (0 calls)
 0: trait_prerequisite_diamond.ta.label_a<0>
 label_a(x##0:Type0<:trait_prerequisite_diamond.ta <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_prerequisite_diamond.ta, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
@@ -519,7 +580,8 @@ define external fastcc i64 @"trait_prerequisite_diamond#.ta#.label_a<0>"(i64 %"x
 proc label_b > public abstract {inline} (0 calls)
 0: trait_prerequisite_diamond.tb.label_b<0>
 label_b(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb}, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
@@ -556,7 +618,8 @@ define external fastcc i64 @"trait_prerequisite_diamond#.tb#.label_b<0>"(i64 %"x
 proc label_c > public abstract {inline} (0 calls)
 0: trait_prerequisite_diamond.tc.label_c<0>
 label_c(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tc} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tc}, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
@@ -593,7 +656,8 @@ define external fastcc i64 @"trait_prerequisite_diamond#.tc#.label_c<0>"(i64 %"x
 proc label_d > public abstract {inline} (0 calls)
 0: trait_prerequisite_diamond.td.label_d<0>
 label_d(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb, trait_prerequisite_diamond.tc, trait_prerequisite_diamond.td} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb, trait_prerequisite_diamond.tc, trait_prerequisite_diamond.td}, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 

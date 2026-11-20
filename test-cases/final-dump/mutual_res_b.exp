@@ -17,7 +17,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: mutual_res_a.<0>
 ()<{}; {<<mutual_res_a.a_res>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm store(42:wybe.int, <<mutual_res_a.a_res>>:wybe.int) @mutual_res_a:nn:nn
 
@@ -53,7 +53,7 @@ define external fastcc void @"mutual_res_a#.<0>"() {
 module top-level code > public {inline,semipure} (0 calls)
 0: mutual_res_b.<0>
 ()<{}; {<<mutual_res_b.b_res>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm store(99:wybe.char, <<mutual_res_b.b_res>>:wybe.char) @mutual_res_b:nn:nn
 

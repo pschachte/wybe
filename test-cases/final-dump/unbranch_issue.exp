@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: unbranch_issue.<0>
 ()<{}; {<<unbranch_issue.n>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm store(0:wybe.int, <<unbranch_issue.n>>:wybe.int) @unbranch_issue:nn:nn
 

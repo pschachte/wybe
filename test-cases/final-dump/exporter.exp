@@ -18,7 +18,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: exporter.<0>
 ()<{}; {<<exporter.res>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm store(3:wybe.int, <<exporter.res>>:wybe.int) @exporter:nn:nn
 

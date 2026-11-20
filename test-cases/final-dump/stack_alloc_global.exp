@@ -21,7 +21,9 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: stack_alloc_global.<0>
 ()<{}; {<<stack_alloc_global.gcell>>, <<stack_alloc_global.gpair>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtGlobal <<stack_alloc_global.gcell>>.FieldAny -> [ExtConst stack_alloc_global#constant#0]
+    ExtGlobal <<stack_alloc_global.gpair>>.FieldAny -> [ExtConst stack_alloc_global#constant#1]
   InterestingCallProperties: []
     foreign lpvm store(stack_alloc_global#constant#0:stack_alloc_global.cell, <<stack_alloc_global.gcell>>:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm store(stack_alloc_global#constant#1:stack_alloc_global.pair, <<stack_alloc_global.gpair>>:stack_alloc_global.pair) @stack_alloc_global:nn:nn
