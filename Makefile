@@ -115,6 +115,9 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro \
 
 
 test:	wybemk
+	@python3 test-cases/run-parallel.py
+
+oldtest:	wybemk
 	@rm -f ERRS ; printf "Testing run " > ERRS ; date >> ERRS
 	@rm -f $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o
 	@echo -e "Building $(LIBDIR)/wybe/cbits.o"
