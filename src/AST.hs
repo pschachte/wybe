@@ -76,7 +76,9 @@ module AST (
   procCallCount, transformModuleProcs,
   getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
-  AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
+  ParameterID, parameterIDToVarName,
+  FieldKey(..), ExtNode(..),
+  ProcPTGSummary(..), emptyProcPTGSummary,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
@@ -2700,19 +2702,57 @@ speczVersionToId = List.take 10 . show . sha1 . Data.Binary.encode
 type SpeczProcBodies = Map SpeczVersion (Maybe ProcBody)
 
 
--- | Use to record the alias relation between arguments of a procedure.
-type AliasMap = DisjointSet PrimVarName
+-- | A field selector for the points-to graph.  LPVM addresses fields by byte
+-- offset, almost always a compile-time constant; a non-constant
+-- offset collapses to 'FieldAny'.
+-- (Lives here, rather than in PointsToGraph, so the serialized summary below
+-- can reference it without an import cycle -- PointsToGraph imports AST.)
+data FieldKey
+    = Field !Int   -- ^ a constant byte offset
+    | FieldAny     -- ^ unknown offset: the catch-all, a supertype of every Field
+    | FieldIdent   -- ^ identity ("same memory") edge, NOT a field offset
+    deriving (Eq, Ord, Show, Generic)
 
 
--- | a synonym function to hide the impletation of how unionfind is printed
-showAliasMap :: AliasMap -> String
-showAliasMap aliasMap = show $ aliasMapToAliasPairs aliasMap
+-- | A caller-independent external node: the identity of a piece of memory
+-- visible across a call boundary.  Portable -- keyed by 'ParameterID', not
+-- caller SSA names -- so the summary can be serialized into an object file and
+-- instantiated at any call site.
+data ExtNode
+    = ExtParam   ParameterID      -- ^ memory reachable from an input parameter
+    | ExtReturn  ParameterID      -- ^ memory written to an output parameter
+    | ExtGlobal  GlobalInfo       -- ^ a resource / global sink
+    | ExtConst   StructID         -- ^ a constant memory block
+    | ExtPhantom ExtNode FieldKey -- ^ callee-side memory with no portable name,
+                                  --   reached via a field of another node;
+                                  --   nesting capped at depth 1 (see
+                                  --   'collapsePhantom')
+    deriving (Eq, Ord, Show, Generic)
 
 
--- | a synonym function to hide the impletation of how unionfind is converted to
--- alias pairs
-aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
-aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
+-- | The serialized interprocedural points-to summary: a projection of a proc's
+-- final PointsToGraph onto the nodes visible across the call boundary, preserving
+-- field/direction structure for the caller (and future analyses).
+newtype ProcPTGSummary = ProcPTGSummary (Map ExtNode (Map FieldKey (Set ExtNode)))
+    deriving (Eq, Ord, Generic)
+
+
+-- | The empty summary (the callee does nothing observable).
+emptyProcPTGSummary :: ProcPTGSummary
+emptyProcPTGSummary = ProcPTGSummary Map.empty
+
+
+instance Show ProcPTGSummary where
+    show (ProcPTGSummary edges) =
+        let edgeStrs = [ show src ++ "." ++ show f ++ " -> " ++ showNodeList tgts
+                       | (src, fm) <- Map.toAscList edges
+                       , (f, tgts) <- Map.toAscList fm ]
+        in showBlock edgeStrs
+      where
+        showNodeList ns =
+            "[" ++ intercalate ", " (List.map show (Set.toAscList ns)) ++ "]"
+        showBlock [] = " []"
+        showBlock xs = concatMap ("\n    " ++) xs
 
 
 -- |Infomation about specialization versions the current proc directly uses.
@@ -2752,7 +2792,7 @@ data InterestingCallProperty
 
 -- | Stores whatever analysis results we infer about a proc definition.
 data ProcAnalysis = ProcAnalysis {
-    procArgAliasMap               :: AliasMap,
+    procArgPTGSummary             :: ProcPTGSummary,
     procInterestingCallProperties :: Set InterestingCallProperty,
     procMultiSpeczDepInfo         :: MultiSpeczDepInfo
 } deriving (Eq,Generic)
@@ -2760,7 +2800,7 @@ data ProcAnalysis = ProcAnalysis {
 
 -- | The empty ProcAnalysis
 emptyProcAnalysis :: ProcAnalysis
-emptyProcAnalysis = ProcAnalysis emptyDS Set.empty Map.empty
+emptyProcAnalysis = ProcAnalysis emptyProcPTGSummary Set.empty Map.empty
 
 
 -- |Check if a procedure definition body is compiled. 
@@ -2790,11 +2830,11 @@ instance Show ProcImpln where
 
 
 instance Show ProcAnalysis where
-    show (ProcAnalysis aliasMap interestingCallProperties multiSpeczDepInfo) =
+    show (ProcAnalysis ptgSummary interestingCallProperties multiSpeczDepInfo) =
         let multiSpeczDepInfo' = Map.toList multiSpeczDepInfo
                 |> List.filter (not . List.null . snd)
         in
-        "\n  AliasPairs: " ++ showAliasMap aliasMap
+        "\n  AliasSummary:" ++ show ptgSummary
         ++ "\n  InterestingCallProperties: "
         ++ show (Set.toAscList interestingCallProperties)
         ++ if List.null multiSpeczDepInfo'

@@ -1,0 +1,14 @@
+# BUG-12 (alias audit pass 2, see scratch/alias_analysis_bugs.md): a destructive
+# update must not corrupt a live alias; correct output matches each "expect".
+pub type position { pub position(x:int, y:int) }
+pub def pp(pos:position) use !io { !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")") }
+# A recursive {inline} proc: its body is inlined once, but the inner recursive
+# call survives as a PrimCall to an inline proc, which alias analysis skips.
+pub def {inline} idrec(p:position, n:int):position =
+    if { n <= 0 :: p | else :: idrec(p, n - 1) }
+!read(?i:int)
+?v = position(i, 2)
+?w = idrec(v, i)
+x(!w, 44)
+!print("expect w (44,2):"); !pp(w)
+!print("expect v (3,2):"); !pp(v)

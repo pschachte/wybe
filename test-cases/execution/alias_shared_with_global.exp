@@ -1,0 +1,2 @@
+expect r (999,2): (999,2)
+expect stash (1,2): (1,2)

@@ -13,6 +13,7 @@ module Transform (transformProc,
 
 import           AliasAnalysis
 import           AST
+import           PointsToGraph (emptyPTG, seedAliasedParam, seedOwnedParam)
 import           BodyBuilder
 import           Callers       (getSccProcs)
 import           Control.Monad
@@ -176,12 +177,15 @@ initAliasMap proto speczVersion = do
     inputParams <- protoInputParamNames proto
     logTransform $ "inputParams:      " ++ show inputParams
     logTransform $ "nonAliasedParams: " ++ show nonAliasedParams
+    -- A non-aliased param is proven owned (seedOwnedParam: destructively
+    -- updatable root, conservative field reads); every other param is
+    -- definitely aliased (seedAliasedParam).
     return $
-        List.foldl (\aliasMap param ->
+        List.foldl (\ptg param ->
             if List.notElem param nonAliasedParams
-                then unionTwoInDS (LiveVar param) (AliasByParam param) aliasMap
-                else aliasMap
-            ) emptyDS inputParams
+                then seedAliasedParam param ptg
+                else seedOwnedParam param ptg
+            ) emptyPTG inputParams
 
 
 -- | Collect all prims from a body, including all fork branches (conservative).
@@ -385,8 +389,11 @@ transformForks caller body (aliasMap, deadCells, stackVars) callSiteMap escapedV
             lift $ logTransform "Forking:"
             mapM_ (\(brNum, currBody) -> do
                     beginBranch brNum
+                    -- same path refinement as the analysis (refineForkBranch)
+                    let aliasMap' =
+                            refineForkBranch (bodyPrims body) var brNum aliasMap
                     transformBody caller currBody
-                                (aliasMap, deadCells, stackVars) callSiteMap escapedVars
+                                (aliasMap', deadCells, stackVars) callSiteMap escapedVars
                     endBranch
                 ) (List.map (mapFst Just) fBodies ++ maybeToList ((Nothing,) <$> deflt))
             completeFork
@@ -820,7 +827,7 @@ logTransform = logMsg Transform
 --   to any global or parameter in that map. A sweep of the whole final-dump suite
 --   confirms it: `escapedByAlias=True` appears in **zero** of the 57 alloc
 --   decisions, while genuinely-escaping allocs are all caught by
---   `escapedByMutation`. The stored whole-body `procArgAliasMap` would not help
+--   `escapedByMutation`. The stored whole-body `procArgPTGSummary` would not help
 --   either — it is *parameter-level* and does not track local alloc temporaries.
 --
 --   It is kept (rather than deleted) because it is harmless: being part of an

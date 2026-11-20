@@ -1,0 +1,12 @@
+# BUG-10 (alias audit pass 2, see scratch/alias_analysis_bugs.md): a destructive
+# update must not corrupt a live alias; correct output matches each "expect".
+pub type position { pub position(x:int, y:int) }
+pub type pair { pub pair(fst:position, snd:int) }
+pub def pp(pos:position) use !io { !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")") }
+pub def {noinline} wrap(p:position, n:int):pair = pair(p, n)
+!read(?i:int)
+?r = wrap(position(1, 2), i)
+?q = r^fst
+x(!q, 9)
+!print("expect q (9,2):"); !pp(q)
+!print("expect fresh const (1,2):"); !pp(position(1,2))

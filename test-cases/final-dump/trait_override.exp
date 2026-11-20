@@ -18,13 +18,15 @@ AFTER EVERYTHING:
 proc describe > public abstract {inline} (0 calls)
 0: trait_import_support.override_named.describe<0>
 describe(x##0:Type0<:trait_import_support.override_named <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 proc describe > public {inline} (0 calls)
 1: trait_import_support.override_named.describe<1>
 describe([x##0:Type0<:trait_import_support.override_named <{}; {}; {0}>], ?#result##0:wybe.string, [#vtable##0:opaque])<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtConst "unnamed"]
   InterestingCallProperties: []
     foreign llvm move("unnamed":wybe.string, ?#result##0:wybe.string) @override_named:nn:nn
 
@@ -74,7 +76,7 @@ define external fastcc i64 @"trait_import_support#.override_named#.describe<1>"(
 proc = > public {inline} (1 calls)
 0: trait_import_support.override_person.=<0>
 =(#left##0:trait_import_support.override_person, #right##0:trait_import_support.override_person, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.override_person, ~#right##0:trait_import_support.override_person, ?#success##0:wybe.bool)
 
@@ -82,7 +84,8 @@ proc = > public {inline} (1 calls)
 proc describe > public {inline} (1 calls)
 0: trait_import_support.override_person.describe<0>
 describe(x##0:trait_import_support.override_person, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_import_support.override_person, ?#result##0:wybe.string) @override_person:nn:nn
 
@@ -90,7 +93,8 @@ describe(x##0:trait_import_support.override_person, ?#result##0:wybe.string)<{};
 proc describe#adapter > {noinline} (0 calls)
 0: trait_import_support.override_person.describe#adapter<0>
 describe#adapter(x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: [(#result##0,x##0)]
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign llvm move(~x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string) @override_person:nn:nn
 
@@ -98,13 +102,15 @@ describe#adapter(x##0:Type0<:trait_import_support.override_named, ?#result##0:wy
 proc name > public {inline} (1 calls)
 0: trait_import_support.override_person.name<0>
 name(#rec##0:trait_import_support.override_person, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_import_support.override_person, ?#result##0:wybe.string) @override_person:nn:nn
 proc name > public {inline} (0 calls)
 1: trait_import_support.override_person.name<1>
 name([#rec##0:trait_import_support.override_person], ?#rec##2:trait_import_support.override_person, #field##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:wybe.string, ?#rec##2:trait_import_support.override_person) @override_person:nn:nn
 
@@ -112,13 +118,15 @@ name([#rec##0:trait_import_support.override_person], ?#rec##2:trait_import_suppo
 proc trait_override_person > public {inline} (0 calls)
 0: trait_import_support.override_person.trait_override_person<0>
 trait_override_person(name##0:wybe.string, ?#result##2:trait_import_support.override_person)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~name##0:wybe.string, ?#result##2:trait_import_support.override_person) @override_person:nn:nn
 proc trait_override_person > public {inline} (0 calls)
 1: trait_import_support.override_person.trait_override_person<1>
 trait_override_person(?name##0:wybe.string, #result##0:trait_import_support.override_person)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_import_support.override_person, ?name##0:wybe.string) @override_person:nn:nn
 
@@ -126,7 +134,7 @@ trait_override_person(?name##0:wybe.string, #result##0:trait_import_support.over
 proc ~= > public {inline} (0 calls)
 0: trait_import_support.override_person.~=<0>
 ~=(#left##0:trait_import_support.override_person, #right##0:trait_import_support.override_person, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.override_person, ~#right##0:trait_import_support.override_person, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -196,16 +204,37 @@ define external fastcc i1 @"trait_import_support#.override_person#.~=<0>"(i64 %"
 module top-level code > public {semipure} (0 calls)
 0: trait_override.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named.Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2))]
+    ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named.Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1))]
+    ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named.Field 6 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 6)]
+    ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named.Field 7 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7)]
+    ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named.Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 8)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2)).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2)).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2)).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2)).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2)).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1)).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1)).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1)).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1)).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1)).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1)).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7).Field (-2) -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7).Field (-1) -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-2)), ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field (-1)), ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7).Field 6 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7).Field 7 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 7), ExtPhantom (ExtGlobal vtable trait_import_support.override_person <: trait_import_support.override_named) (Field 8)]
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(7,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast("Ada":wybe.string, ?tmp#0##0:trait_import_support.override_person) @trait_override:nn:nn
     wybe.string.print<0>("Ada":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @trait_override:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @trait_override:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @trait_override:nn:nn
     foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_override:nn:nn
     vtable trait_import_support.override_person <: trait_import_support.override_named:opaque@0(~tmp#0##0:trait_import_support.override_person, ?tmp#2##0:wybe.string, vtable trait_import_support.override_person <: trait_import_support.override_named:opaque) #0 @trait_override:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @trait_override:nn:nn
+    wybe.string.print<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @trait_override:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @trait_override:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @trait_override:nn:nn
     foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_override:nn:nn
@@ -214,7 +243,8 @@ module top-level code > public {semipure} (0 calls)
 proc describe_through_trait > {inline} (1 calls)
 0: trait_override.describe_through_trait<0>
 describe_through_trait(x##0:Type0<:trait_import_support.override_named <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.override_named, ?#result##0:wybe.string, ~#vtable##0:opaque) #0 @trait_override:nn:nn
 
@@ -232,7 +262,6 @@ target triple   = ????
 
 declare external fastcc i64 @"trait_import_support#.override_person#.describe#adapter<0>"(i64, ptr)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -243,7 +272,7 @@ define external fastcc void @"trait_override#.<0>"() {
   %"tmp#18##0" = getelementptr inbounds ptr, ptr @"trait_import_support#.override_person##vtable#0", i64 0
   %"tmp#19##0" = load ptr, ptr %"tmp#18##0"
   %"tmp#2##0" = tail call fastcc i64 %"tmp#19##0"(i64 %"tmp#0##0", ptr @"trait_import_support#.override_person##vtable#0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#2##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#2##0")
   call ccc void @putchar(i8 10)
   ret void
 }

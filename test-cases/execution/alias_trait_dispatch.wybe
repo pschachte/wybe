@@ -1,0 +1,29 @@
+# BUG-4 (Class F): virtual / trait-dispatch call (PrimVirtualCall) is untracked.
+# `get_via_trait` dispatches `get` virtually; the impl returns x^val, so r
+# aliases inner.  The PrimVirtualCall is not modelled, so the destructive update
+# of inner corrupts r.
+# Correct: r stays (100,150).  Bug: r becomes (200,150).
+pub type position { pub position(x:int, y:int) }
+pub type pbox { pub pbox(val:position) }
+
+type getter trait {
+    abstract get(x:_): position
+}
+
+impl pbox <: getter
+def get(x:pbox): position = x^val
+
+pub def printPosition(pos:position) use !io {
+    !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")")
+}
+
+def {noinline} get_via_trait(x:U<:getter): position = getter.get(x)
+
+!read(?a:int)
+!read(?b:int)
+?inner = position(a, b)
+?bx = pbox(inner)
+?r = get_via_trait(bx)       # virtual dispatch -> r aliases inner
+x(!inner, 200)               # must be non-destructive
+!print("expect inner(200,"); !print(b); !print("): "); !printPosition(inner)
+!print("expect r    (100,"); !print(b); !print("): "); !printPosition(r)

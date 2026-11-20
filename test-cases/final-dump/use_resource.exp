@@ -19,7 +19,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: use_resource.<0>
 ()<{<<wybe.io.io>>}; {<<use_resource.count>>, <<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.print<0>("Inner count (4): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @use_resource:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @use_resource:nn:nn
@@ -37,7 +37,7 @@ module top-level code > public {semipure} (0 calls)
 proc inc_count > {inline} (4 calls)
 0: use_resource.inc_count<0>
 inc_count()<{<<use_resource.count>>}; {<<use_resource.count>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%count##0:wybe.int) @use_resource:nn:nn
     foreign llvm add(~count##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @use_resource:nn:nn
@@ -47,7 +47,7 @@ inc_count()<{<<use_resource.count>>}; {<<use_resource.count>>}; {}>:
 proc use_test > {inline} (1 calls)
 0: use_resource.use_test<0>
 use_test()<{<<use_resource.count>>, <<wybe.io.io>>}; {<<use_resource.count>>, <<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%tmp#4##0:wybe.int) @use_resource:nn:nn
     foreign llvm add(~tmp#4##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @use_resource:nn:nn

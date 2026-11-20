@@ -22,7 +22,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_prerequisite_redundant_partial.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(6,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast(vtable trait_prerequisite_redundant_partial.box(Type0<:trait_prerequisite_redundant_partial.printable) <: trait_prerequisite_redundant_partial.tb:opaque, ?#vtableviewbase##0:pointer) @trait_prerequisite_redundant_partial:nn:nn
@@ -44,7 +44,25 @@ module top-level code > public {semipure} (0 calls)
 proc label > {inline} (1 calls)
 0: trait_prerequisite_redundant_partial.label<0>
 label(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.Field (-2) -> [ExtReturn 1]
+    ExtReturn 1.Field (-1) -> [ExtReturn 1]
+    ExtReturn 1.Field 0 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtReturn 1.Field 6 -> [ExtReturn 1]
+    ExtReturn 1.Field 7 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 8)]
   InterestingCallProperties: []
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?#result##0:wybe.string) #1 @trait_prerequisite_redundant_partial:nn:nn
 
@@ -52,7 +70,25 @@ label(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
 proc label#adapter > {noinline} (0 calls)
 0: trait_prerequisite_redundant_partial.label#adapter<0>
 label#adapter(x##0:Type0<:trait_prerequisite_redundant_partial.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.Field (-2) -> [ExtReturn 1]
+    ExtReturn 1.Field (-1) -> [ExtReturn 1]
+    ExtReturn 1.Field 0 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtReturn 1.Field 6 -> [ExtReturn 1]
+    ExtReturn 1.Field 7 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 0).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 8)]
+    ExtPhantom (ExtReturn 1) (Field 8).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_prerequisite_redundant_partial.printable, ?x#adapter0##0:wybe.int)
     wybe.int.fmt<2>(~x#adapter0##0:wybe.int, 0:wybe.int, 32:wybe.char, ?#result##0:wybe.string) #1 @trait_prerequisite_redundant_partial:nn:nn
@@ -61,7 +97,8 @@ label#adapter(x##0:Type0<:trait_prerequisite_redundant_partial.printable, ?#resu
 proc label_a > {inline} (1 calls)
 0: trait_prerequisite_redundant_partial.label_a<0>
 label_a(x##0:trait_prerequisite_redundant_partial.box(T<:trait_prerequisite_redundant_partial.printable) <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_prerequisite_redundant_partial.box(T<:trait_prerequisite_redundant_partial.printable), ?tmp#1##0:T<:trait_prerequisite_redundant_partial.printable) @trait_prerequisite_redundant_partial:nn:nn
     trait_prerequisite_redundant_partial.printable.label<0>(~tmp#1##0:T<:trait_prerequisite_redundant_partial.printable, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_redundant_partial:nn:nn
@@ -70,7 +107,9 @@ label_a(x##0:trait_prerequisite_redundant_partial.box(T<:trait_prerequisite_redu
 proc label_a#adapter > {noinline} (0 calls)
 0: trait_prerequisite_redundant_partial.label_a#adapter<0>
 label_a#adapter(x##0:Type0<:trait_prerequisite_redundant_partial.ta, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 8:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
     trait_prerequisite_redundant_partial.printable.label<0>(~x##0:T<:trait_prerequisite_redundant_partial.printable, ?#result##0:wybe.string, ~#vtable#adapter0##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_redundant_partial:nn:nn
@@ -79,7 +118,8 @@ label_a#adapter(x##0:Type0<:trait_prerequisite_redundant_partial.ta, ?#result##0
 proc label_b > {inline} (1 calls)
 0: trait_prerequisite_redundant_partial.label_b<0>
 label_b(x##0:trait_prerequisite_redundant_partial.box(T<:trait_prerequisite_redundant_partial.printable) <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_prerequisite_redundant_partial.box(T<:trait_prerequisite_redundant_partial.printable), ?tmp#1##0:T<:trait_prerequisite_redundant_partial.printable) @trait_prerequisite_redundant_partial:nn:nn
     trait_prerequisite_redundant_partial.printable.label<0>(~tmp#1##0:T<:trait_prerequisite_redundant_partial.printable, ?#result##0:wybe.string, ~#vtable##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_redundant_partial:nn:nn
@@ -88,7 +128,9 @@ label_b(x##0:trait_prerequisite_redundant_partial.box(T<:trait_prerequisite_redu
 proc label_b#adapter > {noinline} (0 calls)
 0: trait_prerequisite_redundant_partial.label_b#adapter<0>
 label_b#adapter(x##0:Type0<:{trait_prerequisite_redundant_partial.ta, trait_prerequisite_redundant_partial.tb}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 2.Field 16 -> [ExtPhantom (ExtParam 2) (Field 16)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 16)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 16:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
     trait_prerequisite_redundant_partial.printable.label<0>(~x##0:T<:trait_prerequisite_redundant_partial.printable, ?#result##0:wybe.string, ~#vtable#adapter0##0:opaque)<{}; {}; {0}> #1 @trait_prerequisite_redundant_partial:nn:nn
@@ -188,13 +230,15 @@ define external fastcc i64 @"trait_prerequisite_redundant_partial#.label_b#adapt
 proc box > public {inline} (0 calls)
 0: trait_prerequisite_redundant_partial.box.box<0>
 box(value##0:T <{}; {}; {0}>, ?#result##2:trait_prerequisite_redundant_partial.box(T) <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~value##0:T, ?#result##2:trait_prerequisite_redundant_partial.box(T)) @trait_prerequisite_redundant_partial:nn:nn
 proc box > public {inline} (0 calls)
 1: trait_prerequisite_redundant_partial.box.box<1>
 box(?value##0:T <{}; {}; {1}>, #result##0:trait_prerequisite_redundant_partial.box(T) <{}; {}; {1}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_prerequisite_redundant_partial.box(T), ?value##0:T) @trait_prerequisite_redundant_partial:nn:nn
 
@@ -202,13 +246,15 @@ box(?value##0:T <{}; {}; {1}>, #result##0:trait_prerequisite_redundant_partial.b
 proc value > public {inline} (0 calls)
 0: trait_prerequisite_redundant_partial.box.value<0>
 value(#rec##0:trait_prerequisite_redundant_partial.box(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_prerequisite_redundant_partial.box(T), ?#result##0:T) @trait_prerequisite_redundant_partial:nn:nn
 proc value > public {inline} (0 calls)
 1: trait_prerequisite_redundant_partial.box.value<1>
 value([#rec##0:trait_prerequisite_redundant_partial.box(T) <{}; {}; {0}>], ?#rec##2:trait_prerequisite_redundant_partial.box(T) <{}; {}; {2}>, #field##0:T <{}; {}; {2}>)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:T, ?#rec##2:trait_prerequisite_redundant_partial.box(T)) @trait_prerequisite_redundant_partial:nn:nn
 
@@ -254,7 +300,8 @@ define external fastcc i64 @"trait_prerequisite_redundant_partial#.box#.value<1>
 proc label > public abstract {inline} (0 calls)
 0: trait_prerequisite_redundant_partial.printable.label<0>
 label(x##0:Type0<:trait_prerequisite_redundant_partial.printable <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_prerequisite_redundant_partial.printable, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
@@ -291,7 +338,8 @@ define external fastcc i64 @"trait_prerequisite_redundant_partial#.printable#.la
 proc label_a > public abstract {inline} (0 calls)
 0: trait_prerequisite_redundant_partial.ta.label_a<0>
 label_a(x##0:Type0<:trait_prerequisite_redundant_partial.ta <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_prerequisite_redundant_partial.ta, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 
@@ -328,7 +376,8 @@ define external fastcc i64 @"trait_prerequisite_redundant_partial#.ta#.label_a<0
 proc label_b > public abstract {inline} (0 calls)
 0: trait_prerequisite_redundant_partial.tb.label_b<0>
 label_b(x##0:Type0<:{trait_prerequisite_redundant_partial.ta, trait_prerequisite_redundant_partial.tb} <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:{trait_prerequisite_redundant_partial.ta, trait_prerequisite_redundant_partial.tb}, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 

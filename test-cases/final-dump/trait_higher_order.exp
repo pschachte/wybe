@@ -22,12 +22,11 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_higher_order.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm cast("Ada":wybe.string, ?tmp#0##0:trait_import_support.higher_order_box) @trait_higher_order:nn:nn
     trait_higher_order.#closure#1<0><>:(trait_import_support.higher_order_box, ?wybe.string)(~tmp#0##0:trait_import_support.higher_order_box, ?tmp#1##0:wybe.string) #0 @trait_higher_order:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @trait_higher_order:nn:nn
+    wybe.string.print<0>(~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @trait_higher_order:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @trait_higher_order:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @trait_higher_order:nn:nn
     foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_higher_order:nn:nn
@@ -36,7 +35,54 @@ module top-level code > public {semipure} (0 calls)
 proc #closure#1 > {inline} (1 calls)
 0: trait_higher_order.#closure#1<0>
 #closure#1(x##0 <{}; {}; {0}>, ?#result##0)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtParam 0.Field 0 -> [ExtConst "box: "]
+    ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtParam 0.Field 8 -> [ExtParam 0, ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtConst "box: "]
+    ExtConst "box: ".Field (-2) -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtConst "box: ".Field (-1) -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtConst "box: ".Field 0 -> [ExtConst "box: "]
+    ExtConst "box: ".Field 6 -> [ExtPhantom (ExtConst "box: ") (Field 6)]
+    ExtConst "box: ".Field 7 -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtConst "box: ".Field 8 -> [ExtParam 0, ExtPhantom (ExtConst "box: ") (Field 8)]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-2)), ExtPhantom (ExtParam 0) (Field (-1)), ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7), ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field (-2) -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field (-1) -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field 6 -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field 7 -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field 8 -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field (-2) -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field (-1) -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field 0 -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field 6 -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field 7 -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field 8 -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field (-2) -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field (-1) -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field 0 -> [ExtPhantom (ExtConst "box: ") (Field (-2)), ExtPhantom (ExtConst "box: ") (Field (-1)), ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field 6 -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field 7 -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field 8 -> [ExtPhantom (ExtConst "box: ") (Field 7), ExtPhantom (ExtConst "box: ") (Field 8)]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_import_support.higher_order_box, ?tmp#5##0:wybe.string) @trait_higher_order:nn:nn
     wybe.string.,,<0>("box: ":wybe.string, ~tmp#5##0:wybe.string, ?#result##0:wybe.string) #1 @trait_higher_order:nn:nn
@@ -45,7 +91,54 @@ proc #closure#1 > {inline} (1 calls)
 proc describe_box > {inline} (1 calls)
 0: trait_higher_order.describe_box<0>
 describe_box(x##0:trait_import_support.higher_order_box, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtParam 0.Field 0 -> [ExtConst "box: "]
+    ExtParam 0.Field 6 -> [ExtPhantom (ExtParam 0) (Field 6)]
+    ExtParam 0.Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtParam 0.Field 8 -> [ExtParam 0, ExtPhantom (ExtParam 0) (Field 8)]
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtConst "box: "]
+    ExtConst "box: ".Field (-2) -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtConst "box: ".Field (-1) -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtConst "box: ".Field 0 -> [ExtConst "box: "]
+    ExtConst "box: ".Field 6 -> [ExtPhantom (ExtConst "box: ") (Field 6)]
+    ExtConst "box: ".Field 7 -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtConst "box: ".Field 8 -> [ExtParam 0, ExtPhantom (ExtConst "box: ") (Field 8)]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-2)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-2))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 6 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 7 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field (-1)).Field 8 -> [ExtPhantom (ExtParam 0) (Field (-1))]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-2) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field (-1) -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 0 -> [ExtPhantom (ExtParam 0) (Field (-2)), ExtPhantom (ExtParam 0) (Field (-1)), ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 6 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 7 -> [ExtPhantom (ExtParam 0) (Field 7)]
+    ExtPhantom (ExtParam 0) (Field 7).Field 8 -> [ExtPhantom (ExtParam 0) (Field 7), ExtPhantom (ExtParam 0) (Field 8)]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field (-2) -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field (-1) -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field 6 -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field 7 -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-2)).Field 8 -> [ExtPhantom (ExtConst "box: ") (Field (-2))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field (-2) -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field (-1) -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field 0 -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field 6 -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field 7 -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field (-1)).Field 8 -> [ExtPhantom (ExtConst "box: ") (Field (-1))]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field (-2) -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field (-1) -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field 0 -> [ExtPhantom (ExtConst "box: ") (Field (-2)), ExtPhantom (ExtConst "box: ") (Field (-1)), ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field 6 -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field 7 -> [ExtPhantom (ExtConst "box: ") (Field 7)]
+    ExtPhantom (ExtConst "box: ") (Field 7).Field 8 -> [ExtPhantom (ExtConst "box: ") (Field 7), ExtPhantom (ExtConst "box: ") (Field 8)]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:trait_import_support.higher_order_box, ?tmp#2##0:wybe.string) @trait_higher_order:nn:nn
     wybe.string.,,<0>("box: ":wybe.string, ~tmp#2##0:wybe.string, ?#result##0:wybe.string) #3 @trait_higher_order:nn:nn
@@ -65,7 +158,7 @@ target triple   = ????
 @"trait_higher_order#constant#4" = private unnamed_addr constant {ptr} { ptr @"trait_higher_order#.#closure#1<0>" }, align 8
 
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -73,7 +166,7 @@ define external fastcc void @"trait_higher_order#.<0>"() {
   %"tmp#0##0" = ptrtoint ptr @"trait_higher_order#constant#3" to i64
   %"tmp#14##0" = load ptr, ptr @"trait_higher_order#constant#4"
   %"tmp#1##0" = tail call fastcc i64 %"tmp#14##0"(ptr @"trait_higher_order#constant#4", i64 %"tmp#0##0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#1##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#1##0")
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -109,7 +202,7 @@ define external fastcc i64 @"trait_higher_order#.describe_box<0>"(i64 %"x##0") {
 proc = > public {inline} (1 calls)
 0: trait_import_support.higher_order_box.=<0>
 =(#left##0:trait_import_support.higher_order_box, #right##0:trait_import_support.higher_order_box, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.higher_order_box, ~#right##0:trait_import_support.higher_order_box, ?#success##0:wybe.bool)
 
@@ -117,7 +210,8 @@ proc = > public {inline} (1 calls)
 proc apply_to_self > public {inline} (1 calls)
 0: trait_import_support.higher_order_box.apply_to_self<0>
 apply_to_self(x##0:trait_import_support.higher_order_box, f##0:(trait_import_support.higher_order_box, ?wybe.string), ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     ~f##0:(trait_import_support.higher_order_box, ?wybe.string)(~x##0:trait_import_support.higher_order_box, ?#result##0:wybe.string) #0 @higher_order_box:nn:nn
 
@@ -125,7 +219,8 @@ apply_to_self(x##0:trait_import_support.higher_order_box, f##0:(trait_import_sup
 proc apply_to_self#adapter > {noinline} (0 calls)
 0: trait_import_support.higher_order_box.apply_to_self#adapter<0>
 apply_to_self#adapter(x##0:T<:trait_import_support.higher_order_mapper, f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:T<:trait_import_support.higher_order_mapper, ?x#adapter0##0:trait_import_support.higher_order_box)
     foreign lpvm cast(~f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?f#adapter1##0:(trait_import_support.higher_order_box, ?wybe.string))
@@ -135,13 +230,15 @@ apply_to_self#adapter(x##0:T<:trait_import_support.higher_order_mapper, f##0:(T<
 proc name > public {inline} (0 calls)
 0: trait_import_support.higher_order_box.name<0>
 name(#rec##0:trait_import_support.higher_order_box, ?#result##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:trait_import_support.higher_order_box, ?#result##0:wybe.string) @higher_order_box:nn:nn
 proc name > public {inline} (0 calls)
 1: trait_import_support.higher_order_box.name<1>
 name([#rec##0:trait_import_support.higher_order_box], ?#rec##2:trait_import_support.higher_order_box, #field##0:wybe.string)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 2]
   InterestingCallProperties: []
     foreign lpvm cast(~#field##0:wybe.string, ?#rec##2:trait_import_support.higher_order_box) @higher_order_box:nn:nn
 
@@ -149,13 +246,15 @@ name([#rec##0:trait_import_support.higher_order_box], ?#rec##2:trait_import_supp
 proc trait_higher_order_box > public {inline} (0 calls)
 0: trait_import_support.higher_order_box.trait_higher_order_box<0>
 trait_higher_order_box(name##0:wybe.string, ?#result##2:trait_import_support.higher_order_box)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0]
   InterestingCallProperties: []
     foreign lpvm cast(~name##0:wybe.string, ?#result##2:trait_import_support.higher_order_box) @higher_order_box:nn:nn
 proc trait_higher_order_box > public {inline} (0 calls)
 1: trait_import_support.higher_order_box.trait_higher_order_box<1>
 trait_higher_order_box(?name##0:wybe.string, #result##0:trait_import_support.higher_order_box)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtParam 1]
   InterestingCallProperties: []
     foreign lpvm cast(~#result##0:trait_import_support.higher_order_box, ?name##0:wybe.string) @higher_order_box:nn:nn
 
@@ -163,7 +262,7 @@ trait_higher_order_box(?name##0:wybe.string, #result##0:trait_import_support.hig
 proc ~= > public {inline} (0 calls)
 0: trait_import_support.higher_order_box.~=<0>
 ~=(#left##0:trait_import_support.higher_order_box, #right##0:trait_import_support.higher_order_box, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:trait_import_support.higher_order_box, ~#right##0:trait_import_support.higher_order_box, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -233,7 +332,8 @@ define external fastcc i1 @"trait_import_support#.higher_order_box#.~=<0>"(i64 %
 proc apply_to_self > public abstract {inline} (0 calls)
 0: trait_import_support.higher_order_mapper.apply_to_self<0>
 apply_to_self(x##0:T<:trait_import_support.higher_order_mapper <{}; {}; {0}>, f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string) <{}; {}; {1}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 2.FieldIdent -> [ExtParam 0, ExtParam 1, ExtParam 3]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:trait_import_support.higher_order_mapper, ~f##0:(T<:trait_import_support.higher_order_mapper, ?wybe.string), ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 

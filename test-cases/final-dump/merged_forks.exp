@@ -19,7 +19,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: merged_forks.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     merged_forks.nested_same_default<0>(1:wybe.bool, 0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @merged_forks:nn:nn
     merged_forks.nested_same_default<0>(1:wybe.bool, 1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @merged_forks:nn:nn
@@ -34,7 +34,7 @@ module top-level code > public {semipure} (0 calls)
 proc defaulty > {noinline} (0 calls)
 0: merged_forks.defaulty<0>
 defaulty(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ule(x##0:wybe.int, 2:wybe.int, ?tmp#29##0:1 bit unsigned)
     case ~tmp#29##0:1 bit unsigned of
@@ -55,7 +55,7 @@ defaulty(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc leq_2 > {noinline} (0 calls)
 0: merged_forks.leq_2<0>
 leq_2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ule(~x##0:wybe.int, 2:wybe.int, ?tmp#27##0:1 bit unsigned)
     factored ~tmp#27##0:1 bit unsigned of
@@ -69,7 +69,7 @@ leq_2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc nested > {noinline} (0 calls)
 0: merged_forks.nested<0>
 nested(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.bool.print<0>(~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @merged_forks:nn:nn
     foreign llvm icmp_ule(~x##0:wybe.int, 2:wybe.int, ?tmp#55##0:1 bit unsigned)
@@ -84,14 +84,13 @@ nested(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc nested_different_default > {noinline} (0 calls)
 0: merged_forks.nested_different_default<0>
 nested_different_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(12,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     case ~b##0:wybe.bool of
     0:
         wybe.bool.fmt<0>(0:wybe.bool, ?tmp#4##0:wybe.string) #9 @merged_forks:nn:nn
         wybe.string.,,<0>(~tmp#4##0:wybe.string, 1155:wybe.string, ?tmp#3##0:wybe.string) #11 @merged_forks:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#3##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @merged_forks:nn:nn
+        wybe.string.print<0>(~tmp#3##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @merged_forks:nn:nn
         foreign llvm icmp_eq(x##0:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.bool) @merged_forks:nn:nn
         case ~tmp#11##0:wybe.bool of
         0:
@@ -113,7 +112,7 @@ nested_different_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wyb
     1:
         wybe.bool.fmt<0>(1:wybe.bool, ?tmp#1##0:wybe.string) #0 @merged_forks:nn:nn
         wybe.string.,,<0>(~tmp#1##0:wybe.string, 1155:wybe.string, ?tmp#0##0:wybe.string) #2 @merged_forks:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @merged_forks:nn:nn
+        wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @merged_forks:nn:nn
         foreign llvm icmp_eq(x##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @merged_forks:nn:nn
         case ~tmp#9##0:wybe.bool of
         0:
@@ -137,14 +136,13 @@ nested_different_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wyb
 proc nested_disjoint_same_default > {noinline} (0 calls)
 0: merged_forks.nested_disjoint_same_default<0>
 nested_disjoint_same_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     factored ~b##0:wybe.bool of
       ?tmp#83##0:wybe.int <- merged_forks#constant#2[IntStructMember 2 8,IntStructMember 3 8]
         wybe.bool.fmt<0>(~b##0:wybe.bool, ?tmp#1##0:wybe.string) #0 @merged_forks:nn:nn
         wybe.string.,,<0>(~tmp#1##0:wybe.string, 1155:wybe.string, ?tmp#0##0:wybe.string) #2 @merged_forks:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @merged_forks:nn:nn
+        wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @merged_forks:nn:nn
         case ~x##0:wybe.int of
         0:
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom) @merged_forks:nn:nn
@@ -181,14 +179,13 @@ nested_disjoint_same_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<
 proc nested_same_default > {noinline} (8 calls)
 0: merged_forks.nested_same_default<0>
 nested_same_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     factored ~b##0:wybe.bool of
       ?tmp#59##0:wybe.int <- merged_forks#constant#1[IntStructMember 3 8,IntStructMember 2 8]
         wybe.bool.fmt<0>(~b##0:wybe.bool, ?tmp#1##0:wybe.string) #0 @merged_forks:nn:nn
         wybe.string.,,<0>(~tmp#1##0:wybe.string, 1155:wybe.string, ?tmp#0##0:wybe.string) #2 @merged_forks:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @merged_forks:nn:nn
+        wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @merged_forks:nn:nn
         foreign llvm icmp_eq(x##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @merged_forks:nn:nn
         case ~tmp#9##0:wybe.bool of
         0:
@@ -211,7 +208,7 @@ nested_same_default(b##0:wybe.bool, x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.
 proc not_dense > {noinline} (0 calls)
 0: merged_forks.not_dense<0>
 not_dense(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(x##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @merged_forks:nn:nn
     case ~tmp#2##0:wybe.bool of
@@ -235,7 +232,7 @@ not_dense(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc not_dense_but_similar > {noinline} (0 calls)
 0: merged_forks.not_dense_but_similar<0>
 not_dense_but_similar(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~x##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @merged_forks:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @merged_forks:nn:nn
@@ -259,7 +256,7 @@ target triple   = ????
 declare external fastcc i64 @"wybe#.bool#.fmt<0>"(i1)
 declare external fastcc void @"wybe#.bool#.print<0>"(i1)
 declare external fastcc i64 @"wybe#.string#.,,<0>"(i64, i64)
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @print_int(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
@@ -315,7 +312,7 @@ define external fastcc void @"merged_forks#.nested_different_default<0>"(i1 %"b#
 if.then.0:
   %"tmp#1##0" = tail call fastcc i64 @"wybe#.bool#.fmt<0>"(i1 1)
   %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#1##0", i64 1155)
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
   %"tmp#9##0" = icmp eq i64 %"x##0", 0
   br i1 %"tmp#9##0", label %if.then.1, label %if.else.1
 if.then.1:
@@ -333,7 +330,7 @@ if.else.1:
 if.else.0:
   %"tmp#4##0" = tail call fastcc i64 @"wybe#.bool#.fmt<0>"(i1 0)
   %"tmp#3##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#4##0", i64 1155)
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#3##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#3##0")
   %"tmp#11##0" = icmp eq i64 %"x##0", 0
   br i1 %"tmp#11##0", label %if.then.2, label %if.else.2
 if.then.2:
@@ -356,7 +353,7 @@ define external fastcc void @"merged_forks#.nested_disjoint_same_default<0>"(i1 
   %"tmp#83##0" = load i64, ptr %"tmp#84##0"
   %"tmp#1##0" = tail call fastcc i64 @"wybe#.bool#.fmt<0>"(i1 %"b##0")
   %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#1##0", i64 1155)
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
   switch i64 %"x##0", label %default.switch.0 [
     i64 0, label %case.0.switch.0
     i64 2, label %case.2.switch.0
@@ -390,7 +387,7 @@ define external fastcc void @"merged_forks#.nested_same_default<0>"(i1 %"b##0", 
   %"tmp#59##0" = load i64, ptr %"tmp#60##0"
   %"tmp#1##0" = tail call fastcc i64 @"wybe#.bool#.fmt<0>"(i1 %"b##0")
   %"tmp#0##0" = tail call fastcc i64 @"wybe#.string#.,,<0>"(i64 %"tmp#1##0", i64 1155)
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
   %"tmp#9##0" = icmp eq i64 %"x##0", 0
   br i1 %"tmp#9##0", label %if.then.0, label %if.else.0
 if.then.0:

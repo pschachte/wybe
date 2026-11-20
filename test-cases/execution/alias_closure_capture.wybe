@@ -1,0 +1,13 @@
+# BUG-10 (alias audit pass 2, see scratch/alias_analysis_bugs.md): a destructive
+# update must not corrupt a live alias; correct output matches each "expect".
+pub type position { pub position(x:int, y:int) }
+pub def pp(pos:position) use !io { !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")") }
+# The closure literal captures v; a closure arg's captured values were dropped
+# when resolving the callee's summary, so w (which IS v) read as fresh.
+pub def {noinline} apply(f:(?position), ?b:position) { f(?b) }
+!read(?i:int)
+?v = position(i, 2)
+apply({ ?@ = v }, ?w)
+x(!w, 33)
+!print("expect w (33,2):"); !pp(w)
+!print("expect v (1,2):"); !pp(v)

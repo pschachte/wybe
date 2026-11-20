@@ -1,0 +1,2 @@
+expect q (9,2): (9,2)
+expect fresh const (1,2): (1,2)
