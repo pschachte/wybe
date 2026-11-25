@@ -1,9 +1,9 @@
 # When a type is only settled after the search tries overloads, both a concrete
 # procedure and an abstract one can succeed.  The concrete one should be chosen.
 
-use trait_import_support.printable
+use trait_import_support.renderable
 
-impl int <: printable
+impl int <: renderable
 
 def render(x:int):string = "int"
 

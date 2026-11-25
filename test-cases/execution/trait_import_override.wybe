@@ -1,11 +1,11 @@
 # A local trait impl overrides conflicting imported implementations.
 
-use trait_import_support.printable,
+use trait_import_support.renderable,
     trait_import_support.same_a,
     trait_import_support.different_b
 
-impl int <: printable
+impl int <: renderable
 
 def render(x:int): string = "local"
 
-!println(printable.render(1))
+!println(renderable.render(1))
