@@ -310,14 +310,10 @@ target triple   = ????
 @"list_member#constant#46" = private unnamed_addr constant {ptr, ptr} { ptr @"list_member#constant#44", ptr @"list_member#constant#45" }, align 8
 @"list_member#constant#47" = private unnamed_addr constant {i64, ptr} { i64 18, ptr @"list_member#constant#7" }, align 8
 
-declare external fastcc i1 @"wybe#.int#.=#adapter<0>"(i64, i64, ptr)
-declare external fastcc i1 @"wybe#.int#.~=#adapter<0>"(i64, i64, ptr)
 declare external fastcc i1 @"wybe#.list#.in<0>"(i64, i64, ptr)
 declare external fastcc i64 @"wybe#.range#.construct<0>"(i64, i64, i64)
 declare external fastcc i1 @"wybe#.range#.in<0>"(i64, i64)
-declare external fastcc i1 @"wybe#.string#.=#adapter<0>"(i64, i64, ptr)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
-declare external fastcc i1 @"wybe#.string#.~=#adapter<0>"(i64, i64, ptr)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 

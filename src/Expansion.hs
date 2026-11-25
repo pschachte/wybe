@@ -296,7 +296,9 @@ expandPrim call@(PrimCall id pspec impurity args gFlows) pos = do
         case procImpln def' of
             ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
                 if procInline def'
-                then inlineCall proto args'' body pos
+                then do
+                    lift2 $ importBodyVTables (procSpecMod pspec') body
+                    inlineCall proto args'' body pos
                 else do
                     logExpansion "  Not inlinable"
                     addInstr call' pos

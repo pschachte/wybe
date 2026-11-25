@@ -377,7 +377,7 @@ recordConst spec = do
                         allConsts = Set.insert spec
                             $ maybe id Set.delete previous $ allConsts s,
                         allVTables = Map.insert ispec spec $ allVTables s }
-                    recordConstParts info
+                    unless external $ recordConstParts info
             _ -> do
                 modify $ \s -> s {allConsts=Set.insert spec $ allConsts s}
                 maybe (return ()) recordConstParts info
