@@ -40,13 +40,32 @@ import Data.Tuple.HT (mapSnd)
 
 
 ----------------------------------------------------------------
---           Validating Proc Parameter Type Declarations
+--     Validating Proc Parameter and Body Type Declarations
 ----------------------------------------------------------------
 
 
--- |Validation of proc parameter types, sharing the type variables introduced
--- for trait types across the params of one proc.
-type Validator = StateT TraitTypeVars Compiler
+-- |The state of validating the declared types of a proc: first its parameter
+-- types, then the type annotations in its body.
+data ValidatorState = ValidatorState {
+    validatorTraitTypeVars :: TraitTypeVars,
+                            -- ^ The type variables introduced for trait types,
+                            -- shared across the whole proc, and the number of
+                            -- the next faux type variable
+    validatorSeenTypeVars :: Set TypeVarName,
+                            -- ^ The type variables occurring so far, for the
+                            -- rule that trait bounds go on the first occurrence
+    validatorParamTypeVars :: Set TypeVarName,
+                            -- ^ The type variables of the proc's parameters;
+                            -- set once the parameters have been validated
+    validatorLocalTypeVars :: Map TypeVarName TypeSpec
+                            -- ^ The faux type variable, with its bounds,
+                            -- standing for each type variable that first
+                            -- occurs in the body
+}
+
+
+-- |Validation of the declared types of a proc.
+type Validator = StateT ValidatorState Compiler
 
 
 -- |Check declared types of exported procs for the specified module.
@@ -85,13 +104,23 @@ validateProcDefTypes name def = do
     let params = procProtoParams proto
     let tvarCount = procFauxTypeVarCount def
     logTypes $ "Validating def of " ++ showProcName name
-    forM_ (repeatedTypeVarBounds $ paramType . content <$> params) $
-        errmsg pos . repeatedTypeVarBoundMsg
-    (params', finalState) <- runStateT (traverse (updatePlacedM $ validateParam name pos public) params)
-                             $ TraitTypeVars Map.empty tvarCount
+    let initState = ValidatorState (TraitTypeVars Map.empty tvarCount)
+                                   Set.empty Set.empty Map.empty
+    ((params', impln'), finalState) <- flip runStateT initState $ do
+        checkFirstOccurrences pos $ paramType . content <$> params
+        params' <- traverse (updatePlacedM $ validateParam name pos public)
+                    params
+        modify $ \s -> s { validatorParamTypeVars = validatorSeenTypeVars s }
+        impln' <- case procImpln def of
+            ProcDefSrc body ->
+                ProcDefSrc <$> mapBodyTypesPosM validateBodyType body
+            impln -> return impln
+        return (params', impln')
     boundedTypeParams <- minimiseTypeVarBounds $ getBoundedTypeParams params'
     return $ def { procProto = proto { procProtoParams = params' }
-                 , procFauxTypeVarCount = traitTypeVarCounter finalState
+                 , procImpln = impln'
+                 , procFauxTypeVarCount = traitTypeVarCounter
+                                        $ validatorTraitTypeVars finalState
                  , procBoundedTypeParams = boundedTypeParams
                  , procAnnotatedParams = Set.fromList
                     [paramName param | param <- content <$> params
@@ -101,7 +130,7 @@ validateProcDefTypes name def = do
 validateParam :: Ident -> OptPos -> Bool -> Param -> Validator Param
 validateParam pname ppos public param = do
     let ty = paramType param
-    checkDeclIfPublic pname ppos public ty
+    lift $ checkDeclIfPublic pname ppos public ty
     logValidator $ "Checking type " ++ show ty ++ " of param " ++ show param
     ty' <- validateParamType ppos ty
     let param' = param { paramType = ty' }
@@ -112,9 +141,84 @@ validateParam pname ppos public param = do
 validateParamType :: OptPos -> TypeSpec -> Validator TypeSpec
 validateParamType ppos ty = do
     ty' <- lift $ lookupType "proc declaration" ppos ty
-    validateTypeVarBoundsIn ppos ty'
-    ty'' <- traitTypesToTypeVars ty'
+    lift $ validateTypeVarBoundsIn ppos ty'
+    ty'' <- traitTypesToSharedTypeVars ty'
     lift $ addImpliedBounds ty''
+
+
+-- |Validate and canonicalise a type annotation in a proc body.  A trait type
+-- means the same type variable as that trait type in the proc's parameters.
+-- A type variable first occurring in the body may be given trait bounds there,
+-- and stands for whatever type the body requires, which must satisfy those
+-- bounds.  Trait bounds are only allowed on the first occurrence of a type
+-- variable, counting its occurrences in the proc's parameters.
+validateBodyType :: OptPos -> TypeSpec -> Validator TypeSpec
+validateBodyType _ AnyType = return AnyType
+validateBodyType pos ty = do
+    ty' <- lift $ lookupType "type annotation" pos ty
+    lift $ validateTypeVarBoundsIn pos ty'
+    checkFirstOccurrences pos [ty']
+    ty'' <- localiseTypeVars ty'
+    ty''' <- traitTypesToSharedTypeVars ty''
+    lift $ addImpliedBounds ty'''
+
+
+-- |Report each type variable given trait bounds on an occurrence other than
+-- its first in the specified types, counting the occurrences already seen in
+-- the proc, and record the type variables occurring in the types.
+checkFirstOccurrences :: OptPos -> [TypeSpec] -> Validator ()
+checkFirstOccurrences pos tys = do
+    seen <- gets validatorSeenTypeVars
+    let (seen', repeated) = repeatedTypeVarBoundsFrom seen tys
+    lift $ forM_ repeated $ errmsg pos . repeatedTypeVarBoundMsg
+    modify $ \s -> s { validatorSeenTypeVars = seen' }
+
+
+-- |Replace each trait type within a type with a type variable bounded by that
+-- trait, using the same type variable for a trait wherever it occurs in the
+-- proc.
+traitTypesToSharedTypeVars :: TypeSpec -> Validator TypeSpec
+traitTypesToSharedTypeVars ty = do
+    traitVars <- gets validatorTraitTypeVars
+    (ty', traitVars') <- lift $ runStateT (traitTypesToTypeVars ty) traitVars
+    modify $ \s -> s { validatorTraitTypeVars = traitVars' }
+    return ty'
+
+
+-- |Replace each type variable first occurring in the proc body with a faux
+-- type variable, so that type inference may bind it.  Every occurrence gets
+-- the bounds given at the first occurrence, so the bounds are checked
+-- whichever occurrence is unified first.
+localiseTypeVars :: TypeSpec -> Validator TypeSpec
+localiseTypeVars ty@TypeVariable{typeVariableName=name@RealTypeVar{},
+                                 typeVariableBounds=bounds} = do
+    isParamVar <- gets $ Set.member name . validatorParamTypeVars
+    local <- gets $ Map.lookup name . validatorLocalTypeVars
+    case local of
+        _ | isParamVar -> return ty
+        Just var -> return var
+        Nothing -> do
+            var <- (`TypeVariable` bounds) . FauxTypeVar <$> nextFauxTypeVar
+            modify $ \s -> s { validatorLocalTypeVars =
+                                Map.insert name var $ validatorLocalTypeVars s }
+            return var
+localiseTypeVars ty@TypeSpec{typeParams=params} = do
+    params' <- mapM localiseTypeVars params
+    return ty { typeParams = params' }
+localiseTypeVars ty@HigherOrderType{higherTypeParams=flows} = do
+    tys <- mapM (localiseTypeVars . typeFlowType) flows
+    return ty { higherTypeParams = zipWith setTypeFlowType tys flows }
+localiseTypeVars ty = return ty
+
+
+-- |Allocate the number of a new faux type variable.
+nextFauxTypeVar :: Validator Int
+nextFauxTypeVar = do
+    traitVars <- gets validatorTraitTypeVars
+    let next = traitTypeVarCounter traitVars
+    modify $ \s -> s { validatorTraitTypeVars =
+                        traitVars { traitTypeVarCounter = next + 1 } }
+    return next
 
 
 -- |Add the prerequisites of every type variable bound within a type to the
@@ -133,7 +237,7 @@ addImpliedBounds ty = return ty
 
 
 -- |Check the bounds of every type variable within a type.
-validateTypeVarBoundsIn :: OptPos -> TypeSpec -> Validator ()
+validateTypeVarBoundsIn :: OptPos -> TypeSpec -> Compiler ()
 validateTypeVarBoundsIn ppos TypeSpec{typeParams=params} =
     mapM_ (validateTypeVarBoundsIn ppos) params
 validateTypeVarBoundsIn ppos (TypeVariable _ bounds) =
@@ -143,22 +247,22 @@ validateTypeVarBoundsIn ppos HigherOrderType{higherTypeParams=tfs} =
 validateTypeVarBoundsIn _ _ = return ()
 
 
-validateTypeVarBounds :: OptPos -> Set TraitSpec -> Validator ()
+validateTypeVarBounds :: OptPos -> Set TraitSpec -> Compiler ()
 validateTypeVarBounds ppos bounds =
     mapM_ validateTypeVarBound $ Set.toAscList bounds
   where
     validateTypeVarBound bound = do
-        validTrait <- lift $ isTraitType bound
+        validTrait <- isTraitType bound
         unless (validTrait || bound == InvalidType) $
-            lift $ message Error
+            message Error
                 ("Invalid type variable bound: " ++ show bound ++ " is not a trait")
                 ppos
 
 
-checkDeclIfPublic :: Ident -> OptPos -> Bool -> TypeSpec -> Validator ()
+checkDeclIfPublic :: Ident -> OptPos -> Bool -> TypeSpec -> Compiler ()
 checkDeclIfPublic pname ppos public ty =
     when (public && ty == AnyType) $
-        lift $ message Error ("Public proc " ++ pname ++
+        message Error ("Public proc " ++ pname ++
                         " with undeclared parameter or return type") ppos
 
 

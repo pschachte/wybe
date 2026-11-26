@@ -1,0 +1,4 @@
+Error detected during checking parameter type declarations in module(s) trait_error_body_bound_not_first, trait_error_body_bound_not_first.measurable
+final-dump/trait_error_body_bound_not_first.wybe:8:44: Trait bounds of type variable T must all be specified at its first occurrence
+final-dump/trait_error_body_bound_not_first.wybe:10:55: Trait bounds of type variable T must all be specified at its first occurrence
+final-dump/trait_error_body_bound_not_first.wybe:12:52: Trait bounds of type variable U must all be specified at its first occurrence

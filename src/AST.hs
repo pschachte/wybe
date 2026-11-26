@@ -26,7 +26,8 @@ module AST (
   TraitSpec, TraitImplSpec(..), KnownTraitImpl(..), traitImplModule,
   TraitImplResolution(..), TypeVarBound,
   resolveTraitImpl, lookupTraitImpl, traitImplMoreSpecific,
-  typePatternsMoreGeneral, specialiseTraitImpl,
+  typePatternsMoreGeneral, specialiseTraitImpl, substituteTypeVars,
+  mapBodyTypes, mapBodyTypesM, mapBodyTypesPosM,
   traitImplTypeBounds, traitImplConstraints,
   traitImplConstraintsFor, canonicalise, sameTraitConstraint,
   directTraitPrerequisites, allTraitPrerequisites, traitPrerequisiteLayout,
@@ -35,7 +36,7 @@ module AST (
   genericType, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, isTraitType, typeModule,
   TraitTypeVars(..), traitTypesToTypeVars, rejectTraitBounds,
-  repeatedTypeVarBounds, repeatedTypeVarBoundMsg,
+  repeatedTypeVarBounds, repeatedTypeVarBoundsFrom, repeatedTypeVarBoundMsg,
   traitBoundNotAllowedMsg,
   VarDict, TypeVarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
@@ -192,6 +193,7 @@ import           Data.Tuple.HT ( mapSnd, mapFst )
 import           Data.Word (Word8)
 import           Data.Char
 import           Data.Functor     ((<&>))
+import           Data.Functor.Identity (Identity(..))
 import           Flow             ((|>))
 import           Numeric          (showHex)
 import           Options
@@ -3344,9 +3346,17 @@ rejectTraitBounds _ _ ty = return ty
 -- on any occurrence but their first in the specified types.  Bounds appearing
 -- inside a bound don't count as occurrences of the variables they mention.
 repeatedTypeVarBounds :: [TypeSpec] -> [TypeVarName]
-repeatedTypeVarBounds tys = List.nub $ reverse $ snd
-    $ List.foldl' occurrences (Set.empty, []) tys
+repeatedTypeVarBounds = snd . repeatedTypeVarBoundsFrom Set.empty
+
+
+-- |Like 'repeatedTypeVarBounds', but treating the type variables in the
+-- specified set as already having occurred.  Also returns that set extended
+-- with the type variables occurring in the specified types.
+repeatedTypeVarBoundsFrom :: Set TypeVarName -> [TypeSpec]
+                          -> (Set TypeVarName, [TypeVarName])
+repeatedTypeVarBoundsFrom seen0 tys = (seen, List.nub $ reverse bad)
   where
+    (seen, bad) = List.foldl' occurrences (seen0, []) tys
     occurrences (seen, bad) TypeVariable{typeVariableName=name,
                                          typeVariableBounds=bounds} =
         (Set.insert name seen,
@@ -4328,6 +4338,106 @@ substituteTypeVars bindings ty@HigherOrderType{higherTypeParams=flows} =
     substituteFlow flow =
         flow { typeFlowType = substituteTypeVars bindings $ typeFlowType flow }
 substituteTypeVars _ ty = ty
+
+
+-- |Apply the given function to every type written or recorded in the body.
+mapBodyTypes :: (TypeSpec -> TypeSpec) -> [Placed Stmt] -> [Placed Stmt]
+mapBodyTypes substType = runIdentity . mapBodyTypesM (Identity . substType)
+
+
+-- |Apply the given monadic function to every type written or recorded in the
+-- body.
+mapBodyTypesM :: Monad m => (TypeSpec -> m TypeSpec) -> [Placed Stmt]
+              -> m [Placed Stmt]
+mapBodyTypesM substType = mapBodyTypesPosM (const substType)
+
+
+-- |Apply the given monadic function to every type written or recorded in the
+-- body, in the order they appear, also passing the source position of the
+-- innermost placed statement or expression containing the type.
+mapBodyTypesPosM :: Monad m => (OptPos -> TypeSpec -> m TypeSpec)
+                 -> [Placed Stmt] -> m [Placed Stmt]
+mapBodyTypesPosM substType = mapM (substPStmt Nothing)
+  where
+    onPlaced fn outer placed =
+        let pos = place placed `orElse` outer
+        in (`maybePlace` place placed) <$> fn pos (content placed)
+    orElse (Just pos) _ = Just pos
+    orElse Nothing outer = outer
+    substDict pos = traverse (substType pos)
+    substPExp = onPlaced substExp
+    substPStmt = onPlaced substStmt
+    substPStmts pos = mapM (substPStmt pos)
+    substPGen = onPlaced $ \pos (In var gen) ->
+        In <$> substPExp pos var <*> substPExp pos gen
+
+    substStmt pos (ProcCall fun det resourceful args) =
+        (\fun' -> ProcCall fun' det resourceful)
+            <$> substFunctor pos fun <*> mapM (substPExp pos) args
+    substStmt pos (ForeignCall lang name flags args) =
+        ForeignCall lang name flags <$> mapM (substPExp pos) args
+    substStmt pos (Cond tst thn els afterCond afterAll resources) =
+        Cond <$> substPStmt pos tst <*> substPStmts pos thn
+            <*> substPStmts pos els
+            <*> traverse (substDict pos) afterCond
+            <*> traverse (substDict pos) afterAll
+            <*> pure resources
+    substStmt pos (UseResources resources dict body) =
+        UseResources resources <$> traverse (substDict pos) dict
+            <*> substPStmts pos body
+    substStmt pos (Case exp cases fallback) = Case
+        <$> substPExp pos exp
+        <*> mapM (\(match, body) ->
+                    (,) <$> substPExp pos match <*> substPStmts pos body)
+                 cases
+        <*> traverse (substPStmts pos) fallback
+    substStmt pos (TestBool exp) = TestBool <$> substExp pos exp
+    substStmt pos (And body) = And <$> substPStmts pos body
+    substStmt pos (Or body dict resources) =
+        Or <$> substPStmts pos body <*> traverse (substDict pos) dict
+            <*> pure resources
+    substStmt pos (Not stmt) = Not <$> substPStmt pos stmt
+    substStmt pos (Loop body dict resources) =
+        Loop <$> substPStmts pos body <*> traverse (substDict pos) dict
+            <*> pure resources
+    substStmt pos (For generators body) =
+        For <$> mapM (substPGen pos) generators <*> substPStmts pos body
+    substStmt _ stmt = return stmt
+
+    substFunctor pos (Higher exp) = Higher <$> substPExp pos exp
+    substFunctor _ fun = return fun
+
+    substExp pos (Closure spec closed) =
+        Closure spec <$> mapM (substPExp pos) closed
+    substExp pos (Typed exp ty cast) =
+        Typed <$> substExp pos exp <*> substType pos ty
+            <*> traverse (substType pos) cast
+    substExp pos (AnonProc mods params body dict resources) =
+        (\params' body' dict' -> AnonProc mods params' body' dict' resources)
+            <$> mapM (substParam pos) params <*> substPStmts pos body
+            <*> traverse (substDict pos) dict
+    substExp pos (AnonFunc exp) = AnonFunc <$> substPExp pos exp
+    substExp pos (Where body exp) =
+        Where <$> substPStmts pos body <*> substPExp pos exp
+    substExp pos (DisjExp left right) =
+        DisjExp <$> substPExp pos left <*> substPExp pos right
+    substExp pos (CondExp test yes no) =
+        CondExp <$> substPStmt pos test <*> substPExp pos yes
+            <*> substPExp pos no
+    substExp pos (Fncall mod name resourceful args) =
+        Fncall mod name resourceful <$> mapM (substPExp pos) args
+    substExp pos (ForeignFn lang name flags args) =
+        ForeignFn lang name flags <$> mapM (substPExp pos) args
+    substExp pos (CaseExp exp cases fallback) = CaseExp
+        <$> substPExp pos exp
+        <*> mapM (\(match, result) ->
+                    (,) <$> substPExp pos match <*> substPExp pos result)
+                 cases
+        <*> traverse (substPExp pos) fallback
+    substExp _ exp = return exp
+
+    substParam pos param =
+        (\ty -> param { paramType = ty }) <$> substType pos (paramType param)
 
 
 -- |Direct prerequisites of a specialised trait, with the declaring trait's

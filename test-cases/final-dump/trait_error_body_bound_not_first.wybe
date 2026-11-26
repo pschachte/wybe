@@ -1,0 +1,12 @@
+# Trait bounds in a proc body annotation are only allowed on the first
+# occurrence of a type variable, counting its occurrences in the parameters.
+
+type measurable trait {
+    abstract measure(x:_): int
+}
+
+def param_unbounded(a:T): int = r where { ?x:T<:measurable = a; ?r = 0 }
+
+def param_bounded(a:T<:measurable): int = r where { ?x:T<:measurable = a; ?r = 0 }
+
+def body_second(a:int): int = r where { ?x:U = a; ?y:U<:measurable = x; ?r = 0 }

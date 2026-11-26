@@ -1,0 +1,10 @@
+# A type variable bounded in a proc body annotation must be bound to a type
+# implementing the bound.
+
+type measurable trait {
+    abstract measure(x:_): int
+}
+
+def body_unsatisfied(a:string): int = r where { ?x:U<:measurable = a; ?r = 0 }
+
+def body_trait_unsatisfied(a:string): int = r where { ?x:measurable = a; ?r = 0 }
