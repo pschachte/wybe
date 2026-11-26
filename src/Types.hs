@@ -1055,11 +1055,8 @@ unifyTypes' _ ty1@TypeVariable{} ty2@TypeVariable{} = do
     let result = min ty1 ty2
     mergeTypeVarBounds (typeVariableName result) ty1 ty2
     return result
-unifyTypes' reason var@TypeVariable{typeVariableName=RealTypeVar{}} ty = do
-    bounds <- typeVarBounds var
-    if Set.null bounds
-        then invalidTypeError reason
-        else unifyTypeVarBounds reason bounds ty
+unifyTypes' reason TypeVariable{typeVariableName=RealTypeVar{}} _ =
+    invalidTypeError reason
 unifyTypes' reason var@TypeVariable{typeVariableName=FauxTypeVar{}} ty = do
     bounds <- typeVarBounds var
     if Set.null bounds
@@ -2043,7 +2040,7 @@ callInfos vars pstmt = do
                             ([to, from], [ParamOut, ParamIn]) -> [MoveInfo from to]
                             _ -> []
                         else []
-                return $ StmtTypings pstmt $ firstInfos ++ catMaybes partialInfos ++ moveInfo
+                return $ StmtTypings pstmt $ moveInfo ++ firstInfos ++ catMaybes partialInfos
         ProcCall (Higher fn) _ _ _ ->
             return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
@@ -2133,11 +2130,16 @@ typecheckCalls' _ [] residue@(overloaded:_) False foreigns = do
     typecheckCalls'' _ _ [] alt = alt
     typecheckCalls'' typings rest infos alt = do
         typings' <- snd <$$> mapM (getTyping . typecheckCallWithInfo typings rest) infos
-        case List.filter (List.null . typingErrs) typings' of
-            [typing] -> do
+        let valid = List.filter (List.null . typingErrs . snd) $ zip infos typings'
+        preferred <- lift $ mostSpecificMatch valid
+        case (valid, preferred) of
+            ([(_, typing)], _) -> do
                 logTyped "Found one valid typing"
                 put typing
-            valid -> do
+            (_, Just (_, typing)) -> do
+                logTyped "Found one most specific valid typing"
+                put typing
+            _ -> do
                 logTyped $ "Still ambiguous: " ++ show (length valid)
                 alt
     typecheckCallWithInfo typings rest info = do

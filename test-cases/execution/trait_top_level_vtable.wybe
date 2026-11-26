@@ -1,0 +1,20 @@
+# Top-level code small enough to be inlined into the generated main module can
+# pass a vtable that also refers to the vtable of a constraint.
+
+type box(T) {
+    pub box(value:T)
+}
+
+type my_printable trait {
+    abstract my_print(x:_) use !io
+}
+
+impl int <: my_printable
+
+def my_print(x:int) use !io { !println(x) }
+
+impl box(T<:my_printable) <: my_printable
+
+def my_print(x:box(T<:my_printable)) use !io { !my_printable.my_print(value(x)) }
+
+!my_printable.my_print(box(3))

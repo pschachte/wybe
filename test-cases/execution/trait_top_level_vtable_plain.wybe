@@ -1,0 +1,15 @@
+# Top-level code small enough to be inlined into the generated main module can
+# pass a vtable, directly or to a generic proc.
+
+type my_printable trait {
+    abstract my_print(x:_) use !io
+}
+
+impl int <: my_printable
+
+def my_print(x:int) use !io { !println(x) }
+
+def {noinline} generic(x:T<:my_printable) use !io { !my_printable.my_print(x) }
+
+!my_printable.my_print(4)
+!generic(5)

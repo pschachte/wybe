@@ -67,7 +67,6 @@ target triple   = ????
 @"trait_import_support#.basic_dog##vtable#0" = external unnamed_addr constant {ptr}, align 8
 @"trait_basic#constant#2" = private unnamed_addr constant {i64, ptr} { i64 3, ptr @"trait_basic#constant#0" }, align 8
 
-declare external fastcc i64 @"trait_import_support#.basic_dog#.speak#adapter<0>"(i64, ptr)
 declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)

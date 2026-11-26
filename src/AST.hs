@@ -127,7 +127,8 @@ module AST (
   ProcModifiers(..), defaultProcModifiers,
   setDetism, setInline, setImpurity, setVariant,
   ProcVariant(..), Inlining(..), Impurity(..),
-  addProc, addProcDef, addAbstractProc, addTraitImpl, lookupProc, publicProc, callTargets,
+  importBodyVTables, importVTable, addProc, addProcDef, addAbstractProc,
+  addTraitImpl, lookupProc, publicProc, callTargets,
   abstractProcs, traitImplProcProto, outputVariableName, outputStatusName,
   envParamName, envPrimParam, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
@@ -1658,6 +1659,41 @@ recordConstStruct info exp = do
             logAST $ "Recorded structs: "
                 ++ showMap "{" ", " "}" ((++"::") .show) show structs
             return structID
+
+
+-- | Make the vtables referenced by a body from the source module available to
+-- the current module, which is about to inline that body.  External vtables are
+-- otherwise only declared for the references in a module's own lowered code,
+-- before any inlining takes place.
+importBodyVTables :: ModSpec -> ProcBody -> Compiler ()
+importBodyVTables source body = do
+    thisMod <- getModuleSpec
+    unless (source == thisMod)
+        $ mapLPVMBodyM (const $ return ()) importArg body
+  where
+    importArg (ArgGlobal (GlobalVTable ispec) _) = importVTable ispec source
+    importArg _ = return ()
+
+
+-- | Ensure the current module has an entry for the specified vtable, declaring
+-- it as an external copy of the entry in the specified module if not.  That
+-- module need not define the vtable, or be imported by the current module.
+importVTable :: TraitImplSpec -> ModSpec -> Compiler ()
+importVTable ispec source = do
+    known <- getModule $ Map.member ispec . modVTables
+    unless known $ do
+        entry <- getModule (Map.lookup ispec . modVTables) `inModule` source
+        (index, sourceID) <- case entry of
+            Just (VTableStandalone index structID) -> return (index, structID)
+            _ -> shouldnt $ "importVTable: " ++ show ispec
+                    ++ " has no standalone vtable in " ++ showModSpec source
+        info <- lookupConstInfo sourceID
+        external <- case info of
+            Just table@VTableInfo{} -> return table { vtableExternal = True }
+            _ -> shouldnt $ "importVTable: not a vtable: " ++ show ispec
+        structID <- recordConstStruct external Nothing
+        updateModule $ \mod -> mod { modVTables = Map.insert ispec
+            (VTableStandalone index structID) $ modVTables mod }
 
 
 -- | Find the StructID for the specified StructInfo, if it exists.

@@ -1,0 +1,7 @@
+# Inline procs that pass on a vtable from a module their callers need not import.
+
+use trait_import_support.low
+
+pub def {inline} show_mid() use !io { !my_printable.my_print(2) }
+
+pub def {inline} show_via_mid() use !io { !show_low }
