@@ -1,0 +1,21 @@
+# The trait bounds of a type variable can only be set at its first occurrence.
+
+type printy trait {
+    abstract printy_val(a:_):int
+}
+
+type ordy trait {
+    abstract ordy_val(a:_):int
+}
+
+def both_bounded(a:T<:printy, b:T<:ordy) { pass }
+
+def second_bounded(a:T, b:T<:ordy) { pass }
+
+def same_bound_again(a:T<:printy, b:T<:printy) { pass }
+
+def nested_first(a:list(T), b:T<:ordy) { pass }
+
+def nested_second(a:T<:printy, b:list(T<:ordy)) { pass }
+
+def in_output(a:T):T<:ordy = a

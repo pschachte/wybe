@@ -53,7 +53,7 @@ proc type_var_bound_union > {inline} (0 calls)
 type_var_bound_union(x##0:T<:{trait_import_support.basic_named, trait_import_support.basic_speaker} <{}; {}; {0}>, [y##0:T<:{trait_import_support.basic_named, trait_import_support.basic_speaker} <{}; {}; {1}>], ?#result##0:wybe.string, #vtable##0:opaque, [#vtable##1:opaque])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    ~#vtable##0:opaque@0(~x##0:T<:trait_import_support.basic_speaker, ?#result##0:wybe.string, ~#vtable##0:opaque) #0 @trait_basic:nn:nn
+    ~#vtable##0:opaque@0(~x##0:T<:{trait_import_support.basic_named, trait_import_support.basic_speaker}, ?#result##0:wybe.string, ~#vtable##0:opaque) #0 @trait_basic:nn:nn
 
   LLVM code       :
 

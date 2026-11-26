@@ -18,7 +18,7 @@ type hashmap(K,V) {
 
 impl hashmap(K<:hash,V) <: mapping(K,V)
 
-def key_hash(x:hashmap(K<:hash,V), key:K<:hash): int = hash.hash(key)
+def key_hash(x:hashmap(K<:hash,V), key:K): int = hash.hash(key)
 
 ?m:hashmap(int,float) = hashmap(42, 3.14)
 !println(mapping.key_hash(m, 42))

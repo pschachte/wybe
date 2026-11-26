@@ -1,0 +1,19 @@
+# Trait bounds are inferred for unannotated parameters of private procedures.
+
+type printy trait {
+    abstract printy_val(a:_):int
+}
+
+def inferred(a):int = printy_val(a)
+
+def inferred_alongside_declared(a, b:T<:printy):int =
+    printy_val(a) + printy_val(b)
+
+# A candidate requiring an undeclared bound doesn't apply to a declared variable
+def overloaded(x:U):int = 0
+def overloaded(x:U<:printy):int = printy_val(x)
+def picks_unbounded(a:T):int = overloaded(a)
+
+# With mutual recursion, a parameter's bound is only inferred on a later pass
+def mutual_f(a, n:int):int = if { n <= 0 :: 0 | else :: mutual_g(a, n - 1) }
+def mutual_g(b, n:int):int = if { n <= 0 :: printy_val(b) | else :: mutual_f(b, n - 1) }

@@ -32,13 +32,13 @@ def dbg(x:int): string = "int $(x)"
 
 impl hashmap(K<:hash,V) <: mapping(K,V)
 
-def key_hash(x:hashmap(K<:hash,V), key:K<:hash): int = hash.hash(key)
+def key_hash(x:hashmap(K<:hash,V), key:K): int = hash.hash(key)
 
 impl box(debug) <: printable
 
 def show(x:box(debug)): string = "box of " ,, debug.dbg(x^value)
 
-def lookup_hash(m:hashmap(U<:hash,V), key:U<:hash): int = mapping.key_hash(m, key)
+def lookup_hash(m:hashmap(U<:hash,V), key:U): int = mapping.key_hash(m, key)
 
 def show_boxed(x:U<:debug): string = printable.show(box(x))
 

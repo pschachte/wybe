@@ -1,0 +1,7 @@
+Error detected during type checking of module(s) trait_error_body_bound_unsatisfied, trait_error_body_bound_unsatisfied.measurable
+final-dump/trait_error_body_bound_unsatisfied.wybe:8:50: Type of ?x:Type0<:trait_error_body_bound_unsatisfied.measurable incompatible with a
+final-dump/trait_error_body_bound_unsatisfied.wybe:8:50: Type error in call to proc =, argument 1
+final-dump/trait_error_body_bound_unsatisfied.wybe:8:50: Type error in call to proc =, argument 2
+final-dump/trait_error_body_bound_unsatisfied.wybe:10:56: Type of ?x:Type0<:trait_error_body_bound_unsatisfied.measurable incompatible with a
+final-dump/trait_error_body_bound_unsatisfied.wybe:10:56: Type error in call to proc =, argument 1
+final-dump/trait_error_body_bound_unsatisfied.wybe:10:56: Type error in call to proc =, argument 2

@@ -26,7 +26,8 @@ module AST (
   TraitSpec, TraitImplSpec(..), KnownTraitImpl(..), traitImplModule,
   TraitImplResolution(..), TypeVarBound,
   resolveTraitImpl, lookupTraitImpl, traitImplMoreSpecific,
-  typePatternsMoreGeneral, specialiseTraitImpl,
+  typePatternsMoreGeneral, specialiseTraitImpl, substituteTypeVars,
+  mapBodyTypes, mapBodyTypesM, mapBodyTypesPosM,
   traitImplTypeBounds, traitImplConstraints,
   traitImplConstraintsFor, canonicalise, sameTraitConstraint,
   directTraitPrerequisites, allTraitPrerequisites, traitPrerequisiteLayout,
@@ -35,6 +36,7 @@ module AST (
   genericType, higherOrderType, isHigherOrder,
   isResourcefulHigherOrder, isTraitType, typeModule,
   TraitTypeVars(..), traitTypesToTypeVars, rejectTraitBounds,
+  repeatedTypeVarBounds, repeatedTypeVarBoundsFrom, repeatedTypeVarBoundMsg,
   traitBoundNotAllowedMsg,
   VarDict, TypeVarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
@@ -191,6 +193,7 @@ import           Data.Tuple.HT ( mapSnd, mapFst )
 import           Data.Word (Word8)
 import           Data.Char
 import           Data.Functor     ((<&>))
+import           Data.Functor.Identity (Identity(..))
 import           Flow             ((|>))
 import           Numeric          (showHex)
 import           Options
@@ -1386,6 +1389,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let ProcModifiers detism inlining impurity variant _ = mods
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
                   vis Nothing detism inlining impurity variant (initSuperprocSpec vis) Map.empty [] 0
+                  Set.empty
     void $ addProcDef procDef
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
@@ -1400,7 +1404,7 @@ addAbstractProc tmpCtr (AbstractProcDecl mods proto stmts pos) = do
     updateModule (\mod -> mod { modAbstractProcCount = abstractProcIndex + 1 })
     let procDef = ProcDef name proto ProcDefAbstract pos tmpCtr 0 Map.empty
                   Public (Just abstractProcIndex) detism inlining impurity variant (initSuperprocSpec Public)
-                  Map.empty [] 0
+                  Map.empty [] 0 Set.empty
     void $ addProcDef procDef
 addAbstractProc _ item =
     shouldnt $ "addAbstractProc given non-AbstractProc item " ++ show item
@@ -2376,8 +2380,11 @@ data ProcDef = ProcDef {
     procBoundedTypeParams :: [TypeVarBound],
                                 -- ^The bounded type variables in the proc's params
                                 -- used for generating vtable params
-    procFauxTypeVarCount :: Int
+    procFauxTypeVarCount :: Int,
                                 -- ^The number of faux type variables
+    procAnnotatedParams :: Set VarName
+                                -- ^The parameters with a type annotation in
+                                -- the source
 }
              deriving (Eq, Generic)
 
@@ -3333,6 +3340,41 @@ rejectTraitBounds context pos ty@HigherOrderType{higherTypeParams=flows} = do
     tys <- mapM (rejectTraitBounds context pos . typeFlowType) flows
     return ty { higherTypeParams = zipWith setTypeFlowType tys flows }
 rejectTraitBounds _ _ ty = return ty
+
+
+-- |The type variables, in order and without duplicates, that have a trait bound
+-- on any occurrence but their first in the specified types.  Bounds appearing
+-- inside a bound don't count as occurrences of the variables they mention.
+repeatedTypeVarBounds :: [TypeSpec] -> [TypeVarName]
+repeatedTypeVarBounds = snd . repeatedTypeVarBoundsFrom Set.empty
+
+
+-- |Like 'repeatedTypeVarBounds', but treating the type variables in the
+-- specified set as already having occurred.  Also returns that set extended
+-- with the type variables occurring in the specified types.
+repeatedTypeVarBoundsFrom :: Set TypeVarName -> [TypeSpec]
+                          -> (Set TypeVarName, [TypeVarName])
+repeatedTypeVarBoundsFrom seen0 tys = (seen, List.nub $ reverse bad)
+  where
+    (seen, bad) = List.foldl' occurrences (seen0, []) tys
+    occurrences (seen, bad) TypeVariable{typeVariableName=name,
+                                         typeVariableBounds=bounds} =
+        (Set.insert name seen,
+         if name `Set.member` seen && not (Set.null bounds)
+            then name:bad
+            else bad)
+    occurrences acc TypeSpec{typeParams=params} =
+        List.foldl' occurrences acc params
+    occurrences acc HigherOrderType{higherTypeParams=flows} =
+        List.foldl' occurrences acc $ typeFlowType <$> flows
+    occurrences acc _ = acc
+
+
+-- |The message for a trait bound on a later occurrence of a type variable.
+repeatedTypeVarBoundMsg :: TypeVarName -> String
+repeatedTypeVarBoundMsg name =
+    "Trait bounds of type variable " ++ show name
+    ++ " must all be specified at its first occurrence"
 
 
 -- |The message for a trait bound, described by the first argument, written
@@ -4298,6 +4340,106 @@ substituteTypeVars bindings ty@HigherOrderType{higherTypeParams=flows} =
 substituteTypeVars _ ty = ty
 
 
+-- |Apply the given function to every type written or recorded in the body.
+mapBodyTypes :: (TypeSpec -> TypeSpec) -> [Placed Stmt] -> [Placed Stmt]
+mapBodyTypes substType = runIdentity . mapBodyTypesM (Identity . substType)
+
+
+-- |Apply the given monadic function to every type written or recorded in the
+-- body.
+mapBodyTypesM :: Monad m => (TypeSpec -> m TypeSpec) -> [Placed Stmt]
+              -> m [Placed Stmt]
+mapBodyTypesM substType = mapBodyTypesPosM (const substType)
+
+
+-- |Apply the given monadic function to every type written or recorded in the
+-- body, in the order they appear, also passing the source position of the
+-- innermost placed statement or expression containing the type.
+mapBodyTypesPosM :: Monad m => (OptPos -> TypeSpec -> m TypeSpec)
+                 -> [Placed Stmt] -> m [Placed Stmt]
+mapBodyTypesPosM substType = mapM (substPStmt Nothing)
+  where
+    onPlaced fn outer placed =
+        let pos = place placed `orElse` outer
+        in (`maybePlace` place placed) <$> fn pos (content placed)
+    orElse (Just pos) _ = Just pos
+    orElse Nothing outer = outer
+    substDict pos = traverse (substType pos)
+    substPExp = onPlaced substExp
+    substPStmt = onPlaced substStmt
+    substPStmts pos = mapM (substPStmt pos)
+    substPGen = onPlaced $ \pos (In var gen) ->
+        In <$> substPExp pos var <*> substPExp pos gen
+
+    substStmt pos (ProcCall fun det resourceful args) =
+        (\fun' -> ProcCall fun' det resourceful)
+            <$> substFunctor pos fun <*> mapM (substPExp pos) args
+    substStmt pos (ForeignCall lang name flags args) =
+        ForeignCall lang name flags <$> mapM (substPExp pos) args
+    substStmt pos (Cond tst thn els afterCond afterAll resources) =
+        Cond <$> substPStmt pos tst <*> substPStmts pos thn
+            <*> substPStmts pos els
+            <*> traverse (substDict pos) afterCond
+            <*> traverse (substDict pos) afterAll
+            <*> pure resources
+    substStmt pos (UseResources resources dict body) =
+        UseResources resources <$> traverse (substDict pos) dict
+            <*> substPStmts pos body
+    substStmt pos (Case exp cases fallback) = Case
+        <$> substPExp pos exp
+        <*> mapM (\(match, body) ->
+                    (,) <$> substPExp pos match <*> substPStmts pos body)
+                 cases
+        <*> traverse (substPStmts pos) fallback
+    substStmt pos (TestBool exp) = TestBool <$> substExp pos exp
+    substStmt pos (And body) = And <$> substPStmts pos body
+    substStmt pos (Or body dict resources) =
+        Or <$> substPStmts pos body <*> traverse (substDict pos) dict
+            <*> pure resources
+    substStmt pos (Not stmt) = Not <$> substPStmt pos stmt
+    substStmt pos (Loop body dict resources) =
+        Loop <$> substPStmts pos body <*> traverse (substDict pos) dict
+            <*> pure resources
+    substStmt pos (For generators body) =
+        For <$> mapM (substPGen pos) generators <*> substPStmts pos body
+    substStmt _ stmt = return stmt
+
+    substFunctor pos (Higher exp) = Higher <$> substPExp pos exp
+    substFunctor _ fun = return fun
+
+    substExp pos (Closure spec closed) =
+        Closure spec <$> mapM (substPExp pos) closed
+    substExp pos (Typed exp ty cast) =
+        Typed <$> substExp pos exp <*> substType pos ty
+            <*> traverse (substType pos) cast
+    substExp pos (AnonProc mods params body dict resources) =
+        (\params' body' dict' -> AnonProc mods params' body' dict' resources)
+            <$> mapM (substParam pos) params <*> substPStmts pos body
+            <*> traverse (substDict pos) dict
+    substExp pos (AnonFunc exp) = AnonFunc <$> substPExp pos exp
+    substExp pos (Where body exp) =
+        Where <$> substPStmts pos body <*> substPExp pos exp
+    substExp pos (DisjExp left right) =
+        DisjExp <$> substPExp pos left <*> substPExp pos right
+    substExp pos (CondExp test yes no) =
+        CondExp <$> substPStmt pos test <*> substPExp pos yes
+            <*> substPExp pos no
+    substExp pos (Fncall mod name resourceful args) =
+        Fncall mod name resourceful <$> mapM (substPExp pos) args
+    substExp pos (ForeignFn lang name flags args) =
+        ForeignFn lang name flags <$> mapM (substPExp pos) args
+    substExp pos (CaseExp exp cases fallback) = CaseExp
+        <$> substPExp pos exp
+        <*> mapM (\(match, result) ->
+                    (,) <$> substPExp pos match <*> substPExp pos result)
+                 cases
+        <*> traverse (substPExp pos) fallback
+    substExp _ exp = return exp
+
+    substParam pos param =
+        (\ty -> param { paramType = ty }) <$> substType pos (paramType param)
+
+
 -- |Direct prerequisites of a specialised trait, with the declaring trait's
 -- parameters substituted into the prerequisite specifications.
 directTraitPrerequisites :: TraitSpec -> Compiler [TraitSpec]
@@ -4353,7 +4495,7 @@ prerequisiteSlotOffset hostTrait targetTrait = do
 
 -- |The trait bounds declared within an implementation type, in ABI order:
 -- type variables by first occurrence, then each variable's bounds in ascending
--- order. Repeated occurrences of a variable contribute their union of bounds.
+-- order.
 traitImplTypeBounds :: TraitImplSpec -> [TypeVarBound]
 traitImplTypeBounds = typeBounds . implType
   where
@@ -5298,7 +5440,7 @@ showProcDefs firstID (def:defs) =
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
   procdef@(ProcDef n proto def pos tmpCount _ _ vis abstract detism inline impurity ctor
-                   sub _ _ _) =
+                   sub _ _ _ _) =
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis

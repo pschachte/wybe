@@ -1,0 +1,45 @@
+# Trait types and trait-bounded type variables in type annotations in a proc
+# body.  A trait type means the same type variable as that trait type in the
+# proc's parameters; a type variable first occurring in the body may be
+# bounded there, and is inferred.
+
+type measurable trait {
+    abstract measure(x:_): int
+}
+
+impl int <: measurable
+def measure(x:int): int = x * 10
+
+# A body-only trait type: inferred as int, which implements measurable.
+def body_trait(a:int): int = r where { ?x:measurable = a; ?r = measure(x) }
+
+# The body's measurable is the same type variable as the parameter's.
+def shared_trait(a:measurable, b:int): int = r where {
+    ?x:measurable = a
+    ?r = measure(x) + b
+}
+
+# A bounded type variable first occurring in the body, used again unbounded.
+def body_bounded(a:int): int = r where {
+    ?x:U<:measurable = a
+    ?y:U = x
+    ?r = measure(y)
+}
+
+# A parameter's type variable used, unbounded, in the body.
+def param_var(a:T<:measurable): int = r where { ?x:T = a; ?r = measure(x) }
+
+# A trait type in the body for a parameter bounded by the same trait.
+def param_bounded(a:T<:measurable): int = r where {
+    ?x:measurable = a
+    ?r = measure(x)
+}
+
+?top:measurable = 9
+
+!println(body_trait(1))
+!println(shared_trait(2, 1))
+!println(body_bounded(3))
+!println(param_var(4))
+!println(param_bounded(5))
+!println(measure(top))

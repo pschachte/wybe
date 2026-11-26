@@ -1,0 +1,9 @@
+# Trait bounds aren't inferred for public procedures, which must annotate types.
+
+type printy trait {
+    abstract printy_val(a:_):int
+}
+
+pub def unannotated(a, ?r:int) {
+    ?r = printy_val(a)
+}
