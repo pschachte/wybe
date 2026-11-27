@@ -51,11 +51,7 @@ declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 proc = > public (1 calls)
 0: mutual_type.a.=<0>
 =(#left##0:mutual_type.a, #right##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -98,7 +94,6 @@ proc a > public {inline} (12 calls)
 1: mutual_type.a.a<1>
 a(?ahead##0:wybe.int, ?atail##0:mutual_type.b, #result##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -152,7 +147,6 @@ proc atail > public {inline} (0 calls)
 0: mutual_type.a.atail<0>
 atail(#rec##0:mutual_type.a, ?#result##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -194,11 +188,7 @@ no_a(?#result##0:mutual_type.a)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: mutual_type.a.~=<0>
 ~=(#left##0:mutual_type.a, #right##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     mutual_type.a.=<0>(~#left##0:mutual_type.a, ~#right##0:mutual_type.a, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
@@ -384,11 +374,7 @@ define external fastcc i1 @"mutual_type#.a#.~=<0>"(i64 %"#left##0", i64 %"#right
 proc = > public (1 calls)
 0: mutual_type.b.=<0>
 =(#left##0:mutual_type.b, #right##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -431,7 +417,6 @@ proc b > public {inline} (12 calls)
 1: mutual_type.b.b<1>
 b(?bhead##0:wybe.int, ?btail##0:mutual_type.a, #result##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -485,7 +470,6 @@ proc btail > public {inline} (0 calls)
 0: mutual_type.b.btail<0>
 btail(#rec##0:mutual_type.b, ?#result##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -527,11 +511,7 @@ no_b(?#result##0:mutual_type.b)<{}; {}; {}>:
 proc ~= > public {inline} (0 calls)
 0: mutual_type.b.~=<0>
 ~=(#left##0:mutual_type.b, #right##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     mutual_type.b.=<0>(~#left##0:mutual_type.b, ~#right##0:mutual_type.b, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

@@ -46,11 +46,9 @@ proc ,, > public (2 calls)
 0: type_list.,,<0>
 ,,(x##0:type_list.intlist, y##0:type_list.intlist, outByReference #result##0:type_list.intlist)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtParam 1.Field 8 -> [ExtParam 1]
     ExtReturn 2.Field 8 -> [ExtParam 1]
     ExtReturn 2.FieldIdent -> [ExtParam 1]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(type_list.,,<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @type_list:nn:nn
@@ -71,9 +69,7 @@ proc ,, > public (2 calls)
 proc length > public (2 calls)
 0: type_list.length<0>
 length(x##0:type_list.intlist, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @type_list:nn:nn
     case ~tmp#5##0:wybe.bool of
@@ -173,11 +169,7 @@ if.else.0:
 proc = > public (2 calls)
 0: type_list.intlist.=<0>
 =(#left##0:type_list.intlist, #right##0:type_list.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -220,7 +212,6 @@ proc cons > public {inline} (12 calls)
 1: type_list.intlist.cons<1>
 cons(?head##0:wybe.int, ?tail##0:type_list.intlist, #result##0:type_list.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -282,7 +273,6 @@ proc tail > public {inline} (0 calls)
 0: type_list.intlist.tail<0>
 tail(#rec##0:type_list.intlist, ?#result##0:type_list.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -316,11 +306,7 @@ tail(#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, #field##0:type_list.
 proc ~= > public {inline} (0 calls)
 0: type_list.intlist.~=<0>
 ~=(#left##0:type_list.intlist, #right##0:type_list.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     type_list.intlist.=<0>(~#left##0:type_list.intlist, ~#right##0:type_list.intlist, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

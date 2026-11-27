@@ -43,7 +43,6 @@ proc cons > {inline} (0 calls)
 1: current_module_alias_type_args.cons<1>
 cons(?head##0:T <{}; {}; {2}>, ?tail##0:current_module_alias_type_args(T) <{}; {}; {2}>, #result##0:current_module_alias_type_args(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -105,7 +104,6 @@ proc tail > {inline} (0 calls)
 0: current_module_alias_type_args.tail<0>
 tail(#rec##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#result##0:current_module_alias_type_args(T) <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)

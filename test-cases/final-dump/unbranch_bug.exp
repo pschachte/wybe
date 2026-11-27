@@ -38,9 +38,7 @@ proc #cont#2 > {inline,semipure} (1 calls)
 proc #cont#3 > {semipure} (2 calls)
 0: unbranch_bug.#cont#3<0>
 #cont#3(tmp#0##0:wybe.list(Type7) <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @unbranch_bug:nn:nn
     case ~tmp#7##0:wybe.bool of

@@ -77,7 +77,6 @@ module top-level code > {terminal,inline,impure} (0 calls)
 (%argc##0:wybe.int, %argv##0:wybe.c_array.raw_array, %?exit_code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasSummary:
     ExtReturn 2.FieldIdent -> [ExtGlobal <<command_line.exit_code>>]
-    ExtGlobal <<command_line.arguments>>.FieldAny -> [ExtPhantom (ExtGlobal <<command_line.arguments>>) FieldAny]
     ExtGlobal <<command_line.argv>>.FieldAny -> [ExtParam 1]
     ExtGlobal <<command_line.command>>.FieldAny -> [ExtConst c""]
     ExtPhantom (ExtGlobal <<command_line.arguments>>) FieldAny.Field 8 -> [ExtGlobal <<command_line.argv>>]
@@ -630,7 +629,6 @@ module top-level code > {terminal,inline,impure} (0 calls)
 (%argc##0:wybe.int, %argv##0:wybe.c_array.raw_array, %?exit_code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasSummary:
     ExtReturn 2.FieldIdent -> [ExtGlobal <<command_line.exit_code>>]
-    ExtGlobal <<command_line.arguments>>.FieldAny -> [ExtPhantom (ExtGlobal <<command_line.arguments>>) FieldAny]
     ExtGlobal <<command_line.argv>>.FieldAny -> [ExtParam 1]
     ExtGlobal <<command_line.command>>.FieldAny -> [ExtConst c""]
     ExtPhantom (ExtGlobal <<command_line.arguments>>) FieldAny.Field 8 -> [ExtGlobal <<command_line.argv>>]

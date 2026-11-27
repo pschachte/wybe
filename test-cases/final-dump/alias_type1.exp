@@ -323,9 +323,7 @@ if.else.0:
 proc = > public {inline} (1 calls)
 0: alias_type1.posrec.=<0>
 =(#left##0:alias_type1.posrec, #right##0:alias_type1.posrec, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:alias_type1.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#a##0:wybe.int) @alias_type1:nn:nn
     foreign lpvm access(~#left##0:alias_type1.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#p##0:alias_type1.position) @alias_type1:nn:nn
@@ -371,7 +369,6 @@ proc p > public {inline} (0 calls)
 0: alias_type1.posrec.p<0>
 p(#rec##0:alias_type1.posrec, ?#result##0:alias_type1.position)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type1.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:alias_type1.position) @alias_type1:nn:nn
@@ -397,7 +394,6 @@ proc posrec > public {inline} (6 calls)
 1: alias_type1.posrec.posrec<1>
 posrec(?a##0:wybe.int, ?p##0:alias_type1.position, #result##0:alias_type1.posrec)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(#result##0:alias_type1.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?a##0:wybe.int) @alias_type1:nn:nn
@@ -407,9 +403,7 @@ posrec(?a##0:wybe.int, ?p##0:alias_type1.position, #result##0:alias_type1.posrec
 proc ~= > public {inline} (0 calls)
 0: alias_type1.posrec.~=<0>
 ~=(#left##0:alias_type1.posrec, #right##0:alias_type1.posrec, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:alias_type1.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @alias_type1:nn:nn
     foreign lpvm access(~#left##0:alias_type1.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:alias_type1.position) @alias_type1:nn:nn

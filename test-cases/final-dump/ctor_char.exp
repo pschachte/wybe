@@ -30,11 +30,7 @@ module top-level code > public {semipure} (0 calls)
 proc = > public (2 calls)
 0: ctor_char.=<0>
 =(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -235,7 +231,6 @@ proc other_ctor > {inline} (8 calls)
 1: ctor_char.other_ctor<1>
 other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
     ExtReturn 0.FieldIdent -> [ExtPhantom (ExtParam 1) (Field (-1))]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -261,11 +256,7 @@ other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.b
 proc ~= > public {inline} (0 calls)
 0: ctor_char.~=<0>
 ~=(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+  AliasSummary: []
   InterestingCallProperties: []
     ctor_char.=<0>(~#left##0:ctor_char, ~#right##0:ctor_char, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

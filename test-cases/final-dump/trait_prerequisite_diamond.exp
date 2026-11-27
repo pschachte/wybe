@@ -108,23 +108,11 @@ proc label > {inline} (1 calls)
 0: trait_prerequisite_diamond.label<0>
 label(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
-    ExtReturn 1.Field (-2) -> [ExtReturn 1]
-    ExtReturn 1.Field (-1) -> [ExtReturn 1]
-    ExtReturn 1.Field 0 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtReturn 1.Field 6 -> [ExtReturn 1]
-    ExtReturn 1.Field 7 -> [ExtReturn 1]
-    ExtReturn 1.Field 8 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtReturn 1.Field 0 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1]
     ExtPhantom (ExtReturn 1) (Field 0).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 0)]
     ExtPhantom (ExtReturn 1) (Field 0).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 8)]
     ExtPhantom (ExtReturn 1) (Field 8).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 8)]
     ExtPhantom (ExtReturn 1) (Field 8).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 8)]
   InterestingCallProperties: []
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?#result##0:wybe.string) #1 @trait_prerequisite_diamond:nn:nn
@@ -134,23 +122,11 @@ proc label#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label#adapter<0>
 label#adapter(x##0:Type0<:trait_prerequisite_diamond.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
-    ExtReturn 1.Field (-2) -> [ExtReturn 1]
-    ExtReturn 1.Field (-1) -> [ExtReturn 1]
-    ExtReturn 1.Field 0 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtReturn 1.Field 6 -> [ExtReturn 1]
-    ExtReturn 1.Field 7 -> [ExtReturn 1]
-    ExtReturn 1.Field 8 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtReturn 1.Field 0 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1]
     ExtPhantom (ExtReturn 1) (Field 0).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 0)]
     ExtPhantom (ExtReturn 1) (Field 0).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 8)]
     ExtPhantom (ExtReturn 1) (Field 8).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 8)]
     ExtPhantom (ExtReturn 1) (Field 8).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_prerequisite_diamond.printable, ?x#adapter0##0:wybe.int)
@@ -171,7 +147,6 @@ proc label_a#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label_a#adapter<0>
 label_a#adapter(x##0:Type0<:trait_prerequisite_diamond.ta, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 24 -> [ExtPhantom (ExtParam 2) (Field 24)]
     ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 24)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 24:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
@@ -180,7 +155,6 @@ proc label_a#adapter > {noinline} (0 calls)
 1: trait_prerequisite_diamond.label_a#adapter<1>
 label_a#adapter(x##0:Type0<:trait_prerequisite_diamond.ta, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 8:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
@@ -201,7 +175,6 @@ proc label_b#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label_b#adapter<0>
 label_b#adapter(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 32 -> [ExtPhantom (ExtParam 2) (Field 32)]
     ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 32)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 32:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
@@ -222,7 +195,6 @@ proc label_c#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label_c#adapter<0>
 label_c#adapter(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tc}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 16 -> [ExtPhantom (ExtParam 2) (Field 16)]
     ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 16)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 16:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
@@ -243,7 +215,6 @@ proc label_d#adapter > {noinline} (0 calls)
 0: trait_prerequisite_diamond.label_d#adapter<0>
 label_d#adapter(x##0:Type0<:{trait_prerequisite_diamond.ta, trait_prerequisite_diamond.tb, trait_prerequisite_diamond.tc, trait_prerequisite_diamond.td}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 40 -> [ExtPhantom (ExtParam 2) (Field 40)]
     ExtReturn 1.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 2) (Field 40)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 40:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)

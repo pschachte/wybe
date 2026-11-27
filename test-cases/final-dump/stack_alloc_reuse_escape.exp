@@ -19,8 +19,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: stack_alloc_reuse_escape.<0>
 ()<{<<wybe.io.io>>}; {<<stack_alloc_reuse_escape.saved>>, <<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtGlobal <<stack_alloc_reuse_escape.saved>>.FieldAny -> [ExtPhantom (ExtGlobal <<stack_alloc_reuse_escape.saved>>) FieldAny]
+  AliasSummary: []
   InterestingCallProperties: []
     stack_alloc_reuse_escape.stash<0>(42:wybe.int)<{}; {<<stack_alloc_reuse_escape.saved>>}; {}> #1 @stack_alloc_reuse_escape:nn:nn
     stack_alloc_reuse_escape.clobber<0>(1000:wybe.int, ?junk##0:wybe.int) #2 @stack_alloc_reuse_escape:nn:nn

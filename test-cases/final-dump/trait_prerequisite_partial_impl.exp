@@ -54,7 +54,6 @@ proc before_label#adapter > {noinline} (0 calls)
 0: trait_prerequisite_partial_impl.before_label#adapter<0>
 before_label#adapter(left##0:Type0<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered}, right##0:Type0<:{trait_prerequisite_partial_impl.equivalent, trait_prerequisite_partial_impl.ordered}, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 3.Field 16 -> [ExtPhantom (ExtParam 3) (Field 16)]
     ExtReturn 2.FieldIdent -> [ExtParam 1, ExtPhantom (ExtParam 3) (Field 16)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 16:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
@@ -86,7 +85,6 @@ proc equivalent_label#adapter > {noinline} (0 calls)
 0: trait_prerequisite_partial_impl.equivalent_label#adapter<0>
 equivalent_label#adapter(left##0:Type0<:trait_prerequisite_partial_impl.equivalent, right##0:Type0<:trait_prerequisite_partial_impl.equivalent, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 3.Field 8 -> [ExtPhantom (ExtParam 3) (Field 8)]
     ExtReturn 2.FieldIdent -> [ExtParam 0, ExtPhantom (ExtParam 3) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(~#vtable##0:pointer, 8:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)
@@ -97,23 +95,11 @@ proc label > {inline} (1 calls)
 0: trait_prerequisite_partial_impl.label<0>
 label(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasSummary:
-    ExtReturn 1.Field (-2) -> [ExtReturn 1]
-    ExtReturn 1.Field (-1) -> [ExtReturn 1]
-    ExtReturn 1.Field 0 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtReturn 1.Field 6 -> [ExtReturn 1]
-    ExtReturn 1.Field 7 -> [ExtReturn 1]
-    ExtReturn 1.Field 8 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtReturn 1.Field 0 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1]
     ExtPhantom (ExtReturn 1) (Field 0).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 0)]
     ExtPhantom (ExtReturn 1) (Field 0).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 8)]
     ExtPhantom (ExtReturn 1) (Field 8).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 8)]
     ExtPhantom (ExtReturn 1) (Field 8).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 8)]
   InterestingCallProperties: []
     wybe.int.fmt<2>(~x##0:wybe.int, 0:wybe.int, 32:wybe.char, ?#result##0:wybe.string) #1 @trait_prerequisite_partial_impl:nn:nn
@@ -123,23 +109,11 @@ proc label#adapter > {noinline} (0 calls)
 0: trait_prerequisite_partial_impl.label#adapter<0>
 label#adapter(x##0:Type0<:trait_prerequisite_partial_impl.printable, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
   AliasSummary:
-    ExtReturn 1.Field (-2) -> [ExtReturn 1]
-    ExtReturn 1.Field (-1) -> [ExtReturn 1]
-    ExtReturn 1.Field 0 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtReturn 1.Field 6 -> [ExtReturn 1]
-    ExtReturn 1.Field 7 -> [ExtReturn 1]
-    ExtReturn 1.Field 8 -> [ExtReturn 1, ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 0)]
+    ExtReturn 1.Field 0 -> [ExtReturn 1]
+    ExtReturn 1.Field 8 -> [ExtReturn 1]
     ExtPhantom (ExtReturn 1) (Field 0).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 0).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 0)]
     ExtPhantom (ExtReturn 1) (Field 0).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 0)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field (-2) -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field (-1) -> [ExtPhantom (ExtReturn 1) (Field 8)]
     ExtPhantom (ExtReturn 1) (Field 8).Field 0 -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field 6 -> [ExtPhantom (ExtReturn 1) (Field 8)]
-    ExtPhantom (ExtReturn 1) (Field 8).Field 7 -> [ExtPhantom (ExtReturn 1) (Field 8)]
     ExtPhantom (ExtReturn 1) (Field 8).Field 8 -> [ExtPhantom (ExtReturn 1) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm cast(~x##0:Type0<:trait_prerequisite_partial_impl.printable, ?x#adapter0##0:wybe.int)

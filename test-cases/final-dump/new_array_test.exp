@@ -62,9 +62,7 @@ proc #cont#2 > {inline,semipure} (1 calls)
 proc #cont#3 > {semipure} (2 calls)
 0: new_array_test.#cont#3<0>
 #cont#3(sum##0:wybe.int, tmp#4##0:wybe.array.array_iterator(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(tmp#4##0:wybe.array.array_iterator(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#14##0:wybe.c_array.raw_array) @new_array_test:nn:nn
     foreign lpvm access(tmp#4##0:wybe.array.array_iterator(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.c_array.raw_array) @new_array_test:nn:nn

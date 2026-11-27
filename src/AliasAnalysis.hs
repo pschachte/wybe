@@ -427,15 +427,29 @@ projectSummary proto ptg =
             let e       = xl Map.! n
                 flds    = Map.findWithDefault Map.empty n (ptgEdges ptg)
                 pairs   = [ (f, t) | (f, ts) <- Map.toList flds, t <- Set.toList ts ]
-                (xl', acc', new) = List.foldl' (step e) (xl, acc, []) pairs
+                (xl', acc', new) = List.foldl' (step n e) (xl, acc, []) pairs
             in bfs xl' acc' (new ++ queue)
-        step e (xl, acc, new) (f, t) =
+        step n e (xl, acc, new) (f, t) =
             case extOfOrigin (nodeOrigin t) of
                 Just x  ->
                     let (xl', new') = if Map.member t xl
                                         then (xl, new)
                                         else (Map.insert t x xl, t : new)
-                    in (xl', addEdge acc e f x, new')
+                        -- An edge n.f -> PhantomNode(n, f) only records that the
+                        -- callee READ that field ('readFieldMat' materialising a
+                        -- placeholder for its unknown contents).  It tells the
+                        -- caller nothing its own graph doesn't, so it is walked
+                        -- (to reach what lies beyond) but not emitted.  Emitted,
+                        -- the phantom depth cap folds it into a self-loop which,
+                        -- replayed onto a SET of caller nodes, writes an
+                        -- all-to-all clique; along a chain of calls (string
+                        -- interpolation) that compounds and compile time grows
+                        -- far faster than the proc.
+                        isReadPlaceholder =
+                            nodeOrigin t == PhantomNode (nodeOrigin n) f
+                        acc' = if isReadPlaceholder then acc
+                                                    else addEdge acc e f x
+                    in (xl', acc', new')
                 Nothing -> case Map.lookup t xl of
                     Just x  -> (xl, addEdge acc e f x, new)
                     Nothing ->

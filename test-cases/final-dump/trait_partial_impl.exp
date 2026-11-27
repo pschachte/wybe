@@ -60,8 +60,7 @@ key_hash([x##0:trait_partial_impl.hashmap(K<:trait_partial_impl.hash, V) <{}; {}
 proc key_hash#adapter > {noinline} (0 calls)
 0: trait_partial_impl.key_hash#adapter<0>
 key_hash#adapter(x##0:Type0<:trait_partial_impl.mapping(K, V), key##0:K, ?#result##0:wybe.int, #vtable##0:opaque)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 3.Field 8 -> [ExtPhantom (ExtParam 3) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm cast(~key##0:K, ?key#adapter1##0:K<:trait_partial_impl.hash)
     foreign lpvm access(~#vtable##0:pointer, 8:wybe.int, 8:wybe.int, 0:wybe.int, ?#vtable#adapter0##0:opaque)

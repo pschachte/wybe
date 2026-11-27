@@ -48,11 +48,7 @@ proc #closure#2 > {inline} (1 calls)
 proc #cont#1 > {semipure} (2 calls)
 0: higher_order_loop.#cont#1<0>
 #cont#1(tmp#5##0:wybe.list({resource}(wybe.int)) <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}>:
-  AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 0 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @higher_order_loop:nn:nn
     case ~tmp#9##0:wybe.bool of

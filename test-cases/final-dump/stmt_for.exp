@@ -189,11 +189,7 @@ multiple_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc multiple_generator#cont#1 > (2 calls)
 0: stmt_for.multiple_generator#cont#1<0>
 multiple_generator#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#15##0:wybe.bool of
@@ -262,11 +258,7 @@ shortest_generator_termination()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc shortest_generator_termination#cont#1 > (2 calls)
 0: stmt_for.shortest_generator_termination#cont#1<0>
 shortest_generator_termination#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#15##0:wybe.bool of
@@ -304,9 +296,7 @@ single_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc single_generator#cont#1 > (2 calls)
 0: stmt_for.single_generator#cont#1<0>
 single_generator#cont#1(tmp#4##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#4##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#8##0:wybe.bool of
@@ -334,9 +324,7 @@ using_break()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc using_break#cont#1 > (2 calls)
 0: stmt_for.using_break#cont#1<0>
 using_break#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -424,9 +412,7 @@ using_next()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc using_next#cont#1 > (3 calls)
 0: stmt_for.using_next#cont#1<0>
 using_next#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -461,9 +447,7 @@ using_unless()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc using_unless#cont#1 > (3 calls)
 0: stmt_for.using_unless#cont#1<0>
 using_unless#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -498,9 +482,7 @@ using_until()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc using_until#cont#1 > (2 calls)
 0: stmt_for.using_until#cont#1<0>
 using_until#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -534,9 +516,7 @@ using_when()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc using_when#cont#1 > (3 calls)
 0: stmt_for.using_when#cont#1<0>
 using_when#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of
@@ -571,9 +551,7 @@ using_while()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc using_while#cont#1 > (2 calls)
 0: stmt_for.using_while#cont#1<0>
 using_while#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_for:nn:nn
     case ~tmp#10##0:wybe.bool of

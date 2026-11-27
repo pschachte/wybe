@@ -191,9 +191,7 @@ print#cont#1(x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc print#cont#2 > {inline} (1 calls)
 0: box_unbox.print#cont#2<0>
 print#cont#2(s##0:wybe.list(wybe.char))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     box_unbox.print#cont#3<0>(~s##0:wybe.list(wybe.char))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @box_unbox:nn:nn
 
@@ -201,9 +199,7 @@ print#cont#2(s##0:wybe.list(wybe.char))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc print#cont#3 > (2 calls)
 0: box_unbox.print#cont#3<0>
 print#cont#3(tmp#5##0:wybe.list(wybe.char))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool) @box_unbox:nn:nn
     case ~tmp#9##0:wybe.bool of
@@ -222,9 +218,7 @@ print#cont#3(tmp#5##0:wybe.list(wybe.char))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; 
 proc print#cont#4 > (2 calls)
 0: box_unbox.print#cont#4<0>
 print#cont#4(s##0:wybe.list(wybe.char), x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtParam 0, ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(x##0:box_unbox, 0:box_unbox, ?tmp#8##0:wybe.bool) @box_unbox:nn:nn
     case ~tmp#8##0:wybe.bool of
@@ -246,8 +240,7 @@ print#cont#4(s##0:wybe.list(wybe.char), x##0:box_unbox)<{<<wybe.io.io>>}; {<<wyb
 proc print#cont#5 > {inline} (1 calls)
 0: box_unbox.print#cont#5<0>
 print#cont#5(s##0:wybe.list(wybe.char), x##0:box_unbox)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtParam 0]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm srem(x##0:box_unbox, 10:box_unbox, ?tmp#4##0:box_unbox) @box_unbox:nn:nn
     foreign lpvm cast(~tmp#4##0:box_unbox, ?tmp#3##0:wybe.int) @box_unbox:nn:nn

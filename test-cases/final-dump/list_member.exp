@@ -82,13 +82,7 @@ module top-level code > public {semipure} (0 calls)
 proc #cont#1 > {semipure} (2 calls)
 0: list_member.#cont#1<0>
 #cont#1(fruit##0:wybe.list(wybe.string), langs##0:wybe.list(wybe.string), lst##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 2) (Field 8).Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.list.in<0>(8:wybe.int, ~lst##0:wybe.list(wybe.int), ?tmp#48##0:wybe.bool, vtable wybe.int <: wybe.eq:opaque) #0 @list_member:nn:nn
     case ~tmp#48##0:wybe.bool of
@@ -107,11 +101,7 @@ proc #cont#1 > {semipure} (2 calls)
 proc #cont#2 > {semipure} (2 calls)
 0: list_member.#cont#2<0>
 #cont#2(fruit##0:wybe.list(wybe.string), langs##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.list.in<0>("Wybe":wybe.string, ~langs##0:wybe.list(wybe.string), ?tmp#47##0:wybe.bool, vtable wybe.string <: wybe.eq:opaque) #1 @list_member:nn:nn
     case ~tmp#47##0:wybe.bool of
@@ -130,9 +120,7 @@ proc #cont#2 > {semipure} (2 calls)
 proc #cont#3 > {semipure} (2 calls)
 0: list_member.#cont#3<0>
 #cont#3(fruit##0:wybe.list(wybe.string))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.list.in<0>("Wybe":wybe.string, ~fruit##0:wybe.list(wybe.string), ?tmp#46##0:wybe.bool, vtable wybe.string <: wybe.eq:opaque) #1 @list_member:nn:nn
     case ~tmp#46##0:wybe.bool of

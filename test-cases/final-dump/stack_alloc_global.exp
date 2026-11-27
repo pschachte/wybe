@@ -413,9 +413,7 @@ if.else.0:
 proc = > public {inline} (1 calls)
 0: stack_alloc_global.pair.=<0>
 =(#left##0:stack_alloc_global.pair, #right##0:stack_alloc_global.pair, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm access(~#left##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#q##0:wybe.int) @stack_alloc_global:nn:nn
@@ -446,7 +444,6 @@ proc p > public {inline} (0 calls)
 0: stack_alloc_global.pair.p<0>
 p(#rec##0:stack_alloc_global.pair, ?#result##0:stack_alloc_global.cell)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
@@ -472,7 +469,6 @@ proc pair > public {inline} (6 calls)
 1: stack_alloc_global.pair.pair<1>
 pair(?p##0:stack_alloc_global.cell, ?q##0:wybe.int, #result##0:stack_alloc_global.pair)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 0 -> [ExtPhantom (ExtParam 2) (Field 0)]
     ExtReturn 0.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(#result##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?p##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
@@ -497,9 +493,7 @@ q(#rec##0:stack_alloc_global.pair, ?#rec##1:stack_alloc_global.pair, #field##0:w
 proc ~= > public {inline} (0 calls)
 0: stack_alloc_global.pair.~=<0>
 ~=(#left##0:stack_alloc_global.pair, #right##0:stack_alloc_global.pair, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stack_alloc_global.pair, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:stack_alloc_global.cell) @stack_alloc_global:nn:nn
     foreign lpvm access(~#left##0:stack_alloc_global.pair, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @stack_alloc_global:nn:nn

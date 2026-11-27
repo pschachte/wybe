@@ -42,8 +42,7 @@ module top-level code > public {semipure} (0 calls)
 proc #cont#1 > {semipure} (2 calls)
 0: caret.#cont#1<0>
 #cont#1(reg##0:caret.region)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign lpvm access(~reg##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:position.position) @caret:nn:nn
     foreign lpvm access(tmp#6##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @caret:nn:nn
@@ -262,11 +261,7 @@ define external fastcc i64 @"caret#.expand_region<0>"(i64 %"reg##0", i64 %"point
 proc = > public {inline} (1 calls)
 0: caret.region.=<0>
 =(#left##0:caret.region, #right##0:caret.region, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lower_left##0:position.position) @caret:nn:nn
     foreign lpvm access(~#left##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#upper_right##0:position.position) @caret:nn:nn
@@ -308,7 +303,6 @@ proc lower_left > public {inline} (0 calls)
 0: caret.region.lower_left<0>
 lower_left(#rec##0:caret.region, ?#result##0:position.position)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 0)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:position.position) @caret:nn:nn
@@ -337,8 +331,6 @@ proc region > public {inline} (6 calls)
 1: caret.region.region<1>
 region(?lower_left##0:position.position, ?upper_right##0:position.position, #result##0:caret.region)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 0 -> [ExtPhantom (ExtParam 2) (Field 0)]
-    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
     ExtReturn 0.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 0)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
@@ -350,7 +342,6 @@ proc upper_right > public {inline} (0 calls)
 0: caret.region.upper_right<0>
 upper_right(#rec##0:caret.region, ?#result##0:position.position)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:position.position) @caret:nn:nn
@@ -368,11 +359,7 @@ upper_right(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.posi
 proc ~= > public {inline} (0 calls)
 0: caret.region.~=<0>
 ~=(#left##0:caret.region, #right##0:caret.region, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:position.position) @caret:nn:nn
     foreign lpvm access(~#left##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:position.position) @caret:nn:nn

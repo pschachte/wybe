@@ -28,9 +28,7 @@ AFTER EVERYTHING:
 proc print > public (0 calls)
 0: loop_bug.print<0>
 print(lst##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @loop_bug:nn:nn
     foreign c putchar(91:wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @loop_bug:nn:nn
@@ -52,9 +50,7 @@ print(lst##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 proc print#cont#1 > (2 calls)
 0: loop_bug.print#cont#1<0>
 print#cont#1([h##0:wybe.int], t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @loop_bug:nn:nn
     case ~tmp#5##0:wybe.bool of
@@ -77,9 +73,7 @@ print#cont#1([h##0:wybe.int], t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.
 proc print#cont#2 > {inline} (1 calls)
 0: loop_bug.print#cont#2<0>
 print#cont#2(h##0:wybe.int, t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasSummary:
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @loop_bug:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @loop_bug:nn:nn
@@ -169,11 +163,7 @@ define external fastcc void @"loop_bug#.print#cont#2<0>"(i64 %"h##0", i64 %"t##0
 proc = > public (2 calls)
 0: loop_bug.int_list.=<0>
 =(#left##0:loop_bug.int_list, #right##0:loop_bug.int_list, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -216,7 +206,6 @@ proc cons > public {inline} (12 calls)
 1: loop_bug.int_list.cons<1>
 cons(?head##0:wybe.int, ?tail##0:loop_bug.int_list, #result##0:loop_bug.int_list, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 2.Field 8 -> [ExtPhantom (ExtParam 2) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 2) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -278,7 +267,6 @@ proc tail > public {inline} (0 calls)
 0: loop_bug.int_list.tail<0>
 tail(#rec##0:loop_bug.int_list, ?#result##0:loop_bug.int_list, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 8)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -312,11 +300,7 @@ tail(#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, #field##0:loop_bug.i
 proc ~= > public {inline} (0 calls)
 0: loop_bug.int_list.~=<0>
 ~=(#left##0:loop_bug.int_list, #right##0:loop_bug.int_list, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtParam 1.Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
-    ExtPhantom (ExtParam 0) (Field 8).Field 8 -> [ExtPhantom (ExtParam 0) (Field 8)]
-    ExtPhantom (ExtParam 1) (Field 8).Field 8 -> [ExtPhantom (ExtParam 1) (Field 8)]
+  AliasSummary: []
   InterestingCallProperties: []
     loop_bug.int_list.=<0>(~#left##0:loop_bug.int_list, ~#right##0:loop_bug.int_list, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

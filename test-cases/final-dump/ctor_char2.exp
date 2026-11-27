@@ -30,19 +30,7 @@ module top-level code > public {semipure} (0 calls)
 proc = > public (3 calls)
 0: ctor_char2.=<0>
 =(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtParam 1.Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-    ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtPhantom (ExtParam 1) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-    ExtPhantom (ExtParam 1) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-    ExtPhantom (ExtParam 1) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-    ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -135,7 +123,6 @@ proc another_ctor > {inline} (8 calls)
 1: ctor_char2.another_ctor<1>
 another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 1.Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
     ExtReturn 0.FieldIdent -> [ExtPhantom (ExtParam 1) (Field (-2))]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -297,7 +284,6 @@ proc other_ctor > {inline} (12 calls)
 1: ctor_char2.other_ctor<1>
 other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
     ExtReturn 0.FieldIdent -> [ExtPhantom (ExtParam 1) (Field (-1))]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -324,19 +310,7 @@ other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe
 proc ~= > public {inline} (0 calls)
 0: ctor_char2.~=<0>
 ~=(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-    ExtParam 0.Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtParam 1.Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-    ExtParam 1.Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-    ExtPhantom (ExtParam 0) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-    ExtPhantom (ExtParam 0) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-2))]
-    ExtPhantom (ExtParam 0) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtPhantom (ExtParam 0) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 0) (Field (-1))]
-    ExtPhantom (ExtParam 1) (Field (-2)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-    ExtPhantom (ExtParam 1) (Field (-2)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-2))]
-    ExtPhantom (ExtParam 1) (Field (-1)).Field (-2) -> [ExtPhantom (ExtParam 1) (Field (-1))]
-    ExtPhantom (ExtParam 1) (Field (-1)).Field (-1) -> [ExtPhantom (ExtParam 1) (Field (-1))]
+  AliasSummary: []
   InterestingCallProperties: []
     ctor_char2.=<0>(~#left##0:ctor_char2, ~#right##0:ctor_char2, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)

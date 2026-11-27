@@ -46,13 +46,7 @@ module top-level code > public {semipure} (0 calls)
 proc lookup > public (5 calls)
 0: stmt_if2.lookup<0>
 lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
-    ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtPhantom (ExtParam 1) (Field 0).Field 16 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtPhantom (ExtParam 1) (Field 16).Field 0 -> [ExtPhantom (ExtParam 1) (Field 16)]
-    ExtPhantom (ExtParam 1) (Field 16).Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+  AliasSummary: []
   InterestingCallProperties: []
     stmt_if2.tree.=<0>(tree##0:stmt_if2.tree, 0:stmt_if2.tree, ?tmp#13##0:wybe.bool) #1 @stmt_if2:nn:nn
     case ~tmp#13##0:wybe.bool of
@@ -183,19 +177,7 @@ define external fastcc i1 @"stmt_if2#.lookup#cont#1<0>"(i1 %"tmp#4##0") {
 proc = > public (7 calls)
 0: stmt_if2.tree.=<0>
 =(#left##0:stmt_if2.tree, #right##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
-    ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtPhantom (ExtParam 0) (Field 0).Field 16 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtPhantom (ExtParam 0) (Field 16).Field 0 -> [ExtPhantom (ExtParam 0) (Field 16)]
-    ExtPhantom (ExtParam 0) (Field 16).Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-    ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtPhantom (ExtParam 1) (Field 0).Field 16 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtPhantom (ExtParam 1) (Field 16).Field 0 -> [ExtPhantom (ExtParam 1) (Field 16)]
-    ExtPhantom (ExtParam 1) (Field 16).Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -279,7 +261,6 @@ proc left > public {inline} (0 calls)
 0: stmt_if2.tree.left<0>
 left(#rec##0:stmt_if2.tree, ?#result##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 0)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -327,8 +308,6 @@ proc node > public {inline} (16 calls)
 1: stmt_if2.tree.node<1>
 node(?left##0:stmt_if2.tree, ?key##0:wybe.int, ?right##0:stmt_if2.tree, #result##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 3.Field 0 -> [ExtPhantom (ExtParam 3) (Field 0)]
-    ExtParam 3.Field 16 -> [ExtPhantom (ExtParam 3) (Field 16)]
     ExtReturn 0.FieldIdent -> [ExtPhantom (ExtParam 3) (Field 0)]
     ExtReturn 2.FieldIdent -> [ExtPhantom (ExtParam 3) (Field 16)]
   InterestingCallProperties: []
@@ -352,7 +331,6 @@ proc right > public {inline} (0 calls)
 0: stmt_if2.tree.right<0>
 right(#rec##0:stmt_if2.tree, ?#result##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasSummary:
-    ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
     ExtReturn 1.FieldIdent -> [ExtPhantom (ExtParam 0) (Field 16)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -388,19 +366,7 @@ right(#rec##0:stmt_if2.tree, ?#rec##1:stmt_if2.tree, #field##0:stmt_if2.tree, ?#
 proc ~= > public {inline} (0 calls)
 0: stmt_if2.tree.~=<0>
 ~=(#left##0:stmt_if2.tree, #right##0:stmt_if2.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasSummary:
-    ExtParam 0.Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtParam 0.Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-    ExtParam 1.Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtParam 1.Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
-    ExtPhantom (ExtParam 0) (Field 0).Field 0 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtPhantom (ExtParam 0) (Field 0).Field 16 -> [ExtPhantom (ExtParam 0) (Field 0)]
-    ExtPhantom (ExtParam 0) (Field 16).Field 0 -> [ExtPhantom (ExtParam 0) (Field 16)]
-    ExtPhantom (ExtParam 0) (Field 16).Field 16 -> [ExtPhantom (ExtParam 0) (Field 16)]
-    ExtPhantom (ExtParam 1) (Field 0).Field 0 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtPhantom (ExtParam 1) (Field 0).Field 16 -> [ExtPhantom (ExtParam 1) (Field 0)]
-    ExtPhantom (ExtParam 1) (Field 16).Field 0 -> [ExtPhantom (ExtParam 1) (Field 16)]
-    ExtPhantom (ExtParam 1) (Field 16).Field 16 -> [ExtPhantom (ExtParam 1) (Field 16)]
+  AliasSummary: []
   InterestingCallProperties: []
     stmt_if2.tree.=<0>(~#left##0:stmt_if2.tree, ~#right##0:stmt_if2.tree, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
