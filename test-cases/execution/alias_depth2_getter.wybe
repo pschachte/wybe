@@ -1,0 +1,15 @@
+# BUG-8 (alias audit pass 2, see scratch/alias_analysis_bugs.md): a destructive
+# update must not corrupt a live alias; correct output matches each "expect".
+pub type position { pub position(x:int, y:int) }
+pub type pair { pub pair(fst:position, snd:int) }
+pub type box { pub box(inner:pair, tag:int) }
+pub def pp(pos:position) use !io { !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")") }
+pub def {noinline} get2(b:box):position = b^inner^fst
+!read(?i:int)
+?leaf = position(i, 2)
+?other = pair(leaf, 9)
+?bx = box(pair(leaf, 0), 0)
+?w = get2(bx)
+x(!w, 66)
+!print("expect w (66,2):"); !pp(w)
+!print("expect other^fst (1,2):"); !pp(other^fst)

@@ -18,7 +18,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,semipure} (0 calls)
 0: exporter.<0>
 ()<{}; {<<exporter.res>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm store(3:wybe.int, <<exporter.res>>:wybe.int) @exporter:nn:nn
 
@@ -26,7 +26,7 @@ module top-level code > public {inline,semipure} (0 calls)
 proc fn > public {inline} (0 calls)
 0: exporter.fn<0>
 fn(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign c ipow(2:wybe.int, ~i##0:wybe.int, ?#result##0:wybe.int) @exporter:nn:nn
 
@@ -34,7 +34,8 @@ fn(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 proc three > public {inline} (0 calls)
 0: exporter.three<0>
 three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 0.FieldIdent -> [ExtGlobal <<exporter.res>>]
   InterestingCallProperties: []
     foreign lpvm load(<<exporter.res>>:wybe.int, ?%n##0:wybe.int) @exporter:nn:nn
 

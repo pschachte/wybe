@@ -1,0 +1,13 @@
+# BUG-11 (alias audit pass 2, see scratch/alias_analysis_bugs.md): a destructive
+# update must not corrupt a live alias; correct output matches each "expect".
+pub type position { pub position(x:int, y:int) }
+pub def pp(pos:position) use !io { !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")") }
+resource stash:position = position(0,0)
+pub def {noinline} keep(p:position) use !stash { ?stash = p }
+pub def {noinline} show() use !io, stash { !print("expect stash (1,2):"); !pp(stash) }
+!read(?i:int)
+?v = position(i, 2)
+!keep(v)
+x(!v, 77)
+!print("expect v (77,2):"); !pp(v)
+!show

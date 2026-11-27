@@ -19,7 +19,7 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: subresource.<0>
 ()<{<<subresource.a.res>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm load(<<subresource.a.res>>:wybe.int, ?%res##0:wybe.int) @subresource:nn:nn
     wybe.int.fmt<2>(~res##0:wybe.int, 0:wybe.int, 32:wybe.char, ?tmp#1##0:wybe.string) #4 @subresource:nn:nn
@@ -70,7 +70,7 @@ define external fastcc void @"subresource#.<0>"() {
 module top-level code > public {inline,semipure} (0 calls)
 0: subresource.a.<0>
 ()<{}; {<<subresource.a.res>>}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign lpvm store(42:wybe.int, <<subresource.a.res>>:wybe.int) @subresource:nn:nn
 

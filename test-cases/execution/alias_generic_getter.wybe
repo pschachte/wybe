@@ -1,0 +1,22 @@
+# BUG-6 (Class B) + Class A: generic member read via a noinline accessor.
+# `unwrap` returns b^val where val has type variable X; the member read is not
+# tracked (argIsPointer false for a type variable), and the summary cannot
+# express the result<->field alias.  Destructive update corrupts p2.
+# Correct: p2 stays (100,150).  Bug: p2 becomes (200,150).
+pub type position { pub position(x:int, y:int) }
+pub type gbox(T) { pub gbox(val:T) }
+
+pub def printPosition(pos:position) use !io {
+    !print(" ("); !print(pos^x); !print(","); !print(pos^y); !println(")")
+}
+
+pub def {noinline} unwrap(b:gbox(X)):X = b^val
+
+!read(?a:int)
+!read(?b:int)
+?p = position(a, b)
+?bx = gbox(p)
+?p2 = unwrap(bx)          # p2 aliases p
+x(!p, 200)               # must be non-destructive
+!print("expect p (200,"); !print(b); !print("): "); !printPosition(p)
+!print("expect p2(100,"); !print(b); !print("): "); !printPosition(p2)

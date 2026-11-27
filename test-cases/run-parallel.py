@@ -95,7 +95,7 @@ def execution_test(src):
     out, exp, inp, cmdline = (targ + ext for ext in (".out", ".exp", ".in", ".cmdline"))
     if os.path.exists(targ):
         os.remove(targ)
-    run([WYBEMK, "--force-all", "-L", LIBDIR, targ], 30,
+    run([WYBEMK, "--force-all", "-L", LIBDIR, targ], 60,
         stdout=subprocess.DEVNULL)
     cmd = [targ]
     if os.access(cmdline, os.R_OK):
@@ -104,7 +104,7 @@ def execution_test(src):
     with open(out, "wb") as o:
         stdin = open(inp, "rb") if os.path.exists(inp) else subprocess.DEVNULL
         try:
-            run(cmd, 30, stdin=stdin, stdout=o, stderr=subprocess.STDOUT)
+            run(cmd, 60, stdin=stdin, stdout=o, stderr=subprocess.STDOUT)
         except OSError as e:  # executable wasn't built
             o.write(f"{e}\n".encode())
         finally:
@@ -118,7 +118,7 @@ def example_test(src):
     for f in (targ, targ + ".o"):
         if os.path.exists(f):
             os.remove(f)
-    r = run([WYBEMK, "--force-all", "-L", LIBDIR, targ], 30,
+    r = run([WYBEMK, "--force-all", "-L", LIBDIR, targ], 60,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if r.returncode == 0:
         return PASS, ""

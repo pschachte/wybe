@@ -18,11 +18,14 @@ AFTER EVERYTHING:
 module top-level code > public {semipure} (0 calls)
 0: trait_default.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field (-1)).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field (-1)).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field (-1))]
+    ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field 7).Field 0 -> [ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field (-2)), ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field (-1)), ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field 7)]
+    ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field 7).Field 8 -> [ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field 7), ExtPhantom (ExtGlobal vtable trait_import_support.default_silent <: trait_import_support.default_greeter) (Field 8)]
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     vtable trait_import_support.default_silent <: trait_import_support.default_greeter:opaque@0(0:trait_import_support.default_silent, ?tmp#0##0:wybe.string, vtable trait_import_support.default_silent <: trait_import_support.default_greeter:opaque) #0 @trait_default:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @trait_default:nn:nn
+    wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @trait_default:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @trait_default:nn:nn
     foreign c putchar(10:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @trait_default:nn:nn
     foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @trait_default:nn:nn
@@ -31,7 +34,8 @@ module top-level code > public {semipure} (0 calls)
 proc greet_through_trait > {inline} (1 calls)
 0: trait_default.greet_through_trait<0>
 greet_through_trait(x##0:Type0<:trait_import_support.default_greeter <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:Type0<:trait_import_support.default_greeter, ?#result##0:wybe.string, ~#vtable##0:opaque) #0 @trait_default:nn:nn
 
@@ -45,7 +49,7 @@ target triple   = ????
 
 @"trait_import_support#.default_silent##vtable#0" = external unnamed_addr constant {ptr}, align 8
 
-declare external fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64)
+declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
 
@@ -53,7 +57,7 @@ define external fastcc void @"trait_default#.<0>"() {
   %"tmp#7##0" = getelementptr inbounds ptr, ptr @"trait_import_support#.default_silent##vtable#0", i64 0
   %"tmp#8##0" = load ptr, ptr %"tmp#7##0"
   %"tmp#0##0" = tail call fastcc i64 %"tmp#8##0"(ptr @"trait_import_support#.default_silent##vtable#0")
-  tail call fastcc void @"wybe#.string#.print<0>[410bae77d3]"(i64 %"tmp#0##0")
+  tail call fastcc void @"wybe#.string#.print<0>"(i64 %"tmp#0##0")
   call ccc void @putchar(i8 10)
   ret void
 }
@@ -81,13 +85,15 @@ define external fastcc i64 @"trait_default#.greet_through_trait<0>"(i64 %"x##0",
 proc greet > public abstract {inline} (0 calls)
 0: trait_import_support.default_greeter.greet<0>
 greet(x##0:T<:trait_import_support.default_greeter <{}; {}; {0}>, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtParam 0, ExtParam 2]
   InterestingCallProperties: []
     ~#vtable##0:opaque@0(~x##0:T<:trait_import_support.default_greeter, ?#result##0:wybe.string, ~#vtable##0:opaque) #0
 proc greet > public {inline} (0 calls)
 1: trait_import_support.default_greeter.greet<1>
 greet([x##0:Type0<:trait_import_support.default_greeter <{}; {}; {0}>], ?#result##0:wybe.string, [#vtable##0:opaque])<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtConst "default greeting"]
   InterestingCallProperties: []
     foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @default_greeter:nn:nn
 
@@ -133,7 +139,7 @@ define external fastcc i64 @"trait_import_support#.default_greeter#.greet<1>"() 
 proc = > public {inline} (1 calls)
 0: trait_import_support.default_silent.=<0>
 =([#left##0:trait_import_support.default_silent], [#right##0:trait_import_support.default_silent], ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -141,7 +147,8 @@ proc = > public {inline} (1 calls)
 proc greet#adapter > {noinline} (0 calls)
 0: trait_import_support.default_silent.greet#adapter<0>
 greet#adapter(x##0:T<:trait_import_support.default_greeter, ?#result##0:wybe.string, #vtable##0:opaque)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary:
+    ExtReturn 1.FieldIdent -> [ExtConst "default greeting"]
   InterestingCallProperties: []
     foreign llvm move("default greeting":wybe.string, ?#result##0:wybe.string) @default_greeter:nn:nn
 
@@ -149,7 +156,7 @@ greet#adapter(x##0:T<:trait_import_support.default_greeter, ?#result##0:wybe.str
 proc trait_default_silent > public {inline} (0 calls)
 0: trait_import_support.default_silent.trait_default_silent<0>
 trait_default_silent(?#result##0:trait_import_support.default_silent)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(0:trait_import_support.default_silent, ?#result##0:trait_import_support.default_silent)
 
@@ -157,7 +164,7 @@ trait_default_silent(?#result##0:trait_import_support.default_silent)<{}; {}; {}
 proc ~= > public {inline} (0 calls)
 0: trait_import_support.default_silent.~=<0>
 ~=([#left##0:trait_import_support.default_silent], [#right##0:trait_import_support.default_silent], ?#success##0:wybe.bool)<{}; {}; {}>:
-  AliasPairs: []
+  AliasSummary: []
   InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
