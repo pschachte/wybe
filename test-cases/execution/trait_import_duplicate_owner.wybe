@@ -1,7 +1,7 @@
 # Repeated paths to one defining impl do not constitute a conflict.
 
-use trait_import_support.printable,
+use trait_import_support.renderable,
     trait_import_support.same_a,
     trait_import_support.reexport
 
-!println(printable.render(1))
+!println(renderable.render(1))

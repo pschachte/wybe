@@ -1,0 +1,16 @@
+Error detected during type checking of module(s) trait_error_declared_type_var_concrete, trait_error_declared_type_var_concrete.my_add
+final-dump/trait_error_declared_type_var_concrete.wybe:12:38: Type error in call to proc plus, argument 1
+final-dump/trait_error_declared_type_var_concrete.wybe:12:38: Type error in call to proc plus, argument 2
+final-dump/trait_error_declared_type_var_concrete.wybe:12:38: Type error in call to proc plus, argument 3
+final-dump/trait_error_declared_type_var_concrete.wybe:12:38: Type error in partial application of proc plus, argument 1
+final-dump/trait_error_declared_type_var_concrete.wybe:12:38: Type error in partial application of proc plus, argument 2
+final-dump/trait_error_declared_type_var_concrete.wybe:12:38: Type error in partial application of proc plus, argument 3
+final-dump/trait_error_declared_type_var_concrete.wybe:14:47: Type error in call to proc plus, argument 1
+final-dump/trait_error_declared_type_var_concrete.wybe:14:47: Type error in call to proc plus, argument 2
+final-dump/trait_error_declared_type_var_concrete.wybe:14:47: Type error in call to proc plus, argument 3
+final-dump/trait_error_declared_type_var_concrete.wybe:14:47: Type error in partial application of proc plus, argument 1
+final-dump/trait_error_declared_type_var_concrete.wybe:14:47: Type error in partial application of proc plus, argument 2
+final-dump/trait_error_declared_type_var_concrete.wybe:14:47: Type error in partial application of proc plus, argument 3
+final-dump/trait_error_declared_type_var_concrete.wybe:16:42: Type of ?j incompatible with i
+final-dump/trait_error_declared_type_var_concrete.wybe:16:42: Type error in call to proc =, argument 1
+final-dump/trait_error_declared_type_var_concrete.wybe:16:42: Type error in call to proc =, argument 2

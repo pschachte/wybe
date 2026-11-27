@@ -717,7 +717,7 @@ compileLocalVTables thisMod = do
         (\(index, ispec) -> do
             entry <- case Map.lookup ispec redundancy of
                 Just (host, offset) -> return $ VTableEmbedded host offset
-                Nothing -> uncurry VTableStandalone <$> compileVTable index ispec Nothing
+                Nothing -> uncurry VTableStandalone <$> compileVTable index ispec
             return (ispec, entry))
         (zip [0..] localImpls)
     updateModule (\mod -> mod{ modVTables = Map.union vTables $ modVTables mod })
@@ -742,33 +742,12 @@ compileExternalVTables thisMod = do
             Just Nothing -> impls
             Just (Just mod) -> Map.insert ispec mod impls
         externalImpls = Set.foldl' addReferenced Map.empty referenced
-    vTables <- Map.traverseWithKey
-        (\ispec mod -> do
-            definingVTables <- getModule modVTables `inModule` mod
-            let index = case Map.lookup ispec definingVTables of
-                    Just (VTableStandalone i _) -> i
-                    _ -> shouldnt $ "compileExternalVTables: " ++ show ispec
-                        ++ " has no standalone vtable in " ++ showModSpec mod
-            uncurry VTableStandalone <$> compileVTable index ispec (Just mod))
-        externalImpls
-    updateModule (\mod -> mod{ modVTables = Map.union vTables $ modVTables mod })
+    mapM_ (uncurry importVTable) $ Map.toList externalImpls
     reexitModule
 
 
-compileVTable :: Int -> TraitImplSpec -> Maybe ModSpec -> Compiler (Int, StructID)
-compileVTable index ispec (Just definingMod) = do
-    definingVTables <- getModule modVTables `inModule` definingMod
-    let definingStruct = case Map.lookup ispec definingVTables of
-            Just (VTableStandalone _ sid) -> sid
-            _ -> shouldnt $ "external vtable definition: " ++ show ispec
-    info <- trustFromJust "external vtable metadata" <$>
-        lookupConstInfo definingStruct
-    externalInfo <- case info of
-        table@VTableInfo{} -> return table { vtableExternal = True }
-        _ -> shouldnt $ "external vtable is not a vtable: " ++ show ispec
-    structId <- recordConstStruct externalInfo Nothing
-    return (index, structId)
-compileVTable index ispec Nothing = do
+compileVTable :: Int -> TraitImplSpec -> Compiler (Int, StructID)
+compileVTable index ispec = do
     logMsg Clause $ "Compiling local vtable for trait impl " ++ show ispec
     thisMod <- getModuleSpec
     knownTraitImpls <- getModuleImplementationField modKnownTraitImpls

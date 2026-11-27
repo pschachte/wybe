@@ -1,0 +1,11 @@
+# Defines a trait implementation, and an inline proc passing its vtable.
+
+pub type my_printable trait {
+    abstract my_print(x:_) use !io
+}
+
+impl int <: my_printable
+
+pub def my_print(x:int) use !io { !println(x) }
+
+pub def {inline} show_low() use !io { !my_printable.my_print(1) }

@@ -1,0 +1,18 @@
+# When a type is only settled after the search tries overloads, both a concrete
+# procedure and an abstract one can succeed.  The concrete one should be chosen.
+
+use trait_import_support.renderable
+
+impl int <: renderable
+
+def render(x:int):string = "int"
+
+def show(n:int) use !io {
+    ?xs = []
+    ?i = n
+    do { while i > 0; ?xs = [i | xs]; ?i = i - 1 }
+    for ?x in xs { !print(x); !print(':'); !print(render(x)); !print(' ') }
+    !nl
+}
+
+!show(3)

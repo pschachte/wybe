@@ -1,0 +1,7 @@
+# Inlining code that uses a vtable makes the vtable visible where it is inlined,
+# whether or not that module imports the module defining it.
+
+use trait_import_support.mid
+
+!show_mid
+!show_via_mid

@@ -1,0 +1,8 @@
+# A move to an output must not be ambiguous with a visible `=` test, even when
+# the moved value has a generic type.
+def {noinline} (x:T -- y:T):T = x
+def {test} (x:T = y:T) { foreign llvm {test} icmp_eq(x, y) }
+def rev(?x:T, y:T, z:T) { ?x = z -- y }
+
+rev(?a, 1, 2)
+!println(a)
