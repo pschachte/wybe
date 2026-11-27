@@ -49,7 +49,6 @@ target triple   = ????
 
 @"trait_import_support#.default_silent##vtable#0" = external unnamed_addr constant {ptr}, align 8
 
-declare external fastcc i64 @"trait_import_support#.default_silent#.greet#adapter<0>"(i64, ptr)
 declare external fastcc void @"wybe#.string#.print<0>"(i64)
 declare external ccc void @putchar(i8)
 declare external ccc void @llvm.memcpy.p0.p0.i64(ptr, ptr, i64, i1)
